@@ -1,0 +1,152 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 30px;
+    margin: 0;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.post, .comment, .comments-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.post-author-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.post-author-box img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-content {
+    color: #34495e;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+}
+
+.post-image {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.post-date {
+    font-size: 13px;
+    color: #999;
+    margin-top: 10px;
+}
+
+.comment {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-left: 3px solid #2980b9;
+    padding-left: 12px;
+    margin-bottom: 16px;
+}
+
+.comment img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comment-content {
+    font-size: 14px;
+    color: #555;
+}
+
+.comment-content strong {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.comment-content small {
+    font-size: 12px;
+    color: #999;
+    margin-top: 6px;
+    display: block;
+}
+
+textarea.post-textarea,
+textarea.comment-textarea {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    outline-offset: 2px;
+    transition: border-color 0.3s ease;
+}
+
+textarea.post-textarea:focus,
+textarea.comment-textarea:focus {
+    border-color: #2980b9;
+    box-shadow: 0 0 8px rgba(41, 128, 185, 0.3);
+}
+
+button.post-btn,
+button.comment-btn {
+    background-color: #2980b9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+button.post-btn:hover,
+button.comment-btn:hover {
+    background-color: #1f5f8b;
+}
+
+@media (max-width: 768px) {
+    .post-author-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    button.post-btn,
+    button.comment-btn {
+        width: 100%;
+    }
+}
+.flash-message {
+    background-color: #d4edda; /* light green */
+    color: #155724; /* dark green */
+    border: 1px solid #c3e6cb;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+}

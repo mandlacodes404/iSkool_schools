@@ -1,0 +1,76 @@
+[22-Oct-2025 13:30:41 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'school_portal.teachers' doesn't exist in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:34:55 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'c.teacher_email' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:38:48 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'c.teacher_id' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:38:50 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'c.teacher_id' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:43:09 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'c.teacher_id' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:43:51 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'q.uploaded_by' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[22-Oct-2025 13:43:52 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'q.uploaded_by' in 'on clause' in C:\xampp\htdocs\servicePortal\quiz_list.php:41
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(41): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 41
+[31-Oct-2025 15:23:31 Africa/Johannesburg] PHP Warning:  Undefined variable $placeholders in C:\xampp\htdocs\servicePortal\quiz_list.php on line 50
+[31-Oct-2025 15:23:31 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ')
+    ORDER BY u.surname, u.title, q.created_at DESC' at line 12 in C:\xampp\htdocs\servicePortal\quiz_list.php:38
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(38): mysqli->prepare('\r\n    SELECT \r\n...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 38
+[19-Nov-2025 10:34:55 Africa/Johannesburg] PHP Warning:  Undefined variable $teacherProfile in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 370
+[19-Nov-2025 10:34:56 Africa/Johannesburg] PHP Warning:  Undefined variable $teacherName in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 385
+[19-Nov-2025 10:34:56 Africa/Johannesburg] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 385
+[19-Nov-2025 10:34:56 Africa/Johannesburg] PHP Warning:  Undefined variable $teacherEmail in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 386
+[19-Nov-2025 10:34:56 Africa/Johannesburg] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 386
+[21-Nov-2025 12:24:47 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 939
+[21-Nov-2025 12:24:47 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 939
+[21-Nov-2025 12:30:23 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 12:30:23 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 12:55:11 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 12:55:11 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 12:57:14 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 12:57:14 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 13:34:32 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 13:34:32 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 944
+[21-Nov-2025 13:44:10 Africa/Johannesburg] PHP Warning:  Undefined variable $classes in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 945
+[21-Nov-2025 13:44:10 Africa/Johannesburg] PHP Warning:  foreach() argument must be of type array|object, null given in C:\xampp\htdocs\servicePortal\learner_dashboard.php on line 945
+[23-Nov-2025 12:22:59 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'v.title' in 'field list' in C:\xampp\htdocs\servicePortal\quiz_list.php:56
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\quiz_list.php(56): mysqli->prepare('\r\n        SELEC...')
+#1 {main}
+  thrown in C:\xampp\htdocs\servicePortal\quiz_list.php on line 56
+[28-Nov-2025 11:37:57 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: No connection could be made because the target machine actively refused it in C:\xampp\htdocs\servicePortal\config.php:15
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\config.php(15): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'school_portal')
+#1 C:\xampp\htdocs\servicePortal\learner_dashboard.php(9): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\servicePortal\config.php on line 15
+[28-Nov-2025 16:01:12 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'school_portal' in C:\xampp\htdocs\servicePortal\config.php:15
+Stack trace:
+#0 C:\xampp\htdocs\servicePortal\config.php(15): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'school_portal')
+#1 C:\xampp\htdocs\servicePortal\learner_dashboard.php(9): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\servicePortal\config.php on line 15

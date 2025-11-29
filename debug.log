@@ -1,0 +1,20 @@
+[24-Nov-2025 18:08:08 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: mysqli_stmt::bind_param(): Argument #6 cannot be passed by reference in C:\xampp\htdocs\servicePortal\get_analytics_data.php:176
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\servicePortal\get_analytics_data.php on line 176
+[24-Nov-2025 18:18:30 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: mysqli_stmt::bind_param(): Argument #6 cannot be passed by reference in C:\xampp\htdocs\servicePortal\get_analytics_data.php:430
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\servicePortal\get_analytics_data.php on line 430
+[24-Nov-2025 18:18:42 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: mysqli_stmt::bind_param(): Argument #6 cannot be passed by reference in C:\xampp\htdocs\servicePortal\get_analytics_data.php:430
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\servicePortal\get_analytics_data.php on line 430
+[24-Nov-2025 18:18:48 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: mysqli_stmt::bind_param(): Argument #6 cannot be passed by reference in C:\xampp\htdocs\servicePortal\get_analytics_data.php:430
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\servicePortal\get_analytics_data.php on line 430
+[24-Nov-2025 18:21:17 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: mysqli_stmt::bind_param(): Argument #6 cannot be passed by reference in C:\xampp\htdocs\servicePortal\get_analytics_data.php:430
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\servicePortal\get_analytics_data.php on line 430

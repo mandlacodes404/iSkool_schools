@@ -1,0 +1,198 @@
+<?php
+session_start();
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+    header("Location: index.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Learner Manual - iSkool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: rgba(22, 27, 34, 0.7);
+            --text-color: #e0e6f0;
+            --heading-color: white;
+            --accent-color: white;
+            --button-bg: white;
+            --button-hover-bg: #dddddd;
+            --border-radius: 15px;
+            --shadow-glow: rgba(255, 255, 255, 0.6);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            color: var(--heading-color);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        a.back {
+            text-decoration: none;
+            background: #e74c3c;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px #e74c3c;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        a.back:hover {
+            background-color: #c0392b;
+        }
+
+        .section {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        .section h2 {
+            color: var(--button-bg);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2 svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            fill: var(--button-bg);
+        }
+
+        .section p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        ul li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-color);
+            opacity: 0.6;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M464 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM224 416H64v-96h160v96zm0-160H64v-96h160v96zm224 160H288v-96h160v96zm0-160H288v-96h160v96z"/>
+            </svg>
+            Taking Quizzes
+        </h2>
+        <p>Access and complete quizzes assigned by your teacher:</p>
+        <ul>
+            <li>Click <strong>"Take a Quiz"</strong> to find and complete quizzes your teacher has assigned.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M496 128v16a8 8 0 0 1-8 8h-24v12c0 6.627-5.373 12-12 12H60c-6.627 0-12-5.373-12-12v-12H24a8 8 0 0 1-8-8v-16a8 8 0 0 1 4.941-7.392l232-88a7.996 7.996 0 0 1 6.118 0l232 88A8 8 0 0 1 496 128zm-24 304H40c-13.255 0-24 10.745-24 24v16a8 8 0 0 0 8 8h464a8 8 0 0 0 8-8v-16c0-13.255-10.745-24-24-24zM96 192v192H60c-6.627 0-12 5.373-12 12v20h416v-20c0-6.627-5.373-12-12-12h-36V192h-64v144h-64V192h-64v144H96V192H32z"/>
+            </svg>
+            Viewing Results
+        </h2>
+        <p>Check your quiz performance and scores:</p>
+        <ul>
+            <li>After taking a quiz, check your scores under <strong>"Quiz Results"</strong>.</li>
+            <li>You can only see your marks once the teacher has published them.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 448c-110.532 0-200-89.431-200-200 0-110.495 89.472-200 200-200 110.491 0 200 89.471 200 200 0 110.53-89.431 200-200 200zm107.244-255.2c0 67.868-72.496 124.488-147.6 124.488h-1.6c-75.104 0-147.6-56.62-147.6-124.488 0-61.5 59.688-111.2 133.4-111.2h24.4c73.712 0 133.4 49.7 133.4 111.2z"/>
+            </svg>
+            Joining a Class
+        </h2>
+        <p>Join your class to access quizzes, resources, and announcements:</p>
+        <ul>
+            <li>Select your class using <strong>"Join a Class"</strong>. You can only do this once.</li>
+            <li><strong>"My Class"</strong> shows the class you've joined. Contact admin if you need to switch, or email <strong>support@iskool.online</strong>.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm-6 336H54c-3.314 0-6-2.686-6-6V118c0-3.314 2.686-6 6-6h404c3.314 0 6 2.686 6 6v276c0 3.314-2.686 6-6 6z"/>
+            </svg>
+            Accessing Resources
+        </h2>
+        <p>Use study materials provided by your teacher:</p>
+        <ul>
+            <li>Teachers upload notes and study guides in <strong>"Study Resources"</strong> for your learning.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 48c110.532 0 200 89.451 200 200 0 110.532-89.468 200-200 200-110.532 0-200-89.468-200-200 0-110.549 89.468-200 200-200m0 0v0zm0 390c-22.449 0-43.174-4.764-62.096-12.604l-24.4 24.4C148.093 465.589 130.019 472 112 472c-30.928 0-56-25.072-56-56s25.072-56 56-56c18.019 0 36.093 6.411 50.904 17.796l24.4-24.4C195.764 340.174 200 319.449 200 297c0-55.228 44.772-100 100-100s100 44.772 100 100-44.772 100-100 100z"/>
+            </svg>
+            Viewing Announcements
+        </h2>
+        <p>Stay updated with teacher announcements:</p>
+        <ul>
+            <li>Teachers may post updates in <strong>"Announcements"</strong> — check regularly, but you’ll also get email alerts.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92H124c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"/>
+            </svg>
+            Upcoming Features
+        </h2>
+        <p>Exciting features coming soon to enhance your experience:</p>
+        <ul>
+            <li><strong>School Blog</strong>: Coming Soon!</li>
+            <li><strong>Profile</strong>: Coming Soon!</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>
+            <svg viewBox="0 0 512 512">
+                <path d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"/>
+            </svg>
+            Need Help?
+        </h2>
+        <p>If you're stuck or unsure about a feature, please contact your school admin or email <strong>support@iskool.online</strong>.</p>
+    </div>
+
+    <footer>iSkool v.1.0.0</footer>
+</body>
+</html>
