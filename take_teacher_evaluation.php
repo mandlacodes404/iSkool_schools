@@ -2,36 +2,68 @@
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// Security: Must be logged in as learner
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
 $learnerEmail = $_SESSION['email'];
 
-// Step 1: Get learner's class IDs
+// Step 1: Get current academic year
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($currentYearResult->num_rows === 0) {
+    die("No active academic year. Contact your admin.");
+}
+$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
+
+// Step 2: Get all class IDs this learner is in for current year
 $classIds = [];
-$stmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ?");
-$stmt->bind_param("s", $learnerEmail);
+$stmt = $conn->prepare("
+    SELECT DISTINCT class_id 
+    FROM class_students 
+    WHERE student_email = ? 
+      AND academic_year_id = ?
+");
+$stmt->bind_param("si", $learnerEmail, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
 while ($row = $result->fetch_assoc()) {
-    $classIds[] = $row['class_id'];
+    $classIds[] = (int)$row['class_id'];
 }
 $stmt->close();
 
 $evaluations = [];
+
 if (!empty($classIds)) {
-    // Step 2: Get released evaluations for those classes
+    // Step 3: Get released evaluations for those classes
     $placeholders = implode(',', array_fill(0, count($classIds), '?'));
     $types = str_repeat('i', count($classIds));
-    $stmt = $conn->prepare("SELECT e.*, u.name AS teacher_name, c.name AS class_name
-                            FROM teacher_evaluations e
-                            JOIN users u ON e.teacher_id = u.id
-                            JOIN classes c ON e.class_id = c.id
-                            WHERE e.class_id IN ($placeholders) AND e.released = 1
-                            ORDER BY e.created_at DESC");
-    $stmt->bind_param($types, ...$classIds);
+
+    $stmt = $conn->prepare("
+        SELECT 
+            e.id,
+            e.title,
+            e.description,
+            e.created_at,
+            e.released,
+            u.name AS teacher_name,
+            c.name AS class_name
+        FROM teacher_evaluations e
+        JOIN users u ON e.teacher_id = u.id AND u.role = 'teacher'
+        JOIN classes c ON e.class_id = c.id
+        WHERE e.class_id IN ($placeholders) 
+          AND e.academic_year_id = ?
+          AND e.released = 1
+        ORDER BY e.created_at DESC
+    ");
+
+    $bind_params = $classIds;
+    $bind_params[] = $current_academic_year_id;
+    $types .= 'i';
+
+    $stmt->bind_param($types, ...$bind_params);
     $stmt->execute();
     $evaluations = $stmt->get_result();
     $stmt->close();
@@ -311,7 +343,7 @@ if (!empty($classIds)) {
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
-            <p class="empty">No teacher evaluations available for your class(es) right now.</p>
+            <p class="empty">No teacher evaluations available for your class right now.</p>
         <?php endif; ?>
 
         <div id="loaderOverlay">

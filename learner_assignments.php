@@ -2,25 +2,23 @@
 session_start();
 require_once 'config.php';
 
-
-
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// Security: Must be logged in as learner
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
 $studentEmail = $_SESSION['email'];
 
-// GET CURRENT ACADEMIC YEAR
-$schoolId = $_SESSION['school_id'] ?? null;
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
+// Get current active academic year (no school_id needed)
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
     die("No active academic year set. Contact your admin.");
 }
 $currentYear = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYear['id'];
+$current_academic_year_id = (int)$currentYear['id'];
 
-// Step 1: Get classes the student has joined
+// Step 1: Get all classes this learner has joined this year
 $stmt = $conn->prepare("
     SELECT DISTINCT class_id 
     FROM class_students 
@@ -33,18 +31,19 @@ $result = $stmt->get_result();
 
 $joinedClassIds = [];
 while ($row = $result->fetch_assoc()) {
-    $joinedClassIds[] = $row['class_id'];
+    $joinedClassIds[] = (int)$row['class_id'];
 }
 $stmt->close();
 
 if (empty($joinedClassIds)) {
     $assignments = false;
 } else {
-    // Step 2: Fetch assignments – preserve original title
+    // Step 2: Fetch all assignments for those classes
     $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-    $types = str_repeat('i', count($joinedClassIds));
+    $types = str_repeat('i', count($joinedClassIds)) . 'i'; // last 'i' for academic_year_id
 
-    $sql = "SELECT 
+    $sql = "
+        SELECT 
             a.id,
             a.title AS assignment_title,
             a.description,
@@ -53,55 +52,45 @@ if (empty($joinedClassIds)) {
             c.name AS class_name,
             u.title,
             u.surname,
-            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown')) AS teacher_display
+            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
         FROM assignments a
         JOIN classes c ON a.class_id = c.id
         LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
         WHERE a.class_id IN ($placeholders)
           AND a.academic_year_id = ?
-        ORDER BY u.surname, u.title, a.due_date ASC";
+        ORDER BY a.due_date ASC, u.surname ASC
+    ";
 
-$stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare($sql);
 
-// First: bind all the class IDs
-$bind_names[] = $types;
-foreach ($joinedClassIds as $key => $id) {
-    $bind_name = 'bind' . $key;
-    $$bind_name = $id;
-    $bind_names[] = &$$bind_name;
-}
+    // Bind class IDs + academic year
+    $bind_params = $joinedClassIds;
+    $bind_params[] = $current_academic_year_id;
 
-// Now add the academic year ID at the end
-$bind_names[0] .= 'i';                    // add one more 'i' to the types string
-$bind_names[] = &$current_academic_year_id;  // add the actual value
-
-call_user_func_array([$stmt, 'bind_param'], $bind_names);
-
+    $stmt->bind_param($types, ...$bind_params);
     $stmt->execute();
     $assignments = $stmt->get_result();
     $stmt->close();
 
-    // Group by teacher, preserve original assignment title
+    // Group by teacher – keeps original assignment title
     $groupedAssignments = [];
     while ($row = $assignments->fetch_assoc()) {
-        $teacher = trim($row['teacher_display'] ?? 'Unknown Teacher');
-        if ($teacher === ' Unknown' || empty(trim($row['surname']))) {
+        $teacher = trim($row['teacher_display']);
+        if (empty($teacher) || $teacher === ' ') {
             $teacher = 'Unknown Teacher';
         }
 
-        $assignment = [
-            'id'              => $row['id'],
-            'title'           => $row['assignment_title'],   // ORIGINAL TITLE
-            'description'     => $row['description'],
-            'due_date'        => $row['due_date'],
-            'file_url'        => $row['file_url'],
-            'class_name'      => $row['class_name']
+        $groupedAssignments[$teacher][] = [
+            'id'           => $row['id'],
+            'title'        => $row['assignment_title'],
+            'description'  => $row['description'],
+            'due_date'     => $row['due_date'],
+            'file_url'     => $row['file_url'],
+            'class_name'   => $row['class_name']
         ];
-
-        $groupedAssignments[$teacher][] = $assignment;
     }
 
-    $currentDateTime = new DateTime('now', new DateTimeZone('SAST'));
+    $currentDateTime = new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
 }
 ?>
 

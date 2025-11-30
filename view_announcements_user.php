@@ -2,76 +2,84 @@
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// Security: Must be logged in as learner
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
 $email = $_SESSION['email'];
 
-// Get the learner's school_id
-$schoolStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ?");
-$schoolStmt->bind_param("s", $email);
-$schoolStmt->execute();
-$schoolStmt->bind_result($schoolId);
-$schoolStmt->fetch();
-$schoolStmt->close();
-
-// GET CURRENT ACADEMIC YEAR
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
+// Get current active academic year (no school_id needed)
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
     die("No active academic year. Contact your admin.");
 }
-$current_academic_year_id = $currentYearResult->fetch_assoc()['id'];
+$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
 
-// Get the class the learner has joined
-$classStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ? LIMIT 1");
+// Get the class the learner has joined this year
+$classStmt = $conn->prepare("
+    SELECT class_id 
+    FROM class_students 
+    WHERE student_email = ? 
+      AND academic_year_id = ? 
+    LIMIT 1
+");
 $classStmt->bind_param("si", $email, $current_academic_year_id);
 $classStmt->execute();
-$classQuery = $classStmt->get_result();
+$classResult = $classStmt->get_result();
 
-if ($classQuery->num_rows === 0) {
+if ($classResult->num_rows === 0) {
     $message = "You have not joined a class yet.";
+    $classId = null;
 } else {
-    $classId = $classQuery->fetch_assoc()['class_id'];
+    $classId = (int)$classResult->fetch_assoc()['class_id'];
+}
+$classStmt->close();
 
-    // Fetch announcements with ORIGINAL title + teacher display
+$groupedAnnouncements = [];
+
+if ($classId) {
+    // Fetch announcements – only for this class + current year + sent to learners
     $stmt = $conn->prepare("
         SELECT 
-            a.title AS announcement_title,           -- ORIGINAL TITLE
+            a.title AS announcement_title,
             a.message, 
             a.created_at, 
             a.created_by,
             u.title,
             u.surname,
-            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown')) AS teacher_display
+            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
         FROM announcements a
         LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
         WHERE a.class_id = ? 
-  AND a.academic_year_id = ?
-  AND (u.school_id = ? OR u.school_id IS NULL) 
-  AND a.send_to = 'learners'
-        ORDER BY u.surname, u.title, a.created_at DESC
+          AND a.academic_year_id = ?
+          AND a.send_to = 'learners'
+        ORDER BY a.created_at DESC, u.surname ASC
     ");
-    $stmt->bind_param("iii", $classId, $current_academic_year_id, $schoolId);
+    $stmt->bind_param("ii", $classId, $current_academic_year_id);
     $stmt->execute();
     $announcements = $stmt->get_result();
+    $stmt->close();
 
-    // Group by teacher using "Mr Nkosi" format
-    $groupedAnnouncements = [];
+    // Group by teacher – keeps original title
     while ($row = $announcements->fetch_assoc()) {
-        $teacher = trim($row['teacher_display'] ?? 'Unknown Teacher');
-        if ($teacher === ' Unknown' || empty(trim($row['surname']))) {
+        $teacher = trim($row['teacher_display']);
+        if (empty($teacher) || $teacher === ' ') {
             $teacher = 'Unknown Teacher';
         }
 
-        $groupedAnnouncements[$teacher][] = $row;
+        $groupedAnnouncements[$teacher][] = [
+            'title'       => $row['announcement_title'],
+            'message'     => $row['message'],
+            'created_at'  => $row['created_at'],
+            'created_by'  => $row['created_by']
+        ];
     }
-
-    $currentDateTime = new DateTime('now', new DateTimeZone('SAST'));
-    $sevenDaysAgo = (new DateTime('now', new DateTimeZone('SAST')))->modify('-7 days');
 }
-$classStmt->close();
+
+$currentDateTime = new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
+$sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
 ?>
 
 <!DOCTYPE html>

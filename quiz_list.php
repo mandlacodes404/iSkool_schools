@@ -8,102 +8,92 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-// ADD THIS BLOCK — RIGHT AFTER: session_start(); require_once 'config.php';
-$schoolId = $_SESSION['school_id'] ?? null;
-
-// GET CURRENT ACADEMIC YEAR
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
-if ($currentYearResult->num_rows === 0) {
-    die("No active academic year set. Contact your admin.");
-}
-$currentYear = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYear['id'];
-
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// ────── Security: Must be logged in as learner ──────
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
 $studentEmail = $_SESSION['email'];
 
-// Step 1: Get classes the student has joined
+// ────── Get current active academic year (no school_id needed) ──────
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($currentYearResult->num_rows === 0) {
+    die("No active academic year set. Contact your admin.");
+}
+$currentYear = $currentYearResult->fetch_assoc();
+$current_academic_year_id = (int)$currentYear['id'];
+
+// ────── Step 1: Get all classes this learner has joined this year ──
 $stmt = $conn->prepare("
-    SELECT DISTINCT cs.class_id 
-    FROM class_students cs 
-    WHERE cs.student_email = ? 
-      AND cs.academic_year_id = ?
+    SELECT DISTINCT class_id 
+    FROM class_students 
+    WHERE student_email = ? 
+      AND academic_year_id = ?
 ");
 $stmt->bind_param("si", $studentEmail, $current_academic_year_id);
-if (!$stmt->execute()) {
-    error_log("Class fetch failed: " . $stmt->error);
-    echo "Database error. Please try again later.";
-    exit();
-}
+$stmt->execute();
 $result = $stmt->get_result();
 
 $joinedClassIds = [];
 while ($row = $result->fetch_assoc()) {
-    $joinedClassIds[] = $row['class_id'];
+    $joinedClassIds[] = (int)$row['class_id'];
 }
 $stmt->close();
 
 if (empty($joinedClassIds)) {
     $quizzes = false;
 } else {
-    // Step 2: Fetch quizzes with CORRECT quiz title + teacher display
+    // ── Step 2: Fetch all quizzes for those classes ──
     $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-    $types = str_repeat('i', count($joinedClassIds));
+    $types = str_repeat('i', count($joinedClassIds)) . 'i'; // last 'i' for academic_year_id
+
     $stmt = $conn->prepare("
         SELECT 
-    q.id, 
-    q.title AS quiz_title,
-    q.duration, 
-    q.start_time, 
-    q.status,
-    q.is_summative,
-    u.title,
-    u.surname,
-    CONCAT(COALESCE(u.title, ''), ' ', COALESCE(u.surname, 'Unknown')) AS teacher_name
-FROM quizzes q
-LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
-WHERE q.class_id IN ($placeholders)
-  AND q.academic_year_id = ?
-ORDER BY u.surname, u.title, q.created_at DESC
+            q.id,
+            q.title AS quiz_title,
+            q.duration,
+            q.start_time,
+            q.status,
+            q.is_summative,
+            u.title,
+            u.surname,
+            CONCAT(COALESCE(u.title, ''), ' ', COALESCE(u.surname, 'Teacher')) AS teacher_name
+        FROM quizzes q
+        LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
+        WHERE q.class_id IN ($placeholders)
+          AND q.academic_year_id = ?
+        ORDER BY q.start_time DESC, u.surname ASC
     ");
-    // Add the academic year ID to the bind parameters
-$bind_params = $joinedClassIds;
-$bind_params[] = $current_academic_year_id;
-$types .= 'i'; // one more 'i' for the year
 
-$stmt->bind_param($types, ...$bind_params);
-    if (!$stmt->execute()) {
-        error_log("Quiz fetch failed: " . $stmt->error);
-    }
+    $bind_params = $joinedClassIds;
+    $bind_params[] = $current_academic_year_id;
+
+    $stmt->bind_param($types, ...$bind_params);
+    $stmt->execute();
     $quizzes = $stmt->get_result();
     $stmt->close();
 
-    // Group by teacher using "Mr Nkosi" format
+    // ── Group quizzes by teacher (Mr Nkosi style) ──
     $groupedQuizzes = [];
+    $currentTime = date('Y-m-d H:i:s');
+
     while ($row = $quizzes->fetch_assoc()) {
-        $teacher = trim($row['teacher_name'] ?? 'Unknown Teacher');
-        if ($teacher === ' Unknown' || empty(trim($row['surname']))) {
+        $teacher = trim($row['teacher_name']);
+        if (empty($teacher) || $teacher === ' ') {
             $teacher = 'Unknown Teacher';
         }
 
-        // Ensure quiz title is preserved
-        $quiz = [
-    'id' => $row['id'],
-    'title' => $row['quiz_title'],
-    'duration' => $row['duration'],
-    'start_time' => $row['start_time'],
-    'status' => $row['status'],
-    'is_summative' => !empty($row['is_summative'])  // 1 or 0 → bool
-];
-
-        $groupedQuizzes[$teacher][] = $quiz;
+        $groupedQuizzes[$teacher][] = [
+            'id'           => $row['id'],
+            'title'        => $row['quiz_title'],
+            'duration'     => $row['duration'],
+            'start_time'   => $row['start_time'],
+            'status'       => $row['status'],
+            'is_summative' => !empty($row['is_summative']),
+            'current_time' => $currentTime
+        ];
     }
-
-    $currentTime = date('Y-m-d H:i:s');
 }
 ?>
 

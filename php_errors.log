@@ -74,3 +74,9 @@ Stack trace:
 #1 C:\xampp\htdocs\servicePortal\learner_dashboard.php(9): require_once('C:\\xampp\\htdocs...')
 #2 {main}
   thrown in C:\xampp\htdocs\servicePortal\config.php on line 15
+[29-Nov-2025 16:52:45 Africa/Johannesburg] PHP Warning:  Undefined array key "school_id" in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 14
+[29-Nov-2025 16:52:45 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.schools' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:32
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(32): mysqli->prepare('SELECT name, lo...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 32

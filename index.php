@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+// ADD THIS LINE (points to your new smart config
+require_once 'config.php';   // or 'config.php' if that's the name
+
 $errors = [
     'login' => $_SESSION['login_error'] ?? '',
     'register' => $_SESSION['register_error'] ?? ''
@@ -488,14 +491,11 @@ function isActiveForm($formName, $activeForm) {
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
                 </div>
                 <label>Select School:</label>
-                <select name="school_id" required>
-                    <option value="">-- Select School --</option>
-                    <?= $schoolsOptions ?>
-                </select><br>
+                
                 <label>Select Role:</label>
                 <select name="role" required>
                     <option value="">-- Select Role --</option>
-                    <option value="user">Learner</option>
+                    <option value="learner">Learner</option>
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
                     <option value="school_admin">Principal/School Admin</option>

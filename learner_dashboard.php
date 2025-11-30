@@ -8,33 +8,51 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// ────── Security: Only logged in + correct role ──────
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
-$learnerEmail    = $_SESSION['email'];
-$learnerSchoolId = $_SESSION['school_id'];
+$learnerEmail = $_SESSION['email'];
 
-// GET CURRENT ACTIVE ACADEMIC YEAR
-$currentYearResult = $conn->query("SELECT id, name FROM academic_years WHERE school_id = $learnerSchoolId AND is_current = 1 LIMIT 1");
+// ────── School name from current database (multi-tenant magic) ──────
+$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
+$schoolLogo = 'Uploads/schools/default_school.png'; // you can override per school later
+
+// ────── Get current active academic year (no school_id needed) ──────
+$currentYearResult = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
-    die("No active academic year set. Contact your admin.");
+    $currentYearName = "Current Year";
+    $currentYearId   = 0;
+} else {
+    $year            = $currentYearResult->fetch_assoc();
+    $currentYearId   = $year['id'];
+    $currentYearName = $year['name'];
 }
-$currentYear     = $currentYearResult->fetch_assoc();
-$currentYearId   = $currentYear['id'];
-$currentYearName = $currentYear['name'];
 
-// HANDLE CLASS JOIN
+// ────── Handle class join ──────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
     $classId = (int)$_POST['class_id'];
 
-    $check = $conn->prepare("SELECT 1 FROM class_students WHERE student_email = ? AND class_id = ? AND academic_year_id = ?");
-    $check->bind_param("sii", $learnerEmail, $classId, $currentYearId);
+    // Prevent duplicate join
+    $check = $conn->prepare("SELECT 1 FROM class_students WHERE student_email = ? AND class_id = ?");
+    if ($currentYearId > 0) {
+        $check = $conn->prepare("SELECT 1 FROM class_students WHERE student_email = ? AND class_id = ? AND academic_year_id = ?");
+        $check->bind_param("sii", $learnerEmail, $classId, $currentYearId);
+    } else {
+        $check->bind_param("si", $learnerEmail, $classId);
+    }
     $check->execute();
     if ($check->get_result()->num_rows === 0) {
-        $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id, academic_year_id) VALUES (?, ?, ?)");
-        $insert->bind_param("sii", $learnerEmail, $classId, $currentYearId);
+        if ($currentYearId > 0) {
+            $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id, academic_year_id) VALUES (?, ?, ?)");
+            $insert->bind_param("sii", $learnerEmail, $classId, $currentYearId);
+        } else {
+            $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id) VALUES (?, ?)");
+            $insert->bind_param("si", $learnerEmail, $classId);
+        }
         $insert->execute();
         $insert->close();
     }
@@ -43,44 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
     exit();
 }
 
-// LEARNER INFO
-$learnerName = $_SESSION['name'];
+// ────── Learner profile info ──────
+$learnerName           = $_SESSION['name'];
 $learnerProfilePicture = 'default.png';
+
 $stmt = $conn->prepare("SELECT name, profile_picture FROM users WHERE email = ?");
 $stmt->bind_param("s", $learnerEmail);
 $stmt->execute();
 if ($row = $stmt->get_result()->fetch_assoc()) {
-    $learnerName = $row['name'] ?: $learnerName;
+    $learnerName           = $row['name'] ?: $learnerName;
     $learnerProfilePicture = $row['profile_picture'] ?: 'default.png';
 }
 $stmt->close();
 
-// SCHOOL INFO
-$schoolName = 'Your School';
-$schoolLogo = 'Uploads/schools/default_school.png';
-$stmt = $conn->prepare("SELECT name, logo FROM schools WHERE id = ?");
-$stmt->bind_param("i", $learnerSchoolId);
-$stmt->execute();
-if ($row = $stmt->get_result()->fetch_assoc()) {
-    $schoolName = $row['name'] ?: $schoolName;
-    $schoolLogo = $row['logo'] ?: $schoolLogo;
-}
-$stmt->close();
-
-// GET JOINED CLASSES THIS YEAR
-$joinedStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ?");
-$joinedStmt->bind_param("si", $learnerEmail, $currentYearId);
-$joinedStmt->execute();
-$joinedResult = $joinedStmt->get_result();
-$joinedClassIds = [];
-while ($row = $joinedResult->fetch_assoc()) {
-    $joinedClassIds[] = $row['class_id'];
-}
-$joinedStmt->close();
-
-// GET ALL AVAILABLE CLASSES
-$classesStmt = $conn->prepare("SELECT id, name FROM classes WHERE school_id = ? ORDER BY name");
-$classesStmt->bind_param("i", $learnerSchoolId);
+// ────── Get all classes available in this school (no school_id needed) ──────
+$classesStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $classesStmt->execute();
 $classesResult = $classesStmt->get_result();
 
@@ -89,16 +84,32 @@ while ($row = $classesResult->fetch_assoc()) {
     $allClasses[] = $row;
 }
 $classesStmt->close();
-
-// THIS WAS THE ONLY MISSING LINE → FIXED NOW
 $classes = $allClasses;
 
-// PARENT LINKING
-$parentLink = null;
-$parentsInClass = [];
-if (!empty($joinedClassIds)) {
-    $classId = $joinedClassIds[0];
+// ────── Get classes the learner has already joined ──────
+$joinedClassIds = [];
+if ($currentYearId > 0) {
+    $joinedStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ?");
+    $joinedStmt->bind_param("si", $learnerEmail, $currentYearId);
+} else {
+    $joinedStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ?");
+    $joinedStmt->bind_param("s", $learnerEmail);
+}
+$joinedStmt->execute();
+$joinedResult = $joinedStmt->get_result();
+while ($row = $joinedResult->fetch_assoc()) {
+    $joinedClassIds[] = $row['class_id'];
+}
+$joinedStmt->close();
 
+// ────── Parent linking (only if learner is in a class) ──────
+$parentLink     = null;
+$parentsInClass = [];
+
+if (!empty($joinedClassIds)) {
+    $classId = $joinedClassIds[0]; // learner can only be in one class
+
+    // Check if already linked to a parent
     $linkStmt = $conn->prepare("SELECT parent_email FROM parent_links WHERE learner_email = ? AND class_id = ?");
     $linkStmt->bind_param("si", $learnerEmail, $classId);
     $linkStmt->execute();
@@ -107,6 +118,7 @@ if (!empty($joinedClassIds)) {
     }
     $linkStmt->close();
 
+    // Get all parents in this class
     $parentStmt = $conn->prepare("
         SELECT u.email, u.name 
         FROM parent_classes pc 

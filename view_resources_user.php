@@ -2,83 +2,73 @@
 session_start();
 require_once 'config.php';
 
-$email = $_SESSION['email'];
-
-// GET CURRENT ACADEMIC YEAR ID
-$schoolId = $_SESSION['school_id'] ?? null;
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
-if ($currentYearResult->num_rows === 0) {
-    die("No active academic year. Contact your admin.");
-}
-$current_academic_year_id = $currentYearResult->fetch_assoc()['id'];
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+// Security: Must be logged in as learner
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }
 
 $email = $_SESSION['email'];
 
-// Get learner's class ID (assuming one class per learner)
-$classQuery = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ? LIMIT 1");
+// Get current active academic year (no school_id needed)
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($currentYearResult->num_rows === 0) {
+    die("No active academic year. Contact your admin.");
+}
+$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
+
+// Get learner's class ID (one class per learner)
+$classQuery = $conn->prepare("
+    SELECT class_id 
+    FROM class_students 
+    WHERE student_email = ? 
+      AND academic_year_id = ? 
+    LIMIT 1
+");
 $classQuery->bind_param("si", $email, $current_academic_year_id);
 $classQuery->execute();
 $classQuery->bind_result($classId);
 $classQuery->fetch();
 $classQuery->close();
 
-// Get school name
-$schoolName = '';
-$learnerSchoolId = $_SESSION['school_id'];
-if ($learnerSchoolId) {
-    $stmtSchool = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-    $stmtSchool->bind_param("i", $learnerSchoolId);
-    $stmtSchool->execute();
-    $resultSchool = $stmtSchool->get_result();
-    if ($resultSchool->num_rows > 0) {
-        $rowSchool = $resultSchool->fetch_assoc();
-        $schoolName = $rowSchool['name'];
-    }
-    $stmtSchool->close();
-}
-
 if (!$classId) {
     $message = "You haven't joined a class yet.";
 } else {
-    // Step: Fetch resources with ORIGINAL title + teacher display name
+    // Fetch resources – keeps original title + teacher name
     $stmt = $conn->prepare("
         SELECT 
             r.id, 
-            r.title AS resource_title,           -- ORIGINAL TITLE
+            r.title AS resource_title,
             r.filename, 
             r.uploaded_at,
             u.title,
             u.surname,
-            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown')) AS teacher_display
+            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
         FROM resources r
         LEFT JOIN users u ON r.uploaded_by = u.email AND u.role = 'teacher'
-        WHERE r.class_id = ? AND r.academic_year_id = ?
-        ORDER BY u.surname, u.title, r.uploaded_at DESC
+        WHERE r.class_id = ? 
+          AND r.academic_year_id = ?
+        ORDER BY r.uploaded_at DESC, u.surname ASC
     ");
     $stmt->bind_param("ii", $classId, $current_academic_year_id);
     $stmt->execute();
     $resources = $stmt->get_result();
+    $stmt->close();
 
-    // Group by teacher using "Mr Nkosi" format
+    // Group by teacher – preserves original resource title
     $groupedResources = [];
     while ($row = $resources->fetch_assoc()) {
-        $teacher = trim($row['teacher_display'] ?? 'Unknown Teacher');
-        if ($teacher === ' Unknown' || empty(trim($row['surname']))) {
+        $teacher = trim($row['teacher_display']);
+        if (empty($teacher) || $teacher === ' ') {
             $teacher = 'Unknown Teacher';
         }
 
-        $resource = [
-            'id'           => $row['id'],
-            'title'        => $row['resource_title'],   // ORIGINAL TITLE ONLY
-            'filename'     => $row['filename'],
-            'uploaded_at'  => $row['uploaded_at']
+        $groupedResources[$teacher][] = [
+            'id'          => $row['id'],
+            'title'       => $row['resource_title'],
+            'filename'    => $row['filename'],
+            'uploaded_at' => $row['uploaded_at']
         ];
-
-        $groupedResources[$teacher][] = $resource;
     }
 }
 ?>

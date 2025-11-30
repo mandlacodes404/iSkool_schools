@@ -2,88 +2,92 @@
 session_start();
 require_once 'config.php';
 
-// === DETERMINE WHO WE'RE VIEWING ===
+// Security: Must be logged in as learner OR parent
+if (!isset($_SESSION['email'])) {
+    header("Location: index.php"); exit();
+}
+
 $viewerEmail = $_SESSION['email'];
-$viewerRole = $_SESSION['role'] ?? '';
+$viewerRole  = $_SESSION['role'] ?? '';
 $targetEmail = $viewerEmail;
 
+// Parent viewing their linked learner
 if ($viewerRole === 'parent' && isset($_GET['learner'])) {
     $requestedEmail = filter_var($_GET['learner'], FILTER_VALIDATE_EMAIL);
     if ($requestedEmail) {
         $stmtCheck = $conn->prepare("SELECT 1 FROM parent_links WHERE parent_email = ? AND learner_email = ?");
         $stmtCheck->bind_param("ss", $viewerEmail, $requestedEmail);
         $stmtCheck->execute();
-        $checkResult = $stmtCheck->get_result();
-        if ($checkResult->num_rows === 1) {
+        if ($stmtCheck->get_result()->num_rows === 1) {
             $targetEmail = $requestedEmail;
         }
         $stmtCheck->close();
     }
 }
 
-if ($viewerRole === 'user' && $targetEmail !== $viewerEmail) {
+// Block invalid access
+if ($viewerRole === 'learner' && $targetEmail !== $viewerEmail) {
     header("Location: index.php"); exit();
 }
 if ($viewerRole === 'parent' && $targetEmail === $viewerEmail) {
     header("Location: parent_dashboard.php"); exit();
 }
+if (!in_array($viewerRole, ['learner', 'parent'])) {
+    header("Location: index.php"); exit();
+}
 
-// === GET SCHOOL & ACADEMIC YEAR ===
-$schoolStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ? AND role = 'user'");
-$schoolStmt->bind_param("s", $targetEmail);
-$schoolStmt->execute();
-$schoolStmt->bind_result($schoolId);
-$schoolStmt->fetch();
-$schoolStmt->close();
+// Get current academic year (no school_id needed)
+$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($currentYearResult->num_rows === 0) {
+    die("No active academic year.");
+}
+$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
 
-if (!$schoolId) die("Learner not found.");
-
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
-if ($currentYearResult->num_rows === 0) die("No active academic year.");
-$current_academic_year_id = $currentYearResult->fetch_assoc()['id'];
-
-// === CURRENT TERM & VIEWED TERM (with URL override) ===
+// Current term from platform_settings
 $current_global_term = 4;
 $termStmt = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($termRow = $termStmt->fetch_assoc()) {
     $current_global_term = (int)$termRow['current_global_term'];
 }
-$termStmt->close();
 
-$view_term = isset($_GET['view_term']) && in_array($_GET['view_term'], ['1','2','3','4'])
+// View term (from URL or current)
+$view_term = isset($_GET['view_term']) && in_array($_GET['view_term'], [1,2,3,4])
     ? (int)$_GET['view_term']
     : $current_global_term;
 
-// === FETCH ALL QUIZZES (no term filter – we’ll filter in PHP for term marks) ===
+// Fetch all quiz results for this learner in current year
 $sql = "
     SELECT DISTINCT 
         r.id AS result_id, r.score, r.total, r.submitted_at, r.time_taken,
         q.id AS quiz_id, q.title AS quiz_title, q.duration, q.publish_marks,
         q.is_summative, q.weight_percent, q.term_number,
         q.class_id, q.created_by,
-        COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown Teacher'))) AS display_group,
+        COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown'))) AS display_group,
         u.title, u.surname
     FROM quiz_results r
     JOIN quizzes q ON r.quiz_id = q.id
-    JOIN classes c ON q.class_id = c.id
+    JOIN class_students cs ON q.class_id = cs.class_id 
+                         AND cs.student_email = ? 
+                         AND cs.academic_year_id = ?
     LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
     LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
-    JOIN class_students cs ON q.class_id = cs.class_id AND cs.student_email = ?
-    WHERE r.user_email = ? AND c.school_id = ? AND q.academic_year_id = ?
-    ORDER BY display_group, r.submitted_at DESC
+    WHERE r.user_email = ? 
+      AND q.academic_year_id = ?
+    ORDER BY display_group ASC, r.submitted_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssii", $targetEmail, $targetEmail, $schoolId, $current_academic_year_id);
+$stmt->bind_param("ssii", $targetEmail, $current_academic_year_id, $targetEmail, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $groupedResults = [];
 while ($row = $result->fetch_assoc()) {
-    $group = trim($row['display_group'] ?? 'Unknown Teacher');
-    $group = preg_replace('/\s+/', ' ', $group) ?: 'Unknown Teacher';
+    $group = trim($row['display_group'] ?? 'Unknown Subject');
+    $group = $group === '' ? 'Unknown Subject' : $group;
     $groupedResults[$group][] = $row;
 }
+$stmt->close();
 
 function formatDuration($seconds) {
     $minutes = floor($seconds / 60);
@@ -91,7 +95,7 @@ function formatDuration($seconds) {
     return "{$minutes}m {$secs}s";
 }
 
-// RENDER TERM MARKS TABLE (reusable)
+// Render term marks table (unchanged logic – perfect)
 function renderTermMarksTable($quizzes, $selectedTerm) {
     $summative = array_filter($quizzes, fn($q) => !empty($q['is_summative']) && (int)$q['term_number'] === $selectedTerm);
 
@@ -177,7 +181,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
     <?php if ($totalWeight < 100): ?>
         <p style="text-align:center; margin:10px 0; font-size:12px; color:#8b949e;">
-            <i class="fas fa-clock"></i> <?= (100 - $totalWeight) ?>% of term still to be assessed
+            <?= (100 - $totalWeight) ?>% of term still to be assessed
         </p>
     <?php endif;
 }
