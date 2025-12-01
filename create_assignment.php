@@ -8,60 +8,55 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$teacherSchoolId = $_SESSION['school_id'] ?? null;
 
-// GET CURRENT ACADEMIC YEAR AUTOMATICALLY
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $teacherSchoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found. Contact your administrator.");
 }
-// ==========================================================================
+
 // GET CURRENT GLOBAL TERM (Your throne — same as quizzes)
 $current_global_term = 4; // safety fallback
 $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
-// ==========================================================================
-// Get classes assigned to the teacher's school
-if ($teacherSchoolId !== null) {
-    $stmt = $conn->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY name ASC");
-    $stmt->bind_param("i", $teacherSchoolId);
-    $stmt->execute();
-    $classResult = $stmt->get_result();
-} else {
-    $classResult = $conn->query("SELECT * FROM classes WHERE 0"); // empty
-}
+
+// Get ALL classes in current school (current DB = current school → no filter needed)
+$stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
+$stmt->execute();
+$classResult = $stmt->get_result();
+$stmt->close();
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $title = $_POST['title'];
-    $description = $_POST['description'];
-    $due_date = $_POST['due_date'];
-    $class_id = $_POST['class_id'];
+    $title       = trim($_POST['title']);
+    $description = trim($_POST['description']);
+    $due_date    = $_POST['due_date'];
+    $class_id    = (int)$_POST['class_id'];
 
+    // File upload
     $filePath = null;
-    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === 0) {
+    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = "assignment_Uploads/";
-        if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
         $filename = time() . "_" . basename($_FILES['attachment']['name']);
         $filePath = $uploadDir . $filename;
         move_uploaded_file($_FILES['attachment']['tmp_name'], $filePath);
     }
 
-        $stmt = $conn->prepare("
+    // Insert assignment — no school_id, clean and simple
+    $stmt = $conn->prepare("
         INSERT INTO assignments 
         (title, description, due_date, class_id, created_by, file_url, academic_year_id, term_number) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("ssssssii", 
+    $stmt->bind_param("sssissii", 
         $title, 
         $description, 
         $due_date, 
@@ -69,14 +64,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $email, 
         $filePath, 
         $current_academic_year_id,
-        $current_global_term      // ← FORCED CURRENT TERM
+        $current_global_term
     );
     $stmt->execute();
+    $stmt->close();
 
-    // Output JavaScript to trigger the success popup and redirect
+    // Success feedback
     echo '<script>
         document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("successModal").style.display = "flex";
+            const modal = document.getElementById("successModal");
+            if (modal) modal.style.display = "flex";
             setTimeout(function() {
                 window.location.href = "teacher_assignments.php";
             }, 2000);

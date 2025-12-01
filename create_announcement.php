@@ -14,147 +14,125 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$name = $_SESSION['name'] ?? $email;
-$schoolId = $_SESSION['school_id'];
+$name  = $_SESSION['name'] ?? $email;
 $message = "";
 
-// Get school name
-$schoolName = "School";
-$schoolStmt = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-$schoolStmt->bind_param("i", $schoolId);
-$schoolStmt->execute();
-$schoolResult = $schoolStmt->get_result();
-if ($row = $schoolResult->fetch_assoc()) {
-    $schoolName = $row['name'];
-}
+// GET SCHOOL NAME FROM CURRENT DATABASE (exactly like learner dashboard)
+$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
 
-// GET CURRENT ACADEMIC YEAR AUTOMATICALLY
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $schoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your admin.");
 }
-// ==========================================================================
+
 // GET CURRENT GLOBAL TERM (Your throne — same as quizzes & assignments)
-$current_global_term = 4; // safety fallback
+$current_global_term = 4;
 $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
-// ==========================================================================
-// Get all classes in this school
-$classStmt = $conn->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY name ASC");
-$classStmt->bind_param("i", $schoolId);
+
+// Get all classes in current school (current DB = current school → no filter)
+$classStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $classStmt->execute();
 $classResult = $classStmt->get_result();
+$classStmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title']);
-    $msg = trim($_POST['message']);
-    $class_id = intval($_POST['class_id']);
-    $send_to = $_POST['send_to'] ?? 'learners';
+    $title     = trim($_POST['title']);
+    $msg       = trim($_POST['message']);
+    $class_id  = intval($_POST['class_id']);
+    $send_to   = $_POST['send_to'] ?? 'learners';
 
     if (!empty($title) && !empty($msg) && $class_id > 0) {
-        // Insert announcement
-               $stmt = $conn->prepare("
+        // Insert announcement — NO school_id column anymore
+        $stmt = $conn->prepare("
             INSERT INTO announcements 
-            (class_id, title, message, created_by, school_id, academic_year_id, term_number, send_to) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (class_id, title, message, created_by, academic_year_id, term_number, send_to) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("isssisii", 
+        $stmt->bind_param("issssis", 
             $class_id, 
             $title, 
             $msg, 
             $email, 
-            $schoolId, 
             $current_academic_year_id, 
-            $current_global_term,     // ← FORCED CURRENT TERM
+            $current_global_term,
             $send_to
         );
         $stmt->execute();
+        $stmt->close();
         $message = "Announcement sent successfully!";
 
-       // --- Push Notification Integration ---
-$auth = [
-    'VAPID' => [
-        'subject' => 'mailto:noreply@iskool.online',
-        'publicKey' => 'BKPh1RLmANqolINDIuClVLOGrlfeQSG7o2pgZAS25xgD_rIp-LOPTWIzEu--bdOsFTi3QPNzpQ5mmzT__OEWmJc',
-        'privateKey' => '6crSLhwDbUQsSB5g63iO-8bh_S8gc88cmkRXpSuDvVw',
-    ],
-];
+        // --- Push Notification Integration (unchanged logic) ---
+        $auth = [
+            'VAPID' => [
+                'subject' => 'mailto:noreply@iskool.online',
+                'publicKey' => 'BKPh1RLmANqolINDIuClVLOGrlfeQSG7o2pgZAS25xgD_rIp-LOPTWIzEu--bdOsFTi3QPNzpQ5mmzT__OEWmJc',
+                'privateKey' => '6crSLhwDbUQsSB5g63iO-8bh_S8gc88cmkRXpSuDvVw',
+            ],
+        ];
 
-$webPush = new WebPush($auth);
+        $webPush = new WebPush($auth);
 
-// Fetch subscriptions
-if ($send_to === 'parents') {
-    $subStmt = $conn->prepare("
-        SELECT ps.subscription 
-        FROM push_subscriptions ps
-        JOIN users u ON ps.user_id = u.id
-        JOIN parent_classes pc ON u.email = pc.parent_email
-        WHERE pc.class_id = ?
-    ");
-} else {
-    $subStmt = $conn->prepare("
-        SELECT ps.subscription 
-        FROM push_subscriptions ps
-        JOIN users u ON ps.user_id = u.id
-        JOIN class_students cs ON u.email = cs.student_email
-        WHERE cs.class_id = ?
-    ");
-}
-
-if ($subStmt === false) {
-    error_log("Failed to prepare subscription query: " . $conn->error);
-    $message = "Error preparing notification query.";
-} else {
-    $subStmt->bind_param("i", $class_id);
-    if (!$subStmt->execute()) {
-        error_log("Failed to execute subscription query: " . $subStmt->error);
-        $message = "Error executing notification query.";
-    } else {
-        $subsResult = $subStmt->get_result();
-        $notificationsSent = 0;
-
-        while ($row = $subsResult->fetch_assoc()) {
-            $subscription = Subscription::create(json_decode($row['subscription'], true));
-            $webPush->sendNotification(
-                $subscription,
-                json_encode([
-                    'title' => '📢 ' . $title,
-                    'body' => $msg,
-                    'url' => '/index.php',
-                    'tag' => 'iSkool-notification', // Group notifications like WhatsApp
-                    'renotify' => true // Replace previous if same tag
-                ])
-            );
-            $notificationsSent++;
+        // Fetch push subscriptions
+        if ($send_to === 'parents') {
+            $subStmt = $conn->prepare("
+                SELECT ps.subscription 
+                FROM push_subscriptions ps
+                JOIN users u ON ps.user_id = u.id
+                JOIN parent_classes pc ON u.email = pc.parent_email
+                WHERE pc.class_id = ?
+            ");
+        } else {
+            $subStmt = $conn->prepare("
+                SELECT ps.subscription 
+                FROM push_subscriptions ps
+                JOIN users u ON ps.user_id = u.id
+                JOIN class_students cs ON u.email = cs.student_email
+                WHERE cs.class_id = ?
+            ");
         }
 
-        // Flush notifications with improved error handling
-        $reportCount = 0;
-        foreach ($webPush->flush() as $report) {
-            $reportCount++;
-            if (!$report->isSuccess()) {
-                error_log("Push failed for subscription {$report->getRequest()->getEndpoint()}: {$report->getReason()}");
+        if ($subStmt && $subStmt->bind_param("i", $class_id) && $subStmt->execute()) {
+            $subsResult = $subStmt->get_result();
+            $notificationsSent = 0;
+
+            while ($row = $subsResult->fetch_assoc()) {
+                $subscription = Subscription::create(json_decode($row['subscription'], true));
+                $webPush->sendNotification(
+                    $subscription,
+                    json_encode([
+                        'title' => 'Announcement: ' . $title,
+                        'body'  => $msg,
+                        'url'   => '/index.php',
+                        'tag'   => 'iskool-announcement',
+                        'renotify' => true
+                    ])
+                );
+                $notificationsSent++;
+            }
+
+            foreach ($webPush->flush() as $report) {
+                if (!$report->isSuccess()) {
+                    error_log("Push failed: " . $report->getReason());
+                }
+            }
+
+            if ($notificationsSent > 0) {
+                $message .= " $notificationsSent push notifications sent.";
             }
         }
-        if ($reportCount > 0) {
-            $message .= " $notificationsSent notifications attempted (some may have failed). Check logs.";
-        } else if ($notificationsSent > 0) {
-            $message .= " No push reports received (network issue?).";
-        }
-    }
-    $subStmt->close();
-}
+        $subStmt?->close();
 
-        // --- Email Notification ---
+        // --- Email Notification (unchanged below) ---
         if ($send_to === 'parents') {
             $emailQuery = $conn->prepare("
                 SELECT DISTINCT u.email, u.name 
@@ -167,7 +145,7 @@ if ($subStmt === false) {
                 SELECT DISTINCT u.email, u.name 
                 FROM users u 
                 JOIN class_students cs ON u.email = cs.student_email
-                WHERE cs.class_id = ? AND u.role = 'user'
+                WHERE cs.class_id = ? AND u.role = 'learner'
             ");
         }
 

@@ -7,24 +7,21 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
-$email    = $_SESSION['email'];
-$schoolId = $_SESSION['school_id'] ?? 0;
+$email = $_SESSION['email'];
 
-// GET CURRENT ACADEMIC YEAR AUTOMATICALLY
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $schoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found.");
 }
 
 /* -------------------------------------------------
-   FETCH ANNOUNCEMENTS + CLASS NAME ONLY
+   FETCH ANNOUNCEMENTS + CLASS NAME (NO SCHOOL_ID FILTER)
    ------------------------------------------------- */
 $sql = "
     SELECT 
@@ -33,18 +30,17 @@ $sql = "
     FROM announcements a
     JOIN classes c ON a.class_id = c.id
     WHERE a.created_by = ? 
-      AND c.school_id = ?
       AND a.academic_year_id = ?
     ORDER BY a.created_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $email, $schoolId, $current_academic_year_id);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 /* -------------------------------------------------
-   GROUP BY class_id
+   GROUP BY class_id (unchanged logic — still perfect)
    ------------------------------------------------- */
 $grouped = [];
 while ($row = $result->fetch_assoc()) {
@@ -60,6 +56,8 @@ while ($row = $result->fetch_assoc()) {
     }
     $grouped[$cid]['items'][] = $row;
 }
+
+$stmt->close();
 ?>
 
 <!DOCTYPE html>

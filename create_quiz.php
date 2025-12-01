@@ -20,17 +20,14 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$teacherSchoolId = $_SESSION['school_id'] ?? null;
 
-// ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
-$stmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$stmt->bind_param("i", $teacherSchoolId);
-$stmt->execute();
-$result = $stmt->get_result();
-$currentYearRow = $result->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$stmt->close();
 
+// ==================== AUTOMATIC ACADEMIC YEAR DETECTION (no school_id) ====================
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your admin.");
 }
@@ -43,30 +40,14 @@ if ($result && $row = $result->fetch_assoc()) {
 }
 // ============================================================================
 
-// Fetch classes
-if ($teacherSchoolId !== null) {
-    $stmt = $conn->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY name ASC");
-    $stmt->bind_param("i", $teacherSchoolId);
-    if (!$stmt->execute()) {
-        error_log("Class query failed: " . $stmt->error);
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => "Database error while fetching classes."]);
-        ob_end_flush();
-        exit;
-    }
-    $classResult = $stmt->get_result();
+// Fetch classes (no school_id needed — current DB = current school)
+$stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
+$stmt->execute();
+$classResult = $stmt->get_result();
 
-    $schoolName = 'School Portal';
-    $schoolStmt = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-    $schoolStmt->bind_param("i", $teacherSchoolId);
-    if ($schoolStmt->execute()) {
-        $schoolResult = $schoolStmt->get_result();
-        if ($schoolRow = $schoolResult->fetch_assoc()) {
-            $schoolName = $schoolRow['name'];
-        }
-    }
-    $schoolStmt->close();
-}
+// Get school name from current database name (exactly like learner dashboard)
+$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
@@ -183,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Send email notifications
     if ($notify) {
-        $studentQuery = $conn->prepare("SELECT u.email, u.name FROM users u JOIN class_students cs ON u.email = cs.student_email WHERE cs.class_id = ? AND u.role = 'user'");
+        $studentQuery = $conn->prepare("SELECT u.email, u.name FROM users u JOIN class_students cs ON u.email = cs.student_email WHERE cs.class_id = ? AND u.role = 'learner'");
         $studentQuery->bind_param("i", $class_id);
         if (!$studentQuery->execute()) {
             error_log("Student query failed: " . $studentQuery->error);

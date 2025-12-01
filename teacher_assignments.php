@@ -2,54 +2,41 @@
 session_start();
 include("config.php");
 
-if (!isset($_SESSION['teacher'])) {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
 
 $email = $_SESSION['email'];
-$teacherSchoolId = $_SESSION['school_id'] ?? null;
 
-// GET CURRENT ACADEMIC YEAR (AUTOMATIC)
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $teacherSchoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR (AUTOMATIC - NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found. Contact admin.");
 }
 
+// FETCH ALL ASSIGNMENTS FOR THIS TEACHER IN CURRENT YEAR (NO SCHOOL_ID FILTER)
 $stmt = $conn->prepare("
     SELECT assignments.*, classes.name AS class_name 
     FROM assignments 
     JOIN classes ON assignments.class_id = classes.id 
     WHERE assignments.created_by = ?
-      AND classes.school_id = ?
       AND assignments.academic_year_id = ?
     ORDER BY due_date ASC
 ");
-$stmt->bind_param("sii", $email, $teacherSchoolId, $current_academic_year_id);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $assignmentsResult = $stmt->get_result();
 $stmt->close();
 
-// Get school name
-$schoolName = '';
-if ($teacherSchoolId) {
-    $stmtSchool = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-    $stmtSchool->bind_param("i", $teacherSchoolId);
-    $stmtSchool->execute();
-    $resultSchool = $stmtSchool->get_result();
-    if ($resultSchool->num_rows > 0) {
-        $rowSchool = $resultSchool->fetch_assoc();
-        $schoolName = $rowSchool['name'];
-    }
-    $stmtSchool->close();
-}
+// GET SCHOOL NAME FROM DATABASE NAME (exactly like learner dashboard)
+$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
 ?>
 <!DOCTYPE html>
 <html>

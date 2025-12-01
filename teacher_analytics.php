@@ -9,29 +9,15 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-// Get teacher's school_id
-$schoolStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ? AND role = 'teacher'");
-$schoolStmt->bind_param("s", $email);
-$schoolStmt->execute();
-$schoolResult = $schoolStmt->get_result();
-$schoolRow = $schoolResult->fetch_assoc();
-$school_id = $schoolRow['school_id'] ?? 0;
-$schoolStmt->close();
-
-// GET CURRENT ACADEMIC YEAR
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $school_id);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR (NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found.");
-}
-if (!$school_id) {
-    die("Error: Your school information is missing.");
 }
 
 // GET CURRENT GLOBAL TERM
@@ -42,7 +28,7 @@ if ($termRow = $termStmt->fetch_assoc()) {
 }
 $termStmt->close();
 
-// GET CLASSES — FIXED: u.is_deleted moved to WHERE with proper NULL handling
+// GET CLASSES — SCHOOL_ID REMOVED
 $sql = "
     SELECT DISTINCT 
         q.class_id, 
@@ -52,11 +38,10 @@ $sql = "
     FROM quizzes q
     JOIN classes c ON q.class_id = c.id
     LEFT JOIN class_students cs ON cs.class_id = q.class_id
-    LEFT JOIN users u ON cs.student_email = u.email AND u.role = 'user'
+    LEFT JOIN users u ON cs.student_email = u.email AND u.role = 'learner'
     WHERE q.created_by = ?
       AND q.is_summative = 1 
       AND q.publish_marks = 1 
-      AND c.school_id = ?
       AND q.academic_year_id = ?
       AND q.term_number = ?
       AND (u.is_deleted = 0 OR u.is_deleted IS NULL)
@@ -65,7 +50,7 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("siii", $email, $school_id, $current_academic_year_id, $current_global_term);
+$stmt->bind_param("sii", $email, $current_academic_year_id, $current_global_term);
 $stmt->execute();
 $result = $stmt->get_result();
 

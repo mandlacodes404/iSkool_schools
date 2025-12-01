@@ -80,3 +80,35 @@ Stack trace:
 #0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(32): mysqli->prepare('SELECT name, lo...')
 #1 {main}
   thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 32
+[30-Nov-2025 12:06:07 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.schools' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:39
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(39): mysqli->prepare('SELECT name, lo...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:13:10 Africa/Johannesburg] PHP Warning:  Undefined variable $stmt in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:13:10 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: Call to a member function close() on null in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:39
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:13:37 Africa/Johannesburg] PHP Warning:  Undefined variable $stmt in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:13:37 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: Call to a member function close() on null in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:39
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:15:03 Africa/Johannesburg] PHP Warning:  Undefined variable $stmt in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:15:03 Africa/Johannesburg] PHP Fatal error:  Uncaught Error: Call to a member function close() on null in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:39
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 39
+[30-Nov-2025 12:16:48 Africa/Johannesburg] PHP Warning:  Undefined array key "school_id" in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 14
+[30-Nov-2025 12:16:48 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.schools' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:32
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(32): mysqli->prepare('SELECT name, lo...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 32
+[30-Nov-2025 12:17:11 Africa/Johannesburg] PHP Warning:  Undefined array key "school_id" in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 14
+[30-Nov-2025 12:17:11 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.schools' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:32
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(32): mysqli->prepare('SELECT name, lo...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 32

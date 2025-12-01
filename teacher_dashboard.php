@@ -6,41 +6,38 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 session_start();
 include("config.php");
+
+// Security: Only logged in + correct role
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
+
 $email = $_SESSION['email'];
-$teacherSchoolId = $_SESSION['school_id'];
 
 // Fetch teacher info
-$stmtTeacher = $conn->prepare("SELECT name, profile_picture FROM users WHERE email = ? AND role = 'teacher'");
+$stmtTeacher = $conn->prepare("SELECT name, profile_picture FROM users WHERE email = ?");
 $stmtTeacher->bind_param("s", $email);
 $stmtTeacher->execute();
 $resultTeacher = $stmtTeacher->get_result();
-$teacherName = $_SESSION['name'] ?? 'Teacher';
-$teacherProfile = 'default.png';
-$teacherEmail = $_SESSION['email'];
+
+$teacherName     = $_SESSION['name'] ?? 'Teacher';
+$teacherProfile  = 'default.png';
+$teacherEmail    = $_SESSION['email'];
+
 if ($resultTeacher->num_rows > 0) {
     $rowTeacher = $resultTeacher->fetch_assoc();
-    $teacherName = $rowTeacher['name'] ?: $teacherName;
-    $teacherProfile = $rowTeacher['profile_picture'] ?: $teacherProfile;
+    $teacherName    = $rowTeacher['name'] ?: $teacherName;
+    $teacherProfile = $rowTeacher['profile_picture'] ?: 'default.png';
 }
 $stmtTeacher->close();
 
-// Fetch school info
-$stmtSchool = $conn->prepare("SELECT name, logo FROM schools WHERE id = ?");
-$stmtSchool->bind_param("i", $teacherSchoolId);
-$stmtSchool->execute();
-$resultSchool = $stmtSchool->get_result();
-$schoolName = 'Your School';
-$schoolLogo = 'Uploads/schools/default_school.png';
-if ($resultSchool->num_rows > 0) {
-    $rowSchool = $resultSchool->fetch_assoc();
-    $schoolName = $rowSchool['name'] ?: $schoolName;
-    $schoolLogo = !empty($rowSchool['logo']) ? $rowSchool['logo'] : $schoolLogo;
+$schoolName = 'My School'; // fallback only
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $schoolName = $row['setting_value'];
 }
-$stmtSchool->close();
+$schoolLogo = 'Uploads/schools/default_school.png';
 ?>
 <!DOCTYPE html>
 <html>

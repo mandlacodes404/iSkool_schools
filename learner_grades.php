@@ -9,29 +9,15 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-// Get teacher's school_id
-$schoolStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ? AND role = 'teacher'");
-$schoolStmt->bind_param("s", $email);
-$schoolStmt->execute();
-$schoolResult = $schoolStmt->get_result();
-$schoolRow = $schoolResult->fetch_assoc();
-$school_id = $schoolRow['school_id'] ?? 0;
-// GET CURRENT ACADEMIC YEAR
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $school_id);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR (NO school_id NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found.");
-}
-$schoolStmt->close();
-
-if (!$school_id) {
-    die("Error: Your school information is missing.");
 }
 
 /* -------------------------------------------------
@@ -43,7 +29,6 @@ $sql = "
     FROM quizzes q
     JOIN classes c ON q.class_id = c.id
     WHERE q.created_by = ?
-      AND c.school_id = ?
       AND q.academic_year_id = ?
       AND q.term_number = (
           SELECT current_global_term 
@@ -54,7 +39,7 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $email, $school_id, $current_academic_year_id);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

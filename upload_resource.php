@@ -12,62 +12,67 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$name = $_SESSION['name'] ?? 'Teacher';
-$schoolId = $_SESSION['school_id'] ?? 0;
+$name  = $_SESSION['name'] ?? 'Teacher';
+$message = "";
+$maxFileSize = 10 * 1024 * 1024; // 10MB
 
-// GET CURRENT ACADEMIC YEAR AUTOMATICALLY
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $schoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact admin.");
 }
-// ==========================================================================
-// GET CURRENT GLOBAL TERM (Your throne — same as quizzes, assignments, announcements)
-$current_global_term = 4; // safety fallback only
+
+// GET CURRENT GLOBAL TERM (Your throne — same as everywhere)
+$current_global_term = 4;
 $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
-// ==========================================================================
-$message = "";
-$maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
 
-// Get all classes in the teacher's school
-$stmt = $conn->prepare("SELECT id, name FROM classes WHERE school_id = ? ORDER BY name ASC");
-$stmt->bind_param("i", $schoolId);
+// Get ALL classes in current school (current DB = current school → no filter)
+$stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $stmt->execute();
 $classes = $stmt->get_result();
+$stmt->close();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
-    $title = trim($_POST['title']);
-    $classId = intval($_POST['class_id']);
-    $file = $_FILES['resource'];
+    $title    = trim($_POST['title']);
+    $classId  = intval($_POST['class_id']);
+    $file     = $_FILES['resource'];
 
     // Validate inputs
-    if (empty($title) || empty($classId)) {
-        $message = "❗ All fields are required.";
+    if (empty($title)) {
+        $message = "Please enter a title.";
+    } elseif ($classId <= 0) {
+        $message = "Please select a class.";
     } elseif ($file['error'] !== UPLOAD_ERR_OK) {
-        $message = "❌ File upload error: " . $file['error'];
+        $message = "File upload failed.";
     } elseif ($file['size'] > $maxFileSize) {
-        $message = "❌ File too large. Maximum size is 10MB.";
+        $message = "File too large. Max 10MB allowed.";
     } else {
         $allowedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
         $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        
         if (!in_array($fileExt, $allowedTypes)) {
-            $message = "❌ Invalid file type. Allowed: " . implode(', ', $allowedTypes) . ".";
+            $message = "Invalid file type. Allowed: " . implode(', ', $allowedTypes);
         } else {
+            // Secure filename
             $filename = time() . "_" . preg_replace("/[^A-Za-z0-9._-]/", "", basename($file['name']));
             $targetPath = "resources/" . $filename;
 
+            if (!is_dir("resources/")) {
+                mkdir("resources/", 0755, true);
+            }
+
             if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                               $uploadStmt = $conn->prepare("
+                // Insert resource — clean, no school_id
+                $uploadStmt = $conn->prepare("
                     INSERT INTO resources 
                     (title, filename, class_id, uploaded_by, academic_year_id, term_number, uploaded_at) 
                     VALUES (?, ?, ?, ?, ?, ?, NOW())
@@ -78,15 +83,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
                     $classId, 
                     $email, 
                     $current_academic_year_id,
-                    $current_global_term      // FORCED CURRENT TERM
+                    $current_global_term
                 );
                 $uploadStmt->execute();
+                $uploadStmt->close();
+
+                $message = "Resource uploaded successfully!";
 
                 // Notify learners in that class
                 $userQuery = $conn->prepare("
-                    SELECT u.email, u.name FROM users u
+                    SELECT u.email, u.name 
+                    FROM users u
                     JOIN class_students cs ON u.email = cs.student_email
-                    WHERE cs.class_id = ? AND u.role = 'user'
+                    WHERE cs.class_id = ? AND u.role = 'learner'
                 ");
                 $userQuery->bind_param("i", $classId);
                 $userQuery->execute();

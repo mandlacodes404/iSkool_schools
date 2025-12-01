@@ -7,66 +7,35 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
-$email    = $_SESSION['email'];
-$schoolId = $_SESSION['school_id'] ?? null;
-
-if (!$schoolId) {
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
-    <style>
-        :root{--bg-color:#0d1117;--card-bg:#1a202c;--text-color:#e0e6f0;--accent-color:#4fd1c5;--error-color:#f85149;--card-radius:12px;--shadow-glow:rgba(79,209,197,.3)}
-        body{font-family:'Inter',Arial,sans-serif;background:var(--bg-color);color:var(--text-color);display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;margin:0;padding:20px;text-align:center}
-        h1{color:var(--error-color);font-size:2.5rem;margin-bottom:20px;display:flex;align-items:center;gap:10px}
-        p{font-size:1.2rem;margin-bottom:30px;max-width:400px;line-height:1.5}
-        a.btn-dashboard{background:var(--accent-color);color:var(--bg-color);padding:12px 30px;text-decoration:none;border-radius:var(--card-radius);font-weight:600;transition:background .3s,box-shadow .3s}
-        a.btn-dashboard:hover{background:#1ed760;box-shadow:0 0 15px var(--shadow-glow)}
-        .container{max-width:600px}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Error</h1>
-        <p>Your school information is missing.</p>
-        <a class="btn-dashboard" href="teacher_dashboard.php">Back to Dashboard</a>
-    </div>
-</body>
-</html>
-<?php
-    exit();
-}
+$email = $_SESSION['email'];
 
 /* -------------------------------------------------
-   GET CURRENT ACADEMIC YEAR (AUTOMATIC)
+   GET CURRENT ACADEMIC YEAR (AUTOMATIC) - NO SCHOOL_ID
    ------------------------------------------------- */
-$stmt = $conn->prepare("SELECT id, name FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$stmt->bind_param("i", $schoolId);
-$stmt->execute();
-$yearResult = $stmt->get_result();
-$currentYear = $yearResult->fetch_assoc();
-$current_academic_year_id = $currentYear['id'] ?? null;
-$current_year_name        = $currentYear['name'] ?? 'Unknown';
-$stmt->close();
+$current_academic_year_id = null;
+$current_year_name        = 'Unknown';
+
+$result = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+    $current_year_name        = $row['name'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your administrator.");
 }
+
 /* -------------------------------------------------
    GET CURRENT GLOBAL TERM — YOUR THRONE
    ------------------------------------------------- */
-$current_global_term = 4; // fallback
+$current_global_term = 4;
 $termResult = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($termRow = $termResult->fetch_assoc()) {
     $current_global_term = (int)$termRow['current_global_term'];
 }
 
 /* -------------------------------------------------
-   FETCH QUIZZES + TERM NUMBER
+   FETCH QUIZZES (NO SCHOOL_ID NEEDED)
    ------------------------------------------------- */
 $sql = "
     SELECT 
@@ -75,23 +44,22 @@ $sql = "
     FROM quizzes q
     INNER JOIN classes c ON q.class_id = c.id
     WHERE q.created_by = ? 
-      AND c.school_id = ?
       AND q.academic_year_id = ?
     ORDER BY q.term_number ASC, c.name ASC, q.start_time DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $email, $schoolId, $current_academic_year_id);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 /* -------------------------------------------------
    GROUP BY TERM → CLASS → QUIZZES
    ------------------------------------------------- */
-$terms = []; // $terms[term][class_id] = [class_name, quizzes[]]
+$terms = [];
 
 while ($row = $result->fetch_assoc()) {
-    $term = $row['term_number'] ?? $current_global_term; // fallback to current if null
+    $term = $row['term_number'] ?? $current_global_term;
     $class_id = $row['class_id'];
     
     if (!isset($terms[$term])) {

@@ -8,78 +8,89 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-// GET CURRENT ACADEMIC YEAR + SCHOOL ID
-$schoolId = $_SESSION['school_id'] ?? null;
 
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $schoolId);
-$currentYearStmt->execute();
-$currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
-$currentYearStmt->close();
+// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID NEEDED)
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
 
 if (!$current_academic_year_id) {
     die("No active academic year found.");
 }
 
+// HANDLE DELETE REQUEST
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
 
-    // Get filename first to delete file from server
+    // Get filename to delete from server
     $getFile = $conn->prepare("SELECT filename FROM resources WHERE id = ? AND uploaded_by = ?");
     $getFile->bind_param("is", $deleteId, $email);
     $getFile->execute();
     $getFileResult = $getFile->get_result();
+
     if ($fileRow = $getFileResult->fetch_assoc()) {
         $filename = $fileRow['filename'];
-        if (file_exists("resources/$filename")) {
-            unlink("resources/$filename");
+        $filePath = "resources/" . $filename;
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
         }
 
-        // Delete DB record
+        // Delete from database
         $del = $conn->prepare("DELETE FROM resources WHERE id = ? AND uploaded_by = ?");
         $del->bind_param("is", $deleteId, $email);
         $del->execute();
+        $del->close();
 
-        // Output JavaScript to trigger the success popup
+        // Success feedback
         echo '<script>
             document.addEventListener("DOMContentLoaded", function() {
-                document.getElementById("successModal").style.display = "flex";
-                setTimeout(function() {
-                    document.getElementById("successModal").style.display = "none";
+                const modal = document.getElementById("successModal");
+                if (modal) modal.style.display = "flex";
+                setTimeout(() => {
+                    if (modal) modal.style.display = "none";
                     window.location.href = "view_resources_teacher.php";
                 }, 2000);
             });
         </script>';
     }
+    $getFile->close();
+    exit();
 }
 
 /* -------------------------------------------------
-   FETCH RESOURCES + CLASS NAME ONLY
+   FETCH ALL RESOURCES UPLOADED BY THIS TEACHER
    ------------------------------------------------- */
 $sql = "
-    SELECT r.id, r.title, r.filename, r.uploaded_at,
-           c.id AS class_id, c.name AS class_name
+    SELECT 
+        r.id, 
+        r.title, 
+        r.filename, 
+        r.uploaded_at,
+        c.id AS class_id, 
+        c.name AS class_name
     FROM resources r
     JOIN classes c ON r.class_id = c.id
     WHERE r.uploaded_by = ?
-      AND c.school_id = ?
       AND r.academic_year_id = ?
     ORDER BY c.name ASC, r.uploaded_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $email, $schoolId, $current_academic_year_id);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 /* -------------------------------------------------
-   GROUP BY class_id
+   GROUP BY class_id (clean and beautiful)
    ------------------------------------------------- */
 $grouped = [];
+
 while ($row = $result->fetch_assoc()) {
     $cid = $row['class_id'];
+
     if (!isset($grouped[$cid])) {
         $grouped[$cid] = [
             'info' => [
@@ -91,6 +102,8 @@ while ($row = $result->fetch_assoc()) {
     }
     $grouped[$cid]['resources'][] = $row;
 }
+
+$stmt->close();
 ?>
 
 <!DOCTYPE html>

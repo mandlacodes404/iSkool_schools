@@ -20,6 +20,16 @@ function isActiveForm($formName, $activeForm) {
     return $formName === $activeForm ? 'active' : '';
 }
 
+$schoolName = 'My School'; // fallback only (will almost never show)
+
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $schoolName = trim($row['setting_value']);
+    if (empty($schoolName)) {
+        $schoolName = 'My School';
+    }
+}
+
 
 ?>
 
@@ -146,41 +156,49 @@ function isActiveForm($formName, $activeForm) {
         align-items: center;
         height: 100vh;
     }
+#iskool-brand {
+    display: none;
+    text-align: center;
+    font-size: 42px;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0 auto 30px auto;
+    max-width: 95vw;
+    white-space: nowrap;
+    padding: 0 10px;
+    /* Auto-shrink text to fit */
+    font-size: clamp(28px, 8vw, 48px);   /* This is magic */
+    /* or use this older method if you want: */
+    /* font-size: 8vw; */  /* Scales perfectly with screen width */
+}
 
+@media (max-width: 480px) {
     #iskool-brand {
-        display: none;
-        text-align: center;
-        font-size: 48px;
-        font-weight: 900;
-        color: #ffffff;
-        margin: 20px auto 0 auto;
-        max-width: 350px;
+        font-size: 32px;           /* Smaller on mobile */
+        margin-bottom: 25px;
+        max-width: 95vw;
     }
+}
 
-    @media (max-width: 480px) {
-        #iskool-brand {
-            font-size: 32px;
-        }
+@media (max-width: 360px) {
+    #iskool-brand {
+        font-size: 28px;
     }
+}
 
     .container {
-        display: none;
-        width: 90%;
-        max-width: 350px;
-        background: #161b22;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-        color: white;
-        overflow-y: auto;
-        max-height: 90vh;
-        margin: 0;
-    }
+    display: none;
+    width: 90%;
+    max-width: 420px;          /* Slightly wider for long school names */
+    margin: 0 auto;
+    padding: 20px 0;           /* Only vertical padding, no side padding = clean edges */
+    text-align: center;
+}
 
-    .container.show {
-        display: block;
-        animation: fadeSlideIn 1.2s ease forwards;
-    }
+.container.show {
+    display: block;
+    animation: fadeSlideIn 1.2s ease forwards;
+}
 
     @keyframes fadeSlideIn {
         from {
@@ -436,10 +454,10 @@ function isActiveForm($formName, $activeForm) {
 <body>
     <!-- Animation wrapper -->
     <div id="animation-wrapper">
-        <div id="loader-logo">iSkool</div>
+       <div id="loader-logo">iSkool</div>
         <div class="branding">
-            <span>from</span>
-            <span>Plan B</span>
+            <!--<span>from</span> -->
+            <span>v1.0.1</span>
         </div>
     </div>
     <!-- Login/Register container -->
@@ -490,7 +508,7 @@ function isActiveForm($formName, $activeForm) {
                     <input type="password" name="password" id="register-password" placeholder="Password" required>
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
                 </div>
-                <label>Select School:</label>
+                
                 
                 <label>Select Role:</label>
                 <select name="role" required>

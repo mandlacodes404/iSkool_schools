@@ -31,24 +31,14 @@ $teacher_email = $_SESSION['email'];
 $class_id = (int)$_POST['class_id'];
 
 try {
-    // === 1. Get school_id ===
-    $stmt = $conn->prepare("SELECT school_id FROM users WHERE email = ? AND role = 'teacher'");
-    $stmt->bind_param("s", $teacher_email);
-    $stmt->execute();
-    $school_id = $stmt->get_result()->fetch_assoc()['school_id'] ?? 0;
-    $stmt->close();
-    if (!$school_id) {
-        echo json_encode(['error' => 'School not found']);
-        ob_end_flush();
-        exit();
-    }
+    // === 1. SCHOOL LOGIC REMOVED – we now work per-database (current DB = current school) ===
 
-    // === 2. Current academic year ===
-    $stmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-    $stmt->bind_param("i", $school_id);
+    // === 2. Current academic year (NO school_id needed) ===
+    $stmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
     $stmt->execute();
     $current_academic_year_id = $stmt->get_result()->fetch_assoc()['id'] ?? null;
     $stmt->close();
+
     if (!$current_academic_year_id) {
         echo json_encode(['error' => 'No active academic year']);
         ob_end_flush();
