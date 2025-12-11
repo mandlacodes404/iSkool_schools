@@ -28,12 +28,12 @@ if ($termRow = $termStmt->fetch_assoc()) {
 }
 $termStmt->close();
 
-// GET CLASSES — SCHOOL_ID REMOVED
 $sql = "
     SELECT DISTINCT 
         q.class_id, 
         c.name AS class_name, 
         c.subject,
+        q.term_number,
         COUNT(DISTINCT CASE WHEN u.is_deleted = 0 THEN cs.student_email END) AS student_count
     FROM quizzes q
     JOIN classes c ON q.class_id = c.id
@@ -43,29 +43,49 @@ $sql = "
       AND q.is_summative = 1 
       AND q.publish_marks = 1 
       AND q.academic_year_id = ?
-      AND q.term_number = ?
       AND (u.is_deleted = 0 OR u.is_deleted IS NULL)
-    GROUP BY q.class_id, c.name, c.subject
-    ORDER BY c.name ASC
+    GROUP BY q.class_id, c.name, c.subject, q.term_number
+    ORDER BY q.term_number ASC, c.name ASC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $email, $current_academic_year_id, $current_global_term);
+$stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$classes = [];
-$class_ids = [];
+$grouped_by_term = [];
 
 while ($row = $result->fetch_assoc()) {
+    $term = $row['term_number'];
     $class_id = $row['class_id'];
-    $class_ids[] = $class_id;
-    $classes[] = [
-        'id' => $class_id,
-        'name' => $row['class_name'],
-        'subject' => $row['subject'] ?? 'General',
-        'student_count' => (int)$row['student_count']
-    ];
+
+    if (!isset($grouped_by_term[$term])) {
+        $grouped_by_term[$term] = [
+            'term_number' => $term,
+            'classes' => []
+        ];
+    }
+
+    // Only add class once per term
+    if (!isset($grouped_by_term[$term]['classes'][$class_id])) {
+        $grouped_by_term[$term]['classes'][$class_id] = [
+            'id' => $class_id,
+            'name' => $row['class_name'],
+            'subject' => $row['subject'] ?? 'General',
+            'student_count' => (int)$row['student_count'],
+            'term_number' => $term
+        ];
+    }
+}
+
+// Sort terms 1-4
+ksort($grouped_by_term);
+
+$class_ids = [];
+foreach ($grouped_by_term as $termData) {
+    foreach ($termData['classes'] as $class) {
+        $class_ids[] = $class['id'];
+    }
 }
 $stmt->close();
 
@@ -161,107 +181,120 @@ if (!empty($class_ids)) {
     <h2>My Analytics</h2>
     <p class="description">Click a class to explore performance insights by gender and quiz.</p>
 
-    <?php if (!empty($classes)): ?>
-        <?php foreach ($classes as $class): 
-            $class_id = $class['id'];
-            $custom_subject = $custom_subjects[$class_id] ?? null;
-            $display_subject = $custom_subject ?: 'Set Subject';
-            $is_set = !empty($custom_subject);
-        ?>
-            <div class="class-group" data-class-id="<?= $class_id ?>">
-                <div class="class-header">
-                    <div class="class-title">
-                        <span class="subject-name" data-class-id="<?= $class_id ?>">
-                            <?= $is_set ? htmlspecialchars($display_subject) : '<i>Set Subject</i>' ?>
-                        </span>
-                        <span class="class-name"><?= htmlspecialchars($class['name']) ?></span>
-                        <button class="edit-subject" onclick="openSubjectModal(<?= $class_id ?>, '<?= $is_set ? addslashes($custom_subject) : '' ?>')">
-    <i class="fas fa-pencil-alt"></i>
-</button>
-                    </div>
-                    <div>
-                        <span class="count">(<?= $class['student_count'] ?> students)</span>
-                        <button class="toggle-class"><i class="fas fa-chevron-down"></i></button>
-                    </div>
-                </div>
-                <div class="class-content">
-                    <!-- Quiz Average Overall -->
-                    <div class="analytics-section" data-type="quiz_avg">
-                        <div class="section-header">
-                            <h4>Quiz Average</h4>
-                            <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
-                        </div>
-                        <div class="section-body">
-                            <div class="chart-container">
-                                <canvas id="quiz-avg-<?= $class_id ?>"></canvas>
-                            </div>
-                            <div class="no-data" id="no-quiz-avg-<?= $class_id ?>">No data</div>
-                        </div>
-                    </div>
-
-                    <!-- Quiz Average by Gender -->
-                    <div class="analytics-section" data-type="quiz_gender">
-                        <div class="section-header">
-                            <h4>Quiz Average (Boys vs Girls)</h4>
-                            <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
-                        </div>
-                        <div class="section-body">
-                            <div class="chart-container">
-                                <canvas id="quiz-gender-<?= $class_id ?>"></canvas>
-                            </div>
-                            <div class="no-data" id="no-quiz-gender-<?= $class_id ?>">No gender data</div>
-                        </div>
-                    </div>
-
-                    <!-- Top 5 Girls & Boys -->
-                    <div class="analytics-section" data-type="top_gender">
-                        <div class="section-header">
-                            <h4>Top Performers</h4>
-                            <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
-                        </div>
-                        <div class="section-body">
-                            <div class="top-performers-grid">
-                                <div class="top-list">
-                                    <h5>Top 5 Girls</h5>
-                                    <div id="top-girls-<?= $class_id ?>"></div>
-                                </div>
-                                <div class="top-list">
-                                    <h5>Top 5 Boys</h5>
-                                    <div id="top-boys-<?= $class_id ?>"></div>
-                                </div>
-                            </div>
-                            <div class="no-data" id="no-top-gender-<?= $class_id ?>">No results</div>
-                        </div>
-                    </div>
-
-                    <!-- Boys vs Girls Monthly (Line Chart) -->
-                    <div class="analytics-section" data-type="monthly_gender">
-                        <div class="section-header">
-                            <h4>Boys vs Girls (Monthly)</h4>
-                            <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
-                        </div>
-                        <div class="section-body">
-                            <div class="chart-container">
-                                <canvas id="monthly-gender-<?= $class_id ?>"></canvas>
-                            </div>
-                            <div class="no-data" id="no-monthly-gender-<?= $class_id ?>">No monthly data</div>
-                        </div>
-                    </div>
-                </div>
+    <?php if (!empty($grouped_by_term)): ?>
+    <?php foreach ($grouped_by_term as $term => $termData): ?>
+        <div class="term-group" style="margin-bottom: 45px;">
+            <!-- Term Header -->
+            <div style="background: rgba(0,255,153,.15); padding: 16px 20px; border-radius: 12px; 
+                        font-size: 21px; font-weight: 600; color: var(--accent-color); 
+                        text-align: center; margin-bottom: 20px; 
+                        border: 1px solid rgba(0,255,153,.3); box-shadow: 0 4px 15px rgba(0,255,153,.1);">
+                Term <?= $term ?>
             </div>
 
-            <!-- Auto-open modal if subject not set -->
-            <?php if (!$is_set): ?>
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        openSubjectModal(<?= $class_id ?>, '');
-                    });
-                </script>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p class="empty">No published summative assessments yet.</p>
-    <?php endif; ?>
+            <?php foreach ($termData['classes'] as $class): 
+                $class_id = $class['id'];
+                $custom_subject = $custom_subjects[$class_id] ?? null;
+                $display_subject = $custom_subject ?: 'Set Subject';
+                $is_set = !empty($custom_subject);
+            ?>
+                <div class="class-group" data-class-id="<?= $class_id ?>" data-term="<?= $term ?>">
+                    <div class="class-header">
+                        <div class="class-title">
+                            <span class="subject-name" data-class-id="<?= $class_id ?>">
+                                <?= $is_set ? htmlspecialchars($display_subject) : '<i>Set Subject</i>' ?>
+                            </span>
+                            <span class="class-name"><?= htmlspecialchars($class['name']) ?></span>
+                            <button class="edit-subject" onclick="openSubjectModal(<?= $class_id ?>, '<?= $is_set ? addslashes($custom_subject) : '' ?>')">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <span class="count">(<?= $class['student_count'] ?> students)</span>
+                            <button class="toggle-class"><i class="fas fa-chevron-down"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="class-content">
+                        <!-- All your analytics sections stay 100% the same -->
+                        <div class="analytics-section" data-type="quiz_avg">
+                            <div class="section-header">
+                                <h4>Quiz Average</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="chart-container">
+                                   <canvas id="quiz-avg-<?= $class_id ?>-term<?= $term ?>"></canvas>
+                                </div>
+                                <div class="no-data" id="no-quiz-avg-<?= $class_id ?>-term<?= $term ?>">No data</div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-section" data-type="quiz_gender">
+                            <div class="section-header">
+                                <h4>Quiz Average (Boys vs Girls)</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="chart-container">
+                                    <canvas id="quiz-gender-<?= $class_id ?>-term<?= $term ?>"></canvas>
+                                </div>
+                                <div class="no-data" id="no-quiz-gender-<?= $class_id ?>-term<?= $term ?>">No gender data</div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-section" data-type="top_gender">
+                            <div class="section-header">
+                                <h4>Top Performers</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="top-performers-grid">
+                                    <div class="top-list">
+                                        <h5>Top 5 Girls</h5>
+                                        <div id="top-girls-<?= $class_id ?>-term<?= $term ?>"></div>
+                                    </div>
+                                    <div class="top-list">
+                                        <h5>Top 5 Boys</h5>
+                                        <div id="top-boys-<?= $class_id ?>-term<?= $term ?>"></div>
+                                    </div>
+                                </div>
+                                <div class="no-data" id="no-top-gender-<?= $class_id ?>-term<?= $term ?>">No results</div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-section" data-type="monthly_gender">
+                            <div class="section-header">
+                                <h4>Boys vs Girls (Monthly)</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="chart-container">
+                                    <canvas id="monthly-gender-<?= $class_id ?>-term<?= $term ?>"></canvas>
+                                </div>
+                                <div class="no-data" id="no-monthly-gender-<?= $class_id ?>-term<?= $term ?>">No monthly data</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-open subject modal if not set -->
+                <?php if (!$is_set): ?>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            openSubjectModal(<?= $class_id ?>, '');
+                        });
+                    </script>
+                <?php endif; ?>
+
+            <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
+<?php else: ?>
+    <p class="empty" style="text-align: center; max-width: 700px; margin: 50px auto; font-size: 16px;">
+        No published summative assessments yet.
+    </p>
+<?php endif; ?>
 
     <a href="teacher_dashboard.php" class="back-btn">Back to Dashboard</a>
 
@@ -284,44 +317,52 @@ if (!empty($class_ids)) {
     const teacherEmail = <?= json_encode($email) ?>;
     let currentClassId = null;
 
-    // Toggle class open/close
-    document.querySelectorAll('.toggle-class').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const header = this.closest('.class-header');
-            const content = header.nextElementSibling;
-            content.classList.toggle('show');
-            this.classList.toggle('active');
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Toggle class open/close
+        document.querySelectorAll('.toggle-class').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const header = this.closest('.class-header');
+                const content = header.nextElementSibling;
+                content.classList.toggle('show');
+                this.classList.toggle('active');
+            });
+        });
+
+        // Click anywhere on header (except buttons)
+        document.querySelectorAll('.class-header').forEach(header => {
+            header.addEventListener('click', e => {
+                if (e.target.closest('.toggle-class') || e.target.closest('.edit-subject')) return;
+                header.querySelector('.toggle-class').click();
+            });
+        });
+
+        // Toggle analytics sections + load data
+        document.querySelectorAll('.toggle-section').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const header = btn.closest('.section-header');
+                const body = header.nextElementSibling;
+                const section = header.parentElement;
+                const type = section.dataset.type;
+                const classGroup = section.closest('.class-group');
+                const classId = classGroup.dataset.classId;
+                const term = classGroup.dataset.term;
+
+                body.classList.toggle('show');
+                btn.classList.toggle('active');
+
+                if (body.classList.contains('show') && !section.dataset.loaded) {
+                    loadSectionData(classId, term, type);
+                    section.dataset.loaded = 'true';
+                }
+            });
         });
     });
 
-    // Click anywhere on header (except buttons)
-    document.querySelectorAll('.class-header').forEach(header => {
-        header.addEventListener('click', e => {
-            if (e.target.closest('.toggle-class') || e.target.closest('.edit-subject')) return;
-            header.querySelector('.toggle-class').click();
-        });
-    });
-
-    // Toggle analytics sections + load data
-    document.querySelectorAll('.toggle-section').forEach(btn => {
-        btn.addEventListener('click', e => {
-            e.stopPropagation();
-            const header = btn.closest('.section-header');
-            const body = header.nextElementSibling;
-            const section = header.parentElement;
-            const type = section.dataset.type;
-            const classId = section.closest('.class-group').dataset.classId;
-            body.classList.toggle('show');
-            btn.classList.toggle('active');
-            if (body.classList.contains('show') && !section.dataset.loaded) {
-                loadSectionData(classId, type);
-                section.dataset.loaded = 'true';
-            }
-        });
-    });
-
-    // Subject modal (unchanged)
+    // Subject modal functions (unchanged)
     function openSubjectModal(classId, currentSubject) {
         currentClassId = classId;
         const className = document.querySelector(`[data-class-id="${classId}"] .class-name`).textContent;
@@ -334,8 +375,10 @@ if (!empty($class_ids)) {
     function saveSubject() {
         const subject = document.getElementById('subject-input').value.trim();
         if (!subject) return alert('Please enter a subject name');
+
         const loader = document.getElementById('loaderOverlay');
         loader.classList.add('show');
+
         fetch('save_subject.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -349,6 +392,7 @@ if (!empty($class_ids)) {
                 const span = document.querySelector(`[data-class-id="${currentClassId}"] .subject-name`);
                 span.innerHTML = data.subject_name;
                 span.style.fontStyle = 'normal';
+
                 let pencil = span.parentElement.querySelector('.edit-subject');
                 if (!pencil) {
                     pencil = document.createElement('button');
@@ -373,30 +417,17 @@ if (!empty($class_ids)) {
         }
     });
 
-    // Load analytics data (IMPROVED ERROR HANDLING)
-    function loadSectionData(classId, type) {
+    // Load analytics data with correct term
+    function loadSectionData(classId, term, type) {
         const loader = document.getElementById('loaderOverlay');
         loader.classList.add('show');
 
         fetch('get_analytics_data.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `class_id=${classId}&teacher_email=${encodeURIComponent(teacherEmail)}`
+            body: `class_id=${classId}&teacher_email=${encodeURIComponent(teacherEmail)}&term=${term}`
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 500)}`);
-                });
-            }
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                return response.text().then(text => {
-                    throw new Error(`Expected JSON, got: ${text.substring(0, 500)}`);
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.ok ? response.json() : response.text().then(text => { throw new Error(text); }))
         .then(data => {
             loader.classList.remove('show');
             if (data.error) {
@@ -404,7 +435,7 @@ if (!empty($class_ids)) {
                 alert(`Failed to load analytics: ${data.error}`);
                 return;
             }
-            renderSection(classId, type, data);
+            renderSection(classId, term, type, data);
         })
         .catch(err => {
             loader.classList.remove('show');
@@ -413,20 +444,33 @@ if (!empty($class_ids)) {
         });
     }
 
-    function renderSection(classId, type, data) {
-        if (type === 'quiz_avg') renderQuizAverage(classId, data.quiz_averages);
-        else if (type === 'quiz_gender') renderQuizGender(classId, data.quiz_gender_averages);
-        else if (type === 'top_gender') renderTopGender(classId, data.top_girls, data.top_boys);
-        else if (type === 'monthly_gender') renderMonthlyGender(classId, data.boys_vs_girls_monthly);
+    // Updated renderSection to pass term
+    function renderSection(classId, term, type, data) {
+        if (type === 'quiz_avg') renderQuizAverage(classId, term, data.quiz_averages);
+        else if (type === 'quiz_gender') renderQuizGender(classId, term, data.quiz_gender_averages);
+        else if (type === 'top_gender') renderTopGender(classId, term, data.top_girls, data.top_boys);
+        else if (type === 'monthly_gender') renderMonthlyGender(classId, term, data.boys_vs_girls_monthly);
     }
 
-    function renderQuizAverage(classId, averages) {
-        const ctx = document.getElementById(`quiz-avg-${classId}`);
-        const noData = document.getElementById(`no-quiz-avg-${classId}`);
-        if (!averages || averages.length === 0) { ctx.style.display = 'none'; noData.style.display = 'block'; return; }
-        ctx.style.display = 'block'; noData.style.display = 'none';
-        if (charts[`avg-${classId}`]) charts[`avg-${classId}`].destroy();
-        charts[`avg-${classId}`] = new Chart(ctx, {
+    // UPDATED: All render functions now use classId + term in IDs
+    function renderQuizAverage(classId, term, averages) {
+        const canvasId = `quiz-avg-${classId}-term${term}`;
+        const noDataId = `no-quiz-avg-${classId}-term${term}`;
+        const ctx = document.getElementById(canvasId);
+        const noData = document.getElementById(noDataId);
+
+        if (!averages || averages.length === 0) {
+            ctx.style.display = 'none';
+            noData.style.display = 'block';
+            return;
+        }
+        ctx.style.display = 'block';
+        noData.style.display = 'none';
+
+        const chartKey = `avg-${classId}-term${term}`;
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        charts[chartKey] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: averages.map(a => a.title),
@@ -438,17 +482,35 @@ if (!empty($class_ids)) {
                     borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } }, scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } }, x: { ticks: { color: '#ccc' } } } }
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#fff' } } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } },
+                    x: { ticks: { color: '#ccc' } }
+                }
+            }
         });
     }
 
-    function renderQuizGender(classId, genderData) {
-        const ctx = document.getElementById(`quiz-gender-${classId}`);
-        const noData = document.getElementById(`no-quiz-gender-${classId}`);
-        if (!genderData || genderData.length === 0) { ctx.style.display = 'none'; noData.style.display = 'block'; return; }
-        ctx.style.display = 'block'; noData.style.display = 'none';
-        if (charts[`gender-${classId}`]) charts[`gender-${classId}`].destroy();
-        charts[`gender-${classId}`] = new Chart(ctx, {
+    function renderQuizGender(classId, term, genderData) {
+        const canvasId = `quiz-gender-${classId}-term${term}`;
+        const noDataId = `no-quiz-gender-${classId}-term${term}`;
+        const ctx = document.getElementById(canvasId);
+        const noData = document.getElementById(noDataId);
+
+        if (!genderData || genderData.length === 0) {
+            ctx.style.display = 'none';
+            noData.style.display = 'block';
+            return;
+        }
+        ctx.style.display = 'block';
+        noData.style.display = 'none';
+
+        const chartKey = `gender-${classId}-term${term}`;
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        charts[chartKey] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: genderData.map(d => d.title),
@@ -457,32 +519,61 @@ if (!empty($class_ids)) {
                     { label: 'Girls %', data: genderData.map(d => d.girls), backgroundColor: 'rgba(225, 87, 89, 0.7)', borderColor: '#e15759' }
                 ]
             },
-            options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } }, scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } }, x: { ticks: { color: '#ccc' } } } }
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#fff' } } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } },
+                    x: { ticks: { color: '#ccc' } }
+                }
+            }
         });
     }
 
-    function renderTopGender(classId, girls, boys) {
-        const gContainer = document.getElementById(`top-girls-${classId}`);
-        const bContainer = document.getElementById(`top-boys-${classId}`);
-        const noData = document.getElementById(`no-top-gender-${classId}`);
+    function renderTopGender(classId, term, girls, boys) {
+        const gId = `top-girls-${classId}-term${term}`;
+        const bId = `top-boys-${classId}-term${term}`;
+        const noDataId = `no-top-gender-${classId}-term${term}`;
+
+        const gContainer = document.getElementById(gId);
+        const bContainer = document.getElementById(bId);
+        const noData = document.getElementById(noDataId);
+
         if ((!girls || girls.length === 0) && (!boys || boys.length === 0)) {
             noData.style.display = 'block';
-            gContainer.innerHTML = ''; bContainer.innerHTML = '';
+            gContainer.innerHTML = '';
+            bContainer.innerHTML = '';
             return;
         }
+
         noData.style.display = 'none';
-        gContainer.innerHTML = girls.length ? girls.map((p, i) => `<div class="performer"><span class="name">${i+1}. ${p.name}</span><span class="avg">${p.avg}%</span></div>`).join('') : '<div class="no-data">No girls</div>';
-        bContainer.innerHTML = boys.length ? boys.map((p, i) => `<div class="performer"><span class="name">${i+1}. ${p.name}</span><span class="avg">${p.avg}%</span></div>`).join('') : '<div class="no-data">No boys</div>';
+        gContainer.innerHTML = girls.length 
+            ? girls.map((p, i) => `<div class="performer"><span class="name">${i+1}. ${p.name}</span><span class="avg">${p.avg}%</span></div>`).join('')
+            : '<div class="no-data">No girls</div>';
+        bContainer.innerHTML = boys.length 
+            ? boys.map((p, i) => `<div class="performer"><span class="name">${i+1}. ${p.name}</span><span class="avg">${p.avg}%</span></div>`).join('')
+            : '<div class="no-data">No boys</div>';
     }
 
-    function renderMonthlyGender(classId, data) {
-        const ctx = document.getElementById(`monthly-gender-${classId}`);
-        const noData = document.getElementById(`no-monthly-gender-${classId}`);
+    function renderMonthlyGender(classId, term, data) {
+        const canvasId = `monthly-gender-${classId}-term${term}`;
+        const noDataId = `no-monthly-gender-${classId}-term${term}`;
+        const ctx = document.getElementById(canvasId);
+        const noData = document.getElementById(noDataId);
+
         const hasData = data.boys.some(v => v !== null) || data.girls.some(v => v !== null);
-        if (!hasData) { ctx.style.display = 'none'; noData.style.display = 'block'; return; }
-        ctx.style.display = 'block'; noData.style.display = 'none';
-        if (charts[`monthly-${classId}`]) charts[`monthly-${classId}`].destroy();
-        charts[`monthly-${classId}`] = new Chart(ctx, {
+        if (!hasData) {
+            ctx.style.display = 'none';
+            noData.style.display = 'block';
+            return;
+        }
+        ctx.style.display = 'block';
+        noData.style.display = 'none';
+
+        const chartKey = `monthly-${classId}-term${term}`;
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        charts[chartKey] = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -493,8 +584,14 @@ if (!empty($class_ids)) {
             },
             options: {
                 responsive: true,
-                plugins: { legend: { labels: { color: '#fff' } }, title: { display: true, text: 'Monthly Performance %', color: '#00ff99' } },
-                scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } }, x: { ticks: { color: '#ccc' } } }
+                plugins: {
+                    legend: { labels: { color: '#fff' } },
+                    title: { display: true, text: 'Monthly Performance %', color: '#00ff99' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } },
+                    x: { ticks: { color: '#ccc' } }
+                }
             }
         });
     }

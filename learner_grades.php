@@ -21,21 +21,16 @@ if (!$current_academic_year_id) {
 }
 
 /* -------------------------------------------------
-   FETCH QUIZZES + CLASS NAME ONLY
+   FETCH ALL QUIZZES FOR CURRENT ACADEMIC YEAR (ALL TERMS)
    ------------------------------------------------- */
 $sql = "
-    SELECT q.id, q.title, q.created_at,
+    SELECT q.id, q.title, q.created_at, q.term_number,
            c.id AS class_id, c.name AS class_name
     FROM quizzes q
     JOIN classes c ON q.class_id = c.id
     WHERE q.created_by = ?
       AND q.academic_year_id = ?
-      AND q.term_number = (
-          SELECT current_global_term 
-          FROM platform_settings 
-          LIMIT 1
-      )
-    ORDER BY c.name ASC, q.created_at DESC
+    ORDER BY q.term_number ASC, c.name ASC, q.created_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
@@ -44,22 +39,39 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 /* -------------------------------------------------
-   GROUP BY class_id
+   GROUP BY term_number → class_id → quizzes
    ------------------------------------------------- */
-$grouped = [];
+$grouped_by_term = [];
+
 while ($row = $result->fetch_assoc()) {
-    $cid = $row['class_id'];
-    if (!isset($grouped[$cid])) {
-        $grouped[$cid] = [
+    $term = $row['term_number'];
+    $class_id = $row['class_id'];
+
+    // Initialize term if not exists
+    if (!isset($grouped_by_term[$term])) {
+        $grouped_by_term[$term] = [
+            'term_number' => $term,
+            'classes' => []
+        ];
+    }
+
+    // Initialize class inside term
+    if (!isset($grouped_by_term[$term]['classes'][$class_id])) {
+        $grouped_by_term[$term]['classes'][$class_id] = [
             'info' => [
-                'id'   => $cid,
+                'id'   => $class_id,
                 'name' => $row['class_name']
             ],
             'quizzes' => []
         ];
     }
-    $grouped[$cid]['quizzes'][] = $row;
+
+    // Add quiz to class
+    $grouped_by_term[$term]['classes'][$class_id]['quizzes'][] = $row;
 }
+
+// Sort terms 1 to 4 (in case some are missing)
+ksort($grouped_by_term);
 ?>
 
 <!DOCTYPE html>
@@ -313,7 +325,7 @@ while ($row = $result->fetch_assoc()) {
     </style>
 </head>
 <body>
-    <h2>All Your Quizzes</h2>
+    <h2>Grades</h2>
 
     <p class="description">
         All the quizzes you have created on this platform are listed here.<br>
@@ -325,38 +337,47 @@ while ($row = $result->fetch_assoc()) {
     <div class="add-quiz">
         <a href="manual_add_quiz.php">+ Add Quiz</a>
     </div>
+           <?php if (!empty($grouped_by_term)): ?>
+    <?php foreach ($grouped_by_term as $term => $termData): ?>
+        <div class="term-group" style="margin-bottom: 35px;">
+            <div class="term-header" style="background: rgba(0,255,153,.15); padding: 16px; border-radius: 12px; font-size: 20px; font-weight: 600; color: var(--accent-color); text-align: center; margin-bottom: 15px; border: 1px solid rgba(0,255,153,.3);">
+                Term <?= $term ?>
+            </div>
 
-    <?php if (!empty($grouped)): ?>
-        <?php foreach ($grouped as $classId => $class): ?>
-            <div class="class-group">
-                <div class="class-header">
-                    <h3><?= htmlspecialchars($class['info']['name']) ?></h3>
-                    <div>
-                        <span class="count">(<?= count($class['quizzes']) ?>)</span>
-                        <button class="toggle-class" aria-label="Toggle quizzes"><i class="fas fa-chevron-down"></i></button>
+            <?php foreach ($termData['classes'] as $classId => $class): ?>
+                <div class="class-group">
+                    <div class="class-header">
+                        <h3><?= htmlspecialchars($class['info']['name']) ?></h3>
+                        <div>
+                            <span class="count">(<?= count($class['quizzes']) ?>)</span>
+                            <button class="toggle-class" aria-label="Toggle quizzes"><i class="fas fa-chevron-down"></i></button>
+                        </div>
+                    </div>
+                    <div class="class-quizzes">
+                        <?php foreach ($class['quizzes'] as $quiz): ?>
+                            <div class="quiz" data-quiz-id="<?= $quiz['id'] ?>">
+                                <h3 onclick="toggleDetails(this)">
+                                    <i class="fas fa-chevron-down"></i>
+                                    <a href="quiz_grades.php?quiz_id=<?= $quiz['id'] ?>" class="quiz-link"><?= htmlspecialchars($quiz['title']) ?></a>
+                                </h3>
+                                <div class="quiz-details" id="details-<?= $quiz['id'] ?>">
+                                    <p><strong>Class:</strong> <?= htmlspecialchars($class['info']['name']) ?></p>
+                                    <?php if ($quiz['created_at']): ?>
+                                        <p><strong>Created:</strong> <?= date('d M Y, H:i', strtotime($quiz['created_at'])) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-                <div class="class-quizzes">
-                    <?php foreach ($class['quizzes'] as $quiz): ?>
-                        <div class="quiz" data-quiz-id="<?= $quiz['id'] ?>">
-                            <h3 onclick="toggleDetails(this)">
-                                <i class="fas fa-chevron-down"></i>
-                                <a href="quiz_grades.php?quiz_id=<?= $quiz['id'] ?>" class="quiz-link"><?= htmlspecialchars($quiz['title']) ?></a>
-                            </h3>
-                            <div class="quiz-details" id="details-<?= $quiz['id'] ?>">
-                                <p><strong>Class:</strong> <?= htmlspecialchars($class['info']['name']) ?></p>
-                                <?php if ($quiz['created_at']): ?>
-                                    <p><strong>Created:</strong> <?= date('d M Y, H:i', strtotime($quiz['created_at'])) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p class="empty">You haven't created any quizzes yet.</p>
-    <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
+<?php else: ?>
+    <p class="empty">You haven't created any quizzes yet.</p>
+<?php endif; ?>
+    
+      
 
     <div id="loaderOverlay">
         <div class="loader-container">

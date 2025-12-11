@@ -527,7 +527,7 @@ if (empty($joinedClassIds)) {
 <body>
     <div class="container">
         <div class="header">
-            <h2>My Assignments</h2>
+            <h2>Assignments</h2>
             <?php if (!empty($groupedAssignments)): ?>
                 <div class="search-sort">
                     <input type="text" id="searchInput" placeholder="Search by title or class..." aria-label="Search assignments">

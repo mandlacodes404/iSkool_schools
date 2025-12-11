@@ -11,177 +11,199 @@ $defaultPic = 'default.png';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Settings</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <style>
-    :root {
-        --bg: #000000;
-        --card: rgba(15, 15, 15, 0.82);
-        --glass-border: rgba(255, 255, 255, 0.09);
-        --text: #ffffff;
-        --text-muted: #b0b0b0;
-        --accent: #4fd1c5;
-        --danger: #ff4444;
-        --hover-glow: 0 0 22px rgba(79, 209, 197, 0.45);
-    }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #1a202c;
+            --text-color: #e0e6f0;
+            --accent-color: #4fd1c5;
+            --button-bg: #2c3e50;
+            --button-hover-bg: #34495e;
+            --disabled-bg: #3a3f47;
+            --disabled-text: #7a7f88;
+            --card-radius: 12px;
+            --shadow-glow: rgba(79, 209, 197, 0.3);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --danger-bg: #ff4444;
+            --danger-hover: #ff6666;
+        }
 
-    * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    body {
-        margin: 0;
-        padding: 24px;
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--text);
-        font-family: 'Nunito', sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-image: 
-            radial-gradient(circle at 15% 25%, rgba(79, 209, 197, 0.07) 0%, transparent 25%),
-            radial-gradient(circle at 85% 75%, rgba(79, 209, 197, 0.05) 0%, transparent 25%);
-    }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
 
-    .settings-card {
-        width: 100%;
-        max-width: 440px;
-        background: var(--card);
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-        border: 1px solid var(--glass-border);
-        border-radius: 26px;
-        padding: 44px 36px;
-        box-shadow:
-            0 25px 50px rgba(0, 0, 0, 0.5),
-            0 0 80px rgba(79, 209, 197, 0.1);
-        text-align: center;
-        animation: fadeIn 0.7s ease-out;
-    }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
+        h2 {
+            font-size: 28px;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
 
-    h2 {
-        margin: 0 0 36px 0;
-        font-size: 34px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #4fd1c5, #6df5e9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
+        .settings-card {
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
 
-    ul { list-style: none; padding: 0; margin: 0; }
-    li { margin-bottom: 18px; }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    button, a {
-        width: 100%;
-        padding: 19px 22px;
-        border: none;
-        border-radius: 18px;
-        font-family: 'Nunito', sans-serif;
-        font-size: 17.5px;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        transition: all 0.4s ease;
-        position: relative;
-        overflow: hidden;
-        text-decoration: none;
-        color: white;
-    }
+        li {
+            margin-bottom: 15px;
+        }
 
-    button::before, a::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-        transition: left 0.7s;
-    }
+        li:last-child {
+            margin-bottom: 0;
+        }
 
-    button:hover::before, a:hover::before { left: 100%; }
+        button,
+        a.btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--card-radius);
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
 
-    /* Accent Button (Update Profile) */
-    #updateProfileBtn, #updateTeacherProfileBtn {
-        background: rgba(79, 209, 197, 0.16);
-        border: 1.8px solid rgba(79, 209, 197, 0.4);
-        color: #4fd1c5;
-    }
-    #updateProfileBtn:hover, #updateTeacherProfileBtn:hover {
-        background: #4fd1c5;
-        color: #000;
-        transform: translateY(-5px);
-        box-shadow: var(--hover-glow);
-    }
+        button:hover,
+        a.btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
 
-    /* Danger Button (Remove Profile) */
-    #removeProfileBtn, #removeTeacherProfileBtn {
-        background: rgba(255, 68, 68, 0.15);
-        border: 1.8px solid rgba(255, 68, 68, 0.4);
-        color: #ff6666;
-    }
-    #removeProfileBtn:hover, #removeTeacherProfileBtn:hover {
-        background: #ff4444;
-        color: white;
-        transform: translateY(-5px);
-        box-shadow: 0 0 25px rgba(255, 68, 68, 0.5);
-    }
+        /* Accent style for Update Profile */
+        #updateProfileBtn {
+            background-color: rgba(79, 209, 197, 0.15);
+            border: 1px solid rgba(79, 209, 197, 0.3);
+            color: var(--accent-color);
+        }
 
-    /* Logout */
-    .logout-link {
-        background: linear-gradient(135deg, #ff3333, #cc0000);
-        margin-top: 10px;
-        box-shadow: 0 10px 30px rgba(255, 51, 51, 0.35);
-    }
-    .logout-link:hover {
-        background: linear-gradient(135deg, #ff1111, #aa0000);
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(255, 51, 51, 0.5);
-    }
+        #updateProfileBtn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
 
-    button i, a i {
-        font-size: 21px;
-        width: 30px;
-    }
+        /* Danger style for Remove Profile */
+        #removeProfileBtn {
+            background-color: rgba(255, 68, 68, 0.15);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff6666;
+        }
 
-    @media (max-width: 480px) {
-        .settings-card { padding: 36px 28px; border-radius: 22px; }
-        h2 { font-size: 30px; }
-    }
-</style>
+        #removeProfileBtn:hover {
+            background-color: var(--danger-bg);
+            color: white;
+        }
+
+        /* Logout button */
+        .logout-link {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+        }
+
+        .logout-link:hover {
+            background: linear-gradient(135deg, #ff6666, #aa0000);
+            box-shadow: 0 6px 16px rgba(255, 68, 68, 0.4);
+        }
+
+        button i,
+        a.btn i {
+            font-size: 18px;
+            color: inherit;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .settings-card {
+                padding: 20px;
+            }
+
+            button,
+            a.btn {
+                padding: 12px 16px;
+                font-size: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h2>Settings</h2>
+        </div>
 
-<div class="settings-card">
-    <h2>Settings</h2>
-    
-    <ul>
-        <li>
-            <button id="updateProfileBtn">
-                Update Profile Picture
-            </button>
-        </li>
+        <div class="settings-card">
+            <ul>
+                <li>
+                    <button id="updateProfileBtn">
+                        <i class="fas fa-user-circle"></i> Update Profile Picture
+                    </button>
+                </li>
 
-        <li>
-            <button id="removeProfileBtn">
-                Remove Profile Picture
-            </button>
-        </li>
+                <li>
+                    <button id="removeProfileBtn">
+                        <i class="fas fa-user-slash"></i> Remove Profile Picture
+                    </button>
+                </li>
 
-        <li>
-            <a href="logout.php" target="_top" class="logout-link">
-                Logout
-            </a>
-        </li>
-    </ul>
-</div>
+                <li>
+                    <a href="logout.php" target="_top" class="btn logout-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

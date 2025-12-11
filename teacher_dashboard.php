@@ -16,19 +16,25 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 $email = $_SESSION['email'];
 
 // Fetch teacher info
-$stmtTeacher = $conn->prepare("SELECT name, profile_picture FROM users WHERE email = ?");
+$stmtTeacher = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
 $stmtTeacher->bind_param("s", $email);
 $stmtTeacher->execute();
 $resultTeacher = $stmtTeacher->get_result();
 
 $teacherName     = $_SESSION['name'] ?? 'Teacher';
+$teacherSurname  = '';
+$teacherFullName = $teacherName; // fallback
 $teacherProfile  = 'default.png';
 $teacherEmail    = $_SESSION['email'];
 
 if ($resultTeacher->num_rows > 0) {
     $rowTeacher = $resultTeacher->fetch_assoc();
     $teacherName    = $rowTeacher['name'] ?: $teacherName;
+    $teacherSurname = $rowTeacher['surname'] ?? '';
     $teacherProfile = $rowTeacher['profile_picture'] ?: 'default.png';
+    
+    // Combine name + surname
+    $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
 }
 $stmtTeacher->close();
 
@@ -271,18 +277,18 @@ $schoolLogo = 'Uploads/schools/default_school.png';
 
 
     </div>
-    <div class="teacher-name"><?= htmlspecialchars($teacherName) ?></div>
+    <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
     <div class="sidebar-links" style="margin-top:20px;">
         <a href="teacher_manual.php" target="mainFrame" class="<?= $currentPage==='teacher_manual.php'?'active':'' ?>"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="create_quiz.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_quiz.php'?'active':'' ?>"><i class="fas fa-question-circle"></i><span>Create Quiz</span></a>
-        <a href="teacher_quizzes.php" target="mainFrame" class="desktop-only <?= $currentPage==='teacher_quizzes.php'?'active':'' ?>"><i class="fas fa-list-check"></i><span>View Quizzes</span></a>
+        <a href="teacher_quizzes.php" target="mainFrame" class="<?= $currentPage==='teacher_quizzes.php'?'active':'' ?>"><i class="fas fa-list-check"></i><span>View Quizzes</span></a>
         <a href="create_assignment.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_assignment.php'?'active':'' ?>"><i class="fas fa-file-alt"></i><span>Create Assignment</span></a>
         <a href="teacher_assignments.php" target="mainFrame" class="<?= $currentPage==='teacher_assignments.php'?'active':'' ?>"><i class="fas fa-folder-open"></i><span>Assignments</span></a>
         <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i><span>Announcement</span></a>
         <a href="teacher_announcements.php" target="mainFrame" class="<?= $currentPage==='teacher_announcements.php'?'active':'' ?>"><i class="fas fa-bell"></i><span>Announcements</span></a>
         <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>"><i class="fas fa-chart-bar"></i><span>Learner Grades</span></a>
-        <a href="upload_resource.php" target="mainFrame" class="<?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
+        <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
         <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
     </div>
     <div class="footer"><strong>iSkool v.1.0.0</strong></div>
@@ -382,9 +388,22 @@ window.toggleDesktopSidebar = () => {
         }
     }
 
-    // Settings
-    document.getElementById('settingsBtn')?.addEventListener('click', () => {
-        document.querySelector('iframe[name="mainFrame"]').src = 'teacher_settings.php';
+           // Settings (with loader + close mobile sidebar + clear active states)
+    document.getElementById('settingsBtn')?.addEventListener('click', function() {
+        loader.style.display = 'flex';  // Show loader immediately
+        
+        iframe.src = "teacher_settings.php";  // Load settings page
+
+        // Optional: Clear active states from sidebar links (consistent with learner)
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // Close mobile sidebar if open (mobile only)
+        if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
+            overlay.style.display = 'none';  // Hide overlay/blur
+        }
     });
 });
 </script>

@@ -30,10 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['class_id'])) {
 $teacher_email = $_SESSION['email'];
 $class_id = (int)$_POST['class_id'];
 
-try {
-    // === 1. SCHOOL LOGIC REMOVED – we now work per-database (current DB = current school) ===
+// === NEW: Get the term from frontend (sent via JS), fallback to current global term ===
+$term = isset($_POST['term']) ? (int)$_POST['term'] : null;
+if ($term < 1 || $term > 4) {
+    // Fallback: get current global term from DB
+    $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+    $term = ($row = $result->fetch_assoc()) ? (int)$row['current_global_term'] : 4;
+}
 
-    // === 2. Current academic year (NO school_id needed) ===
+try {
+    // === Current academic year ===
     $stmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
     $stmt->execute();
     $current_academic_year_id = $stmt->get_result()->fetch_assoc()['id'] ?? null;
@@ -45,25 +51,24 @@ try {
         exit();
     }
 
-    // === 3. Current global term ===
-    $current_global_term = 4;
-    $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
-    if ($row = $result->fetch_assoc()) {
-        $current_global_term = (int)$row['current_global_term'];
-    }
-
-    // === 4. Quiz Averages (Overall) ===
+    // === 1. Quiz Averages (Overall) ===
     $sql = "SELECT q.title, AVG((r.score / r.total) * 100) AS avg_percent
             FROM quizzes q
             JOIN quiz_results r ON q.id = r.quiz_id
             JOIN class_students cs ON r.user_email = cs.student_email AND cs.class_id = q.class_id
             JOIN users u ON cs.student_email = u.email AND u.is_deleted = 0
-            WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ? AND q.term_number = ?
-              AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
-            GROUP BY q.id, q.title ORDER BY q.start_time";
+            WHERE q.created_by = ? 
+              AND q.class_id = ? 
+              AND q.academic_year_id = ? 
+              AND q.term_number = ?
+              AND q.is_summative = 1 
+              AND q.publish_marks = 1 
+              AND r.total > 0
+            GROUP BY q.id, q.title 
+            ORDER BY q.start_time";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $current_global_term);
+    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $term);
     $stmt->execute();
     $result = $stmt->get_result();
     $quiz_averages = [];
@@ -75,18 +80,24 @@ try {
     }
     $stmt->close();
 
-    // === 5. Quiz Averages by Gender ===
+    // === 2. Quiz Averages by Gender ===
     $sql = "SELECT q.title, u.gender, AVG((r.score / r.total) * 100) AS avg_percent
             FROM quizzes q
             JOIN quiz_results r ON q.id = r.quiz_id
             JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender IN ('male','female')
             JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
-            WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ? AND q.term_number = ?
-              AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
-            GROUP BY q.id, u.gender ORDER BY q.start_time";
+            WHERE q.created_by = ? 
+              AND q.class_id = ? 
+              AND q.academic_year_id = ? 
+              AND q.term_number = ?
+              AND q.is_summative = 1 
+              AND q.publish_marks = 1 
+              AND r.total > 0
+            GROUP BY q.id, u.gender 
+            ORDER BY q.start_time";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $current_global_term);
+    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $term);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -108,21 +119,28 @@ try {
         ];
     }
 
-    // === 6. TOP 5 GIRLS & BOYS — 100% XAMPP SAFE ===
+    // === 3. TOP 5 GIRLS & BOYS ===
     $top_sql = "SELECT CONCAT(COALESCE(u.title,''),' ',COALESCE(u.name,''),' ',COALESCE(u.surname,'')) AS name,
                        AVG((r.score / r.total) * 100) AS avg_percent
                 FROM quiz_results r
                 JOIN quizzes q ON r.quiz_id = q.id
                 JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender = ?
                 JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
-                WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ? AND q.term_number = ?
-                  AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
-                GROUP BY u.email ORDER BY avg_percent DESC LIMIT 5";
+                WHERE q.created_by = ? 
+                  AND q.class_id = ? 
+                  AND q.academic_year_id = ? 
+                  AND q.term_number = ?
+                  AND q.is_summative = 1 
+                  AND q.publish_marks = 1 
+                  AND r.total > 0
+                GROUP BY u.email 
+                ORDER BY avg_percent DESC 
+                LIMIT 5";
 
     // Top 5 Girls
     $gender = 'female';
     $stmt = $conn->prepare($top_sql);
-    $stmt->bind_param("ssiii", $gender, $teacher_email, $class_id, $current_academic_year_id, $current_global_term);
+    $stmt->bind_param("ssiii", $gender, $teacher_email, $class_id, $current_academic_year_id, $term);
     $stmt->execute();
     $result = $stmt->get_result();
     $top_girls = [];
@@ -134,7 +152,7 @@ try {
     // Top 5 Boys
     $gender = 'male';
     $stmt = $conn->prepare($top_sql);
-    $stmt->bind_param("ssiii", $gender, $teacher_email, $class_id, $current_academic_year_id, $current_global_term);
+    $stmt->bind_param("ssiii", $gender, $teacher_email, $class_id, $current_academic_year_id, $term);
     $stmt->execute();
     $result = $stmt->get_result();
     $top_boys = [];
@@ -143,18 +161,24 @@ try {
     }
     $stmt->close();
 
-    // === 7. Monthly Boys vs Girls ===
+    // === 4. Monthly Boys vs Girls ===
     $sql = "SELECT MONTH(q.start_time) AS m, u.gender, AVG((r.score / r.total) * 100) AS avg_percent
             FROM quizzes q
             JOIN quiz_results r ON q.id = r.quiz_id
             JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender IN ('male','female')
             JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
-            WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ? AND q.term_number = ?
-              AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0 AND q.start_time IS NOT NULL
+            WHERE q.created_by = ? 
+              AND q.class_id = ? 
+              AND q.academic_year_id = ? 
+              AND q.term_number = ?
+              AND q.is_summative = 1 
+              AND q.publish_marks = 1 
+              AND r.total > 0 
+              AND q.start_time IS NOT NULL
             GROUP BY MONTH(q.start_time), u.gender";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $current_global_term);
+    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $term);
     $stmt->execute();
     $result = $stmt->get_result();
 

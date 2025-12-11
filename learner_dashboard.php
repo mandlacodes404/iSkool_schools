@@ -64,15 +64,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
 }
 
 // ────── Learner profile info ──────
-$learnerName           = $_SESSION['name'];
+// Default fallback values
+$learnerName           = $_SESSION['name'] ?? '';
+$learnerSurname        = '';
+$learnerFullName       = trim($learnerName); // fallback to just name if no surname
 $learnerProfilePicture = 'default.png';
 
-$stmt = $conn->prepare("SELECT name, profile_picture FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
 $stmt->bind_param("s", $learnerEmail);
 $stmt->execute();
 if ($row = $stmt->get_result()->fetch_assoc()) {
     $learnerName           = $row['name'] ?: $learnerName;
+    $learnerSurname        = $row['surname'] ?? '';
     $learnerProfilePicture = $row['profile_picture'] ?: 'default.png';
+    
+    // Combine name + surname
+    $learnerFullName = trim($learnerName . ' ' . $learnerSurname);
 }
 $stmt->close();
 
@@ -535,20 +542,13 @@ iframe {
     font-size: 15px;
 }
 
-#loaderOverlay {
-    position: absolute;
-    top: 0;
-    left: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
-}
+ /* Loader */
+        #loaderOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; color: white; font-size: 18px;
+        }
 
 .sidebar.collapsed ~ #loaderOverlay {
     left: var(--sidebar-collapsed-width);
@@ -556,14 +556,9 @@ iframe {
 }
 
 .loader {
-    border: 6px solid #e2e8f0;
-    border-top: 6px solid var(--accent-color);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin-top: 12px;
-}
+            border: 6px solid #e2e8f0; border-top: 6px solid var(--accent-color);
+            border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-top: 20px;
+        }
 
 .loader-text {
     color: var(--text-color);
@@ -572,9 +567,8 @@ iframe {
     text-align: center;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
 }
 
 @media (max-width: 768px) {
@@ -653,11 +647,6 @@ iframe {
 
     .sidebar.active .desktop-toggle-btn {
         display: none;
-    }
-
-    #loaderOverlay {
-        left: 0;
-        width: 100%;
     }
 
     iframe {
@@ -920,7 +909,7 @@ iframe {
         <input type="file" id="profileInput" accept="image/*" style="display:none;">
     </div>
 
-    <div class="learner-name"><?= htmlspecialchars($learnerName ?: 'Learner') ?></div> 
+    <div class="learner-name"><?= htmlspecialchars($learnerFullName ?: 'Learner') ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
@@ -1057,6 +1046,38 @@ iframe {
 document.addEventListener("DOMContentLoaded", function () {
     const loader         = document.getElementById("loaderOverlay");
     const iframe         = document.querySelector('iframe[name="mainFrame"]');
+        // LOADER: Show when clicking any navigation link (sidebar + bottom nav)
+    document.querySelectorAll('a[target="mainFrame"], #mobileBottomNav a').forEach(link => {
+        link.addEventListener('click', () => {
+            loader.style.display = 'flex';
+        });
+    });
+
+    // LOADER: Hide when iframe finishes loading
+    iframe?.addEventListener('load', () => {
+        loader.style.display = 'none';
+    });
+
+    // ────────────────────── ADD THIS BLOCK FOR SETTINGS ──────────────────────
+    const settingsBtn = document.getElementById("settingsBtn");
+    
+    settingsBtn.addEventListener('click', function() {
+        // 1. Show the loader immediately
+        loader.style.display = 'flex';
+        
+        // 2. Load the settings page into the iframe.
+        // Assuming your settings page is 'learner_settings.php'
+        iframe.src = "learner_settings.php"; 
+
+        // 3. Clear active states (optional, but good for UI clarity)
+        setActive("learner_settings.php"); 
+        
+        // 4. Close mobile sidebar if open
+        if (sidebar.classList.contains("active")) {
+            toggleSidebar();
+        }
+    });
+    // ────────────────────── END NEW BLOCK ──────────────────────
     const sidebar        = document.querySelector(".sidebar");
     const myClassContent = document.getElementById("myClassContent");
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();

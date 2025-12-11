@@ -424,7 +424,7 @@ if (empty($joinedClassIds)) {
 <body>
     <div class="container">
         <div class="header">
-            <h2>Available Quizzes</h2>
+            <h2>Quizzes</h2>
             <?php if (!empty($groupedQuizzes)): ?>
                 <div class="search-sort">
                     <input type="text" id="searchInput" placeholder="Search by quiz title..." aria-label="Search quizzes">
