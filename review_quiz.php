@@ -16,14 +16,6 @@ $resultId = intval($_GET['result_id']);
 $loggedInEmail = $_SESSION['email'];
 $userRole = $_SESSION['role'] ?? 'user';
 
-// Get user's school_id
-$schoolStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ?");
-$schoolStmt->bind_param("s", $loggedInEmail);
-$schoolStmt->execute();
-$schoolStmt->bind_result($userSchoolId);
-$schoolStmt->fetch();
-$schoolStmt->close();
-
 // Fetch quiz result including user_email and quiz creator
 $quizStmt = $conn->prepare("
     SELECT r.quiz_id, r.score, r.total, r.submitted_at, q.title, r.user_email, q.created_by, q.publish_marks
@@ -41,23 +33,13 @@ if (!$quizResult) {
     exit();
 }
 
-// Get quiz creator's school_id
-$creatorStmt = $conn->prepare("SELECT school_id FROM users WHERE email = ?");
-$creatorStmt->bind_param("s", $quizResult['created_by']);
-$creatorStmt->execute();
-$creatorStmt->bind_result($creatorSchoolId);
-$creatorStmt->fetch();
-$creatorStmt->close();
-
-// Access control
+// Access control (school_id logic completely removed)
 if ($userRole === 'user') {
-    if (
-        $quizResult['user_email'] !== $loggedInEmail ||
-        $userSchoolId !== $creatorSchoolId
-    ) {
+    if ($quizResult['user_email'] !== $loggedInEmail) {
         echo "Access denied.";
         exit();
     }
+
 
     // Block if publish_marks is off
     if ($quizResult['publish_marks'] == 0) {

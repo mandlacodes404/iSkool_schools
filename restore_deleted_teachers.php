@@ -8,14 +8,12 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
-
 // Handle restoration if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $userId = intval($_POST['user_id']);
 
-    $stmt = $conn->prepare("UPDATE users SET is_deleted = 0 WHERE id = ? AND school_id = ? AND role = 'teacher'");
-    $stmt->bind_param("ii", $userId, $schoolId);
+    $stmt = $conn->prepare("UPDATE users SET is_deleted = 0 WHERE id = ? AND role = 'teacher'");
+    $stmt->bind_param("i", $userId);
     if ($stmt->execute()) {
         $_SESSION['success_message'] = "Teacher restored successfully.";
     } else {
@@ -27,9 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     exit();
 }
 
-// Fetch deleted teachers
-$stmt = $conn->prepare("SELECT id, name FROM users WHERE school_id = ? AND role = 'teacher' AND is_deleted = 1 ORDER BY name ASC");
-$stmt->bind_param("i", $schoolId);
+// Fetch deleted teachers (no school_id filter needed anymore)
+$stmt = $conn->prepare("SELECT id, name FROM users WHERE role = 'teacher' AND is_deleted = 1 ORDER BY name ASC");
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -38,7 +35,7 @@ $result = $stmt->get_result();
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Restore Deleted Teachers</title>
   <style>
     body { font-family: Arial, sans-serif; background: #0d1117; color: #e0e6f0; padding: 30px; }

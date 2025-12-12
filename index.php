@@ -299,6 +299,7 @@ if ($result && $row = $result->fetch_assoc()) {
     h2 {
         text-align: center;
         margin-bottom: 20px;
+        
     }
 
     /* NEW: Title + Name + Surname Row */
@@ -457,7 +458,7 @@ if ($result && $row = $result->fetch_assoc()) {
        <div id="loader-logo">iSkool</div>
         <div class="branding">
             <!--<span>from</span> -->
-            <span>v1.0.1</span>
+            <span>v1.0.0</span>
         </div>
     </div>
     <!-- Login/Register container -->

@@ -2,21 +2,28 @@
 session_start();
 require_once 'config.php';
 
-// Ensure only logged-in users can view
-if (!isset($_SESSION['school_admin']) && !isset($_SESSION['role'])) {
+// Ensure only logged-in users can view (admin or any role)
+if (!isset($_SESSION['role']) && !isset($_SESSION['school_admin'])) {
     header("Location: index.php");
     exit();
 }
 
 $userId = $_SESSION['user_id'] ?? 0;
-$schoolId = $_SESSION['school_id'] ?? 0;
-$term = $_GET['term'] ?? 1;
+$term   = (int)($_GET['term'] ?? 1);
 
-// Fetch achievers with likes & comments counts
+// Clean up old session key
+unset($_SESSION['school_id']);
+
+// Fetch achievers for current term — NO school_id needed
 $stmt = $conn->prepare("
-    SELECT a.id, a.full_name, a.class, a.medal, a.profile_picture,
-           COALESCE(lc.likes_count,0) AS likes_count,
-           COALESCE(cc.comments_count,0) AS comments_count
+    SELECT 
+        a.id, 
+        a.full_name, 
+        a.class, 
+        a.medal, 
+        a.profile_picture,
+        COALESCE(lc.likes_count, 0) AS likes_count,
+        COALESCE(cc.comments_count, 0) AS comments_count
     FROM top_achievers a
     LEFT JOIN (
         SELECT achiever_id, COUNT(*) AS likes_count
@@ -28,10 +35,10 @@ $stmt = $conn->prepare("
         FROM achiever_comments
         GROUP BY achiever_id
     ) cc ON a.id = cc.achiever_id
-    WHERE a.school_id = ? AND a.term = ?
-    ORDER BY a.class ASC, FIELD(a.medal,'Gold','Silver','Bronze')
+    WHERE a.term = ?
+    ORDER BY a.class ASC, FIELD(a.medal, 'Gold', 'Silver', 'Bronze')
 ");
-$stmt->bind_param("ii", $schoolId, $term);
+$stmt->bind_param("i", $term);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -41,19 +48,21 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Fetch which achievers current user liked (school-specific)
+// Fetch which achievers current user has liked (in current school = current DB)
 $userLikes = [];
-if ($userId) {
+if ($userId > 0) {
     $stmt = $conn->prepare("
-        SELECT achiever_id 
-        FROM achiever_likes al
-        INNER JOIN top_achievers ta ON al.achiever_id = ta.id
-        WHERE al.user_id=? AND ta.school_id=?
+        SELECT achiever_id, COUNT(*) 
+        FROM achiever_likes 
+        WHERE user_id = ? 
+        GROUP BY achiever_id
     ");
-    $stmt->bind_param("ii", $userId, $schoolId);
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
     $res = $stmt->get_result();
-    while ($r = $res->fetch_assoc()) $userLikes[] = $r['achiever_id'];
+    while ($r = $res->fetch_assoc()) {
+        $userLikes[] = $r['achiever_id'];
+    }
     $stmt->close();
 }
 ?>

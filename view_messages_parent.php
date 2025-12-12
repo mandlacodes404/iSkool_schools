@@ -9,16 +9,22 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'parent') {
 
 $parentEmail = $_SESSION['email'];
 
-// Fetch messages with teacher name (title + surname)
+// Clean up any old session junk (good practice)
+unset($_SESSION['school_id']);
+
+// Fetch sent messages with teacher name (title + surname)
 $stmt = $conn->prepare("
     SELECT 
         m.teacher_email,
         m.message, 
         m.created_at,
-        u.title,
-        u.surname
+        COALESCE(u.title, '') AS title,
+        COALESCE(u.surname, 'Teacher') AS surname,
+        CONCAT(TRIM(COALESCE(u.title, '')), ' ', TRIM(COALESCE(u.surname, 'Teacher'))) AS teacher_name
     FROM messages m
-    LEFT JOIN users u ON m.teacher_email = u.email AND u.role = 'teacher'
+    LEFT JOIN users u ON m.teacher_email = u.email 
+                     AND u.role = 'teacher' 
+                     AND u.is_deleted = 0
     WHERE m.parent_email = ?
     ORDER BY m.created_at DESC
 ");

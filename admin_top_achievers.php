@@ -8,45 +8,55 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
+// Clean up old session key
+unset($_SESSION['school_id']);
+
 $message = "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['term'], $_POST['full_name'], $_POST['class'], $_POST['medal'])) {
-        $term = intval($_POST['term']);
-        $names = $_POST['full_name'];
+        $term    = (int)$_POST['term'];
+        $names   = $_POST['full_name'];
         $classes = $_POST['class'];
-        $medals = $_POST['medal'];
+        $medals  = $_POST['medal'];
 
-        // Handle multiple achievers
+        $uploadDir = "uploads/achievers/";
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // Process each achiever
         for ($i = 0; $i < count($names); $i++) {
-            $fullName = trim($names[$i]);
-            $class = trim($classes[$i]);
-            $medal = $medals[$i];
+            $fullName   = trim($names[$i]);
+            $class      = trim($classes[$i]);
+            $medal      = $medals[$i];
             $profilePic = null;
 
-            // Handle file upload
-            if (isset($_FILES['profile_picture']['name'][$i]) && $_FILES['profile_picture']['name'][$i] !== "") {
-                $uploadDir = "uploads/achievers/";
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                $fileName = time() . "_" . basename($_FILES['profile_picture']['name'][$i]);
+            // Handle profile picture upload
+            if (isset($_FILES['profile_picture']['name'][$i]) && !empty($_FILES['profile_picture']['name'][$i])) {
+                $fileName   = time() . "_" . $i . "_" . basename($_FILES['profile_picture']['name'][$i]);
                 $targetFile = $uploadDir . $fileName;
+
                 if (move_uploaded_file($_FILES['profile_picture']['tmp_name'][$i], $targetFile)) {
                     $profilePic = $fileName;
                 }
             }
 
-            // Insert into DB
-            $stmt = $conn->prepare("INSERT INTO top_achievers (school_id, full_name, class, term, medal, profile_picture) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ississ", $schoolId, $fullName, $class, $term, $medal, $profilePic);
+            // Insert into DB — NO school_id column
+            $stmt = $conn->prepare("
+                INSERT INTO top_achievers 
+                (full_name, class, term, medal, profile_picture) 
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->bind_param("ssiss", $fullName, $class, $term, $medal, $profilePic);
             $stmt->execute();
             $stmt->close();
         }
 
-        $message = "✅ Top Achievers updated successfully!";
+        $message = "Top Achievers updated successfully!";
+    } else {
+        $message = "Please fill in all required fields.";
     }
 }
 ?>

@@ -161,33 +161,40 @@ try {
     }
     $stmt->close();
 
-    // === 4. Monthly Boys vs Girls ===
-    $sql = "SELECT MONTH(q.start_time) AS m, u.gender, AVG((r.score / r.total) * 100) AS avg_percent
+        // === 4. Boys vs Girls Performance by Term (Term 1–4) ===
+    $sql = "SELECT 
+                q.term_number,
+                u.gender,
+                AVG((r.score / r.total) * 100) AS avg_percent
             FROM quizzes q
             JOIN quiz_results r ON q.id = r.quiz_id
             JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender IN ('male','female')
             JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
             WHERE q.created_by = ? 
               AND q.class_id = ? 
-              AND q.academic_year_id = ? 
-              AND q.term_number = ?
+              AND q.academic_year_id = ?
               AND q.is_summative = 1 
               AND q.publish_marks = 1 
-              AND r.total > 0 
-              AND q.start_time IS NOT NULL
-            GROUP BY MONTH(q.start_time), u.gender";
+              AND r.total > 0
+            GROUP BY q.term_number, u.gender
+            ORDER BY q.term_number";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siii", $teacher_email, $class_id, $current_academic_year_id, $term);
+    $stmt->bind_param("sii", $teacher_email, $class_id, $current_academic_year_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    $boys  = array_fill(0, 12, null);
-    $girls = array_fill(0, 12, null);
+    $boys_by_term  = [null, null, null, null];  // Index 0 unused → Term 1 at index 1
+    $girls_by_term = [null, null, null, null];
+
     while ($row = $result->fetch_assoc()) {
-        $i = $row['m'] - 1;
-        $p = round($row['avg_percent'], 1);
-        $row['gender'] === 'male' ? $boys[$i] = $p : $girls[$i] = $p;
+        $t = (int)$row['term_number'];
+        $avg = round($row['avg_percent'], 1);
+        if ($row['gender'] === 'male') {
+            $boys_by_term[$t] = $avg;
+        } else {
+            $girls_by_term[$t] = $avg;
+        }
     }
     $stmt->close();
 
@@ -197,9 +204,9 @@ try {
         'quiz_gender_averages'  => $quiz_gender_averages,
         'top_girls'             => $top_girls,
         'top_boys'              => $top_boys,
-        'boys_vs_girls_monthly' => [
-            'boys'  => array_values($boys),
-            'girls' => array_values($girls)
+        'boys_vs_girls_by_term' => [
+         'boys'  => array_slice($boys_by_term, 1, 4),   // Only Term 1–4
+        'girls' => array_slice($girls_by_term, 1, 4)
         ]
     ];
 

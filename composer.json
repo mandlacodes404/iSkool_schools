@@ -2,5 +2,8 @@
     "require": {
         "phpmailer/phpmailer": "^6.10",
         "minishlink/web-push": "^9.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
     }
 }

@@ -8,9 +8,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'parent') {
 }
 
 $parentEmail = $_SESSION['email'];
-$schoolId = $_SESSION['school_id'] ?? 0;
 
-// Get class IDs the parent has joined
+// Clean up old session junk
+unset($_SESSION['school_id']);
+
+// Get class IDs the parent has joined (current school = current DB)
 $joined = $conn->prepare("SELECT class_id FROM parent_classes WHERE parent_email = ?");
 $joined->bind_param("s", $parentEmail);
 $joined->execute();
@@ -18,14 +20,14 @@ $joinedResult = $joined->get_result();
 
 $classIds = [];
 while ($row = $joinedResult->fetch_assoc()) {
-    $classIds[] = $row['class_id'];
+    $classIds[] = (int)$row['class_id'];
 }
+$joined->close();
 
-$announcements = [];
 $groupedAnnouncements = [];
 
 if (!empty($classIds)) {
-    $inClause = implode(',', array_map('intval', $classIds));
+    $inClause = implode(',', $classIds);
     $sql = "
         SELECT 
             a.title AS announcement_title,
@@ -35,28 +37,27 @@ if (!empty($classIds)) {
             c.name AS class_name,
             u.title AS teacher_title,
             u.surname AS teacher_surname,
-            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown')) AS teacher_display
+            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'')) AS teacher_display
         FROM announcements a
         JOIN classes c ON a.class_id = c.id
         LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
         WHERE a.class_id IN ($inClause) 
-          AND c.school_id = $schoolId 
           AND a.send_to = 'parents'
-        ORDER BY u.surname, u.title, a.created_at DESC
+        ORDER BY a.created_at DESC
     ";
     $result = $conn->query($sql);
 
     while ($row = $result->fetch_assoc()) {
         $teacher = trim($row['teacher_display'] ?? 'Unknown Teacher');
-        if ($teacher === ' Unknown' || empty(trim($row['teacher_surname']))) {
+        if ($teacher === '' || $teacher === ' ') {
             $teacher = 'Unknown Teacher';
         }
         $groupedAnnouncements[$teacher][] = $row;
     }
 }
 
-$currentDateTime = new DateTime('now', new DateTimeZone('SAST'));
-$sevenDaysAgo = (new DateTime('now', new DateTimeZone('SAST')))->modify('-7 days');
+$currentDateTime = new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
+$sevenDaysAgo = (clone $currentDateTime)->modify('-7 days');
 ?>
 
 <!DOCTYPE html>

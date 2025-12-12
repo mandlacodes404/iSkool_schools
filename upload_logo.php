@@ -7,45 +7,60 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
 $message = '';
 
+// Handle logo upload
 if (isset($_POST['upload']) && isset($_FILES['logo'])) {
     $file = $_FILES['logo'];
-    $fileName = $file['name'];
     $fileTmp = $file['tmp_name'];
     $fileSize = $file['size'];
     $fileError = $file['error'];
+    $fileName = $file['name'];
 
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-    if (in_array($fileExt, $allowed)) {
-        if ($fileError === 0) {
-            if ($fileSize < 2 * 1024 * 1024) { // 2MB limit
-                $newFileName = 'school_' . $schoolId . '.' . $fileExt;
-                $uploadDir = 'uploads/schools/';
-                $fileDestination = $uploadDir . $newFileName;
-
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                move_uploaded_file($fileTmp, $fileDestination);
-
-                $stmt = $conn->prepare("UPDATE schools SET logo = ? WHERE id = ?");
-                $stmt->bind_param("si", $fileDestination, $schoolId);
-                $stmt->execute();
-
-                $message = "<p style='color:lightgreen;'>✅ Logo uploaded successfully!</p>";
-            } else {
-                $message = "<p style='color:red;'>File too large (max 2MB).</p>";
-            }
-        } else {
-            $message = "<p style='color:red;'>Error uploading file.</p>";
-        }
+    if (!in_array($fileExt, $allowed)) {
+        $message = "<p style='color:#f85149;'>Invalid file type. Only images allowed.</p>";
+    } elseif ($fileError !== 0) {
+        $message = "<p style='color:#f85149;'>Upload error occurred.</p>";
+    } elseif ($fileSize > 3 * 1024 * 1024) {
+        $message = "<p style='color:#f85149;'>File too large (max 3MB).</p>";
     } else {
-        $message = "<p style='color:red;'>Invalid file type. Allowed: JPG, PNG, GIF, WEBP.</p>";
+        // Define upload location
+        $uploadDir = 'uploads/schools/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate clean filename: school_logo.ext
+        $newFileName = 'school_logo.' . $fileExt;
+        $fileDestination = $uploadDir . $newFileName;
+
+        // Delete any old logo files
+        array_map('unlink', glob($uploadDir . 'school_logo.*'));
+
+        // Save new logo
+        if (move_uploaded_file($fileTmp, $fileDestination)) {
+            // Update the setting in school_name table
+            $stmt = $conn->prepare("UPDATE school_name SET setting_value = ? WHERE setting_key = 'school_logo'");
+            $stmt->bind_param("s", $fileDestination);
+            $stmt->execute();
+
+            $message = "<p style='color:#79c0ff;'>Logo updated successfully!</p>";
+        } else {
+            $message = "<p style='color:#f85149;'>Failed to save file.</p>";
+        }
+    }
+}
+
+// Get current logo path
+$currentLogo = '';
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_logo'");
+if ($row = $result->fetch_assoc()) {
+    $path = trim($row['setting_value']);
+    if ($path !== '' && file_exists($path)) {
+        $currentLogo = $path;
     }
 }
 ?>
@@ -54,69 +69,127 @@ if (isset($_POST['upload']) && isset($_FILES['logo'])) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Upload School Logo</title>
 <style>
-body {
-    background-color: #0d1117;
-    color: #e0e6f0;
-    font-family: Arial, sans-serif;
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --accent: #58a6ff;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
-}
-.container {
-    background: rgba(22,27,34,0.7);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    padding: 20px;
+  }
+  .container {
+    background: var(--card);
+    padding: 40px 50px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     text-align: center;
-}
-input[type="file"] {
-    background: #161b22;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px;
-    color: #e0e6f0;
-}
-button {
-    background: white;
-    color: #0d1117;
+    max-width: 500px;
+    width: 100%;
+    border: 1px solid var(--border);
+  }
+  h2 {
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-size: 2rem;
+  }
+  .message {
+    margin: 16px 0;
+    font-weight: 500;
+  }
+  input[type="file"] {
+    background: #0d1117;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 30px;
+    width: 100%;
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  input[type="file"]::file-selector-button {
+    background: var(--accent);
+    color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
-    margin-top: 15px;
-}
-button:hover {
-    background: #dddddd;
-}
-img {
-    margin-top: 15px;
-    border-radius: 10px;
-    max-height: 100px;
-}
+    font-weight: 600;
+    margin-right: 12px;
+  }
+  button {
+    background: white;
+    color: #0d1117;
+    border: none;
+    padding: 14px 34px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.2s;
+  }
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  }
+  .current-logo {
+    margin-top: 30px;
+    padding: 20px;
+    background: #0d1117;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .current-logo img {
+    max-height: 140px;
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .no-logo {
+    color: #8b949e;
+    font-style: italic;
+    padding: 20px;
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>Upload School Logo</h2>
-    <?= $message ?>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="logo" accept="image/*" required><br>
-        <button type="submit" name="upload">Upload Logo</button>
-    </form>
+  <h2>School Logo</h2>
 
-    <?php
-    $result = $conn->query("SELECT logo FROM schools WHERE id = $schoolId");
-if ($row = $result->fetch_assoc()) {
-    if (!empty($row['logo'])) {
-        echo "<img src='" . htmlspecialchars($row['logo']) . "' alt='Current Logo'>";
-    }
-}
+  <?php if ($message) echo "<div class='message'>$message</div>"; ?>
 
-    ?>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="logo" accept="image/*" required>
+    <br>
+    <button type="submit" name="upload">Upload New Logo</button>
+  </form>
+
+  <div class="current-logo">
+    <?php if ($currentLogo): ?>
+      <p><strong>Current Logo:</strong></p>
+      <img src="<?= htmlspecialchars($currentLogo) ?>" alt="School Logo">
+      <p style="margin-top:10px; font-size:0.9rem; color:#79c0ff;">
+        <?= htmlspecialchars(basename($currentLogo)) ?>
+      </p>
+    <?php else: ?>
+      <p class="no-logo">No logo uploaded yet</p>
+    <?php endif; ?>
+  </div>
 </div>
+
 </body>
 </html>

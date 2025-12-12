@@ -10,10 +10,17 @@ if (!isset($_SESSION['school_admin'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $userId = intval($_POST['user_id']);
 
-    // Set is_deleted back to 0
-    $stmt = $conn->prepare("UPDATE users SET is_deleted = 0 WHERE id = ? AND role = 'user'");
+    // Restore the learner — safely targets only learners
+    $stmt = $conn->prepare("UPDATE users SET is_deleted = 0 WHERE id = ? AND role = 'learner'");
     $stmt->bind_param("i", $userId);
-    $stmt->execute();
+    
+    if ($stmt->execute()) {
+        $_SESSION['success_message'] = "Learner restored successfully.";
+    } else {
+        $_SESSION['error_message'] = "Failed to restore learner.";
+    }
+    
+    $stmt->close();
 }
 
 header("Location: deleted_learners.php");

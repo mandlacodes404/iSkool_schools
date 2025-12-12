@@ -468,12 +468,17 @@ $mail->Body = '
     <textarea name="message" rows="5" required></textarea>
 
     <label for="class_id">Send To Class:</label>
-    <select name="class_id" required>
-        <option value="">-- Select Class --</option>
-        <?php $classResult->data_seek(0); while ($row = $classResult->fetch_assoc()): ?>
-            <option value="<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?><?= $row['subject'] ? " ({$row['subject']})" : '' ?></option>
-        <?php endwhile; ?>
-    </select>
+<select name="class_id" required>
+    <option value="">-- Select Class --</option>
+    <?php 
+    $classResult->data_seek(0); 
+    while ($row = $classResult->fetch_assoc()): 
+    ?>
+        <option value="<?= $row['id'] ?>">
+            <?= htmlspecialchars($row['name']) ?>
+        </option>
+    <?php endwhile; ?>
+</select>
 
     <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>

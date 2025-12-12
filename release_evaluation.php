@@ -8,37 +8,43 @@ if (!isset($_SESSION['school_admin']) || $_SESSION['role'] !== 'school_admin') {
     exit();
 }
 
-$school_id = $_SESSION['school_id'];
+// Clean up old session key
+unset($_SESSION['school_id']);
+
 $success = "";
-$error = "";
+$error   = "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $teacher_id = $_POST['teacher_id'];
-    $class_id = $_POST['class_id'];
-    $subject = trim($_POST['subject']);
-    $description = trim($_POST['description']);
+    $teacher_id   = (int)$_POST['teacher_id'];
+    $class_id     = (int)$_POST['class_id'];
+    $subject      = trim($_POST['subject']);
+    $description  = trim($_POST['description']);
 
-    // Simple input validation (you can add more)
+    // Input validation
     if (empty($teacher_id) || empty($class_id) || empty($subject) || empty($description)) {
         $error = "All fields are required.";
     } else {
-        $stmt = $conn->prepare("INSERT INTO teacher_evaluations (school_id, teacher_id, class_id, subject, description, released) VALUES (?, ?, ?, ?, ?, 1)");
-        $stmt->bind_param("iiiss", $school_id, $teacher_id, $class_id, $subject, $description);
+        // Insert evaluation — NO school_id column needed
+        $stmt = $conn->prepare("
+            INSERT INTO teacher_evaluations 
+            (teacher_id, class_id, subject, description, released) 
+            VALUES (?, ?, ?, ?, 1)
+        ");
+        $stmt->bind_param("iiss", $teacher_id, $class_id, $subject, $description);
 
         if ($stmt->execute()) {
             $success = "Teacher evaluation released successfully!";
         } else {
             $error = "Failed to release evaluation. Please try again.";
         }
-
         $stmt->close();
     }
 }
 
-// Fetch teachers and classes from the same school
-$teachers = $conn->query("SELECT id, name FROM users WHERE role = 'teacher' AND school_id = $school_id");
-$classes = $conn->query("SELECT id, name FROM classes WHERE school_id = $school_id");
+// Fetch teachers and classes from current school (current DB = current school)
+$teachers = $conn->query("SELECT id, name FROM users WHERE role = 'teacher' AND is_deleted = 0 ORDER BY name");
+$classes  = $conn->query("SELECT id, name FROM classes ORDER BY name");
 ?>
 
 <!DOCTYPE html>

@@ -44,7 +44,7 @@ if (!empty($classIds)) {
     $stmt = $conn->prepare("
         SELECT 
             e.id,
-            e.title,
+           e.subject AS title, 
             e.description,
             e.created_at,
             e.released,

@@ -265,7 +265,7 @@ if (!empty($class_ids)) {
 
                         <div class="analytics-section" data-type="monthly_gender">
                             <div class="section-header">
-                                <h4>Boys vs Girls (Monthly)</h4>
+                                <h4>Boys vs Girls by Term</h4>
                                 <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
                             </div>
                             <div class="section-body">
@@ -449,7 +449,7 @@ if (!empty($class_ids)) {
         if (type === 'quiz_avg') renderQuizAverage(classId, term, data.quiz_averages);
         else if (type === 'quiz_gender') renderQuizGender(classId, term, data.quiz_gender_averages);
         else if (type === 'top_gender') renderTopGender(classId, term, data.top_girls, data.top_boys);
-        else if (type === 'monthly_gender') renderMonthlyGender(classId, term, data.boys_vs_girls_monthly);
+        else if (type === 'monthly_gender') renderTermTrend(classId, term, data.boys_vs_girls_by_term);
     }
 
     // UPDATED: All render functions now use classId + term in IDs
@@ -555,46 +555,97 @@ if (!empty($class_ids)) {
             : '<div class="no-data">No boys</div>';
     }
 
-    function renderMonthlyGender(classId, term, data) {
-        const canvasId = `monthly-gender-${classId}-term${term}`;
-        const noDataId = `no-monthly-gender-${classId}-term${term}`;
-        const ctx = document.getElementById(canvasId);
-        const noData = document.getElementById(noDataId);
+    function renderTermTrend(classId, term, data) {
+    const canvasId = `monthly-gender-${classId}-term${term}`;
+    const noDataId = `no-monthly-gender-${classId}-term${term}`;
+    const ctx = document.getElementById(canvasId);
+    const noData = document.getElementById(noDataId);
 
-        const hasData = data.boys.some(v => v !== null) || data.girls.some(v => v !== null);
-        if (!hasData) {
-            ctx.style.display = 'none';
-            noData.style.display = 'block';
-            return;
-        }
-        ctx.style.display = 'block';
-        noData.style.display = 'none';
+    // Check if there's any real data
+    const hasData = data.boys.some(v => v !== null) || data.girls.some(v => v !== null);
+    if (!hasData) {
+        ctx.style.display = 'none';
+        noData.style.display = 'block';
+        noData.textContent = 'No term data available';
+        return;
+    }
 
-        const chartKey = `monthly-${classId}-term${term}`;
-        if (charts[chartKey]) charts[chartKey].destroy();
+    ctx.style.display = 'block';
+    noData.style.display = 'none';
 
-        charts[chartKey] = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                datasets: [
-                    { label: 'Boys', data: data.boys, borderColor: '#4e79a7', backgroundColor: 'rgba(78,121,167,0.1)', tension: 0.3, fill: true },
-                    { label: 'Girls', data: data.girls, borderColor: '#e15759', backgroundColor: 'rgba(225,87,89,0.1)', tension: 0.3, fill: true }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { labels: { color: '#fff' } },
-                    title: { display: true, text: 'Monthly Performance %', color: '#00ff99' }
+    const chartKey = `termtrend-${classId}-term${term}`;
+    if (charts[chartKey]) charts[chartKey].destroy();
+
+    charts[chartKey] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+            datasets: [
+                {
+                    label: 'Boys',
+                    data: data.boys,
+                    borderColor: '#4e79a7',
+                    backgroundColor: 'rgba(78, 121, 167, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#4e79a7',
+                    pointRadius: 6,
+                    pointHoverRadius: 9
                 },
-                scales: {
-                    y: { beginAtZero: true, max: 100, ticks: { color: '#ccc', callback: v => v + '%' } },
-                    x: { ticks: { color: '#ccc' } }
+                {
+                    label: 'Girls',
+                    data: data.girls,
+                    borderColor: '#e15759',
+                    backgroundColor: 'rgba(225, 87, 89, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#e15759',
+                    pointRadius: 6,
+                    pointHoverRadius: 9
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#fff', font: { size: 14 } }
+                },
+                title: {
+                    display: true,
+                    text: 'Performance Trend by Term',
+                    color: '#00ff99',
+                    font: { size: 18, weight: 'bold' },
+                    padding: 20
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return `${context.dataset.label}: ${value !== null ? value + '%' : 'No data'}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#ccc',
+                        callback: v => v + '%',
+                        stepSize: 10
+                    },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#fff', font: { weight: 'bold', size: 13 } },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
                 }
             }
-        });
-    }
+        }
+    });
+}
 </script>
 </body>
 </html>

@@ -8,22 +8,29 @@ if (!isset($_SESSION['school_admin']) || $_SESSION['role'] !== 'school_admin') {
     exit();
 }
 
-$school_id = $_SESSION['school_id'];
+// Clean up old session key if exists
+unset($_SESSION['school_id']);
 
-// Fetch evaluations with counts of responses from the correct table
+// Fetch evaluations with response count — NO school_id needed
 $sql = "
-    SELECT te.id, te.subject, te.description, te.class_id, te.teacher_id, te.created_at,
-           u.name AS teacher_name, c.name AS class_name,
-           (SELECT COUNT(*) FROM teacher_evaluation_responses er WHERE er.evaluation_id = te.id) AS response_count
+    SELECT 
+        te.id, 
+        te.subject, 
+        te.description, 
+        te.class_id, 
+        te.teacher_id, 
+        te.created_at,
+        u.name AS teacher_name, 
+        c.name AS class_name,
+        (SELECT COUNT(*) FROM teacher_evaluation_responses er WHERE er.evaluation_id = te.id) AS response_count
     FROM teacher_evaluations te
     JOIN users u ON u.id = te.teacher_id
     JOIN classes c ON c.id = te.class_id
-    WHERE te.school_id = ? AND te.released = 1
+    WHERE te.released = 1
     ORDER BY te.created_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $school_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>

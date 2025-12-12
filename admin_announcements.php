@@ -13,40 +13,38 @@ if (!isset($_SESSION['school_admin'])) {
 }
 
 $email = $_SESSION['email'] ?? '';
-$name = $_SESSION['name'] ?? 'Admin';
-$schoolId = $_SESSION['school_id'] ?? 0;
+$name  = $_SESSION['name'] ?? 'Admin';
 $message = "";
 
-// Get school name
+// Get school name from your clean school_name table (no schools table, no school_id)
 $schoolName = "School";
-$stmtSchool = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-$stmtSchool->bind_param("i", $schoolId);
-$stmtSchool->execute();
-$resSchool = $stmtSchool->get_result();
-if ($row = $resSchool->fetch_assoc()) {
-    $schoolName = $row['name'];
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $schoolName = trim($row['setting_value']);
 }
-$stmtSchool->close();
+
+// Clean up old session key if exists
+unset($_SESSION['school_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
-    $msg = trim($_POST['message']);
+    $msg   = trim($_POST['message']);
 
     if (!empty($title) && !empty($msg)) {
-        // Insert announcement (class_id is NULL for school-wide)
+        // Insert announcement – school-wide (class_id = NULL), no school_id needed
         $target_role = 'teacher';
-        $stmt = $conn->prepare("INSERT INTO announcements (class_id, title, message, created_by, school_id, target_role) VALUES (NULL, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssis", $title, $msg, $email, $schoolId, $target_role);
+        $stmt = $conn->prepare("
+            INSERT INTO announcements (class_id, title, message, created_by, target_role) 
+            VALUES (NULL, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param("ssss", $title, $msg, $email, $target_role);
         $stmt->execute();
         $stmt->close();
 
         $message = "Announcement sent successfully!";
 
-        // Get teacher emails in the same school
-        $emailQuery = $conn->prepare("SELECT email, name FROM users WHERE role = 'teacher' AND school_id = ?");
-        $emailQuery->bind_param("i", $schoolId);
-        $emailQuery->execute();
-        $recipients = $emailQuery->get_result();
+        // Get all teachers in current school (current DB = current school)
+        $recipients = $conn->query("SELECT email, name FROM users WHERE role = 'teacher' AND is_deleted = 0");
 
         while ($recipient = $recipients->fetch_assoc()) {
             try {
@@ -75,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log("Email failed to send to {$recipient['email']}: " . $mail->ErrorInfo);
             }
         }
+        $recipients->free();
     } else {
         $message = "Please fill in all fields.";
     }

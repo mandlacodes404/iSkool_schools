@@ -11,8 +11,8 @@ if (!isset($_SESSION['school_admin'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $userId = intval($_POST['user_id']);
 
-    // Perform soft delete
-    $stmt = $conn->prepare("UPDATE users SET is_deleted = 1 WHERE id = ? AND role = 'user'");
+    // Perform soft delete — now correctly targets learners only
+    $stmt = $conn->prepare("UPDATE users SET is_deleted = 1 WHERE id = ? AND role = 'learner'");
     $stmt->bind_param("i", $userId);
 
     if ($stmt->execute()) {

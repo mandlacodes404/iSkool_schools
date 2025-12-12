@@ -18,7 +18,7 @@ $stmt = $conn->prepare("
     SELECT DISTINCT pl.learner_email, u.name 
     FROM parent_links pl
     JOIN users u ON pl.learner_email = u.email
-    WHERE pl.parent_email = ? AND u.role = 'user'
+    WHERE pl.parent_email = ? AND u.role = 'learner'
     ORDER BY u.name
 ");
 $stmt->bind_param("s", $parentEmail);

@@ -12,26 +12,27 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'parent') {
 }
 
 $parentEmail = $_SESSION['email'];
-$parentName = $_SESSION['name'] ?? 'Parent';
-$schoolId = $_SESSION['school_id'] ?? 0;
-$feedback = "";
+$parentName  = $_SESSION['name'] ?? 'Parent';
+$feedback    = "";
 
-// Fetch teachers from same school
+// Clean up old session key
+unset($_SESSION['school_id']);
+
+/* ---------- Fetch all teachers from current school (current DB = current school) ---------- */
 $teachers = [];
-if ($schoolId) {
-    $stmt = $conn->prepare("SELECT name, email FROM users WHERE role = 'teacher' AND school_id = ?");
-    $stmt->bind_param("i", $schoolId);
-    $stmt->execute();
-    $teachers = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+$stmt = $conn->query("SELECT name, email FROM users WHERE role = 'teacher' AND is_deleted = 0 ORDER BY name");
+while ($row = $stmt->fetch_assoc()) {
+    $teachers[] = $row;
 }
+$stmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $teacherEmail = $_POST['teacher_email'] ?? '';
-    $message = trim($_POST['message']);
+    $message      = trim($_POST['message'] ?? '');
 
     if (!empty($teacherEmail) && !empty($message)) {
-        $teacherName = '';
+        // Get teacher's name
+        $teacherName = 'Teacher';
         foreach ($teachers as $t) {
             if ($t['email'] === $teacherEmail) {
                 $teacherName = $t['name'];
@@ -42,77 +43,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'mandlasimphiwe99@gmail.com';
-            $mail->Password = 'qbfn gpyq gmuh fyyx';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'mandlasimphiwe99@gmail.com';
+            $mail->Password   = 'qbfn gpyq gmuh fyyx'; // Consider using environment variables later
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
-            $mail->setFrom('mandlasimphiwe99@gmail.com', $parentName);
+            $mail->setFrom('mandlasimphiwe99@gmail.com', "iSkool - {$parentName}");
             $mail->addAddress($teacherEmail, $teacherName);
             $mail->isHTML(true);
-            $mail->Subject = 'New Message from Parent';
+            $mail->Subject = 'New Message from Parent - iSkool';
 
             $mail->Body = '
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Message Notification</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  body {margin:0;padding:0;background:#121212;font-family:"Inter",Arial,sans-serif;color:#fff}
-  .email-wrapper {max-width:600px;margin:30px auto;background:#1e1e1e;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.5)}
-  .email-header {background:#161b22;padding:30px;text-align:center}
-  .email-header h1 {margin:0;font-size:28px;font-weight:700;color:#4fd1c5}
-  .email-header p {margin:6px 0 0;font-size:14px;color:#c9d1d9}
-  .email-body {padding:30px;text-align:left}
-  .email-body p {margin:0 0 15px;font-size:16px;line-height:1.6;color:#c9d1d9}
-  blockquote {margin:15px 0;padding:15px 20px;background:#161b22;border-left:4px solid #4fd1c5;border-radius:8px;font-style:italic;color:#e6edf3}
-  .email-footer {background:#161b22;padding:20px;text-align:center;font-size:13px;color:#8b949e}
-  @media(max-width:480px){
-    .email-wrapper {margin:20px 10px}
-    .email-header,.email-body,.email-footer {padding:20px}
-    .email-header h1 {font-size:24px}
-    .email-body p {font-size:15px}
-  }
-</style>
+    <meta charset="UTF-8">
+    <title>New Message from Parent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {margin:0;padding:0;background:#121212;font-family:"Inter",sans-serif;color:#e6edf3}
+        .wrapper {max-width:600px;margin:30px auto;background:#1e1e1e;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+        .header {background:linear-gradient(135deg,#4fd1c5,#3898ec);padding:30px;text-align:center;color:#fff}
+        .header h1 {margin:0;font-size:28px;font-weight:700}
+        .body {padding:30px;color:#c9d1d9}
+        .body p {margin:0 0 16px;line-height:1.6;font-size:16px}
+        blockquote {margin:20px 0;padding:20px;background:#161b22;border-left:5px solid #4fd1c5;border-radius:8px;font-style:italic}
+        .footer {background:#0d1117;padding:20px;text-align:center;font-size:13px;color:#8b949e}
+        @media(max-width:480px){
+            .wrapper {margin:15px;border-radius:10px}
+            .header, .body, .footer {padding:20px}
+        }
+    </style>
 </head>
 <body>
-  <div class="email-wrapper">
-    <div class="email-header">
-      <h1>iSkool</h1>
-      <p>New Message Notification</p>
+    <div class="wrapper">
+        <div class="header">
+            <h1>iSkool</h1>
+            <p>New Message from Parent</p>
+        </div>
+        <div class="body">
+            <p>Dear <strong>' . htmlspecialchars($teacherName) . '</strong>,</p>
+            <p>You have received a new message from a parent:</p>
+            <blockquote>' . nl2br(htmlspecialchars($message)) . '</blockquote>
+            <p><strong>Sender:</strong> ' . htmlspecialchars($parentName) . '<br>
+               <strong>Email:</strong> ' . htmlspecialchars($parentEmail) . '</p>
+            <p>Please log in to iSkool to respond.</p>
+            <p>Best regards,<br><strong>iSkool System</strong></p>
+        </div>
+        <div class="footer">
+            <p>&copy; ' . date('Y') . ' iSkool • Powered by Excellence</p>
+        </div>
     </div>
-    <div class="email-body">
-      <p>Dear ' . htmlspecialchars($teacherName) . ',</p>
-      <p>You’ve received a new message from a parent:</p>
-      <blockquote>' . nl2br(htmlspecialchars($message)) . '</blockquote>
-      <p><strong>Sender:</strong> ' . htmlspecialchars($parentName) . ' (' . htmlspecialchars($parentEmail) . ')</p>
-      <p>Best regards,<br><strong>iSkool</strong></p>
-    </div>
-    <div class="email-footer">
-      <p>Powered by iSkool &copy; 2025</p>
-    </div>
-  </div>
 </body>
 </html>';
 
             $mail->send();
 
+            // Save message to database
             $stmt = $conn->prepare("INSERT INTO messages (parent_email, receiver_name, teacher_email, message) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("ssss", $parentEmail, $teacherName, $teacherEmail, $message);
             $stmt->execute();
             $stmt->close();
 
-            $feedback = "Your message was successfully sent to $teacherName.";
+            $feedback = "<div style='color:#4fd1c5;font-weight:600;'>Your message was successfully sent to <strong>$teacherName</strong>.</div>";
+
         } catch (Exception $e) {
-            $feedback = "Failed to send message. Please try again later.";
+            $feedback = "<div style='color:#f87171;'>Failed to send message. Please try again later.</div>";
         }
     } else {
-        $feedback = "Please select a teacher and write a message.";
+        $feedback = "<div style='color:#fbbf24;'>Please select a teacher and write a message.</div>";
     }
 }
 ?>

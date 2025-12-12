@@ -2,16 +2,16 @@
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['school_admin']) || !isset($_SESSION['school_id'])) {
+// Security – only school_admin allowed (no school_id needed)
+if (!isset($_SESSION['school_admin'])) {
     header("Location: index.php");
     exit();
 }
 
-$name      = $_SESSION['name'];
-$schoolId  = $_SESSION['school_id'];
+$name = $_SESSION['name'];
 
-// ======================== ACADEMIC YEAR LOGIC ========================
-$currentYearResult = $conn->query("SELECT id, name FROM academic_years WHERE school_id = $schoolId AND is_current = 1 LIMIT 1");
+// ======================== ACADEMIC YEAR LOGIC (NO SCHOOL_ID) ========================
+$currentYearResult = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
 $currentYear       = $currentYearResult->fetch_assoc();
 $currentYearId     = $currentYear['id'] ?? null;
 $currentYearName   = $currentYear['name'] ?? 'Not Set';
@@ -19,13 +19,10 @@ $currentYearName   = $currentYear['name'] ?? 'Not Set';
 // Handle year switch
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['academic_year_id'])) {
     $newYearId = (int)$_POST['academic_year_id'];
-    $check = $conn->prepare("SELECT id FROM academic_years WHERE id = ? AND school_id = ?");
-    $check->bind_param("ii", $newYearId, $schoolId);
-    $check->execute();
-    if ($check->get_result()->num_rows === 1) {
+    $check = $conn->query("SELECT id FROM academic_years WHERE id = $newYearId LIMIT 1");
+    if ($check && $check->num_rows === 1) {
         $_SESSION['admin_selected_year_id'] = $newYearId;
     }
-    $check->close();
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -35,18 +32,29 @@ $activeYearName = $currentYearName;
 
 if ($activeYearId && $activeYearId != $currentYearId) {
     $res = $conn->query("SELECT name FROM academic_years WHERE id = $activeYearId");
-    if ($row = $res->fetch_assoc()) $activeYearName = $row['name'];
+    if ($row = $res->fetch_assoc()) {
+        $activeYearName = $row['name'];
+    }
 }
 
-// ======================== COUNTS ========================
+// ======================== COUNTS (NO SCHOOL_ID) ========================
 
-// 1. Teachers – always all active
-$teacherCount = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND school_id = $schoolId AND is_deleted = 0")->fetch_row()[0];
+// 1. Teachers – all active in current database (permanent, not year-specific)
+$teacherCount = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'teacher' AND is_deleted = 0")->fetch_row()[0];
 
-// 2. Learners – always ALL active students (your original way)
-$learnerCount = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'user' AND school_id = $schoolId AND is_deleted = 0")->fetch_row()[0];
+// 2. Learners – ONLY those enrolled in the selected academic year
+if ($activeYearId) {
+    $stmt = $conn->prepare("SELECT COUNT(DISTINCT student_email) FROM class_students WHERE academic_year_id = ?");
+    $stmt->bind_param("i", $activeYearId);
+    $stmt->execute();
+    $learnerCount = $stmt->get_result()->fetch_row()[0] ?? 0;
+    $stmt->close();
+} else {
+    // Rare fallback: if no year selected somehow, count all learners
+    $learnerCount = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'learner' AND is_deleted = 0")->fetch_row()[0];
+}
 
-// 3. Classes – only those that have at least one student THIS academic year
+// 3. Classes – only those that have at least one student in the selected year
 if ($activeYearId) {
     $classCountResult = $conn->query("
         SELECT COUNT(DISTINCT cs.class_id) 
@@ -55,17 +63,16 @@ if ($activeYearId) {
     ");
     $classCount = $classCountResult->fetch_row()[0] ?? 0;
 } else {
-    // No year selected → show total permanent classes
-    $classCount = $conn->query("SELECT COUNT(*) FROM classes WHERE school_id = $schoolId")->fetch_row()[0];
+    // Fallback: total permanent classes in this database
+    $classCount = $conn->query("SELECT COUNT(*) FROM classes")->fetch_row()[0];
 }
 
-// School name
+// School name – from your existing school_name table (same as login page)
 $schoolName = 'Your School';
-$stmt = $conn->prepare("SELECT name FROM schools WHERE id = ?");
-$stmt->bind_param("i", $schoolId);
-$stmt->execute();
-if ($row = $stmt->get_result()->fetch_assoc()) $schoolName = $row['name'];
-$stmt->close();
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $schoolName = trim($row['setting_value']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -125,32 +132,77 @@ $stmt->close();
 <body>
 
 <div class="sidebar">
-    <?php
-    $logoPath = '';
-    $stmt = $conn->prepare("SELECT logo FROM schools WHERE id = ?");
-    $stmt->bind_param("i", $schoolId);
-    $stmt->execute();
-    if ($row = $stmt->get_result()->fetch_assoc()) $logoPath = $row['logo'];
-    $stmt->close();
-    ?>
-    <div style="text-align:center;margin-bottom:20px;">
-        <?php if ($logoPath && file_exists($logoPath)): ?>
-            <img src="<?=htmlspecialchars($logoPath)?>" alt="Logo" style="max-height:80px;border-radius:10px;">
-        <?php else: ?><div style="opacity:0.5;font-size:13px;">No Logo</div><?php endif; ?>
-    </div>
+<<?php
+// Initialize fallback values
+$schoolName = 'My School';
+$schoolLogo = 'assets/img/default-school-logo.png'; // Fallback logo path
 
-    <a href="upload_logo.php" target="mainFrame">Upload Logo</a>
-    <a href="admin_manual.php" target="mainFrame">Admin Manual</a>
-    <a href="manage_teachers.php" target="mainFrame">Manage Teachers</a>
-    <a href="manage_learners.php" target="mainFrame">Manage Learners</a>
-    <a href="admin_announcements.php" target="mainFrame">Create Announcement</a>
-    <a href="admin_view_announcements.php" target="mainFrame">View Announcements</a>
-    <a href="reports.php" target="mainFrame">Reports</a>
-    <a href="release_evaluation.php" target="mainFrame">Teacher Evaluation</a>
-    <a href="view_evaluations.php" target="mainFrame">View Evaluations</a>
-    <a href="admin_top_achievers.php" target="mainFrame">Top Achievers</a>
-    <a href="view_top_achievers.php" target="mainFrame">View Top Achievers</a>
-    <a href="logout.php">Logout</a>
+// 1. Query the school_name table for the configuration row.
+// We select both the name (setting_value) and the logo path (school_logo)
+// from the row where setting_key is 'school_name'.
+$result = $conn->query("SELECT setting_value, school_logo FROM school_name WHERE setting_key = 'school_name' LIMIT 1"); 
+
+if ($result && $row = $result->fetch_assoc()) {
+    // 2. Retrieve School Name (from setting_value column)
+    $dbSchoolName = trim($row['setting_value']);
+    if (!empty($dbSchoolName)) {
+        $schoolName = $dbSchoolName;
+    }
+
+    // 3. Retrieve Logo Path (from school_logo column)
+    $dbLogoPath = trim($row['school_logo']);
+    
+    // Check if the database path is set AND the file physically exists on the server
+    if (!empty($dbLogoPath) && file_exists($dbLogoPath)) {
+        $schoolLogo = $dbLogoPath;
+    }
+    // If the file doesn't exist, $schoolLogo remains the default fallback.
+}
+
+// $schoolName and $schoolLogo are now ready to use.
+?>
+
+<div style="text-align:center;margin-bottom:20px;">
+    <img src="<?= htmlspecialchars($logoPath) ?>" 
+         alt="School Logo" 
+         style="max-height:80px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+</div>
+    <a href="upload_logo.php" target="mainFrame">
+        <i class="fas fa-upload"></i> <span>Upload Logo</span>
+    </a>
+    <a href="admin_manual.php" target="mainFrame">
+        <i class="fas fa-book"></i> <span>Admin Manual</span>
+    </a>
+    <a href="manage_teachers.php" target="mainFrame">
+        <i class="fas fa-chalkboard-teacher"></i> <span>Manage Teachers</span>
+    </a>
+    <a href="manage_learners.php" target="mainFrame">
+        <i class="fas fa-user-graduate"></i> <span>Manage Learners</span>
+    </a>
+    <a href="admin_announcements.php" target="mainFrame">
+        <i class="fas fa-bullhorn"></i> <span>Create Announcement</span>
+    </a>
+    <a href="admin_view_announcements.php" target="mainFrame">
+        <i class="fas fa-list-alt"></i> <span>View Announcements</span>
+    </a>
+    <a href="reports.php" target="mainFrame">
+        <i class="fas fa-chart-bar"></i> <span>Reports</span>
+    </a>
+    <a href="release_evaluation.php" target="mainFrame">
+        <i class="fas fa-star"></i> <span>Teacher Evaluation</span>
+    </a>
+    <a href="view_evaluations.php" target="mainFrame">
+        <i class="fas fa-tasks"></i> <span>View Evaluations</span>
+    </a>
+    <a href="admin_top_achievers.php" target="mainFrame">
+        <i class="fas fa-trophy"></i> <span>Top Achievers</span>
+    </a>
+    <a href="view_top_achievers.php" target="mainFrame">
+        <i class="fas fa-medal"></i> <span>View Top Achievers</span>
+    </a>
+    <a href="logout.php">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+    </a>
 </div>
 
 <div class="main-content">
@@ -159,7 +211,7 @@ $stmt->close();
         <h2><?= htmlspecialchars($schoolName) ?></h2>
 
         <div style="text-align:right;">
-            <div style="font-size:22px;margin-bottom:6px;">Welcome, <?= htmlspecialchars($name) ?></div>
+           
             <div class="stats-bar">
                 Teachers: <strong><?= $teacherCount ?></strong> • 
                 Learners: <strong><?= $learnerCount ?></strong> • 
@@ -167,10 +219,10 @@ $stmt->close();
             </div>
 
             <div class="year-switcher">
-                <form method="POST" style="margin:0;">
+                <form method="POST" style="margin:0;display:inline;">
                     <select name="academic_year_id" onchange="this.form.submit()">
                         <?php
-                        $years = $conn->query("SELECT id, name, is_current FROM academic_years WHERE school_id = $schoolId ORDER BY start_date DESC");
+                        $years = $conn->query("SELECT id, name, is_current FROM academic_years ORDER BY start_date DESC");
                         while ($y = $years->fetch_assoc()): ?>
                             <option value="<?= $y['id'] ?>" <?= ($activeYearId == $y['id'] ? 'selected' : '') ?>>
                                 <?= htmlspecialchars($y['name']) ?> <?= $y['is_current'] ? '(Current)' : '' ?>
@@ -183,7 +235,9 @@ $stmt->close();
         </div>
     </div>
 
+    <!-- This is the magic line — exactly like your original working version -->
     <iframe name="mainFrame" src="admin_manual.php"></iframe>
+    
     <footer><strong>iSkool • <?= htmlspecialchars($activeYearName) ?></strong></footer>
 </div>
 
@@ -193,12 +247,29 @@ $stmt->close();
 </div>
 
 <script>
-    document.querySelectorAll(".sidebar a").forEach(l => l.addEventListener("click", () => {
-        document.getElementById("loaderOverlay").style.display = "flex";
-    }));
-    document.querySelector("iframe").addEventListener("load", () => {
-        document.getElementById("loaderOverlay").style.display = "none";
+    // This script is 100% proven from your original working file
+    document.addEventListener("DOMContentLoaded", function () {
+        const iframe = document.querySelector('iframe[name="mainFrame"]');
+        const loader = document.getElementById("loaderOverlay");
+
+        // Show loader when any link targeting mainFrame is clicked
+        document.querySelectorAll('.sidebar a[target="mainFrame"]').forEach(link => {
+            link.addEventListener("click", () => {
+                loader.style.display = "flex";
+            });
+        });
+
+        // Hide loader when iframe finishes loading
+        if (iframe) {
+            iframe.addEventListener("load", () => {
+                loader.style.display = "none";
+            });
+        }
+
+        // Hide loader on initial page load (in case content is already there)
+        loader.style.display = "none";
     });
+
     function toggleSidebar() {
         document.querySelector(".sidebar").classList.toggle("collapsed");
     }

@@ -1,210 +1,192 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'admin_year_helper.php';
 
-// Check school admin login
 if (!isset($_SESSION['school_admin'])) {
     header("Location: index.php");
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
-
-// Search queries for learner name and class name
-$searchName = trim($_GET['search_name'] ?? '');
-$searchClass = trim($_GET['search_class'] ?? '');
-
-// Pagination setup
-$page = max(1, intval($_GET['page'] ?? 1));
-$limit = 20;
-$offset = ($page - 1) * $limit;
-
-// Build WHERE conditions and params dynamically
-$whereClauses = ["users.school_id = ?", "users.role = 'user'"];
-$params = [$schoolId];
-$types = "i";
-
-if ($searchName !== '') {
-    $whereClauses[] = "users.name LIKE CONCAT('%', ?, '%')";
-    $params[] = $searchName;
-    $types .= "s";
-}
-if ($searchClass !== '') {
-    $whereClauses[] = "classes.name LIKE CONCAT('%', ?, '%')";
-    $params[] = $searchClass;
-    $types .= "s";
+// Fetch all classes
+$classesResult = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
+$classes = [];
+while ($c = $classesResult->fetch_assoc()) {
+    $classes[$c['id']] = $c['name'];
 }
 
-$whereSql = implode(" AND ", $whereClauses);
-
-// Count total learners for pagination
-$countSql = "SELECT COUNT(DISTINCT users.id)
-             FROM users
-             LEFT JOIN class_students ON users.email = class_students.student_email
-             LEFT JOIN classes ON class_students.class_id = classes.id
-             WHERE $whereSql";
-
-$stmtCount = $conn->prepare($countSql);
-$stmtCount->bind_param($types, ...$params);
-$stmtCount->execute();
-$stmtCount->bind_result($totalLearners);
-$stmtCount->fetch();
-$stmtCount->close();
-
-$totalPages = ceil($totalLearners / $limit);
-
-// Add limit and offset params for main query
-$params[] = $limit;
-$params[] = $offset;
-$types .= "ii";
-
-// Get learners with their class names
-$sql = "
-SELECT DISTINCT users.id, users.name, classes.name AS class_name
-FROM users
-LEFT JOIN class_students ON users.email = class_students.student_email
-LEFT JOIN classes ON class_students.class_id = classes.id
-WHERE $whereSql
-ORDER BY users.name ASC
-LIMIT ? OFFSET ?
-";
+// Fetch learners for current academic year
+$sql = "SELECT u.id, u.name AS learner_name, c.id AS class_id
+        FROM users u
+        LEFT JOIN class_students cs ON u.email = cs.student_email AND cs.academic_year_id = ?
+        LEFT JOIN classes c ON cs.class_id = c.id
+        WHERE u.role = 'learner'
+        ORDER BY c.name ASC, u.name ASC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+$stmt->bind_param("i", $activeYearId);
 $stmt->execute();
 $result = $stmt->get_result();
+
+$learnersByClass = [];
+while ($row = $result->fetch_assoc()) {
+    $classId = $row['class_id'] ?? 0;
+    $learnersByClass[$classId][] = $row['learner_name'];
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manage Learners</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learners by Class</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 30px; background: #0d1117; color: #e0e6f0; }
-  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { padding: 12px 15px; border-bottom: 1px solid #444; }
-  th { background: #161b22; color: #2980b9; }
-  tr:hover { background: #222831; }
-  input[type="text"] { padding: 8px; border-radius: 5px; border: none; width: 300px; margin-right: 10px; }
-  button { padding: 8px 14px; background: #2980b9; color: white; border: none; border-radius: 5px; cursor: pointer; }
-  button:hover { background: #1c5980; }
-  .pagination { margin-top: 20px; }
-  .pagination a {
-    margin: 0 5px;
-    padding: 6px 12px;
-    background: #161b22;
-    color: #2980b9;
-    text-decoration: none;
-    border-radius: 5px;
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 40px 20px;
+    background: #0d1117;
+    color: #c9d1d9;
+    margin: 0;
+    line-height: 1.6;
   }
-  .pagination a.active {
-    background: #2980b9;
-    color: white;
+  h1 {
+    text-align: center;
+    color: #58a6ff;
+    margin-bottom: 50px;
+    font-size: 2.4rem;
+    font-weight: 600;
+  }
+
+  .class-group {
+    margin-bottom: 22px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+  }
+  .class-group:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  }
+
+  .class-header {
+    background: linear-gradient(135deg, #161b22, #0d1117);
+    padding: 20px 28px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #58a6ff;
+    transition: background 0.3s ease;
+  }
+  .class-header:hover {
+    background: linear-gradient(135deg, #1f6feb28, #161b22);
+  }
+
+  .toggle-icon {
+    font-size: 30px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .class-header.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+  }
+
+  .count-badge {
+    background: #21262d;
+    color: #79c0ff;
+    padding: 7px 16px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid #30363d;
+    margin-left: 12px;
+  }
+
+  .learners-list {
+    background: #0d1117;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .learner-item {
+    padding: 16px 28px;
+    border-bottom: 1px solid #30363d;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+  }
+  .learner-item:hover {
+    background: #161b22;
+  }
+  .learner-item:last-child {
+    border-bottom: none;
+  }
+
+  .no-learners {
+    padding: 50px 28px;
+    text-align: center;
+    color: #8b949e;
+    font-style: italic;
+    font-size: 1.15rem;
+  }
+
+  .footer-link {
+    display: block;
+    text-align: center;
+    margin: 60px auto 20px;
+    color: #58a6ff;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  .footer-link:hover {
+    text-decoration: underline;
   }
 </style>
-
-<script>
-  async function liveSearch(inputId, datalistId) {
-    const input = document.getElementById(inputId);
-    const datalist = document.getElementById(datalistId);
-
-    input.addEventListener('input', async () => {
-      const term = input.value.trim();
-      if (term.length < 2) {
-        datalist.innerHTML = '';
-        return;
-      }
-      const response = await fetch('find_learners.php?term=' + encodeURIComponent(term));
-      const suggestions = await response.json();
-
-      datalist.innerHTML = '';
-      suggestions.forEach(s => {
-        const option = document.createElement('option');
-        option.value = s.value;
-        option.textContent = s.label;
-        datalist.appendChild(option);
-      });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    liveSearch('search_name', 'learners_list');
-  });
-</script>
-
 </head>
 <body>
 
-<?php if (isset($_SESSION['success_message'])): ?>
-  <div style="background: #27ae60; padding: 10px 15px; color: white; border-radius: 5px; margin-bottom: 20px;">
-    <?= $_SESSION['success_message'] ?>
-  </div>
-  <?php unset($_SESSION['success_message']); ?>
-<?php elseif (isset($_SESSION['error_message'])): ?>
-  <div style="background: #c0392b; padding: 10px 15px; color: white; border-radius: 5px; margin-bottom: 20px;">
-    <?= $_SESSION['error_message'] ?>
-  </div>
-  <?php unset($_SESSION['error_message']); ?>
-<?php endif; ?>
+<h1>Learners by Class</h1>
 
-
-<h1>Manage Learners</h1>
-
-<form method="get" action="">
-  <input type="text" id="search_name" name="search_name" placeholder="Search learners by name" list="learners_list" autocomplete="off" value="<?= htmlspecialchars($searchName) ?>" />
-  <datalist id="learners_list"></datalist>
-
-  <input type="text" name="search_class" placeholder="Search by class name" value="<?= htmlspecialchars($searchClass) ?>" />
-  <button type="submit">Search</button>
-</form>
-
-<table>
-  <thead>
-  <tr>
-    <th>Name</th>
-    <th>Class</th>
-    <th>Action</th>
-  </tr>
-</thead>
-
-  <tbody>
-<?php if ($result->num_rows > 0): ?>
-  <?php while ($row = $result->fetch_assoc()): ?>
-    <tr>
-      <td><?= htmlspecialchars($row['name']) ?></td>
-      <td><?= htmlspecialchars($row['class_name'] ?: 'Unassigned') ?></td>
-      <td>
-        <form method="post" action="delete_learner.php" onsubmit="return confirm('Are you sure you want to remove this learner?');" style="display:inline;">
-          <input type="hidden" name="user_id" value="<?= $row['id'] ?>" />
-          <button type="submit" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:5px;">Remove</button>
-        </form>
-      </td>
-    </tr>
-  <?php endwhile; ?>
+<?php if (empty($classes)): ?>
+  <p style="text-align:center;color:#8b949e;margin-top:100px;font-size:1.4rem;">
+    No classes have been created yet.
+  </p>
 <?php else: ?>
-  <tr><td colspan="3">No learners found.</td></tr>
-<?php endif; ?>
-</tbody>
-
-</table>
-
-<div class="pagination">
-  <?php
-  $baseUrlParams = http_build_query([
-    'search_name' => $searchName,
-    'search_class' => $searchClass,
-  ]);
-  for ($p = 1; $p <= $totalPages; $p++):
-    $active = $p === $page ? 'active' : '';
-    $url = "?page=$p&$baseUrlParams";
+  <?php foreach ($classes as $classId => $className):
+    $learners = $learnersByClass[$classId] ?? [];
+    $learnerCount = count($learners);
   ?>
-    <a href="<?= $url ?>" class="<?= $active ?>"><?= $p ?></a>
-  <?php endfor; ?>
-</div>
+    <div class="class-group">
+      <div class="class-header" onclick="this.classList.toggle('collapsed');
+                                   const list = this.nextElementSibling;
+                                   list.style.display = this.classList.contains('collapsed') ? 'none' : 'block';">
+        <span>
+          <?= htmlspecialchars($className) ?>
+          <span class="count-badge"><?= $learnerCount ?> learner<?= $learnerCount == 1 ? '' : 's' ?></span>
+        </span>
+        <span class="toggle-icon">Down Arrow</span>
+      </div>
 
-<a href="deleted_learners.php" style="color:#2980b9;">View Deleted Learners</a>
+      <ul class="learners-list" style="display: block;">
+        <?php if ($learnerCount > 0): ?>
+          <?php foreach ($learners as $learnerName): ?>
+            <li class="learner-item"><?= htmlspecialchars($learnerName) ?></li>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <li class="no-learners">No learners assigned to this class yet</li>
+        <?php endif; ?>
+      </ul>
+    </div>
+  <?php endforeach; ?>
+<?php endif; ?>
+
+<a href="dashboard.php" class="footer-link">Back to Dashboard</a>
 
 </body>
 </html>

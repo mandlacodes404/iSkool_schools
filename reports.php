@@ -7,29 +7,30 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
+// Clean up old session key
+unset($_SESSION['school_id']);
 
-$classStmt = $conn->prepare("SELECT id, name FROM classes WHERE school_id = ?");
-$classStmt->bind_param("i", $schoolId);
-$classStmt->execute();
-$classResult = $classStmt->get_result();
+// Fetch all classes in current school (current DB = current school)
+$classResult = $conn->query("SELECT id, name FROM classes ORDER BY name");
 
 $classes = [];
+
 while ($class = $classResult->fetch_assoc()) {
     $classId = $class['id'];
 
-    // Count learners
+    // Count learners in this class (role = 'learner')
     $countStmt = $conn->prepare("
         SELECT COUNT(*) as total
         FROM class_students cs
         JOIN users u ON cs.student_email = u.email
-        WHERE cs.class_id = ? AND u.role = 'user' AND u.is_deleted = 0
+        WHERE cs.class_id = ? AND u.role = 'learner' AND u.is_deleted = 0
     ");
     $countStmt->bind_param("i", $classId);
     $countStmt->execute();
-    $learnerCount = $countStmt->get_result()->fetch_assoc()['total'];
+    $learnerCount = $countStmt->get_result()->fetch_assoc()['total'] ?? 0;
+    $countStmt->close();
 
-    // Average quiz score
+    // Calculate average quiz score for this class
     $avgStmt = $conn->prepare("
         SELECT SUM(score) as total_score, SUM(total) as total_total
         FROM quiz_results
@@ -38,15 +39,16 @@ while ($class = $classResult->fetch_assoc()) {
     $avgStmt->bind_param("i", $classId);
     $avgStmt->execute();
     $avgRow = $avgStmt->get_result()->fetch_assoc();
+    $avgStmt->close();
 
     $average = ($avgRow['total_total'] > 0)
         ? round(($avgRow['total_score'] / $avgRow['total_total']) * 100, 2)
         : 0;
 
     $classes[] = [
-        'id' => $class['id'],
-        'name' => $class['name'],
-        'average' => $average,
+        'id'       => $class['id'],
+        'name'     => $class['name'],
+        'average'  => $average,
         'learners' => $learnerCount
     ];
 }

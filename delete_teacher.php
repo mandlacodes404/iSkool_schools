@@ -10,11 +10,10 @@ if (!isset($_SESSION['school_admin'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = intval($_POST['user_id']);
-    $schoolId = $_SESSION['school_id'];
 
-    // Verify teacher belongs to this school and role = teacher
-    $stmtCheck = $conn->prepare("SELECT id FROM users WHERE id = ? AND school_id = ? AND role = 'teacher' AND is_deleted = 0");
-    $stmtCheck->bind_param("ii", $userId, $schoolId);
+    // Verify this is a teacher and not already deleted
+    $stmtCheck = $conn->prepare("SELECT id FROM users WHERE id = ? AND role = 'teacher' AND is_deleted = 0");
+    $stmtCheck->bind_param("i", $userId);
     $stmtCheck->execute();
     $stmtCheck->store_result();
 

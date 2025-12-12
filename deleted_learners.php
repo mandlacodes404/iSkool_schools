@@ -7,19 +7,17 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
-
+// Removed all school_id logic — now shows all deleted learners in this database (subdomain)
 $sql = "
 SELECT users.id, users.name, classes.name AS class_name
 FROM users
 LEFT JOIN class_students ON users.email = class_students.student_email
 LEFT JOIN classes ON class_students.class_id = classes.id
-WHERE users.school_id = ? AND users.role = 'user' AND users.is_deleted = 1
+WHERE users.role = 'learner' AND users.is_deleted = 1
 ORDER BY users.name ASC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $schoolId);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>

@@ -7,13 +7,15 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
+// Clean up old session key if exists
+unset($_SESSION['school_id']);
+
 $targetRoleFilter = $_GET['target_role'] ?? '';
 
-// Dynamic filters
-$whereClauses = ['a.school_id = ?'];
-$params = [$schoolId];
-$types = 'i';
+// Build WHERE clause — NO school_id needed
+$whereClauses = [];
+$params = [];
+$types = "";
 
 if ($targetRoleFilter && in_array($targetRoleFilter, ['all', 'teachers', 'learners'])) {
     $whereClauses[] = "a.target_role = ?";
@@ -21,24 +23,29 @@ if ($targetRoleFilter && in_array($targetRoleFilter, ['all', 'teachers', 'learne
     $types .= 's';
 }
 
-$whereSql = implode(' AND ', $whereClauses);
+$whereSql = !empty($whereClauses) ? "WHERE " . implode(" AND ", $whereClauses) : "";
 
+// Fetch announcements (current DB = current school)
 $sql = "
-SELECT a.id, a.title, a.message, a.created_at, a.created_by, a.class_id, a.target_role, u.name AS creator_name
-FROM announcements a
-JOIN users u ON a.created_by = u.email
-WHERE $whereSql
-ORDER BY a.created_at DESC
+    SELECT 
+        a.id, a.title, a.message, a.created_at, a.created_by, 
+        a.class_id, a.target_role, u.name AS creator_name
+    FROM announcements a
+    JOIN users u ON a.created_by = u.email
+    $whereSql
+    ORDER BY a.created_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Fetch class names
+// Fetch class names for display (current school only)
 $classNames = [];
-$classResult = $conn->query("SELECT id, name FROM classes WHERE school_id = $schoolId");
+$classResult = $conn->query("SELECT id, name FROM classes");
 while ($row = $classResult->fetch_assoc()) {
     $classNames[$row['id']] = $row['name'];
 }

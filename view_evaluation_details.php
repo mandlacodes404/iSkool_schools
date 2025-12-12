@@ -8,26 +8,30 @@ if (!isset($_SESSION['school_admin']) || $_SESSION['role'] !== 'school_admin') {
     exit();
 }
 
-$school_id = $_SESSION['school_id'];
+// Clean up old session key
+unset($_SESSION['school_id']);
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid evaluation ID.");
 }
 
-$evaluation_id = intval($_GET['id']);
+$evaluation_id = (int)$_GET['id'];
 
-// Fetch evaluation details (ensure it belongs to this school and is released)
+// Fetch evaluation details — only check if released (no school_id needed)
 $sqlEval = "
-    SELECT te.*, u.name AS teacher_name, c.name AS class_name
+    SELECT 
+        te.*, 
+        u.name AS teacher_name, 
+        c.name AS class_name
     FROM teacher_evaluations te
     JOIN users u ON u.id = te.teacher_id
     JOIN classes c ON c.id = te.class_id
-    WHERE te.id = ? AND te.school_id = ? AND te.released = 1
+    WHERE te.id = ? AND te.released = 1
     LIMIT 1
 ";
 
 $stmtEval = $conn->prepare($sqlEval);
-$stmtEval->bind_param("ii", $evaluation_id, $school_id);
+$stmtEval->bind_param("i", $evaluation_id);
 $stmtEval->execute();
 $resultEval = $stmtEval->get_result();
 

@@ -9,59 +9,73 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'parent') {
 
 $parentEmail = $_SESSION['email'];
 $parentName  = $_SESSION['name'] ?? 'Parent';
-$schoolId    = $_SESSION['school_id'] ?? 0;
 
-/* ---------- SCHOOL INFO ---------- */
+// Clean up old session junk
+unset($_SESSION['school_id']);
+
+/* ---------- SCHOOL NAME & LOGO (from school_name table) ---------- */
 $schoolName = 'Your School';
 $schoolLogo = 'Uploads/schools/default_school.png';
-if ($schoolId) {
-    $stmtSchool = $conn->prepare("SELECT name, logo FROM schools WHERE id = ?");
-    $stmtSchool->bind_param("i", $schoolId);
-    $stmtSchool->execute();
-    $resultSchool = $stmtSchool->get_result();
-    if ($resultSchool->num_rows > 0) {
-        $rowSchool = $resultSchool->fetch_assoc();
-        $schoolName = $rowSchool['name'] ?: $schoolName;
-        $schoolLogo = !empty($rowSchool['logo']) ? $rowSchool['logo'] : $schoolLogo;
-    }
-    $stmtSchool->close();
+
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $schoolName = trim($row['setting_value']) ?: $schoolName;
 }
 
-/* ---------- PROFILE PICTURE ---------- */
-$stmtParent = $conn->prepare("SELECT profile_picture FROM users WHERE email = ? AND role = 'parent'");
-$stmtParent->bind_param("s", $parentEmail);
-$stmtParent->execute();
-$resultParent = $stmtParent->get_result();
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_logo' LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $logoPath = trim($row['setting_value']);
+    if (!empty($logoPath) && file_exists($logoPath)) {
+        $schoolLogo = $logoPath;
+    }
+}
+
+/* ---------- PARENT PROFILE PICTURE ---------- */
+$stmt = $conn->prepare("SELECT profile_picture FROM users WHERE email = ? AND role = 'parent'");
+$stmt->bind_param("s", $parentEmail);
+$stmt->execute();
+$result = $stmt->get_result();
 $parentProfile = 'default.png';
-if ($resultParent->num_rows > 0) {
-    $rowParent = $resultParent->fetch_assoc();
-    $parentProfile = $rowParent['profile_picture'] ?: $parentProfile;
+if ($row = $result->fetch_assoc()) {
+    $parentProfile = $row['profile_picture'] ?: $parentProfile;
 }
-$stmtParent->close();
+$stmt->close();
 
-/* ---------- JOIN CLASS ---------- */
+/* ---------- JOIN CLASS (safe & secure) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
-    $classId = intval($_POST['class_id']);
-    $check   = $conn->query("SELECT * FROM parent_classes WHERE parent_email = '$parentEmail' AND class_id = $classId");
+    $classId = (int)$_POST['class_id'];
+
+    $check = $conn->prepare("SELECT 1 FROM parent_classes WHERE parent_email = ? AND class_id = ?");
+    $check->bind_param("si", $parentEmail, $classId);
+    $check->execute();
+    $check->store_result();
+
     if ($check->num_rows === 0) {
-        $conn->query("INSERT INTO parent_classes (parent_email, class_id) VALUES ('$parentEmail', $classId)");
+        $insert = $conn->prepare("INSERT INTO parent_classes (parent_email, class_id) VALUES (?, ?)");
+        $insert->bind_param("si", $parentEmail, $classId);
+        $insert->execute();
+        $insert->close();
     }
+    $check->close();
+
     header("Location: parent_dashboard.php");
     exit();
 }
 
-/* ---------- AVAILABLE CLASSES ---------- */
-$classStmt = $conn->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY name ASC");
-$classStmt->bind_param("i", $schoolId);
-$classStmt->execute();
-$classResult = $classStmt->get_result();
+/* ---------- AVAILABLE CLASSES (current DB = current school) ---------- */
+$classResult = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
 
 /* ---------- JOINED CLASSES ---------- */
-$joined = $conn->query("SELECT class_id FROM parent_classes WHERE parent_email = '$parentEmail'");
+$joinedStmt = $conn->prepare("SELECT class_id FROM parent_classes WHERE parent_email = ?");
+$joinedStmt->bind_param("s", $parentEmail);
+$joinedStmt->execute();
+$joinedResult = $joinedStmt->get_result();
+
 $joinedClassIds = [];
-while ($row = $joined->fetch_assoc()) {
-    $joinedClassIds[] = $row['class_id'];
+while ($row = $joinedResult->fetch_assoc()) {
+    $joinedClassIds[] = (int)$row['class_id'];
 }
+$joinedStmt->close();
 ?>
 <!DOCTYPE html>
 <html>
@@ -178,14 +192,12 @@ iframe{border:none;width:100%;flex:1;overflow:auto;background:var(--card-bg)}
             <form method="POST">
                 <select name="class_id" required>
                     <option value="">-- Select Class --</option>
-                    <?php 
-                    $classStmt->execute();
-                    $classResult = $classStmt->get_result();
-                    while ($c = $classResult->fetch_assoc()): 
-                        if (!in_array($c['id'], $joinedClassIds)): ?>
-                            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                        <?php endif;
-                    endwhile; ?>
+                   <?php while ($c = $classResult->fetch_assoc()): 
+    if (!in_array($c['id'], $joinedClassIds)): ?>
+        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+    <?php endif;
+endwhile; 
+$classResult->data_seek(0); // Reset pointer for later use if needed ?>
                 </select>
                 <button type="submit" name="join_class" class="join-class-btn">Join Class</button>
             </form>
@@ -253,7 +265,7 @@ iframe{border:none;width:100%;flex:1;overflow:auto;background:var(--card-bg)}
             <ul>
                 <?php
                 $ids = implode(',', array_map('intval', $joinedClassIds));
-                $joinedNames = $conn->query("SELECT name FROM classes WHERE id IN ($ids) AND school_id = $schoolId");
+$joinedNames = $conn->query("SELECT name FROM classes WHERE id IN ($ids)");
                 while ($cls = $joinedNames->fetch_assoc()): ?>
                     <li><?=htmlspecialchars($cls['name'])?></li>
                 <?php endwhile; ?>

@@ -2,62 +2,17 @@
 session_start();
 require_once 'config.php';
 
-// Check school admin login
+// Security – only school_admin allowed
 if (!isset($_SESSION['school_admin'])) {
     header("Location: index.php");
     exit();
 }
 
-$schoolId = $_SESSION['school_id'];
+// Clean up old session key if exists
+unset($_SESSION['school_id']);
 
-// Search query for teacher name
-$searchName = trim($_GET['search_name'] ?? '');
-
-// Pagination setup
-$page = max(1, intval($_GET['page'] ?? 1));
-$limit = 20;
-$offset = ($page - 1) * $limit;
-
-// Build WHERE conditions and params dynamically
-$whereClauses = ["school_id = ?", "role = 'teacher'", "is_deleted = 0"];
-$params = [$schoolId];
-$types = "i";
-
-if ($searchName !== '') {
-    $whereClauses[] = "name LIKE CONCAT('%', ?, '%')";
-    $params[] = $searchName;
-    $types .= "s";
-}
-
-$whereSql = implode(" AND ", $whereClauses);
-
-// Count total teachers for pagination
-$countSql = "SELECT COUNT(*) FROM users WHERE $whereSql";
-$stmtCount = $conn->prepare($countSql);
-$stmtCount->bind_param($types, ...$params);
-$stmtCount->execute();
-$stmtCount->bind_result($totalTeachers);
-$stmtCount->fetch();
-$stmtCount->close();
-
-$totalPages = ceil($totalTeachers / $limit);
-
-// Add limit and offset params for main query
-$params[] = $limit;
-$params[] = $offset;
-$types .= "ii";
-
-// Get teachers
-$sql = "
-SELECT id, name
-FROM users
-WHERE $whereSql
-ORDER BY name ASC
-LIMIT ? OFFSET ?
-";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+// Fetch ALL active teachers (not deleted)
+$stmt = $conn->prepare("SELECT name FROM users WHERE role = 'teacher' AND is_deleted = 0 ORDER BY name ASC");
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -65,30 +20,78 @@ $result = $stmt->get_result();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manage Teachers</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 30px; background: #0d1117; color: #e0e6f0; }
-  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-  th, td { padding: 12px 15px; border-bottom: 1px solid #444; }
-  th { background: #161b22; color: #2980b9; }
-  tr:hover { background: #222831; }
-  input[type="text"] { padding: 8px; border-radius: 5px; border: none; width: 300px; margin-right: 10px; }
-  button { padding: 8px 14px; background: #2980b9; color: white; border: none; border-radius: 5px; cursor: pointer; }
-  button:hover { background: #1c5980; }
-  .pagination { margin-top: 20px; }
-  .pagination a {
-    margin: 0 5px;
-    padding: 6px 12px;
-    background: #161b22;
-    color: #2980b9;
-    text-decoration: none;
-    border-radius: 5px;
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 40px 20px;
+    background: #0d1117;
+    color: #c9d1d9;
+    margin: 0;
+    line-height: 1.6;
   }
-  .pagination a.active {
-    background: #2980b9;
-    color: white;
+  h1 {
+    text-align: center;
+    color: #58a6ff;
+    margin-bottom: 50px;
+    font-size: 2.4rem;
+    font-weight: 600;
+  }
+
+  .teachers-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .teachers-list {
+    background: #161b22;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    border: 1px solid #30363d;
+  }
+
+  .teacher-item {
+    padding: 18px 28px;
+    border-bottom: 1px solid #30363d;
+    font-size: 1.15rem;
+    transition: background 0.25s ease;
+  }
+  .teacher-item:hover {
+    background: #1f6feb18;
+  }
+  .teacher-item:last-child {
+    border-bottom: none;
+  }
+
+  .no-teachers {
+    padding: 60px 28px;
+    text-align: center;
+    color: #8b949e;
+    font-style: italic;
+    font-size: 1.2rem;
+  }
+
+  .total-count {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #79c0ff;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .footer-link {
+    display: block;
+    text-align: center;
+    margin: 60px auto 20px;
+    color: #58a6ff;
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  .footer-link:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
@@ -96,51 +99,29 @@ $result = $stmt->get_result();
 
 <h1>Manage Teachers</h1>
 
-<form method="get" action="">
-  <input type="text" name="search_name" placeholder="Search teachers by name" value="<?= htmlspecialchars($searchName) ?>" />
-  <button type="submit">Search</button>
-</form>
+<div class="teachers-container">
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+  <div class="total-count">
+    <?= $result->num_rows ?> Active Teacher<?= $result->num_rows == 1 ? '' : 's' ?>
+  </div>
 
-  <tbody>
-<?php if ($result->num_rows > 0): ?>
-  <?php while ($row = $result->fetch_assoc()): ?>
-    <tr>
-      <td><?= htmlspecialchars($row['name']) ?></td>
-      <td>
-        <form method="post" action="delete_teacher.php" onsubmit="return confirm('Are you sure you want to remove this teacher?');" style="display:inline;">
-          <input type="hidden" name="user_id" value="<?= $row['id'] ?>" />
-          <button type="submit" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:5px;">Remove</button>
-        </form>
-      </td>
-    </tr>
-  <?php endwhile; ?>
-<?php else: ?>
-  <tr><td colspan="2">No teachers found.</td></tr>
-<?php endif; ?>
-  </tbody>
-</table>
+  <?php if ($result->num_rows > 0): ?>
+    <div class="teachers-list">
+      <?php while ($row = $result->fetch_assoc()): ?>
+        <div class="teacher-item">
+          <?= htmlspecialchars($row['name']) ?>
+        </div>
+      <?php endwhile; ?>
+    </div>
+  <?php else: ?>
+    <div class="teachers-list">
+      <div class="no-teachers">No teachers have been added yet.</div>
+    </div>
+  <?php endif; ?>
 
-<div class="pagination">
-<?php
-$baseUrlParams = http_build_query(['search_name' => $searchName]);
-for ($p = 1; $p <= $totalPages; $p++):
-  $active = $p === $page ? 'active' : '';
-  $url = "?page=$p&$baseUrlParams";
-?>
-  <a href="<?= $url ?>" class="<?= $active ?>"><?= $p ?></a>
-<?php endfor; ?>
 </div>
 
-
-<a href="restore_deleted_teachers.php" style="color:#2980b9;">View Deleted Teachers</a>
+<a href="dashboard.php" class="footer-link">Back to Dashboard</a>
 
 </body>
 </html>

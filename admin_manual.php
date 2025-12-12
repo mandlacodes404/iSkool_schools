@@ -1,5 +1,6 @@
 <?php
 session_start();
+// Only school_admin can access — no school_id needed anymore
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'school_admin') {
     header("Location: index.php");
     exit();

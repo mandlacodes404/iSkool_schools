@@ -9,45 +9,21 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'admin') {
 }
 
 $adminEmail = $_SESSION['email'];
-$adminSchoolId = $_SESSION['school_id'];
-$isSuperAdmin = ($adminSchoolId == 9999);
 
-// Step 1: Determine selected school_id to manage
-// For super admin, get from GET param ?school_id=xx, else use their school_id
-if ($isSuperAdmin && isset($_GET['school_id']) && is_numeric($_GET['school_id'])) {
-    $selectedSchoolId = intval($_GET['school_id']);
-} else {
-    $selectedSchoolId = $adminSchoolId;
-}
+// Clean up old session key
+unset($_SESSION['school_id']);
 
-// Fetch all schools for super admin to select from
-$schools = [];
-if ($isSuperAdmin) {
-    $result = $conn->query("SELECT id, name FROM schools ORDER BY name ASC");
-    while ($row = $result->fetch_assoc()) {
-        $schools[] = $row;
-    }
-}
-
-// Handle deletion of class, only if it belongs to selected school
+// Handle deletion of class
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
-    // Verify class belongs to selected school before deleting
-    $checkClass = $conn->prepare("SELECT id FROM classes WHERE id = ? AND school_id = ?");
-    $checkClass->bind_param("ii", $deleteId, $selectedSchoolId);
-    $checkClass->execute();
-    $checkClass->store_result();
-    if ($checkClass->num_rows > 0) {
-        $stmt = $conn->prepare("DELETE FROM classes WHERE id = ?");
-        $stmt->bind_param("i", $deleteId);
-        $stmt->execute();
-    }
-    // Redirect to avoid resubmission & keep school_id in URL if super admin
-    $redirectUrl = "admin_classes.php";
-    if ($isSuperAdmin) {
-        $redirectUrl .= "?school_id=" . $selectedSchoolId;
-    }
-    header("Location: $redirectUrl");
+    
+    // No school_id check needed — current DB = current school
+    $stmt = $conn->prepare("DELETE FROM classes WHERE id = ?");
+    $stmt->bind_param("i", $deleteId);
+    $stmt->execute();
+    $stmt->close();
+    
+    header("Location: admin_classes.php");
     exit();
 }
 
@@ -55,37 +31,30 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['class_name'])) {
     $className = trim($_POST['class_name']);
     if (!empty($className)) {
-        // Define required variables for insert
-        $subject = 'General';  // default subject, can be changed or expanded later
-        $schoolId = $selectedSchoolId;
+        $subject = 'General';  // default subject
         $createdBy = $adminEmail;
 
-        // Check duplicate class name only within the selected school
-        $check = $conn->prepare("SELECT * FROM classes WHERE name = ? AND school_id = ?");
-        $check->bind_param("si", $className, $selectedSchoolId);
+        // Check duplicate class name (current school only)
+        $check = $conn->prepare("SELECT id FROM classes WHERE name = ?");
+        $check->bind_param("s", $className);
         $check->execute();
         $check->store_result();
 
         if ($check->num_rows === 0) {
-            $stmt = $conn->prepare("INSERT INTO classes (name, subject, school_id, created_by) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssis", $className, $subject, $schoolId, $createdBy);
+            $stmt = $conn->prepare("INSERT INTO classes (name, subject, created_by) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $className, $subject, $createdBy);
             $stmt->execute();
+            $stmt->close();
         }
+        $check->close();
     }
-    // Redirect with school_id for super admin
-    $redirectUrl = "admin_classes.php";
-    if ($isSuperAdmin) {
-        $redirectUrl .= "?school_id=" . $selectedSchoolId;
-    }
-    header("Location: $redirectUrl");
+    header("Location: admin_classes.php");
     exit();
 }
 
-// Fetch classes for the selected school only
-$stmt = $conn->prepare("SELECT * FROM classes WHERE school_id = ? ORDER BY name ASC");
-$stmt->bind_param("i", $selectedSchoolId);
-$stmt->execute();
-$classes = $stmt->get_result();
+// Fetch all classes for current school (current DB = current school)
+$result = $conn->query("SELECT * FROM classes ORDER BY name ASC");
+$classes = $result;
 ?>
 
 <!DOCTYPE html>
@@ -155,18 +124,7 @@ $classes = $stmt->get_result();
 
 <h1>Manage Classes</h1>
 
-<?php if ($isSuperAdmin): ?>
-    <form method="GET" id="school-select">
-        <label for="school_id">Select School:</label>
-        <select name="school_id" id="school_id" onchange="this.form.submit()">
-            <?php foreach ($schools as $school): ?>
-                <option value="<?= $school['id'] ?>" <?= ($school['id'] == $selectedSchoolId) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($school['name']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </form>
-<?php endif; ?>
+<!-- SCHOOL DROPDOWN COMPLETELY REMOVED — NO MORE SUPER ADMIN SWITCHING -->
 
 <form method="POST">
     <input type="text" name="class_name" placeholder="Enter class name (e.g. 11A)" required>
@@ -187,7 +145,11 @@ $classes = $stmt->get_result();
                 <td><?= htmlspecialchars($row['name']) ?></td>
                 <td><?= htmlspecialchars($row['created_by']) ?></td>
                 <td>
-                    <a class="delete" href="admin_classes.php?delete=<?= $row['id'] ?><?php if ($isSuperAdmin) echo '&school_id=' . $selectedSchoolId; ?>" onclick="return confirm('Are you sure you want to delete this class?');">Delete</a>
+                    <!-- CLEAN DELETE LINK — NO school_id IN URL ANYMORE -->
+                    <a class="delete" href="admin_classes.php?delete=<?= $row['id'] ?>" 
+                       onclick="return confirm('Are you sure you want to delete this class?');">
+                        Delete
+                    </a>
                 </td>
             </tr>
         <?php endwhile; ?>
