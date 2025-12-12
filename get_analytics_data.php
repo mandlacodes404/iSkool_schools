@@ -198,16 +198,48 @@ try {
     }
     $stmt->close();
 
-    // === FINAL JSON OUTPUT ===
-    $output = [
+
+        // === 5. Overall Class Performance by Term (Term 1–4) ===
+    $sql = "SELECT 
+                q.term_number,
+                AVG((r.score / r.total) * 100) AS avg_percent
+            FROM quizzes q
+            JOIN quiz_results r ON q.id = r.quiz_id
+            JOIN class_students cs ON r.user_email = cs.student_email AND cs.class_id = q.class_id
+            JOIN users u ON cs.student_email = u.email AND u.is_deleted = 0
+            WHERE q.created_by = ? 
+              AND q.class_id = ? 
+              AND q.academic_year_id = ?
+              AND q.is_summative = 1 
+              AND q.publish_marks = 1 
+              AND r.total > 0
+            GROUP BY q.term_number
+            ORDER BY q.term_number";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sii", $teacher_email, $class_id, $current_academic_year_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $class_by_term = [null, null, null, null];  // Index 0 unused → Term 1 at index 1
+
+    while ($row = $result->fetch_assoc()) {
+        $t = (int)$row['term_number'];
+        $avg = round($row['avg_percent'], 1);
+        $class_by_term[$t] = $avg;
+    }
+    $stmt->close();
+
+        $output = [
         'quiz_averages'         => $quiz_averages,
         'quiz_gender_averages'  => $quiz_gender_averages,
         'top_girls'             => $top_girls,
         'top_boys'              => $top_boys,
         'boys_vs_girls_by_term' => [
-         'boys'  => array_slice($boys_by_term, 1, 4),   // Only Term 1–4
-        'girls' => array_slice($girls_by_term, 1, 4)
-        ]
+            'boys'  => array_slice($boys_by_term, 1, 4),
+            'girls' => array_slice($girls_by_term, 1, 4)
+        ],
+        'class_performance_by_term' => array_slice($class_by_term, 1, 4)  // New: overall class average per term
     ];
 
     echo json_encode($output);

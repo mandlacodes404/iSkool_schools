@@ -175,6 +175,7 @@ if (!empty($class_ids)) {
         .loader-book i { font-size: 5rem; color: var(--accent-color); animation: rotateBook 4s linear infinite; }
         @keyframes rotateBook { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @media (max-width: 768px) { .top-performers-grid { grid-template-columns: 1fr; } }
+        
     </style>
 </head>
 <body>
@@ -243,6 +244,35 @@ if (!empty($class_ids)) {
                             </div>
                         </div>
 
+                        
+
+                                                <!-- NEW: Class Performance by Term (Overall Average) -->
+                        <div class="analytics-section" data-type="class_trend">
+                            <div class="section-header">
+                                <h4>Class Performance by Term</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="chart-container">
+                                    <canvas id="class-trend-<?= $class_id ?>-term<?= $term ?>"></canvas>
+                                </div>
+                                <div class="no-data" id="no-class-trend-<?= $class_id ?>-term<?= $term ?>">No term data available</div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-section" data-type="monthly_gender">
+                            <div class="section-header">
+                                <h4>Boys vs Girls by Term</h4>
+                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
+                            </div>
+                            <div class="section-body">
+                                <div class="chart-container">
+                                    <canvas id="monthly-gender-<?= $class_id ?>-term<?= $term ?>"></canvas>
+                                </div>
+                                <div class="no-data" id="no-monthly-gender-<?= $class_id ?>-term<?= $term ?>">No monthly data</div>
+                            </div>
+                        </div>
+
                         <div class="analytics-section" data-type="top_gender">
                             <div class="section-header">
                                 <h4>Top Performers</h4>
@@ -263,18 +293,7 @@ if (!empty($class_ids)) {
                             </div>
                         </div>
 
-                        <div class="analytics-section" data-type="monthly_gender">
-                            <div class="section-header">
-                                <h4>Boys vs Girls by Term</h4>
-                                <button class="toggle-section"><i class="fas fa-chevron-down"></i></button>
-                            </div>
-                            <div class="section-body">
-                                <div class="chart-container">
-                                    <canvas id="monthly-gender-<?= $class_id ?>-term<?= $term ?>"></canvas>
-                                </div>
-                                <div class="no-data" id="no-monthly-gender-<?= $class_id ?>-term<?= $term ?>">No monthly data</div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -296,7 +315,7 @@ if (!empty($class_ids)) {
     </p>
 <?php endif; ?>
 
-    <a href="teacher_dashboard.php" class="back-btn">Back to Dashboard</a>
+    
 
     <!-- Subject Modal -->
     <div id="subjectModal">
@@ -444,12 +463,12 @@ if (!empty($class_ids)) {
         });
     }
 
-    // Updated renderSection to pass term
-    function renderSection(classId, term, type, data) {
+        function renderSection(classId, term, type, data) {
         if (type === 'quiz_avg') renderQuizAverage(classId, term, data.quiz_averages);
         else if (type === 'quiz_gender') renderQuizGender(classId, term, data.quiz_gender_averages);
         else if (type === 'top_gender') renderTopGender(classId, term, data.top_girls, data.top_boys);
         else if (type === 'monthly_gender') renderTermTrend(classId, term, data.boys_vs_girls_by_term);
+        else if (type === 'class_trend') renderClassTrend(classId, term, data.class_performance_by_term);
     }
 
     // UPDATED: All render functions now use classId + term in IDs
@@ -646,6 +665,85 @@ if (!empty($class_ids)) {
         }
     });
 }
+    function renderClassTrend(classId, term, averages) {
+        const canvasId = `class-trend-${classId}-term${term}`;
+        const noDataId = `no-class-trend-${classId}-term${term}`;
+        const ctx = document.getElementById(canvasId);
+        const noData = document.getElementById(noDataId);
+
+        const hasData = averages.some(v => v !== null);
+        if (!hasData) {
+            ctx.style.display = 'none';
+            noData.style.display = 'block';
+            noData.textContent = 'No term data available';
+            return;
+        }
+
+        ctx.style.display = 'block';
+        noData.style.display = 'none';
+
+        const chartKey = `classtrend-${classId}-term${term}`;
+        if (charts[chartKey]) charts[chartKey].destroy();
+
+        charts[chartKey] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+                datasets: [{
+                    label: 'Class Average',
+                    data: averages,
+                    borderColor: '#00ff99',
+                    backgroundColor: 'rgba(0, 255, 153, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#00ff99',
+                    pointRadius: 7,
+                    pointHoverRadius: 10,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#fff', font: { size: 15, weight: 'bold' } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Overall Class Performance by Term',
+                        color: '#00ff99',
+                        font: { size: 19, weight: 'bold' },
+                        padding: 20
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                return value !== null ? `Class Average: ${value}%` : 'No data';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: '#ccc',
+                            callback: v => v + '%',
+                            stepSize: 10,
+                            font: { weight: 'bold' }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#fff', font: { weight: 'bold', size: 14 } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>
