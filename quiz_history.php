@@ -661,12 +661,22 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 <body>
     <div class="container">
         <div class="header">
+            
             <h2>
                 Grades
                 <?php if ($viewerRole === 'parent'): ?>
                     <small>— <?= htmlspecialchars($targetEmail) ?></small>
                 <?php endif; ?>
             </h2>
+
+            <div style="text-align:center; margin:30px 0;">
+    <button onclick="generateProgressReport()" 
+            style="padding:14px 32px; background:#00ff99; color:black; border:none; border-radius:12px; 
+                   font-weight:600; font-size:16px; cursor:pointer; box-shadow:0 8px 25px rgba(0,255,153,0.4);
+                   transition:all 0.3s;">
+        Generate Progress Report
+    </button>
+</div>
             <?php if (!empty($groupedResults)): ?>
                 <div class="search-sort">
                     <input type="text" id="searchInput" placeholder="Search by quiz title..." aria-label="Search quiz results">
@@ -897,6 +907,11 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
         document.getElementById('closeModal').onclick = () => gradeModal.style.display = 'none';
         gradeModal.onclick = e => { if (e.target === gradeModal) gradeModal.style.display = 'none'; };
+
+        function generateProgressReport() {
+    const url = `progress_report.php?learner=<?= urlencode($targetEmail) ?>`;
+    window.open(url, '_blank');
+}
     </script>
 </body>
 </html>
