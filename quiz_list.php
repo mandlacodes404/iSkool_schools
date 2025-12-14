@@ -49,22 +49,25 @@ if (empty($joinedClassIds)) {
     $types = str_repeat('i', count($joinedClassIds)) . 'i'; // last 'i' for academic_year_id
 
     $stmt = $conn->prepare("
-        SELECT 
-            q.id,
-            q.title AS quiz_title,
-            q.duration,
-            q.start_time,
-            q.status,
-            q.is_summative,
-            u.title,
-            u.surname,
-            CONCAT(COALESCE(u.title, ''), ' ', COALESCE(u.surname, 'Teacher')) AS teacher_name
-        FROM quizzes q
-        LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
-        WHERE q.class_id IN ($placeholders)
-          AND q.academic_year_id = ?
-        ORDER BY q.start_time DESC, u.surname ASC
-    ");
+    SELECT 
+        q.id,
+        q.title AS quiz_title,
+        q.duration,
+        q.start_time,
+        q.status,
+        q.is_summative,
+        q.class_id,
+        q.created_by,
+        COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown Teacher'))) AS display_group,
+        u.title,
+        u.surname
+    FROM quizzes q
+    LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
+    LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
+    WHERE q.class_id IN ($placeholders)
+      AND q.academic_year_id = ?
+    ORDER BY display_group ASC, q.start_time DESC
+");
 
     $bind_params = $joinedClassIds;
     $bind_params[] = $current_academic_year_id;
@@ -76,24 +79,22 @@ if (empty($joinedClassIds)) {
 
     // ── Group quizzes by teacher (Mr Nkosi style) ──
     $groupedQuizzes = [];
-    $currentTime = date('Y-m-d H:i:s');
+$currentTime = date('Y-m-d H:i:s');
 
-    while ($row = $quizzes->fetch_assoc()) {
-        $teacher = trim($row['teacher_name']);
-        if (empty($teacher) || $teacher === ' ') {
-            $teacher = 'Unknown Teacher';
-        }
+while ($row = $quizzes->fetch_assoc()) {
+    $group = trim($row['display_group'] ?? 'Unknown Teacher');
+    $group = $group === '' ? 'Unknown Teacher' : $group;
 
-        $groupedQuizzes[$teacher][] = [
-            'id'           => $row['id'],
-            'title'        => $row['quiz_title'],
-            'duration'     => $row['duration'],
-            'start_time'   => $row['start_time'],
-            'status'       => $row['status'],
-            'is_summative' => !empty($row['is_summative']),
-            'current_time' => $currentTime
-        ];
-    }
+    $groupedQuizzes[$group][] = [
+        'id'           => $row['id'],
+        'title'        => $row['quiz_title'],
+        'duration'     => $row['duration'],
+        'start_time'   => $row['start_time'],
+        'status'       => $row['status'],
+        'is_summative' => !empty($row['is_summative']),
+        'current_time' => $currentTime
+    ];
+}
 }
 ?>
 
@@ -439,13 +440,13 @@ if (empty($joinedClassIds)) {
         </div>
 
         <?php if (!empty($groupedQuizzes)): ?>
-            <?php foreach ($groupedQuizzes as $teacher => $quizzes): ?>
+            <?php foreach ($groupedQuizzes as $group => $quizzes): ?>
                 <div class="teacher-section">
                     <div class="teacher-header" onclick="toggleTeacher(this)">
-                        <h3>
-                            <?= htmlspecialchars($teacher) ?>  <!-- Mr Nkosi -->
-                            <span class="file-count">(<?= count($quizzes) ?> quiz<?= count($quizzes) > 1 ? 'zes' : '' ?>)</span>
-                        </h3>
+                          <h3>
+                              <?= htmlspecialchars($group) ?>
+                              <span class="file-count">(<?= count($quizzes) ?> quiz<?= count($quizzes) > 1 ? 'zes' : '' ?>)</span>
+                         </h3>
                         <button class="toggle-teacher" type="button">
                             <i class="fas fa-chevron-down"></i>
                         </button>

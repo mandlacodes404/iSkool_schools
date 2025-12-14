@@ -36,6 +36,36 @@ if (!in_array($viewerRole, ['learner', 'parent'])) {
     header("Location: index.php"); exit();
 }
 
+// === School Name & Logo (same as learner dashboard) ===
+$schoolName = 'My School';
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $schoolName = $row['setting_value'];
+}
+$schoolLogo = 'Uploads/schools/default_school.png';
+
+// === Fetch learner details (name, surname, class) ===
+$learnerStmt = $conn->prepare("
+    SELECT u.name, u.surname, c.name AS class_name 
+    FROM users u
+    LEFT JOIN class_students cs ON u.email = cs.student_email
+        AND cs.academic_year_id = (SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1)
+    LEFT JOIN classes c ON cs.class_id = c.id
+    WHERE u.email = ? AND u.role = 'learner'
+    LIMIT 1
+");
+$learnerStmt->bind_param("s", $targetEmail);
+$learnerStmt->execute();
+$learnerResult = $learnerStmt->get_result();
+$learner = $learnerResult->fetch_assoc();
+$learnerStmt->close();
+
+$learnerFullName = trim(($learner['name'] ?? '') . ' ' . ($learner['surname'] ?? ''));
+$learnerClass    = $learner['class_name'] ?? 'Not enrolled';
+
+// === Current date ===
+$currentDate = date('F j, Y'); // December 14, 2025
+
 // Get current academic year
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
@@ -50,7 +80,7 @@ if ($termRow = $termStmt->fetch_assoc()) {
     $current_global_term = (int)$termRow['current_global_term'];
 }
 
-// Fetch all quiz results (same as grades page)
+// Fetch all quiz results
 $sql = "
     SELECT DISTINCT 
         r.id AS result_id, r.score, r.total, r.submitted_at, r.time_taken,
@@ -154,9 +184,9 @@ function calculateTermPercentage($quizzes, $term) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Progress Report - Term <?= $current_global_term ?></title>
+    <title><?= htmlspecialchars($schoolName) ?> - Progress Report</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0d1117;
@@ -171,32 +201,63 @@ function calculateTermPercentage($quizzes, $term) {
             font-family: 'Nunito', sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
-            padding: 30px;
+            padding: 40px 20px;
             min-height: 100vh;
         }
         .container {
             max-width: 900px;
             margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
-        h1 {
+        .report-header {
+            background: rgba(79, 209, 197, 0.15);
+            padding: 35px 30px;
             text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .school-logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 4px solid rgba(255,255,255,0.2);
+        }
+        .school-name {
             font-size: 34px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin: 0;
             color: var(--accent-color);
         }
-        .subtitle {
+        .report-subtitle {
+            font-size: 19px;
+            opacity: 0.9;
+            margin: 5px 0;
+        }
+        .learner-info {
+            padding: 25px 30px;
             text-align: center;
-            font-size: 18px;
-            margin-bottom: 50px;
+            background: rgba(255,255,255,0.03);
+        }
+        .learner-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 8px 0;
+        }
+        .learner-class {
+            font-size: 19px;
             opacity: 0.9;
         }
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .report-table th {
             background: rgba(79, 209, 197, 0.2);
@@ -242,43 +303,58 @@ function calculateTermPercentage($quizzes, $term) {
         }
         .no-data {
             text-align: center;
-            padding: 80px;
+            padding: 100px 20px;
             font-size: 20px;
             opacity: 0.7;
         }
         .print-btn {
             display: block;
-            margin: 40px auto;
-            padding: 14px 36px;
+            margin: 50px auto;
+            padding: 16px 44px;
             background: var(--accent-color);
             color: black;
             border: none;
             border-radius: 12px;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .print-btn:hover {
+            transform: scale(1.05);
         }
         @media print {
-            body { padding: 20px; background: white; color: black; }
+            body { background: white; color: black; padding: 20px; }
+            .container { box-shadow: none; border-radius: 0; }
+            .report-header { background: #f0f8f8 !important; }
+            .school-logo { border: 3px solid #ccc; }
             .print-btn { display: none; }
             .progress-bar { background: #4fd1c5 !important; }
+            .school-name, .learner-name { color: #000 !important; }
         }
         @media (max-width: 768px) {
-            .percentage { font-size: 28px; }
-            .report-table td { padding: 16px; }
+            .percentage { font-size: 30px; }
+            .learner-name { font-size: 24px; }
+            .school-name { font-size: 28px; }
+            .school-logo { width: 70px; height: 70px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Progress Report</h1>
-        <div class="subtitle">
-            Term <?= $current_global_term ?> 
-            <?php if ($viewerRole === 'parent'): ?>
-                — <?= htmlspecialchars($targetEmail) ?>
-            <?php else: ?>
-                — Your Results
-            <?php endif; ?>
+        <!-- School Header -->
+        <div class="report-header">
+            <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo" class="school-logo">
+            <div class="school-name"><?= htmlspecialchars($schoolName) ?></div>
+            <div class="report-subtitle">
+                Progress Report • Term <?= $current_global_term ?> • <?= $currentDate ?>
+            </div>
+        </div>
+
+        <!-- Learner Info -->
+        <div class="learner-info">
+            <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>
+            <div class="learner-class">Class: <?= htmlspecialchars($learnerClass) ?></div>
         </div>
 
         <?php if (empty($groupedResults)): ?>
@@ -296,14 +372,13 @@ function calculateTermPercentage($quizzes, $term) {
                         $calc = calculateTermPercentage($quizzes, $current_global_term);
                         $assessedWidth = $calc['assessed_percent'] ?? 0;
 
-                        // Dynamic color based on performance
-                        $barColor = '#f85149'; // low
+                        $barColor = '#f85149';
                         if ($calc['percentage'] !== null) {
-                            if ($calc['percentage'] >= 80) $barColor = '#1ed760';      // excellent
-                            elseif ($calc['percentage'] >= 60) $barColor = '#4fd1c5'; // good
-                            elseif ($calc['percentage'] >= 40) $barColor = '#ffd43b'; // average
+                            if ($calc['percentage'] >= 80) $barColor = '#1ed760';
+                            elseif ($calc['percentage'] >= 60) $barColor = '#4fd1c5';
+                            elseif ($calc['percentage'] >= 40) $barColor = '#ffd43b';
                         } else {
-                            $barColor = '#30363d'; // no mark yet
+                            $barColor = '#30363d';
                         }
                     ?>
                         <tr>
@@ -332,7 +407,7 @@ function calculateTermPercentage($quizzes, $term) {
             </table>
 
             <button class="print-btn" onclick="window.print()">
-                <i class="fas fa-print"></i> Print Report
+                <i class="fas fa-print"></i> Print / Save as PDF
             </button>
         <?php endif; ?>
     </div>

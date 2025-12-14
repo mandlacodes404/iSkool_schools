@@ -95,7 +95,9 @@ while ($row = $classesResult->fetch_assoc()) {
 $classesStmt->close();
 $classes = $allClasses;
 
-// ────── Get classes the learner has already joined ──────
+//──────────────────────────────────────────────────────────────────────
+//         Get classes the learner has already joined 
+//─────────────────────────────────────────────────────────────────────
 $joinedClassIds = [];
 if ($currentYearId > 0) {
     $joinedStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ?");

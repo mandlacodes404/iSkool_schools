@@ -112,3 +112,38 @@ Stack trace:
 #0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(32): mysqli->prepare('SELECT name, lo...')
 #1 {main}
   thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 32
+[13-Dec-2025 13:48:40 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:49:01 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:50:51 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:51:05 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:55:42 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:59:46 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[13-Dec-2025 13:59:49 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskool_sandtonhigh.teacher_classes' doesn't exist in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php:366
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
+#1 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
