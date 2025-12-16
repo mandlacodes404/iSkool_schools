@@ -1,4 +1,25 @@
 <?php
+/**
+ * iSkool - Teacher Quizzes List
+ *
+ * Displays all quizzes created by the logged-in teacher, organized by term and class.
+ * Features:
+ * - Automatic grouping by academic year terms and classes
+ * - Real-time status indicators (Open, Scheduled, Closed) with toggle functionality
+ * - Publish/unpublish marks controls with confirmation modal
+ * - Edit quiz links and student results viewing
+ * - Dynamic current year and term badges
+ * - Responsive design with collapsible sections and full-screen loader
+ *
+ * @package     iSkool
+ * @subpackage  Teacher
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-15
+ * @link        https://iskool.online
+ */
 session_start();
 include("config.php");
 
@@ -10,7 +31,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 $email = $_SESSION['email'];
 
 /* -------------------------------------------------
-   GET CURRENT ACADEMIC YEAR (AUTOMATIC) - NO SCHOOL_ID
+         GET CURRENT ACADEMIC YEAR 
    ------------------------------------------------- */
 $current_academic_year_id = null;
 $current_year_name        = 'Unknown';
@@ -26,7 +47,7 @@ if (!$current_academic_year_id) {
 }
 
 /* -------------------------------------------------
-   GET CURRENT GLOBAL TERM — YOUR THRONE
+          GET CURRENT GLOBAL TERM 
    ------------------------------------------------- */
 $current_global_term = 4;
 $termResult = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
@@ -35,7 +56,7 @@ if ($termRow = $termResult->fetch_assoc()) {
 }
 
 /* -------------------------------------------------
-   FETCH QUIZZES (NO SCHOOL_ID NEEDED)
+               FETCH QUIZZES
    ------------------------------------------------- */
 $sql = "
     SELECT 
@@ -54,7 +75,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 /* -------------------------------------------------
-   GROUP BY TERM → CLASS → QUIZZES
+         GROUP BY TERM → CLASS → QUIZZES
    ------------------------------------------------- */
 $terms = [];
 

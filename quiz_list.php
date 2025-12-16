@@ -1,4 +1,26 @@
 <?php
+/**
+ * iSkool - Available Quizzes List
+ *
+ * Displays all available quizzes for the logged-in learner, grouped by subject
+ * (from teacher_subjects table) with fallback to teacher name (e.g., "Ms Ntuli").
+ * Features:
+ * - Dynamic grouping using COALESCE for subject or teacher name
+ * - Collapsible sections per subject/teacher
+ * - Quiz status handling (Open, Scheduled, Closed) with countdown timers
+ * - Responsive design with search functionality
+ * - Start quiz button with proper availability logic
+ * - Full-screen processing loader
+ *
+ * @package     iSkool
+ * @subpackage  Learner
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-14
+ * @link        https://iskool.online
+ */
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -8,7 +30,9 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-// ────── Security: Must be logged in as learner ──────
+// ────────────────────────────────────────────────────────────────────────
+//           Security: Must be logged in as learner 
+// ────────────────────────────────────────────────────────────────────────
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
@@ -16,7 +40,10 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 
 $studentEmail = $_SESSION['email'];
 
-// ────── Get current active academic year (no school_id needed) ──────
+// ────────────────────────────────────────────────────────────────────────
+//    Get current active academic year (no school_id needed) 
+// ────────────────────────────────────────────────────────────────────────
+
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
     die("No active academic year set. Contact your admin.");
@@ -24,7 +51,10 @@ if ($currentYearResult->num_rows === 0) {
 $currentYear = $currentYearResult->fetch_assoc();
 $current_academic_year_id = (int)$currentYear['id'];
 
-// ────── Step 1: Get all classes this learner has joined this year ──
+// ────────────────────────────────────────────────────────────────────────
+//     Step 1: Get all classes this learner has joined this year 
+// ────────────────────────────────────────────────────────────────────────
+
 $stmt = $conn->prepare("
     SELECT DISTINCT class_id 
     FROM class_students 
@@ -77,7 +107,9 @@ if (empty($joinedClassIds)) {
     $quizzes = $stmt->get_result();
     $stmt->close();
 
-    // ── Group quizzes by teacher (Mr Nkosi style) ──
+    // ────────────────────────────────────────────────────────────────────────
+    //       Group quizzes by teacher  
+    // ────────────────────────────────────────────────────────────────────────
     $groupedQuizzes = [];
 $currentTime = date('Y-m-d H:i:s');
 

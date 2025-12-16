@@ -1,4 +1,25 @@
 <?php
+/**
+ * iSkool - Teacher Quiz Results Viewer
+ *
+ * Displays detailed results for a specific quiz created by the logged-in teacher.
+ * Features:
+ * - Student scores, time taken, submission dates, and individual review links
+ * - Multiple sorting options (score, time taken, submission date)
+ * - CSV export with calculated percentages
+ * - Responsive table layout with hover effects
+ * - Full-screen processing loader for exports
+ * - Secure access limited to the quiz owner
+ *
+ * @package     iSkool
+ * @subpackage  Teacher
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.1.0
+ * @since       2025-12-15
+ * @link        https://iskool.online
+ */
 session_start();
 include("config.php");
 
@@ -19,7 +40,10 @@ if (!$schoolId) {
     die("Error: Your school information is missing.");
 }
 
-// Get quiz title
+//──────────────────────────────────────────────────────────────────────────────
+//                        Get quiz title
+//──────────────────────────────────────────────────────────────────────────────
+
 $titleStmt = $conn->prepare("SELECT title FROM quizzes WHERE id = ? AND created_by = ?");
 $titleStmt->bind_param("is", $quizId, $_SESSION['email']);
 $titleStmt->execute();
@@ -51,7 +75,10 @@ switch ($sort) {
         break;
 }
 
-// Fetch results with student names
+//──────────────────────────────────────────────────────────────────────────────
+//              Fetch results with student names
+//──────────────────────────────────────────────────────────────────────────────
+
 $stmt = $conn->prepare("
     SELECT qr.id AS result_id, u.name AS student_name, qr.score, qr.total, qr.time_taken, qr.submitted_at 
     FROM quiz_results qr

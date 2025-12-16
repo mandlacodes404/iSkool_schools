@@ -1,4 +1,26 @@
 <?php
+/**
+ * iSkool - Create Announcement
+ *
+ * Allows teachers to create and send announcements to learners or parents in a selected class.
+ * Features:
+ * - Automatic assignment to current academic year and global term
+ * - Dynamic school name detection from database name
+ * - Email notifications via PHPMailer with branded HTML template
+ * - Web push notifications using WebPush library
+ * - Recipient selection (learners or parents)
+ * - Full-screen processing loader
+ * - Responsive form with current term indicator
+ *
+ * @package     iSkool
+ * @subpackage  Teacher
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-12
+ * @link        https://iskool.online
+ */
 session_start();
 require_once 'config.php';
 require 'vendor/autoload.php';
@@ -17,11 +39,15 @@ $email = $_SESSION['email'];
 $name  = $_SESSION['name'] ?? $email;
 $message = "";
 
+// ────────────────────────────────────────────────────────────────────────
 // GET SCHOOL NAME FROM CURRENT DATABASE (exactly like learner dashboard)
+// ────────────────────────────────────────────────────────────────────────
 $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
 $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
 
-// GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID)
+// ────────────────────────────────────────────────────────────────────────
+//      GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID)
+// ────────────────────────────────────────────────────────────────────────
 $current_academic_year_id = null;
 $result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($row = $result->fetch_assoc()) {
@@ -32,14 +58,18 @@ if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your admin.");
 }
 
+// ────────────────────────────────────────────────────────────────────────
 // GET CURRENT GLOBAL TERM (Your throne — same as quizzes & assignments)
+// ────────────────────────────────────────────────────────────────────────
 $current_global_term = 4;
 $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
 
+// ────────────────────────────────────────────────────────────────────────
 // Get all classes in current school (current DB = current school → no filter)
+// ────────────────────────────────────────────────────────────────────────
 $classStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $classStmt->execute();
 $classResult = $classStmt->get_result();
@@ -52,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $send_to   = $_POST['send_to'] ?? 'learners';
 
     if (!empty($title) && !empty($msg) && $class_id > 0) {
-        // Insert announcement — NO school_id column anymore
+        // Insert announcement 
         $stmt = $conn->prepare("
             INSERT INTO announcements 
             (class_id, title, message, created_by, academic_year_id, term_number, send_to) 

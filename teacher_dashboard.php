@@ -1,4 +1,26 @@
 <?php
+/**
+ * iSkool - Teacher Dashboard
+ *
+ * Main interface for logged-in teachers. Provides centralized navigation to all teacher tools,
+ * including quiz creation, assignment management, announcements, learner grades, and analytics.
+ * Features:
+ * - Responsive sidebar with collapsible desktop mode and mobile bottom navigation
+ * - Dynamic school branding (name and logo)
+ * - Teacher profile display with picture upload
+ * - iframe-based content loading with active state highlighting
+ * - Full-screen processing loader
+ * - Mobile-friendly overlay and toggle behavior
+ *
+ * @package     iSkool
+ * @subpackage  Teacher
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-14
+ * @link        https://iskool.online
+ */
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -6,8 +28,9 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 session_start();
 include("config.php");
-
-// Security: Only logged in + correct role
+//──────────────────────────────────────────────────────────────────────────────
+//           Security: Only logged in + correct role
+//──────────────────────────────────────────────────────────────────────────────
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
     exit();
@@ -15,7 +38,9 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-// Fetch teacher info
+//──────────────────────────────────────────────────────────────────────────────
+//                     Fetch teacher info
+//──────────────────────────────────────────────────────────────────────────────
 $stmtTeacher = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
 $stmtTeacher->bind_param("s", $email);
 $stmtTeacher->execute();
@@ -37,6 +62,10 @@ if ($resultTeacher->num_rows > 0) {
     $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
 }
 $stmtTeacher->close();
+
+//──────────────────────────────────────────────────────────────────────────────
+//           Get teacher school name
+//──────────────────────────────────────────────────────────────────────────────
 
 $schoolName = 'My School'; // fallback only
 $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");

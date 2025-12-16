@@ -1,8 +1,30 @@
 <?php
+/**
+ * iSkool - Login & Registration Page
+ *
+ * Entry point for user authentication and account creation.
+ * Features:
+ * - Animated splash screen with branded loader
+ * - Responsive login and registration forms with role selection
+ * - Password visibility toggle
+ * - Access key validation for registration
+ * - Full-screen processing overlay
+ * - PWA support with service worker and push notification subscription
+ * - Dynamic school name display from database
+ *
+ * @package     iSkool
+ * @subpackage  Authentication
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-14
+ * @link        https://iskool.online
+ */
 session_start();
 
-// ADD THIS LINE (points to your new smart config
-require_once 'config.php';   // or 'config.php' if that's the name
+
+require_once 'config.php';   
 
 $errors = [
     'login' => $_SESSION['login_error'] ?? '',

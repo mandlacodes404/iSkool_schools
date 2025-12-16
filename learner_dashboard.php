@@ -1,4 +1,28 @@
 <?php
+/**
+ * iSkool - Learner Dashboard
+ *
+ * Main interface for logged-in learners. Provides navigation to all learner features,
+ * including quizzes, assignments, grades, resources, announcements, and teacher evaluations.
+ * Features:
+ * - Responsive sidebar with collapsible mode and mobile support
+ * - Dynamic school branding (name and logo)
+ * - Class joining workflow with one-time selection
+ * - Parent linking functionality
+ * - Profile picture upload
+ * - iframe-based content loading with navigation highlighting
+ * - Mobile bottom navigation bar
+ * - Full-screen processing loader
+ *
+ * @package     iSkool
+ * @subpackage  Learner
+ * @author      mandlasimphiwe99@gmail.com
+ * @copyright   2025 iSkool EdTech. All rights reserved.
+ * @license     Proprietary - Unauthorized use prohibited
+ * @version     1.0.0
+ * @since       2025-12-14
+ * @link        https://iskool.online
+ */
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
@@ -8,7 +32,9 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-// ────── Security: Only logged in + correct role ──────
+// ──────────────────────────────────────────────────────────────────
+//        Security: Only logged in + correct role 
+//──────────────────────────────────────────────────────────────────
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
@@ -16,6 +42,9 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 
 $learnerEmail = $_SESSION['email'];
 
+//──────────────────────────────────────────────────────────────────
+//           Get learner school name
+//──────────────────────────────────────────────────────────────────
 $schoolName = 'My School'; // fallback only
 $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 if ($row = $result->fetch_assoc()) {
@@ -23,7 +52,9 @@ if ($row = $result->fetch_assoc()) {
 }
 $schoolLogo = 'Uploads/schools/default_school.png';
 
-// ────── Get current active academic year (no school_id needed) ──────
+//──────────────────────────────────────────────────────────────────────────────
+//        Get current active academic year (no school_id needed) 
+//──────────────────────────────────────────────────────────────────────────────
 $currentYearResult = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
     $currentYearName = "Current Year";
@@ -34,7 +65,9 @@ if ($currentYearResult->num_rows === 0) {
     $currentYearName = $year['name'];
 }
 
-// ────── Handle class join ──────
+//──────────────────────────────────────────────────────────────────────────────
+//                     Handle class join 
+//──────────────────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
     $classId = (int)$_POST['class_id'];
 
@@ -63,7 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
     exit();
 }
 
-// ────── Learner profile info ──────
+//────────────────────────────────────────────────────────────────────────
+//                 Learner profile info 
+//────────────────────────────────────────────────────────────────────────
 // Default fallback values
 $learnerName           = $_SESSION['name'] ?? '';
 $learnerSurname        = '';
@@ -83,7 +118,9 @@ if ($row = $stmt->get_result()->fetch_assoc()) {
 }
 $stmt->close();
 
-// ────── Get all classes available in this school (no school_id needed) ──────
+//────────────────────────────────────────────────────────────────────────────────────
+//         Get all classes available in this school  
+//────────────────────────────────────────────────────────────────────────────────────
 $classesStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $classesStmt->execute();
 $classesResult = $classesStmt->get_result();
@@ -113,7 +150,9 @@ while ($row = $joinedResult->fetch_assoc()) {
 }
 $joinedStmt->close();
 
-// ────── Parent linking (only if learner is in a class) ──────
+//────────────────────────────────────────────────────────────────────────
+//           Parent linking (only if learner is in a class) 
+//────────────────────────────────────────────────────────────────────────
 $parentLink     = null;
 $parentsInClass = [];
 
