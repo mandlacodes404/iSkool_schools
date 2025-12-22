@@ -42,40 +42,40 @@ $groupedAnnouncements = [];
 if ($classId) {
     // Fetch announcements – only for this class + current year + sent to learners
     $stmt = $conn->prepare("
-        SELECT 
-            a.title AS announcement_title,
-            a.message, 
-            a.created_at, 
-            a.created_by,
-            u.title,
-            u.surname,
-            CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
-        FROM announcements a
-        LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
-        WHERE a.class_id = ? 
-          AND a.academic_year_id = ?
-          AND a.send_to = 'learners'
-        ORDER BY a.created_at DESC, u.surname ASC
+       SELECT 
+    a.title,
+    a.message, 
+    a.created_at, 
+    a.created_by,
+    u.title AS teacher_title,
+    u.surname,
+    CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
+FROM announcements a
+LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
+WHERE a.class_id = ? 
+  AND a.academic_year_id = ?
+  AND a.send_to = 'learners'
+ORDER BY a.created_at DESC, u.surname ASC
     ");
     $stmt->bind_param("ii", $classId, $current_academic_year_id);
     $stmt->execute();
     $announcements = $stmt->get_result();
     $stmt->close();
 
-    // Group by teacher – keeps original title
-    while ($row = $announcements->fetch_assoc()) {
-        $teacher = trim($row['teacher_display']);
-        if (empty($teacher) || $teacher === ' ') {
-            $teacher = 'Unknown Teacher';
-        }
-
-        $groupedAnnouncements[$teacher][] = [
-            'title'       => $row['announcement_title'],
-            'message'     => $row['message'],
-            'created_at'  => $row['created_at'],
-            'created_by'  => $row['created_by']
-        ];
+   while ($row = $announcements->fetch_assoc()) {
+    $teacher = trim($row['teacher_display'] ?? 'Unknown Teacher');
+    if (empty($teacher) || $teacher === ' ') {
+        $teacher = 'Unknown Teacher';
     }
+
+    $groupedAnnouncements[$teacher][] = [
+    'title'       => $row['title'] ?? '(No Title)',
+    'message'     => $row['message'] ?? '(No Message)',
+    'created_at'  => $row['created_at'] ?? date('Y-m-d H:i:s'),
+    'created_by'  => $row['created_by'] ?? 'unknown@iskool.online'
+];
+    
+}
 }
 
 $currentDateTime = new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
@@ -413,11 +413,13 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
                             $isNew = $createdAt > $sevenDaysAgo;
                             ?>
                             <div class="announcement" 
-                                 data-title="<?= htmlspecialchars($row['announcement_title']) ?>" 
-                                 data-message="<?= htmlspecialchars($row['message']) ?>">
-                                <div class="announcement-header">
+      
+                                 data-title="<?= htmlspecialchars($row['title'] ?? '(No Title)', ENT_QUOTES) ?>" 
+                                    data-message="<?= htmlspecialchars($row['message'] ?? '(No Message)', ENT_QUOTES) ?>">
+                                   <div class="announcement-header">
                                     <i class="fas fa-bullhorn announcement-icon"></i>
-                                    <h3><?= htmlspecialchars($row['announcement_title']) ?></h3>   <!-- ORIGINAL TITLE ONLY -->
+                                    <h3><?= htmlspecialchars($row['title'] ?? '(No Title)', ENT_QUOTES) ?></h3>
+        
                                     <?php if ($isNew): ?>
                                         <span class="new-badge">New</span>
                                     <?php endif; ?>

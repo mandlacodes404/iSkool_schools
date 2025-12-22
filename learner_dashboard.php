@@ -984,8 +984,11 @@ iframe {
             <i class="fas fa-bullhorn"></i><span>Announcements</span>
         </a>
 
-        <a href="take_teacher_evaluation.php" target="mainFrame" data-page="take_teacher_evaluation.php"
-           class="<?= $currentPage === 'take_teacher_evaluation.php' ? 'active' : '' ?>">
+
+     
+
+        <a href="learner_evaluations.php" target="mainFrame" data-page="learner_evaluations.php"
+           class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
             <i class="fas fa-star"></i><span>Teacher Evaluations</span>
         </a>
 

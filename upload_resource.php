@@ -240,13 +240,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
 
                 // Output JavaScript to trigger the success popup and redirect
                 echo '<script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        document.getElementById("successModal").style.display = "flex";
-                        setTimeout(function() {
-                            window.location.href = "view_resources_teacher.php";
-                        }, 2000);
-                    });
-                </script>';
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = document.getElementById("successModal");
+        if (modal) modal.style.display = "flex";
+        setTimeout(function() {
+            window.location.href = "view_resources_teacher.php";
+        }, 2000);
+    });
+</script>';
             } else {
                 $message = '<i class="fas fa-exclamation-circle"></i> Failed to upload file.';
             }
@@ -690,7 +691,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
     </form>
 
     <div id="loaderOverlay">
-        <div class="loader-text">Uploading...</div>
+        <div class="loader-text">might take a couple of seconds please wait!</div>
         <div class="loader"></div>
     </div>
 

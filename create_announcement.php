@@ -28,7 +28,7 @@ require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
+
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
@@ -101,66 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         $message = "Announcement sent successfully!";
 
-        // --- Push Notification Integration (unchanged logic) ---
-        $auth = [
-            'VAPID' => [
-                'subject' => 'mailto:noreply@iskool.online',
-                'publicKey' => 'BKPh1RLmANqolINDIuClVLOGrlfeQSG7o2pgZAS25xgD_rIp-LOPTWIzEu--bdOsFTi3QPNzpQ5mmzT__OEWmJc',
-                'privateKey' => '6crSLhwDbUQsSB5g63iO-8bh_S8gc88cmkRXpSuDvVw',
-            ],
-        ];
-
-        $webPush = new WebPush($auth);
-
-        // Fetch push subscriptions
-        if ($send_to === 'parents') {
-            $subStmt = $conn->prepare("
-                SELECT ps.subscription 
-                FROM push_subscriptions ps
-                JOIN users u ON ps.user_id = u.id
-                JOIN parent_classes pc ON u.email = pc.parent_email
-                WHERE pc.class_id = ?
-            ");
-        } else {
-            $subStmt = $conn->prepare("
-                SELECT ps.subscription 
-                FROM push_subscriptions ps
-                JOIN users u ON ps.user_id = u.id
-                JOIN class_students cs ON u.email = cs.student_email
-                WHERE cs.class_id = ?
-            ");
-        }
-
-        if ($subStmt && $subStmt->bind_param("i", $class_id) && $subStmt->execute()) {
-            $subsResult = $subStmt->get_result();
-            $notificationsSent = 0;
-
-            while ($row = $subsResult->fetch_assoc()) {
-                $subscription = Subscription::create(json_decode($row['subscription'], true));
-                $webPush->sendNotification(
-                    $subscription,
-                    json_encode([
-                        'title' => 'Announcement: ' . $title,
-                        'body'  => $msg,
-                        'url'   => '/index.php',
-                        'tag'   => 'iskool-announcement',
-                        'renotify' => true
-                    ])
-                );
-                $notificationsSent++;
-            }
-
-            foreach ($webPush->flush() as $report) {
-                if (!$report->isSuccess()) {
-                    error_log("Push failed: " . $report->getReason());
-                }
-            }
-
-            if ($notificationsSent > 0) {
-                $message .= " $notificationsSent push notifications sent.";
-            }
-        }
-        $subStmt?->close();
+       
 
         // --- Email Notification (unchanged below) ---
         if ($send_to === 'parents') {
@@ -322,7 +263,18 @@ $mail->Body = '
             } catch (Exception $e) {
                 error_log("Email sending failed for {$recipient['email']}: " . $mail->ErrorInfo);
             }
+            // Show success modal and redirect after 2 seconds
+
         }
+        echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = document.getElementById("successModal");
+        if (modal) modal.style.display = "flex";
+        setTimeout(function() {
+            window.location.href = "teacher_announcements.php"; // Change to your announcements list page if different
+        }, 2000);
+    });
+</script>';
     } else {
         $message = "Please fill in all fields.";
     }
@@ -479,6 +431,49 @@ $mail->Body = '
     100% { transform: rotate(360deg); }
 }
 
+/* Success Modal Styles */
+#successModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 17, 23, 0.85);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#successModalContent {
+    background: #161b22;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1.5px solid #30363d;
+}
+
+#successModalContent p {
+    font-size: 18px;
+    color: #c9d1d9;
+    margin: 0 0 10px;
+    font-weight: 600;
+}
+
+#successModalContent i {
+    color: #238636;
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
     </style>
 </head>
 <body>
@@ -486,9 +481,7 @@ $mail->Body = '
 <h1>📢 Create Announcement</h1>
 
 
-<?php if ($message): ?>
-    <p class="message"><?= htmlspecialchars($message) ?></p>
-<?php endif; ?>
+
 
 <form method="POST">
     <label for="title">Title:</label>
@@ -512,7 +505,7 @@ $mail->Body = '
 
     <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-        <small style="color:#8b949e;">This announcement automatically belongs to the current term.<br>You (Super Admin) control the current term globally.</small>
+        <small style="color:#8b949e;">This announcement automatically belongs to the current term.<br></small>
     </div>
 
     <label for="send_to">Send Email Alert To:</label>
@@ -532,6 +525,14 @@ $mail->Body = '
     </div>
     <div class="loader-text">Processing...</div>
   </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal">
+    <div id="successModalContent">
+        <i class="fas fa-check-circle"></i>
+        <p>Announcement sent successfully!</p>
+    </div>
 </div>
 
 <script>

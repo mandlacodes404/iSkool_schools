@@ -94,8 +94,6 @@ function formatDuration($seconds) {
     $secs = $seconds % 60;
     return "{$minutes}m {$secs}s";
 }
-
-// Render term marks table (unchanged logic – perfect)
 function renderTermMarksTable($quizzes, $selectedTerm) {
     $summative = array_filter($quizzes, fn($q) => !empty($q['is_summative']) && (int)$q['term_number'] === $selectedTerm);
 
@@ -142,13 +140,13 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
                 if ($q['publish_marks'] == 1 && isset($publishedMap[$idx])) {
                     $wIdx = $publishedMap[$idx];
-                    $weight = round($weights[$wIdx], 1);
+                    $weight = $weights[$wIdx];  // Full precision for calculation
                     $score = $q['score'] ?? 0;
                     $total = $q['total'] ?? 1;
                     $earned = $total > 0 ? round(($score / $total) * $weight, 1) : 0;
                     $earnedTotal += $earned;
                     $scoreDisplay = "$score/$total";
-                    $earnedDisplay = "$earned/$weight";
+                    $earnedDisplay = number_format($earned, 1) . '/' . number_format($weight, 1);
                 }
             ?>
                 <tr style="border-bottom:1px solid #30363d;">
@@ -159,7 +157,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                         <?php endif; ?>
                     </td>
                     <td style="padding:8px 6px; text-align:center; color:#8b949e;">
-                        <?= $q['publish_marks'] == 1 ? $weight . '%' : '—' ?>
+                        <?= $q['publish_marks'] == 1 ? number_format($weight, 1) . '%' : '—' ?>
                     </td>
                     <td style="padding:8px 6px; text-align:center;"><?= $scoreDisplay ?></td>
                     <td style="padding:8px 6px; text-align:center; font-weight:700; color:#4fd1c5;">
@@ -170,10 +168,10 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
             <tr style="border-top:2px solid #4fd1c5; font-weight:700;">
                 <td style="padding:10px 6px; color:#4fd1c5;">TOTAL</td>
-                <td style="padding:10px 6px; text-align:center; color:#4fd1c5;"><?= round($maxTotal, 1) ?>%</td>
+                <td style="padding:10px 6px; text-align:center; color:#4fd1c5;"><?= number_format($maxTotal, 1) ?>%</td>
                 <td style="padding:10px 6px; text-align:center;">—</td>
                 <td style="padding:10px 6px; text-align:center; color:#1ed760; font-size:1.1em;">
-                    <?= round($earnedTotal, 1) ?>/<?= round($maxTotal, 1) ?> → <?= $maxTotal > 0 ? round(($earnedTotal / $maxTotal) * 100) : 0 ?>%
+                    <?= number_format($earnedTotal, 1) ?>/<?= number_format($maxTotal, 1) ?> → <?= $maxTotal > 0 ? round(($earnedTotal / $maxTotal) * 100) : 0 ?>%
                 </td>
             </tr>
         </tbody>

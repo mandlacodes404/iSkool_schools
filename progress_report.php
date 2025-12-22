@@ -64,7 +64,7 @@ $learnerFullName = trim(($learner['name'] ?? '') . ' ' . ($learner['surname'] ??
 $learnerClass    = $learner['class_name'] ?? 'Not enrolled';
 
 // === Current date ===
-$currentDate = date('F j, Y'); // December 14, 2025
+$currentDate = date('F j, Y'); // e.g. December 19, 2025
 
 // Get current academic year
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -115,7 +115,7 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 /**
- * Calculate term percentage and assessment progress
+ * Calculate term percentage — NOW MATCHES TERM MARKS PAGE EXACTLY
  */
 function calculateTermPercentage($quizzes, $term) {
     $summative = array_filter($quizzes, fn($q) => !empty($q['is_summative']) && (int)$q['term_number'] === $term);
@@ -158,7 +158,9 @@ function calculateTermPercentage($quizzes, $term) {
             $weight = $weights[$wIdx];
             $score = $q['score'] ?? 0;
             $total = $q['total'] ?? 1;
-            $earned = $total > 0 ? ($score / $total) * $weight : 0;
+
+            // KEY FIX: Round each earned contribution to 1 decimal (matches term marks page)
+            $earned = $total > 0 ? round(($score / $total) * $weight, 1) : 0;
             $earnedTotal += $earned;
         }
     }
