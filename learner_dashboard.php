@@ -991,6 +991,10 @@ iframe {
            class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
             <i class="fas fa-star"></i><span>Teacher Evaluations</span>
         </a>
+        <a href="discussions.php" target="mainFrame" data-page="discussions.php"
+           class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
+            <i class="fas fa-star"></i><span>Discussions</span>
+        </a>
 
         <?php if (empty($joinedClassIds)): ?>
             <button type="button" onclick="toggleJoinClassForm()" data-page="join-class"

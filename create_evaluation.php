@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.addEventListener("DOMContentLoaded", () => {
                 const modal = document.getElementById("successModal");
                 if (modal) modal.style.display = "flex";
-                setTimeout(() => window.location.href = "teacher_dashboard.php", 2000);
+                setTimeout(() => window.location.href = "view_evaluation_results.php", 2000);
             });
         </script>';
     }

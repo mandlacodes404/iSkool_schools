@@ -319,7 +319,8 @@ $schoolLogo = 'Uploads/schools/default_school.png';
         <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>"><i class="fas fa-chart-bar"></i><span>Learner Grades</span></a>
         <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
         <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluation</span></a>
-        <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluation</span></a>
+        <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluations</span></a>
+        <a href="teacher_discussions.php" target="mainFrame" class="desktop-only <?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Discussions</span></a>
 
 
         <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
