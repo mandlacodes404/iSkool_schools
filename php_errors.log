@@ -147,3 +147,15 @@ Stack trace:
 #0 C:\xampp\htdocs\iskool_schools\teacher_dashboard.php(366): mysqli->prepare('\r\n             ...')
 #1 {main}
   thrown in C:\xampp\htdocs\iskool_schools\teacher_dashboard.php on line 366
+[29-Dec-2025 14:28:28 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' (using password: YES) in C:\xampp\htdocs\iskool_schools\config.php:38
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\config.php(38): mysqli->__construct('localhost', 'iskowdbw', Object(SensitiveParameterValue), 'iskowdbw_sandto...')
+#1 C:\xampp\htdocs\iskool_schools\learner_dashboard.php(33): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\config.php on line 38
+[31-Dec-2025 16:31:09 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' (using password: YES) in C:\xampp\htdocs\iskool_schools\config.php:38
+Stack trace:
+#0 C:\xampp\htdocs\iskool_schools\config.php(38): mysqli->__construct('localhost', 'iskowdbw', Object(SensitiveParameterValue), 'iskowdbw_sandto...')
+#1 C:\xampp\htdocs\iskool_schools\learner_dashboard.php(33): require_once('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\iskool_schools\config.php on line 38

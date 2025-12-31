@@ -40,6 +40,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     exit();
 }
 
+
 $learnerEmail = $_SESSION['email'];
 
 //──────────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key 
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
 }
-$schoolLogo = 'Uploads/schools/default_school.png';
+$schoolLogo = 'uploads/schools/default_school.png';
 
 //──────────────────────────────────────────────────────────────────────────────
 //        Get current active academic year (no school_id needed) 
@@ -943,7 +944,7 @@ iframe {
         <i class="fas fa-chevron-right"></i>
     </button>
     <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;">
-        <img src="Uploads/learners/<?= htmlspecialchars($learnerProfilePicture ?: 'default.png') ?>" 
+        <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture ?: 'default.png') ?>" 
              alt="Profile Picture" 
              class="learner-avatar"
              style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">

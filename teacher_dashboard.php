@@ -72,7 +72,7 @@ $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key 
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
 }
-$schoolLogo = 'Uploads/schools/default_school.png';
+$schoolLogo = 'uploads/schools/default_school.png';
 ?>
 <!DOCTYPE html>
 <html>
@@ -291,7 +291,7 @@ $schoolLogo = 'Uploads/schools/default_school.png';
 <div class="sidebar">
     <div class="sidebar-header">
         <div class="profile-picture-wrapper">
-            <img src="Uploads/teachers/<?= htmlspecialchars($teacherProfile ?: 'default.png') ?>" alt="Profile" class="teacher-avatar">
+            <img src="uploads/teachers/<?= htmlspecialchars($teacherProfile ?: 'default.png') ?>" alt="Profile" class="teacher-avatar">
             <input type="file" id="teacherProfileInput" accept="image/*" style="display:none;">
         </div>
      <button class="round-toggle" onclick="toggleDesktopSidebar()">
