@@ -237,27 +237,50 @@ $schoolLogo = 'uploads/schools/default_school.png';
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Mobile Bottom Navigation */
+                     /* Mobile Bottom Navigation */
         #mobileBottomNav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; width: 100%; height: 57.5px; /* slightly taller for better glass effect */
-    background: rgba(66, 65, 65, 0.35);           /* very dark but transparent */
-    backdrop-filter: blur(20px);                   /* strong glass blur */
-    -webkit-backdrop-filter: blur(20px);           /* Safari support */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);    /* subtle lift shadow */
-    z-index: 4000;
-    justify-content: space-around;
-    align-items: center;
-}
-        #mobileBottomNav a {
-            color: var(--text-color); text-decoration: none; font-size: 11px;
-            text-align: center; flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: all 0.2s;
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px; /* taller base height for better visibility and comfort */
+            background: rgba(66, 65, 65, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 4000;
+            justify-content: space-around;
+            align-items: center;
+            box-sizing: border-box;
+            transition: padding-bottom 0.3s ease, height 0.3s ease;
         }
-        #mobileBottomNav a i { font-size: 20px; margin-bottom: 4px; }
-        #mobileBottomNav a.active, #mobileBottomNav a:hover { color: var(--accent-color); transform: translateY(-3px); }
+
+        #mobileBottomNav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* align content to the top */
+            padding-top: 1px; /* pushes icons and text higher inside the taller bar */
+            transition: all 0.2s;
+        }
+
+        #mobileBottomNav a i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        #mobileBottomNav a.active,
+        #mobileBottomNav a:hover {
+            color: var(--accent-color);
+            transform: translateY(-3px);
+        }
 
         /* MOBILE LAYOUT */
         @media (max-width: 768px) {
@@ -273,16 +296,26 @@ $schoolLogo = 'uploads/schools/default_school.png';
             
             iframe { height: calc(100vh - 120px) !important; }
             #mobileBottomNav { display: flex !important; }
+
+            /* Safe area support - now based on 80px base height */
+            #mobileBottomNav {
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
+                height: calc(80px + env(safe-area-inset-bottom));
+                height: calc(80px + constant(safe-area-inset-bottom));
+            }
+
             .sidebar a.desktop-only { display: none; }
         }
 
         @media (min-width: 769px) {
             .school-name { display: inline; }
         }
+
         .drawer-icon svg {
-    transition: transform 0.3s ease;
-    display: block;
-}
+            transition: transform 0.3s ease;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -320,9 +353,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
         <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluation</span></a>
         <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluations</span></a>
-        <a href="teacher_discussions.php" target="mainFrame" class="desktop-only <?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Discussions</span></a>
-
-
+        <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-home"></i><span>Discussions</span></a>
         <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
     </div>
    
@@ -353,7 +384,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <a href="create_quiz.php" target="mainFrame" class="<?= $currentPage==='create_quiz.php'?'active':'' ?>"><i class="fas fa-question-circle"></i>Quiz</a>
     <a href="create_assignment.php" target="mainFrame" class="<?= $currentPage==='create_assignment.php'?'active':'' ?>"><i class="fas fa-file-alt"></i>Assignments</a>
     <a href="upload_resource.php" target="mainFrame" class="<?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i>Resources</a>
-    <a href="create_announcement.php" target="mainFrame" class="<?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i>Announce</a>
+    <a href="create_announcement.php" target="mainFrame" class="<?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i>Announcement</a>
 </nav>
 
 <script>

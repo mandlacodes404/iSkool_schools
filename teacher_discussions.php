@@ -30,6 +30,10 @@ $reports = $conn->query("
     WHERE d.id IN (SELECT discussion_id FROM discussion_teachers WHERE teacher_email = '$teacher_email')
     ORDER BY dr.reported_at DESC
 ")->fetch_all(MYSQLI_ASSOC);
+
+// ——————— MOBILE DETECTION (same as learner side) ———————
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+$is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/i", $user_agent);
 ?>
 
 <!DOCTYPE html>
@@ -91,20 +95,20 @@ $reports = $conn->query("
     <h2>Your Tagged Discussions</h2>
     <?php if (empty($discussions)): ?>
         <p class="no-data">You haven't been tagged in any discussions yet.</p>
-    <?php else: foreach ($discussions as $d): ?>
-        <div class="disc-card">
-            <h3>
-                <a href="view_discussion.php?id=<?= $d['id'] ?>">
-                    <?= htmlspecialchars($d['title']) ?>
-                </a>
-            </h3>
-            <div class="disc-meta">
-                Class: <strong><?= htmlspecialchars($d['class_name']) ?></strong> • 
-                Replies: <strong><?= $d['reply_count'] ?></strong> • 
-                Created: <?= date('M j, Y', strtotime($d['created_at'])) ?>
-            </div>
+<?php else: foreach ($discussions as $d): ?>
+    <div class="disc-card">
+        <h3>
+            <a href="view_discussion.php?id=<?= $d['id'] ?>" <?= $is_mobile ? 'target="_blank"' : '' ?>>
+                <?= htmlspecialchars($d['title']) ?>
+            </a>
+        </h3>
+        <div class="disc-meta">
+            Class: <strong><?= htmlspecialchars($d['class_name']) ?></strong> • 
+            Replies: <strong><?= $d['reply_count'] ?></strong> • 
+            Created: <?= date('M j, Y', strtotime($d['created_at'])) ?>
         </div>
-    <?php endforeach; endif; ?>
+    </div>
+<?php endforeach; endif; ?>
 </div>
 </body>
 </html>

@@ -326,14 +326,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
             font-size: 18px;
         }
 
+                        .anonymity-note {
+            background: rgba(79,209,197,0.1);
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            color: #c9d1d9;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+            z-index: 10; /* ensures button is on top */
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .anonymity-text {
+            flex: 1;
+            font-size: 14px;
+            padding-left: 52px;  /* ← This is the key fix: pushes text right of button */
+            padding-right: 52px; /* optional: symmetric on right side */
+            box-sizing: border-box;
+        }
+
+        /* Hide back button on desktop */
+        @media (min-width: 769px) {
+            .back-btn {
+                display: none;
+            }
+            .anonymity-text {
+                padding-left: 0;   /* no need for padding on desktop */
+                padding-right: 0;
+            }
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) { .chat-container { padding: 15px; } .message { max-width: 90%; } .input-bar { padding: 12px; } }
     </style>
 </head>
 <body>
     <div class="anonymity-note">
-        <strong>Note:</strong> Posts can be anonymous among classmates, but the tagged teacher can see names for moderation.
-    </div>
+    <button class="back-btn" onclick="goBackToDiscussions()">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <span class="anonymity-text">
+        <strong></strong> Questions can be anonymous, but the tagged teacher can see names for moderation.
+    </span>
+</div>
 
     <?php if (isset($report_msg)): ?>
         <div style="text-align:center; padding:15px; background:#238636; border-radius:12px; margin:20px;">
@@ -555,6 +616,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
         const chat = document.getElementById('chat');
         chat.scrollTop = chat.scrollHeight;
+
+                function goBackToDiscussions() {
+            // Check if we came from the dashboard (most users will)
+            if (document.referrer.includes('learner_dashboard.php') || document.referrer.includes('teacher_dashboard.php')) {
+                history.back(); // This goes back to the dashboard with discussions.php loaded in iframe
+            } else {
+                // Fallback: directly go to dashboard and load discussions
+                window.location.href = '<?php echo $_SESSION['role'] === 'teacher' ? 'teacher_dashboard.php' : 'learner_dashboard.php'; ?>?page=discussions.php';
+            }
+        }
     </script>
 </body>
 </html>

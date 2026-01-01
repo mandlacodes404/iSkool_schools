@@ -772,63 +772,74 @@ iframe {
     opacity: 0;
 }
 
-/* FIXED: Only this part was cleaned — everything else is 100% original */
-#mobileBottomNav {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: rgba(20, 20, 20, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 4000;
-    transition: background 0.3s ease, transform 0.3s ease;
-}
+        /* Mobile Bottom Navigation - Improved for better visibility on all phones */
+        #mobileBottomNav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px; /* taller base height for comfort and clear labels */
+           background: rgba(92, 89, 89, 0.35);  /* ← Exact same transparent dark as teacher */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            justify-content: space-around;
+            align-items: center;
+            z-index: 4000;
+            box-sizing: border-box;
+            transition: padding-bottom 0.3s ease, height 0.3s ease;
+        }
 
-#mobileBottomNav a {
-    color: #b4b8c2ff;
-    text-decoration: none;
-    font-size: 11px;
-    text-align: center;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s ease, transform 0.2s ease;
-}
+        #mobileBottomNav a {
+            color: #e2e8f0; /* matches your main text color - clearer than #b4b8c2 */
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* pushes content up */
+            padding-top: 1px; /* lifts icons + text higher together */
+            transition: all 0.2s;
+        }
 
-#mobileBottomNav a i {
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 20px;
-    margin-bottom: 4px;
-}
+        #mobileBottomNav a i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
 
-#mobileBottomNav a.active,
-#mobileBottomNav a:hover {
-    color: var(--accent-color);
-    transform: translateY(-2px);
-}
+        #mobileBottomNav a.active,
+        #mobileBottomNav a:hover {
+            color: var(--accent-color);
+            transform: translateY(-3px);
+        }
 
-@media (max-width: 768px) {
-    #mobileBottomNav {
-        display: flex !important;
-    }
-    iframe {
-        height: calc(100vh - 60px);
-    }
-}
+        /* Mobile Layout - Show bottom nav + safe area support */
+        @media (max-width: 768px) {
+            #mobileBottomNav {
+                display: flex !important;
+            }
 
-.sidebar.active ~ #mobileBottomNav {
-    filter: blur(5px);
-    pointer-events: none;
-}
+            /* Critical: Lifts the entire bar on iPhone & Android gesture navigation */
+            #mobileBottomNav {
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
+                height: calc(80px + env(safe-area-inset-bottom));
+                height: calc(80px + constant(safe-area-inset-bottom));
+            }
+
+            iframe {
+                height: calc(100vh - 80px);
+            }
+        }
+
+        .sidebar.active ~ #mobileBottomNav {
+            filter: blur(5px);
+            pointer-events: none;
+        }
 
 .learner-name {
     margin-top: 4px;
