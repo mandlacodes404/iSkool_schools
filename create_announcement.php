@@ -24,6 +24,7 @@
 session_start();
 require_once 'config.php';
 require 'vendor/autoload.php';
+require_once 'push_functions.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -124,114 +125,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $emailQuery->execute();
         $recipients = $emailQuery->get_result();
 
-        while ($recipient = $recipients->fetch_assoc()) {
-            try {
-                $mail = new PHPMailer(true);
-                $mail->isSMTP();
-                $mail->Host       = 'iskool.online';
-                $mail->SMTPAuth   = true;
-                $mail->Username   = 'noreply@iskool.online';
-                $mail->Password   = 'ogeQkRitRfdy';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
-                $mail->Port       = 465;
-
-                $mail->setFrom('noreply@iskool.online', $schoolName);
-                $mail->addAddress($recipient['email']);
-                $mail->isHTML(true);
-                $mail->Subject = htmlspecialchars($title);
-
-$mail->Body = '
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="light dark">
-<title>iSkool Notification</title>
-<style>
-  :root { color-scheme: light dark; }
-  body { 
-    margin:0; 
-    padding:0; 
-    font-family:Verdana, Tahoma, Arial, Helvetica, sans-serif; 
-    font-size:16px;
-    line-height:1.6;
-  }
-  .wrapper { 
-    max-width:600px; 
-    margin:30px auto; 
-    border-radius:16px; 
-    overflow:hidden; 
-    box-shadow:0 8px 25px rgba(0,0,0,0.2); 
-  }
-  .header { 
-    padding:40px; 
-    text-align:center; 
-    background:#161b22; 
-    color:#ffffff; 
-  }
-  .header h1 { 
-    margin:0; 
-    font-size:32px; 
-    font-weight:bold; 
-    color:#1db954; 
-  }
-  .body { 
-    padding:40px; 
-    background:#1e1e1e; 
-    color:#c9d1d9; 
-  }
-  .body h2 { 
-    color:#1db954; 
-    font-size:24px; 
-    font-weight:bold; 
-    margin-bottom:20px; 
-  }
-  .footer { 
-    padding:30px; 
-    text-align:center; 
-    background:#161b22; 
-    font-size:14px; 
-    color:#8b949e; 
-  }
-  @media (prefers-color-scheme: light) {
-    .wrapper { background:#ffffff; }
-    .header, .body, .footer { background:#ffffff; color:#333333; }
-    .body h2 { color:#1db954; }
-    .footer { color:#666666; border-top:1px solid #eeeeee; }
-  }
-  @media (max-width: 480px) {
-    .header, .body, .footer { padding:30px 20px !important; }
-    .header h1 { font-size:28px !important; }
-    .body h2 { font-size:22px !important; }
-  }
-</style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="header"><h1>iSkool</h1></div>
-    <div class="body">
-      <h2>' . htmlspecialchars($title) . '</h2>
-      <p>' . nl2br(htmlspecialchars($msg)) . '</p>
-    </div>
-    <div class="footer">
-      <p>From: ' . htmlspecialchars($name) . '</p>
-      <p>Best regards, ' . htmlspecialchars($schoolName) . '</p>
-      <p>Powered by iSkool © ' . date("Y") . '</p>
-    </div>
-  </div>
-</body>
-</html>
-';
+// 1. Capture the "Urgent" checkbox value from the form
+$force_email = isset($_POST['force_email']) ? true : false;
 
 
-                $mail->send();
-            } catch (Exception $e) {
-                error_log("Email sending failed for {$recipient['email']}: " . $mail->ErrorInfo);
-            }
-            // Show success modal and redirect after 2 seconds
 
+while ($recipient = $recipients->fetch_assoc()) {
+    $currentEmail = $recipient['email'];
+    $isPushSent = false;
+
+    // 3. Check for Push Subscription
+    $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+    $checkSub->bind_param("s", $currentEmail);
+    $checkSub->execute();
+    $subResult = $checkSub->get_result();
+    
+    if ($subResult->num_rows > 0) {
+        // Attempt Push
+        $isPushSent = sendPushToUser(
+            $conn, 
+            $currentEmail, 
+            "New Notification: " . $title, 
+            $msg
+        );
+    }
+
+    // 4. SMART ROUTING: Send email IF (Push failed/not exists) OR (Urgent is checked)
+    if (!$isPushSent || $force_email) {
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = 'iskool.online';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'noreply@iskool.online';
+            $mail->Password   = 'ogeQkRitRfdy';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+
+            $mail->setFrom('noreply@iskool.online', $schoolName);
+            $mail->addAddress($currentEmail);
+            $mail->isHTML(true);
+            $mail->Subject = htmlspecialchars($title);
+
+            $mail->Body = '
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { margin:0; padding:0; font-family:Verdana, sans-serif; font-size:16px; line-height:1.6; }
+              .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); border: 1px solid #eee; }
+              .header { padding:40px; text-align:center; background:#161b22; color:#ffffff; }
+              .header h1 { margin:0; font-size:32px; color:#1db954; }
+              .body { padding:40px; background:#ffffff; color:#333333; }
+              .body h2 { color:#1db954; font-size:24px; margin-bottom:20px; }
+              .footer { padding:30px; text-align:center; background:#f4f4f4; font-size:14px; color:#666666; }
+            </style>
+            </head>
+            <body>
+              <div class="wrapper">
+                <div class="header"><h1>iSkool</h1></div>
+                <div class="body">
+                  <h2>' . htmlspecialchars($title) . '</h2>
+                  <p>' . nl2br(htmlspecialchars($msg)) . '</p>
+                </div>
+                <div class="footer">
+                  <p>From: ' . htmlspecialchars($name) . '</p>
+                  <p>Best regards, ' . htmlspecialchars($schoolName) . '</p>
+                  <p>Powered by iSkool © ' . date("Y") . '</p>
+                </div>
+              </div>
+            </body>
+            </html>';
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Email sending failed for $currentEmail: " . $mail->ErrorInfo);
         }
+    }
+}
         echo '<script>
     document.addEventListener("DOMContentLoaded", function() {
         const modal = document.getElementById("successModal");
@@ -479,6 +452,12 @@ $mail->Body = '
         <option value="parents">Parents Only</option>
         <option value="learners" selected>Learners Only</option>
     </select>
+    <div style="background:#1a202c; padding:15px; border-radius:10px; border:1px solid #2d3748; margin-bottom:20px;">
+    <label style="display: flex; align-items: center; cursor: pointer; color: #4fd1c5; font-weight: bold;">
+        <input type="checkbox" name="force_email" value="1" style="width: 22px; height: 22px; margin-right: 12px; cursor: pointer;">
+       we recommend sending mobile notifications but if you feel the message is important or urgent you can tick this box
+    </label>
+</div>
 
     <button type="submit">Send Announcement</button>
 </form>

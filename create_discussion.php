@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'push_functions.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php"); exit();
@@ -174,28 +175,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $classmatesQuery->execute();
         $classmatesResult = $classmatesQuery->get_result();
 
-        while ($recipient = $classmatesResult->fetch_assoc()) {
-            try {
-                $mail = new PHPMailer(true);
-                $mail->isSMTP();
-                $mail->Host       = 'iskool.online';
-                $mail->SMTPAuth   = true;
-                $mail->Username   = 'noreply@iskool.online';
-                $mail->Password   = 'ogeQkRitRfdy';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                $mail->Port       = 465;
+        while ($teacher = $teachersResult->fetch_assoc()) {
+                $currentEmail = $teacher['email'];
+                $isPushSent = false;
 
-                $mail->setFrom('noreply@iskool.online', $schoolName);
-                $mail->addAddress($recipient['email']);
-                $mail->isHTML(true);
-                $mail->Subject = "New Discussion: " . $title;
-                $mail->Body = $emailTemplate($recipient['name'], 'learner');
+                // A. Try Push Notification (Teachers definitely want this)
+                $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+                $checkSub->bind_param("s", $currentEmail);
+                $checkSub->execute();
+                $subResult = $checkSub->get_result();
+                
+                if ($subResult->num_rows > 0) {
+                    $isPushSent = sendPushToUser(
+                        $conn, 
+                        $currentEmail, 
+                        "🔔 Tagged in Discussion", 
+                        $creatorDisplay . " tagged you in: " . $title
+                    );
+                }
 
-                $mail->send();
-            } catch (Exception $e) {
-                error_log("Discussion email failed (classmate {$recipient['email']}): " . $mail->ErrorInfo);
+                // B. Email if Push failed
+                if (!$isPushSent) {
+                    try {
+                        $mail = new PHPMailer(true);
+                        $mail->isSMTP();
+                        $mail->Host       = 'iskool.online';
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = 'noreply@iskool.online';
+                        $mail->Password   = 'ogeQkRitRfdy';
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                        $mail->Port       = 465;
+
+                        $mail->setFrom('noreply@iskool.online', $schoolName);
+                        $mail->addAddress($currentEmail);
+                        $mail->isHTML(true);
+                        $mail->Subject = "You've been tagged: " . $title;
+                        $mail->Body = $emailTemplate($teacher['name'], 'teacher');
+
+                        $mail->send();
+                    } catch (Exception $e) {
+                        error_log("Discussion email failed (teacher $currentEmail): " . $mail->ErrorInfo);
+                    }
+                }
             }
-        }
         $classmatesQuery->close();
 
         // 2. Notify tagged teachers

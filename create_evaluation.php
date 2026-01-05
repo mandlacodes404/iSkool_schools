@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'push_functions.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php"); exit();
@@ -146,32 +147,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $learnersQuery->execute();
         $learnersResult = $learnersQuery->get_result();
 
+        // --- SMART NOTIFICATION LOGIC ---
+        
+        $force_email = isset($_POST['force_email']) ? true : false;
+
         while ($learner = $learnersResult->fetch_assoc()) {
-            try {
-                $mail = new PHPMailer(true);
-                $mail->isSMTP();
-                $mail->Host       = 'iskool.online';
-                $mail->SMTPAuth   = true;
-                $mail->Username   = 'noreply@iskool.online';
-                $mail->Password   = 'ogeQkRitRfdy';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                $mail->Port       = 465;
+            $currentEmail = $learner['email'];
+            $isPushSent = false;
 
-                $mail->setFrom('noreply@iskool.online', $schoolName);
-                $mail->addAddress($learner['email']);
-                $mail->isHTML(true);
-                $mail->Subject = "New Evaluation: " . $title;
+            // A. Try Mobile Push first
+            $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+            $checkSub->bind_param("s", $currentEmail);
+            $checkSub->execute();
+            $subResult = $checkSub->get_result();
+            
+            if ($subResult->num_rows > 0) {
+                $isPushSent = sendPushToUser(
+                    $conn, 
+                    $currentEmail, 
+                    "📊 New Evaluation: " . $title, 
+                    "Your teacher requested your feedback. Please complete the evaluation."
+                );
+            }
 
-                // Personalize name
-                $personalizedBody = str_replace('{{name}}', htmlspecialchars($learner['name']), $emailBody);
-                $mail->Body = $personalizedBody;
+            // B. Email Fallback / Force Email
+            if (!$isPushSent || $force_email) {
+                try {
+                    $mail = new PHPMailer(true);
+                    $mail->isSMTP();
+                    $mail->Host       = 'iskool.online';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'noreply@iskool.online';
+                    $mail->Password   = 'ogeQkRitRfdy';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                    $mail->Port       = 465;
 
-                $mail->send();
-            } catch (Exception $e) {
-                error_log("Evaluation email failed (learner {$learner['email']}): " . $mail->ErrorInfo);
+                    $mail->setFrom('noreply@iskool.online', $schoolName);
+                    $mail->addAddress($currentEmail);
+                    $mail->isHTML(true);
+                    $mail->Subject = "New Evaluation: " . $title;
+
+                    // Personalize name
+                    $personalizedBody = str_replace('{{name}}', htmlspecialchars($learner['name']), $emailBody);
+                    $mail->Body = $personalizedBody;
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Evaluation email failed (learner {$currentEmail}): " . $mail->ErrorInfo);
+                }
             }
         }
         $learnersQuery->close();
+        // --- END NOTIFICATION LOGIC ---
 
         // Success message
         $message = "Evaluation released successfully!";
@@ -242,7 +269,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <button type="button" class="add-btn" onclick="addStatement()">+ Add Question</button>
-
+        <div style="background:#1a202c; padding:15px; border-radius:10px; border:1px solid #30363d; margin:20px 0;">
+    <label style="display: flex; align-items: center; cursor: pointer; color: #4fd1c5; font-weight: bold; margin:0;">
+        <input type="checkbox" name="force_email" value="1" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+        Urgent: Also send Email Alert to all students
+    </label>
+</div>
         <button type="submit">Release Evaluation</button>
     </form>
 </div>

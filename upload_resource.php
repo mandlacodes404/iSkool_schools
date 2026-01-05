@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'push_functions.php';
 require 'vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -101,153 +102,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
                 $userQuery->execute();
                 $learners = $userQuery->get_result();
 
+    // --- SMART NOTIFICATION LOGIC ---
+                
+                $force_email = isset($_POST['force_email']) ? true : false;
+
                 while ($learner = $learners->fetch_assoc()) {
-                    try {
-                        $mail = new PHPMailer(true);
-                        $mail->isSMTP();
-                        $mail->Host = 'iskool.online';
-                        $mail->SMTPAuth = true;
-                        $mail->Username = 'noreply@iskool.online';
-                        $mail->Password = 'ogeQkRitRfdy';
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                        $mail->Port = 465;
+                    $currentEmail = $learner['email'];
+                    $learnerName  = $learner['name'];
+                    $isPushSent   = false;
 
-                        $mail->setFrom('noreply@iskool.online', 'iSkool');
-                        $mail->addAddress($learner['email']);
-                        $mail->isHTML(true);
-                        $mail->Subject = "New Resource: $title";
-                        $mail->Body = '
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Resource Notification</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #121212;
-    font-family: "Inter", system-ui, Arial, sans-serif;
-    color: #ffffff;
-  }
-  .email-wrapper {
-    max-width: 600px;
-    margin: 30px auto;
-    background-color: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-  }
-  .email-header {
-    background-color: #161b22;
-    padding: 30px;
-    text-align: center;
-  }
-  .email-header h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1db954;
-  }
-  .email-header p {
-    margin: 6px 0 0;
-    font-size: 14px;
-    color: #c9d1d9;
-  }
-  .email-body {
-    padding: 30px;
-    text-align: left;
-  }
-  .email-body p {
-    margin: 0 0 15px;
-    font-size: 16px;
-    line-height: 1.6;
-    color: #c9d1d9;
-  }
-  .email-body h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #1db954;
-    margin: 0 0 20px;
-  }
-  .cta-button {
-    display: inline-block;
-    padding: 12px 25px;
-    margin-top: 15px;
-    background-color: #1db954;
-    color: #121212;
-    font-weight: 600;
-    border-radius: 25px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-  }
-  .cta-button:hover {
-    background-color: #1ed760;
-  }
-  .email-footer {
-    background-color: #161b22;
-    padding: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: #8b949e;
-  }
-  @media (max-width: 480px) {
-    .email-wrapper {
-      margin: 20px 10px;
-    }
-    .email-header, .email-body, .email-footer {
-      padding: 20px;
-    }
-    .email-header h1 {
-      font-size: 24px;
-    }
-    .email-body h2 {
-      font-size: 20px;
-    }
-    .email-body p {
-      font-size: 15px;
-    }
-  }
-</style>
-</head>
-<body>
-  <div class="email-wrapper">
-    <div class="email-header">
-      <h1><i class="fas fa-book"></i> iSkool</h1>
-      <p>Your Digital Classroom</p>
-    </div>
-    <div class="email-body">
-      <p>Hello ' . htmlspecialchars($learner['name']) . ',</p>
-      <h2>New Resource: ' . htmlspecialchars($title) . '</h2>
-      <p>A new study resource has been uploaded for your class. Check it out to stay ahead!</p>
-      <a href="http://iskool.online/view_resources_user.php" class="cta-button"><i class="fas fa-folder-open"></i> View Resources</a>
-    </div>
-    <div class="email-footer">
-      <p>Powered by iSkool &copy; 2025</p>
-    </div>
-  </div>
-</body>
-</html>
-';
+                    // 1. Try Mobile Push first
+                    $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+                    $checkSub->bind_param("s", $currentEmail);
+                    $checkSub->execute();
+                    $subResult = $checkSub->get_result();
+                    
+                    if ($subResult->num_rows > 0) {
+                        $isPushSent = sendPushToUser(
+                            $conn, 
+                            $currentEmail, 
+                            "📚 New Resource: " . $title, 
+                            "A new study material has been uploaded for your class."
+                        );
+                    }
+                    $checkSub->close();
 
-                        $mail->send();
-                    } catch (Exception $e) {
-                        error_log("Email failed to " . $learner['email'] . ": " . $mail->ErrorInfo);
+                    // 2. Email Fallback (Only if Push failed OR Teacher forced it)
+                    if (!$isPushSent || $force_email) {
+                        try {
+                            $mail = new PHPMailer(true);
+                            $mail->isSMTP();
+                            $mail->Host       = 'iskool.online';
+                            $mail->SMTPAuth   = true;
+                            $mail->Username   = 'noreply@iskool.online';
+                            $mail->Password   = 'ogeQkRitRfdy';
+                            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                            $mail->Port       = 465;
+
+                            $mail->setFrom('noreply@iskool.online', 'iSkool');
+                            $mail->addAddress($currentEmail);
+                            $mail->isHTML(true);
+                            $mail->Subject = "New Resource: $title";
+                            $mail->Body = '
+                                <!DOCTYPE html>
+                                <html lang="en">
+                                <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>New Resource Notification</title>
+                                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+                                <style>
+                                  body { margin: 0; padding: 0; background-color: #121212; font-family: "Inter", sans-serif; color: #ffffff; }
+                                  .email-wrapper { max-width: 600px; margin: 30px auto; background-color: #1e1e1e; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+                                  .email-header { background-color: #161b22; padding: 30px; text-align: center; }
+                                  .email-header h1 { margin: 0; font-size: 28px; font-weight: 700; color: #1db954; }
+                                  .email-body { padding: 30px; text-align: left; }
+                                  .email-body h2 { font-size: 22px; font-weight: 600; color: #1db954; margin: 0 0 20px; }
+                                  .cta-button { display: inline-block; padding: 12px 25px; margin-top: 15px; background-color: #1db954; color: #121212; font-weight: 600; border-radius: 25px; text-decoration: none; }
+                                  .email-footer { background-color: #161b22; padding: 20px; text-align: center; font-size: 13px; color: #8b949e; }
+                                </style>
+                                </head>
+                                <body>
+                                  <div class="email-wrapper">
+                                    <div class="email-header"><h1>iSkool</h1></div>
+                                    <div class="email-body">
+                                      <p>Hello ' . htmlspecialchars($learnerName) . ',</p>
+                                      <h2>New Resource: ' . htmlspecialchars($title) . '</h2>
+                                      <p>A new study resource has been uploaded for your class. Check it out to stay ahead!</p>
+                                      <a href="http://iskool.online/view_resources_user.php" class="cta-button">View Resources</a>
+                                    </div>
+                                    <div class="email-footer"><p>Powered by iSkool &copy; 2026</p></div>
+                                  </div>
+                                </body>
+                                </html>';
+
+                            $mail->send();
+                        } catch (Exception $e) {
+                            error_log("Email failed to " . $currentEmail . ": " . $mail->ErrorInfo);
+                        }
                     }
                 }
+                $userQuery->close();
+                // --- END NOTIFICATION LOGIC ---
 
                 // Output JavaScript to trigger the success popup and redirect
                 echo '<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const modal = document.getElementById("successModal");
-        if (modal) modal.style.display = "flex";
-        setTimeout(function() {
-            window.location.href = "view_resources_teacher.php";
-        }, 2000);
-    });
-</script>';
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const modal = document.getElementById("successModal");
+                        if (modal) modal.style.display = "flex";
+                        setTimeout(function() {
+                            window.location.href = "view_resources_teacher.php";
+                        }, 2000);
+                    });
+                </script>';
             } else {
                 $message = '<i class="fas fa-exclamation-circle"></i> Failed to upload file.';
             }
@@ -686,7 +633,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
             <img id="previewImage" alt="File Preview">
             <p id="fileName"></p>
         </div>
-
+         <label style="display: flex; align-items: center; cursor: pointer; color: #4fd1c5; margin-bottom: 15px;">
+    <input type="checkbox" name="force_email" value="1" style="margin-right: 10px; width: 18px; height: 18px;">
+    learrners will uatomatically get mobile notifications but you can also send Email Alert to everyone
+</label>
         <button type="submit" id="submitBtn">Upload</button>
     </form>
 
