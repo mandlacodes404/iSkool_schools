@@ -412,7 +412,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     <div class="chat-container" id="chat">
         <!-- Initial Message -->
         <div class="message <?= $disc['creator_email'] === $user_email ? 'me' : '' ?>" data-id="0">
-            <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>" class="avatar">
+            <?php if (!($disc['creator_anonymous'] && $user_role === 'learner')): ?>
+              <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>" class="avatar">
+             <?php endif; ?>
             <div>
                 <div class="bubble" onclick="toggleActions(this.parentElement.parentElement)">
                     <strong><?= htmlspecialchars($creator_display) ?></strong><br>
@@ -446,7 +448,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
             }
             ?>
             <div class="message <?= $r['is_me'] ? 'me' : '' ?>" data-id="<?= $r['id'] ?>">
-                <img src="uploads/learners/<?= htmlspecialchars($reply_pic) ?>" class="avatar">
+                <?php if (!($r['replier_anonymous'] && $user_role === 'learner')): ?>
+                  <img src="uploads/learners/<?= htmlspecialchars($reply_pic) ?>" class="avatar">
+                <?php endif; ?>
                 <div>
                     <?php if ($parent_preview): ?>
                         <div class="reply-preview">

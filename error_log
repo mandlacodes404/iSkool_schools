@@ -1,0 +1,230 @@
+[29-Dec-2025 13:47:55 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 13:58:34 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 13:58:34 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 13:58:35 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 15:33:56 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 16:11:11 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[29-Dec-2025 16:11:32 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[29-Dec-2025 16:28:21 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[29-Dec-2025 16:28:54 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[29-Dec-2025 20:16:38 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[29-Dec-2025 22:29:40 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 05:38:51 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 08:20:20 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 12:41:39 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 15:21:03 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[30-Dec-2025 15:21:08 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[30-Dec-2025 19:21:55 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 20:24:21 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 20:44:47 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[30-Dec-2025 22:07:03 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[30-Dec-2025 22:08:06 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[31-Dec-2025 02:28:42 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 09:07:22 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 09:40:04 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 15:53:40 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 16:12:53 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 16:22:40 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[31-Dec-2025 16:24:27 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[31-Dec-2025 16:24:35 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:24
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(24): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 24
+[31-Dec-2025 16:29:06 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/teacher_discussions.php:12
+Stack trace:
+#0 /home/iskowdbw/public_html/teacher_discussions.php(12): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/teacher_discussions.php on line 12
+[31-Dec-2025 16:38:32 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:25
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(25): mysqli->prepare()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 25
+[31-Dec-2025 16:38:55 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/teacher_discussions.php:12
+Stack trace:
+#0 /home/iskowdbw/public_html/teacher_discussions.php(12): mysqli->query()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/teacher_discussions.php on line 12
+[31-Dec-2025 16:40:20 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:25
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(25): mysqli->prepare()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 25
+[31-Dec-2025 16:40:23 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'iskowdbw_sandtonhigh.class_discussions' doesn't exist in /home/iskowdbw/public_html/discussions.php:25
+Stack trace:
+#0 /home/iskowdbw/public_html/discussions.php(25): mysqli->prepare()
+#1 {main}
+  thrown in /home/iskowdbw/public_html/discussions.php on line 25
+[31-Dec-2025 16:47:02 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[31-Dec-2025 23:49:24 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[01-Jan-2026 07:01:18 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[01-Jan-2026 09:49:58 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[01-Jan-2026 11:45:24 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[01-Jan-2026 13:52:13 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(27): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38
+[01-Jan-2026 18:57:39 Africa/Johannesburg] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'iskowdbw'@'localhost' to database 'iskowdbw_www' in /home/iskowdbw/public_html/config.php:38
+Stack trace:
+#0 /home/iskowdbw/public_html/config.php(38): mysqli->__construct()
+#1 /home/iskowdbw/public_html/index.php(28): require_once('/home/iskowdbw/...')
+#2 {main}
+  thrown in /home/iskowdbw/public_html/config.php on line 38

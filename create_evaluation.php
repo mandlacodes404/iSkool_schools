@@ -6,6 +6,9 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php"); exit();
 }
 
+ require 'vendor/autoload.php';
+        use PHPMailer\PHPMailer\PHPMailer;
+        use PHPMailer\PHPMailer\Exception;
 $teacher_email = $_SESSION['email'];
 $message = "";
 
@@ -16,7 +19,6 @@ $current_global_term = $conn->query("SELECT current_global_term FROM platform_se
 // Get all classes
 $classes = $conn->query("SELECT id, name FROM classes ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
     $description = trim($_POST['description'] ?? '');
@@ -34,12 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if ($use_default) {
-            // Copy from default template (assumes default has evaluation_id = 1)
+            // Copy default statements
             $conn->query("INSERT INTO evaluation_statements (evaluation_id, statement, order_num)
                           SELECT $eval_id, statement, order_num FROM evaluation_statements WHERE evaluation_id = 1");
         }
 
-        // Custom statements (if any)
+        // Custom statements
         if (isset($_POST['statements']) && is_array($_POST['statements'])) {
             $stmt = $conn->prepare("INSERT INTO evaluation_statements (evaluation_id, statement, order_num) VALUES (?, ?, ?)");
             foreach ($_POST['statements'] as $order => $stmt_text) {
@@ -51,6 +53,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         }
 
+        // ────────────────────────────────────────────────────────────────────────
+        // EMAIL NOTIFICATIONS: Only Learners in the Class
+        // ────────────────────────────────────────────────────────────────────────
+       
+
+        // Get school name
+        $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+        $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+
+        // Teacher name for email
+        $teacher_name = $_SESSION['name'] ?? 'Your Teacher';
+
+        // Link to evaluations page (update later if you have a direct link to this specific evaluation)
+        $evalLink = "https://iskool.online/student_evaluations.php";
+
+        // Email template
+        $emailBody = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>New Evaluation Released</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; padding:0; font-family:Verdana, Tahoma, Arial, Helvetica, sans-serif; font-size:16px; line-height:1.6; }
+  .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); }
+  .header { padding:40px; text-align:center; background:#161b22; color:#ffffff; }
+  .header h1 { margin:0; font-size:32px; font-weight:bold; color:#4fd1c5; }
+  .body { padding:40px; background:#1e1e1e; color:#c9d1d9; }
+  .body h2 { color:#4fd1c5; font-size:24px; font-weight:bold; margin-bottom:20px; }
+  .body p { margin:0 0 18px; }
+  .highlight { background:#2d333b; padding:20px; border-radius:12px; margin:25px 0; border-left:5px solid #4fd1c5; }
+  .cta-button {
+    display:inline-block; padding:16px 32px; margin:30px 0;
+    background:#4fd1c5; color:#000; font-weight:bold; border-radius:30px;
+    text-decoration:none; font-size:17px;
+  }
+  .footer { padding:30px; text-align:center; background:#161b22; font-size:14px; color:#8b949e; }
+  @media (prefers-color-scheme: light) {
+    .wrapper { background:#ffffff; }
+    .header, .body, .footer { background:#ffffff; color:#333333; }
+    .body h2 { color:#4fd1c5; }
+    .highlight { background:#f0f9ff; border-left-color:#4fd1c5; }
+    .footer { color:#666666; border-top:1px solid #eeeeee; }
+  }
+  @media (max-width: 480px) {
+    .header, .body, .footer { padding:30px 20px !important; }
+    .header h1 { font-size:28px !important; }
+    .body h2 { font-size:22px !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header"><h1>iSkool</h1></div>
+    <div class="body">
+      <h2>New Teacher Evaluation</h2>
+      <p>Hi {{name}},</p>
+      <p>A new evaluation has been released by your teacher.</p>
+      
+      <div class="highlight">
+        <strong>' . htmlspecialchars($title) . '</strong><br><br>
+        ' . (!empty($description) ? nl2br(htmlspecialchars($description)) . '<br><br>' : '') . '
+        <em>Released by: ' . htmlspecialchars($teacher_name) . '</em>
+      </div>
+
+      <p style="text-align:center;">
+        <a href="' . $evalLink . '" class="cta-button">Complete Evaluation</a>
+      </p>
+
+      <p>Your honest feedback helps improve teaching. Thank you!</p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>' . htmlspecialchars($schoolName) . '</p>
+      <p>Powered by iSkool © ' . date("Y") . '</p>
+    </div>
+  </div>
+</body>
+</html>';
+
+        // Get all learners in the class
+        $learnersQuery = $conn->prepare("
+            SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+            FROM users u
+            JOIN class_students cs ON u.email = cs.student_email
+            WHERE cs.class_id = ? AND u.role = 'learner'
+        ");
+        $learnersQuery->bind_param("i", $class_id);
+        $learnersQuery->execute();
+        $learnersResult = $learnersQuery->get_result();
+
+        while ($learner = $learnersResult->fetch_assoc()) {
+            try {
+                $mail = new PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = 'iskool.online';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'noreply@iskool.online';
+                $mail->Password   = 'ogeQkRitRfdy';
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port       = 465;
+
+                $mail->setFrom('noreply@iskool.online', $schoolName);
+                $mail->addAddress($learner['email']);
+                $mail->isHTML(true);
+                $mail->Subject = "New Evaluation: " . $title;
+
+                // Personalize name
+                $personalizedBody = str_replace('{{name}}', htmlspecialchars($learner['name']), $emailBody);
+                $mail->Body = $personalizedBody;
+
+                $mail->send();
+            } catch (Exception $e) {
+                error_log("Evaluation email failed (learner {$learner['email']}): " . $mail->ErrorInfo);
+            }
+        }
+        $learnersQuery->close();
+
+        // Success message
         $message = "Evaluation released successfully!";
         echo '<script>
             document.addEventListener("DOMContentLoaded", () => {

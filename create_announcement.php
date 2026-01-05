@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->Host       = 'iskool.online';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'noreply@iskool.online';
-                $mail->Password   = 'oxJTVc6HXRSc';
+                $mail->Password   = 'ogeQkRitRfdy';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
                 $mail->Port       = 465;
 
@@ -146,112 +146,78 @@ $mail->Body = '
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>iSkool Notification</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #121212;
-    font-family: "Inter", system-ui, Arial, sans-serif;
-    color: #ffffff;
+  :root { color-scheme: light dark; }
+  body { 
+    margin:0; 
+    padding:0; 
+    font-family:Verdana, Tahoma, Arial, Helvetica, sans-serif; 
+    font-size:16px;
+    line-height:1.6;
   }
-  .email-wrapper {
-    max-width: 600px;
-    margin: 30px auto;
-    background-color: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  .wrapper { 
+    max-width:600px; 
+    margin:30px auto; 
+    border-radius:16px; 
+    overflow:hidden; 
+    box-shadow:0 8px 25px rgba(0,0,0,0.2); 
   }
-  .email-header {
-    background-color: #161b22;
-    padding: 30px;
-    text-align: center;
+  .header { 
+    padding:40px; 
+    text-align:center; 
+    background:#161b22; 
+    color:#ffffff; 
   }
-  .email-header h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1db954; /* accent color */
+  .header h1 { 
+    margin:0; 
+    font-size:32px; 
+    font-weight:bold; 
+    color:#1db954; 
   }
-  .email-header p {
-    margin: 6px 0 0;
-    font-size: 14px;
-    color: #c9d1d9;
+  .body { 
+    padding:40px; 
+    background:#1e1e1e; 
+    color:#c9d1d9; 
   }
-  .email-body {
-    padding: 30px;
-    text-align: left;
+  .body h2 { 
+    color:#1db954; 
+    font-size:24px; 
+    font-weight:bold; 
+    margin-bottom:20px; 
   }
-  .email-body p {
-    margin: 0 0 15px;
-    font-size: 16px;
-    line-height: 1.6;
-    color: #c9d1d9;
+  .footer { 
+    padding:30px; 
+    text-align:center; 
+    background:#161b22; 
+    font-size:14px; 
+    color:#8b949e; 
   }
-  .email-body h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #1db954;
-    margin: 0 0 20px;
-  }
-  .cta-button {
-    display: inline-block;
-    padding: 12px 25px;
-    margin-top: 15px;
-    background-color: #1db954;
-    color: #121212;
-    font-weight: 600;
-    border-radius: 25px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-  }
-  .cta-button:hover {
-    background-color: #1ed760;
-  }
-  .email-footer {
-    background-color: #161b22;
-    padding: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: #8b949e;
+  @media (prefers-color-scheme: light) {
+    .wrapper { background:#ffffff; }
+    .header, .body, .footer { background:#ffffff; color:#333333; }
+    .body h2 { color:#1db954; }
+    .footer { color:#666666; border-top:1px solid #eeeeee; }
   }
   @media (max-width: 480px) {
-    .email-wrapper {
-      margin: 20px 10px;
-    }
-    .email-header, .email-body, .email-footer {
-      padding: 20px;
-    }
-    .email-header h1 {
-      font-size: 24px;
-    }
-    .email-body h2 {
-      font-size: 20px;
-    }
-    .email-body p {
-      font-size: 15px;
-    }
+    .header, .body, .footer { padding:30px 20px !important; }
+    .header h1 { font-size:28px !important; }
+    .body h2 { font-size:22px !important; }
   }
 </style>
 </head>
 <body>
-  <div class="email-wrapper">
-    <div class="email-header">
-      <h1>📢 iSkool</h1>
-      <p>Your Digital Classroom</p>
-    </div>
-    <div class="email-body">
-      <p>Hello ' . htmlspecialchars($recipient['name']) . ',</p>
+  <div class="wrapper">
+    <div class="header"><h1>iSkool</h1></div>
+    <div class="body">
       <h2>' . htmlspecialchars($title) . '</h2>
       <p>' . nl2br(htmlspecialchars($msg)) . '</p>
-     
     </div>
-    <div class="email-footer">
-      <p>Author: ' . htmlspecialchars($name) . '</p>
+    <div class="footer">
+      <p>From: ' . htmlspecialchars($name) . '</p>
       <p>Best regards, ' . htmlspecialchars($schoolName) . '</p>
-      <p>Powered by iSkool &copy; 2025</p>
+      <p>Powered by iSkool © ' . date("Y") . '</p>
     </div>
   </div>
 </body>

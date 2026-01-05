@@ -1,0 +1,17 @@
+Array
+(
+    [subscription] => Array
+        (
+            [endpoint] => https://fcm.googleapis.com/fcm/send/dQWSAESXT-A:APA91bGRUiW0zGVacprFild2H1lqrtTCPBUEtmgf0swCMkILUQmewli5g5AcKTXNNWLKhpWIAaELBV66Q_QB2fcLCX2qkbPgpfnEKj9vqXl3LljHHhjkCp0pnmEsjQijY6aA3rjrltA4
+            [expirationTime] => 
+            [keys] => Array
+                (
+                    [p256dh] => BIdnQLxngot-Q7iRrNL-6mfFYgmghRRIadJzXM_qDnEOiMyP1ajxt1ZDtaLtDkhkcB2HNrx_fhdcW4yMyWGBY3Y
+                    [auth] => dC0dccvFbHd48hLchhuYxA
+                )
+
+        )
+
+    [email] => lungile.buthelezi@iskool.demo
+    [role] => learner
+)

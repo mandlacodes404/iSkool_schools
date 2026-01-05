@@ -5,6 +5,9 @@ require_once 'config.php';
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php"); exit();
 }
+  require 'vendor/autoload.php';
+       use PHPMailer\PHPMailer\PHPMailer;
+       use PHPMailer\PHPMailer\Exception;
 
 $learner_email = $_SESSION['email'];
 $current_year_id = $conn->query("SELECT id FROM academic_years WHERE is_current = 1")->fetch_assoc()['id'];
@@ -41,12 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($title) || empty($message_text) || empty($tagged_teachers)) {
         $message = "Please fill all fields and tag at least one teacher.";
     } else {
-        // Get learner's full name from session or DB
+        // Get learner's full name from session
         $learner_name = $_SESSION['name'] ?? '';
         $learner_surname = $_SESSION['surname'] ?? '';
         $creator_full_name = $anonymous ? NULL : trim($learner_name . ' ' . $learner_surname);
 
-        // Insert discussion with creator_name
+        // Insert discussion
         $stmt = $conn->prepare("
             INSERT INTO class_discussions 
             (title, initial_message, class_id, creator_email, creator_anonymous, creator_name) 
@@ -65,8 +68,176 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->close();
 
-        // EMAIL NOTIFICATIONS REMOVED FOR NOW
+        // ────────────────────────────────────────────────────────────────────────
+        // EMAIL NOTIFICATIONS: Classmates + Tagged Teachers
+        // ────────────────────────────────────────────────────────────────────────
+      
 
+        // Get school name from database name
+        $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+        $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+
+        // Creator display name for email
+        $creatorDisplay = $anonymous 
+            ? 'Anonymous Learner' 
+            : trim($learner_name . ' ' . $learner_surname);
+
+        // Link to discussions page (change later if you have a direct discussion view)
+        $viewLink = "https://iskool.online/discussions.php";
+
+        // Reusable email template function
+        $emailTemplate = function($recipientName, $recipientRole) use ($title, $message_text, $creatorDisplay, $viewLink, $schoolName) {
+            $greeting = $recipientRole === 'teacher' ? 'Dear Teacher' : 'Hi ' . htmlspecialchars($recipientName);
+            $introLine = $recipientRole === 'teacher' 
+                ? 'A learner in your class has started a new discussion and tagged you:' 
+                : 'A new discussion has been started in your class:';
+
+            $extraLine = $recipientRole === 'teacher' 
+                ? '<p>Please check and respond when you can.</p>' 
+                : '<p>Your teachers have been notified.</p>';
+
+            return '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>New Discussion on iSkool</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; padding:0; font-family:Verdana, Tahoma, Arial, Helvetica, sans-serif; font-size:16px; line-height:1.6; }
+  .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); }
+  .header { padding:40px; text-align:center; background:#161b22; color:#ffffff; }
+  .header h1 { margin:0; font-size:32px; font-weight:bold; color:#4fd1c5; }
+  .body { padding:40px; background:#1e1e1e; color:#c9d1d9; }
+  .body h2 { color:#4fd1c5; font-size:24px; font-weight:bold; margin-bottom:20px; }
+  .body p { margin:0 0 18px; }
+  .highlight { background:#2d333b; padding:20px; border-radius:12px; margin:25px 0; border-left:5px solid #4fd1c5; }
+  .cta-button {
+    display:inline-block; padding:16px 32px; margin:30px 0;
+    background:#4fd1c5; color:#000; font-weight:bold; border-radius:30px;
+    text-decoration:none; font-size:17px;
+  }
+  .footer { padding:30px; text-align:center; background:#161b22; font-size:14px; color:#8b949e; }
+  @media (prefers-color-scheme: light) {
+    .wrapper { background:#ffffff; }
+    .header, .body, .footer { background:#ffffff; color:#333333; }
+    .body h2 { color:#4fd1c5; }
+    .highlight { background:#f0f9ff; border-left-color:#4fd1c5; }
+    .footer { color:#666666; border-top:1px solid #eeeeee; }
+  }
+  @media (max-width: 480px) {
+    .header, .body, .footer { padding:30px 20px !important; }
+    .header h1 { font-size:28px !important; }
+    .body h2 { font-size:22px !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header"><h1>iSkool</h1></div>
+    <div class="body">
+      <h2>New Class Discussion</h2>
+      <p>' . $greeting . ',</p>
+      <p>' . $introLine . '</p>
+      
+      <div class="highlight">
+        <strong>' . htmlspecialchars($title) . '</strong><br><br>
+        ' . nl2br(htmlspecialchars($message_text)) . '<br><br>
+        <em>— ' . htmlspecialchars($creatorDisplay) . '</em>
+      </div>
+
+      <p style="text-align:center;">
+        <a href="' . $viewLink . '" class="cta-button">View Discussion</a>
+      </p>
+
+      ' . $extraLine . '
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>' . htmlspecialchars($schoolName) . '</p>
+      <p>Powered by iSkool © ' . date("Y") . '</p>
+    </div>
+  </div>
+</body>
+</html>';
+        };
+
+        // 1. Notify classmates (exclude creator)
+        $classmatesQuery = $conn->prepare("
+            SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+            FROM users u
+            JOIN class_students cs ON u.email = cs.student_email
+            WHERE cs.class_id = ? AND u.role = 'learner' AND u.email != ?
+        ");
+        $classmatesQuery->bind_param("is", $class_id, $learner_email);
+        $classmatesQuery->execute();
+        $classmatesResult = $classmatesQuery->get_result();
+
+        while ($recipient = $classmatesResult->fetch_assoc()) {
+            try {
+                $mail = new PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = 'iskool.online';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'noreply@iskool.online';
+                $mail->Password   = 'ogeQkRitRfdy';
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port       = 465;
+
+                $mail->setFrom('noreply@iskool.online', $schoolName);
+                $mail->addAddress($recipient['email']);
+                $mail->isHTML(true);
+                $mail->Subject = "New Discussion: " . $title;
+                $mail->Body = $emailTemplate($recipient['name'], 'learner');
+
+                $mail->send();
+            } catch (Exception $e) {
+                error_log("Discussion email failed (classmate {$recipient['email']}): " . $mail->ErrorInfo);
+            }
+        }
+        $classmatesQuery->close();
+
+        // 2. Notify tagged teachers
+        if (!empty($tagged_teachers)) {
+            $placeholders = str_repeat('?,', count($tagged_teachers) - 1) . '?';
+            $types = str_repeat('s', count($tagged_teachers));
+
+            $teacherQuery = $conn->prepare("
+                SELECT email, COALESCE(name, 'Teacher') AS name
+                FROM users
+                WHERE email IN ($placeholders) AND role = 'teacher'
+            ");
+            $teacherQuery->bind_param($types, ...$tagged_teachers);
+            $teacherQuery->execute();
+            $teachersResult = $teacherQuery->get_result();
+
+            while ($teacher = $teachersResult->fetch_assoc()) {
+                try {
+                    $mail = new PHPMailer(true);
+                    $mail->isSMTP();
+                    $mail->Host       = 'iskool.online';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'noreply@iskool.online';
+                    $mail->Password   = 'ogeQkRitRfdy';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                    $mail->Port       = 465;
+
+                    $mail->setFrom('noreply@iskool.online', $schoolName);
+                    $mail->addAddress($teacher['email']);
+                    $mail->isHTML(true);
+                    $mail->Subject = "You've been tagged: " . $title;
+                    $mail->Body = $emailTemplate($teacher['name'], 'teacher');
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("Discussion email failed (teacher {$teacher['email']}): " . $mail->ErrorInfo);
+                }
+            }
+            $teacherQuery->close();
+        }
+
+        // Success message and redirect
         $message = "Discussion created successfully!";
         echo '<script>
             document.addEventListener("DOMContentLoaded", () => {

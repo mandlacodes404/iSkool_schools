@@ -8,7 +8,7 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user' || !isset($_GET['quiz_id'])) {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_GET['quiz_id'])) {
     header("Location: index.php");
     exit();
 }
@@ -114,9 +114,8 @@ if ($status === 'Closed') {
 
 // School and class access control
 $classCheck = $conn->prepare("
-    SELECT c.id AS class_id, c.school_id
+    SELECT cs.class_id
     FROM class_students cs
-    JOIN classes c ON cs.class_id = c.id
     WHERE cs.student_email = ?
     LIMIT 1
 ");
@@ -206,12 +205,11 @@ if (!$classInfo) {
 }
 
 $learnerClassId = $classInfo['class_id'];
-$learnerSchoolId = $classInfo['school_id'];
+
 
 $verifyQuiz = $conn->prepare("
-    SELECT q.class_id, c.school_id 
+    SELECT q.class_id 
     FROM quizzes q
-    JOIN classes c ON q.class_id = c.id
     WHERE q.id = ?
 ");
 $verifyQuiz->bind_param("i", $quizId);
@@ -223,7 +221,7 @@ if (!$verifyQuiz->execute()) {
 $quizCheck = $verifyQuiz->get_result()->fetch_assoc();
 $verifyQuiz->close();
 
-if (!$quizCheck || $quizCheck['class_id'] != $learnerClassId || $quizCheck['school_id'] != $learnerSchoolId) {
+if (!$quizCheck || $quizCheck['class_id'] != $learnerClassId) {
 ?>
 <!DOCTYPE html>
 <html lang="en">

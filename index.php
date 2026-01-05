@@ -21,10 +21,23 @@
  * @since       2025-12-14
  * @link        https://iskool.online
  */
+
+// ────────────────────── MAKE SESSION LAST 30 DAYS (Improved) ──────────────────────
+ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
+
+session_set_cookie_params([
+    'lifetime' => 2592000,  // 30 days
+    'path'     => '/',
+    'domain'   => '',       // leave empty = current domain only
+    'secure'   => false,    // change to true when you go live with HTTPS
+    'httponly' => true,     // prevents JavaScript access (more secure)
+    'samesite' => 'Lax'     // good balance of security and usability
+]);
+// ───────────────────────────────────────────────────────────────────────────────────
+
 session_start();
 
-
-require_once 'config.php';   
+require_once 'config.php';      
 
 $errors = [
     'login' => $_SESSION['login_error'] ?? '',
@@ -58,28 +71,37 @@ if ($result && $row = $result->fetch_assoc()) {
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#161b22">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Application - iSkool</title>
-    <!-- Font Awesome for icons -->
+    <link rel="manifest" href="https://iskool.online/manifest.json">
+   
+    <meta name="theme-color" content="#1E1C37">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Google Fonts -->
+    
+   
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
     /* --- Animation Styles --- */
     body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: #0d1117;
-        font-family: 'Nunito', sans-serif;
-        color: #fff;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #0E0E0E; /* Gemini Neutral Black */
+    font-family: 'Inter', 'Nunito', sans-serif;
+    color: #E3E3E3;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+
+    
+}
 
     /* Glowing Logo Loader */
     #animation-wrapper {
@@ -96,10 +118,18 @@ if ($result && $row = $result->fetch_assoc()) {
     }
 
     #loader-logo {
-        font-size: 6rem;
-        font-weight: 900;
-        color: #ffffff;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#loader-logo svg {
+    /* Precise size for the splash screen logo */
+    width: 100px; 
+    height: 100px;
+    /* This makes it appear smoothly when the page first hits */
+    animation: reveal 0.6s ease-out;
+}
 
     /* Branding Styles */
     .branding {
@@ -170,28 +200,30 @@ if ($result && $row = $result->fetch_assoc()) {
         }
     }
 
-    /* --- Login/Register Styles --- */
-    body.show-container {
-        background: #161b22;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
+    
+
 #iskool-brand {
-    display: none;
-    text-align: center;
-    font-size: 42px;
-    font-weight: 900;
-    color: #ffffff;
-    margin: 0 auto 30px auto;
-    max-width: 95vw;
-    white-space: nowrap;
-    padding: 0 10px;
-    /* Auto-shrink text to fit */
-    font-size: clamp(28px, 8vw, 48px);   /* This is magic */
-    /* or use this older method if you want: */
-    /* font-size: 8vw; */  /* Scales perfectly with screen width */
+    display: flex; /* Changed from 'none' to 'flex' to center the SVG */
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px auto;
+    padding: 10px;
+    /* This ensures it scales nicely on mobile */
+    width: 100%;
+}
+
+#iskool-brand svg {
+    width: 80px; 
+    height: 80px;
+    /* Optional: very subtle glow to make the white pop against the dark box */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+}
+/* Make sure the container displays properly on mobile */
+@media (max-width: 480px) {
+    #iskool-brand svg {
+        width: 65px;
+        height: 65px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -208,17 +240,20 @@ if ($result && $row = $result->fetch_assoc()) {
     }
 }
 
-    .container {
-    display: none;
+ .container {
+    background: transparent;
+    box-shadow: none;
     width: 90%;
-    max-width: 420px;          /* Slightly wider for long school names */
-    margin: 0 auto;
-    padding: 20px 0;           /* Only vertical padding, no side padding = clean edges */
-    text-align: center;
+    max-width: 400px;
+
+    /* ADD THIS — hides it without shifting anything */
+    opacity: 0;
+    transition: opacity 1s ease;
 }
 
 .container.show {
-    display: block;
+    opacity: 1;
+    /* Keep your existing animation if you want the slide */
     animation: fadeSlideIn 1.2s ease forwards;
 }
 
@@ -260,35 +295,46 @@ if ($result && $row = $result->fetch_assoc()) {
         font-size: 14px;
     }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        background: #0d1117;
-        color: #fff;
-        border: 1.5px solid white;
-        padding: 12px 20px;
-        border-radius: 9999px;
-        box-sizing: border-box;
-        font-size: 14px;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+ input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+    background: #1E1F20;
+    color: #fff;
+    border: 1px solid transparent;
+    padding: 12px 45px;         /* ← KEY CHANGE: less vertical (12px), more horizontal (32px) */
+    border-radius: 30px;        /* ← Slightly larger radius for smoother long pill */
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    width: 100%;                /* Ensures they stretch full width nicely */
+}
 
-    input:focus,
-    select:focus {
-        border-color: #00bfff;
-        box-shadow: 0 0 6px #00bfff;
-        outline: none;
-    }
+input:focus, select:focus {
+    background: #1E1F20;
+    border-color: #444746;
+    box-shadow: 0 0 0 1px #444746;
+    outline: none;
+}
 
-    button {
-        border-radius: 9999px;
-    }
+  button {
+    background: #ffffff; 
+    color: #131314;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 24px; /* Matches the pills */
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+    transition: background 0.2s ease;
+}
 
-    button:hover {
-        background: #dddddd;
-    }
+button:hover {
+    background: #F1F1F1;
+}
 
     a {
         color: white;
@@ -319,10 +365,10 @@ if ($result && $row = $result->fetch_assoc()) {
     }
 
     h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        
-    }
+    font-weight: 400; /* Gemini uses lighter font weights for headings */
+    font-size: 24px;
+    color: #E3E3E3;
+}
 
     /* NEW: Title + Name + Surname Row */
     .name-row {
@@ -477,7 +523,17 @@ if ($result && $row = $result->fetch_assoc()) {
 <body>
     <!-- Animation wrapper -->
     <div id="animation-wrapper">
-       <div id="loader-logo">iSkool</div>
+       <div id="loader-logo">
+    <div id="loader-logo">
+    <div id="loader-logo">
+    <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50,10 C58,10 63,15 63,22 C63,29 58,34 50,34 C42,34 37,29 37,22 C37,15 42,10 50,10 Z" fill="white"/>
+        
+        <path d="M38,44 C38,39 42,37 50,37 C58,37 62,39 62,44 V82 C62,87 58,90 50,90 C42,90 38,87 38,82 V44 Z" fill="white" />
+    </svg>
+</div>
+</div>
+</div>
         <div class="branding">
             <!--<span>from</span> -->
             <span>v1.0.0</span>
@@ -489,7 +545,12 @@ if ($result && $row = $result->fetch_assoc()) {
         <div class="form-box <?= isActiveForm('login', $activeForm); ?>" id="login-form">
             <form action="login_register.php" method="post">
                 <!-- iSkool brand text -->
-                <div id="iskool-brand">iSkool</div>
+                <div id="iskool-brand">
+                    <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                     <path d="M50,10 C58,10 63,15 63,22 C63,29 58,34 50,34 C42,34 37,29 37,22 C37,15 42,10 50,10 Z" fill="white"/>
+                      <path d="M38,44 C38,39 42,37 50,37 C58,37 62,39 62,44 V82 C62,87 58,90 50,90 C42,90 38,87 38,82 V44 Z" fill="white" />
+                     </svg>
+                </div>
                 <?= showError($errors['login']); ?>
                 <input type="email" name="email" placeholder="Email" required><br>
                 <div class="password-wrapper">
@@ -551,6 +612,15 @@ if ($result && $row = $result->fetch_assoc()) {
                 <label for="age">Age:</label>
                 <input type="number" name="age" id="age" min="3" max="120" required placeholder="Enter your age"><br>
                 <input type="text" name="access_key" placeholder="Enter Access Key" required><br>
+
+                <!-- NEW: Notification Agreement Checkbox -->
+                <div style="margin: 15px 0; text-align: left; padding: 0 20px;">
+                    <label style="font-size: 13px; color: #ccc; cursor: pointer;">
+                        <input type="checkbox" name="agree_notifications" required style="margin-right: 8px;">
+                        I agree to receive notifications for important updates, replies, announcements, and grades.
+                    </label>
+                </div>
+
                 <button type="submit" name="register">Register</button>
                 <p>Already have an account? 
                    <a href="#" onclick="document.getElementById('register-form').classList.remove('active'); document.getElementById('login-form').classList.add('active'); return false;">Login</a>
@@ -573,16 +643,31 @@ if ($result && $row = $result->fetch_assoc()) {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const iskoolBrand = document.getElementById('iskool-brand');
-        const timeout = window.innerWidth <= 480 ? 4000 : 5000;
+        // Set to 2.0 seconds (2000ms)
+         const timeout = 2000;
         setTimeout(() => {
-            animationWrapper.style.opacity = '0';
-            setTimeout(() => {
-                animationWrapper.style.display = 'none';
-                iskoolBrand.style.display = 'block';
-                container.classList.add('show');
-                document.body.classList.add('show-container');
-            }, 800);
-        }, timeout);
+    animationWrapper.style.opacity = '0';
+    setTimeout(() => {
+        animationWrapper.style.display = 'none';
+
+        // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
+        <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+            // Logged in → go straight to dashboard
+            <?php if ($_SESSION['role'] === 'teacher'): ?>
+                window.location.href = 'teacher_dashboard.php';
+            <?php else: ?>
+                window.location.href = 'learner_dashboard.php';
+            <?php endif; ?>
+        <?php else: ?>
+            // Not logged in → show login form
+            iskoolBrand.style.display = 'flex';
+            container.classList.add('show');
+           
+        <?php endif; ?>
+        // ─────────────────────────────────────────────────────
+
+          }, 800);
+         }, timeout);
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const activeForm = "<?= $activeForm ?>";
@@ -615,53 +700,7 @@ if ($result && $row = $result->fetch_assoc()) {
             .then(reg => console.log("Service Worker registered", reg))
             .catch(err => console.error("Service Worker failed", err));
     }
-    function subscribeToPush() {
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-            if ('<?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>' === 'true' && 'PushManager' in window) {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.pushManager.getSubscription().then(subscription => {
-                        if (!subscription) {
-                            const publicVapidKey = "BKPh1RLmANqolINDIuClVLOGrlfeQSG7o2pgZAS25xgD_rIp-LOPTWIzEu--bdOsFTi3QPNzpQ5mmzT__OEWmJc";
-                            Notification.requestPermission().then(permission => {
-                                if (permission === 'granted') {
-                                    registration.pushManager.subscribe({
-                                        userVisibleOnly: true,
-                                        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-                                    }).then(sub => {
-                                        console.log('Subscribed:', sub);
-                                        fetch('subscribe_push.php', {
-                                            method: 'POST',
-                                            body: JSON.stringify({ subscription: sub }),
-                                            headers: { 'Content-Type': 'application/json' }
-                                        }).then(response => response.json())
-                                            .then(data => console.log('Server response:', data))
-                                            .catch(err => console.error('Fetch error:', err));
-                                    }).catch(err => console.error('Subscription error:', err));
-                                } else {
-                                    console.warn('Notification permission denied');
-                                }
-                            });
-                        }
-                    });
-                });
-            } else {
-                console.log('Not logged in or PushManager unavailable');
-            }
-        } else {
-            console.log('Not a PWA installation, skipping push subscription');
-        }
-    }
-    window.addEventListener('load', () => subscribeToPush());
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-    }
+ 
     </script>
 </body>
 </html>

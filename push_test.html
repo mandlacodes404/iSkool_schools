@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iSkool Push Test</title>
+</head>
+<body>
+    <h1>iSkool Push Test Page</h1>
+    <button onclick="subscribe()">Subscribe to Push</button>
+    <pre id="output"></pre>
+
+    <script>
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function subscribe() {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            const reg = await navigator.serviceWorker.register('service-worker.js');
+            console.log('SW registered');
+
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array('BKPh1RLmANqolINDIuClVLOGrlfeQSG7o2pgZAS25xgD_rIp-LOPTWIzEu--bdOsFTi3QPNzpQ5mmzT__OEWmJc')
+            });
+
+            document.getElementById('output').textContent = JSON.stringify(sub, null, 2);
+            console.log('Subscribed:', sub);
+        } else {
+            alert('Push not supported');
+        }
+    }
+    </script>
+</body>
+</html>

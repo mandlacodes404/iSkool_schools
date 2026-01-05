@@ -192,6 +192,7 @@ if (!empty($joinedClassIds)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
  <style>
@@ -1039,6 +1040,14 @@ iframe {
 </div>
 
 <div class="main-content">
+    <button onclick="
+    alert('Button Test: OK'); 
+    if(!window.isSecureContext) { alert('ERROR: You are not using HTTPS!'); }
+    if(!('serviceWorker' in navigator)) { alert('ERROR: No Service Worker support!'); }
+    requestIphonePush();
+" style="padding: 20px; background: orange; color: black; font-weight: bold;">
+    ACTIVATE PUSH
+</button>
     <div class="main-header">
     <button id="mobileToggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
@@ -1322,5 +1331,110 @@ document.addEventListener("DOMContentLoaded", function () {
     </a>
 </nav>
 
+<script>
+/**
+ * 1. CORE UTILITIES
+ * These must be at the top of the script
+ */
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+// Global function to send the subscription to your server log
+function sendToCatcher(subscription) {
+    console.log('Sending subscription to server...');
+    fetch('subscribe_push.php', {
+        method: 'POST',
+        body: JSON.stringify({
+            subscription: subscription,
+            email: '<?= addslashes($_SESSION['email']) ?>',
+            role: '<?= addslashes($_SESSION['role']) ?>'
+        }),
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Server response:', data);
+        alert('SUCCESS: iPhone Handshake Saved to Log!');
+        if(document.getElementById('pushPromptContainer')) {
+            document.getElementById('pushPromptContainer').style.display = 'none';
+        }
+    })
+    .catch(err => {
+        console.error('Catcher send failed:', err);
+        alert('Log Error: ' + err);
+    });
+}
+
+/**
+ * 2. IPHONE BUTTON ACTION
+ * This is what runs when you tap your orange button
+ */
+function requestIphonePush() {
+    console.log("Requesting permission...");
+    
+    if (!('serviceWorker' in navigator)) {
+        alert("Error: Service Worker not found.");
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array('BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w')
+                })
+                .then(subscription => {
+                    alert('Success! iPhone Registered.');
+                    sendToCatcher(subscription);
+                })
+                .catch(err => {
+                    alert('Subscription Failed: ' + err);
+                    console.error(err);
+                });
+            });
+        } else {
+            alert('Permission was: ' + permission + ". If denied, you must reset Safari settings.");
+        }
+    });
+}
+
+/**
+ * 3. AUTOMATIC CHECK ON LOAD
+ * Checks if the user is already subscribed when they open the dashboard
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    console.log('Push script initialized');
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.pushManager.getSubscription().then(existingSub => {
+                if (existingSub) {
+                    console.log('Already subscribed, refreshing log...');
+                    sendToCatcher(existingSub);
+                }
+            });
+        });
+    }
+
+    // --- Keep your existing Sidebar/Loader code below this line ---
+    const loader = document.getElementById("loaderOverlay");
+    const iframe = document.querySelector('iframe[name="mainFrame"]');
+    if (iframe) {
+        iframe.onload = function() { loader.style.display = "none"; };
+    }
+});
+
+function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }
+function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
+</script>
 </body>
 </html>

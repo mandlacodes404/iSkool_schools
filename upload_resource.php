@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
                         $mail->Host = 'iskool.online';
                         $mail->SMTPAuth = true;
                         $mail->Username = 'noreply@iskool.online';
-                        $mail->Password = 'oxJTVc6HXRSc';
+                        $mail->Password = 'ogeQkRitRfdy';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                         $mail->Port = 465;
 

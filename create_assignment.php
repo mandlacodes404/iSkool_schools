@@ -7,6 +7,10 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
+require 'vendor/autoload.php';
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
+    
 $email = $_SESSION['email'];
 
 // GET CURRENT ACADEMIC YEAR AUTOMATICALLY (NO SCHOOL_ID NEEDED)
@@ -33,7 +37,6 @@ $stmt->execute();
 $classResult = $stmt->get_result();
 $stmt->close();
 
-// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title       = trim($_POST['title']);
     $description = trim($_POST['description']);
@@ -42,15 +45,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // File upload
     $filePath = null;
+    $hasAttachment = false;
     if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = "assignment_Uploads/";
         if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
         $filename = time() . "_" . basename($_FILES['attachment']['name']);
         $filePath = $uploadDir . $filename;
-        move_uploaded_file($_FILES['attachment']['tmp_name'], $filePath);
+        if (move_uploaded_file($_FILES['attachment']['tmp_name'], $filePath)) {
+            $hasAttachment = true;
+            $attachmentName = basename($_FILES['attachment']['name']);
+        }
     }
 
-    // Insert assignment — no school_id, clean and simple
+    // Insert assignment
     $stmt = $conn->prepare("
         INSERT INTO assignments 
         (title, description, due_date, class_id, created_by, file_url, academic_year_id, term_number) 
@@ -67,7 +74,134 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $current_global_term
     );
     $stmt->execute();
+    $assignment_id = $stmt->insert_id;
     $stmt->close();
+
+    // ────────────────────────────────────────────────────────────────────────
+    // EMAIL NOTIFICATIONS: All Learners in the Class
+    // ────────────────────────────────────────────────────────────────────────
+    
+
+    // Get school name
+    $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
+    $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+
+    // Teacher name
+    $teacher_name = $_SESSION['name'] ?? 'Your Teacher';
+
+    // Format due date nicely
+    $formatted_due_date = date("l, F j, Y", strtotime($due_date));
+
+    // Link to assignments page (update later if you have a direct view)
+    $assignmentLink = "https://iskool.online/student_assignments.php";
+
+    // Email template
+    $emailBody = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>New Assignment Released</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; padding:0; font-family:Verdana, Tahoma, Arial, Helvetica, sans-serif; font-size:16px; line-height:1.6; }
+  .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); }
+  .header { padding:40px; text-align:center; background:#161b22; color:#ffffff; }
+  .header h1 { margin:0; font-size:32px; font-weight:bold; color:#4fd1c5; }
+  .body { padding:40px; background:#1e1e1e; color:#c9d1d9; }
+  .body h2 { color:#4fd1c5; font-size:24px; font-weight:bold; margin-bottom:20px; }
+  .body p { margin:0 0 18px; }
+  .highlight { background:#2d333b; padding:20px; border-radius:12px; margin:25px 0; border-left:5px solid #4fd1c5; }
+  .cta-button {
+    display:inline-block; padding:16px 32px; margin:30px 0;
+    background:#4fd1c5; color:#000; font-weight:bold; border-radius:30px;
+    text-decoration:none; font-size:17px;
+  }
+  .footer { padding:30px; text-align:center; background:#161b22; font-size:14px; color:#8b949e; }
+  .due-date { font-weight:bold; color:#4fd1c5; font-size:18px; }
+  @media (prefers-color-scheme: light) {
+    .wrapper { background:#ffffff; }
+    .header, .body, .footer { background:#ffffff; color:#333333; }
+    .body h2 { color:#4fd1c5; }
+    .highlight { background:#f0f9ff; border-left-color:#4fd1c5; }
+    .footer { color:#666666; border-top:1px solid #eeeeee; }
+  }
+  @media (max-width: 480px) {
+    .header, .body, .footer { padding:30px 20px !important; }
+    .header h1 { font-size:28px !important; }
+    .body h2 { font-size:22px !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header"><h1>iSkool</h1></div>
+    <div class="body">
+      <h2>New Assignment</h2>
+      <p>Hi {{name}},</p>
+      <p>A new assignment has been released in your class.</p>
+      
+      <div class="highlight">
+        <strong>' . htmlspecialchars($title) . '</strong><br><br>
+        ' . nl2br(htmlspecialchars($description)) . '<br><br>
+        <span class="due-date">Due Date: ' . $formatted_due_date . '</span>' .
+        ($hasAttachment ? '<br><br><em>📎 Attachment included: ' . htmlspecialchars($attachmentName) . '</em>' : '') . '<br><br>
+        <em>Assigned by: ' . htmlspecialchars($teacher_name) . '</em>
+      </div>
+
+      <p style="text-align:center;">
+        <a href="' . $assignmentLink . '" class="cta-button">View Assignment</a>
+      </p>
+
+      <p>Please complete and submit before the due date. Good luck!</p>
+    </div>
+    <div class="footer">
+      <p>Best regards,<br>' . htmlspecialchars($schoolName) . '</p>
+      <p>Powered by iSkool © ' . date("Y") . '</p>
+    </div>
+  </div>
+</body>
+</html>';
+
+    // Get all learners in the class
+    $learnersQuery = $conn->prepare("
+        SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+        FROM users u
+        JOIN class_students cs ON u.email = cs.student_email
+        WHERE cs.class_id = ? AND u.role = 'learner'
+    ");
+    $learnersQuery->bind_param("i", $class_id);
+    $learnersQuery->execute();
+    $learnersResult = $learnersQuery->get_result();
+
+    while ($learner = $learnersResult->fetch_assoc()) {
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = 'iskool.online';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'noreply@iskool.online';
+            $mail->Password   = 'ogeQkRitRfdy';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+
+            $mail->setFrom('noreply@iskool.online', $schoolName);
+            $mail->addAddress($learner['email']);
+            $mail->isHTML(true);
+            $mail->Subject = "New Assignment: " . $title;
+
+            // Personalize the name
+            $personalizedBody = str_replace('{{name}}', htmlspecialchars($learner['name']), $emailBody);
+            $mail->Body = $personalizedBody;
+
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Assignment email failed (learner {$learner['email']}): " . $mail->ErrorInfo);
+        }
+    }
+    $learnersQuery->close();
 
     // Success feedback
     echo '<script>
