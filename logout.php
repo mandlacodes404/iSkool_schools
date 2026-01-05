@@ -1,7 +1,27 @@
 <?php
 session_start();
-session_unset(); // Clear all session variables
-session_destroy(); // End the session
-header("Location: index.php"); // Redirect back to login
+require_once 'config.php';
+
+// 1. Delete the long-session token from the database
+if (isset($_COOKIE['remember_me'])) {
+    $parts = explode(':', $_COOKIE['remember_me']);
+    if (count($parts) === 2) {
+        $selector = $parts[0];
+        $stmt = $conn->prepare("DELETE FROM user_tokens WHERE selector = ?");
+        $stmt->bind_param("s", $selector);
+        $stmt->execute();
+        $stmt->close();
+    }
+    
+    // 2. Clear the cookie from the browser
+    setcookie('remember_me', '', time() - 3600, '/', '', false, true);
+}
+
+// 3. Standard session clear
+session_unset(); 
+session_destroy(); 
+
+// 4. Redirect back to login
+header("Location: index.php"); 
 exit();
 ?>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'remember_me_functions.php'; // --- ADDED THIS ---
 
 // --- Registration Logic ---
 if (isset($_POST['register'])) {
@@ -9,13 +10,12 @@ if (isset($_POST['register'])) {
     $surname    = trim($_POST['surname'] ?? '');
     $email      = trim($_POST['email']);
     $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role       = $_POST['role'];           // learner, teacher, parent, school_admin
+    $role       = $_POST['role'];
     $access_key = trim($_POST['access_key']);
     $gender     = $_POST['gender'];
     $age        = (int)$_POST['age'];
     $defaultPic = 'uploads/default_profile.png';
 
-    // Block global admin self-registration
     if ($role === 'admin') {
         $_SESSION['register_error'] = 'Admin accounts can only be created by the system.';
         $_SESSION['active_form'] = 'register';
@@ -23,7 +23,6 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    // Basic validation
     if (empty($title) || empty($first_name) || empty($surname) || empty($email) || empty($role) || empty($access_key)) {
         $_SESSION['register_error'] = 'All fields are required.';
         $_SESSION['active_form'] = 'register';
@@ -31,7 +30,6 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    // Validate access key (must exist, match role, and not be used)
     $keyStmt = $conn->prepare("SELECT id FROM access_keys WHERE role = ? AND access_key = ?");
     $keyStmt->bind_param("ss", $role, $access_key);
     $keyStmt->execute();
@@ -45,9 +43,6 @@ if (isset($_POST['register'])) {
     }
     $keyStmt->close();
 
-   
-
-    // Check if email already exists
     $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $check->bind_param("s", $email);
     $check->execute();
@@ -60,7 +55,6 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    // Create user
     $stmt = $conn->prepare("
         INSERT INTO users 
         (title, name, surname, email, password, role, profile_pic, gender, age)
@@ -106,7 +100,12 @@ if (isset($_POST['login'])) {
             $_SESSION['profile_pic'] = $profile_pic ?: 'uploads/default_profile.png';
             $_SESSION['role']        = $role;
 
-            // Correct redirects for your roles
+            // --- REMEMBER ME LOGIC ---
+            if (isset($_POST['remember_me'])) {
+                create_remember_me_token($conn, $email);
+            }
+            // -------------------------
+
             switch ($role) {
                 case 'admin':
                     $_SESSION['admin'] = true;

@@ -22,22 +22,10 @@
  * @link        https://iskool.online
  */
 
-// ────────────────────── MAKE SESSION LAST 30 DAYS (Improved) ──────────────────────
-ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
-
-session_set_cookie_params([
-    'lifetime' => 2592000,  // 30 days
-    'path'     => '/',
-    'domain'   => '',       // leave empty = current domain only
-    'secure'   => false,    // change to true when you go live with HTTPS
-    'httponly' => true,     // prevents JavaScript access (more secure)
-    'samesite' => 'Lax'     // good balance of security and usability
-]);
-// ───────────────────────────────────────────────────────────────────────────────────
-
 session_start();
 
-require_once 'config.php';      
+require_once 'config.php'; 
+require_once 'check_remember_me.php';     
 
 $errors = [
     'login' => $_SESSION['login_error'] ?? '',
@@ -557,6 +545,10 @@ button:hover {
                     <input type="password" name="password" id="login-password" placeholder="Password" required>
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
                 </div>
+                 <div style="display: flex; align-items: center; margin: 10px 0 15px 10px; text-align: left;">
+                  <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer;">
+                  <label for="remember_me" style="font-size: 13px; color: #ccc; cursor: pointer; user-select: none;">Keep me logged in</label>
+                </div>
                 <button type="submit" name="login">Login</button>
                 <p>Don't have an account? 
                    <a href="#" onclick="document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.add('active'); return false;">Register</a>
@@ -592,7 +584,6 @@ button:hover {
                     <input type="password" name="password" id="register-password" placeholder="Password" required>
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
                 </div>
-                
                 
                 <label>Select Role:</label>
                 <select name="role" required>
