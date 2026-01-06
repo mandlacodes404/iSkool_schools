@@ -112,288 +112,339 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($disc['title']) ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #e0e6f0;
-            --accent: #4fd1c5;
-            --my-bubble: #4fd1c5;
-            --other-bubble: #21262d;
-            --border: #30363d;
-            --preview-bg: rgba(255,255,255,0.05);
-        }
-        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; }
+   <style>
+    :root {
+    --bg: #131314;           /* Gemini's deep charcoal */
+    --card: #1e1f20;         /* Surface color */
+    --text: #e3e3e3;         /* Soft white text */
+    --accent: #8ab4f8;       /* Gemini Blue */
+    --my-bubble: #1a232e;    /* Tonal blue for your messages */
+    --other-bubble: #1e1f20; /* Tonal gray for others */
+    --border: #444746;       /* Subtle border */
+    --preview-bg: rgba(255,255,255,0.05);
+}
 
-        .anonymity-note {
-            background: rgba(79,209,197,0.1);
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border);
-            color: #c9d1d9;
-        }
+/* 1. Base Layout */
+body { 
+    font-family: 'Inter', 'Nunito', sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    margin: 0; 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+}
 
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+/* 2. Top Navigation Bar */
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(19, 19, 20, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
 
-        .message {
-            display: flex;
-            max-width: 80%;
-            gap: 10px;
-            position: relative;
-            animation: fadeIn 0.3s ease;
-            padding: 8px;
-            border-radius: 18px;
-            transition: background 0.2s;
-        }
-        .message:hover { background: rgba(255,255,255,0.03); }
-        .message.me { align-self: flex-end; flex-direction: row-reverse; }
-        .message .avatar {
-            width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0;
-        }
-        .bubble {
-            background: var(--other-bubble);
-            padding: 12px 16px;
-            border-radius: 18px;
-            border-top-left-radius: 4px;
-            max-width: 100%;
-            word-wrap: break-word;
-            cursor: pointer;
-        }
-        .message.me .bubble {
-            background: var(--my-bubble);
-            color: black;
-            border-top-right-radius: 4px;
-            border-top-left-radius: 18px;
-        }
-        .message.active .bubble {
-            background: rgba(79,209,197,0.2) !important;
-        }
+.page-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+}
 
-        .attachment {
-            margin-top: 10px;
-            max-width: 300px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        .attachment img {
-            width: 100%;
-            display: block;
-            border-radius: 12px;
-        }
-        .attachment a {
-            display: block;
-            background: rgba(79,209,197,0.15);
-            padding: 14px;
-            text-align: center;
-            color: var(--accent);
-            font-weight: 600;
-            text-decoration: none;
-            border-top: 1px solid var(--border);
-        }
+.back-btn, .info-btn {
+    background: transparent;
+    color: var(--text);
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
 
-        .reply-preview {
-            background: var(--preview-bg);
-            padding: 8px 12px;
-            border-left: 4px solid var(--accent);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .reply-preview .author { font-weight: 600; font-size: 13px; color: var(--accent); }
-        .reply-preview .text { margin-top: 4px; color: #b0b7c1; }
+.back-btn:hover, .info-btn:hover { background: rgba(255,255,255,0.05); }
+.info-btn { color: var(--accent); }
 
-        .message-info {
-            font-size: 12px;
-            color: #8b949e;
-            margin-top: 5px;
-            text-align: right;
-        }
-        .message.me .message-info { text-align: left; }
+/* Privacy Modal Styles */
+.info-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 10002;
+    align-items: center;
+    justify-content: center;
+}
 
-        .message-actions {
-            position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card);
-            padding: 10px 16px;
-            border-radius: 30px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            display: none;
-            gap: 20px;
-            z-index: 10;
-            white-space: nowrap;
-        }
-        .message.active .message-actions {
-            display: flex;
-        }
-        .message-actions button {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 15px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .message-actions button:hover {
-            background: rgba(255,255,255,0.1);
-        }
+.info-modal-content {
+    background: var(--card);
+    padding: 24px;
+    border-radius: 20px;
+    max-width: 300px;
+    text-align: center;
+    border: 1px solid var(--border);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-        .input-bar {
-            background: var(--card);
-            padding: 15px 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .input-wrapper {
-            flex: 1;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 8px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .input-wrapper textarea {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            resize: none;
-            min-height: 20px;
-            max-height: 100px;
-            font-size: 15px;
-            outline: none;
-        }
-        .attach-btn { cursor: pointer; font-size: 20px; color: var(--accent); }
-        .input-bar button {
-            background: var(--accent);
-            color: black;
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        .input-bar .anon-checkbox { font-size: 14px; white-space: nowrap; }
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 
-        #filePreview {
-            display: none;
-            background: rgba(79,209,197,0.1);
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            align-items: center;
-            gap: 8px;
-        }
-        #filePreview img {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        #filePreview span {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #filePreview button {
-            background: none;
-            border: none;
-            color: #f85149;
-            cursor: pointer;
-            font-size: 18px;
-        }
+.info-modal-content h3 { margin-top: 0; color: var(--accent); font-size: 18px; }
+.info-modal-content p { font-size: 14px; color: #9aa0a6; line-height: 1.5; }
+.info-modal-content button {
+    background: var(--accent);
+    color: #131314;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+}
 
-                        .anonymity-note {
-            background: rgba(79,209,197,0.1);
-            padding: 12px 16px;
-            text-align: center;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border);
-            color: #c9d1d9;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
+/* 3. Chat Area */
+.chat-container {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    overflow-y: auto;
+    padding: 10px 20px 30px 20px; /* Adjusted top padding */
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    scroll-behavior: smooth;
+}
 
-        .back-btn {
-            position: absolute;
-            left: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: var(--text);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease;
-            z-index: 10; /* ensures button is on top */
-        }
+/* 4. Messages & Bubbles */
+.message {
+    display: flex;
+    max-width: 85%;
+    gap: 12px;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
 
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .anonymity-text {
-            flex: 1;
-            font-size: 14px;
-            padding-left: 52px;  /* ← This is the key fix: pushes text right of button */
-            padding-right: 52px; /* optional: symmetric on right side */
-            box-sizing: border-box;
-        }
+.message.me { align-self: flex-end; flex-direction: row-reverse; }
 
-        /* Hide back button on desktop */
-        @media (min-width: 769px) {
-            .back-btn {
-                display: none;
-            }
-            .anonymity-text {
-                padding-left: 0;   /* no need for padding on desktop */
-                padding-right: 0;
-            }
-        }
+.message .avatar {
+    width: 32px; height: 32px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 1px solid var(--border);
+}
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .chat-container { padding: 15px; } .message { max-width: 90%; } .input-bar { padding: 12px; } }
-    </style>
+.bubble {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 22px;
+    font-size: 15px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    cursor: pointer;
+}
+
+.message.me .bubble {
+    background: var(--my-bubble);
+    border: 1px solid #3c4043;
+    color: #d2e3fc;
+}
+
+.message.active .bubble {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* 5. Attachments & Previews */
+.attachment {
+    margin-top: 10px;
+    max-width: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.attachment img { width: 100%; display: block; }
+
+.attachment a {
+    display: block;
+    background: rgba(138, 180, 248, 0.1);
+    padding: 12px;
+    text-align: center;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.reply-preview {
+    background: var(--preview-bg);
+    padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.message-info {
+    font-size: 11px;
+    color: #80868b;
+    margin-top: 6px;
+    padding: 0 10px;
+}
+
+/* 6. Action Menu (The floating Reply/Report) */
+.message-actions {
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d2e31;
+    border: 1px solid var(--border);
+    padding: 6px;
+    border-radius: 12px;
+    display: none;
+    gap: 8px;
+    z-index: 100;
+}
+
+.message.active .message-actions { display: flex; }
+
+.message-actions button {
+    background: transparent;
+    border: none;
+    color: #e3e3e3;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-actions button:hover { background: rgba(255,255,255,0.1); }
+
+/* 7. Input Bar (The Pill) */
+.input-bar {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    background: var(--bg);
+}
+
+#replyForm {
+    max-width: 800px;
+    background: #282a2d;
+    border-radius: 28px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+}
+
+#replyForm:focus-within { border-color: #5f6368; }
+
+.input-wrapper { flex: 1; }
+
+textarea {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text) !important;
+    font-size: 15px !important;
+    outline: none !important;
+    width: 100%;
+}
+
+.attach-btn { color: #9aa0a6; font-size: 18px; }
+
+.input-bar button[type="submit"] {
+    background: transparent;
+    color: var(--accent);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 8. Report Modal */
+#reportForm {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    z-index: 10001;
+}
+
+/* 9. RESPONSIVE / MOBILE */
+@media (max-width: 768px) {
+    /* Since we have a sticky top-nav, we ensure chat doesn't hide behind it */
+    .top-nav {
+        padding: 8px 12px;
+    }
+    
+    .page-title {
+        font-size: 14px; /* Slightly smaller for mobile screens */
+    }
+
+    .chat-container { 
+        padding: 10px 10px 20px 10px; 
+    } 
+    
+    .message { max-width: 95%; } /* Give messages more room on small screens */
+    .bubble { padding: 12px 14px; font-size: 14px; }
+    
+    .input-bar { padding: 10px; }
+    #replyForm { border-radius: 20px; gap: 8px; }
+    
+    .anon-checkbox label { display: none; } /* Show only the checkbox to save space */
+}
+
+@media (min-width: 769px) {
+    /* On desktop, we can make the navigation feel more integrated */
+    .top-nav {
+        padding: 15px 40px;
+    }
+}
+   </style>
 </head>
 <body>
-    <div class="anonymity-note">
+    <div class="top-nav">
     <button class="back-btn" onclick="goBackToDiscussions()">
         <i class="fas fa-chevron-left"></i>
     </button>
-    <span class="anonymity-text">
-        <strong></strong> Questions can be anonymous, but the tagged teacher can see names for moderation.
-    </span>
+    <div class="page-title">Discussion</div>
+    <button class="info-btn" onclick="toggleInfoModal()">
+        <i class="fas fa-info-circle"></i>
+    </button>
+</div>
+
+<div id="infoModal" class="info-modal" onclick="toggleInfoModal()">
+    <div class="info-modal-content" onclick="event.stopPropagation()">
+        <h3>Privacy & Anonymity</h3>
+        <p>Questions can be anonymous to classmates, but the tagged teacher can always see names for moderation purposes.</p>
+        <button onclick="toggleInfoModal()">Got it</button>
+    </div>
 </div>
 
     <?php if (isset($report_msg)): ?>
@@ -550,6 +601,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     </div>
 
     <script>
+        function toggleInfoModal() {
+    const modal = document.getElementById('infoModal');
+    modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+}
         function toggleActions(messageElement) {
             document.querySelectorAll('.message').forEach(m => m.classList.remove('active'));
             messageElement.classList.add('active');

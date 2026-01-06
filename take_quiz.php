@@ -6,6 +6,14 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
 session_start();
+// ────────────────────── UPDATED MOBILE DETECTION ──────────────────────
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+$is_mobile_ua = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/i", $user_agent);
+$is_mobile_get = (isset($_GET['mobile']) && $_GET['mobile'] == 'true');
+
+// If either is true, we are in Mobile App mode
+$isMobileApp = ($is_mobile_ua || $is_mobile_get);
+// ──────────────────────────────────────────────────────────────────────
 require_once 'config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_GET['quiz_id'])) {
@@ -98,6 +106,33 @@ if ($status === 'Closed') {
         .container {
             max-width: 600px;
         }
+
+        /* Only show the mobile exit button when in App Mode */
+.mobile-exit-nav {
+    display: none; 
+}
+
+<?php if ($isMobileApp): ?>
+.mobile-exit-nav {
+    display: block;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.btn-exit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+<?php endif; ?>
     </style>
 </head>
 <body>
@@ -528,18 +563,39 @@ $query->close();
             transform: scale(1.05);
         }
 
-        label {
-            display: block;
-            padding: 8px 0;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
+        /* --- APP MODE OVERRIDES --- */
+<?php if ($isMobileApp): ?>
+body { padding: 0 !important; margin: 0 !important; background-color: #000 !important; }
+.container { max-width: 100% !important; width: 100% !important; margin: 0 !important; border-radius: 0 !important; border: none !important; padding: 10px !important; }
+#timer { position: sticky !important; top: 0 !important; width: 100%; border-radius: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+<?php endif; ?>
 
-        input[type="radio"] {
-            margin-right: 10px;
-            cursor: pointer;
-        }
+/* --- TAPPABLE CHOICE BUTTONS --- */
+.choice-label {
+    display: flex;
+    align-items: center;
+    background: #1e293b;
+    margin-bottom: 12px;
+    padding: 18px; /* Bigger padding for fingers */
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Highlight box when radio is checked */
+.choice-label:has(input[type="radio"]:checked) {
+    border-color: var(--accent-color);
+    background: rgba(79, 209, 197, 0.15);
+    box-shadow: 0 0 12px var(--shadow-glow);
+}
+
+.choice-label input[type="radio"] {
+    width: 22px; /* Bigger radio button */
+    height: 22px;
+    margin-right: 15px;
+    accent-color: var(--accent-color);
+}
 
         input[type="radio"]:checked + span {
             color: var(--answered-color);
@@ -706,6 +762,15 @@ $query->close();
 </head>
 <body>
     <div class="container">
+    <?php if ($isMobileApp): ?>
+    <div class="mobile-exit-nav">
+        <button type="button" onclick="confirmExit()" class="btn-exit">
+            <i class="fas fa-chevron-left"></i> Exit Quiz
+        </button>
+    </div>
+    <?php endif; ?>
+
+    
         <h2><i class="fas fa-poll"></i> <?= htmlspecialchars($quizTitle) ?></h2>
         <div class="quiz-info">
             Duration: <?= $quizDuration ?> minutes
@@ -738,14 +803,17 @@ $query->close();
                     <?php if (!empty($q['image'])): ?>
                         <img src="<?= htmlspecialchars($q['image']) ?>" alt="Question Image" class="quiz-image" onclick="openLightbox(this)">
                     <?php endif; ?>
-                    <?php foreach ($q['choices'] as $choice): ?>
-                        <div>
-                            <label>
-                                <input type="radio" name="answers[<?= $qid ?>]" value="<?= $choice['id'] ?>" aria-label="Option: <?= htmlspecialchars($choice['text']) ?>">
-                                <span><?= htmlspecialchars($choice['text']) ?></span>
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
+                   <?php foreach ($q['choices'] as $choice): ?>
+                           <div class="choice-wrapper">
+                               <label class="choice-label">
+                                 <input type="radio" 
+                                 name="answers[<?= $qid ?>]" 
+                                 value="<?= $choice['id'] ?>" 
+                                  aria-label="Option: <?= htmlspecialchars($choice['text']) ?>">
+                                 <span class="choice-text"><?= htmlspecialchars($choice['text']) ?></span>
+                           </label>
+                         </div>
+                  <?php endforeach; ?>
                 </div>
             <?php 
             $questionNumber++;
@@ -898,6 +966,18 @@ $query->close();
                 input.addEventListener('change', saveAnswers);
             });
         });
+
+        function confirmExit() {
+    if (confirm("Are you sure you want to exit? Your progress may not be saved.")) {
+        // If opened via target="_blank", this closes the tab and returns to the app
+        window.close();
+        
+        // Fallback if window.close() is blocked:
+        setTimeout(() => {
+            window.location.href = 'quiz_list.php';
+        }, 100);
+    }
+}
     </script>
 </body>
 </html>
