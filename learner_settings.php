@@ -184,6 +184,16 @@ $defaultPic = 'default.png';
         </div>
 
         <div class="settings-card">
+            <div style="background: rgba(79, 209, 197, 0.05); border-left: 4px solid var(--accent-color); padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+                 <h4 style="margin: 0 0 10px 0; color: var(--accent-color); font-size: 16px;">
+                   <i class="fas fa-lightbulb"></i> Notification Help
+                    </h4>
+                 <ol style="margin: 0; padding-left: 20px; font-size: 13px; color: #aaa; line-height: 1.6;">
+                     <li><strong>iPhone Users:</strong> You must "Add to Home Screen" first for notifications to work.</li>
+                    <li>Tap <strong>Sync Notifications</strong> below if you aren't getting quiz alerts.</li>
+                    <li>If prompted, select <strong>"Allow"</strong> on the system popup.</li>
+                 </ol>
+           </div>
             <ul>
                 <li>
                     <button id="updateProfileBtn">
@@ -202,6 +212,15 @@ $defaultPic = 'default.png';
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>
+
+                <li>
+                     <div style="margin-bottom: 8px; font-size: 13px; color: #aaa; padding: 0 5px;">
+                      <i class="fas fa-info-circle"></i> Not receiving alerts? Tap below to sync.
+                       </div>
+                       <button id="syncPushBtn" style="background-color: rgba(79, 209, 197, 0.1); border: 1px solid var(--accent-color); color: var(--accent-color);">
+                      <i class="fas fa-bell"></i> Sync Notifications
+                     </button>
+                </li>
             </ul>
         </div>
 
@@ -209,6 +228,7 @@ $defaultPic = 'default.png';
 document.addEventListener('DOMContentLoaded', function () {
     const updateBtn = document.getElementById('updateProfileBtn');
     const removeBtn = document.getElementById('removeProfileBtn');
+    const syncPushBtn = document.getElementById('syncPushBtn');
 
     updateBtn.addEventListener('click', () => {
         const iframeWindow = window.parent;
@@ -241,6 +261,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    syncPushBtn.addEventListener('click', () => {
+    // Check if the function exists on the parent dashboard
+    if (window.parent && typeof window.parent.requestIphonePush === 'function') {
+        window.parent.requestIphonePush();
+    } else {
+        alert("Notification system is currently unavailable.");
+    }
+});
 
     // THIS IS THE MAGIC LINE THAT FIXES DOUBLE UPLOAD
     // Listen for successful upload from the dashboard script and update sidebar instantly

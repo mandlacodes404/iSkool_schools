@@ -1040,14 +1040,7 @@ iframe {
 </div>
 
 <div class="main-content">
-    <button onclick="
-    alert('Button Test: OK'); 
-    if(!window.isSecureContext) { alert('ERROR: You are not using HTTPS!'); }
-    if(!('serviceWorker' in navigator)) { alert('ERROR: No Service Worker support!'); }
-    requestIphonePush();
-" style="padding: 20px; background: orange; color: black; font-weight: bold;">
-    ACTIVATE PUSH
-</button>
+  
     <div class="main-header">
     <button id="mobileToggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
@@ -1434,7 +1427,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
-    
+
     // --- Keep your existing Sidebar/Loader code below this line ---
     const loader = document.getElementById("loaderOverlay");
     const iframe = document.querySelector('iframe[name="mainFrame"]');
