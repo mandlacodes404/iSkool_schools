@@ -236,11 +236,19 @@ body {
     left: 0;
     height: 100vh;
     z-index: 5000;
-    overflow-y: auto;
+    
+    /* FIX STARTS HERE */
+    overflow-y: auto;   /* Keep vertical scrolling for long menus */
+    overflow-x: hidden; /* Prevents horizontal scroll entirely */
+    scrollbar-width: none; /* Hides scrollbar track in Firefox */
+    
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
     font-weight: 400;
 }
 
+.sidebar::-webkit-scrollbar {
+    display: none; /* Hides scrollbar track in Chrome/Safari */
+}
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
 }
@@ -758,10 +766,13 @@ iframe {
     }
 }
 
+/* Update this block to use an INSET shadow instead of a BORDER */
 .sidebar a.active,
 .sidebar button.active {
-    background: rgba(79, 209, 197, 0.2);
-    border-left: 4px solid var(--accent-color);
+    background: rgba(79, 209, 197, 0.15);
+    /* This creates the line inside the button so width doesn't change */
+    box-shadow: inset 4px 0 0 0 var(--accent-color); 
+    border-left: none; /* Remove the old border */
 }
 
 .sidebar span {
@@ -953,7 +964,7 @@ iframe {
 
 <div class="sidebar">
     <button class="desktop-toggle-btn" onclick="toggleDesktopSidebar()" title="Toggle Sidebar">
-        <i class="fas fa-chevron-right"></i>
+        <i class="fas fa-bars"></i>
     </button>
     <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;">
         <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture ?: 'default.png') ?>" 
@@ -1250,7 +1261,7 @@ iframe?.addEventListener('load', () => {
             const collapsed = sidebar.classList.contains("collapsed");
             localStorage.setItem("sidebarCollapsed", collapsed);
             document.querySelector(".desktop-toggle-btn i").className =
-                collapsed ? "fas fa-chevron-right" : "fas fa-chevron-left";
+                collapsed ? "fas fa-bars" : "fas fa-bars";
         }
     };
 
