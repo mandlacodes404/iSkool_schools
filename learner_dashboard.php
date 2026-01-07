@@ -1425,6 +1425,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // --- PASTE THE NEW CODE HERE ---
+    const sidebarLinks = document.querySelectorAll('.sidebar-links a, .sidebar-links button');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar(); 
+            }
+        });
+    });
+    
     // --- Keep your existing Sidebar/Loader code below this line ---
     const loader = document.getElementById("loaderOverlay");
     const iframe = document.querySelector('iframe[name="mainFrame"]');

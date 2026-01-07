@@ -111,12 +111,24 @@ if ($result && $row = $result->fetch_assoc()) {
     justify-content: center;
 }
 
+/* Update your existing #loader-logo svg style */
 #loader-logo svg {
-    /* Precise size for the splash screen logo */
     width: 120px; 
     height: 120px;
-    /* This makes it appear smoothly when the page first hits */
-    animation: reveal 0.6s ease-out;
+    /* Apply both the reveal effect and the infinite spin */
+    animation: reveal 0.6s ease-out, logo-spin 16s linear infinite;
+    /* This ensures it rotates around its own center */
+    transform-origin: center;
+}
+
+/* Add this new keyframe at the bottom of your animations */
+@keyframes logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
     /* Branding Styles */
@@ -512,8 +524,7 @@ button:hover {
     <!-- Animation wrapper -->
     <div id="animation-wrapper">
        <div id="loader-logo">
-    <div id="loader-logo">
-    <div id="loader-logo">
+    
    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="180" height="180" viewBox="0 0 1024.000000 1024.000000"
  preserveAspectRatio="xMidYMid meet">
@@ -608,8 +619,7 @@ l-86 18 -12 -26 c-7 -14 -47 -107 -90 -206 -43 -99 -94 -215 -114 -259 -20
 </div>
 </div>
         <div class="branding">
-            <!--<span>from</span> -->
-            <span>v1.0.0</span>
+           
         </div>
     </div>
     <!-- Login/Register container -->
@@ -805,8 +815,8 @@ l-86 18 -12 -26 c-7 -14 -47 -107 -90 -206 -43 -99 -94 -215 -114 -259 -20
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const iskoolBrand = document.getElementById('iskool-brand');
-        // Set to 2.0 seconds (2000ms)
-         const timeout = 2000;
+        // Set to 2.0 seconds (2500ms)
+         const timeout = 2500;
         setTimeout(() => {
     animationWrapper.style.opacity = '0';
     setTimeout(() => {

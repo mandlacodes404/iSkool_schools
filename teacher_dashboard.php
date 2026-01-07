@@ -410,25 +410,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Loader
+    // Loader + Mobile Auto-Close
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
-        link.addEventListener('click', () => loader.style.display = 'flex');
+        link.addEventListener('click', () => {
+            loader.style.display = 'flex';
+
+            // ADD THIS: Close sidebar on mobile when a link is clicked
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                // If you have an overlay style reset, add it here too:
+                if (overlay) overlay.style.display = 'none';
+            }
+        });
     });
     iframe?.addEventListener('load', () => loader.style.display = 'none');
 
-    // Toggle sidebar (mobile)
+   // Toggle sidebar (mobile)
     window.toggleSidebar = () => {
         if (window.innerWidth <= 768) {
-            sidebar.classList.toggle('active');
+            const isActive = sidebar.classList.toggle('active');
+            // Show overlay if sidebar is active, hide if not
+            if (overlay) {
+                overlay.style.display = isActive ? 'block' : 'none';
+            }
         }
     };
 
-    // Close when tapping overlay
-    overlay.addEventListener('click', () => {
+    // Close when tapping overlay (blurry part)
+    overlay?.addEventListener('click', () => {
         sidebar.classList.remove('active');
+        overlay.style.display = 'none'; // Hide the blurry part
     });
 
-    // Desktop collapse
+   
     // Desktop collapse - now with SVG rotation
 window.toggleDesktopSidebar = () => {
     if (window.innerWidth > 768) {
