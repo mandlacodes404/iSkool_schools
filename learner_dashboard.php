@@ -1108,6 +1108,14 @@ iframe {
 document.addEventListener("DOMContentLoaded", function () {
     const loader         = document.getElementById("loaderOverlay");
     const iframe         = document.querySelector('iframe[name="mainFrame"]');
+
+    // --- ADD THIS BIT HERE ---
+    // Check if we have a saved page from before the refresh
+    const savedPage = localStorage.getItem("lastLearnerPage");
+    if (savedPage && savedPage !== "learner_manual.php") {
+        iframe.src = savedPage;
+    }
+    // -------------------------
         // LOADER: Show when clicking any navigation link (sidebar + bottom nav)
     document.querySelectorAll('a[target="mainFrame"], #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
@@ -1116,9 +1124,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // LOADER: Hide when iframe finishes loading
-    iframe?.addEventListener('load', () => {
-        loader.style.display = 'none';
-    });
+   // LOADER: Hide when iframe finishes loading
+iframe?.addEventListener('load', () => {
+    // 1. Turn off the "Processing..." screen
+    loader.style.display = 'none';
+
+    // 2. Try to save the current page to memory
+    try {
+        const path = iframe.contentWindow.location.pathname;
+        const fullPage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
+    
+    if (fullPage && !fullPage.startsWith('blank.php')) {
+        localStorage.setItem("lastLearnerPage", fullPage);
+        
+        // For the sidebar highlighting, we still just need the name
+        const filename = iframe.contentWindow.location.pathname.split("/").pop();
+        setActive(filename);
+        }
+    } catch (e) { 
+        // If we load an external link, we can't "see" the filename, so we just ignore it
+        console.log("External page loaded, cannot save state."); 
+    }
+});
 
     // ────────────────────── ADD THIS BLOCK FOR SETTINGS ──────────────────────
     const settingsBtn = document.getElementById("settingsBtn");
@@ -1207,14 +1234,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const page = item.getAttribute("data-page");
             if (page) setActive(page);
         });
-    });
-
-    iframe?.addEventListener("load", () => {
-        try {
-            const path = iframe.contentWindow.location.pathname;
-            const filename = path.split("/").pop();
-            if (filename) setActive(filename);
-        } catch (e) { /* ignore cross-origin */ }
     });
 
     // SIDEBAR TOGGLES
@@ -1431,9 +1450,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Keep your existing Sidebar/Loader code below this line ---
     const loader = document.getElementById("loaderOverlay");
     const iframe = document.querySelector('iframe[name="mainFrame"]');
-    if (iframe) {
-        iframe.onload = function() { loader.style.display = "none"; };
-    }
+   
 });
 
 function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }
