@@ -570,27 +570,26 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         }
 
         .score-range {
-            position: relative;
-            width: 100%;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-        }
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background: #333;
+    border-radius: 6px;
+    margin: 40px 0 20px 0; /* Extra top margin for labels */
+}
+        .score-line {
+    position: absolute;
+    top: -15px; /* Move line above the bar */
+    bottom: -5px;
+    width: 2px;
+    transform: translateX(-50%);
+    z-index: 2;
+}
 
-        .score-range-line {
-            position: absolute;
-            top: 50%;
-            left: 10px;
-            right: 10px;
-            height: 2px;
-            background: #aaa;
-            transform: translateY(-50%);
-        }
+/* Color coding for the lines */
+#lowLine { background: #ff4d4d; }   /* Red for Lowest */
+#meanLine { background: #ffcc00; }  /* Yellow for Average */
+#highLine { background: #00ff00; }  /* Green for Highest */
 
         .score-marker {
             position: absolute;
@@ -603,23 +602,31 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             transition: left 0.3s ease;
         }
 
-        .score-line {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: #aaa;
-            transform: translateX(-50%);
-        }
+     .score-marker {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border: 3px solid #00aaff; /* Your specific score color */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    transition: left 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.score-line:hover {
+    width: 4px; /* Makes the line thicker on hover */
+    cursor: help;
+}
 
-        .score-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 5px;
-        }
+.score-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 10px;
+}
 
         @media (max-width: 768px) {
             .container {
@@ -739,7 +746,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                                         <?php if ($row['publish_marks'] == 1): ?>
                                             <p><strong>Score:</strong> <?= $row['score'] ?> / <?= $row['total'] ?></p>
                                             <p>
-                                                <strong>Review:</strong>
+                                                <strong>Performance overview:</strong>
                                                 <button class="viewDetails" data-quiz="<?= $row['quiz_id'] ?>" 
                                                         style="background:#00ffff1a;color:#00ffff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;">
                                                     View Details
@@ -784,132 +791,176 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         </div>
     </div>
 
-    <!-- Grade Modal -->
     <div id="gradeModal" class="modal">
-        <div class="modal-content">
-            <span id="closeModal" class="close-modal">×</span>
-            <div class="modal-header"><h2>Grade</h2></div>
-            <div class="score-circle-container">
-                <svg width="120" height="120">
-                    <circle class="score-circle-bg" cx="60" cy="60" r="50" />
-                    <circle class="score-circle-fg" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314" />
-                </svg>
-                <div class="score-circle-text" id="scoreText"></div>
-            </div>
-            <div class="score-out-of" id="scoreOutOf"></div>
-            <div class="score-range" id="scoreRange">
-                <div class="score-range-line"></div>
-                <div class="score-marker" id="scoreMarker"></div>
-                <div class="score-line" id="lowLine"></div>
-                <div class="score-line" id="meanLine"></div>
-                <div class="score-line" id="highLine"></div>
-            </div>
-            <div class="score-labels" id="scoreLabels"></div>
+    <div class="modal-content">
+        <span id="closeModal" class="close-modal">×</span>
+        <div class="modal-header"><h2>Performance Overview</h2></div>
+        
+        <div class="score-circle-container">
+            <svg width="120" height="120">
+                <circle class="score-circle-bg" cx="60" cy="60" r="50" />
+                <circle class="score-circle-fg" id="circleProgress" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314" />
+            </svg>
+            <div class="score-circle-text" id="scoreText">0%</div>
+        </div>
+        
+        <div id="scoreOutOf" style="color:#8b949e; margin-bottom:10px;"></div>
+
+        <div class="score-range">
+            <div class="score-marker" id="scoreMarker"></div>
+            <div class="score-line" id="lowLine" title="Lowest"></div>
+            <div class="score-line" id="meanLine" title="Average"></div>
+            <div class="score-line" id="highLine" title="Highest"></div>
+        </div>
+        
+        <div class="score-labels">
+            <span>0%</span>
+            <span>Class Distribution</span>
+            <span>100%</span>
+        </div>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
+        <div class="modal-description" style="text-align: left; color: #8b949e; font-size: 12px; line-height: 1.6; font-weight: normal;">
+            <p style="margin: 0 0 5px 0;"><i class="fas fa-info-circle" style="margin-right: 5px;"></i> <strong>How to read this:</strong></p>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li><span style="color: #00aaff;">●</span> The <b>Blue Dot</b> is your personal score.</li>
+                <li><span style="color: #ff4d4d;">|</span> The <b>Red Line</b> is the lowest score in class.</li>
+                <li><span style="color: #ffcc00;">|</span> The <b>Yellow Line</b> is the class average.</li>
+                <li><span style="color: #00ff00;">|</span> The <b>Green Line</b> is the highest score achieved.</li>
+            </ul>
         </div>
     </div>
+</div>
 
     <script>
-        function toggleTeacher(el) {
-            const section = el.closest('.teacher-section');
-            const content = section.querySelector('.teacher-quizzes');
-            const icon = section.querySelector('.toggle-teacher i');
-            content.classList.toggle('collapsed');
-            icon.style.transform = content.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+    function toggleTeacher(el) {
+        const section = el.closest('.teacher-section');
+        const content = section.querySelector('.teacher-quizzes');
+        const icon = section.querySelector('.toggle-teacher i');
+        content.classList.toggle('collapsed');
+        icon.style.transform = content.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+
+    function toggleDetails(btn) {
+        event.stopPropagation();
+        const details = btn.parentElement.nextElementSibling;
+        const expanded = details.style.display === 'block';
+        details.style.display = expanded ? 'none' : 'block';
+        btn.querySelector('i').classList.toggle('fa-chevron-down', expanded);
+        btn.querySelector('i').classList.toggle('fa-chevron-up', !expanded);
+    }
+
+    function toggleTermMarks(btn) {
+        const section = btn.closest('.teacher-section');
+        const original = section.querySelector('.original-view');
+        const termView = section.querySelector('.term-marks-view');
+        const isInTermMode = termView.style.display === 'block';
+
+        if (isInTermMode) {
+            original.style.display = 'block';
+            termView.style.display = 'none';
+            btn.innerHTML = '<i class="fas fa-calculator"></i> TERM MARKS';
+        } else {
+            original.style.display = 'none';
+            termView.style.display = 'block';
+            btn.innerHTML = '<i class="fas fa-list"></i> QUIZ LIST';
         }
+    }
 
-        function toggleDetails(btn) {
-            event.stopPropagation();
-            const details = btn.parentElement.nextElementSibling;
-            const expanded = details.style.display === 'block';
-            details.style.display = expanded ? 'none' : 'block';
-            btn.querySelector('i').classList.toggle('fa-chevron-down', expanded);
-            btn.querySelector('i').classList.toggle('fa-chevron-up', !expanded);
-        }
-
-        // FIXED: Now stays in term marks mode forever until user clicks back
-        function toggleTermMarks(btn) {
-            const section = btn.closest('.teacher-section');
-            const original = section.querySelector('.original-view');
-            const termView = section.querySelector('.term-marks-view');
-            const isInTermMode = termView.style.display === 'block';
-
-            if (isInTermMode) {
-                // Exit term mode → go back to quiz list
-                original.style.display = 'block';
-                termView.style.display = 'none';
-                btn.innerHTML = '<i class="fas fa-calculator"></i> TERM MARKS';
-            } else {
-                // Enter term mode → show report and stay here
-                original.style.display = 'none';
-                termView.style.display = 'block';
-                btn.innerHTML = '<i class="fas fa-list"></i> QUIZ LIST';
-            }
-        }
-
-        // Term selector: change term → reload page → stays in term marks mode!
-        document.querySelectorAll('.term-selector').forEach(sel => {
-            sel.addEventListener('change', function() {
-                const url = new URL(window.location);
-                url.searchParams.set('view_term', this.value);
-                window.location = url.toString();
-            });
+    document.querySelectorAll('.term-selector').forEach(sel => {
+        sel.addEventListener('change', function() {
+            const url = new URL(window.location);
+            url.searchParams.set('view_term', this.value);
+            window.location = url.toString();
         });
+    });
 
-        // Search functionality (unchanged)
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            let timeout;
-            searchInput.addEventListener('input', () => {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    const term = searchInput.value.toLowerCase();
-                    document.querySelectorAll('.teacher-section').forEach(sec => {
-                        const header = sec.querySelector('.teacher-header h3').textContent.toLowerCase();
-                        const quizzes = sec.querySelectorAll('.quiz');
-                        let visible = 0;
-                        quizzes.forEach(q => {
-                            const title = q.dataset.title.toLowerCase();
-                            const match = title.includes(term) || header.includes(term);
-                            q.style.display = match ? 'block' : 'none';
-                            if (match) visible++;
-                        });
-                        sec.style.display = visible ? 'block' : 'none';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        let timeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const term = searchInput.value.toLowerCase();
+                document.querySelectorAll('.teacher-section').forEach(sec => {
+                    const header = sec.querySelector('.teacher-header h3').textContent.toLowerCase();
+                    const quizzes = sec.querySelectorAll('.quiz');
+                    let visible = 0;
+                    quizzes.forEach(q => {
+                        const title = q.dataset.title.toLowerCase();
+                        const match = title.includes(term) || header.includes(term);
+                        q.style.display = match ? 'block' : 'none';
+                        if (match) visible++;
                     });
-                }, 300);
-            });
-        }
-
-        // Modal (unchanged)
-        const gradeModal = document.getElementById('gradeModal');
-        document.querySelectorAll('.viewDetails').forEach(btn => {
-            btn.addEventListener('click', e => {
-                e.stopPropagation();
-                const quizId = btn.dataset.quiz;
-                gradeModal.style.display = 'flex';
-                fetch(`get_quiz_stats.php?quiz_id=${quizId}&user_email=<?= urlencode($targetEmail) ?>`)
-                    .then(r => r.json())
-                    .then(data => {
-                        const percent = Math.round((data.user_score / data.total) * 100);
-                        const circ = 314;
-                        document.querySelector('.score-circle-fg').setAttribute('stroke-dashoffset', circ - (circ * percent / 100));
-                        document.getElementById('scoreText').textContent = data.user_score;
-                        document.getElementById('scoreOutOf').textContent = `Out of ${data.total} pts`;
-                        document.getElementById('scoreLabels').innerHTML = `
-                            <span>Low: ${data.min}</span>
-                            <span>Mean: ${Math.round(data.avg * 10)/10}</span>
-                            <span>High: ${data.max}</span>
-                        `;
-                    });
-            });
+                    sec.style.display = visible ? 'block' : 'none';
+                });
+            }, 300);
         });
+    }
 
-        document.getElementById('closeModal').onclick = () => gradeModal.style.display = 'none';
-        gradeModal.onclick = e => { if (e.target === gradeModal) gradeModal.style.display = 'none'; };
+    // --- MODAL & STATS LOGIC ---
+    const modal = document.getElementById('gradeModal');
+    const loader = document.getElementById('loaderOverlay');
 
-        function generateProgressReport() {
-    const url = `progress_report.php?learner=<?= urlencode($targetEmail) ?>`;
-    window.open(url, '_blank');
-}
-    </script>
+    document.querySelectorAll('.viewDetails').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const quizId = this.dataset.quiz;
+            loader.style.display = 'flex';
+
+            fetch(`get_quiz_stats.php?quiz_id=${quizId}`)
+                .then(response => response.json())
+                .then(data => {
+                    loader.style.display = 'none';
+                    if (data.error) {
+                        alert("Could not load stats.");
+                        return;
+                    }
+
+                    modal.style.display = 'flex';
+
+                    // Update Circle
+                    const circle = document.getElementById('circleProgress');
+                    const percentage = data.user_score;
+                    const offset = 314 - (314 * (percentage / 100));
+                    circle.style.strokeDashoffset = offset;
+
+                    // Update Text
+                    document.getElementById('scoreText').innerText = percentage + '%';
+                    document.getElementById('scoreOutOf').innerText = `You scored ${data.score_out_of}`;
+
+                    // Update Distribution Map
+                    document.getElementById('scoreMarker').style.left = percentage + '%';
+                    
+                    const lowL = document.getElementById('lowLine');
+                    const meanL = document.getElementById('meanLine');
+                    const highL = document.getElementById('highLine');
+
+                    lowL.style.left = data.min + '%';
+                    meanL.style.left = data.avg + '%';
+                    highL.style.left = data.max + '%';
+
+                    lowL.title = `Lowest: ${data.min}%`;
+                    meanL.title = `Average: ${data.avg}%`;
+                    highL.title = `Highest: ${data.max}%`;
+                })
+                .catch(err => {
+                    loader.style.display = 'none';
+                    console.error(err);
+                });
+        });
+    });
+
+    // Close Modal when clicking X or clicking outside the box
+    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal) modal.style.display = 'none';
+    };
+
+    function generateProgressReport() {
+        const url = `progress_report.php?learner=<?= urlencode($targetEmail) ?>`;
+        window.open(url, '_blank');
+    }
+</script>
 </body>
 </html>
