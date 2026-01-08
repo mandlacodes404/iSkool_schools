@@ -18,6 +18,19 @@ $stmt->bind_result($quizTitle, $duration, $attemptLimit);
 $stmt->fetch();
 $stmt->close();
 
+// --- ADD THIS: Check for existing attempt ---
+$attemptStatus = '';
+$stmt = $conn->prepare("SELECT status FROM quiz_attempts WHERE quiz_id = ? AND user_email = ? LIMIT 1");
+$stmt->bind_param("is", $quizId, $userEmail);
+$stmt->execute();
+$stmt->bind_result($attemptStatus);
+$stmt->fetch();
+$stmt->close();
+
+// Decide button text and instructions based on status
+$isContinuing = ($attemptStatus === 'in_progress');
+$buttonText = $isContinuing ? "Continue Quiz" : "Start Quiz";
+
 // ────────────────────── YOUR MOBILE DETECTION ──────────────────────
 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 $is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/i", $user_agent);
@@ -78,10 +91,11 @@ $is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/
 
     <h3 style="color:#c9d1d9;">⚠️ Please read carefully:</h3>
     <ul>
-        <li>You can only attempt this quiz <strong><?= $attemptLimit ?></strong> time(s).</li>
-        <li>Once you begin, the timer will start immediately.</li>
-        <li>Make sure your internet connection is stable.</li>
-        <li>Only click "Start Quiz" when you're ready.</li>
+    <?php if ($isContinuing): ?>
+        <li style="color: #e67e22;"><strong>Note:</strong> You have an unfinished attempt. You will resume from where you left off.</li>
+    <?php endif; ?>
+    <li>You can only attempt this quiz <strong><?= $attemptLimit ?></strong> time(s).</li>
+    <li>Once you begin, the timer will start immediately.</li>
     </ul>
 
     <form method="GET" action="take_quiz.php" <?= $is_mobile ? 'target="_blank"' : '' ?>>
@@ -91,7 +105,9 @@ $is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/
             <input type="hidden" name="mobile" value="true">
         <?php endif; ?>
         
-        <button type="submit" class="start-btn">✅ Start Quiz</button>
+      <button type="submit" class="start-btn" <?= $isContinuing ? 'style="background-color: #e67e22;"' : '' ?>>
+    <?= $buttonText ?>
+</button>
     </form>
 </div>
 

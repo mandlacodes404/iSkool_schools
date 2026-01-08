@@ -209,7 +209,7 @@ if (!empty($joinedClassIds)) {
     --shadow-glow: rgba(79, 209, 197, 0.3);
     --card-radius: 16px;
     --sidebar-width: 240px;
-    --sidebar-collapsed-width: 64px;
+    --sidebar-collapsed-width: 80px;
     --transition-speed: 0.3s;
 }
 

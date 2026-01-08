@@ -71,62 +71,60 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
+// ... (Your Step 1 code is fine) ...
+
 if (empty($joinedClassIds)) {
     $quizzes = false;
 } else {
-    // ── Step 2: Fetch all quizzes for those classes ──
+    // ── Step 2: Fetch all quizzes AND the learner's attempt status ──
     $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-    $types = str_repeat('i', count($joinedClassIds)) . 'i'; // last 'i' for academic_year_id
+    $types = str_repeat('i', count($joinedClassIds)) . 'is'; 
 
     $stmt = $conn->prepare("
-    SELECT 
-        q.id,
-        q.title AS quiz_title,
-        q.duration,
-        q.start_time,
-        q.status,
-        q.is_summative,
-        q.class_id,
-        q.created_by,
-        COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown Teacher'))) AS display_group,
-        u.title,
-        u.surname
-    FROM quizzes q
-    LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
-    LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
-    WHERE q.class_id IN ($placeholders)
-      AND q.academic_year_id = ?
-    ORDER BY display_group ASC, q.start_time DESC
-");
+        SELECT 
+            q.id,
+            q.title AS quiz_title,
+            q.duration,
+            q.start_time,
+            q.status AS quiz_db_status,
+            q.is_summative,
+            q.class_id,
+            COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher'))) AS display_group,
+            qa.status AS attempt_status
+        FROM quizzes q
+        LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
+        LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
+        LEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_email = ?
+        WHERE q.class_id IN ($placeholders)
+          AND q.academic_year_id = ?
+        ORDER BY display_group ASC, q.start_time DESC
+    ");
 
-    $bind_params = $joinedClassIds;
-    $bind_params[] = $current_academic_year_id;
-
+    $bind_params = array_merge([$studentEmail], $joinedClassIds, [$current_academic_year_id]);
     $stmt->bind_param($types, ...$bind_params);
     $stmt->execute();
-    $quizzes = $stmt->get_result();
+    $quizzesResult = $stmt->get_result(); // Named this to avoid confusion
     $stmt->close();
 
-    // ────────────────────────────────────────────────────────────────────────
-    //       Group quizzes by teacher  
-    // ────────────────────────────────────────────────────────────────────────
     $groupedQuizzes = [];
-$currentTime = date('Y-m-d H:i:s');
+    $currentTime = date('Y-m-d H:i:s');
 
-while ($row = $quizzes->fetch_assoc()) {
-    $group = trim($row['display_group'] ?? 'Unknown Teacher');
-    $group = $group === '' ? 'Unknown Teacher' : $group;
+    // ONLY ONE LOOP NEEDED HERE
+    while ($row = $quizzesResult->fetch_assoc()) {
+        $group = trim($row['display_group'] ?? 'Unknown Teacher');
+        $group = $group === '' ? 'Unknown Teacher' : $group;
 
-    $groupedQuizzes[$group][] = [
-        'id'           => $row['id'],
-        'title'        => $row['quiz_title'],
-        'duration'     => $row['duration'],
-        'start_time'   => $row['start_time'],
-        'status'       => $row['status'],
-        'is_summative' => !empty($row['is_summative']),
-        'current_time' => $currentTime
-    ];
-}
+        $groupedQuizzes[$group][] = [
+            'id'             => $row['id'],
+            'title'          => $row['quiz_title'],
+            'duration'       => $row['duration'],
+            'start_time'     => $row['start_time'],
+            'status'         => $row['quiz_db_status'], // Use the aliased name from SQL
+            'is_summative'   => !empty($row['is_summative']),
+            'attempt_status' => $row['attempt_status'],
+            'current_time'   => $currentTime
+        ];
+    }
 }
 ?>
 
@@ -506,25 +504,41 @@ while ($row = $quizzes->fetch_assoc()) {
                                         <i class="fas fa-chevron-down"></i>
                                     </button>
                                 </div>
-                                <div class="quiz-details">
-                                    <p><strong>Duration:</strong> <?= $quiz['duration'] ?> minutes</p>
-                                    <p>
-                                        <?php
-                                        $quizId = $quiz['id'];
-                                        if ($isScheduled && !$isDisabled) {
-                                            echo "<strong>Action:</strong> <a class='btn' href='quiz_instructions.php?quiz_id=$quizId'>Start Quiz</a>";
-                                        } elseif ($isScheduled) {
-                                            $startTimestamp = strtotime($quiz['start_time']) * 1000;
-                                            echo "<span><strong>Availability:</strong> <span class='countdown' data-start='$startTimestamp' id='countdown_$quizId'>Loading...</span></span>";
-                                        } else {
-                                            ?>
-                                            <strong>Action:</strong> 
-                                            <a class="btn <?= $isDisabled ? 'disabled' : '' ?>" href="quiz_instructions.php?quiz_id=<?= $quizId ?>" <?= $isDisabled ? "tabindex='-1' aria-disabled='true'" : "" ?>><?= $btnText ?></a>
-                                            <?php
-                                        }
-                                        ?>
-                                    </p>
-                                </div>
+                               <div class="quiz-details">
+    <p><strong>Duration:</strong> <?= $quiz['duration'] ?> minutes</p>
+    <p>
+        <strong>Action:</strong>
+        <?php
+        $quizId = $quiz['id'];
+        $attemptStatus = $quiz['attempt_status']; // From our new JOIN
+        $quizStatus = $quiz['status']; // Open, Closed, or Scheduled
+        $startTime = strtotime($quiz['start_time']);
+        $now = time();
+
+        // 1. If already submitted
+        if ($attemptStatus === 'submitted') {
+            echo "<a class='btn disabled' style='background: #27ae60; opacity: 1;'><i class='fas fa-check-double'></i> Completed</a>";
+        } 
+        // 2. If quiz is Closed
+        elseif ($quizStatus === 'Closed') {
+            echo "<a class='btn disabled'>Quiz Closed</a>";
+        }
+        // 3. If Scheduled but not yet time
+        elseif ($quizStatus === 'Scheduled' && $now < $startTime) {
+            $startTimestamp = $startTime * 1000;
+            echo "<span class='countdown' data-start='$startTimestamp' id='countdown_$quizId'>Loading...</span>";
+        }
+        // 4. If In Progress (Needs to continue)
+        elseif ($attemptStatus === 'in_progress') {
+            echo "<a class='btn' href='quiz_instructions.php?quiz_id=$quizId' style='background: #e67e22;'>Continue Quiz</a>";
+        }
+        // 5. Default: Start Quiz
+        else {
+            echo "<a class='btn' href='quiz_instructions.php?quiz_id=$quizId'>Start Quiz</a>";
+        }
+        ?>
+    </p>
+</div>
                             </div>
                         <?php endforeach; ?>
                     </div>

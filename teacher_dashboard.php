@@ -89,7 +89,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             --accent-color765: #4fd1c5;
             --card-radius: 16px;
             --sidebar-width: 240px;
-            --sidebar-collapsed-width: 64px;
+            --sidebar-collapsed-width: 80px;
             --transition-speed: 0.3s;
         }
         body { margin:0; font-family:'Nunito',sans-serif; font-weight:600; display:flex; height:100vh; background:var(--bg-color); color:var(--text-color); overflow:hidden; }

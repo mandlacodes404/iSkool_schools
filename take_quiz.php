@@ -344,6 +344,100 @@ if (!$attemptCheck->execute()) {
 }
 $attemptCheck->close();
 
+// ==========================================
+// START OF WORLD-CLASS TIMER LOGIC
+// ==========================================
+
+// 1. Check if an active attempt exists in the quiz_attempts table
+// We use 'start_time' to calculate the real ticking clock
+$checkAttempt = $conn->prepare("SELECT start_time, status FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+$checkAttempt->bind_param("si", $userEmail, $quizId);
+$checkAttempt->execute();
+$attemptData = $checkAttempt->get_result()->fetch_assoc();
+
+$currentTime = time();
+
+if (!$attemptData) {
+    // Brand new attempt: Record the start time NOW
+    // This ensures the clock starts the second the page first loads
+    $now = date('Y-m-d H:i:s');
+    $insertAttempt = $conn->prepare("INSERT INTO quiz_attempts (user_email, quiz_id, start_time, status) VALUES (?, ?, ?, 'in_progress')");
+    $insertAttempt->bind_param("sis", $userEmail, $quizId, $now);
+    $insertAttempt->execute();
+    
+    $startTime = $currentTime;
+} else {
+    // Resume existing attempt
+    if ($attemptData['status'] !== 'in_progress') {
+        // Production safety: If they already submitted, don't let them back in
+        header("Location: quiz_results.php?quiz_id=" . $quizId);
+        exit();
+    }
+    $startTime = strtotime($attemptData['start_time']);
+}
+
+// 2. Calculate the REAL time left
+$durationSeconds = $quizDuration * 60;
+$elapsedSeconds = $currentTime - $startTime;
+$actualTimeLeft = $durationSeconds - $elapsedSeconds;
+
+// ==========================================
+// THE SAFETY GATE (Replaces your old redirect)
+// ==========================================
+if ($actualTimeLeft <= 0) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Time Expired</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <style>
+            body { 
+                background: #0d1117; color: #e0e6f0; font-family: 'Inter', sans-serif; 
+                display: flex; justify-content: center; align-items: center; 
+                height: 100vh; margin: 0; text-align: center;
+            }
+            .container { max-width: 400px; padding: 20px; }
+            h1 { color: #f85149; }
+            .loader { 
+                border: 4px solid #1a202c; border-top: 4px solid #4fd1c5; 
+                border-radius: 50%; width: 40px; height: 40px; 
+                animation: spin 1s linear infinite; margin: 20px auto; 
+            }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1><i class="fas fa-hourglass-end"></i> Time is up!</h1>
+            <p>Your quiz session has ended. We are submitting your answers now...</p>
+            <div class="loader"></div>
+            
+            <form id="autoSubmitGate" action="submit_quiz.php" method="POST">
+                <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
+                <input type="hidden" name="start_time" value="<?= $startTime ?>">
+                </form>
+        </div>
+
+        <script>
+            // Short delay to let the user see the message before the POST happens
+            setTimeout(() => {
+                document.getElementById('autoSubmitGate').submit();
+            }, 2000);
+        </script>
+    </body>
+    </html>
+    <?php
+    exit(); 
+}
+// ==========================================
+
+// ==========================================
+// END OF WORLD-CLASS TIMER LOGIC
+// ==========================================
+
 // Fetch questions + choices
 $query = $conn->prepare("
     SELECT q.id AS question_id, q.question_text, q.image_path, q.points,
@@ -380,6 +474,19 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 $query->close();
+
+// --- FETCH SAVED ANSWERS FROM DATABASE ---
+$savedAnswers = [];
+$loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
+$loadStmt->bind_param("si", $userEmail, $quizId);
+$loadStmt->execute();
+$savedResult = $loadStmt->get_result();
+
+while ($row = $savedResult->fetch_assoc()) {
+    $savedAnswers[$row['question_id']] = $row['selected_choice_id'];
+}
+$loadStmt->close();
+// ------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -850,9 +957,9 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
     </div>
     <script>
-        let timeLeft = <?= $quizDuration * 60 ?>;
+        let timeLeft = <?= max(0, $actualTimeLeft) ?>;
         let oneMinuteAlertShown = false;
-        const totalTime = timeLeft;
+         const totalTime = <?= $quizDuration * 60 ?>;
         const timerCircle = document.querySelector('.timer-circle circle');
 
         function startTimer() {
@@ -918,17 +1025,47 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         }
 
         function loadAnswers() {
-            const answers = JSON.parse(sessionStorage.getItem('quizAnswers_<?= $quizId ?>') || '{}');
-            Object.keys(answers).forEach(questionId => {
-                const input = document.querySelector(`input[name="answers[${questionId}]"][value="${answers[questionId]}"]`);
-                if (input) input.checked = true;
-            });
-            const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
-            flaggedQuestions.forEach(questionId => {
-                const button = document.querySelector(`.question-block[data-question-id="${questionId}"] .flag-btn`);
-                if (button) button.classList.add('flagged');
-            });
+    // 1. Get answers from the Database (passed from PHP)
+    const dbAnswers = <?= json_encode($savedAnswers) ?>;
+    
+    // 2. Get answers from local session storage (as a backup)
+    const localAnswers = JSON.parse(sessionStorage.getItem('quizAnswers_<?= $quizId ?>') || '{}');
+
+    // Combine them: Database takes priority
+    const finalAnswers = { ...localAnswers, ...dbAnswers };
+
+    Object.keys(finalAnswers).forEach(questionId => {
+        const choiceId = finalAnswers[questionId];
+        const input = document.querySelector(`input[name="answers[${questionId}]"][value="${choiceId}"]`);
+        if (input) {
+            input.checked = true;
         }
+    });
+
+    // Handle flags (from session storage)
+    const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
+    flaggedQuestions.forEach(questionId => {
+        const button = document.querySelector(`.question-block[data-question-id="${questionId}"] .flag-btn`);
+        if (button) button.classList.add('flagged');
+    });
+}
+
+     function autoSaveToDatabase(questionId, choiceId) {
+    const formData = new FormData();
+    formData.append('quiz_id', <?= $quizId ?>);
+    formData.append('question_id', questionId);
+    formData.append('choice_id', choiceId);
+
+    fetch('save_progress.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Server Saved:", data.status);
+    })
+    .catch(err => console.error("Save failed:", err));
+}
 
         let zoomLevel = 1;
         function openLightbox(img) {
@@ -959,13 +1096,24 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
             }
         });
 
-        window.addEventListener('load', () => {
-            startTimer();
-            loadAnswers();
-            document.querySelectorAll('input[type="radio"]').forEach(input => {
-                input.addEventListener('change', saveAnswers);
-            });
+       window.addEventListener('load', () => {
+    startTimer();
+    loadAnswers();
+    
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+            // 1. Existing local save (sessionStorage)
+            saveAnswers(); 
+            
+            // 2. NEW: Database Auto-save
+            // This extracts the question ID from your input name "answers[123]"
+            const questionId = e.target.name.match(/answers\[(\d+)\]/)[1];
+            const choiceId = e.target.value;
+            
+            autoSaveToDatabase(questionId, choiceId);
         });
+    });
+});
 
         function confirmExit() {
     if (confirm("Are you sure you want to exit? Your progress may not be saved.")) {

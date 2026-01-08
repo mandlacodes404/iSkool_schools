@@ -80,12 +80,16 @@ if ($status === 'Closed') {
 </html>
 <?php exit(); }
 
-// --- GRADING LOGIC ---
+// --- UPDATED GRADING LOGIC (Database-First) ---
 $startTimePost = isset($_POST['start_time']) ? intval($_POST['start_time']) : 0;
 $endTime = time();
 $timeTaken = ($startTimePost > 0) ? max(0, $endTime - $startTimePost) : null;
 
-$sql = "SELECT q.id AS question_id, q.points, c.id AS correct_choice_id FROM quizquestions q JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND c.is_correct = 1";
+// 1. Fetch correct answers
+$sql = "SELECT q.id AS question_id, q.points, c.id AS correct_choice_id 
+        FROM quizquestions q 
+        JOIN choices c ON q.id = c.question_id 
+        WHERE q.quiz_id = ? AND c.is_correct = 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $quizId);
 $stmt->execute();
@@ -95,18 +99,44 @@ $correctAnswers = [];
 $totalPoints = 0;
 while ($row = $result->fetch_assoc()) {
     $qid = $row['question_id'];
-    $correctAnswers[$qid] = ['correct_choice_id' => $row['correct_choice_id'], 'points' => intval($row['points'])];
+    $correctAnswers[$qid] = [
+        'correct_choice_id' => $row['correct_choice_id'], 
+        'points' => intval($row['points'])
+    ];
     $totalPoints += intval($row['points']);
 }
 $stmt->close();
 
-$score = 0;
+// 2. FETCH ANSWERS: Use POST if available, otherwise fallback to Auto-Saved Database
+$finalSubmittedAnswers = [];
 if (isset($_POST['answers']) && is_array($_POST['answers'])) {
-    foreach ($correctAnswers as $questionId => $data) {
-        $submitted = $_POST['answers'][$questionId] ?? null;
-        if ($submitted == $data['correct_choice_id']) { $score += $data['points']; }
+    $finalSubmittedAnswers = $_POST['answers'];
+} else {
+    // Fallback: The student abandoned the quiz or timer hit zero without a POST
+    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
+    $savedStmt->bind_param("si", $userEmail, $quizId);
+    $savedStmt->execute();
+    $savedRes = $savedStmt->get_result();
+    while ($sRow = $savedRes->fetch_assoc()) {
+        $finalSubmittedAnswers[$sRow['question_id']] = $sRow['selected_choice_id'];
+    }
+    $savedStmt->close();
+}
+
+// 3. Calculate Score using the merged data
+$score = 0;
+foreach ($correctAnswers as $questionId => $data) {
+    $submitted = $finalSubmittedAnswers[$questionId] ?? null;
+    if ($submitted == $data['correct_choice_id']) { 
+        $score += $data['points']; 
     }
 }
+
+// --- UPDATE ATTEMPT STATUS ---
+$updateStatus = $conn->prepare("UPDATE quiz_attempts SET status = 'submitted' WHERE user_email = ? AND quiz_id = ?");
+$updateStatus->bind_param("si", $userEmail, $quizId);
+$updateStatus->execute();
+$updateStatus->close();
 
 // --- SAVE RESULTS TO DATABASE ---
 $insertResult = $conn->prepare("INSERT INTO quiz_results (user_email, quiz_id, score, total, time_taken, submitted_at) VALUES (?, ?, ?, ?, ?, NOW())");
@@ -115,11 +145,14 @@ $insertResult->execute();
 $resultId = $insertResult->insert_id;
 $insertResult->close();
 
-if (!empty($_POST['answers'])) {
+// 4. Unified Answer Save (Saves what we found in Step 2 to the permanent Results record)
+if (!empty($finalSubmittedAnswers)) {
     $values = []; $params = []; $types = '';
-    foreach ($_POST['answers'] as $questionId => $selectedChoiceId) {
+    foreach ($finalSubmittedAnswers as $questionId => $selectedChoiceId) {
         $values[] = '(?, ?, ?)';
-        $params[] = $resultId; $params[] = $questionId; $params[] = $selectedChoiceId;
+        $params[] = $resultId; 
+        $params[] = $questionId; 
+        $params[] = $selectedChoiceId;
         $types .= 'iii';
     }
     $sqlAnswers = "INSERT INTO user_answers (result_id, question_id, selected_choice_id) VALUES " . implode(',', $values);
