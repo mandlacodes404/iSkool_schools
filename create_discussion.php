@@ -23,13 +23,12 @@ if (!$class_id) die("Not enrolled in a class.");
 
 $message = "";
 
-// Get teachers who teach this class
+// Fetch all teachers registered in this school/database
 $teachers = $conn->query("
-    SELECT DISTINCT u.email, CONCAT(COALESCE(u.title,''), ' ', u.surname, ' (', u.name, ')') AS display_name
-    FROM users u
-    JOIN quizzes q ON u.email = q.created_by
-    WHERE q.class_id = $class_id AND u.role = 'teacher'
-    ORDER BY u.surname
+    SELECT email, CONCAT(COALESCE(title,''), ' ', surname, ' (', name, ')') AS display_name
+    FROM users 
+    WHERE role = 'teacher'
+    ORDER BY surname ASC
 ")->fetch_all(MYSQLI_ASSOC);
 
 if (empty($teachers)) {
@@ -222,15 +221,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Your Message / Question *</label>
         <textarea name="message" required placeholder="Explain what you need help with or want to discuss..."><?= htmlspecialchars($_POST['message'] ?? '') ?></textarea>
 
-        <label>Tag Teacher(s) * <em>(select at least one — they will moderate)</em></label>
-        <select name="teachers[]" multiple required size="6">
-            <?php foreach ($teachers as $t): ?>
-                <option value="<?= $t['email'] ?>" <?= in_array($t['email'], $_POST['teachers'] ?? []) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($t['display_name']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <small style="color:#8b949e; display:block; margin-top:8px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple</small>
+        <label>Tag Teacher(s) *</label>
+<select name="teachers[]" multiple required style="height: 200px;">
+    <?php foreach ($teachers as $t): ?>
+        <option value="<?= htmlspecialchars($t['email']) ?>" 
+            <?= (isset($_POST['teachers']) && in_array($t['email'], $_POST['teachers'])) ? 'selected' : '' ?>>
+            <?= htmlspecialchars($t['display_name']) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+<small style="color:#8b949e; display:block; margin-top:8px;">
+    <i class="fas fa-info-circle"></i> Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac) to select more than one teacher.
+</small>
 
         <div class="checkbox">
             <label>

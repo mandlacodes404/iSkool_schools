@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $class_id       = intval($_POST['class_id'] ?? 0);
     $publish_marks  = isset($_POST['publish_marks']) ? 1 : 0;
     $start_time     = $_POST['start_time'] ?? '';
-    $status         = $_POST['status'] ?? 'Open';
+    $status = $_POST['status'] ?? 'Scheduled'; 
     $is_summative   = isset($_POST['is_summative']) ? 1 : 0;
     $weight_percent = $is_summative && !empty($_POST['weight_percent']) ? floatval($_POST['weight_percent']) : null;
 
@@ -72,20 +72,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // INSERT QUIZ
-    $stmt = $conn->prepare("
-        INSERT INTO quizzes 
-        (title, duration, created_by, class_id, publish_marks, start_time, status, 
-         is_summative, weight_percent, academic_year_id, term_number) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->bind_param("sisissisiii", $quiz_title, $duration, $email, $class_id, $publish_marks, $start_time, $status, $is_summative, $weight_percent, $current_academic_year_id, $current_global_term);
+    // 1. Prepare the SQL to match your table columns exactly
+$stmt = $conn->prepare("
+    INSERT INTO quizzes 
+    (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
 
-    if (!$stmt->execute()) {
-        http_response_code(500);
-        echo json_encode(["success" => false, "message" => "Failed to create quiz."]);
-        exit;
-    }
+/**
+ * 2. Bind the parameters with correct types:
+ * title (s), duration (i), publish_marks (i), created_by (s), class_id (i), 
+ * academic_year_id (i), term_number (i), start_time (s), status (s), 
+ * is_summative (i), weight_percent (d)
+ */
+$stmt->bind_param("siisiiisssd", 
+    $quiz_title, 
+    $duration, 
+    $publish_marks, 
+    $email, 
+    $class_id, 
+    $current_academic_year_id, 
+    $current_global_term, 
+    $start_time, 
+    $status, 
+    $is_summative, 
+    $weight_percent
+);
+
+if (!$stmt->execute()) {
+    // This will help you see the EXACT error in your log if it fails again
+    error_log("SQL Execution Error: " . $stmt->error);
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Database error: " . $stmt->error]);
+    exit;
+}
+  
     $quiz_id = $stmt->insert_id;
     $stmt->close();
 
@@ -521,11 +542,11 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
     <input type="datetime-local" name="start_time" required aria-label="Quiz start time">
 
     <label>Quiz Status:</label>
-    <select name="status" required aria-label="Quiz status">
-      <option value="Scheduled">Scheduled (Opens at start time)</option>
-      <option value="Open" selected>Open (Available immediately or at start time)</option>
-      <option value="Closed">Closed (Not available to students)</option>
-    </select>
+<select name="status" id="quizStatus" required>
+  <option value="Scheduled">Scheduled (Opens at start time)</option>
+  <option value="Open">Open (Available immediately)</option>
+  <option value="Closed">Closed (Not accessible)</option>
+</select>
 
     <div class="checkbox-container">
       <input type="checkbox" name="notify" value="1" id="notifyCheckbox" />
