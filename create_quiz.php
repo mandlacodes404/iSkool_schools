@@ -11,6 +11,7 @@ include("config.php");
 require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+require_once 'push_functions.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     http_response_code(401);
@@ -21,8 +22,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-
-// ==================== AUTOMATIC ACADEMIC YEAR DETECTION (no school_id) ====================
+// ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
 $result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
@@ -31,23 +31,22 @@ if ($result && $row = $result->fetch_assoc()) {
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your admin.");
 }
-// ==========================================================================
-// ==================== GET CURRENT GLOBAL TERM (Your throne) ====================
-$current_global_term = 4; // default until proven otherwise
+
+// ==================== GET CURRENT GLOBAL TERM ====================
+$current_global_term = 4; 
 $result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
-// ============================================================================
 
-// Fetch classes (no school_id needed — current DB = current school)
+// Fetch classes 
 $stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $stmt->execute();
 $classResult = $stmt->get_result();
 
-// Get school name from current database name (exactly like learner dashboard)
+// Get school name from DB
 $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.g. iskool_sandtonhigh → Sandton High
+$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
@@ -56,29 +55,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $publish_marks  = isset($_POST['publish_marks']) ? 1 : 0;
     $start_time     = $_POST['start_time'] ?? '';
     $status         = $_POST['status'] ?? 'Open';
-    $notify         = isset($_POST['notify']) ? 1 : 0;
     $is_summative   = isset($_POST['is_summative']) ? 1 : 0;
     $weight_percent = $is_summative && !empty($_POST['weight_percent']) ? floatval($_POST['weight_percent']) : null;
 
-    // Validation (unchanged)
+    // Validation
     $errors = [];
     if (empty($quiz_title)) $errors[] = "Quiz title is required.";
     if ($duration < 1 || $duration > 180) $errors[] = "Duration must be between 1 and 180 minutes.";
     if ($class_id < 1) $errors[] = "Invalid class selected.";
     if (empty($start_time) || !strtotime($start_time)) $errors[] = "Valid start time is required.";
-    if (!in_array($status, ['Scheduled', 'Open', 'Closed'])) $errors[] = "Invalid status selected.";
-
-    if (!empty($_POST['question'])) {
-        foreach ($_POST['question'] as $i => $qText) {
-            $qText = trim($qText);
-            if (empty($qText)) $errors[] = "Question " . ($i + 1) . " text is required.";
-            if (empty($_POST['choices'][$i]) || count($_POST['choices'][$i]) < 2) $errors[] = "Question " . ($i + 1) . " must have at least 2 choices.";
-            if (!isset($_POST['correct_choice'][$i]) || !is_numeric($_POST['correct_choice'][$i])) $errors[] = "Question " . ($i + 1) . " must have a valid correct choice.";
-            if (empty($_POST['points'][$i]) || intval($_POST['points'][$i]) < 1) $errors[] = "Question " . ($i + 1) . " must have points greater than 0.";
-        }
-    } else {
-        $errors[] = "At least one question is required.";
-    }
 
     if (!empty($errors)) {
         http_response_code(400);
@@ -87,46 +72,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // ==================== INSERT QUIZ WITH AUTOMATIC YEAR ====================
-       // ==================== INSERT QUIZ WITH TERM_NUMBER (Forced current term) ====================
+    // INSERT QUIZ
     $stmt = $conn->prepare("
         INSERT INTO quizzes 
         (title, duration, created_by, class_id, publish_marks, start_time, status, 
          is_summative, weight_percent, academic_year_id, term_number) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param(
-        "sisissisiii",
-        $quiz_title,
-        $duration,
-        $email,
-        $class_id,
-        $publish_marks,
-        $start_time,
-        $status,
-        $is_summative,
-        $weight_percent,
-        $current_academic_year_id,
-        $current_global_term        // ← THIS IS THE MAGIC (forced by you)
-    );
-    // =====================================================================================
+    $stmt->bind_param("sisissisiii", $quiz_title, $duration, $email, $class_id, $publish_marks, $start_time, $status, $is_summative, $weight_percent, $current_academic_year_id, $current_global_term);
 
     if (!$stmt->execute()) {
-        error_log("Quiz insert failed: " . $stmt->error);
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "Failed to create quiz."]);
-        ob_end_flush();
         exit;
     }
     $quiz_id = $stmt->insert_id;
     $stmt->close();
-    // ==========================================================================
 
-    // Rest of your code (questions, images, emails) stays 100% the same
-    // ... [your existing question/choice/image/email code] ...
-    // (I'm keeping it exactly as you had it — no changes needed below)
-
-    // [YOUR EXISTING QUESTION & CHOICE INSERTION CODE — UNCHANGED]
+    // INSERT QUESTIONS & CHOICES
     $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points) VALUES (?, ?, ?, ?)");
     $cStmt = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
 
@@ -137,8 +100,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $points = intval($_POST['points'][$i]);
         $choices = array_map('trim', $_POST['choices'][$i]);
         $correct = intval($_POST['correct_choice'][$i]);
-
         $imagePath = null;
+
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
             $filename = time() . "_" . basename($_FILES['question_images']['name'][$i]);
             $targetFile = $targetDir . $filename;
@@ -158,39 +121,50 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $cStmt->execute();
         }
     }
-
     $qStmt->close();
     $cStmt->close();
 
-    // Send email notifications
-    if ($notify) {
-        $studentQuery = $conn->prepare("SELECT u.email, u.name FROM users u JOIN class_students cs ON u.email = cs.student_email WHERE cs.class_id = ? AND u.role = 'learner'");
-        $studentQuery->bind_param("i", $class_id);
-        if (!$studentQuery->execute()) {
-            error_log("Student query failed: " . $studentQuery->error);
-        }
-        $result = $studentQuery->get_result();
+    // --- SMART NOTIFICATION LOGIC (Matching Assignment logic) ---
+    $force_email = isset($_POST['force_email']) ? true : false;
 
-        $mail = new PHPMailer(true);
-        try {
-            $mail->isSMTP();
-            $mail->Host = 'iskool.online';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'noreply@iskool.online';
-            $mail->Password = 'ogeQkRitRfdy';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port = 465;
-            $mail->setFrom('noreply@iskool.online', $schoolName);
-            $mail->isHTML(true);
-            $mail->Subject = 'New Quiz Posted!';
-        } catch (Exception $e) {
-            error_log("Mailer init failed: {$mail->ErrorInfo}");
-        }
+    $learnersQuery = $conn->prepare("
+        SELECT DISTINCT u.email, u.name 
+        FROM users u 
+        JOIN class_students cs ON u.email = cs.student_email 
+        WHERE cs.class_id = ? AND u.role = 'learner'
+    ");
+    $learnersQuery->bind_param("i", $class_id);
+    $learnersQuery->execute();
+    $result = $learnersQuery->get_result();
 
-        while ($learner = $result->fetch_assoc()) {
+    while ($learner = $result->fetch_assoc()) {
+        $currentEmail = $learner['email'];
+        $isPushSent = false;
+
+        // A. Try Mobile Push (Automatic if subscription exists)
+        $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+        $checkSub->bind_param("s", $currentEmail);
+        $checkSub->execute();
+        if ($checkSub->get_result()->num_rows > 0) {
+            $isPushSent = sendPushToUser($conn, $currentEmail, "✍️ New Quiz: " . $quiz_title, "Status: " . $status . ". Good luck!");
+        }
+        $checkSub->close();
+
+        // B. Send Email if Push failed OR Force Email is checked
+        if (!$isPushSent || $force_email) {
             try {
-                $mail->clearAddresses();
-                $mail->addAddress($learner['email']);
+                $mail = new PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host = 'iskool.online';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'noreply@iskool.online';
+                $mail->Password = 'ogeQkRitRfdy';
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port = 465;
+                $mail->setFrom('noreply@iskool.online', $schoolName);
+                $mail->addAddress($currentEmail);
+                $mail->isHTML(true);
+                $mail->Subject = 'New Quiz: ' . $quiz_title;
                 $mail->Body = '
 <!DOCTYPE html>
 <html lang="en">
@@ -307,13 +281,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </body>
 </html>
 ';
-                $mail->send();
+            $mail->send();
             } catch (Exception $e) {
-                error_log("Quiz email failed for {$learner['email']}: {$mail->ErrorInfo}");
+                error_log("Email failed for $currentEmail: " . $mail->ErrorInfo);
             }
         }
-        $studentQuery->close();
     }
+    $learnersQuery->close();
+    
 
     ob_end_clean();
     echo json_encode(["success" => true, "redirect" => "teacher_quizzes.php"]);
@@ -565,6 +540,13 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
     <div class="checkbox-container" style="margin-top: 20px;">
   <input type="checkbox" name="is_summative" value="1" id="isSummativeCheckbox" />
   <label for="isSummativeCheckbox">Counts toward official term mark (Verified)</label>
+</div>
+
+<div style="background:#1a202c; padding:15px; border-radius:10px; border:1px solid #30363d; margin:20px 0;">
+    <label style="display: flex; align-items: center; cursor: pointer; color: #4fd1c5; font-weight: bold; margin:0;">
+        <input type="checkbox" name="force_email" value="1" style="width: 20px; height: 20px; margin-right: 12px;">
+        Learners automatically get mobile notifications, tick the box if you want the learners to get emails too but we recommend mobile notifications because emails are heavy on the server.
+    </label>
 </div>
 
   <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
