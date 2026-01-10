@@ -55,7 +55,7 @@ $view_term = isset($_GET['view_term']) && in_array($_GET['view_term'], [1,2,3,4]
     ? (int)$_GET['view_term']
     : $current_global_term;
 
-// Fetch all quiz results for this learner in current year
+// Fetch ONLY this learner's own quiz results (strict filter)
 $sql = "
     SELECT DISTINCT 
         r.id AS result_id, r.score, r.total, r.submitted_at, r.time_taken,
@@ -73,11 +73,12 @@ $sql = "
     LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
     WHERE r.user_email = ? 
       AND q.academic_year_id = ?
+      AND r.user_email = cs.student_email   -- ← ADDED THIS: Force results to match the enrolled learner
     ORDER BY display_group ASC, r.submitted_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssii", $targetEmail, $current_academic_year_id, $targetEmail, $current_academic_year_id);
+$stmt->bind_param("sisi", $targetEmail, $current_academic_year_id, $targetEmail, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

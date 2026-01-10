@@ -359,17 +359,33 @@ $currentTime = time();
 
 if (!$attemptData) {
     // Brand new attempt: Record the start time NOW
-    // This ensures the clock starts the second the page first loads
     $now = date('Y-m-d H:i:s');
-    $insertAttempt = $conn->prepare("INSERT INTO quiz_attempts (user_email, quiz_id, start_time, status) VALUES (?, ?, ?, 'in_progress')");
+
+    $insertAttempt = $conn->prepare("
+        INSERT INTO quiz_attempts (user_email, quiz_id, start_time, status) 
+        VALUES (?, ?, ?, 'in_progress')
+    ");
     $insertAttempt->bind_param("sis", $userEmail, $quizId, $now);
-    $insertAttempt->execute();
-    
-    $startTime = $currentTime;
+
+    if ($insertAttempt->execute()) {
+        // Success - normal flow
+        $startTime = $currentTime;
+    } else {
+        // ERROR HAPPENED → Show it clearly so we can see why
+        $errorMessage = "Failed to create quiz attempt for user $userEmail on quiz $quizId: " . $insertAttempt->error;
+        error_log($errorMessage);  // Also log it
+        die("<div style='color:red; padding:20px; background:#fee; border:2px solid red; margin:20px; font-family:Arial;'>
+            <h2>DEBUG ERROR - Quiz Start Failed</h2>
+            <p>$errorMessage</p>
+            <p><strong>Please copy this message and send it to your developer.</strong></p>
+            <p>After fixing, refresh the page to try again.</p>
+        </div>");
+    }
+
+    $insertAttempt->close();
 } else {
-    // Resume existing attempt
+    // Resume existing attempt (keep your original code here)
     if ($attemptData['status'] !== 'in_progress') {
-        // Production safety: If they already submitted, don't let them back in
         header("Location: quiz_results.php?quiz_id=" . $quizId);
         exit();
     }
@@ -987,6 +1003,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         }
 
         function showTimeUpModal() {
+            isSubmitting = true; // Set this to true here
             document.getElementById('timeUpModal').style.display = 'flex';
             setTimeout(() => document.getElementById('quizForm').submit(), 3000);
         }
@@ -1000,6 +1017,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         }
 
         function submitQuiz() {
+            isSubmitting = true; // Set this to true here
             document.getElementById('quizForm').submit();
         }
 
@@ -1126,6 +1144,29 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         }, 100);
     }
 }
+
+// --- INTEGRITY SNITCH CODE ---
+// Tracks when a student switches tabs or minimizes the window
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === 'hidden' && !isSubmitting) {
+        const formData = new FormData();
+        formData.append('quiz_id', <?= $quizId ?>);
+        formData.append('event_type', 'tab_hidden');
+
+        // sendBeacon is a "fire and forget" method—perfect for cheating logs
+        navigator.sendBeacon('log_integrity_event.php', formData);
+    }
+});
+
+// Tracks when they click out of the browser (e.g., opening another app)
+window.addEventListener('blur', function() {
+    if (!isSubmitting) {
+        const formData = new FormData();
+        formData.append('quiz_id', <?= $quizId ?>);
+        formData.append('event_type', 'window_blur');
+        navigator.sendBeacon('log_integrity_event.php', formData);
+    }
+});
     </script>
 </body>
 </html>

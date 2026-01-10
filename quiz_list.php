@@ -78,7 +78,7 @@ if (empty($joinedClassIds)) {
 } else {
     // ── Step 2: Fetch all quizzes AND the learner's attempt status ──
     $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-    $types = str_repeat('i', count($joinedClassIds)) . 'is'; 
+   $types = 's' . str_repeat('i', count($joinedClassIds)) . 'i';
 
     $stmt = $conn->prepare("
         SELECT 

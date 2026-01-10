@@ -305,6 +305,14 @@ $stmt->close();
                                                 </button>
                                             </p>
                                             <p><a class="results-link" href="teacher_quiz_results.php?quiz_id=<?= $quiz['id'] ?>">View Student Results</a></p>
+                                            <p>
+    <button class="integrity-report-btn" 
+            style="background:#f39c12; color:white; border:none; padding:8px 14px; border-radius:var(--card-radius); font-weight:700; cursor:pointer;"
+            data-quiz-id="<?= $quiz['id'] ?>" 
+            data-quiz-title="<?= htmlspecialchars($quiz['title']) ?>">
+        <i class="fas fa-shield-alt"></i> Integrity Report
+    </button>
+</p>
                                             <p><a class="edit-link" href="edit_quiz.php?quiz_id=<?= $quiz['id'] ?>">Edit Quiz</a></p>
                                         </div>
                                     </div>
@@ -330,6 +338,25 @@ $stmt->close();
 <div id="publishModal"><div id="publishModalContent"><p id="publishModalMessage"></p><div class="modal-actions"><button class="modal-btn" id="confirmPublish">Confirm</button><button class="modal-btn cancel" onclick="closePublishModal()">Cancel</button></div></div></div>
 <div id="statusModal"><div id="statusModalContent"><p id="statusModalMessage"></p><div class="modal-actions"><button class="modal-btn" id="confirmStatus">Confirm</button><button class="modal-btn cancel" onclick="closeStatusModal()">Cancel</button></div></div></div>
 
+<div id="integrityModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.85); z-index:2000; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:16px; max-width:600px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid var(--accent-color);">
+        <div id="integrityWarning">
+            <h3 style="color:#f39c12; margin-top:0;"><i class="fas fa-exclamation-triangle"></i> Important Disclaimer</h3>
+            <p style="line-height:1.6; color:#cbd5e0;">This report tracks how many times a learner switched tabs or minimized the browser window during the quiz.</p>
+            <div style="background:rgba(243,156,18,0.1); border-left:4px solid #f39c12; padding:15px; margin:20px 0;">
+                <p style="margin:0; font-size:14px;"><strong>Please Note:</strong> Tab switching can happen accidentally due to system notifications or antivirus popups. Use this data as a guide for further investigation, not as absolute proof of cheating.</p>
+            </div>
+            <button class="modal-btn" id="showIntegrityData" style="width:100%;">I Understand, Show Data</button>
+        </div>
+
+        <div id="integrityDataArea" style="display:none;">
+            <h3 id="reportTitle" style="margin-top:0; color:var(--accent-color);"></h3>
+            <div style="max-height:400px; overflow-y:auto; margin-top:20px;" id="integrityResultsBody">
+                </div>
+            <button class="modal-btn cancel" onclick="closeIntegrityModal()" style="width:100%; margin-top:20px;">Close Report</button>
+        </div>
+    </div>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Toggle individual quiz details
@@ -462,6 +489,59 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial binding
     bindButtons();
 });
+
+// --- INTEGRITY REPORT LOGIC ---
+const integrityModal = document.getElementById('integrityModal');
+let activeQuizId = null;
+
+document.querySelectorAll('.integrity-report-btn').forEach(btn => {
+    btn.onclick = function() {
+        activeQuizId = this.dataset.quizId;
+        document.getElementById('reportTitle').textContent = "Integrity Report: " + this.dataset.quizTitle;
+        document.getElementById('integrityWarning').style.display = 'block';
+        document.getElementById('integrityDataArea').style.display = 'none';
+        integrityModal.style.display = 'flex';
+    };
+});
+
+document.getElementById('showIntegrityData').onclick = function() {
+    const resultsBody = document.getElementById('integrityResultsBody');
+    resultsBody.innerHTML = '<p style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Analyzing logs...</p>';
+    
+    document.getElementById('integrityWarning').style.display = 'none';
+    document.getElementById('integrityDataArea').style.display = 'block';
+
+    fetch(`fetch_integrity_report.php?quiz_id=${activeQuizId}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.length === 0) {
+                resultsBody.innerHTML = '<p style="text-align:center; color:#8b949e;">No integrity flags found. All learners stayed on the tab!</p>';
+                return;
+            }
+
+            let html = '<table style="width:100%; border-collapse:collapse; color:#e0e6f0;">';
+            html += '<tr style="border-bottom:2px solid #30363d; text-align:left;"><th style="padding:10px;">Learner</th><th style="padding:10px; text-align:center;">Flags</th><th style="padding:10px;">Risk Level</th></tr>';
+            
+            data.forEach(row => {
+                let color = '#238636'; // Green
+                let risk = 'Low';
+                if(row.switches >= 3) { color = '#f39c12'; risk = 'Medium'; }
+                if(row.switches >= 6) { color = '#f85149'; risk = 'High'; }
+
+                html += `<tr style="border-bottom:1px solid #30363d;">
+                            <td style="padding:10px;">${row.name} ${row.surname}</td>
+                            <td style="padding:10px; text-align:center; font-weight:bold;">${row.switches}</td>
+                            <td style="padding:10px; color:${color}; font-weight:bold;">${risk}</td>
+                         </tr>`;
+            });
+            html += '</table>';
+            resultsBody.innerHTML = html;
+        });
+};
+
+window.closeIntegrityModal = () => integrityModal.style.display = 'none';
 </script>
+
+
 </body>
 </html>
