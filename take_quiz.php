@@ -973,6 +973,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
     </div>
     <script>
+        let isSubmitting = false;
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
         let oneMinuteAlertShown = false;
          const totalTime = <?= $quizDuration * 60 ?>;
