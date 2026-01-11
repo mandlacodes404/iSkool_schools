@@ -1,7 +1,7 @@
 <?php
 ob_start();
 error_reporting(E_ALL);
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
@@ -25,7 +25,7 @@ $userEmail = $_SESSION['email'];
 $quizId = intval($_GET['quiz_id']);
 
 // Fetch quiz details
-$quizStmt = $conn->prepare("SELECT title, duration, status FROM quizzes WHERE id = ?");
+$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 if (!$quizStmt->execute()) {
     error_log("Quiz fetch failed: " . $quizStmt->error);
@@ -38,6 +38,7 @@ if ($quizResult->num_rows === 0) {
     exit();
 }
 $quiz = $quizResult->fetch_assoc();
+$layoutType = $quiz['layout_mode'] ?? 'single_page';
 $quizTitle = $quiz['title'];
 $quizDuration = $quiz['duration'];
 $status = $quiz['status'] ?? 'Open';
@@ -490,7 +491,24 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 $query->close();
-
+// --- SHUFFLE LOGIC ---
+// Check if shuffle is enabled in the database for this specific quiz
+if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
+    // We shuffle the keys (Question IDs) to maintain the link between questions and their choices
+    $keys = array_keys($questions);
+    shuffle($keys);
+    $shuffledQuestions = [];
+    foreach ($keys as $key) {
+        $shuffledQuestions[$key] = $questions[$key];
+        
+        // Optional: Shuffle choices within each question too
+        if (!empty($shuffledQuestions[$key]['choices'])) {
+            shuffle($shuffledQuestions[$key]['choices']);
+        }
+    }
+    $questions = $shuffledQuestions;
+}
+// ----------------------
 // --- FETCH SAVED ANSWERS FROM DATABASE ---
 $savedAnswers = [];
 $loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
@@ -881,6 +899,20 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
                 height: 30px;
             }
         }
+
+        /* Hide questions by default only in multi-page mode */
+.multi-page-mode .question-block {
+    display: none;
+}
+.multi-page-mode .question-block.active {
+    display: block;
+}
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -942,6 +974,11 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
             $questionNumber++;
             endforeach; 
             ?>
+
+            <div class="nav-buttons <?= ($layoutType === 'single_page') ? 'hidden' : '' ?>" style="margin-bottom: 20px;">
+                <button type="button" id="prevBtn" class="modal-btn cancel" onclick="changeQuestion(-1)">Previous</button>
+                <button type="button" id="nextBtn" class="modal-btn" onclick="changeQuestion(1)">Next</button>
+            </div>
             <button class="submit-btn" type="button" onclick="showSubmitModal()" aria-label="Submit quiz">Submit Quiz</button>
         </form>
         <div id="timeUpModal">
@@ -975,6 +1012,9 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     <script>
         let isSubmitting = false;
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
+        let currentStep = 0;
+        const layoutType = '<?= $layoutType ?>'; // From PHP
+        const questions = document.querySelectorAll('.question-block');
         let oneMinuteAlertShown = false;
          const totalTime = <?= $quizDuration * 60 ?>;
         const timerCircle = document.querySelector('.timer-circle circle');
@@ -1037,54 +1077,80 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         function saveAnswers() {
             const answers = {};
             document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
-                const questionId = input.name.match(/answers\[(\d+)\]/)[1];
-                answers[questionId] = input.value;
+               const match = input.name.match(/answers\[(\d+)\]/);
+if (match) {
+    const questionId = match[1];
+    answers[questionId] = input.value;
+}
+             
             });
             sessionStorage.setItem('quizAnswers_<?= $quizId ?>', JSON.stringify(answers));
         }
+function loadAnswers() {
+            const dbAnswers = <?= json_encode($savedAnswers) ?>;
+            const localAnswers = JSON.parse(sessionStorage.getItem('quizAnswers_<?= $quizId ?>') || '{}');
+            const finalAnswers = { ...localAnswers, ...dbAnswers };
 
-        function loadAnswers() {
-    // 1. Get answers from the Database (passed from PHP)
-    const dbAnswers = <?= json_encode($savedAnswers) ?>;
-    
-    // 2. Get answers from local session storage (as a backup)
-    const localAnswers = JSON.parse(sessionStorage.getItem('quizAnswers_<?= $quizId ?>') || '{}');
+            Object.keys(finalAnswers).forEach(questionId => {
+                const choiceId = finalAnswers[questionId];
+                const input = document.querySelector(`input[name="answers[${questionId}]"][value="${choiceId}"]`);
+                if (input) { input.checked = true; }
+            });
 
-    // Combine them: Database takes priority
-    const finalAnswers = { ...localAnswers, ...dbAnswers };
-
-    Object.keys(finalAnswers).forEach(questionId => {
-        const choiceId = finalAnswers[questionId];
-        const input = document.querySelector(`input[name="answers[${questionId}]"][value="${choiceId}"]`);
-        if (input) {
-            input.checked = true;
+            const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
+            flaggedQuestions.forEach(questionId => {
+                const button = document.querySelector(`.question-block[data-question-id="${questionId}"] .flag-btn`);
+                if (button) button.classList.add('flagged');
+            });
         }
-    });
 
-    // Handle flags (from session storage)
-    const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
-    flaggedQuestions.forEach(questionId => {
-        const button = document.querySelector(`.question-block[data-question-id="${questionId}"] .flag-btn`);
-        if (button) button.classList.add('flagged');
-    });
-}
+        function initLayout() {
+            if (layoutType === 'multi_page') {
+                document.querySelector('.container').classList.add('multi-page-mode');
+                showQuestion(0);
+            }
+        }
 
-     function autoSaveToDatabase(questionId, choiceId) {
-    const formData = new FormData();
-    formData.append('quiz_id', <?= $quizId ?>);
-    formData.append('question_id', questionId);
-    formData.append('choice_id', choiceId);
+        function showQuestion(n) {
+            questions.forEach(q => q.classList.remove('active'));
+            questions[n].classList.add('active');
 
-    fetch('save_progress.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Server Saved:", data.status);
-    })
-    .catch(err => console.error("Save failed:", err));
-}
+            document.getElementById('prevBtn').classList.toggle('hidden', n === 0);
+            
+            const nextBtn = document.getElementById('nextBtn');
+            const mainSubmitBtn = document.querySelector('.submit-btn');
+
+            if (n === (questions.length - 1)) {
+                nextBtn.innerText = "Finish & Review";
+                nextBtn.onclick = showSubmitModal;
+                mainSubmitBtn.classList.remove('hidden'); 
+            } else {
+                nextBtn.innerText = "Next";
+                nextBtn.onclick = () => changeQuestion(1);
+                mainSubmitBtn.classList.add('hidden'); 
+            }
+        }
+
+        function changeQuestion(n) {
+            currentStep += n;
+            showQuestion(currentStep);
+            window.scrollTo(0, 0); 
+        }
+
+        function autoSaveToDatabase(questionId, choiceId) {
+            const formData = new FormData();
+            formData.append('quiz_id', <?= $quizId ?>);
+            formData.append('question_id', questionId);
+            formData.append('choice_id', choiceId);
+
+            fetch('save_progress.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => { console.log("Server Saved:", data.status); })
+            .catch(err => console.error("Save failed:", err));
+        }
 
         let zoomLevel = 1;
         function openLightbox(img) {
@@ -1118,7 +1184,8 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
        window.addEventListener('load', () => {
     startTimer();
     loadAnswers();
-    
+    initLayout(); // <--- ADD THIS LINE
+
     document.querySelectorAll('input[type="radio"]').forEach(input => {
         input.addEventListener('change', (e) => {
             // 1. Existing local save (sessionStorage)

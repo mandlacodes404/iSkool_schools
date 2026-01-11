@@ -71,33 +71,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ob_end_flush();
         exit;
     }
+$layout_mode = $_POST['layout_mode'] ?? 'single_page';
+    // Capture the shuffle checkbox (1 if checked, 0 if not)
+    $shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
 
-    // 1. Prepare the SQL to match your table columns exactly
-$stmt = $conn->prepare("
-    INSERT INTO quizzes 
-    (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-");
+    // 1. Updated SQL to include shuffle_questions
+    $stmt = $conn->prepare("
+        INSERT INTO quizzes 
+        (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
 
-/**
- * 2. Bind the parameters with correct types:
- * title (s), duration (i), publish_marks (i), created_by (s), class_id (i), 
- * academic_year_id (i), term_number (i), start_time (s), status (s), 
- * is_summative (i), weight_percent (d)
- */
-$stmt->bind_param("siisiiisssd", 
-    $quiz_title, 
-    $duration, 
-    $publish_marks, 
-    $email, 
-    $class_id, 
-    $current_academic_year_id, 
-    $current_global_term, 
-    $start_time, 
-    $status, 
-    $is_summative, 
-    $weight_percent
-);
+    /**
+     * 2. Added one more "i" at the end of the string and added $shuffle_questions variable
+     */
+    $stmt->bind_param("siisiiisssdsi", 
+        $quiz_title, 
+        $duration, 
+        $publish_marks, 
+        $email, 
+        $class_id, 
+        $current_academic_year_id, 
+        $current_global_term, 
+        $start_time, 
+        $status, 
+        $is_summative, 
+        $weight_percent,
+        $layout_mode,
+        $shuffle_questions
+    );
 
 if (!$stmt->execute()) {
     // This will help you see the EXACT error in your log if it fails again
@@ -518,6 +520,59 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Mode Card Styling */
+.layout-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+.mode-card {
+    flex: 1;
+    background: #1a202c;
+    border: 2px solid #30363d;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.mode-card i {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #8b949e;
+}
+input[type="radio"]:checked + .mode-card {
+    border-color: #4fd1c5;
+    background: rgba(79, 209, 197, 0.1);
+}
+input[type="radio"]:checked + .mode-card i {
+    color: #4fd1c5;
+}
+.info-trigger {
+    color: #4fd1c5;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+/* Modal for Information */
+#layoutModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: #1a202c;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 450px;
+    border: 1px solid #4fd1c5;
+}
 </style>
 </head>
 <body>
@@ -549,11 +604,6 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
 </select>
 
     <div class="checkbox-container">
-      <input type="checkbox" name="notify" value="1" id="notifyCheckbox" />
-      <label for="notifyCheckbox">Notify learners via email <i class="fas fa-envelope"></i></label>
-    </div>
-
-    <div class="checkbox-container">
       <input type="checkbox" name="publish_marks" value="1" id="publishMarksCheckbox" />
       <label for="publishMarksCheckbox">Publish marks immediately <i class="fas fa-poll"></i></label>
     </div>
@@ -580,6 +630,51 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
   <label for="weight_percent">Weight % of term mark (e.g., 40 for 40%)</label>
   <input type="number" name="weight_percent" id="weight_percent" min="0" max="100" step="0.1" placeholder="Optional – leave blank for equal weight" style="max-width: 200px;" />
   <small style="color: #8b949e; display: block; margin-top: 6px;">Only used if "Counts toward term mark" is checked.</small>
+</div>
+
+<div style="margin-bottom: 30px;">
+    <label style="display: flex; align-items: center;">
+        Quiz Layout Mode 
+        <i class="fas fa-info-circle info-trigger" onclick="document.getElementById('layoutModal').style.display='flex'"></i>
+    </label>
+    
+    <div class="layout-options">
+        <label style="flex: 1;">
+            <input type="radio" name="layout_mode" value="single_page" checked style="display:none;">
+            <div class="mode-card">
+                <i class="fas fa-file-alt"></i>
+                <strong>Single Page</strong>
+            </div>
+        </label>
+        
+        <label style="flex: 1;">
+            <input type="radio" name="layout_mode" value="multi_page" style="display:none;">
+            <div class="mode-card">
+                <i class="fas fa-layer-group"></i>
+                <strong>Multi-Page</strong>
+            </div>
+        </label>
+    </div>
+</div>
+
+<div id="randomizeOption" style="display: none; margin-top: 15px; background: rgba(79, 209, 197, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #4fd1c5;">
+    <div class="checkbox-container" style="margin: 0;">
+        <input type="checkbox" name="shuffle_questions" value="1" id="shuffleCheckbox" />
+        <label for="shuffleCheckbox" style="margin-top:0; color: #e0e6f0;">
+            Shuffle Questions <i class="fas fa-random" style="margin-left:5px;"></i>
+            <br><small style="color: #8b949e; font-weight: normal;">Every student gets questions in a different order.</small>
+        </label>
+    </div>
+</div>
+
+<div id="layoutModal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="color:#4fd1c5; margin-top:0;"><i class="fas fa-question-circle"></i> Choosing a Layout</h3>
+        <p><strong>📄 Single Page:</strong> All questions appear on one screen. Best for students with <b>unstable internet</b> because it loads everything at once.</p>
+        <hr style="border:0; border-top:1px solid #30363d; margin:15px 0;">
+        <p><strong>📑 Multi-Page:</strong> Shows one question at a time. This allows the <b>Integrity Report</b> to track exactly which question a student was viewing when they switched tabs.</p>
+        <button type="button" class="submit-btn" style="padding:10px; font-size:1rem;" onclick="document.getElementById('layoutModal').style.display='none'">I Understand</button>
+    </div>
 </div>
 
     <div id="questions-container">
@@ -726,6 +821,20 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+});
+
+// Listen for changes on the layout radio buttons
+document.querySelectorAll('input[name="layout_mode"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const randomizeDiv = document.getElementById('randomizeOption');
+        if (this.value === 'multi_page') {
+            // Show with a nice fade-in effect if you want, or just display:block
+            randomizeDiv.style.display = 'block';
+        } else {
+            randomizeDiv.style.display = 'none';
+            document.getElementById('shuffleCheckbox').checked = false; // Reset it
+        }
+    });
 });
 </script>
 
