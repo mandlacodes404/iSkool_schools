@@ -913,6 +913,51 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     margin-top: 20px;
 }
 .hidden { display: none !important; }
+
+/* --- QUIZ SUMMARY PALETTE (Desktop Only) --- */
+.quiz-summary-palette {
+    position: fixed;
+    right: 20px;
+    top: 100px;
+    width: 220px;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: var(--card-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+}
+
+/* Hide on mobile/tablets */
+@media (max-width: 768px) {
+    .quiz-summary-palette { display: none; }
+}
+
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.palette-item {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--button-bg);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+/* Status Colors */
+.palette-item.answered { background-color: var(--answered-color); color: white; }
+.palette-item.flagged { border-color: var(--warning-color); color: var(--warning-color); }
+.palette-item.current { outline: 2px solid var(--accent-color); outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -939,9 +984,23 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
             </div>
             <span></span>
         </div>
+        <?php if (!$isMobileApp): ?>
+<div class="quiz-summary-palette">
+    <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+        <i class="fas fa-th"></i> Question Summary
+    </div>
+    <div class="palette-grid">
+        <?php for ($i = 0; $i < count($questions); $i++): ?>
+            <div class="palette-item" id="palette-item-<?= $i ?>" onclick="jumpToQuestion(<?= $i ?>)">
+                <?= $i + 1 ?>
+            </div>
+        <?php endfor; ?>
+    </div>
+</div>
+<?php endif; ?>
         <form id="quizForm" action="submit_quiz.php" method="POST">
             <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
-            <input type="hidden" name="start_time" value="<?= time() ?>">
+            <input type="hidden" name="start_time" value="<?= $startTime ?>">
             <?php 
             $questionNumber = 1;
             foreach ($questions as $qid => $q): 
@@ -1129,6 +1188,7 @@ function loadAnswers() {
                 nextBtn.onclick = () => changeQuestion(1);
                 mainSubmitBtn.classList.add('hidden'); 
             }
+            updatePalette(); // <--- ADD THIS HERE
         }
 
         function changeQuestion(n) {
@@ -1197,6 +1257,7 @@ function loadAnswers() {
             const choiceId = e.target.value;
             
             autoSaveToDatabase(questionId, choiceId);
+            updatePalette(); // <--- ADD THIS HERE
         });
     });
 });
@@ -1235,6 +1296,41 @@ window.addEventListener('blur', function() {
         navigator.sendBeacon('log_integrity_event.php', formData);
     }
 });
+
+// Function to jump to a specific question from the palette
+function jumpToQuestion(n) {
+    if (layoutType === 'multi_page') {
+        currentStep = n;
+        showQuestion(currentStep);
+    } else {
+        // For single page, scroll to the specific question block
+        const target = questions[n];
+        window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
+    }
+}
+
+// Function to update the palette colors based on answers and flags
+function updatePalette() {
+    questions.forEach((q, index) => {
+        const qId = q.getAttribute('data-question-id');
+        const paletteItem = document.getElementById(`palette-item-${index}`);
+        if (!paletteItem) return;
+
+        // Reset classes
+        paletteItem.classList.remove('answered', 'flagged', 'current');
+
+        // Check if Answered
+        const isAnswered = document.querySelector(`input[name="answers[${qId}]"]:checked`);
+        if (isAnswered) paletteItem.classList.add('answered');
+
+        // Check if Flagged
+        const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
+        if (flaggedQuestions.includes(parseInt(qId))) paletteItem.classList.add('flagged');
+
+        // Check if Current (only for multi-page)
+        if (layoutType === 'multi_page' && index === currentStep) paletteItem.classList.add('current');
+    });
+}
     </script>
 </body>
 </html>
