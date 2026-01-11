@@ -519,23 +519,32 @@ document.getElementById('showIntegrityData').onclick = function() {
                 return;
             }
 
-            let html = '<table style="width:100%; border-collapse:collapse; color:#e0e6f0;">';
-            html += '<tr style="border-bottom:2px solid #30363d; text-align:left;"><th style="padding:10px;">Learner</th><th style="padding:10px; text-align:center;">Flags</th><th style="padding:10px;">Risk Level</th></tr>';
+            // We use an empty string instead of a <table> tag now
+            let html = ''; 
             
             data.forEach(row => {
-                let color = '#238636'; // Green
-                let risk = 'Low';
-                if(row.switches >= 3) { color = '#f39c12'; risk = 'Medium'; }
-                if(row.switches >= 6) { color = '#f85149'; risk = 'High'; }
-
-                html += `<tr style="border-bottom:1px solid #30363d;">
-                            <td style="padding:10px;">${row.name} ${row.surname}</td>
-                            <td style="padding:10px; text-align:center; font-weight:bold;">${row.switches}</td>
-                            <td style="padding:10px; color:${color}; font-weight:bold;">${risk}</td>
-                         </tr>`;
+                html += `
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px; border-left:5px solid ${row.color}; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <strong style="color:#4fd1c5; font-size:16px;">${row.name}</strong>
+                        <span style="background:${row.color}; color:white; padding:3px 12px; border-radius:20px; font-size:11px; font-weight:800; text-transform:uppercase;">
+                            ${row.risk}
+                        </span>
+                    </div>
+                    <p style="margin:0; font-size:15px; font-style:italic; line-height:1.5; color:#cbd5e0; font-family:'Georgia', serif;">
+                        "${row.narrative}"
+                    </p>
+                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+                         <small style="color:#8b949e;">Total Flags: <strong>${row.switches}</strong></small>
+                         <i class="fas fa-robot" style="color:rgba(255,255,255,0.2); font-size:12px;"> AI Analysis</i>
+                    </div>
+                </div>`;
             });
-            html += '</table>';
+
             resultsBody.innerHTML = html;
+        })
+        .catch(err => {
+            resultsBody.innerHTML = '<p style="color:#f85149;">Error loading report. Please try again.</p>';
         });
 };
 
