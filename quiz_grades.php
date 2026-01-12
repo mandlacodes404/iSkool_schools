@@ -29,18 +29,19 @@ $quizTitle = $quizData['title'];
 $classId = $quizData['class_id'];
 $stmtQuiz->close();
 
-// Step 2: Get all learners in the class, left join with quiz_results for existing scores
+// Step 2: Added DISTINCT to prevent duplicates from multiple years
 $sql = "
-    SELECT u.name AS user_name, u.email AS user_email, qr.score, qr.total
+    SELECT DISTINCT u.name AS user_name, u.email AS user_email, qr.score, qr.total
     FROM users u
     JOIN class_students cs ON cs.student_email = u.email
     LEFT JOIN quiz_results qr ON qr.user_email = u.email AND qr.quiz_id = ?
-    WHERE cs.class_id = ? AND u.role = 'user'
+    WHERE cs.class_id = ? AND u.role = 'learner'
 ";
 
 if (!empty($search)) {
     $sql .= " AND u.name LIKE ?";
 }
+
 $sql .= " ORDER BY u.name ASC";
 
 $stmt = $conn->prepare($sql);

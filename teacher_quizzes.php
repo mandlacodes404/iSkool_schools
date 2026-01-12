@@ -210,6 +210,15 @@ $stmt->close();
             .quiz-header h3{font-size:14px}
             .quiz-details p{font-size:12px}
         }
+        #invigilatorBadge {
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(79, 209, 197, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(79, 209, 197, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(79, 209, 197, 0); }
+}
     </style>
 </head>
 <body>
@@ -338,25 +347,48 @@ $stmt->close();
 <div id="publishModal"><div id="publishModalContent"><p id="publishModalMessage"></p><div class="modal-actions"><button class="modal-btn" id="confirmPublish">Confirm</button><button class="modal-btn cancel" onclick="closePublishModal()">Cancel</button></div></div></div>
 <div id="statusModal"><div id="statusModalContent"><p id="statusModalMessage"></p><div class="modal-actions"><button class="modal-btn" id="confirmStatus">Confirm</button><button class="modal-btn cancel" onclick="closeStatusModal()">Cancel</button></div></div></div>
 
-<div id="integrityModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.85); z-index:2000; justify-content:center; align-items:center; padding:20px;">
-    <div style="background:var(--card-bg); padding:30px; border-radius:16px; max-width:600px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:1px solid var(--accent-color);">
+<div id="integrityModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.9); z-index:2000; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:16px; max-width:650px; width:100%; box-shadow:0 0 40px rgba(79,209,197,0.2); border:1px solid var(--accent-color); font-family: 'Nunito', sans-serif;">
+        
         <div id="integrityWarning">
-            <h3 style="color:#f39c12; margin-top:0;"><i class="fas fa-exclamation-triangle"></i> Important Disclaimer</h3>
-            <p style="line-height:1.6; color:#cbd5e0;">This report tracks how many times a learner switched tabs or minimized the browser window during the quiz.</p>
-            <div style="background:rgba(243,156,18,0.1); border-left:4px solid #f39c12; padding:15px; margin:20px 0;">
-                <p style="margin:0; font-size:14px;"><strong>Please Note:</strong> Tab switching can happen accidentally due to system notifications or antivirus popups. Use this data as a guide for further investigation, not as absolute proof of cheating.</p>
+            <div style="text-align:center; margin-bottom:20px;">
+                <i class="fas fa-robot" style="font-size:40px; color:var(--accent-color); margin-bottom:10px;"></i>
+                <h3 style="color:var(--text-color); margin:0; letter-spacing:1px;">ARTIFICIAL INVIGILATOR</h3>
+                <p style="color:#8b949e; font-size:14px;">Behavioral Integrity Analysis Engine</p>
             </div>
-            <button class="modal-btn" id="showIntegrityData" style="width:100%;">I Understand, Show Data</button>
+
+            <p style="line-height:1.6; color:#cbd5e0;">The Artificial Invigilator has processed the session logs. It cross-references <b>tab-switching frequency</b> with <b>active question IDs</b> and <b>layout constraints</b> to determine risk levels.</p>
+            
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px; margin:20px 0;">
+                <h4 style="margin:0 0 10px; font-size:14px; color:var(--accent-color);"><i class="fas fa-microchip"></i> Detection Logic:</h4>
+                <ul style="margin:0; padding-left:20px; font-size:13px; color:#cbd5e0; line-height:1.8;">
+                    <li><b>Multi-Page Precision:</b> Direct link between events and specific questions.</li>
+                    <li><b>Single-Page Viewport:</b> Tracks the question currently at the top of the screen.</li>
+                    <li><b>Time-Stamp Analysis:</b> Identifies "Rapid Navigation" through questions.</li>
+                </ul>
+            </div>
+
+            <button class="modal-btn" id="showIntegrityData" style="width:100%; padding:15px; font-size:16px;">
+                <i class="fas fa-fingerprint"></i> DECODE LEARNER BEHAVIOR
+            </button>
         </div>
 
         <div id="integrityDataArea" style="display:none;">
-            <h3 id="reportTitle" style="margin-top:0; color:var(--accent-color);"></h3>
-            <div style="max-height:400px; overflow-y:auto; margin-top:20px;" id="integrityResultsBody">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px; margin-bottom:15px;">
+                <h3 id="reportTitle" style="margin:0; color:var(--accent-color); font-size:18px;"></h3>
+                <span id="invigilatorBadge" style="background:rgba(79,209,197,0.2); color:var(--accent-color); padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; border:1px solid var(--accent-color);">AI ACTIVE</span>
+            </div>
+            
+            <div style="max-height:400px; overflow-y:auto; padding-right:8px;" id="integrityResultsBody">
                 </div>
-            <button class="modal-btn cancel" onclick="closeIntegrityModal()" style="width:100%; margin-top:20px;">Close Report</button>
+            
+            <button class="modal-btn cancel" onclick="closeIntegrityModal()" style="width:100%; margin-top:20px; background:transparent; border:1px solid #4a5568;">
+                DISMISS INVIGILATOR
+            </button>
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Toggle individual quiz details
@@ -490,23 +522,36 @@ document.addEventListener('DOMContentLoaded', function () {
     bindButtons();
 });
 
-// --- INTEGRITY REPORT LOGIC ---
-const integrityModal = document.getElementById('integrityModal');
-let activeQuizId = null;
+// --- UPDATED ARTIFICIAL INVIGILATOR LOGIC ---
+let activeQuizId = null; // Global tracker for which quiz we are analyzing
 
-document.querySelectorAll('.integrity-report-btn').forEach(btn => {
-    btn.onclick = function() {
-        activeQuizId = this.dataset.quizId;
-        document.getElementById('reportTitle').textContent = "Integrity Report: " + this.dataset.quizTitle;
+// 1. Capture the click on the "Integrity Report" button
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.integrity-report-btn');
+    if (btn) {
+        activeQuizId = btn.dataset.quizId;
+        const quizTitle = btn.dataset.quizTitle;
+        
+        // Reset Modal State (Show the AI intro first)
         document.getElementById('integrityWarning').style.display = 'block';
         document.getElementById('integrityDataArea').style.display = 'none';
-        integrityModal.style.display = 'flex';
-    };
+        document.getElementById('reportTitle').innerHTML = `<i class="fas fa-robot"></i> Invigilator Report: ${quizTitle}`;
+        
+        // Show the Modal
+        document.getElementById('integrityModal').style.display = 'flex';
+    }
 });
 
+// 2. The "Decode" Button (The AI Analysis Phase)
 document.getElementById('showIntegrityData').onclick = function() {
     const resultsBody = document.getElementById('integrityResultsBody');
-    resultsBody.innerHTML = '<p style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Analyzing logs...</p>';
+    
+    // AI "Thinking" state
+    resultsBody.innerHTML = `
+        <div style="text-align:center; padding:40px 0;">
+            <i class="fas fa-microchip fa-spin" style="font-size:30px; color:var(--accent-color); margin-bottom:15px;"></i>
+            <p style="color:#cbd5e0; letter-spacing:1px;">SCANNING BEHAVIORAL PATTERNS...</p>
+        </div>`;
     
     document.getElementById('integrityWarning').style.display = 'none';
     document.getElementById('integrityDataArea').style.display = 'block';
@@ -514,29 +559,50 @@ document.getElementById('showIntegrityData').onclick = function() {
     fetch(`fetch_integrity_report.php?quiz_id=${activeQuizId}`)
         .then(r => r.json())
         .then(data => {
-            if (data.length === 0) {
-                resultsBody.innerHTML = '<p style="text-align:center; color:#8b949e;">No integrity flags found. All learners stayed on the tab!</p>';
+            if (!data || data.length === 0) {
+                resultsBody.innerHTML = `
+                    <div style="text-align:center; padding:30px; background:rgba(79,209,197,0.05); border-radius:12px; border:1px dashed #4fd1c5;">
+                        <i class="fas fa-check-circle" style="color:#4fd1c5; font-size:24px; margin-bottom:10px;"></i>
+                        <p style="color:#cbd5e0; margin:0;">The Invigilator found no irregularities for this quiz.</p>
+                    </div>`;
                 return;
             }
 
-            // We use an empty string instead of a <table> tag now
             let html = ''; 
-            
             data.forEach(row => {
+                const layoutBadge = row.layout_mode === 'multi_page' 
+                    ? '<span style="color:#4fd1c5; font-size:10px; border:1px solid #4fd1c5; padding:2px 5px; border-radius:4px; font-weight:bold;">MULTI-PAGE</span>'
+                    : '<span style="color:#a855f7; font-size:10px; border:1px solid #a855f7; padding:2px 5px; border-radius:4px; font-weight:bold;">SINGLE-PAGE</span>';
+
                 html += `
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px; border-left:5px solid ${row.color}; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <strong style="color:#4fd1c5; font-size:16px;">${row.name}</strong>
-                        <span style="background:${row.color}; color:white; padding:3px 12px; border-radius:20px; font-size:11px; font-weight:800; text-transform:uppercase;">
-                            ${row.risk}
+                <div style="background:rgba(255,255,255,0.04); padding:15px; border-radius:12px; margin-bottom:15px; border-left:5px solid ${row.color}; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                        <div>
+                            <strong style="color:#e0e6f0; font-size:16px; display:block; margin-bottom:4px;">${row.name}</strong>
+                            ${layoutBadge}
+                        </div>
+                        <span style="background:${row.color}; color:white; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px;">
+                            ${row.risk} RISK
                         </span>
                     </div>
-                    <p style="margin:0; font-size:15px; font-style:italic; line-height:1.5; color:#cbd5e0; font-family:'Georgia', serif;">
-                        "${row.narrative}"
-                    </p>
-                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
-                         <small style="color:#8b949e;">Total Flags: <strong>${row.switches}</strong></small>
-                         <i class="fas fa-robot" style="color:rgba(255,255,255,0.2); font-size:12px;"> AI Analysis</i>
+                    
+                    <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin-bottom:10px;">
+                        <p style="margin:0; font-size:13px; line-height:1.5; color:#cbd5e0;">
+                            <i class="fas fa-comment-dots" style="color:var(--accent-color); margin-right:5px;"></i> 
+                            ${row.narrative}
+                        </p>
+                    </div>
+
+                    ${row.problem_questions ? `
+                    <div style="margin-bottom:10px; padding:8px; background:rgba(248,81,73,0.05); border-radius:6px; border:1px solid rgba(248,81,73,0.2);">
+                        <small style="color:#f85149; font-weight:bold; font-size:11px;">
+                            <i class="fas fa-exclamation-circle"></i> Flags: Question(s) ${row.problem_questions}
+                        </small>
+                    </div>` : ''}
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; opacity:0.6;">
+                         <small style="color:#8b949e;">Activity Count: <b>${row.switches}</b></small>
+                         <small style="color:#8b949e; font-size:10px;">Last Event: ${row.last_event_time}</small>
                     </div>
                 </div>`;
             });
@@ -544,11 +610,15 @@ document.getElementById('showIntegrityData').onclick = function() {
             resultsBody.innerHTML = html;
         })
         .catch(err => {
-            resultsBody.innerHTML = '<p style="color:#f85149;">Error loading report. Please try again.</p>';
+            console.error(err);
+            resultsBody.innerHTML = '<p style="color:#f85149; text-align:center; padding:20px;">AI Engine failed to retrieve data. Check connection.</p>';
         });
 };
 
-window.closeIntegrityModal = () => integrityModal.style.display = 'none';
+// Closing function
+window.closeIntegrityModal = () => {
+    document.getElementById('integrityModal').style.display = 'none';
+};
 </script>
 
 

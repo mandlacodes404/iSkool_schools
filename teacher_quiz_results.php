@@ -34,16 +34,10 @@ if (!isset($_GET['quiz_id'])) {
 }
 
 $quizId = intval($_GET['quiz_id']);
-$schoolId = $_SESSION['school_id'] ?? null;
 
-if (!$schoolId) {
-    die("Error: Your school information is missing.");
-}
-
-//──────────────────────────────────────────────────────────────────────────────
-//                        Get quiz title
-//──────────────────────────────────────────────────────────────────────────────
-
+// ——————————————————————————————————————————————————————————————————————————————
+//                      Get quiz title (Owner check)
+// ——————————————————————————————————————————————————————————————————————————————
 $titleStmt = $conn->prepare("SELECT title FROM quizzes WHERE id = ? AND created_by = ?");
 $titleStmt->bind_param("is", $quizId, $_SESSION['email']);
 $titleStmt->execute();
@@ -54,60 +48,46 @@ $titleStmt->close();
 // Handle sorting
 $sort = $_GET['sort'] ?? 'submitted_at_desc';
 switch ($sort) {
-    case 'score_asc':
-        $orderBy = "score ASC";
-        break;
-    case 'score_desc':
-        $orderBy = "score DESC";
-        break;
-    case 'time_asc':
-        $orderBy = "time_taken ASC";
-        break;
-    case 'time_desc':
-        $orderBy = "time_taken DESC";
-        break;
-    case 'submitted_at_asc':
-        $orderBy = "submitted_at ASC";
-        break;
-    case 'submitted_at_desc':
-    default:
-        $orderBy = "submitted_at DESC";
-        break;
+    case 'score_asc':        $orderBy = "qr.score ASC"; break;
+    case 'score_desc':       $orderBy = "qr.score DESC"; break;
+    case 'time_asc':        $orderBy = "qr.time_taken ASC"; break;
+    case 'time_desc':       $orderBy = "qr.time_taken DESC"; break;
+    case 'submitted_at_asc': $orderBy = "qr.submitted_at ASC"; break;
+    default:                $orderBy = "qr.submitted_at DESC"; break;
 }
 
-//──────────────────────────────────────────────────────────────────────────────
-//              Fetch results with student names
-//──────────────────────────────────────────────────────────────────────────────
-
+// ——————————————————————————————————————————————————————————————————————————————
+//               Fetch results with student names (School Logic Removed)
+// ——————————————————————————————————————————————————————————————————————————————
 $stmt = $conn->prepare("
     SELECT qr.id AS result_id, u.name AS student_name, qr.score, qr.total, qr.time_taken, qr.submitted_at 
     FROM quiz_results qr
     JOIN users u ON qr.user_email = u.email
-    WHERE qr.quiz_id = ? AND u.school_id = ?
+    WHERE qr.quiz_id = ?
     ORDER BY $orderBy
 ");
-$stmt->bind_param("ii", $quizId, $schoolId);
+$stmt->bind_param("i", $quizId); // Removed schoolId
 $stmt->execute();
 $results = $stmt->get_result();
 
-// Handle CSV export
+// ——————————————————————————————————————————————————————————————————————————————
+//                           Handle CSV export
+// ——————————————————————————————————————————————————————————————————————————————
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     header("Content-Type: text/csv");
     header("Content-Disposition: attachment; filename=quiz_results.csv");
     $output = fopen("php://output", "w");
 
-    // Add 'Percentage' to the header
     fputcsv($output, ['Student Name', 'Score', 'Out Of', 'Time Taken', 'Submitted At', 'Percentage']);
 
-    // Reset query for export
     $exportStmt = $conn->prepare("
         SELECT u.name AS student_name, qr.score, qr.total, qr.time_taken, qr.submitted_at 
         FROM quiz_results qr
         JOIN users u ON qr.user_email = u.email
-        WHERE qr.quiz_id = ? AND u.school_id = ?
+        WHERE qr.quiz_id = ?
         ORDER BY qr.submitted_at DESC
     ");
-    $exportStmt->bind_param("ii", $quizId, $schoolId);
+    $exportStmt->bind_param("i", $quizId); // Removed schoolId
     $exportStmt->execute();
     $exportResults = $exportStmt->get_result();
 

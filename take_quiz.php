@@ -1274,36 +1274,64 @@ function loadAnswers() {
     }
 }
 
-// --- INTEGRITY SNITCH CODE ---
+// --- UPDATED SMART INTEGRITY SNITCH ---
+function logIntegrity(eventType) {
+    if (isSubmitting) return;
+
+    const formData = new FormData();
+    formData.append('quiz_id', <?= $quizId ?>);
+    formData.append('event_type', eventType);
+    formData.append('layout_mode', layoutType);
+
+    // Identify which question they were looking at
+    let activeQuestionId = null;
+    if (layoutType === 'multi_page') {
+        // Multi-page: Use the current step index
+        activeQuestionId = questions[currentStep].getAttribute('data-question-id');
+    } else {
+        // Single-page: Find the question closest to the top of the viewport
+        let closest = Array.from(questions).reduce((prev, curr) => {
+            return (Math.abs(curr.getBoundingClientRect().top) < Math.abs(prev.getBoundingClientRect().top) ? curr : prev);
+        });
+        activeQuestionId = closest.getAttribute('data-question-id');
+    }
+    
+    formData.append('active_question_id', activeQuestionId);
+
+    // sendBeacon is used to ensure the log is sent even if the tab is closing
+    navigator.sendBeacon('log_integrity_event.php', formData);
+}
+
 // Tracks when a student switches tabs or minimizes the window
 document.addEventListener("visibilitychange", function() {
-    if (document.visibilityState === 'hidden' && !isSubmitting) {
-        const formData = new FormData();
-        formData.append('quiz_id', <?= $quizId ?>);
-        formData.append('event_type', 'tab_hidden');
-
-        // sendBeacon is a "fire and forget" method—perfect for cheating logs
-        navigator.sendBeacon('log_integrity_event.php', formData);
+    if (document.visibilityState === 'hidden') {
+        logIntegrity('tab_hidden');
     }
 });
 
-// Tracks when they click out of the browser (e.g., opening another app)
+// Tracks when they click out of the browser window
 window.addEventListener('blur', function() {
-    if (!isSubmitting) {
-        const formData = new FormData();
-        formData.append('quiz_id', <?= $quizId ?>);
-        formData.append('event_type', 'window_blur');
-        navigator.sendBeacon('log_integrity_event.php', formData);
-    }
+    logIntegrity('window_blur');
 });
+
+// Navigation Timing for AI (Detects if they answer/move too fast)
+let lastActionTime = Date.now();
+function trackSpeed() {
+    const now = Date.now();
+    const timeDiff = (now - lastActionTime) / 1000;
+    if (timeDiff < 2) { // If less than 2 seconds since last question change/answer
+        logIntegrity('rapid_navigation');
+    }
+    lastActionTime = now;
+}
 
 // Function to jump to a specific question from the palette
 function jumpToQuestion(n) {
+    trackSpeed(); // Log if they are jumping through questions suspiciously fast
     if (layoutType === 'multi_page') {
         currentStep = n;
         showQuestion(currentStep);
     } else {
-        // For single page, scroll to the specific question block
         const target = questions[n];
         window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
     }
@@ -1316,18 +1344,14 @@ function updatePalette() {
         const paletteItem = document.getElementById(`palette-item-${index}`);
         if (!paletteItem) return;
 
-        // Reset classes
         paletteItem.classList.remove('answered', 'flagged', 'current');
 
-        // Check if Answered
         const isAnswered = document.querySelector(`input[name="answers[${qId}]"]:checked`);
         if (isAnswered) paletteItem.classList.add('answered');
 
-        // Check if Flagged
         const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
         if (flaggedQuestions.includes(parseInt(qId))) paletteItem.classList.add('flagged');
 
-        // Check if Current (only for multi-page)
         if (layoutType === 'multi_page' && index === currentStep) paletteItem.classList.add('current');
     });
 }

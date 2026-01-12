@@ -9,20 +9,31 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-// GET CURRENT ACADEMIC YEAR (NO school_id NEEDED)
+/** * 1. GET CURRENT ACADEMIC YEAR
+ * Since this is a subdomain, we just look for the active year 
+ * in this specific school's database.
+ */
 $current_academic_year_id = null;
 $result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+
 if ($row = $result->fetch_assoc()) {
     $current_academic_year_id = $row['id'];
 }
 
 if (!$current_academic_year_id) {
-    die("No active academic year found.");
+    // Fallback: If no year is marked current, get the latest one created
+    $backup_res = $conn->query("SELECT id FROM academic_years ORDER BY id DESC LIMIT 1");
+    if($b_row = $backup_res->fetch_assoc()){
+        $current_academic_year_id = $b_row['id'];
+    } else {
+        die("System Error: No academic years configured in this school's database.");
+    }
 }
 
-/* -------------------------------------------------
-   FETCH ALL QUIZZES FOR CURRENT ACADEMIC YEAR (ALL TERMS)
-   ------------------------------------------------- */
+/** * 2. FETCH ALL QUIZZES
+ * Filtered only by Teacher (created_by) and Year. 
+ * School filtering is handled by the DB connection itself.
+ */
 $sql = "
     SELECT q.id, q.title, q.created_at, q.term_number,
            c.id AS class_id, c.name AS class_name
@@ -38,16 +49,14 @@ $stmt->bind_param("si", $email, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-/* -------------------------------------------------
-   GROUP BY term_number → class_id → quizzes
-   ------------------------------------------------- */
+/** * 3. GROUP BY TERM -> CLASS -> QUIZZES
+ */
 $grouped_by_term = [];
 
 while ($row = $result->fetch_assoc()) {
     $term = $row['term_number'];
     $class_id = $row['class_id'];
 
-    // Initialize term if not exists
     if (!isset($grouped_by_term[$term])) {
         $grouped_by_term[$term] = [
             'term_number' => $term,
@@ -55,7 +64,6 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
 
-    // Initialize class inside term
     if (!isset($grouped_by_term[$term]['classes'][$class_id])) {
         $grouped_by_term[$term]['classes'][$class_id] = [
             'info' => [
@@ -66,11 +74,9 @@ while ($row = $result->fetch_assoc()) {
         ];
     }
 
-    // Add quiz to class
     $grouped_by_term[$term]['classes'][$class_id]['quizzes'][] = $row;
 }
 
-// Sort terms 1 to 4 (in case some are missing)
 ksort($grouped_by_term);
 ?>
 

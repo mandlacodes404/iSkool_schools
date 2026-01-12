@@ -8,33 +8,46 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$schoolId = $_SESSION['school_id'] ?? 0;
 $message = "";
 
-if (!$schoolId) die("School missing.");
-
-// GET CURRENT ACADEMIC YEAR
-$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE school_id = ? AND is_current = 1 LIMIT 1");
-$currentYearStmt->bind_param("i", $schoolId);
+/**
+ * 1. GET CURRENT ACADEMIC YEAR
+ * Removed school_id logic because the subdomain database is school-specific.
+ */
+$current_academic_year_id = null;
+$currentYearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $currentYearStmt->execute();
 $currentYearResult = $currentYearStmt->get_result();
-$currentYearRow = $currentYearResult->fetch_assoc();
-$current_academic_year_id = $currentYearRow['id'] ?? null;
+
+if ($currentYearRow = $currentYearResult->fetch_assoc()) {
+    $current_academic_year_id = $currentYearRow['id'];
+} else {
+    // Fallback: get the latest year if none is marked current
+    $backupRes = $conn->query("SELECT id FROM academic_years ORDER BY id DESC LIMIT 1");
+    if($bRow = $backupRes->fetch_assoc()){
+        $current_academic_year_id = $bRow['id'];
+    }
+}
 $currentYearStmt->close();
 
 if (!$current_academic_year_id) {
-    die("No active academic year found.");
+    die("System Error: No academic years configured in this school's database.");
 }
 
-// GET CURRENT GLOBAL TERM (your throne)
+/**
+ * 2. GET CURRENT GLOBAL TERM
+ */
 $current_global_term = 4; // fallback
 $termResult = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 if ($termRow = $termResult->fetch_assoc()) {
     $current_global_term = (int)$termRow['current_global_term'];
 }
 
-$classStmt = $conn->prepare("SELECT id, name FROM classes WHERE school_id = ? ORDER BY name");
-$classStmt->bind_param("i", $schoolId);
+/**
+ * 3. FETCH CLASSES
+ * Removed school_id filter.
+ */
+$classStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name");
 $classStmt->execute();
 $classResult = $classStmt->get_result();
 
@@ -58,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email,
             $is_summative,
             $weight_percent,
-            $current_academic_year_id,   // 6th → goes into academic_year_id
-            $current_global_term         // 7th → goes into term_number
+            $current_academic_year_id,
+            $current_global_term
         );
 
         if ($insert->execute()) {
@@ -110,10 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php if ($message === "success"): ?>
     <div class="box info">
         <p style="color:var(--green); font-weight:bold;">Quiz added successfully!</p>
-        <p><strong>Total Marks:</strong> <span>Not set (no questions yet)</span></p>
-        <p><strong>Weight:</strong> <span><?= $weightDisplay ?></span></p>
+        <p> Now you can go to learner grades and find the name of the quiz you just created and then edit marks for all learners in class</p>
         <div class="actions">
-            <a href="create_quiz.php?manual=<?= $quizId ?>" class="edit">Add Questions & Marks</a>
+           
             <a href="teacher_quizzes.php" class="back">Back</a>
         </div>
     </div>
