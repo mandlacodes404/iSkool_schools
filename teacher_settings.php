@@ -175,9 +175,9 @@ $defaultPic   = 'default_teacher.png';
         </li>
 
         <li>
-            <a href="logout.php" target="_top" class="logout-link">
-                Logout
-            </a>
+           <a href="logout.php" target="_top" class="logout-link" onclick="localStorage.removeItem('lastTeacherPage');">
+    Logout
+</a>
         </li>
     </ul>
 </div>

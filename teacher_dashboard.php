@@ -397,6 +397,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const iframe = document.querySelector('iframe');
     const loader = document.getElementById('loaderOverlay');
 
+    // ——————————————————————————————————————————————————————————————————————————————
+    // 1. RESTORE STATE: Check if we have a saved page from before the refresh
+    // ——————————————————————————————————————————————————————————————————————————————
+    const savedPage = localStorage.getItem("lastTeacherPage");
+    // Change 'teacher_manual.php' to whatever your default home page is
+    if (savedPage && savedPage !== "teacher_manual.php") {
+        loader.style.display = 'flex'; // Show loader while restoring
+        iframe.src = savedPage;
+    }
+
     // Profile upload
     avatar?.addEventListener('click', () => input.click());
     input.addEventListener('change', e => {
@@ -415,73 +425,82 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', () => {
             loader.style.display = 'flex';
 
-            // ADD THIS: Close sidebar on mobile when a link is clicked
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('active');
-                // If you have an overlay style reset, add it here too:
                 if (overlay) overlay.style.display = 'none';
             }
         });
     });
-    iframe?.addEventListener('load', () => loader.style.display = 'none');
 
-   // Toggle sidebar (mobile)
+    // ——————————————————————————————————————————————————————————————————————————————
+    // 2. SAVE STATE: Capture the iframe URL whenever it finishes loading
+    // ——————————————————————————————————————————————————————————————————————————————
+    iframe?.addEventListener('load', () => {
+        loader.style.display = 'none';
+
+        try {
+            // Get the current page name + any search parameters (like ?quiz_id=12)
+            const fullPage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
+            
+            // Only save if it's not a blank page
+            if (fullPage && !fullPage.startsWith('blank.php')) {
+                localStorage.setItem("lastTeacherPage", fullPage);
+            }
+        } catch (e) { 
+            console.log("External or restricted page loaded, cannot save state."); 
+        }
+    });
+
+    // Toggle sidebar (mobile)
     window.toggleSidebar = () => {
         if (window.innerWidth <= 768) {
             const isActive = sidebar.classList.toggle('active');
-            // Show overlay if sidebar is active, hide if not
             if (overlay) {
                 overlay.style.display = isActive ? 'block' : 'none';
             }
         }
     };
 
-    // Close when tapping overlay (blurry part)
+    // Close when tapping overlay
     overlay?.addEventListener('click', () => {
         sidebar.classList.remove('active');
-        overlay.style.display = 'none'; // Hide the blurry part
+        overlay.style.display = 'none';
     });
 
-   
-    // Desktop collapse - now with SVG rotation
-window.toggleDesktopSidebar = () => {
-    if (window.innerWidth > 768) {
-        sidebar.classList.toggle('collapsed');
-        const collapsed = sidebar.classList.contains('collapsed');
-        localStorage.setItem('sidebarCollapsed', collapsed);
-        
-        // Rotate the SVG 90° when collapsed (exactly like ChatGPT)
-        const svg = document.querySelector('#toggleIcon svg');
-        if (svg) {
-            svg.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
+    // Desktop collapse
+    window.toggleDesktopSidebar = () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.toggle('collapsed');
+            const collapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebarCollapsed', collapsed);
+            
+            const svg = document.querySelector('#toggleIcon svg');
+            if (svg) {
+                svg.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
+            }
         }
-    }
-};
+    };
 
     // Restore desktop state
     if (window.innerWidth > 768) {
         const saved = localStorage.getItem('sidebarCollapsed') === 'true';
         if (saved) {
             sidebar.classList.add('collapsed');
-          //  icon.className = 'fas fa-chevron-right';
         }
     }
 
-           // Settings (with loader + close mobile sidebar + clear active states)
+    // Settings
     document.getElementById('settingsBtn')?.addEventListener('click', function() {
-        loader.style.display = 'flex';  // Show loader immediately
-        
-        iframe.src = "teacher_settings.php";  // Load settings page
+        loader.style.display = 'flex';
+        iframe.src = "teacher_settings.php";
 
-        // Optional: Clear active states from sidebar links (consistent with learner)
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.classList.remove('active');
         });
 
-        // Close mobile sidebar if open (mobile only)
         if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
             sidebar.classList.remove('active');
-            overlay.style.display = 'none';  // Hide overlay/blur
+            overlay.style.display = 'none';
         }
     });
 });

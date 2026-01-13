@@ -208,9 +208,9 @@ $defaultPic = 'default.png';
                 </li>
 
                 <li>
-                    <a href="logout.php" target="_top" class="btn logout-link">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
+                    <a href="logout.php" target="_top" class="btn logout-link" onclick="localStorage.removeItem('lastLearnerPage');">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</a>
                 </li>
 
                 <li>
