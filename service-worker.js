@@ -1,11 +1,17 @@
 self.addEventListener("push", event => {
+  // Default values
   let data = { title: "iSkool", body: "New update available!", url: "/" };
+  
   try {
     if (event.data) {
       const jsonData = event.data.json();
-      if (jsonData.title && jsonData.body) {
-        data = jsonData;
-      }
+      
+      // Update: Check for the URL inside the 'data' object OR at the root
+      data.title = jsonData.title || data.title;
+      data.body = jsonData.body || data.body;
+      
+      // This line ensures we grab the Deep Link we sent from PHP
+      data.url = (jsonData.data && jsonData.data.url) ? jsonData.data.url : (jsonData.url || "/");
     }
   } catch (err) {
     console.error("Push event data parse error:", err);
@@ -13,14 +19,14 @@ self.addEventListener("push", event => {
 
   const options = {
     body: data.body,
-    icon: "/icons/icon-192.png",
+    icon: "/icons/icon-192.png", // Ensure this path is correct for your site
     badge: "/icons/icon-192.png",
-    data: { url: data.url },
-    tag: "iSkool-notification", // Groups notifications
-    renotify: true, // Replaces previous notification if same tag
-    vibrate: [200, 100, 200], // WhatsApp-like vibration
+    data: { url: data.url }, // This stores the URL for the click event below
+    tag: "iSkool-notification",
+    renotify: true,
+    vibrate: [200, 100, 200],
     actions: [
-      { action: "open", title: "Open iSkool", icon: "/icons/icon-192.png" }
+      { action: "open", title: "Open iSkool" }
     ]
   };
 
@@ -29,19 +35,29 @@ self.addEventListener("push", event => {
   );
 });
 
-// Update click event to handle actions
 self.addEventListener("notificationclick", event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url === event.notification.data.url && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(event.notification.data.url);
-      }
-    })
-  );
+    event.notification.close();
+    
+    // 1. Fallback to root if URL is missing
+    const targetUrl = (event.notification.data && event.notification.data.url) 
+                      ? event.notification.data.url 
+                      : "/learner_dashboard.php";
+
+    event.waitUntil(
+        clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+            // 2. Check if the app is already open
+            for (const client of clientList) {
+                // If we find an open window, navigate it to the deep link and focus
+                if ("navigate" in client && "focus" in client) {
+                    client.navigate(targetUrl);
+                    return client.focus();
+                }
+            }
+
+            // 3. If no window is open, open a new one
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });

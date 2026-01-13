@@ -91,9 +91,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Format due date nicely
     $formatted_due_date = date("l, F j, Y", strtotime($due_date));
+// This uses your config's BASE_URL and ensures no double slashes //
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+$assignmentLink = $cleanBaseUrl . "/learner_dashboard.php?page=learner_assignments.php";
 
-    // Link to assignments page (update later if you have a direct view)
-    $assignmentLink = "https://iskool.online/student_assignments.php";
+// LOG IT (Temporary): This will create a file named 'url_test.txt' 
+// so you can see EXACTLY what the teacher is sending.
+file_put_contents('url_test.txt', "Link sent: " . $assignmentLink . PHP_EOL, FILE_APPEND);
 
     // Email template
     $emailBody = '
@@ -190,14 +194,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $checkSub->execute();
         $subResult = $checkSub->get_result();
         
-        if ($subResult->num_rows > 0) {
-            $isPushSent = sendPushToUser(
-                $conn, 
-                $currentEmail, 
-                "📚 New Assignment: " . $title, 
-                "Due: " . $formatted_due_date
-            );
-        }
+      if ($subResult->num_rows > 0) {
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "📚 New Assignment: " . $title, 
+        "Due: " . $formatted_due_date,
+        $assignmentLink // This is correct!
+    );
+}
 
         // B. Send Email if Push failed OR if "Urgent" is checked
         if (!$isPushSent || $force_email) {

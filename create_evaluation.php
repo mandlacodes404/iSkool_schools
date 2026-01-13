@@ -66,8 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Teacher name for email
         $teacher_name = $_SESSION['name'] ?? 'Your Teacher';
 
-        // Link to evaluations page (update later if you have a direct link to this specific evaluation)
-        $evalLink = "https://iskool.online/student_evaluations.php";
+        // Use BASE_URL from config.php and clean it for the dashboard parameter
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+$evalLink = $cleanBaseUrl . "/learner_dashboard.php?page=learner_evaluations.php";
 
         // Email template
         $emailBody = '
@@ -162,13 +163,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $subResult = $checkSub->get_result();
             
             if ($subResult->num_rows > 0) {
-                $isPushSent = sendPushToUser(
-                    $conn, 
-                    $currentEmail, 
-                    "📊 New Evaluation: " . $title, 
-                    "Your teacher requested your feedback. Please complete the evaluation."
-                );
-            }
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "📊 New Evaluation: " . $title, 
+        "Your teacher requested your feedback. Please complete the evaluation.",
+        $evalLink // <--- Add the $evalLink as the 5th parameter here
+    );
+}
 
             // B. Email Fallback / Force Email
             if (!$isPushSent || $force_email) {

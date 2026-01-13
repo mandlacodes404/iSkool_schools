@@ -3,7 +3,8 @@ require __DIR__ . '/vendor/autoload.php';
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
-function sendPushToUser($conn, $email, $title, $message) {
+// Added $targetUrl as a 5th parameter with a default of null
+function sendPushToUser($conn, $email, $title, $message, $targetUrl = null) {
     // 1. Get all device subscriptions for this email
     $stmt = $conn->prepare("SELECT endpoint, p256dh, auth FROM user_subscriptions WHERE user_email = ?");
     $stmt->bind_param("s", $email);
@@ -38,14 +39,18 @@ function sendPushToUser($conn, $email, $title, $message) {
             json_encode([
                 'title' => $title,
                 'body'  => $message,
-                'icon'  => 'https://iskool.online/uploads/schools/default_school.png'
+                'icon'  => 'https://iskool.online/uploads/schools/default_school.png',
+                // --- NEW: This is the payload the Service Worker reads ---
+                'data'  => [
+                    'url' => $targetUrl 
+                ]
             ])
         );
     }
 
     // 4. Send them all at once
     foreach ($webPush->flush() as $report) {
-        // You can log errors here if needed
+        // Logging can be added here if needed
     }
     
     return true;

@@ -71,7 +71,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
         $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
         $creatorDisplay = $anonymous ? 'Anonymous Learner' : trim($learner_name . ' ' . $learner_surname);
-        $viewLink = "https://iskool.online/discussions.php";
+       // ────── 1. Generate the Deep Link ──────
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+
+// For Learners: They go through the dashboard iframe
+$learnerDiscussionLink = $cleanBaseUrl . "/learner_dashboard.php?page=discussions.php";
 
         // Email Template Function
         $emailTemplate = function($recipientName, $recipientRole) use ($title, $message_text, $creatorDisplay, $viewLink, $schoolName) {
@@ -112,7 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         while ($classmate = $classmatesResult->fetch_assoc()) {
             $currentEmail = $classmate['email'];
-            $isPushSent = sendPushToUser($conn, $currentEmail, "New Discussion: " . $title, $creatorDisplay . " started a topic.");
+            // Pass the learnerDiscussionLink as the 5th parameter
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "New Discussion: " . $title, 
+        $creatorDisplay . " started a topic.",
+        $learnerDiscussionLink 
+    );
 
             if (!$isPushSent) {
                 try {
@@ -145,7 +156,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $teachersResult = $teacherQuery->get_result();
 
             while ($teacher = $teachersResult->fetch_assoc()) {
-                sendPushToUser($conn, $teacher['email'], "🔔 Tagged in Discussion", $creatorDisplay . " tagged you.");
+                sendPushToUser(
+        $conn, 
+        $teacher['email'], 
+        "🔔 Tagged in Discussion", 
+        $creatorDisplay . " tagged you.",
+        $teacherDiscussionLink
+    );
                 try {
                     $mail = new PHPMailer(true);
                     $mail->isSMTP();

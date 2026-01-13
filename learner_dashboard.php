@@ -1117,100 +1117,66 @@ iframe {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // 1. Core Elements
     const loader         = document.getElementById("loaderOverlay");
     const iframe         = document.querySelector('iframe[name="mainFrame"]');
-
-    // --- ADD THIS BIT HERE ---
-    // Check if we have a saved page from before the refresh
-    const savedPage = localStorage.getItem("lastLearnerPage");
-    if (savedPage && savedPage !== "learner_manual.php") {
-        iframe.src = savedPage;
-    }
-    // -------------------------
-        // LOADER: Show when clicking any navigation link (sidebar + bottom nav)
-    document.querySelectorAll('a[target="mainFrame"], #mobileBottomNav a').forEach(link => {
-        link.addEventListener('click', () => {
-            loader.style.display = 'flex';
-        });
-    });
-
-    // LOADER: Hide when iframe finishes loading
-   // LOADER: Hide when iframe finishes loading
-iframe?.addEventListener('load', () => {
-    // 1. Turn off the "Processing..." screen
-    loader.style.display = 'none';
-
-    // 2. Try to save the current page to memory
-    try {
-        const path = iframe.contentWindow.location.pathname;
-        const fullPage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
-    
-    if (fullPage && !fullPage.startsWith('blank.php')) {
-        localStorage.setItem("lastLearnerPage", fullPage);
-        
-        // For the sidebar highlighting, we still just need the name
-        const filename = iframe.contentWindow.location.pathname.split("/").pop();
-        setActive(filename);
-        }
-    } catch (e) { 
-        // If we load an external link, we can't "see" the filename, so we just ignore it
-        console.log("External page loaded, cannot save state."); 
-    }
-});
-
-    // ────────────────────── ADD THIS BLOCK FOR SETTINGS ──────────────────────
-    const settingsBtn = document.getElementById("settingsBtn");
-    
-    settingsBtn.addEventListener('click', function() {
-        // 1. Show the loader immediately
-        loader.style.display = 'flex';
-        
-        // 2. Load the settings page into the iframe.
-        // Assuming your settings page is 'learner_settings.php'
-        iframe.src = "learner_settings.php"; 
-
-        // 3. Clear active states (optional, but good for UI clarity)
-        setActive("learner_settings.php"); 
-        
-        // 4. Close mobile sidebar if open
-        if (sidebar.classList.contains("active")) {
-            toggleSidebar();
-        }
-    });
-    // ────────────────────── END NEW BLOCK ──────────────────────
     const sidebar        = document.querySelector(".sidebar");
     const myClassContent = document.getElementById("myClassContent");
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();
 
-    function createMobileOverlay() {
-        const div = document.createElement("div");
-        div.id = "mobileOverlay";
-        Object.assign(div.style, {
-            display: "none",
-            position: "fixed",
-            top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 1500
-        });
-        document.body.appendChild(div);
-        return div;
+    // 2. Smart Load Logic (Deep Linking + Refresh State)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetPage = urlParams.get('page');
+    const savedPage = localStorage.getItem("lastLearnerPage");
+
+    if (targetPage) {
+        // Priority: Deep Link from Push Notification
+        iframe.src = targetPage;
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (savedPage && savedPage !== "learner_manual.php") {
+        // Fallback: Restore last page after refresh
+        iframe.src = savedPage;
     }
 
-    // PROFILE PICTURE UPLOAD
+    // 3. Iframe Load Handler (Hides Loader & Saves State)
+    iframe?.addEventListener('load', () => {
+        loader.style.display = 'none';
+        try {
+            const win = iframe.contentWindow;
+            const fullPage = win.location.pathname.split("/").pop() + win.location.search;
+            
+            if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== "") {
+                localStorage.setItem("lastLearnerPage", fullPage);
+                const filename = win.location.pathname.split("/").pop();
+                setActive(filename);
+            }
+        } catch (e) { 
+            console.log("Cross-origin or empty page loaded."); 
+        }
+    });
+
+    // 4. Navigation & Global UI Logic
+    document.querySelectorAll('a[target="mainFrame"], #mobileBottomNav a').forEach(link => {
+        link.addEventListener('click', () => {
+            loader.style.display = 'flex';
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove("active");
+                mobileOverlay.style.display = "none";
+            }
+        });
+    });
+
+    // Profile Picture Upload
     const avatar = document.querySelector(".learner-avatar");
     const profileInput = document.getElementById("profileInput");
-
     if (avatar && profileInput) {
         avatar.addEventListener("click", () => profileInput.click());
         profileInput.addEventListener("change", function (e) {
             const file = e.target.files[0];
             if (!file) return;
-
             avatar.src = URL.createObjectURL(file);
-
             const fd = new FormData();
             fd.append("profile", file);
-
             fetch("upload_profile.php", { method: "POST", body: fd })
                 .then(r => r.json())
                 .then(data => {
@@ -1224,90 +1190,17 @@ iframe?.addEventListener('load', () => {
         });
     }
 
-    // SHOW LOADER ON FORM SUBMIT
-    document.querySelector("form")?.addEventListener("submit", () => {
-        loader.style.display = "flex";
+    // Settings Button Logic
+    document.getElementById("settingsBtn")?.addEventListener("click", () => {
+        loader.style.display = 'flex';
+        iframe.src = "learner_settings.php"; 
+        if(myClassContent) myClassContent.classList.remove("active");
+        iframe.style.display = "block";
+        setActive("learner_settings.php");
+        if (sidebar.classList.contains("active")) toggleSidebar();
     });
 
-    // MENU ACTIVE STATE
-    const navItems = document.querySelectorAll("[data-page]");
-
-    function setActive(page) {
-        navItems.forEach(item => {
-            item.classList.toggle("active", item.getAttribute("data-page") === page);
-        });
-    }
-
-    setActive("<?= $currentPage ?>");
-
-    navItems.forEach(item => {
-        item.addEventListener("click", () => {
-            const page = item.getAttribute("data-page");
-            if (page) setActive(page);
-        });
-    });
-
-    // SIDEBAR TOGGLES
-    window.toggleSidebar = function () {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.toggle("active");
-            mobileOverlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
-        }
-    };
-
-    window.toggleDesktopSidebar = function () {
-        if (window.innerWidth > 768) {
-            sidebar.classList.toggle("collapsed");
-            const collapsed = sidebar.classList.contains("collapsed");
-            localStorage.setItem("sidebarCollapsed", collapsed);
-            document.querySelector(".desktop-toggle-btn i").className =
-                collapsed ? "fas fa-bars" : "fas fa-bars";
-        }
-    };
-
-    if (window.innerWidth > 768) {
-        const saved = localStorage.getItem("sidebarCollapsed");
-        if (saved === "true" || saved === null) {
-            sidebar.classList.add("collapsed");
-            document.querySelector(".desktop-toggle-btn i").className = "fas fa-chevron-right";
-        }
-    }
-
-    mobileOverlay.addEventListener("click", () => {
-        sidebar.classList.remove("active");
-        mobileOverlay.style.display = "none";
-    });
-
-    // JOIN CLASS FORM TOGGLE
-    window.toggleJoinClassForm = function () {
-        const form = document.getElementById("joinClassForm");
-        if (form) form.style.display = form.style.display === "none" ? "block" : "none";
-    };
-
-    // SHOW MY CLASS PANEL
-    window.showMyClass = function () {
-        myClassContent.classList.add("active");
-        iframe.style.display = "none";
-        setActive("my-class");
-
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove("active");
-            mobileOverlay.style.display = "none";
-        }
-    };
-
-    document.querySelectorAll('.sidebar a[target="mainFrame"]').forEach(link => {
-        link.addEventListener("click", () => {
-            myClassContent.classList.remove("active");
-            iframe.style.display = "block";
-        });
-    });
-
-    window.toggleParentDropdown = () => {
-        document.getElementById("parentDropdown").style.display = 
-            document.getElementById("parentDropdown").style.display === "block" ? "none" : "block";
-    };
-
+    // Parent Link Logic
     document.getElementById("parentLinkForm")?.addEventListener("submit", function(e) {
         e.preventDefault();
         const email = this.querySelector("select").value;
@@ -1323,14 +1216,71 @@ iframe?.addEventListener('load', () => {
         .finally(() => loader.style.display = "none");
     });
 
-    document.getElementById("settingsBtn")?.addEventListener("click", () => {
-        iframe.src = "learner_settings.php";
-        myClassContent.classList.remove("active");
-        iframe.style.display = "block";
+    // Sidebar and Menu Toggles
+    window.toggleSidebar = function () {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle("active");
+            mobileOverlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
+        }
+    };
+
+    window.toggleDesktopSidebar = function () {
+        if (window.innerWidth > 768) {
+            sidebar.classList.toggle("collapsed");
+            const collapsed = sidebar.classList.contains("collapsed");
+            localStorage.setItem("sidebarCollapsed", collapsed);
+        }
+    };
+
+    window.showMyClass = function () {
+        myClassContent.classList.add("active");
+        iframe.style.display = "none";
+        setActive("my-class");
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove("active");
+            mobileOverlay.style.display = "none";
+        }
+    };
+
+    function createMobileOverlay() {
+        const div = document.createElement("div");
+        div.id = "mobileOverlay";
+        Object.assign(div.style, {
+            display: "none", position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.4)", zIndex: 1500
+        });
+        document.body.appendChild(div);
+        return div;
+    }
+
+    mobileOverlay.addEventListener("click", () => {
+        sidebar.classList.remove("active");
+        mobileOverlay.style.display = "none";
     });
 
+    // Active State Management
+    const navItems = document.querySelectorAll("[data-page]");
+    function setActive(page) {
+        navItems.forEach(item => {
+            item.classList.toggle("active", item.getAttribute("data-page") === page);
+        });
+    }
+
+    // Initialize UI
+    if (window.innerWidth > 768) {
+        const saved = localStorage.getItem("sidebarCollapsed");
+        if (saved === "true" || saved === null) sidebar.classList.add("collapsed");
+    }
+    
+    setActive("<?= $currentPage ?>");
     loader.style.display = "none";
 });
+
+// Extra global helper for external components
+function toggleJoinClassForm() {
+    const form = document.getElementById("joinClassForm");
+    if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+}
 </script>
 
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>

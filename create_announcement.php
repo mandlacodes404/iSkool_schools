@@ -140,15 +140,21 @@ while ($recipient = $recipients->fetch_assoc()) {
     $checkSub->execute();
     $subResult = $checkSub->get_result();
     
-    if ($subResult->num_rows > 0) {
-        // Attempt Push
-        $isPushSent = sendPushToUser(
-            $conn, 
-            $currentEmail, 
-            "New Notification: " . $title, 
-            $msg
-        );
-    }
+    // 1. Generate the Deep Link for Announcements
+// We use rtrim to avoid the double-slash // issue
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+$announcementLink = $cleanBaseUrl . "/learner_dashboard.php?page=view_announcements_user.php"; 
+
+// 2. Update the Push Function call
+if ($subResult->num_rows > 0) {
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "📢 New Announcement: " . $title, 
+        $msg,
+        $announcementLink // <--- This tells the phone where to go
+    );
+}
 
     // 4. SMART ROUTING: Send email IF (Push failed/not exists) OR (Urgent is checked)
     if (!$isPushSent || $force_email) {

@@ -41,6 +41,10 @@ $stmt->execute();
 $classes = $stmt->get_result();
 $stmt->close();
 
+// --- Generate Deep Link for Resources ---
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+$resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=view_resources_user.php";
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
     $title    = trim($_POST['title']);
@@ -118,13 +122,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
                     $subResult = $checkSub->get_result();
                     
                     if ($subResult->num_rows > 0) {
-                        $isPushSent = sendPushToUser(
-                            $conn, 
-                            $currentEmail, 
-                            "📚 New Resource: " . $title, 
-                            "A new study material has been uploaded for your class."
-                        );
-                    }
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "📚 New Resource: " . $title, 
+        "A new study material has been uploaded for your class.",
+        $resourceLink // <--- Passes the deep link to the mobile device
+    );
+}
                     $checkSub->close();
 
                     // 2. Email Fallback (Only if Push failed OR Teacher forced it)
