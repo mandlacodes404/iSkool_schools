@@ -106,19 +106,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // --- Email Notification (unchanged below) ---
         if ($send_to === 'parents') {
-            $emailQuery = $conn->prepare("
-                SELECT DISTINCT u.email, u.name 
-                FROM users u 
-                JOIN parent_classes pc ON u.email = pc.parent_email
-                WHERE pc.class_id = ? AND u.role = 'parent'
-            ");
+           $emailQuery = $conn->prepare("
+    SELECT DISTINCT u.email, u.name 
+    FROM users u 
+    JOIN parent_classes pc ON u.email = pc.parent_email
+    WHERE pc.class_id = ? 
+    AND pc.academic_year_id = ? /* <--- Add this */
+    AND u.role = 'parent'
+");
         } else {
-            $emailQuery = $conn->prepare("
-                SELECT DISTINCT u.email, u.name 
-                FROM users u 
-                JOIN class_students cs ON u.email = cs.student_email
-                WHERE cs.class_id = ? AND u.role = 'learner'
-            ");
+          $emailQuery = $conn->prepare("
+    SELECT DISTINCT u.email, u.name 
+    FROM users u 
+    JOIN class_students cs ON u.email = cs.student_email
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this */
+    AND u.role = 'learner'
+");
         }
 
         $emailQuery->bind_param("i", $class_id);

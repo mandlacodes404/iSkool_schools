@@ -150,13 +150,20 @@ if (!$stmt->execute()) {
     // --- SMART NOTIFICATION LOGIC (Matching Assignment logic) ---
     $force_email = isset($_POST['force_email']) ? true : false;
 
+    // 1. Define the link
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+$quizLink = $cleanBaseUrl . "/learner_dashboard.php?page=quiz_list.php";
+
     $learnersQuery = $conn->prepare("
-        SELECT DISTINCT u.email, u.name 
-        FROM users u 
-        JOIN class_students cs ON u.email = cs.student_email 
-        WHERE cs.class_id = ? AND u.role = 'learner'
-    ");
-    $learnersQuery->bind_param("i", $class_id);
+    SELECT DISTINCT u.email, u.name 
+    FROM users u 
+    JOIN class_students cs ON u.email = cs.student_email 
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this */
+    AND u.role = 'learner'
+");
+// Bind two integers: class_id and current_academic_year_id
+$learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
     $learnersQuery->execute();
     $result = $learnersQuery->get_result();
 
@@ -168,9 +175,16 @@ if (!$stmt->execute()) {
         $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
         $checkSub->bind_param("s", $currentEmail);
         $checkSub->execute();
-        if ($checkSub->get_result()->num_rows > 0) {
-            $isPushSent = sendPushToUser($conn, $currentEmail, "✍️ New Quiz: " . $quiz_title, "Status: " . $status . ". Good luck!");
-        }
+        // 2. Add the link as the 5th parameter in the push function
+if ($checkSub->get_result()->num_rows > 0) {
+    $isPushSent = sendPushToUser(
+        $conn, 
+        $currentEmail, 
+        "✍️ New Quiz: " . $quiz_title, 
+        "Status: " . $status . ". Good luck!",
+        $quizLink // <--- Add this here
+    );
+}
         $checkSub->close();
 
         // B. Send Email if Push failed OR Force Email is checked

@@ -137,14 +137,17 @@ $evalLink = $cleanBaseUrl . "/learner_dashboard.php?page=learner_evaluations.php
 </body>
 </html>';
 
-        // Get all learners in the class
         $learnersQuery = $conn->prepare("
-            SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
-            FROM users u
-            JOIN class_students cs ON u.email = cs.student_email
-            WHERE cs.class_id = ? AND u.role = 'learner'
-        ");
-        $learnersQuery->bind_param("i", $class_id);
+    SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+    FROM users u
+    JOIN class_students cs ON u.email = cs.student_email
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this line */
+    AND u.role = 'learner'
+");
+
+// Update to "ii" and add the year variable
+$learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
         $learnersQuery->execute();
         $learnersResult = $learnersQuery->get_result();
 

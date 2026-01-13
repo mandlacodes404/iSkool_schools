@@ -171,12 +171,16 @@ file_put_contents('url_test.txt', "Link sent: " . $assignmentLink . PHP_EOL, FIL
 
     // Get all learners in the class
     $learnersQuery = $conn->prepare("
-        SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
-        FROM users u
-        JOIN class_students cs ON u.email = cs.student_email
-        WHERE cs.class_id = ? AND u.role = 'learner'
-    ");
-    $learnersQuery->bind_param("i", $class_id);
+    SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+    FROM users u
+    JOIN class_students cs ON u.email = cs.student_email
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this filter */
+    AND u.role = 'learner'
+");
+
+// Update bind_param to include the year variable
+$learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
     $learnersQuery->execute();
     $learnersResult = $learnersQuery->get_result();
 

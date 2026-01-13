@@ -103,14 +103,18 @@ $learnerDiscussionLink = $cleanBaseUrl . "/learner_dashboard.php?page=discussion
 
         // --- NOTIFICATIONS START ---
 
-        // 1. Notify Classmates (Push then Email if push fails)
-        $classmatesQuery = $conn->prepare("
-            SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
-            FROM users u
-            JOIN class_students cs ON u.email = cs.student_email
-            WHERE cs.class_id = ? AND u.role = 'learner' AND u.email != ?
-        ");
-        $classmatesQuery->bind_param("is", $class_id, $learner_email);
+        // Use the $current_year_id we fetched at the top
+$classmatesQuery = $conn->prepare("
+    SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
+    FROM users u
+    JOIN class_students cs ON u.email = cs.student_email
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this */
+    AND u.role = 'learner' 
+    AND u.email != ?
+");
+// Bind three parameters: class_id (i), year_id (i), and learner_email (s)
+$classmatesQuery->bind_param("iis", $class_id, $current_year_id, $learner_email);
         $classmatesQuery->execute();
         $classmatesResult = $classmatesQuery->get_result();
 

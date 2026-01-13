@@ -95,14 +95,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resource'])) {
 
                 $message = "Resource uploaded successfully!";
 
-                // Notify learners in that class
                 $userQuery = $conn->prepare("
-                    SELECT u.email, u.name 
-                    FROM users u
-                    JOIN class_students cs ON u.email = cs.student_email
-                    WHERE cs.class_id = ? AND u.role = 'learner'
-                ");
-                $userQuery->bind_param("i", $classId);
+    SELECT u.email, u.name 
+    FROM users u
+    JOIN class_students cs ON u.email = cs.student_email
+    WHERE cs.class_id = ? 
+    AND cs.academic_year_id = ?  /* <--- Add this line */
+    AND u.role = 'learner'
+");
+// Bind both the class ID and the current academic year ID
+$userQuery->bind_param("ii", $classId, $current_academic_year_id);
                 $userQuery->execute();
                 $learners = $userQuery->get_result();
 
