@@ -3,6 +3,9 @@ session_start();
 require_once 'config.php';
 require_once 'remember_me_functions.php'; // --- ADDED THIS ---
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 // --- Registration Logic ---
 if (isset($_POST['register'])) {
     $title      = trim($_POST['title'] ?? '');
@@ -63,9 +66,47 @@ if (isset($_POST['register'])) {
     $stmt->bind_param("ssssssssi", $title, $first_name, $surname, $email, $password, $role, $defaultPic, $gender, $age);
 
     if ($stmt->execute()) {
+        // --- START WELCOME EMAIL ---
+        require 'vendor/autoload.php';
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'iskool.online';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'support@iskool.online';
+            $mail->Password   = 'ogeQkRitRfdy'; // Use your support@iskool.online pass
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+
+            $mail->setFrom('support@iskool.online', 'iSkool Support');
+            $mail->addAddress($email, $first_name);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Welcome to iSkool, ' . $first_name . '!';
+            $mail->Body    = "
+                <div style='font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
+                    <h2 style='color: #00ff99;'>Welcome to iSkool!</h2>
+                    <p>Hi $first_name,</p>
+                    <p>Your account has been successfully created. We are excited to have you on board!</p>
+                    <p><strong>Your School:</strong> " . $_SERVER['HTTP_HOST'] . "</p>
+                    <p><strong>Your Role:</strong> $role</p>
+                    <br>
+                    <a href='https://" . $_SERVER['HTTP_HOST'] . "' style='background: #000; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 25px; font-weight: bold;'>Login to your Dashboard</a>
+                    <br><br>
+                    <p style='font-size: 12px; color: #888;'>If you didn't register for this account, please contact us at support@iskool.online.</p>
+                </div>
+            ";
+            $mail->send();
+        } catch (Exception $e) {
+            // Silently fail if email doesn't send so the user can still log in
+        }
+        // --- END WELCOME EMAIL ---
+
         header("Location: registration_success.php");
         exit();
-    } else {
+    }
+    else {
         $_SESSION['register_error'] = 'Registration failed. Please try again.';
         $_SESSION['active_form'] = 'register';
         header("Location: index.php");

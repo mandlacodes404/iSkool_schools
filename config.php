@@ -8,17 +8,17 @@ date_default_timezone_set('Africa/Johannesburg');
 
 // ────── DATABASE CREDENTIALS (change only when you go live) ──────
 $host     = "localhost";
-$user     = "root";
-$password = "";
-$db_prefix = "iskool_";               // ← all school databases start with this
+$user     = "iskowdbw";               // ← your cPanel database username
+$password = "ogeQkRitRfdy";                       // ← fill in your real password when going live
+$cpanel_prefix = "iskowdbw_";         // ← forced by your hosting (keep this)
 
 // ────── 1. Detect where we are running ──────
 $host_name = $_SERVER['HTTP_HOST'] ?? 'localhost';  // e.g. sandtonhigh.iskool.online or localhost
 
 // ────── 2. LOCALHOST TESTING MODE (delete these lines when you go live) ──────
 if ($host_name === 'localhost' || $host_name === '127.0.0.1' || strpos($host_name, 'iskool.test') !== false) {
-    // CHANGE THIS LINE ONLY when you want to test a different school locally
-    $database = "iskool_sandtonhigh";   // ← switch to iskool_landulwazi, iskool_thokothaba, etc.
+    // For local testing, you can name databases freely — match live style for consistency
+    $database = "iskowdbw_sandtonhigh";   // ← change to iskowdbw_landulwazi, etc. when testing other schools
 }
 // ────── 3. LIVE MODE – automatic subdomain detection ──────
 else {
@@ -30,8 +30,8 @@ else {
         die("<h2 style='text-align:center; margin-top:10%; font-family:Arial;'>Welcome to iSkool<br><small>Please use your school address (e.g. yourschool.iskool.online)</small></h2>");
     }
 
-    // Build correct database name automatically
-    $database = $db_prefix . $subdomain;   // ← THIS IS THE MAGIC LINE
+    // Build database name: cpanel_prefix + subdomain → e.g. iskowdbw_sandtonhigh
+    $database = $cpanel_prefix . $subdomain;
 }
 
 // ────── 4. Connect to the correct school's database ──────
@@ -50,4 +50,10 @@ $conn->set_charset("utf8mb4");
 
 // Optional: store school info in session (useful later)
 $_SESSION['current_school_db'] = $database;
+
+
+// ────── 5. LIVE BASE URL DETECTION ──────
+// Since you are live, we force HTTPS and use the current host name
+$base_url = "https://" . $_SERVER['HTTP_HOST'] . "/";
+define('BASE_URL', $base_url);
 ?>

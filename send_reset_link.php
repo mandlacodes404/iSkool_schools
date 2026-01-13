@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 $email = trim($_POST['email']);
 
-// Check if user exists
+// 1. Check if user exists
 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -19,40 +19,58 @@ if ($userResult->num_rows === 0) {
     exit();
 }
 
-// Create token & expiry
+// 2. Create token & expiry
 $token = bin2hex(random_bytes(32));
-$expires_at = date("Y-m-d H:i:s", time() + 3600); // 1 hour from now
+$expires_at = date("Y-m-d H:i:s", time() + 3600);
 
-// Store token
+// 3. Store token
 $stmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
 $stmt->bind_param("sss", $email, $token, $expires_at);
 $stmt->execute();
 
-// Send email
-$resetLink = "http://localhost/servicePortal/reset_password.php?token=$token";
+// 4. Generate the dynamic Reset Link (Automatically uses the current school's subdomain)
+$resetLink = BASE_URL . "reset_password.php?token=$token";
 
+// 5. Send email via iSkool Server
 $mail = new PHPMailer(true);
-$mail->isSMTP();
-$mail->Host = 'smtp.gmail.com';
-$mail->SMTPAuth = true;
-$mail->Username = 'mandlasimphiwe99@gmail.com';
-$mail->Password = 'qbfn gpyq gmuh fyyx';
-$mail->SMTPSecure = 'tls';
-$mail->Port = 587;
 
-$mail->setFrom('mandlasimphiwe99@gmail.com', 'iSkool Password Reset');
-$mail->addAddress($email);
-$mail->isHTML(true);
-$mail->Subject = 'Reset Your iSkool Password';
-$mail->Body = "
-    <p>Hi there,</p>
-    <p>Click the button below to reset your password. This link will expire in 1 hour:</p>
-    <a href='$resetLink' style='padding: 10px 15px; background: #00bfff; color: white; text-decoration: none; border-radius: 6px;'>Reset Password</a>
-    <p>If you didn't request this, you can ignore this email.</p>
-";
+try {
+    $mail->isSMTP();
+    $mail->Host       = 'iskool.online'; // Check your hosting for the exact SMTP host
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'support@iskool.online';
+    $mail->Password   = 'ogeQkRitRfdy'; // The password for support@iskool.online
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Using SSL
+    $mail->Port       = 465;
 
-$mail->send();
+    $mail->setFrom('support@iskool.online', 'iSkool Support');
+    $mail->addAddress($email);
 
-$_SESSION['reset_message'] = "Reset link sent to your email.";
+    $mail->isHTML(true);
+    $mail->Subject = 'Reset Your iSkool Password';
+    
+    // Modernized email body to match your new Gemini-style UI
+    $mail->Body = "
+        <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+            <h2>Password Reset Request</h2>
+            <p>Hi there,</p>
+            <p>We received a request to reset your password for your iSkool account. Click the button below to proceed:</p>
+            <div style='margin: 30px 0;'>
+                <a href='$resetLink' style='padding: 14px 25px; background: #000; color: #fff; text-decoration: none; border-radius: 25px; font-weight: bold;'>Reset Password</a>
+            </div>
+            <p>This link will expire in 1 hour.</p>
+            <p>If you didn't request this, you can safely ignore this email.</p>
+            <hr style='border: none; border-top: 1px solid #eee; margin-top: 30px;'>
+            <p style='font-size: 12px; color: #888;'>Sent from iSkool Support - " . $_SERVER['HTTP_HOST'] . "</p>
+        </div>
+    ";
+
+    $mail->send();
+    $_SESSION['reset_message'] = "Reset link sent to your email.";
+
+} catch (Exception $e) {
+    $_SESSION['reset_error'] = "Email could not be sent. Please try again later.";
+}
+
 header("Location: forgot_password.php");
 exit();
