@@ -60,7 +60,7 @@ switch ($sort) {
 //               Fetch results with student names (School Logic Removed)
 // ——————————————————————————————————————————————————————————————————————————————
 $stmt = $conn->prepare("
-    SELECT qr.id AS result_id, u.name AS student_name, qr.score, qr.total, qr.time_taken, qr.submitted_at 
+    SELECT qr.id AS result_id, u.name AS student_name, u.surname AS student_surname, qr.score, qr.total, qr.time_taken, qr.submitted_at 
     FROM quiz_results qr
     JOIN users u ON qr.user_email = u.email
     WHERE qr.quiz_id = ?
@@ -94,7 +94,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     while ($row = $exportResults->fetch_assoc()) {
         $percentage = ($row['total'] > 0) ? round(($row['score'] / $row['total']) * 100) . '%' : 'N/A';
         fputcsv($output, [
-            $row['student_name'],
+           $row['student_name'] . ' ' . $row['student_surname'], // Combined here
             $row['score'],
             $row['total'],
             formatDuration($row['time_taken']),
@@ -316,7 +316,7 @@ function formatDuration($seconds) {
         </tr>
         <?php while ($row = $results->fetch_assoc()): ?>
             <tr>
-                <td><?= htmlspecialchars($row['student_name']) ?></td>
+                <td><?= htmlspecialchars($row['student_name'] . ' ' . $row['student_surname']) ?></td>
                 <td><?= htmlspecialchars($row['score']) ?></td>
                 <td><?= htmlspecialchars($row['total']) ?></td>
                 <td><?= formatDuration($row['time_taken']) ?></td>

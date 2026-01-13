@@ -229,17 +229,19 @@ $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.
 
                     $classId = $assignment['class_id'];
                     $assignmentId = $assignment['id'];
-                    // Fetch learners joined with users to get names
-                    $learnersStmt = $conn->prepare("
-                        SELECT u.email, u.name 
-                        FROM class_students cs 
-                        JOIN users u ON cs.student_email = u.email 
-                        WHERE cs.class_id = ?
-                        ORDER BY u.name ASC
-                    ");
-                    $learnersStmt->bind_param("i", $classId);
-                    $learnersStmt->execute();
-                    $learnersResult = $learnersStmt->get_result();
+                  // UPDATED: Added u.surname to the SELECT statement
+$learnersStmt = $conn->prepare("
+    SELECT DISTINCT u.email, u.name, u.surname 
+    FROM class_students cs 
+    JOIN users u ON cs.student_email = u.email 
+    WHERE cs.class_id = ? 
+      AND cs.academic_year_id = ? 
+    ORDER BY u.surname ASC, u.name ASC
+");
+// We order by surname first now, which is standard for class lists
+$learnersStmt->bind_param("ii", $classId, $current_academic_year_id);
+$learnersStmt->execute();
+$learnersResult = $learnersStmt->get_result();
 
                     while ($learner = $learnersResult->fetch_assoc()):
                         $learnerEmail = $learner['email'];
@@ -253,7 +255,7 @@ $schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName)); // e.
                         $submissionStmt->close();
                     ?>
                     <tr>
-                        <td><?= htmlspecialchars($learner['name']) ?></td>
+                        <td><?= htmlspecialchars($learner['name'] . ' ' . $learner['surname']) ?></td>
                         <td>
                             <?php if ($submission): ?>
                                 <span class="submitted">Yes</span><br>

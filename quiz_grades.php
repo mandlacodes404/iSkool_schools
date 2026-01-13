@@ -15,6 +15,17 @@ if (!isset($_GET['quiz_id'])) {
 $quizId = intval($_GET['quiz_id']);
 $search = $_GET['search'] ?? '';
 
+// --- NEW: GET CURRENT ACADEMIC YEAR ---
+$current_academic_year_id = null;
+$resYear = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($rowYear = $resYear->fetch_assoc()) {
+    $current_academic_year_id = $rowYear['id'];
+}
+
+if (!$current_academic_year_id) {
+    die("Error: No active academic year found. Please set one in the admin panel.");
+}
+
 // Step 1: Get the quiz title and class_id
 $stmtQuiz = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ?");
 $stmtQuiz->bind_param("i", $quizId);
@@ -29,28 +40,32 @@ $quizTitle = $quizData['title'];
 $classId = $quizData['class_id'];
 $stmtQuiz->close();
 
-// Step 2: Added DISTINCT to prevent duplicates from multiple years
+// Step 2: Improved SQL to use academic_year_id and fetch surname
 $sql = "
-    SELECT DISTINCT u.name AS user_name, u.email AS user_email, qr.score, qr.total
+    SELECT u.name AS user_name, u.surname AS user_surname, u.email AS user_email, qr.score, qr.total
     FROM users u
     JOIN class_students cs ON cs.student_email = u.email
     LEFT JOIN quiz_results qr ON qr.user_email = u.email AND qr.quiz_id = ?
-    WHERE cs.class_id = ? AND u.role = 'learner'
+    WHERE cs.class_id = ? 
+      AND cs.academic_year_id = ? 
+      AND u.role = 'learner'
 ";
 
 if (!empty($search)) {
-    $sql .= " AND u.name LIKE ?";
+    $sql .= " AND (u.name LIKE ? OR u.surname LIKE ?)";
 }
 
-$sql .= " ORDER BY u.name ASC";
+$sql .= " ORDER BY u.surname ASC, u.name ASC";
 
 $stmt = $conn->prepare($sql);
 
 if (!empty($search)) {
     $like = '%' . $search . '%';
-    $stmt->bind_param("iis", $quizId, $classId, $like);
+    // We bind 5 parameters now: quizId, classId, yearId, like(name), like(surname)
+    $stmt->bind_param("iiiss", $quizId, $classId, $current_academic_year_id, $like, $like);
 } else {
-    $stmt->bind_param("ii", $quizId, $classId);
+    // We bind 3 parameters: quizId, classId, yearId
+    $stmt->bind_param("iii", $quizId, $classId, $current_academic_year_id);
 }
 
 $stmt->execute();
@@ -222,7 +237,7 @@ $results->data_seek(0); // Reset result pointer for table rendering
             <tbody>
                 <?php while ($row = $results->fetch_assoc()): ?>
                     <tr>
-                        <td><?= htmlspecialchars($row['user_name']) ?></td>
+                        <td><?= htmlspecialchars($row['user_name'] . ' ' . $row['user_surname']) ?></td>
                         <td><?= isset($row['score']) && isset($row['total']) ? (htmlspecialchars($row['score']) . ' / ' . htmlspecialchars($row['total'])) : 'Not Attempted' ?></td>
                         <td><?= isset($row['score']) && isset($row['total']) && $row['total'] > 0 ? number_format($row['score'] / $row['total'] * 100, 2) . '%' : 'Not Attempted' ?></td>
                         <td>
@@ -250,7 +265,7 @@ $results->data_seek(0); // Reset result pointer for table rendering
                     ? number_format($learner['score'] / $learner['total'] * 100, 2) . '%'
                     : 'Not Attempted';
                 $csvData[] = [
-                    'name' => $learner['user_name'],
+                    'name' => $learner['user_name'] . ' ' . $learner['user_surname'],
                     'score' => isset($learner['score']) && isset($learner['total']) 
                         ? $learner['score'] . '/' . $learner['total']
                         : 'Not Attempted',
