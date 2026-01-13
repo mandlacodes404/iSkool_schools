@@ -20,6 +20,9 @@ $current_global_term = $conn->query("SELECT current_global_term FROM platform_se
 // Get all classes
 $classes = $conn->query("SELECT id, name FROM classes ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
+ // Fetch default statements to show in the UI preview
+$default_statements = $conn->query("SELECT statement FROM evaluation_statements WHERE evaluation_id = 1 ORDER BY order_num ASC")->fetch_all(MYSQLI_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
     $description = trim($_POST['description'] ?? '');
@@ -54,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         }
 
+       
         // ────────────────────────────────────────────────────────────────────────
         // EMAIL NOTIFICATIONS: Only Learners in the Class
         // ────────────────────────────────────────────────────────────────────────
@@ -268,6 +272,22 @@ $learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
 
         <label><input type="checkbox" name="use_default" checked> Use default questions (recommended)</label>
 
+        <small style="margin-top: 10px; display: block;">
+        <a href="javascript:void(0)" onclick="toggleDefaultPreview()" style="color: #4fd1c5; text-decoration: none;">
+            <i class="fas fa-eye"></i> View default questions
+        </a>
+    </small>
+
+    <div id="defaultPreview" style="display: none; margin-top: 15px; padding-left: 20px; border-top: 1px solid #30363d; padding-top: 10px;">
+        <ul style="margin: 0; padding: 0; list-style: none; font-size: 0.9em; color: #8b949e;">
+            <?php foreach ($default_statements as $index => $ds): ?>
+                <li style="margin-bottom: 8px;">
+                    <span style="color: #4fd1c5;"><?= $index + 1 ?>.</span> <?= htmlspecialchars($ds['statement']) ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+
         <div id="statements">
             <p><strong>Questions:</strong> (Edit or add more below)</p>
             <!-- Dynamic statements will be added via JS if not using default -->
@@ -302,6 +322,15 @@ function addStatement() {
         <textarea name="statements[${count}]" rows="2" placeholder="Enter question..."></textarea>
     `;
     div.appendChild(el);
+}
+
+function toggleDefaultPreview() {
+    const preview = document.getElementById('defaultPreview');
+    if (preview.style.display === 'none') {
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
 }
 </script>
 </body>

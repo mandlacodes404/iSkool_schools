@@ -8,19 +8,30 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $teacher_email = $_SESSION['email'];
 
-// Get teacher's evaluations grouped by class
+// 1. Get current academic year as default
+$current_year_res = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1")->fetch_assoc();
+$current_year_id = $current_year_res['id'] ?? 0;
+
+// 2. Handle user-selected year (from a dropdown)
+$selected_year_id = isset($_GET['year_id']) ? (int)$_GET['year_id'] : $current_year_id;
+
+// 3. Get all years for the filter dropdown
+$all_years = $conn->query("SELECT id, name FROM academic_years ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
+
+// 4. Update SQL to filter by teacher AND selected year
 $sql = "
     SELECT te.*, c.name as class_name, COUNT(er.id) as response_count
     FROM teacher_evaluations te
     JOIN classes c ON te.class_id = c.id
     LEFT JOIN evaluation_responses er ON te.id = er.evaluation_id
-    WHERE te.created_by = ?
+    WHERE te.created_by = ? 
+    AND te.academic_year_id = ?
     GROUP BY te.id
     ORDER BY c.name, te.created_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $teacher_email);
+$stmt->bind_param("si", $teacher_email, $selected_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -106,6 +117,22 @@ $stmt->close();
 <div class="container">
     <h1><i class="fas fa-chart-bar"></i> My Evaluation Results</h1>
 
+    <div class="filter-section" style="margin-bottom: 30px; background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d;">
+        <form method="GET" style="display: flex; align-items: center; gap: 15px;">
+            <label style="font-weight: bold; color: #4fd1c5;">Academic Year:</label>
+            <select name="year_id" onchange="this.form.submit()" style="padding: 8px 15px; border-radius: 8px; background: #0d1117; color: white; border: 1px solid #30363d;">
+                <?php foreach ($all_years as $year): ?>
+                    <option value="<?= $year['id'] ?>" <?= $year['id'] == $selected_year_id ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($year['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if ($selected_year_id != $current_year_id): ?>
+                <span style="color: #ffd43b; font-size: 0.9em;"><i class="fas fa-history"></i> Viewing Archived Data</span>
+            <?php endif; ?>
+        </form>
+    </div>
+    
     <?php if (empty($grouped)): ?>
         <p style="text-align:center; font-size:18px; opacity:0.8;">You haven't released any evaluations yet.</p>
     <?php else: foreach ($grouped as $class_name => $evals): ?>
@@ -114,6 +141,7 @@ $stmt->close();
                 <h2><?= htmlspecialchars($class_name) ?> (<?= count($evals) ?> evaluation<?= count($evals)>1?'s':'' ?>)</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
+            
             <div class="evaluations-list">
                 <?php foreach ($evals as $eval):
                     $eval_id = $eval['id'];

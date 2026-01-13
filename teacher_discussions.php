@@ -2,34 +2,52 @@
 session_start();
 require_once 'config.php';
 
+$current_academic_year_id = null;
+$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($row = $result->fetch_assoc()) {
+    $current_academic_year_id = $row['id'];
+}
+
+if (!$current_academic_year_id) {
+    die("No active academic year found. Please contact admin.");
+}
+
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php"); exit();
 }
 
 $teacher_email = $_SESSION['email'];
 
-// Get teacher's tagged discussions with class name
-$discussions = $conn->query("
+$stmt = $conn->prepare("
     SELECT d.*, c.name as class_name, COUNT(r.id) as reply_count
     FROM class_discussions d
     JOIN discussion_teachers dt ON d.id = dt.discussion_id
     JOIN classes c ON d.class_id = c.id
     LEFT JOIN discussion_replies r ON d.id = r.discussion_id
-    WHERE dt.teacher_email = '$teacher_email'
+    WHERE dt.teacher_email = ? 
+    AND d.academic_year_id = ? 
     GROUP BY d.id
     ORDER BY d.created_at DESC
-")->fetch_all(MYSQLI_ASSOC);
+");
+$stmt->bind_param("si", $teacher_email, $current_academic_year_id);
+$stmt->execute();
+$discussions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
-// Get reports for teacher's tagged discussions
-$reports = $conn->query("
+$rptStmt = $conn->prepare("
     SELECT dr.*, d.title, r.message as reply_text, u.name as reporter_name
     FROM discussion_reports dr
     LEFT JOIN class_discussions d ON dr.discussion_id = d.id
     LEFT JOIN discussion_replies r ON dr.reply_id = r.id
     LEFT JOIN users u ON dr.reporter_email = u.email
-    WHERE d.id IN (SELECT discussion_id FROM discussion_teachers WHERE teacher_email = '$teacher_email')
+    WHERE d.academic_year_id = ? 
+    AND d.id IN (SELECT discussion_id FROM discussion_teachers WHERE teacher_email = ?)
     ORDER BY dr.reported_at DESC
-")->fetch_all(MYSQLI_ASSOC);
+");
+$rptStmt->bind_param("is", $current_academic_year_id, $teacher_email);
+$rptStmt->execute();
+$reports = $rptStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$rptStmt->close();
 
 // ——————— MOBILE DETECTION (same as learner side) ———————
 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';

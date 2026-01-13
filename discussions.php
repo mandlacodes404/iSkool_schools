@@ -21,16 +21,19 @@ $classStmt->close();
 
 if (!$class_id) die("Not enrolled.");
 
-// ────── SAFE QUERY FOR DISCUSSIONS ──────
+// ────── SAFE QUERY FOR DISCUSSIONS (YEAR AWARE) ──────
 $stmt = $conn->prepare("
     SELECT d.*, 
            CASE WHEN d.creator_anonymous = 1 THEN 'A classmate' ELSE COALESCE(u.name, 'Learner') END AS creator_display
     FROM class_discussions d
     LEFT JOIN users u ON d.creator_email = u.email
-    WHERE d.class_id = ?
+    WHERE d.class_id = ? 
+    AND d.academic_year_id = ?  /* <--- Add this filter */
     ORDER BY d.created_at DESC
 ");
-$stmt->bind_param("i", $class_id);
+
+// Bind both class_id and current_year_id
+$stmt->bind_param("ii", $class_id, $current_year_id);
 $stmt->execute();
 $discussions_result = $stmt->get_result();
 $discussions = $discussions_result->fetch_all(MYSQLI_ASSOC);
