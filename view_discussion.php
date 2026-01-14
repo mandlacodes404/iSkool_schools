@@ -53,11 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
         $replier_full_name = $anonymous ? NULL : trim(($_SESSION['name'] ?? '') . ' ' . ($_SESSION['surname'] ?? ''));
 
-        // Fixed path: lowercase 'uploads'
-        $upload_dir = 'uploads/discussions/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
+        // This ensures it uses the uploads folder in your main project root
+$upload_dir = __DIR__ . '/uploads/discussions/';
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir, 0755, true);
+}
 
         // Handle file upload
         if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
@@ -462,23 +462,42 @@ textarea {
 
     <div class="chat-container" id="chat">
         <!-- Initial Message -->
-        <div class="message <?= $disc['creator_email'] === $user_email ? 'me' : '' ?>" data-id="0">
-            <?php if (!($disc['creator_anonymous'] && $user_role === 'learner')): ?>
-              <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>" class="avatar">
-             <?php endif; ?>
-            <div>
-                <div class="bubble" onclick="toggleActions(this.parentElement.parentElement)">
-                    <strong><?= htmlspecialchars($creator_display) ?></strong><br>
-                    <?= nl2br(htmlspecialchars($disc['initial_message'])) ?>
+       <div class="message <?= $disc['creator_email'] === $user_email ? 'me' : '' ?>" data-id="0">
+    <?php if (!($disc['creator_anonymous'] && $user_role === 'learner')): ?>
+        <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>" class="avatar">
+    <?php endif; ?>
+    <div>
+        <div class="bubble" onclick="toggleActions(this.parentElement.parentElement)">
+            <strong><?= htmlspecialchars($creator_display) ?></strong><br>
+            <?= nl2br(htmlspecialchars($disc['initial_message'])) ?>
+
+            <?php if (!empty($disc['attachment'])): 
+                $ext = strtolower(pathinfo($disc['attachment'], PATHINFO_EXTENSION));
+                $path = 'uploads/discussions/' . $disc['attachment'];
+            ?>
+                <div class="attachment" style="margin-top: 10px;">
+                    <?php if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+                        <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();">
+                            <img src="<?= $path ?>" alt="Attached image" style="max-width: 100%; border-radius: 8px;">
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--accent); background: rgba(138, 180, 248, 0.1); padding: 10px; border-radius: 8px;">
+                            <i class="fas fa-file-pdf fa-2x"></i>
+                            <span style="font-size: 13px;">View PDF Document</span>
+                        </a>
+                    <?php endif; ?>
                 </div>
-                <div class="message-info"><?= date('M j, g:i a', strtotime($disc['created_at'])) ?></div>
-            </div>
-            <div class="message-actions">
-                <button onclick="event.stopPropagation(); setReply(0)"><i class="fas fa-reply"></i> Reply</button>
-                <?php if ($user_role === 'learner'): ?>
-                    <button onclick="event.stopPropagation(); showReportForm(0, <?= $disc_id ?>)"><i class="fas fa-flag"></i> Report</button>
-                <?php endif; ?>
-            </div>
+            <?php endif; ?>
+        </div>
+        <div class="message-info"><?= date('M j, g:i a', strtotime($disc['created_at'])) ?></div>
+    </div>
+    
+    <div class="message-actions">
+        <button onclick="event.stopPropagation(); setReply(0)"><i class="fas fa-reply"></i> Reply</button>
+        <?php if ($user_role === 'learner' && $disc['creator_email'] !== $user_email): ?>
+            <button onclick="event.stopPropagation(); showReportForm(0, <?= $disc_id ?>)"><i class="fas fa-flag"></i> Report</button>
+        <?php endif; ?>
+    </div>
         </div>
 
         <!-- Replies -->

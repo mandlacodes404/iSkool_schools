@@ -193,6 +193,6 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
         <p>If you're stuck or unsure about a feature, please contact your school admin or email <strong>support@iskool.online</strong>.</p>
     </div>
 
-    <footer>iSkool v.1.0.0</footer>
+    
 </body>
 </html>

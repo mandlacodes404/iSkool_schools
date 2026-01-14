@@ -23,38 +23,57 @@ if (!$class_id) die("Not enrolled in a class.");
 
 $message = "";
 
-// Fetch all teachers registered in this school/database
-$teachers = $conn->query("
-    SELECT email, CONCAT(COALESCE(title,''), ' ', surname, ' (', name, ')') AS display_name
-    FROM users 
-    WHERE role = 'teacher'
-    ORDER BY surname ASC
-")->fetch_all(MYSQLI_ASSOC);
-
-if (empty($teachers)) {
-    $message = "No teachers found for your class. Contact admin.";
-}
+// Fetch teachers logic remains same...
+$teachers = $conn->query("SELECT email, CONCAT(COALESCE(title,''), ' ', surname, ' (', name, ')') AS display_name FROM users WHERE role = 'teacher' ORDER BY surname ASC")->fetch_all(MYSQLI_ASSOC);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
     $message_text = trim($_POST['message']);
     $anonymous = !empty($_POST['anonymous']);
     $tagged_teachers = $_POST['teachers'] ?? [];
+    
+    // --- NEW: FILE UPLOAD LOGIC ---
+    $attachment_name = null;
+    if (!empty($_FILES['attachment']['name'])) {
+        $target_dir = "uploads/discussions/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+
+        $file_ext = strtolower(pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION));
+        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+
+        if (in_array($file_ext, $allowed)) {
+            $attachment_name = "disc_" . time() . "_" . uniqid() . "." . $file_ext;
+            move_uploaded_file($_FILES['attachment']['tmp_name'], $target_dir . $attachment_name);
+        } else {
+            $message = "Invalid file type. Only PDFs and Images allowed.";
+        }
+    }
 
     if (empty($title) || empty($message_text) || empty($tagged_teachers)) {
         $message = "Please fill all fields and tag at least one teacher.";
-    } else {
+    } elseif (!$message) { // Only proceed if no upload error
         $learner_name = $_SESSION['name'] ?? '';
         $learner_surname = $_SESSION['surname'] ?? '';
         $creator_full_name = $anonymous ? NULL : trim($learner_name . ' ' . $learner_surname);
 
-        // Insert discussion
         $stmt = $conn->prepare("
             INSERT INTO class_discussions 
-            (title, initial_message, class_id, creator_email, creator_anonymous, creator_name) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            (title, initial_message, class_id, creator_email, creator_anonymous, creator_name, attachment, academic_year_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("ssisis", $title, $message_text, $class_id, $learner_email, $anonymous, $creator_full_name);
+        
+        // We added one 's' (for attachment) and one 'i' (for academic_year_id)
+        // types: s (title), s (msg), i (class), s (email), i (anon), s (name), s (attach), i (year)
+        $stmt->bind_param("ssisissi", 
+            $title, 
+            $message_text, 
+            $class_id, 
+            $learner_email, 
+            $anonymous, 
+            $creator_full_name, 
+            $attachment_name,
+            $current_year_id
+        );
         $stmt->execute();
         $disc_id = $stmt->insert_id;
         $stmt->close();
@@ -235,7 +254,7 @@ $classmatesQuery->bind_param("iis", $class_id, $current_year_id, $learner_email)
         </p>
     <?php endif; ?>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <label>Discussion Title *</label>
         <input type="text" name="title" required placeholder="e.g. Help with Quadratic Equations" value="<?= htmlspecialchars($_POST['title'] ?? '') ?>">
 
@@ -261,6 +280,12 @@ $classmatesQuery->bind_param("iis", $class_id, $current_year_id, $learner_email)
                 Post anonymously (classmates won't see your name)
             </label>
         </div>
+
+        <label><i class="fas fa-paperclip"></i> Add Attachment (Optional)</label>
+<div style="background: #0d1117; padding: 15px; border: 1px dashed #30363d; border-radius: 10px; text-align: center;">
+    <input type="file" name="attachment" id="attachment" accept=".pdf,image/*" style="color: #8b949e;">
+    <p style="font-size: 12px; color: #8b949e; margin-top: 8px;">Max size 5MB. PDF or Images only.</p>
+</div>
 
         <button type="submit"><i class="fas fa-paper-plane"></i> Create Discussion</button>
     </form>
