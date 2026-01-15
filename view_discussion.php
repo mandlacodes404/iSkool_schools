@@ -23,14 +23,14 @@ $creator_query = $conn->query("SELECT profile_picture FROM users WHERE email = '
 $creator_row = $creator_query->fetch_assoc();
 $creator_pic = $creator_row['profile_picture'] ?? 'default.png';
 $creator_display = $disc['creator_anonymous'] && $user_role === 'learner' 
-    ? 'A classmate' 
+    ? 'Anonymous' 
     : ($disc['creator_name'] ?: 'Learner');
 
 // Get replies safely
 $replies_query = $conn->query("
     SELECT r.*, u.profile_picture,
            CASE 
-               WHEN r.replier_anonymous = 1 AND '$user_role' = 'learner' THEN 'A classmate'
+               WHEN r.replier_anonymous = 1 AND '$user_role' = 'learner' THEN 'Anonymous'
                ELSE COALESCE(r.replier_name, 'Learner')
            END AS replier_display,
            (r.replier_email = '$user_email') AS is_me
@@ -421,10 +421,64 @@ textarea {
 }
 
 @media (min-width: 769px) {
-    /* On desktop, we can make the navigation feel more integrated */
+    /* Hide the top navigation bar on desktop screens */
     .top-nav {
-        padding: 15px 40px;
+        display: none !important;
     }
+}
+
+/* Media Overlay Layer */
+#mediaOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999; /* Higher than top-nav */
+    flex-direction: column;
+}
+
+#mediaOverlay .overlay-nav {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0,0,0,0.5);
+}
+
+#mediaOverlay .overlay-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 20px;
+}
+
+#mediaOverlay img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#mediaOverlay iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+.close-media {
+    background: var(--accent);
+    color: #131314;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
    </style>
 </head>
@@ -442,7 +496,7 @@ textarea {
 <div id="infoModal" class="info-modal" onclick="toggleInfoModal()">
     <div class="info-modal-content" onclick="event.stopPropagation()">
         <h3>Privacy & Anonymity</h3>
-        <p>Questions can be anonymous to classmates, but the tagged teacher can always see names for moderation purposes.</p>
+        <p>Questions can posted as Anonymous, but the tagged teacher can always see names for moderation purposes.</p>
         <button onclick="toggleInfoModal()">Got it</button>
     </div>
 </div>
@@ -471,23 +525,25 @@ textarea {
             <strong><?= htmlspecialchars($creator_display) ?></strong><br>
             <?= nl2br(htmlspecialchars($disc['initial_message'])) ?>
 
-            <?php if (!empty($disc['attachment'])): 
-                $ext = strtolower(pathinfo($disc['attachment'], PATHINFO_EXTENSION));
-                $path = 'uploads/discussions/' . $disc['attachment'];
-            ?>
-                <div class="attachment" style="margin-top: 10px;">
-                    <?php if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-                        <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();">
-                            <img src="<?= $path ?>" alt="Attached image" style="max-width: 100%; border-radius: 8px;">
-                        </a>
-                    <?php else: ?>
-                        <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--accent); background: rgba(138, 180, 248, 0.1); padding: 10px; border-radius: 8px;">
-                            <i class="fas fa-file-pdf fa-2x"></i>
-                            <span style="font-size: 13px;">View PDF Document</span>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
+            
+           <?php if (!empty($disc['attachment'])): 
+    $ext = strtolower(pathinfo($disc['attachment'], PATHINFO_EXTENSION));
+    $path = 'uploads/discussions/' . $disc['attachment'];
+    $is_image = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+?>
+    <?php if ($is_image): ?>
+        <div class="attachment" onclick="openMedia('<?= $path ?>', 'image'); event.stopPropagation();">
+            <img src="<?= $path ?>" alt="Attached image" style="cursor: pointer;">
+        </div>
+    <?php else: ?>
+        <div class="attachment" onclick="openMedia('<?= $path ?>', 'pdf'); event.stopPropagation();" style="cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(138, 180, 248, 0.1); padding: 10px; border-radius: 8px;">
+                <i class="fas fa-file-pdf fa-2x"></i>
+                <span style="font-size: 13px;">Open PDF Document</span>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
         </div>
         <div class="message-info"><?= date('M j, g:i a', strtotime($disc['created_at'])) ?></div>
     </div>
@@ -531,23 +587,24 @@ textarea {
                     <div class="bubble" onclick="toggleActions(this.parentElement.parentElement)">
                         <strong><?= htmlspecialchars($r['replier_display']) ?></strong><br>
                         <?= nl2br(htmlspecialchars($r['message'] ?? '')) ?>
-                        <?php if ($r['attachment']):
-                            $ext = pathinfo($r['attachment'], PATHINFO_EXTENSION);
-                            $path = 'uploads/discussions/' . $r['attachment'];
-                        ?>
-                            <div class="attachment">
-                                <?php if (in_array($ext, ['jpg','jpeg','png','gif'])): ?>
-                                    <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();">
-                                        <img src="<?= $path ?>" alt="Attached image">
-                                    </a>
-                                <?php else: ?>
-                                    <a href="<?= $path ?>" target="_blank" onclick="event.stopPropagation();">
-                                        <i class="fas fa-file-pdf fa-2x"></i><br>
-                                        View PDF Document
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                       <?php if (!empty($r['attachment'])): 
+    $ext = strtolower(pathinfo($r['attachment'], PATHINFO_EXTENSION));
+    $path = 'uploads/discussions/' . $r['attachment'];
+    $is_image = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+?>
+    <?php if ($is_image): ?>
+        <div class="attachment" onclick="openMedia('<?= $path ?>', 'image'); event.stopPropagation();">
+            <img src="<?= $path ?>" alt="Attached image" style="cursor: pointer;">
+        </div>
+    <?php else: ?>
+        <div class="attachment" onclick="openMedia('<?= $path ?>', 'pdf'); event.stopPropagation();" style="cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(138, 180, 248, 0.1); padding: 10px; border-radius: 8px;">
+                <i class="fas fa-file-pdf fa-2x"></i>
+                <span style="font-size: 13px;">Open PDF Document</span>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
                     </div>
                     <div class="message-info"><?= date('M j, g:i a', strtotime($r['created_at'])) ?></div>
                 </div>
@@ -704,6 +761,44 @@ textarea {
                 window.location.href = '<?php echo $_SESSION['role'] === 'teacher' ? 'teacher_dashboard.php' : 'learner_dashboard.php'; ?>?page=discussions.php';
             }
         }
+
+        function openMedia(path, type) {
+    const overlay = document.getElementById('mediaOverlay');
+    const content = document.getElementById('mediaContent');
+    overlay.style.display = 'flex';
+    
+    if (type === 'image') {
+        content.innerHTML = `<img src="${path}" alt="Preview">`;
+    } else {
+        // For PDFs, we use an iframe
+        content.innerHTML = `<iframe src="${path}"></iframe>`;
+    }
+    
+    // Push a "fake" state to browser history so the hardware back button works!
+    history.pushState({viewingMedia: true}, "");
+}
+
+function closeMedia() {
+    document.getElementById('mediaOverlay').style.display = 'none';
+    document.getElementById('mediaContent').innerHTML = '';
+}
+
+// Handle the hardware back button on Android/iOS
+window.onpopstate = function(event) {
+    if (document.getElementById('mediaOverlay').style.display === 'flex') {
+        closeMedia();
+    }
+};
     </script>
+
+    <div id="mediaOverlay">
+    <div class="overlay-nav">
+        <button class="close-media" onclick="closeMedia()">
+            <i class="fas fa-arrow-left"></i> Back to Chat
+        </button>
+    </div>
+    <div class="overlay-content" id="mediaContent">
+        </div>
+</div>
 </body>
 </html>
