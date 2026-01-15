@@ -1361,7 +1361,6 @@ function sendToCatcher(subscription) {
     .then(res => res.json())
     .then(data => {
         console.log('Server response:', data);
-        alert('SUCCESS: iPhone Handshake Saved to Log!');
         if(document.getElementById('pushPromptContainer')) {
             document.getElementById('pushPromptContainer').style.display = 'none';
         }
@@ -1392,7 +1391,7 @@ function requestIphonePush() {
                     applicationServerKey: urlBase64ToUint8Array('BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w')
                 })
                 .then(subscription => {
-                    alert('Success! iPhone Registered.');
+                    
                     sendToCatcher(subscription);
                 })
                 .catch(err => {
