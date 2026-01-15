@@ -1135,6 +1135,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar        = document.querySelector(".sidebar");
     const myClassContent = document.getElementById("myClassContent");
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();
+    let loaderTimeout; // <--- ADD THIS LINE HERE
 
     // ────────────────────────────────────────────────────────────────────────
     // 1. SMART LOAD LOGIC (Deep Linking + Refresh Persistence)
@@ -1158,8 +1159,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
-            // 1. Show loader immediately
+           // Clear any previous timer to prevent multiple loaders
+        clearTimeout(loaderTimeout);
+
+        // SET A DELAY: Only show the loader if it takes longer than 250ms
+        loaderTimeout = setTimeout(() => {
             loader.style.display = 'flex';
+        }, 800);
 
             // 2. MOBILE AUTO-CLOSE: Remove active class and hide the overlay
             if (window.innerWidth <= 768) {
@@ -1177,7 +1183,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // LOADER: Hide when iframe finishes loading
     iframe?.addEventListener('load', () => {
-        loader.style.display = 'none';
+        // 1. CANCEL THE TIMER (This prevents the loader from showing for fast pages)
+    clearTimeout(loaderTimeout);
+
+    // 2. Hide it if it's already visible
+    loader.style.display = 'none';
         try {
             const win = iframe.contentWindow;
             const fullPage = win.location.pathname.split("/").pop() + win.location.search;

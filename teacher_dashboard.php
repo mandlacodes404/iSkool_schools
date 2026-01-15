@@ -389,6 +389,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let loaderTimeout;
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
     const icon = document.getElementById('toggleIcon');
@@ -423,7 +424,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Loader + Mobile Auto-Close
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
+           clearTimeout(loaderTimeout); // Reset any existing timer
+
+        loaderTimeout = setTimeout(() => {
             loader.style.display = 'flex';
+        }, 800); // 800ms delay
 
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('active');
@@ -436,6 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 2. SAVE STATE: Capture the iframe URL whenever it finishes loading
     // ——————————————————————————————————————————————————————————————————————————————
     iframe?.addEventListener('load', () => {
+        clearTimeout(loaderTimeout); // <--- ADD THIS LINE (Stops loader from showing)
         loader.style.display = 'none';
 
         try {
