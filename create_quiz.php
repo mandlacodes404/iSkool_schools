@@ -71,35 +71,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ob_end_flush();
         exit;
     }
+// ... after layout_mode ...
 $layout_mode = $_POST['layout_mode'] ?? 'single_page';
-    // Capture the shuffle checkbox (1 if checked, 0 if not)
-    $shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
+$shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
+$is_linear = isset($_POST['is_linear']) ? 1 : 0; // NEW: Capture Linear option
 
-    // 1. Updated SQL to include shuffle_questions
-    $stmt = $conn->prepare("
-        INSERT INTO quizzes 
-        (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+// 1. Updated SQL to include is_linear
+$stmt = $conn->prepare("
+    INSERT INTO quizzes 
+    (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions, is_linear) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
 
-    /**
-     * 2. Added one more "i" at the end of the string and added $shuffle_questions variable
-     */
-    $stmt->bind_param("siisiiisssdsi", 
-        $quiz_title, 
-        $duration, 
-        $publish_marks, 
-        $email, 
-        $class_id, 
-        $current_academic_year_id, 
-        $current_global_term, 
-        $start_time, 
-        $status, 
-        $is_summative, 
-        $weight_percent,
-        $layout_mode,
-        $shuffle_questions
-    );
+/**
+ * 2. Added "i" at the end for is_linear (integer 0 or 1)
+ */
+$stmt->bind_param("siisiiisssdsii", 
+    $quiz_title, 
+    $duration, 
+    $publish_marks, 
+    $email, 
+    $class_id, 
+    $current_academic_year_id, 
+    $current_global_term, 
+    $start_time, 
+    $status, 
+    $is_summative, 
+    $weight_percent,
+    $layout_mode,
+    $shuffle_questions,
+    $is_linear // NEW
+);
 
 if (!$stmt->execute()) {
     // This will help you see the EXACT error in your log if it fails again
@@ -587,6 +589,21 @@ input[type="radio"]:checked + .mode-card i {
     max-width: 450px;
     border: 1px solid #4fd1c5;
 }
+/* Add this to your <style> section */
+.layout-options label {
+    cursor: pointer;
+}
+
+/* This ensures when the hidden radio is checked, the card inside it glows */
+input[type="radio"]:checked + .mode-card {
+    border-color: #4fd1c5 !important;
+    background: rgba(79, 209, 197, 0.1) !important;
+    box-shadow: 0 0 10px rgba(79, 209, 197, 0.2);
+}
+
+input[type="radio"]:checked + .mode-card i {
+    color: #4fd1c5 !important;
+}
 </style>
 </head>
 <body>
@@ -671,23 +688,37 @@ input[type="radio"]:checked + .mode-card i {
     </div>
 </div>
 
-<div id="randomizeOption" style="display: none; margin-top: 15px; background: rgba(79, 209, 197, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #4fd1c5;">
-    <div class="checkbox-container" style="margin: 0;">
+<div id="multiPageOptions" style="display: none; margin-top: 15px; background: rgba(79, 209, 197, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed #4fd1c5;">
+    <h4 style="margin-top:0; color:#4fd1c5; font-size:0.9rem; text-transform:uppercase;">Multi-Page Security Settings</h4>
+    
+    <div class="checkbox-container" style="margin: 0 0 10px 0;">
         <input type="checkbox" name="shuffle_questions" value="1" id="shuffleCheckbox" />
         <label for="shuffleCheckbox" style="margin-top:0; color: #e0e6f0;">
             Shuffle Questions <i class="fas fa-random" style="margin-left:5px;"></i>
             <br><small style="color: #8b949e; font-weight: normal;">Every student gets questions in a different order.</small>
         </label>
     </div>
+
+    <div class="checkbox-container" style="margin: 0;">
+        <input type="checkbox" name="is_linear" value="1" id="linearCheckbox" />
+        <label for="linearCheckbox" style="margin-top:0; color: #e0e6f0;">
+            Linear Progression (No going back) 
+            <i class="fas fa-info-circle" style="color:#4fd1c5; cursor:pointer;" onclick="document.getElementById('linearModal').style.display='flex'"></i>
+            <br><small style="color: #8b949e; font-weight: normal;">Learners must answer the current question to move forward and <b>cannot return</b> to previous questions.</small>
+        </label>
+    </div>
 </div>
 
-<div id="layoutModal" onclick="this.style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 style="color:#4fd1c5; margin-top:0;"><i class="fas fa-question-circle"></i> Choosing a Layout</h3>
-        <p><strong>📄 Single Page:</strong> All questions appear on one screen. Best for students with <b>unstable internet</b> because it loads everything at once.</p>
-        <hr style="border:0; border-top:1px solid #30363d; margin:15px 0;">
-        <p><strong>📑 Multi-Page:</strong> Shows one question at a time. This allows the <b>Integrity Report</b> to track exactly which question a student was viewing when they switched tabs.</p>
-        <button type="button" class="submit-btn" style="padding:10px; font-size:1rem;" onclick="document.getElementById('layoutModal').style.display='none'">I Understand</button>
+<div id="linearModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10001; justify-content:center; align-items:center;" onclick="this.style.display='none'">
+    <div class="modal-content" style="background:#1a202c; padding:25px; border-radius:15px; max-width:400px; border:1px solid #4fd1c5;" onclick="event.stopPropagation()">
+        <h3 style="color:#4fd1c5; margin-top:0;"><i class="fas fa-shield-alt"></i> Production-Grade Integrity</h3>
+        <p style="color:#e0e6f0; line-height:1.6;">Linear progression is used by platforms like <b>Canvas</b> and <b>Moodle</b> to stop cheating.</p>
+        <ul style="color:#8b949e; font-size:0.9rem; text-align:left;">
+            <li>Prevents students from taking photos of the whole quiz and sharing them.</li>
+            <li>Stops students from skipping hard questions to find answers later in the quiz.</li>
+            <li>Forces focus on one problem at a time.</li>
+        </ul>
+        <button type="button" class="submit-btn" onclick="document.getElementById('linearModal').style.display='none'">I'll use this for security</button>
     </div>
 </div>
 
@@ -840,13 +871,14 @@ document.addEventListener("DOMContentLoaded", function () {
 // Listen for changes on the layout radio buttons
 document.querySelectorAll('input[name="layout_mode"]').forEach(radio => {
     radio.addEventListener('change', function() {
-        const randomizeDiv = document.getElementById('randomizeOption');
+        const multiPageDiv = document.getElementById('multiPageOptions');
         if (this.value === 'multi_page') {
-            // Show with a nice fade-in effect if you want, or just display:block
-            randomizeDiv.style.display = 'block';
+            multiPageDiv.style.display = 'block';
         } else {
-            randomizeDiv.style.display = 'none';
-            document.getElementById('shuffleCheckbox').checked = false; // Reset it
+            multiPageDiv.style.display = 'none';
+            // Reset both security options if they go back to Single Page
+            document.getElementById('shuffleCheckbox').checked = false;
+            document.getElementById('linearCheckbox').checked = false;
         }
     });
 });
@@ -867,6 +899,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checkbox) {
         const event = new Event('change');
         checkbox.dispatchEvent(event);
+    }
+
+    // NEW: Check layout mode on load
+    const selectedLayout = document.querySelector('input[name="layout_mode"]:checked');
+    if (selectedLayout && selectedLayout.value === 'multi_page') {
+        document.getElementById('multiPageOptions').style.display = 'block';
     }
 });
 </script>

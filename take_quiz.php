@@ -25,7 +25,8 @@ $userEmail = $_SESSION['email'];
 $quizId = intval($_GET['quiz_id']);
 
 // Fetch quiz details
-$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions FROM quizzes WHERE id = ?");
+// Fetch quiz details (Added is_linear)
+$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions, is_linear FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 if (!$quizStmt->execute()) {
     error_log("Quiz fetch failed: " . $quizStmt->error);
@@ -39,6 +40,13 @@ if ($quizResult->num_rows === 0) {
 }
 $quiz = $quizResult->fetch_assoc();
 $layoutType = $quiz['layout_mode'] ?? 'single_page';
+$is_linear = $quiz['is_linear'] ?? 0; // This defines the PHP variable for your JS
+
+// --- ADD THIS SAFETY RULE ---
+// If it's linear, we MUST force it to multi_page so it shows one question at a time
+if ($is_linear == 1 || $is_linear == 'is_linear') {
+    $layoutType = 'multi_page';
+}
 $quizTitle = $quiz['title'];
 $quizDuration = $quiz['duration'];
 $status = $quiz['status'] ?? 'Open';
@@ -477,6 +485,7 @@ while ($row = $result->fetch_assoc()) {
     $qid = $row['question_id'];
     if (!isset($questions[$qid])) {
         $questions[$qid] = [
+            'id' => $qid, // <--- ADD THIS LINE
             'text' => $row['question_text'],
             'image' => $row['image_path'],
             'points' => $row['points'],
@@ -491,24 +500,21 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 $query->close();
-// --- SHUFFLE LOGIC ---
-// Check if shuffle is enabled in the database for this specific quiz
+// --- UPDATED SHUFFLE LOGIC ---
 if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
-    // We shuffle the keys (Question IDs) to maintain the link between questions and their choices
-    $keys = array_keys($questions);
-    shuffle($keys);
-    $shuffledQuestions = [];
-    foreach ($keys as $key) {
-        $shuffledQuestions[$key] = $questions[$key];
-        
-        // Optional: Shuffle choices within each question too
-        if (!empty($shuffledQuestions[$key]['choices'])) {
-            shuffle($shuffledQuestions[$key]['choices']);
+    // Convert to a plain list so shuffle() can reorder them properly
+    $questions = array_values($questions); 
+    
+    shuffle($questions);
+
+    // Also shuffle choices inside each question
+    foreach ($questions as &$q) {
+        if (!empty($q['choices'])) {
+            shuffle($q['choices']);
         }
     }
-    $questions = $shuffledQuestions;
+    unset($q); // Clean up reference
 }
-// ----------------------
 // --- FETCH SAVED ANSWERS FROM DATABASE ---
 $savedAnswers = [];
 $loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
@@ -939,25 +945,98 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     margin-top: 10px;
 }
 
+/* --- QUESTION PALETTE ENHANCEMENTS --- */
 .palette-item {
-    width: 32px;
-    height: 32px;
+    width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--button-bg);
-    border-radius: 6px;
-    font-size: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.palette-item:hover {
+    background: var(--button-hover-bg);
+    transform: translateY(-2px);
+}
+
+/* Answered: Solid Green */
+.palette-item.answered {
+    background-color: var(--answered-color) !important;
+    color: white;
+    border: none;
+}
+
+/* Current Question: Glowing Teal Border */
+.palette-item.current {
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 10px var(--shadow-glow);
+    background: rgba(79, 209, 197, 0.1);
+}
+
+/* Flagged: Orange Border/Text */
+.palette-item.flagged {
+    border-color: var(--warning-color) !important;
+    color: var(--warning-color);
+}
+
+/* --- NAVIGATION BUTTONS (Multi-page Mode) --- */
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+    padding-bottom: 50px;
+}
+
+.nav-btn {
+    flex: 1;
+    background: var(--button-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 15px 25px;
+    border-radius: var(--card-radius);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    border: 1px solid transparent;
+    text-align: center;
 }
 
-/* Status Colors */
-.palette-item.answered { background-color: var(--answered-color); color: white; }
-.palette-item.flagged { border-color: var(--warning-color); color: var(--warning-color); }
-.palette-item.current { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+.nav-btn:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+}
+
+#nextBtn {
+    background: var(--accent-color);
+    color: var(--bg-color);
+}
+
+#nextBtn:hover {
+    background: #1ed760;
+}
+
+/* Floating Exit Button for Integrity */
+.exit-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ff4d4d;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 100;
+}
     </style>
 </head>
 <body>
@@ -1003,7 +1082,8 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
             <input type="hidden" name="start_time" value="<?= $startTime ?>">
             <?php 
             $questionNumber = 1;
-            foreach ($questions as $qid => $q): 
+            foreach ($questions as $qid => $q):
+                $qid = $q['id']; // Get the real ID we stored in step 1 
             ?>
                 <div class="question-block" data-question-id="<?= $qid ?>">
                     <div class="question-header">
@@ -1073,6 +1153,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
         let currentStep = 0;
         const layoutType = '<?= $layoutType ?>'; // From PHP
+        const isLinear = '<?= $is_linear ?>'; // Will be '1' or 'true' or 'is_linear'
         const questions = document.querySelectorAll('.question-block');
         let oneMinuteAlertShown = false;
          const totalTime = <?= $quizDuration * 60 ?>;
@@ -1164,32 +1245,42 @@ function loadAnswers() {
         }
 
         function initLayout() {
-            if (layoutType === 'multi_page') {
-                document.querySelector('.container').classList.add('multi-page-mode');
-                showQuestion(0);
-            }
-        }
+    // Now handles both multi_page and linear
+   if (layoutType === 'multi_page' || isLinear == '1' || isLinear == 'is_linear') {
+        document.querySelector('.container').classList.add('multi-page-mode');
+        showQuestion(0);
+    }
+}
 
         function showQuestion(n) {
-            questions.forEach(q => q.classList.remove('active'));
-            questions[n].classList.add('active');
+    questions.forEach(q => q.classList.remove('active'));
+    questions[n].classList.add('active');
 
-            document.getElementById('prevBtn').classList.toggle('hidden', n === 0);
-            
-            const nextBtn = document.getElementById('nextBtn');
-            const mainSubmitBtn = document.querySelector('.submit-btn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const mainSubmitBtn = document.querySelector('.submit-btn');
 
-            if (n === (questions.length - 1)) {
-                nextBtn.innerText = "Finish & Review";
-                nextBtn.onclick = showSubmitModal;
-                mainSubmitBtn.classList.remove('hidden'); 
-            } else {
-                nextBtn.innerText = "Next";
-                nextBtn.onclick = () => changeQuestion(1);
-                mainSubmitBtn.classList.add('hidden'); 
-            }
-            updatePalette(); // <--- ADD THIS HERE
-        }
+    // LINEAR LOGIC: Hide "Previous" button entirely if in linear mode
+    // FIX: Use isLinear constant to hide button
+    if (isLinear == '1' || isLinear == 'is_linear' || n === 0) {
+        prevBtn.classList.add('hidden');
+    } else {
+        prevBtn.classList.remove('hidden');
+    }
+
+    if (n === (questions.length - 1)) {
+        nextBtn.innerText = "Finish & Review";
+        nextBtn.onclick = showSubmitModal;
+        mainSubmitBtn.classList.remove('hidden'); 
+    } else {
+        nextBtn.innerText = "Next";
+        nextBtn.onclick = () => changeQuestion(1);
+        mainSubmitBtn.classList.add('hidden'); 
+    }
+    
+    currentStep = n; // Ensure sync
+    updatePalette(); 
+}
 
         function changeQuestion(n) {
             currentStep += n;
@@ -1245,6 +1336,7 @@ function loadAnswers() {
     startTimer();
     loadAnswers();
     initLayout(); // <--- ADD THIS LINE
+    updatePalette(); // Initialize the grid colors on load
 
     document.querySelectorAll('input[type="radio"]').forEach(input => {
         input.addEventListener('change', (e) => {
@@ -1325,36 +1417,46 @@ function trackSpeed() {
     lastActionTime = now;
 }
 
-// Function to jump to a specific question from the palette
 function jumpToQuestion(n) {
-    trackSpeed(); // Log if they are jumping through questions suspiciously fast
-    if (layoutType === 'multi_page') {
+    trackSpeed(); 
+
+    // FIX: Block backwards navigation using isLinear
+    if ((isLinear == '1' || isLinear == 'is_linear') && n < currentStep) {
+        alert("This quiz is in Linear Mode. You cannot go back to previous questions.");
+        return;
+    }
+
+    if (layoutType === 'multi_page' || isLinear == '1' || isLinear == 'is_linear') {
         currentStep = n;
         showQuestion(currentStep);
     } else {
-        const target = questions[n];
-        window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
+        questions[n].scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-// Function to update the palette colors based on answers and flags
 function updatePalette() {
-    questions.forEach((q, index) => {
-        const qId = q.getAttribute('data-question-id');
-        const paletteItem = document.getElementById(`palette-item-${index}`);
-        if (!paletteItem) return;
+    questions.forEach((qBlock, index) => {
+        const questionId = qBlock.getAttribute('data-question-id');
+        const isAnswered = document.querySelector(`input[name="answers[${questionId}]"]:checked`);
+        const item = document.getElementById(`palette-item-${index}`);
+        
+        if (!item) return;
 
-        paletteItem.classList.remove('answered', 'flagged', 'current');
+        if (isAnswered) {
+            item.classList.add('answered');
+        } else {
+            item.classList.remove('answered');
+        }
 
-        const isAnswered = document.querySelector(`input[name="answers[${qId}]"]:checked`);
-        if (isAnswered) paletteItem.classList.add('answered');
-
-        const flaggedQuestions = JSON.parse(sessionStorage.getItem('flaggedQuestions') || '[]');
-        if (flaggedQuestions.includes(parseInt(qId))) paletteItem.classList.add('flagged');
-
-        if (layoutType === 'multi_page' && index === currentStep) paletteItem.classList.add('current');
+        // FIX: Ensure current highlight works for both modes
+        if ((layoutType === 'multi_page' || isLinear == '1' || isLinear == 'is_linear') && index === currentStep) {
+            item.classList.add('current');
+        } else {
+            item.classList.remove('current');
+        }
     });
 }
+
     </script>
 </body>
 </html>
