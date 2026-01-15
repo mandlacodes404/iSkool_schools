@@ -155,8 +155,8 @@ $schoolLogo = 'uploads/schools/default_school.png';
 .sidebar a, .sidebar .footer {
     color: var(--text-color);
     text-decoration: none;
-    padding: 8px 12px;      /* slightly smaller vertical padding */
-    margin-bottom: 4px;     /* closer spacing between links */
+    padding: 5px 12px;      /* slightly smaller vertical padding */
+    margin-bottom: 0px;     /* closer spacing between links */
     border-radius: var(--card-radius);
     display: flex;
     align-items: center;
@@ -347,13 +347,13 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <a href="teacher_quizzes.php" target="mainFrame" class="<?= $currentPage==='teacher_quizzes.php'?'active':'' ?>"><i class="fas fa-list-check"></i><span>View Quizzes</span></a>
         <a href="create_assignment.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_assignment.php'?'active':'' ?>"><i class="fas fa-file-alt"></i><span>Create Assignment</span></a>
         <a href="teacher_assignments.php" target="mainFrame" class="<?= $currentPage==='teacher_assignments.php'?'active':'' ?>"><i class="fas fa-folder-open"></i><span>Assignments</span></a>
-        <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i><span>Announcement</span></a>
+        <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i><span>Create Announcement</span></a>
         <a href="teacher_announcements.php" target="mainFrame" class="<?= $currentPage==='teacher_announcements.php'?'active':'' ?>"><i class="fas fa-bell"></i><span>Announcements</span></a>
         <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>"><i class="fas fa-chart-bar"></i><span>Learner Grades</span></a>
         <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
-        <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluation</span></a>
-        <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Evaluations</span></a>
-        <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-home"></i><span>Discussions</span></a>
+        <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>"><i class="fas fa-clipboard-check"></i><span>Release Evaluation</span></a>
+        <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-chart-line"></i><span>Evaluations</span></a>
+        <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-comments"></i><span>Discussions</span></a>
         <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
     </div>
    

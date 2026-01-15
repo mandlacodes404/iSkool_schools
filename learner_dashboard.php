@@ -278,7 +278,7 @@ body {
     color: var(--text-color);
     text-decoration: none;
     padding: 10px 12px;
-    margin-bottom: 6px;
+    margin-bottom: 0px;
     border-radius: var(--card-radius);
     display: flex;
     align-items: center;
@@ -719,8 +719,21 @@ iframe {
 
 @media (max-width: 480px) {
     .sidebar a, .sidebar button {
-        font-size: 12px;
-        padding: 8px 10px;
+        font-size: 16px !important;   
+        font-weight: 800 !important;
+       
+        
+        /* 2. ADD SPACE INSIDE (Padding) */
+        /* This makes the button "taller" - 15px top/bottom */
+        padding: 17px 12px !important;
+        /* 3. ADD SPACE BETWEEN (Margin) */
+        /* This creates a gap between buttons */
+        margin-bottom: 6px !important;
+    }
+    .profile-picture-wrapper img.learner-avatar {
+        width: 65px !important;   /* Was 40px */
+        height: 65px !important;  /* Was 40px */
+        margin-bottom: 7px;
     }
     .sidebar h2 {
         font-size: 16px;
@@ -731,7 +744,7 @@ iframe {
     }
 
     .main-header #settingsBtn {
-        font-size: 12px;
+        font-size: 15px;
     }
 
     .main-header #settingsBtn i {
@@ -748,8 +761,8 @@ iframe {
         font-size: 18px;
     }
 
-    .learner-name { font-size: 16px; }
-    .learner-email { font-size: 11px; margin-bottom: 100px; }
+    .learner-name { font-size: 30px; max-height: 50px !important; font-weight: 800 }
+    .learner-email { font-size: 15px; margin-bottom: 100px; max-height: 40px }
 }
 
 @media (min-width: 769px) {
@@ -1017,7 +1030,7 @@ iframe {
         </a>
         <a href="discussions.php" target="mainFrame" data-page="discussions.php"
            class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
-            <i class="fas fa-star"></i><span>Discussions</span>
+            <i class="fas fa-comments"></i><span>Discussions</span>
         </a>
 
         <?php if (empty($joinedClassIds)): ?>
@@ -1047,7 +1060,7 @@ iframe {
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:12px;"><span><strong>iSkool v.1.0.0</strong></span></div>
+    <div class="footer" style="font-size:15px;"><span><strong>iSkool v.1.0.0</strong></span></div>
 </div>
 
 <div class="main-content">
