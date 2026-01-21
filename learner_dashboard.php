@@ -200,7 +200,7 @@ if (!empty($joinedClassIds)) {
     --bg-color: #0d1117;
     --sidebar-bg: #1a202c;
     --text-color: #e2e8f0;
-    --accent-color: #4fd1c5;
+    --accent-color765: #4fd1c5;
     --secondary-accent: #f6877a;
     --card-bg: #1a202c;
     --button-bg: #f7fafc;
@@ -629,7 +629,7 @@ iframe {
 
     .sidebar {
         left: -100%;
-        width: var(--sidebar-width);
+        width: 300px; /* Increased from 240px to 300px */
         transition: left var(--transition-speed) ease;
     }
 
@@ -657,7 +657,7 @@ iframe {
         left: 0;
         width: 100%;
         height: 100vh;
-        transform: translateX(var(--sidebar-width));
+       transform: translateX(300px);
         filter: blur(2px);
     }
 
@@ -719,21 +719,34 @@ iframe {
 
 @media (max-width: 480px) {
     .sidebar a, .sidebar button {
-        font-size: 16px !important;   
-        font-weight: 800 !important;
+        width: auto !important; /* Changed from 100% to auto */
        
-        
-        /* 2. ADD SPACE INSIDE (Padding) */
-        /* This makes the button "taller" - 15px top/bottom */
-        padding: 17px 12px !important;
-        /* 3. ADD SPACE BETWEEN (Margin) */
-        /* This creates a gap between buttons */
-        margin-bottom: 6px !important;
+        box-sizing: border-box !important;
+
+        font-size: 17px !important; 
+        font-weight: 700 !important; /* Bold like teacher side */
+        padding: 18px 15px !important; /* Tall touch targets */
+        margin-bottom: 10px !important;
+        background: rgba(255, 255, 255, 0.03); /* Subtle button background */
+        border-radius: 14px !important;
     }
+
+    .sidebar a i, .sidebar button i {
+        font-size: 20px !important;
+        margin-right: 15px !important;
+        width: 25px;
+        text-align: center;
+    }
+
+    .sidebar-links {
+        margin-top: 30px !important;
+    }
+    /* 1. Make the Profile Area "Pop" */
     .profile-picture-wrapper img.learner-avatar {
-        width: 65px !important;   /* Was 40px */
-        height: 65px !important;  /* Was 40px */
-        margin-bottom: 7px;
+        width: 70px !important;   
+        height: 70px !important;  
+        border: 4px solid #757272ff !important;
+        margin-bottom: 12px;
     }
     .sidebar h2 {
         font-size: 16px;
@@ -744,7 +757,7 @@ iframe {
     }
 
     .main-header #settingsBtn {
-        font-size: 15px;
+        font-size: 20px;
     }
 
     .main-header #settingsBtn i {
@@ -761,8 +774,25 @@ iframe {
         font-size: 18px;
     }
 
-    .learner-name { font-size: 30px; max-height: 50px !important; font-weight: 800 }
-    .learner-email { font-size: 15px; margin-bottom: 100px; max-height: 40px }
+    .learner-name { 
+        font-size: 23px !important; 
+        max-height: none !important; 
+        font-weight: 800 !important; 
+        margin-top: 8px;
+        color: #ffffff;
+    }
+
+    .learner-email { 
+        font-size: 16px !important; 
+        margin-bottom: 30px !important; 
+        max-height: none !important; 
+        opacity: 0.7;
+    }
+    .sidebar .footer {
+        bottom: 40px !important; /* Lifts it higher on mobile */
+        font-size: 16px !important;
+        opacity: 0.8 !important; /* Makes it a bit easier to see */
+    }
 }
 
 @media (min-width: 769px) {

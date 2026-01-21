@@ -164,6 +164,20 @@ $schoolLogo = 'uploads/schools/default_school.png';
     white-space: nowrap;
     overflow: hidden;
 }
+/* --- Add this right before your first @media line --- */
+.sidebar-footer {
+    display: none; /* This keeps it hidden on computers */
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto; /* This pins it to the bottom */
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-footer span {
+    font-size: 13px;
+    color: #777;
+    letter-spacing: 1px;
+}
 .sidebar a:hover { background: rgba(79,209,197,0.08); transform: translateX(3px); }
 .sidebar a.active { background: rgba(79,209,197,0.2); border-left: 4px solid var(--accent-color); }
 .sidebar.collapsed a { justify-content: center; padding: 12px; }
@@ -286,6 +300,9 @@ $schoolLogo = 'uploads/schools/default_school.png';
         @media (max-width: 768px) {
             #mobileToggle { display: block; }
             .school-name { display: none !important; }
+            .sidebar-footer {
+        display: block !important; /* This "wakes it up" on mobile */
+    }
             
             .sidebar { left: -100%; }
             .sidebar.active { left: 0; }
@@ -316,6 +333,60 @@ $schoolLogo = 'uploads/schools/default_school.png';
             transition: transform 0.3s ease;
             display: block;
         }
+
+        @media (max-width: 480px) {
+
+        .sidebar-footer {
+        margin-bottom: 30px !important; /* Space so it doesn't hit the bottom edge */
+    }
+    /* 1. INCREASE PROFILE PICTURE SIZE */
+    .profile-picture-wrapper {
+        width: 70px !important;   /* Was 40px */
+        height: 70px !important;  /* Was 40px */
+        border-width: 4px !important;
+        margin-bottom: 10px;
+    }
+
+    /* 2. TEXT SIZES FOR THE DRAWER */
+    .teacher-name { 
+        font-size: 24px !important; 
+        font-weight: 800 !important;
+        margin-top: 5px;
+    }
+    
+    .teacher-email { 
+        font-size: 14px !important; 
+        margin-bottom: 20px; 
+        opacity: 0.8;
+    }
+
+    /* 3. BUTTON SPACING & FONT SIZE (Touch Targets) */
+    .sidebar a, .sidebar .logout {
+        font-size: 17px !important;   /* Larger text for readability */
+        font-weight: 700 !important;
+        padding: 16px 15px !important; /* Taller buttons for easy tapping */
+        margin-bottom: 8px !important; /* Gap between buttons */
+        background: rgba(255, 255, 255, 0.03); /* Slight visibility for the button area */
+    }
+
+    .sidebar a i {
+        font-size: 20px !important;   /* Match icon scale to text */
+        margin-right: 15px !important;
+    }
+
+    /* 4. DRAWER HEADER ADJUSTMENT */
+    .sidebar-header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 25px;
+    }
+
+    /* 5. SIDEBAR LINKS CONTAINER */
+    /* Adds a little breathing room at the top of the list */
+    .sidebar-links {
+        margin-top: 20px;
+    }
+}
     </style>
 </head>
 <body>
@@ -357,6 +428,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
     </div>
    
+
+    <div class="sidebar-footer">
+    <span>iSkool v.1.0.0</span>
+</div>
 </div>
 
 <div id="mobileOverlay"></div>
