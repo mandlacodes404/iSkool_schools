@@ -101,23 +101,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
 //                 Learner profile info 
 //────────────────────────────────────────────────────────────────────────
 // Default fallback values
+//────────────────────────────────────────────────────────────────────────
+//         Learner profile info 
+//────────────────────────────────────────────────────────────────────────
+// Default fallback values from session
 $learnerName           = $_SESSION['name'] ?? '';
 $learnerSurname        = '';
-$learnerFullName       = trim($learnerName); // fallback to just name if no surname
 $learnerProfilePicture = 'default.png';
 
 $stmt = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
 $stmt->bind_param("s", $learnerEmail);
 $stmt->execute();
-if ($row = $stmt->get_result()->fetch_assoc()) {
+$res = $stmt->get_result();
+
+if ($row = $res->fetch_assoc()) {
+    // 1. Update variables with real data from DB
     $learnerName           = $row['name'] ?: $learnerName;
-    $learnerSurname        = $row['surname'] ?? '';
+    $learnerSurname        = $row['surname'] ?: '';
     $learnerProfilePicture = $row['profile_picture'] ?: 'default.png';
-    
-    // Combine name + surname
-    $learnerFullName = trim($learnerName . ' ' . $learnerSurname);
 }
 $stmt->close();
+
+// 2. Generate Full Name (Mandla Mahlangu)
+$learnerFullName = trim($learnerName . ' ' . $learnerSurname);
+
+// 3. Generate Initials (MM)
+$firstInitial = !empty($learnerName) ? strtoupper(substr(trim($learnerName), 0, 1)) : '';
+$lastInitial  = !empty($learnerSurname) ? strtoupper(substr(trim($learnerSurname), 0, 1)) : '';
+$initials     = $firstInitial . $lastInitial;
+
+// Fallback if somehow both are empty
+if (empty($initials)) { $initials = "??"; }
 
 //────────────────────────────────────────────────────────────────────────────────────
 //         Get all classes available in this school  
@@ -1000,6 +1014,34 @@ iframe {
         display: block;
     }
 }
+
+/* World Class Initials Avatar */
+.initials-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2d2d2d; /* Charcoal Background */
+    color: #a0a0a0;            /* Muted Silver/Grey text */
+    font-size: 14px;
+    font-weight: 800;
+    border: 3px solid #757272ff;
+    user-select: none;
+    text-transform: uppercase;
+    letter-spacing: -1px; /* Tighter letters look more professional for initials */
+}
+
+/* Adjust for the larger mobile view profile picture */
+@media (max-width: 480px) {
+    .initials-avatar {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 24px !important;
+        border: 4px solid #757272ff !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -1009,15 +1051,21 @@ iframe {
     <button class="desktop-toggle-btn" onclick="toggleDesktopSidebar()" title="Toggle Sidebar">
         <i class="fas fa-bars"></i>
     </button>
-    <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;">
-        <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture ?: 'default.png') ?>" 
+    <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
+    <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
+        <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
              alt="Profile Picture" 
              class="learner-avatar"
              style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
-        <input type="file" id="profileInput" accept="image/*" style="display:none;">
-    </div>
+    <?php else: ?>
+        <div class="initials-avatar">
+            <?= htmlspecialchars($initials) ?>
+        </div>
+    <?php endif; ?>
+    <input type="file" id="profileInput" accept="image/*" style="display:none;">
+</div>
 
-    <div class="learner-name"><?= htmlspecialchars($learnerFullName ?: 'Learner') ?></div>  
+    <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">

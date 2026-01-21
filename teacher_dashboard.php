@@ -41,27 +41,33 @@ $email = $_SESSION['email'];
 //──────────────────────────────────────────────────────────────────────────────
 //                     Fetch teacher info
 //──────────────────────────────────────────────────────────────────────────────
+//──────────────────────────────────────────────────────────────────────────────
+//                    Fetch teacher info
+//──────────────────────────────────────────────────────────────────────────────
 $stmtTeacher = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
 $stmtTeacher->bind_param("s", $email);
 $stmtTeacher->execute();
 $resultTeacher = $stmtTeacher->get_result();
 
-$teacherName     = $_SESSION['name'] ?? 'Teacher';
-$teacherSurname  = '';
-$teacherFullName = $teacherName; // fallback
-$teacherProfile  = 'default.png';
-$teacherEmail    = $_SESSION['email'];
+$teacherName    = $_SESSION['name'] ?? 'Teacher';
+$teacherSurname = '';
+$teacherProfile = ''; // Start empty
 
-if ($resultTeacher->num_rows > 0) {
-    $rowTeacher = $resultTeacher->fetch_assoc();
+if ($rowTeacher = $resultTeacher->fetch_assoc()) {
     $teacherName    = $rowTeacher['name'] ?: $teacherName;
-    $teacherSurname = $rowTeacher['surname'] ?? '';
-    $teacherProfile = $rowTeacher['profile_picture'] ?: 'default.png';
-    
-    // Combine name + surname
-    $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
+    $teacherSurname = $rowTeacher['surname'] ?: '';
+    $teacherProfile = $rowTeacher['profile_picture'];
 }
 $stmtTeacher->close();
+
+// Generate Full Name
+$teacherFullName = trim($teacherName . ' ' . $teacherSurname);
+$teacherEmail    = $_SESSION['email'];
+
+// Generate Initials (e.g., MS)
+$tFirstInitial = !empty($teacherName) ? strtoupper(substr(trim($teacherName), 0, 1)) : '';
+$tLastInitial  = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurname), 0, 1)) : '';
+$teacherInitials = $tFirstInitial . $tLastInitial ?: '??';
 
 //──────────────────────────────────────────────────────────────────────────────
 //           Get teacher school name
@@ -304,11 +310,11 @@ $schoolLogo = 'uploads/schools/default_school.png';
         display: block !important; /* This "wakes it up" on mobile */
     }
             
-            .sidebar { left: -100%; }
-            .sidebar.active { left: 0; }
+            .sidebar { left: -100%; width: 300px; /* ⬅️ INCREASE THIS VALUE (e.g., 280px or 300px) */ }
+            .sidebar.active { left: 0; width: 300px; }
             
             .main-content { margin-left: 0 !important; }
-            .sidebar.active ~ .main-content { transform: translateX(var(--sidebar-width)); filter: blur(3px); }
+            .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
             .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
             
             iframe { height: calc(100vh - 120px) !important; }
@@ -335,6 +341,17 @@ $schoolLogo = 'uploads/schools/default_school.png';
         }
 
         @media (max-width: 480px) {
+            .sidebar {
+        width: 80% !important; /* Covers most of the screen */
+    }
+    .sidebar.active ~ .main-content { 
+        transform: translateX(80vw) !important; 
+    }
+            .sidebar-footer span {
+        font-size: 16px !important; /* Increased from 13px */
+        color: #bbbbbb;            /* Lighter color for better contrast */
+        font-weight: 700;
+    }
 
         .sidebar-footer {
         margin-bottom: 30px !important; /* Space so it doesn't hit the bottom edge */
@@ -387,6 +404,23 @@ $schoolLogo = 'uploads/schools/default_school.png';
         margin-top: 20px;
     }
 }
+.initials-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2d2d2d; 
+    color: #a0a0a0;            
+    font-size: 16px; 
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+/* Adjust font size for the larger mobile profile view */
+@media (max-width: 480px) {
+    .initials-avatar { font-size: 24px; }
+}
     </style>
 </head>
 <body>
@@ -394,10 +428,14 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
 <div class="sidebar">
     <div class="sidebar-header">
-        <div class="profile-picture-wrapper">
-            <img src="uploads/teachers/<?= htmlspecialchars($teacherProfile ?: 'default.png') ?>" alt="Profile" class="teacher-avatar">
-            <input type="file" id="teacherProfileInput" accept="image/*" style="display:none;">
-        </div>
+       <div class="profile-picture-wrapper">
+    <?php if (!empty($teacherProfile) && $teacherProfile !== 'default.png'): ?>
+        <img src="uploads/teachers/<?= htmlspecialchars($teacherProfile) ?>" alt="Profile" class="teacher-avatar">
+    <?php else: ?>
+        <div class="initials-avatar teacher-avatar"><?= htmlspecialchars($teacherInitials) ?></div>
+    <?php endif; ?>
+    <input type="file" id="teacherProfileInput" accept="image/*" style="display:none;">
+</div>
      <button class="round-toggle" onclick="toggleDesktopSidebar()">
     <span id="toggleIcon" class="drawer-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" 
