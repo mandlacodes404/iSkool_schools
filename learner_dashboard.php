@@ -1268,19 +1268,32 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     document.getElementById("parentLinkForm")?.addEventListener("submit", function(e) {
-        e.preventDefault();
-        const email = this.querySelector("select").value;
-        if (!email) return alert("Select a parent");
-        loader.style.display = "flex";
-        fetch("link_parent.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "parent_email=" + encodeURIComponent(email) + "&learner_email=<?= $_SESSION['email'] ?>&class_id=<?= $joinedClassIds[0] ?? 0 ?>"
-        })
-        .then(r => r.json())
-        .then(d => { if (d.success) location.reload(); })
-        .finally(() => loader.style.display = "none");
-    });
+    e.preventDefault();
+    const email = this.querySelector("select").value;
+    // Get the class ID from a hidden input or the PHP variable
+    const classId = "<?= $joinedClassIds[0] ?? 0 ?>"; 
+
+    if (!email || classId == 0) return alert("Select a parent and ensure you are in a class.");
+    
+    loader.style.display = "flex";
+    
+    fetch("link_parent.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        // Use encodeURIComponent for both to be safe
+        body: "parent_email=" + encodeURIComponent(email) + "&class_id=" + classId
+    })
+    .then(r => r.json())
+    .then(d => { 
+        if (d.success) {
+            location.reload(); 
+        } else {
+            alert("Error: " + d.error); // This will now tell you exactly what's wrong
+        }
+    })
+    .catch(err => alert("Connection error"))
+    .finally(() => loader.style.display = "none");
+});
 
     function createMobileOverlay() {
         const div = document.createElement("div");

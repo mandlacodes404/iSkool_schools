@@ -4,7 +4,7 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
