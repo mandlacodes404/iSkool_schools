@@ -197,15 +197,14 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
     <style>
         :root {
             --bg-color: #0d1117;
-            --card-bg: #1a202c;
-            --text-color: #e0e6f0;
-            --accent-color: #4fd1c5;
-            --button-bg: #2c3e50;
-            --button-hover-bg: #34495e;
+            --card-bg: #1a1919;            /* Gemini Sidebar Charcoal */
+            --text-color: #e2e8f0;
+            --accent-color: #4fd1c5;       /* Signature Teal */
+            --secondary-bg: rgba(255, 255, 255, 0.03); 
             --lock-color: #f85149;
-            --card-radius: 12px;
-            --shadow-glow: rgba(79, 209, 197, 0.3);
-            --border-color: rgba(255, 255, 255, 0.1);
+            --card-radius: 18px;
+            --shadow-glow: rgba(79, 209, 197, 0.15);
+            --border-color: rgba(255, 255, 255, 0.06);
         }
 
         body {
@@ -214,11 +213,12 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             font-weight: 600;
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 20px;
+            padding: 40px 20px; /* Increased top padding for a premium feel */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            -webkit-font-smoothing: antialiased; /* Makes the font look crisper on dark backgrounds */
         }
 
         .container {
@@ -235,20 +235,23 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             gap: 10px;
         }
 
-        h2 {
+       h2 {
             font-size: 28px;
-            color: var(--text-color);
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: #ffffff;
             text-align: center;
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         h2 small {
             font-size: 14px;
-            opacity: 0.8;
-            font-weight: normal;
+            color: var(--accent-color);
+            opacity: 0.7;
+            font-weight: 500;
         }
 
         .search-sort {
@@ -275,39 +278,40 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             outline: none;
         }
 
-        /* === SECTION (was teacher-section) === */
         .teacher-section {
-            background: var(--card-bg);
+            background: var(--card-bg) !important;
             border-radius: var(--card-radius);
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
             overflow: hidden;
         }
 
         .teacher-header {
-            padding: 15px;
-            background: rgba(79, 209, 197, 0.15);
+            padding: 20px 24px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             transition: background 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .teacher-header:hover {
-            background: rgba(79, 209, 197, 0.25);
+            background: rgba(79, 209, 197, 0.05) !important;
         }
 
         .teacher-header h3 {
             margin: 0;
             flex: 1;
             font-size: 18px;
-            color: var(--accent-color);
+            font-weight: 700;
+            color: #ffffff !important;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-
         .file-count {
             font-size: 14px;
             opacity: 0.8;
@@ -337,22 +341,24 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
         /* === QUIZ CARD === */
         .quiz {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 12px;
-            border-radius: var(--card-radius);
-            margin: 10px 0;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.02) !important;
+            padding: 16px !important;
+            border-radius: 12px;
+            margin: 12px 15px !important;
+            border: 1px solid rgba(255, 255, 255, 0.03) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
         .quiz:hover:not(.unpublished) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateX(4px) !important;
+            background: rgba(79, 209, 197, 0.04) !important;
+            border-color: rgba(79, 209, 197, 0.2) !important;
         }
 
         .quiz.unpublished {
-            opacity: 0.6;
-            filter: grayscale(50%);
+            opacity: 0.5;
+            background: transparent !important;
+            border: 1px dashed rgba(255, 255, 255, 0.1) !important;
         }
 
         .quiz-header {
@@ -662,6 +668,53 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         .quiz-header h3 i[title] {
             cursor: help;
         }
+
+        /* Term Marks Table Overrides */
+        .term-marks-content table {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border-radius: 10px !important;
+        }
+        .term-marks-content th {
+            text-transform: uppercase !important;
+            font-size: 11px !important;
+            letter-spacing: 0.5px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+        .term-marks-content tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+        }
+        
+        /* Modal Polish */
+        .modal-content {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            border-top: 3px solid var(--accent-color) !important;
+        }
+
+        /* Clean Gemini-Style Report Button */
+        .report-button {
+            padding: 14px 32px;
+            background: rgba(79, 209, 197, 0.1); /* Subtle teal tint */
+            color: var(--accent-color);
+            border: 1px solid rgba(79, 209, 197, 0.4);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: none !important; /* Forces the glow to stay away */
+        }
+
+        .report-button:hover {
+            background: var(--accent-color);
+            color: #0d1117; /* Dark background color for text contrast */
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .report-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -675,12 +728,9 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                 <?php endif; ?>
             </h2>
 
-            <div style="text-align:center; margin:30px 0;">
-    <button onclick="generateProgressReport()" 
-            style="padding:14px 32px; background:#00ff99; color:black; border:none; border-radius:12px; 
-                   font-weight:600; font-size:16px; cursor:pointer; box-shadow:0 8px 25px rgba(0,255,153,0.4);
-                   transition:all 0.3s;">
-        Generate Progress Report
+           <div style="text-align:center; margin:30px 0;">
+    <button onclick="generateProgressReport()" class="report-button">
+        <i class="fas fa-file-invoice" style="margin-right: 8px;"></i> Generate Progress Report
     </button>
 </div>
             <?php if (!empty($groupedResults)): ?>

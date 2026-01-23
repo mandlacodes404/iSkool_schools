@@ -138,17 +138,17 @@ if (empty($joinedClassIds)) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #1a202c;
-            --text-color: #e0e6f0;
-            --accent-color: #4fd1c5;
-            --button-bg: #2c3e50;
-            --button-hover-bg: #34495e;
-            --disabled-bg: #3a3f47;
-            --disabled-text: #7a7f88;
+            --bg-color: #0f1113;           /* Darkest Charcoal */
+            --card-bg: #1a1c1e;            /* Slate Surface */
+            --text-color: #e3e3e3;         /* Off-white text */
+           --accent-color: #4fd1c5;       /* YOUR TEAL ACCENT */
+            --button-bg: #2c3e50;          /* Deep Slate Button */
+            --button-hover-bg: #3c4043;    /* Hover State */
+            --disabled-bg: #3c4043;
+            --disabled-text: #80868b;
             --card-radius: 12px;
-            --shadow-glow: rgba(79, 209, 197, 0.3);
-            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-glow: rgba(138, 180, 248, 0.1);
+            --border-color: rgba(255, 255, 255, 0.08);
         }
 
         body {
@@ -220,26 +220,31 @@ if (empty($joinedClassIds)) {
 
         .teacher-header {
             padding: 15px;
-            background: rgba(79, 209, 197, 0.15);
+            background: rgba(138, 180, 248, 0.05); /* Subtle Blue hint */
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             transition: background 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .teacher-header:hover {
-            background: rgba(79, 209, 197, 0.25);
+            background: rgba(138, 180, 248, 0.1);
         }
 
         .teacher-header h3 {
             margin: 0;
             flex: 1;
             font-size: 18px;
-            color: var(--accent-color);
+            color:var(--accent-color); /* Crisp white for the category */
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        /* This keeps the icon teal while the text is white */
+        .teacher-header h3 i {
+            color: var(--accent-color);
         }
 
         .file-count {
@@ -299,7 +304,7 @@ if (empty($joinedClassIds)) {
             margin: 0;
             flex: 1;
             font-size: 15px;
-            color: var(--accent-color);
+            color: #9aa0a6;
         }
 
         .quiz-details {
@@ -349,13 +354,15 @@ if (empty($joinedClassIds)) {
             border-radius: var(--card-radius);
             font-weight: 600;
             font-size: 14px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             display: inline-block;
+            border: 1px solid var(--border-color);
         }
 
         a.btn:hover:not(.disabled) {
             background-color: var(--accent-color);
-            color: var(--bg-color);
+            color: #0d1117; /* High contrast dark text on blue hover */
+            border-color: var(--accent-color);
         }
 
         a.btn.disabled {
@@ -366,8 +373,9 @@ if (empty($joinedClassIds)) {
         }
 
         .countdown {
-            color: #1e90ff;
+            color: #fdd663; /* Gemini Gold for urgency/scheduled status */
             font-size: 14px;
+            font-weight: 700;
         }
 
         p.empty {
@@ -450,6 +458,19 @@ if (empty($joinedClassIds)) {
         .quiz-header h3 i[title] {
     cursor: help;
 }
+/* Styling for the new quiz icon */
+.quiz-main-icon {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    background: rgba(79, 209, 197, 0.1);
+    padding: 8px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
     </style>
 </head>
 <body>
@@ -474,7 +495,8 @@ if (empty($joinedClassIds)) {
                 <div class="teacher-section">
                     <div class="teacher-header" onclick="toggleTeacher(this)">
                           <h3>
-                              <?= htmlspecialchars($group) ?>
+                           
+    <?= htmlspecialchars($group) ?>
                               <span class="file-count">(<?= count($quizzes) ?> quiz<?= count($quizzes) > 1 ? 'zes' : '' ?>)</span>
                          </h3>
                         <button class="toggle-teacher" type="button">
@@ -493,6 +515,7 @@ if (empty($joinedClassIds)) {
                             ?>
                             <div class="quiz <?= $isClosed ? 'closed' : '' ?>" data-title="<?= htmlspecialchars($quiz['title']) ?>">
                                 <div class="quiz-header">
+                                    <i class="fas fa-stopwatch quiz-main-icon"></i>
                                     <h3>
     <?= htmlspecialchars($quiz['title']) ?>
     <?php if (!empty($quiz['is_summative'])): ?>

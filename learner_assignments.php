@@ -105,10 +105,10 @@ if (empty($joinedClassIds)) {
     <style>
         :root {
             --bg-color: #0d1117;
-            --card-bg: #1a202c;
+            --card-bg: #1a1919;           /* Changed from #1a202c (Gemini Charcoal) */
             --text-color: #e0e6f0;
             --accent-color: #4fd1c5;
-            --button-bg: #2c3e50;
+            --button-bg: rgba(79, 209, 197, 0.1); /* Glassmorphism style */
             --button-hover-bg: #34495e;
             --lock-color: #f85149;
             --card-radius: 12px;
@@ -116,7 +116,9 @@ if (empty($joinedClassIds)) {
             --border-color: rgba(255, 255, 255, 0.1);
             --submission-color: #238636;
             --no-submission-color: #f85149;
+             --secondary-text: #8b949e;    /* New: For labels and metadata */
         }
+       
 
         body {
             margin: 0;
@@ -188,7 +190,8 @@ if (empty($joinedClassIds)) {
 
         .teacher-header {
             padding: 15px;
-            background: rgba(79, 209, 197, 0.15);
+           background: rgba(255, 255, 255, 0.03); 
+    border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -267,7 +270,7 @@ if (empty($joinedClassIds)) {
             margin: 0;
             flex: 1;
             font-size: 15px;
-            color: var(--accent-color);
+            color: #80868b
         }
 
         .assignment-details {
@@ -311,15 +314,17 @@ if (empty($joinedClassIds)) {
 
         a.submit-link {
             background-color: var(--button-bg);
-            color: var(--text-color);
+            color: var(--accent-color);
             padding: 8px 16px;
-            border-radius: var(--card-radius);
+           border-radius: 20px; /* Pill shape */
             font-weight: 600;
             text-decoration: none;
             transition: background-color 0.3s ease;
             display: inline-block;
             margin-top: 5px;
+            border: 1px solid var(--accent-color);
         }
+       
 
         a.submit-link:hover:not(.disabled) {
             background-color: var(--accent-color);

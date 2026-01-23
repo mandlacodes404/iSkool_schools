@@ -289,7 +289,7 @@ body {
 .sidebar button,
 .sidebar .footer,
 .sidebar .logout {
-    color: var(--text-color);
+    color: #757779ff;
     text-decoration: none;
     padding: 10px 12px;
     margin-bottom: 0px;
@@ -312,6 +312,7 @@ body {
 .sidebar .footer:hover,
 .sidebar .logout:hover {
     background: rgba(79, 209, 197, 0.08);
+    color: #ffffff;
     transform: translateX(2px);
 }
 
@@ -828,7 +829,7 @@ iframe {
 .sidebar button.active {
     background: rgba(79, 209, 197, 0.15);
     /* This creates the line inside the button so width doesn't change */
-    box-shadow: inset 4px 0 0 0 var(--accent-color); 
+    box-shadow: inset 4px 0 0 0 #8b949e; /* Grey active line instead of Teal */
     border-left: none; /* Remove the old border */
 }
 

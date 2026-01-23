@@ -15,90 +15,98 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: rgba(22, 27, 34, 0.7);
-            --text-color: #e0e6f0;
-            --heading-color: white;
-            --accent-color: white;
-            --button-bg: white;
-            --button-hover-bg: #dddddd;
-            --border-radius: 15px;
-            --shadow-glow: rgba(255, 255, 255, 0.6);
-        }
+    /* Exact Sidebar/Gemini Colors */
+    --bg-color: #0d1117;           /* Deep Navy/Black */
+    --card-bg: #1a1919;            /* Sidebar Charcoal */
+    --text-color: #e2e8f0;         /* Crisp soft white */
+    --accent-teal: #4fd1c5;        /* Signature Teal */
+    --glass-bg: rgba(255, 255, 255, 0.03); /* Glass button look */
+    --border-radius: 18px;
+}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Nunito', sans-serif;
-            font-weight: 600;
-            margin: 0;
-            padding: 30px;
-        }
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    margin: 0;
+    padding: 25px;
+    /* Smooth scrolling for mobile */
+    -webkit-font-smoothing: antialiased;
+}
 
-        h1 {
-            color: var(--heading-color);
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
+/* --- THE "GEMINI" SECTION CARDS --- */
+.section {
+    background-color: var(--card-bg) !important;
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-top: 20px;
+    /* Subtle Rim light instead of a heavy glow */
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
 
-        a.back {
-            text-decoration: none;
-            background: #e74c3c;
-            color: white;
-            padding: 8px 14px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px #e74c3c;
-            display: inline-block;
-            margin-bottom: 25px;
-        }
+/* Hover effect matches your sidebar interaction */
+.section:hover {
+    border-color: rgba(79, 209, 197, 0.3);
+}
 
-        a.back:hover {
-            background-color: #c0392b;
-        }
+.section h2 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.5px;
+}
 
-        .section {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-top: 25px;
-            box-shadow: 0 0 15px var(--shadow-glow);
-        }
+/* Icon style - using your Teal accent */
+.section h2 svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    fill: var(--accent-teal); /* Icons now pop in Teal */
+}
 
-        .section h2 {
-            color: var(--button-bg);
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-        }
+/* --- TYPOGRAPHY --- */
+.section p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #aaa; /* Muted subtext like Gemini */
+}
 
-        .section h2 svg {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-            fill: var(--button-bg);
-        }
+ul {
+    padding-left: 20px;
+    list-style-type: none;
+}
 
-        .section p {
-            font-size: 14px;
-            line-height: 1.6;
-            opacity: 0.9;
-        }
+ul li {
+    margin-bottom: 12px;
+    position: relative;
+    font-size: 15px;
+}
 
-        ul {
-            padding-left: 20px;
-        }
+/* Custom Teal Bullet points */
+ul li::before {
+    content: "•";
+    color: var(--accent-teal);
+    font-weight: bold;
+    display: inline-block; 
+    width: 1em;
+    margin-left: -1em;
+}
 
-        ul li {
-            margin-bottom: 8px;
-        }
+strong {
+    color: #fff;
+    font-weight: 700;
+}
 
-        footer {
-            margin-top: 60px;
-            text-align: center;
-            color: var(--text-color);
-            opacity: 0.6;
-            font-size: 14px;
-        }
+/* Hide the back button if it's in an iframe, or style it like sidebar */
+a.back {
+    display: none; /* Usually not needed inside the dashboard iframe */
+}
     </style>
 </head>
 <body>

@@ -92,17 +92,18 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #1a202c;
-            --text-color: #e0e6f0;
-            --accent-color: #4fd1c5;
-            --button-bg: #2c3e50;
-            --button-hover-bg: #34495e;
-            --card-radius: 12px;
-            --shadow-glow: rgba(79, 209, 197, 0.3);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --new-badge-color: #f28c38;
-        }
+    --bg-color: #0d1117;
+    --card-bg: #1b1b1b;           /* Pure dark neutral */
+    --text-color: #e2e8f0;
+    --accent-color: #4fd1c5;      /* Neon Teal */
+    --button-bg: rgba(79, 209, 197, 0.1);
+    --button-hover-bg: rgba(79, 209, 197, 0.2);
+    --card-radius: 12px;
+    --shadow-glow: rgba(79, 209, 197, 0.15);
+    --border-color: rgba(255, 255, 255, 0.05);
+    --new-badge-color: #4fd1c5;   /* Changed to match accent color */
+    --secondary-text: #8b949e;
+}
 
         body {
             margin: 0;
@@ -167,24 +168,28 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
         .teacher-section {
             background: var(--card-bg);
             border-radius: var(--card-radius);
+             border: 1px solid var(--border-color); /* Subtle border instead of heavy shadow */
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: none; 
             overflow: hidden;
         }
+       
 
         .teacher-header {
             padding: 15px;
-            background: rgba(79, 209, 197, 0.15);
+             background: transparent; /* Remove the 0.15 teal background */
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             transition: background 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
         }
+        
 
         .teacher-header:hover {
-            background: rgba(79, 209, 197, 0.25);
-        }
+    background: rgba(255, 255, 255, 0.02);
+}
 
         .teacher-header h3 {
             margin: 0;
@@ -225,13 +230,15 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
 
         /* === ANNOUNCEMENT CARD === */
         .announcement {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.03); /* Subtle lift */
             padding: 12px;
             border-radius: var(--card-radius);
+            border: 1px solid rgba(255, 255, 255, 0.02);
             margin: 10px 0;
             box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
 
         .announcement:hover {
             transform: translateY(-2px);
@@ -248,17 +255,20 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
             margin: 0;
             flex: 1;
             font-size: 15px;
-            color: var(--accent-color);
+             color: var(--text-color); /* Main title in white */
+              font-weight: 600;
         }
+        
 
+        
         .announcement-header .new-badge {
-            background: var(--new-badge-color);
-            color: var(--bg-color);
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+    background: rgba(79, 209, 197, 0.1); 
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 2px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
 
         .announcement-details {
             display: none;
@@ -290,9 +300,9 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
         }
 
         .announcement-icon {
-            font-size: 18px;
-            color: var(--accent-color);
-        }
+    color: var(--accent-color);
+    filter: drop-shadow(0 0 5px var(--shadow-glow));
+}
 
         p.empty {
             text-align: center;
