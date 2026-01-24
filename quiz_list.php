@@ -138,18 +138,17 @@ if (empty($joinedClassIds)) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f1113;           /* Darkest Charcoal */
-            --card-bg: #1a1c1e;            /* Slate Surface */
-            --text-color: #e3e3e3;         /* Off-white text */
-           --accent-color: #4fd1c5;       /* YOUR TEAL ACCENT */
-            --button-bg: #2c3e50;          /* Deep Slate Button */
-            --button-hover-bg: #3c4043;    /* Hover State */
-            --disabled-bg: #3c4043;
-            --disabled-text: #80868b;
-            --card-radius: 12px;
-            --shadow-glow: rgba(138, 180, 248, 0.1);
-            --border-color: rgba(255, 255, 255, 0.08);
-        }
+        --bg-color:       #0d1117;                    /* ← match Resources */
+        --card-bg:        #1b1b1b;                    /* ← exact match */
+        --text-color:     #e2e8f0;
+        --accent-color:   #4fd1c5;
+        --button-bg:      rgba(79, 209, 197, 0.1);    /* ← teal tint like Resources */
+        --button-hover-bg:rgba(79, 209, 197, 0.25);
+        --card-radius:    12px;
+        --shadow-glow:    rgba(79, 209, 197, 0.15);   /* ← teal glow */
+        --border-color:   rgba(255, 255, 255, 0.05);  /* ← very close match */
+        --secondary-text: #8b949e;
+    }
 
         body {
             margin: 0;
@@ -210,38 +209,39 @@ if (empty($joinedClassIds)) {
         }
 
         /* === TEACHER SECTION === */
-        .teacher-section {
-            background: var(--card-bg);
-            border-radius: var(--card-radius);
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
+       .teacher-section {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        border: 1px solid var(--border-color);           /* ← added */
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
 
         .teacher-header {
-            padding: 15px;
-            background: rgba(138, 180, 248, 0.05); /* Subtle Blue hint */
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            border-bottom: 1px solid var(--border-color);
-        }
+        padding: 15px;
+        background: transparent;                         /* ← changed – no blue */
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
 
         .teacher-header:hover {
-            background: rgba(138, 180, 248, 0.1);
-        }
+        background: rgba(255, 255, 255, 0.02);           /* ← match Resources hover */
+    }
 
         .teacher-header h3 {
-            margin: 0;
-            flex: 1;
-            font-size: 18px;
-            color:var(--accent-color); /* Crisp white for the category */
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        margin: 0;
+        flex: 1;
+        font-size: 18px;
+        color: var(--secondary-text);                    /* ← muted gray – match Resources */
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
         /* This keeps the icon teal while the text is white */
         .teacher-header h3 i {
             color: var(--accent-color);
@@ -274,15 +274,16 @@ if (empty($joinedClassIds)) {
             display: none;
         }
 
-        /* === QUIZ CARD === */
-        .quiz {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 12px;
-            border-radius: var(--card-radius);
-            margin: 10px 0;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+       /* Inner quiz card ── match resource card exactly */
+    .quiz {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 9px;                           /* ← was 10px → even smaller inner space */
+    border-radius: var(--card-radius);
+    margin: 6px 0;                          /* ← was 8px → tighter vertical spacing between cards */
+    box-shadow: 0 1px 5px rgba(0,0,0,0.18); /* ← slightly softer shadow (optional but helps lightness) */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
         .quiz:hover:not(.closed) {
             transform: translateY(-2px);
@@ -297,30 +298,31 @@ if (empty($joinedClassIds)) {
         .quiz-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .quiz-header h3 {
-            margin: 0;
-            flex: 1;
-            font-size: 15px;
-            color: #9aa0a6;
-        }
+   .quiz-header h3 {
+    margin: 0;
+    flex: 1;
+    font-size: 14px;                        /* ← was 14.5px → noticeably smaller, matches Resources title feel */
+    color: var(--text-color);
+    font-weight: 600;
+}
 
         .quiz-details {
-            display: none;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 0 0 var(--card-radius) var(--card-radius);
-            margin-top: 5px;
-            font-size: 13px;
-        }
+    display: none;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
+    margin-top: 4px;                        /* ← was 5px */
+    font-size: 13px;
+}
 
-        .quiz-details p {
-            margin: 4px 0;
-            opacity: 0.8;
-            line-height: 1.5;
-        }
+.quiz-details p {
+    margin: 3px 0;                          /* ← tighter than 4px */
+    opacity: 0.8;
+    line-height: 1.45;                      /* ← slightly tighter than 1.5 */
+}
 
         .toggle-details {
             background: none;
@@ -346,24 +348,26 @@ if (empty($joinedClassIds)) {
             color: #f85149;
         }
 
-        a.btn {
-            background-color: var(--button-bg);
-            color: var(--text-color);
-            padding: 8px 16px;
-            text-decoration: none;
-            border-radius: var(--card-radius);
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: inline-block;
-            border: 1px solid var(--border-color);
-        }
+       /* Button ── match Resources style */
+    a.btn {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    padding: 6px 12px;          /* ← reduced from 8/16 */
+    text-decoration: none;
+    border-radius: var(--card-radius);
+    font-weight: 600;
+    font-size: 13px;             /* ← slightly smaller text */
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: 1px solid var(--border-color);
+    min-width: 110px;            /* optional: prevents ultra-narrow buttons */
+    text-align: center;          /* optional: better centering */
+}
 
         a.btn:hover:not(.disabled) {
-            background-color: var(--accent-color);
-            color: #0d1117; /* High contrast dark text on blue hover */
-            border-color: var(--accent-color);
-        }
+        background: var(--button-hover-bg);              /* ← softer teal hover */
+        /* or more bold: background: var(--accent-color); color: #0d1117; */
+    }
 
         a.btn.disabled {
             pointer-events: none;
@@ -460,14 +464,16 @@ if (empty($joinedClassIds)) {
 }
 /* Styling for the new quiz icon */
 .quiz-main-icon {
+    width: 26px;                            /* ← was 28px */
+    height: 26px;
     color: var(--accent-color);
-    font-size: 1.2rem;
-    background: rgba(79, 209, 197, 0.1);
-    padding: 8px;
-    border-radius: 10px;
+    background: rgba(79, 209, 197, 0.07);   /* ← even lighter background (was 0.08) */
+    padding: 4px;                           /* ← was 5px → tighter padding */
+    border-radius: 7px;                     /* ← smaller radius for smaller icon */
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 
@@ -515,7 +521,10 @@ if (empty($joinedClassIds)) {
                             ?>
                             <div class="quiz <?= $isClosed ? 'closed' : '' ?>" data-title="<?= htmlspecialchars($quiz['title']) ?>">
                                 <div class="quiz-header">
-                                    <i class="fas fa-stopwatch quiz-main-icon"></i>
+                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="quiz-main-icon">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+</svg>
                                     <h3>
     <?= htmlspecialchars($quiz['title']) ?>
     <?php if (!empty($quiz['is_summative'])): ?>

@@ -104,20 +104,20 @@ if (empty($joinedClassIds)) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #1a1919;           /* Changed from #1a202c (Gemini Charcoal) */
-            --text-color: #e0e6f0;
-            --accent-color: #4fd1c5;
-            --button-bg: rgba(79, 209, 197, 0.1); /* Glassmorphism style */
-            --button-hover-bg: #34495e;
-            --lock-color: #f85149;
-            --card-radius: 12px;
-            --shadow-glow: rgba(79, 209, 197, 0.3);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --submission-color: #238636;
-            --no-submission-color: #f85149;
-             --secondary-text: #8b949e;    /* New: For labels and metadata */
-        }
+    --bg-color:       #0d1117;
+    --card-bg:        #1b1b1b;                    /* exact match to Resources main card bg */
+    --text-color:     #e2e8f0;                    /* softer white like Resources */
+    --accent-color:   #4fd1c5;
+    --button-bg:      rgba(79, 209, 197, 0.1);    /* teal glass tint */
+    --button-hover-bg:rgba(79, 209, 197, 0.2);    /* softer hover like Resources */
+    --card-radius:    12px;
+    --shadow-glow:    rgba(79, 209, 197, 0.15);   /* teal-based subtle glow */
+    --border-color:   rgba(255, 255, 255, 0.05);  /* very faint rim */
+    --secondary-text: #8b949e;                    /* muted gray for counts/labels */
+    --lock-color:     #f85149;                    /* keep red for lock/past-due */
+    --submission-color: #238636;                  /* keep green for submitted */
+    --no-submission-color: #f85149;               /* keep red for missing */
+}
        
 
         body {
@@ -188,30 +188,30 @@ if (empty($joinedClassIds)) {
             overflow: hidden;
         }
 
-        .teacher-header {
-            padding: 15px;
-           background: rgba(255, 255, 255, 0.03); 
+       .teacher-header {
+    padding: 15px;
+    background: transparent;                      /* ← changed from rgba(255,255,255,0.03) */
     border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
 
-        .teacher-header:hover {
-            background: rgba(79, 209, 197, 0.25);
-        }
+.teacher-header:hover {
+    background: rgba(255, 255, 255, 0.02);        /* ← exact Resources hover */
+}
 
-        .teacher-header h3 {
-            margin: 0;
-            flex: 1;
-            font-size: 18px;
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+       .teacher-header h3 {
+    margin: 0;
+    flex: 1;
+    font-size: 18px;
+    color: var(--secondary-text);                 /* ← muted like Resources count */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
         .file-count {
             font-size: 14px;
@@ -242,18 +242,19 @@ if (empty($joinedClassIds)) {
 
         /* === ASSIGNMENT CARD === */
         .assignment {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 12px;
-            border-radius: var(--card-radius);
-            margin: 10px 0;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+    background: rgba(255, 255, 255, 0.03);        /* ← key change: glass lift instead of dark 0.15 */
+    border: 1px solid rgba(255, 255, 255, 0.03);  /* ← faint border like Resources */
+    padding: 12px;
+    border-radius: var(--card-radius);
+    margin: 10px 0;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
         .assignment:hover:not(.past-due) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);    /* ← keep hover lift, but shadow stays dark */
+}
 
         .assignment.past-due {
             opacity: 0.6;
@@ -270,17 +271,17 @@ if (empty($joinedClassIds)) {
             margin: 0;
             flex: 1;
             font-size: 15px;
-            color: #80868b
+            color: var(--text-color);   /* ← this uses your white/off-white #e2e8f0 from :root */
         }
 
         .assignment-details {
-            display: none;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 0 0 var(--card-radius) var(--card-radius);
-            margin-top: 5px;
-            font-size: 13px;
-        }
+    display: none;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.2);               /* keep this – matches Resources */
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
+    margin-top: 5px;
+    font-size: 13px;
+}
 
         .assignment-details p {
             margin: 4px 0;
@@ -304,32 +305,33 @@ if (empty($joinedClassIds)) {
 
         .assignment-icon {
             font-size: 18px;
-            color: var(--accent-color);
+            color: #4fd1c5;
         }
 
-        .lock-icon {
-            font-size: 18px;
-            color: var(--lock-color);
-        }
+        /* Past due / lock – keep red but make sure it doesn't clash */
+.lock-icon {
+    font-size: 18px;
+    color: var(--lock-color);
+}
 
-        a.submit-link {
-            background-color: var(--button-bg);
-            color: var(--accent-color);
-            padding: 8px 16px;
-           border-radius: 20px; /* Pill shape */
-            font-weight: 600;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            display: inline-block;
-            margin-top: 5px;
-            border: 1px solid var(--accent-color);
-        }
+       a.submit-link {
+    background: var(--button-bg);
+    color: var(--text-color);                     /* ← white text instead of accent */
+    padding: 8px 16px;
+    border-radius: var(--card-radius);            /* ← change from 20px pill to square-ish radius */
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    display: inline-block;
+    margin-top: 5px;
+    border: 1px solid var(--border-color);        /* ← faint border instead of accent border */
+}
        
 
         a.submit-link:hover:not(.disabled) {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-        }
+    background: var(--button-hover-bg);           /* ← soft teal hover like Resources */
+    color: var(--text-color);
+}
 
         a.submit-link.disabled {
             opacity: 0.4;
@@ -360,9 +362,9 @@ if (empty($joinedClassIds)) {
         }
 
         .attachment-link:hover,
-        .submission-link:hover {
-            color: #1ed760;
-        }
+.submission-link:hover {
+    color: #3ab8ae;                               /* slightly darker teal hover – more subtle */
+}
 
         p.empty {
             text-align: center;
@@ -598,7 +600,7 @@ if (empty($joinedClassIds)) {
                             ?>
                             <div class="<?= $assignmentClass ?>" data-title="<?= htmlspecialchars($assignment['title']) ?>" data-class="<?= htmlspecialchars($assignment['class_name']) ?>">
                                 <div class="assignment-header">
-                                    <i class="<?= $iconClass ?>"></i>
+                                    <i class="<?= $iconClass ?> assignment-icon"></i>
                                     <h3><?= htmlspecialchars($assignment['title']) ?></h3>   <!-- ORIGINAL TITLE ONLY -->
                                     <button class="toggle-details" onclick="event.stopPropagation(); toggleDetails(this)">
                                         <i class="fas fa-chevron-down"></i>

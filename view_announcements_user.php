@@ -195,7 +195,7 @@ $sevenDaysAgo   = (clone $currentDateTime)->modify('-7 days');
             margin: 0;
             flex: 1;
             font-size: 18px;
-            color: var(--accent-color);
+            color: #8b949e;
             display: flex;
             align-items: center;
             gap: 8px;

@@ -50,32 +50,125 @@ $is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Class Discussions</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body { font-family: 'Nunito', sans-serif; background: #0d1117; color: #e0e6f0; padding: 20px; margin: 0; }
-        .container { max-width: 900px; margin: auto; }
-        h1 { text-align: center; color: #4fd1c5; margin-bottom: 30px; }
-        .new-btn { 
-            display: block; width: 100%; padding: 15px; background: #4fd1c5; color: black; 
-            text-align: center; border-radius: 12px; font-weight: 700; margin: 20px 0; 
-            text-decoration: none; font-size: 18px;
-        }
-        .disc-card { 
-            background: #161b22; padding: 20px; border-radius: 12px; margin: 15px 0; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .disc-title { 
-            font-size: 20px; font-weight: 600; color: #4fd1c5; margin-bottom: 8px;
-        }
-        .disc-title a { color: inherit; text-decoration: none; }
-        .disc-title a:hover { opacity: 0.8; }
-        .disc-meta { color: #8b949e; font-size: 14px; margin: 8px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .reply-count { 
-            background: rgba(79,209,197,0.2); padding: 5px 12px; border-radius: 20px; 
-            font-size: 13px; font-weight: 600;
-        }
-        .preview-text { margin: 10px 0; opacity: 0.9; line-height: 1.5; }
-        .no-discussions { text-align: center; opacity: 0.7; font-size: 16px; }
-    </style>
+   <style>
+    :root {
+        --bg-color:       #0d1117;
+        --card-bg:        #1b1b1b;                    /* ← exact match to other pages */
+        --text-color:     #e2e8f0;
+        --accent-color:   #4fd1c5;
+        --button-bg:      rgba(79, 209, 197, 0.1);
+        --button-hover-bg:rgba(79, 209, 197, 0.2);
+        --card-radius:    12px;
+        --shadow-glow:    rgba(79, 209, 197, 0.15);
+        --border-color:   rgba(255, 255, 255, 0.05);
+        --secondary-text: #8b949e;
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        padding: 20px;
+        margin: 0;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--text-color);          /* ← white instead of strong teal */
+        margin-bottom: 30px;
+        font-size: 28px;                   /* optional: match other h1/h2 */
+    }
+
+    .new-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        background: var(--button-bg);      /* ← glass teal instead of solid */
+        color: var(--text-color);          /* ← white text */
+        text-align: center;
+        border-radius: var(--card-radius);
+        font-weight: 700;
+        margin: 20px 0;
+        text-decoration: none;
+        font-size: 18px;
+        border: 1px solid var(--border-color);
+        transition: background 0.3s ease;
+    }
+
+    .new-btn:hover {
+        background: var(--button-hover-bg);
+    }
+
+    .disc-card {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: var(--card-radius);
+        margin: 15px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);     /* ← softer shadow */
+        border: 1px solid var(--border-color);      /* ← faint rim */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .disc-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .disc-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-color);          /* ← white title */
+        margin-bottom: 8px;
+    }
+
+    .disc-title a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .disc-title a:hover {
+        color: var(--accent-color);        /* ← teal on hover only */
+        opacity: 1;
+    }
+
+    .disc-meta {
+        color: var(--secondary-text);
+        font-size: 14px;
+        margin: 8px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .reply-count {
+        background: rgba(79,209,197,0.1);  /* ← subtle teal glass */
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-color);
+    }
+
+    .preview-text {
+        margin: 10px 0;
+        opacity: 0.9;
+        line-height: 1.5;
+        color: var(--text-color);
+    }
+
+    .no-discussions {
+        text-align: center;
+        opacity: 0.7;
+        font-size: 16px;
+        color: var(--secondary-text);
+    }
+</style>
 </head>
 <body>
 <div class="container">

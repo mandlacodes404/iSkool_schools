@@ -76,27 +76,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $class_id) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #e0e6f0;
-            --accent: #4fd1c5;
-            --accent-dark: #3ab8ac;
-            --success: #1ed760;
-            --border: #30363d;
-            --hover: #21262d;
-        }
+    --bg: #0d1117;                    /* ← already good */
+    --card: #1b1b1b;                  /* ← changed from #161b22 to exact match */
+    --text: #e2e8f0;                  /* ← softer white */
+    --accent: #4fd1c5;
+    --accent-dark: #3ab8ac;           /* ← keep or use rgba(79,209,197,0.2) for hover */
+    --success: #238636;               /* ← slightly darker green like submissions */
+    --border: rgba(255,255,255,0.05); /* ← faint rim like other pages */
+    --hover: rgba(255,255,255,0.03);  /* ← glass hover/lift */
+    --secondary-text: #8b949e;        /* ← add this for muted text */
+}
         body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
         .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 32px; color: var(--accent); margin: 40px 0 30px; }
+        h1 { text-align: center; font-size: 32px; color: var(--text); margin: 40px 0 30px; }
 
         .eval-card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 30px;
-            margin: 25px 0;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-        }
+    background: var(--card);
+    border-radius: 16px;
+    padding: 30px;
+    margin: 25px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    border: 1px solid var(--border);  /* ← faint border */
+}
         .eval-header {
             display: flex;
             justify-content: space-between;
@@ -104,50 +105,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $class_id) {
             margin-bottom: 20px;
         }
         .eval-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent);
-            margin: 0;
-        }
-        .teacher-name {
-            font-size: 16px;
-            color: #8b949e;
-            margin-top: 6px;
-        }
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);               /* ← changed to white/off-white */
+    margin: 0;
+}
+        /* Teacher name – muted */
+.teacher-name {
+    font-size: 16px;
+    color: var(--secondary-text);     /* ← muted gray */
+    margin-top: 6px;
+}
         .completed {
-            background: rgba(30,215,96,0.2);
-            color: var(--success);
-            padding: 10px 18px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    background: rgba(35,134,54,0.15); /* ← darker green glass */
+    color: var(--success);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(35,134,54,0.3);
+}
 
-        .description {
-            background: rgba(79,209,197,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            font-style: italic;
-            opacity: 0.9;
-            border-left: 4px solid var(--accent);
-        }
+       /* Description box – glass effect */
+.description {
+    background: var(--hover);         /* ← rgba(255,255,255,0.03) glass */
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    font-style: italic;
+    opacity: 0.9;
+    border-left: 4px solid var(--accent);
+    color: var(--text);               /* ← ensure white text */
+}
 
         .statement {
             margin: 30px 0;
         }
-        .question-text {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: rgba(33,38,45,0.6);
-            border-radius: 10px;
-            border-left: 4px solid var(--accent);
-        }
+       /* Question boxes – glass + teal accent border */
+.question-text {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--hover);         /* ← glass */
+    border-radius: 10px;
+    border-left: 4px solid var(--accent);
+    color: var(--text);
+}
 
         .options {
             display: grid;
@@ -171,13 +178,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $class_id) {
             font-weight: 600;
             border: 2px solid transparent;
         }
-        .option-label input[type="radio"]:checked + span {
-            background: var(--accent);
-            color: black;
-            border-color: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79,209,197,0.4);
-        }
+        /* Radio option selected – teal bg */
+.option-label input[type="radio"]:checked + span {
+    background: var(--accent);
+    color: #0d1117;                   /* ← dark text on teal for contrast */
+    border-color: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79,209,197,0.4);
+}
         .option-label span:hover {
             background: #2a323c;
         }
@@ -205,33 +213,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $class_id) {
         }
         textarea::placeholder { opacity: 0.7; }
 
-        button[type="submit"] {
-            width: 100%;
-            padding: 18px;
-            background: var(--accent);
-            color: black;
-            font-weight: 700;
-            font-size: 18px;
-            border: none;
-            border-radius: 14px;
-            margin-top: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(79,209,197,0.3);
-        }
+     /* Submit button – teal with dark text */
+button[type="submit"] {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: #0d1117;                   /* ← dark text on teal */
+    font-weight: 700;
+    font-size: 18px;
+    border: none;
+    border-radius: 14px;
+    margin-top: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(79,209,197,0.3);
+}
         button[type="submit"]:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(79,209,197,0.5);
-        }
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(79,209,197,0.5);
+}
 
-        .thank-you {
-            text-align: center;
-            padding: 40px;
-            font-size: 20px;
-            color: var(--success);
-            font-style: italic;
-        }
+        /* Thank you message */
+.thank-you {
+    text-align: center;
+    padding: 40px;
+    font-size: 20px;
+    color: var(--success);
+    font-style: italic;
+}
 
         @media (max-width: 768px) {
             .options { grid-template-columns: 1fr; }
