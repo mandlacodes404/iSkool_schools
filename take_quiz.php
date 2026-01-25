@@ -359,7 +359,8 @@ $attemptCheck->close();
 
 // 1. Check if an active attempt exists in the quiz_attempts table
 // We use 'start_time' to calculate the real ticking clock
-$checkAttempt = $conn->prepare("SELECT start_time, status FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+// We now fetch the current_step (the bookmark) from the database
+$checkAttempt = $conn->prepare("SELECT start_time, status, current_step FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
 $checkAttempt->bind_param("si", $userEmail, $quizId);
 $checkAttempt->execute();
 $attemptData = $checkAttempt->get_result()->fetch_assoc();
@@ -379,6 +380,8 @@ if (!$attemptData) {
     if ($insertAttempt->execute()) {
         // Success - normal flow
         $startTime = $currentTime;
+        // ADD THIS LINE RIGHT HERE:
+        $current_saved_step = 0;
     } else {
         // ERROR HAPPENED → Show it clearly so we can see why
         $errorMessage = "Failed to create quiz attempt for user $userEmail on quiz $quizId: " . $insertAttempt->error;
@@ -393,12 +396,15 @@ if (!$attemptData) {
 
     $insertAttempt->close();
 } else {
-    // Resume existing attempt (keep your original code here)
+    // Resume existing attempt
     if ($attemptData['status'] !== 'in_progress') {
         header("Location: quiz_results.php?quiz_id=" . $quizId);
         exit();
     }
     $startTime = strtotime($attemptData['start_time']);
+    
+    // WORLD CLASS FIX: Get the bookmark from the database
+    $current_saved_step = isset($attemptData['current_step']) ? (int)$attemptData['current_step'] : 0;
 }
 
 // 2. Calculate the REAL time left
@@ -1145,7 +1151,8 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     <script>
         let isSubmitting = false;
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
-        let currentStep = 0;
+        // We default to 0, but if PHP has a saved step from the DB, we use that
+let currentStep = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 ?>;
         const layoutType = '<?= $layoutType ?>'; // From PHP
         const isLinear = '<?= $is_linear ?>'; // Will be '1' or 'true' or 'is_linear'
         const questions = document.querySelectorAll('.question-block');
@@ -1242,7 +1249,7 @@ function loadAnswers() {
     // Now handles both multi_page and linear
    if (layoutType === 'multi_page' || isLinear == '1' || isLinear == 'is_linear') {
         document.querySelector('.container').classList.add('multi-page-mode');
-        showQuestion(0);
+        showQuestion(currentStep);
     }
 }
 
@@ -1274,6 +1281,7 @@ function loadAnswers() {
     
     currentStep = n; // Ensure sync
     updatePalette(); 
+    autoSaveToDatabase();
 }
 
         function changeQuestion(n) {
@@ -1282,20 +1290,27 @@ function loadAnswers() {
             window.scrollTo(0, 0); 
         }
 
-        function autoSaveToDatabase(questionId, choiceId) {
-            const formData = new FormData();
-            formData.append('quiz_id', <?= $quizId ?>);
-            formData.append('question_id', questionId);
-            formData.append('choice_id', choiceId);
+      function autoSaveToDatabase(questionId = null, choiceId = null) {
+    const formData = new FormData();
+    formData.append('quiz_id', <?= $quizId ?>);
+    
+    // Only add answer data if we are actually answering a question
+    if (questionId && choiceId) {
+        formData.append('question_id', questionId);
+        formData.append('choice_id', choiceId);
+    }
+    
+    // ALWAYS send the current step so the bookmark is updated
+    formData.append('current_step', currentStep);
 
-            fetch('save_progress.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => { console.log("Server Saved:", data.status); })
-            .catch(err => console.error("Save failed:", err));
-        }
+    fetch('save_progress.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => { console.log("Progress Bookmarked:", data.status); })
+    .catch(err => console.error("Save failed:", err));
+}
 
         let zoomLevel = 1;
         function openLightbox(img) {

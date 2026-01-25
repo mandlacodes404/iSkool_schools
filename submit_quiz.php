@@ -142,6 +142,7 @@ if ($publishMarks === 0) {
 }
 
 // Helper for UI Consistency
+
 function render_page($title, $icon, $message, $accent = "#4fd1c5") {
     ?>
     <!DOCTYPE html>
@@ -153,17 +154,62 @@ function render_page($title, $icon, $message, $accent = "#4fd1c5") {
         <style>
             :root { --bg-color: #0d1117; --card-bg: #1a202c; --text-color: #e0e6f0; }
             body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-            .container { max-width: 500px; padding: 40px; background: var(--card-bg); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-            h1 { color: <?= $accent ?>; margin-bottom: 15px; }
-            .back-btn { background: <?= $accent ?>; color: #000; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 20px; text-decoration: none; display: inline-block; }
+            .container { max-width: 500px; padding: 40px; background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+            h1 { color: <?= $accent ?>; margin-bottom: 15px; font-size: 2rem; }
+            p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; }
+            
+            /* The 5-Second Wheel Timer */
+            .timer-container { position: relative; width: 80px; height: 80px; margin: 20px auto; }
+            .timer-svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+            .timer-circle {
+                fill: none;
+                stroke: <?= $accent ?>;
+                stroke-width: 6;
+                stroke-dasharray: 226; /* Circumference for 40px radius */
+                stroke-dashoffset: 226;
+                stroke-linecap: round;
+                animation: progress-wheel 10s linear forwards;
+            }
+            .timer-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
+            
+            @keyframes progress-wheel {
+                from { stroke-dashoffset: 226; }
+                to { stroke-dashoffset: 0; }
+            }
+
+            .redirect-text { font-size: 0.9rem; opacity: 0.7; margin-top: 10px; }
         </style>
     </head>
     <body>
         <div class="container">
             <h1><i class="<?= $icon ?>"></i> <?= $title ?></h1>
             <p><?= $message ?></p>
-            <a href="learner_dashboard.php" class="back-btn">Go to Dashboard</a>
+            
+            <div class="timer-container">
+                <svg class="timer-svg">
+                    <circle class="timer-bg" cx="40" cy="40" r="36"></circle>
+                    <circle class="timer-circle" cx="40" cy="40" r="36"></circle>
+                </svg>
+            </div>
+            
+            <p class="redirect-text">Redirecting to your results in <span id="countdown">10</span> seconds...</p>
         </div>
+
+        <script>
+            let timeLeft = 10;
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                countdownElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // Redirect to the grades/results page
+                    window.location.href = 'quiz_history.php'; 
+                }
+            }, 1000);
+        </script>
     </body>
     </html>
     <?php
