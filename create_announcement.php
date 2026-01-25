@@ -125,8 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ");
         }
 
-        $emailQuery->bind_param("i", $class_id);
-        $emailQuery->execute();
+        $emailQuery->bind_param("ii", $class_id, $current_academic_year_id);
+$emailQuery->execute();
         $recipients = $emailQuery->get_result();
 
 // 1. Capture the "Urgent" checkbox value from the form

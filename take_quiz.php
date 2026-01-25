@@ -1089,9 +1089,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
                     <div class="question-header">
                         <span>Question <?= $questionNumber ?> of <?= count($questions) ?></span>
                         <span class="points"><?= $q['points'] ?> pts</span>
-                        <button type="button" class="flag-btn" aria-label="Flag question for review" onclick="toggleFlag(this, <?= $qid ?>)">
-                            <i class="fas fa-flag"></i>
-                        </button>
+                        
                     </div>
                     <p><strong><?= htmlspecialchars($q['text']) ?></strong></p>
                     <?php if (!empty($q['image'])): ?>
@@ -1118,7 +1116,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
                 <button type="button" id="prevBtn" class="modal-btn cancel" onclick="changeQuestion(-1)">Previous</button>
                 <button type="button" id="nextBtn" class="modal-btn" onclick="changeQuestion(1)">Next</button>
             </div>
-            <button class="submit-btn" type="button" onclick="showSubmitModal()" aria-label="Submit quiz">Submit Quiz</button>
+           <button class="submit-btn" type="button" onclick="submitQuiz()" ...>Submit Quiz</button>
         </form>
         <div id="timeUpModal">
             <div id="timeUpModalContent">
@@ -1127,11 +1125,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
         <div id="submitModal">
             <div id="submitModalContent">
-                <p>Are you sure you want to submit your quiz? <?php if ($priorAttempt): ?>This will overwrite your previous attempt.<?php else: ?>You cannot change your answers after submission.<?php endif; ?></p>
-                <div class="modal-actions">
-                    <button class="modal-btn" onclick="submitQuiz()" aria-label="Confirm quiz submission">Submit</button>
-                    <button class="modal-btn cancel" onclick="closeSubmitModal()" aria-label="Cancel submission">Cancel</button>
-                </div>
+                
             </div>
         </div>
         <div id="oneMinuteAlert">
@@ -1269,14 +1263,14 @@ function loadAnswers() {
     }
 
     if (n === (questions.length - 1)) {
-        nextBtn.innerText = "Finish & Review";
-        nextBtn.onclick = showSubmitModal;
-        mainSubmitBtn.classList.remove('hidden'); 
-    } else {
-        nextBtn.innerText = "Next";
-        nextBtn.onclick = () => changeQuestion(1);
-        mainSubmitBtn.classList.add('hidden'); 
-    }
+    nextBtn.classList.add('hidden'); // Hide "Next" on the last question
+    mainSubmitBtn.classList.remove('hidden'); // Show the real Submit button
+} else {
+    nextBtn.classList.remove('hidden');
+    nextBtn.innerText = "Next";
+    nextBtn.onclick = () => changeQuestion(1);
+    mainSubmitBtn.classList.add('hidden'); 
+}
     
     currentStep = n; // Ensure sync
     updatePalette(); 
