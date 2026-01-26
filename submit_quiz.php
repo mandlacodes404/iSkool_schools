@@ -142,7 +142,6 @@ if ($publishMarks === 0) {
 }
 
 // Helper for UI Consistency
-
 function render_page($title, $icon, $message, $accent = "#4fd1c5") {
     ?>
     <!DOCTYPE html>
@@ -151,33 +150,25 @@ function render_page($title, $icon, $message, $accent = "#4fd1c5") {
         <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= $title ?></title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
         <style>
-            :root { --bg-color: #0d1117; --card-bg: #1a202c; --text-color: #e0e6f0; }
-            body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-            .container { max-width: 500px; padding: 40px; background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
-            h1 { color: <?= $accent ?>; margin-bottom: 15px; font-size: 2rem; }
-            p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px; }
+            :root { --bg-color: #0d1117; --card-bg: #1a202c; --text-color: #e2e8f0; }
+            body { font-family: 'Nunito', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+            .container { max-width: 450px; width: 90%; padding: 30px; background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+            h1 { color: <?= $accent ?>; margin-bottom: 10px; font-size: 1.8rem; }
+            p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
             
-            /* The 5-Second Wheel Timer */
-            .timer-container { position: relative; width: 80px; height: 80px; margin: 20px auto; }
-            .timer-svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+            /* The 5-Second Wheel */
+            .timer-container { position: relative; width: 70px; height: 70px; margin: 15px auto; }
+            .timer-svg { transform: rotate(-90deg); width: 70px; height: 70px; }
             .timer-circle {
-                fill: none;
-                stroke: <?= $accent ?>;
-                stroke-width: 6;
-                stroke-dasharray: 226; /* Circumference for 40px radius */
-                stroke-dashoffset: 226;
-                stroke-linecap: round;
+                fill: none; stroke: <?= $accent ?>; stroke-width: 10;
+                stroke-dasharray: 201; stroke-dashoffset: 201; stroke-linecap: round;
                 animation: progress-wheel 10s linear forwards;
             }
-            .timer-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
-            
-            @keyframes progress-wheel {
-                from { stroke-dashoffset: 226; }
-                to { stroke-dashoffset: 0; }
-            }
-
-            .redirect-text { font-size: 0.9rem; opacity: 0.7; margin-top: 10px; }
+            .timer-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 5; }
+            @keyframes progress-wheel { from { stroke-dashoffset: 201; } to { stroke-dashoffset: 0; } }
+            .redirect-text { font-size: 0.85rem; color: <?= $accent ?>; opacity: 0.8; }
         </style>
     </head>
     <body>
@@ -187,28 +178,41 @@ function render_page($title, $icon, $message, $accent = "#4fd1c5") {
             
             <div class="timer-container">
                 <svg class="timer-svg">
-                    <circle class="timer-bg" cx="40" cy="40" r="36"></circle>
-                    <circle class="timer-circle" cx="40" cy="40" r="36"></circle>
+                    <circle class="timer-bg" cx="35" cy="35" r="32"></circle>
+                    <circle class="timer-circle" cx="35" cy="35" r="32"></circle>
                 </svg>
             </div>
             
-            <p class="redirect-text">Redirecting to your results in <span id="countdown">10</span> seconds...</p>
+            <p class="redirect-text">Saving to Grades <span id="countdown">10</span>s...</p>
         </div>
 
         <script>
-            let timeLeft = 10;
-            const countdownElement = document.getElementById('countdown');
-            
-            const timer = setInterval(() => {
-                timeLeft--;
-                countdownElement.textContent = timeLeft;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    // Redirect to the grades/results page
-                    window.location.href = 'quiz_history.php'; 
-                }
-            }, 1000);
+           let timeLeft = 10;
+const countdownElement = document.getElementById('countdown');
+
+const timer = setInterval(() => {
+    timeLeft--;
+    countdownElement.textContent = timeLeft;
+    
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        
+        // 1. Check if we are inside the Iframe (which we should be)
+        if (window.self !== window.top) {
+            /**
+             * WORLD CLASS REDIRECT:
+             * We tell the Parent (learner_dashboard.php) to reload itself 
+             * with the 'page' parameter set to 'quiz_history.php'.
+             * Your dashboard script (Section 1) will see this and 
+             * automatically load Grades into the iframe.
+             */
+            window.parent.location.href = 'learner_dashboard.php?page=quiz_history.php';
+        } else {
+            // 2. Fallback: If for some reason the page is opened directly
+            window.location.href = 'learner_dashboard.php?page=quiz_history.php';
+        }
+    }
+}, 1000);
         </script>
     </body>
     </html>

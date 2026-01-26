@@ -42,7 +42,7 @@ $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key 
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
 }
-$schoolLogo = 'Uploads/schools/default_school.png';
+$schoolLogo = 'uploads/schools/default_school.png';
 
 // === Fetch learner details (name, surname, class) ===
 $learnerStmt = $conn->prepare("
