@@ -340,6 +340,11 @@ function calculateTermPercentage($quizzes, $term) {
             .school-name { font-size: 28px; }
             .school-logo { width: 70px; height: 70px; }
         }
+        @media print {
+    .no-print { display: none !important; }
+    body { padding: 0; background: white; }
+    .container { width: 100%; max-width: none; box-shadow: none; border: none; }
+}
     </style>
 </head>
 <body>
@@ -408,9 +413,7 @@ function calculateTermPercentage($quizzes, $term) {
                 </tbody>
             </table>
 
-            <button class="print-btn" onclick="window.print()">
-                <i class="fas fa-print"></i> Print / Save as PDF
-            </button>
+            
         <?php endif; ?>
     </div>
 </body>

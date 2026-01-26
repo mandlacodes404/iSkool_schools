@@ -684,37 +684,149 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
         }
         
-        /* Modal Polish */
-        .modal-content {
-            background: var(--card-bg) !important;
-            border: 1px solid var(--border-color) !important;
-            border-top: 3px solid var(--accent-color) !important;
-        }
+       .modal {
+    display: none; /* JavaScript will change this to flex */
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background-color: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+}
 
-        /* Clean Gemini-Style Report Button */
-        .report-button {
-            padding: 14px 32px;
-            background: rgba(79, 209, 197, 0.1); /* Subtle teal tint */
-            color: var(--accent-color);
-            border: 1px solid rgba(79, 209, 197, 0.4);
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: none !important; /* Forces the glow to stay away */
-        }
+/* Clean Gemini-Style Report Button */
+.report-button {
+    padding: 14px 32px;
+    background: rgba(79, 209, 197, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(79, 209, 197, 0.4);
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: none !important;
+}
 
-        .report-button:hover {
-            background: var(--accent-color);
-            color: #0d1117; /* Dark background color for text contrast */
-            border-color: var(--accent-color);
-            transform: translateY(-2px);
-        }
+.report-button:hover {
+    background: var(--accent-color);
+    color: #0d1117;
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
 
-        .report-button:active {
-            transform: translateY(0);
-        }
+.report-button:active {
+    transform: translateY(0);
+}
+
+/* ─────────────────────────────────────────────── */
+/*     PROGRESS REPORT MODAL – consolidated        */
+/* ─────────────────────────────────────────────── */
+
+#reportModal .modal-content {
+    width: 95%;
+    max-width: 1000px;
+    height: 90vh;
+    margin: 5vh auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #0d1117;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;          /* ← VERY IMPORTANT: this makes absolute children stay inside */
+}
+
+#reportModal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: #161b22;
+    position: relative;          /* extra safety – close button will stay in header */
+}
+
+/* Base close button styling – visible on all screen sizes */
+#reportModal .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 36px;
+    font-weight: bold;
+    color: #e0e6f0;
+    cursor: pointer;
+    z-index: 10;
+    line-height: 1;
+    padding: 0 8px;
+}
+
+/* Optional: subtle hover effect on desktop too */
+#reportModal .close-modal:hover {
+    color: white;
+    transform: scale(1.15);
+}
+
+/* Rest of the modal parts */
+.iframe-container {
+    flex: 1 1 auto;
+    width: 100%;
+    background: #0d1117;
+    min-height: 0;
+}
+
+#reportFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    background: #161b22;
+}
+
+/* ─────────────────────────────────────────────── */
+/*     MOBILE – full screen + better close button  */
+/* ─────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    #reportModal .modal-content {
+        width: 100%;
+        max-width: none;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    #reportModal .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-footer {
+        padding: 12px 20px;
+    }
+
+    /* Enhanced mobile close button – bigger touch target */
+    #reportModal .close-modal {
+        top: 12px;
+        right: 16px;
+        font-size: 40px;
+        width: 48px;
+        height: 48px;
+        line-height: 48px;
+        text-align: center;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        color: white;
+    }
+
+    #reportModal .close-modal:hover,
+    #reportModal .close-modal:active {
+        background: rgba(0,0,0,0.8);
+    }
+}
     </style>
 </head>
 <body>
@@ -730,8 +842,8 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
            <div style="text-align:center; margin:30px 0;">
     <button onclick="generateProgressReport()" class="report-button">
-        <i class="fas fa-file-invoice" style="margin-right: 8px;"></i> Generate Progress Report
-    </button>
+    <i class="fas fa-file-invoice"></i> Generate Progress Report
+</button>
 </div>
             <?php if (!empty($groupedResults)): ?>
                 <div class="search-sort">
@@ -882,9 +994,22 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
             </ul>
         </div>
     </div>
-</div>
+    </div>
 
-    <script>
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+       <span id="closeReportModal" class="close-modal" onclick="closeReportModalNow()">&times;</span>
+        <div class="modal-header">
+            <h2>Academic Progress Report</h2>
+        </div>
+        <div class="iframe-container" style="height: 70vh; width: 100%;">
+            <iframe id="reportFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+        </div>
+        
+    </div>
+</div>
+<script>
+    // --- 1. PRESERVED UTILITY FUNCTIONS ---
     function toggleTeacher(el) {
         const section = el.closest('.teacher-section');
         const content = section.querySelector('.teacher-quizzes');
@@ -919,6 +1044,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         }
     }
 
+    // --- 2. SEARCH & TERM SELECTION ---
     document.querySelectorAll('.term-selector').forEach(sel => {
         sel.addEventListener('change', function() {
             const url = new URL(window.location);
@@ -950,68 +1076,112 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         });
     }
 
-    // --- MODAL & STATS LOGIC ---
-    const modal = document.getElementById('gradeModal');
-    const loader = document.getElementById('loaderOverlay');
-
+    // --- 3. GRADE STATS MODAL (Performance Overview) ---
     document.querySelectorAll('.viewDetails').forEach(btn => {
         btn.addEventListener('click', function() {
             const quizId = this.dataset.quiz;
-            loader.style.display = 'flex';
+            const loader = document.getElementById('loaderOverlay');
+            const gModal = document.getElementById('gradeModal');
+            
+            if (loader) loader.style.display = 'flex';
 
             fetch(`get_quiz_stats.php?quiz_id=${quizId}`)
                 .then(response => response.json())
                 .then(data => {
-                    loader.style.display = 'none';
-                    if (data.error) {
-                        alert("Could not load stats.");
-                        return;
-                    }
+                    if (loader) loader.style.display = 'none';
+                    if (data.error) { alert("Could not load stats."); return; }
 
-                    modal.style.display = 'flex';
+                    if (gModal) gModal.style.display = 'flex';
 
-                    // Update Circle
                     const circle = document.getElementById('circleProgress');
                     const percentage = data.user_score;
                     const offset = 314 - (314 * (percentage / 100));
-                    circle.style.strokeDashoffset = offset;
+                    if (circle) circle.style.strokeDashoffset = offset;
 
-                    // Update Text
                     document.getElementById('scoreText').innerText = percentage + '%';
                     document.getElementById('scoreOutOf').innerText = `You scored ${data.score_out_of}`;
-
-                    // Update Distribution Map
                     document.getElementById('scoreMarker').style.left = percentage + '%';
                     
-                    const lowL = document.getElementById('lowLine');
-                    const meanL = document.getElementById('meanLine');
-                    const highL = document.getElementById('highLine');
-
-                    lowL.style.left = data.min + '%';
-                    meanL.style.left = data.avg + '%';
-                    highL.style.left = data.max + '%';
-
-                    lowL.title = `Lowest: ${data.min}%`;
-                    meanL.title = `Average: ${data.avg}%`;
-                    highL.title = `Highest: ${data.max}%`;
+                    document.getElementById('lowLine').style.left = data.min + '%';
+                    document.getElementById('meanLine').style.left = data.avg + '%';
+                    document.getElementById('highLine').style.left = data.max + '%';
                 })
                 .catch(err => {
-                    loader.style.display = 'none';
+                    if (loader) loader.style.display = 'none';
                     console.error(err);
                 });
         });
     });
 
-    // Close Modal when clicking X or clicking outside the box
-    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
-    window.onclick = (event) => {
-        if (event.target == modal) modal.style.display = 'none';
+    // --- 4. PROGRESS REPORT MODAL ---
+    function generateProgressReport() {
+        const loader = document.getElementById('loaderOverlay');
+        const rFrame = document.getElementById('reportFrame');
+        const rModal = document.getElementById('reportModal');
+        
+        if (loader) loader.style.display = 'flex';
+        
+        const url = `progress_report.php?learner=<?= urlencode($targetEmail) ?>`;
+        if (rFrame) {
+            rFrame.src = url;
+            rFrame.onload = function() {
+                if (loader) loader.style.display = 'none';
+                if (rModal) rModal.style.display = 'flex';
+            };
+        }
+    }
+
+  function closeReportModalNow() {
+    const rModal = document.getElementById('reportModal');
+    const rFrame = document.getElementById('reportFrame');
+    
+    if (rModal) {
+        rModal.style.setProperty('display', 'none', 'important');
+        rModal.style.display = 'none'; // Double down
+    }
+    
+    if (rFrame) {
+        rFrame.onload = null; // Clear the onload handler to prevent re-triggering
+        rFrame.src = ''; // Now safe to clear content
+    }
+}
+
+    function printReport() {
+        const rFrame = document.getElementById('reportFrame');
+        if (rFrame && rFrame.contentWindow) {
+            rFrame.contentWindow.focus();
+            rFrame.contentWindow.print();
+        }
+    }
+
+   // --- 5. THE "CLOSE" FIX (Global Click Handler) ---
+    window.onclick = function(event) {
+        const gModal = document.getElementById('gradeModal');
+        const rModal = document.getElementById('reportModal');
+        const closeG = document.getElementById('closeModal');
+        const closeR = document.getElementById('closeReportModal');
+
+        // Close Grade Modal logic
+        if (event.target === gModal || event.target === closeG) {
+            if (gModal) gModal.style.display = 'none';
+        }
+        
+        // Close Report Modal logic
+        // We check if they clicked the overlay OR the X button specifically
+        if (event.target === rModal || event.target === closeR || closeR.contains(event.target)) {
+            closeReportModalNow();
+        }
     };
 
-    function generateProgressReport() {
-        const url = `progress_report.php?learner=<?= urlencode($targetEmail) ?>`;
-        window.open(url, '_blank');
-    }
+    // Keyboard support: Close with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            const gModal = document.getElementById('gradeModal');
+            if (gModal) gModal.style.display = 'none';
+            closeReportModalNow();
+        }
+    });
 </script>
+
 </body>
 </html>
