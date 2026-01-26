@@ -190,162 +190,202 @@ function calculateTermPercentage($quizzes, $term) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --text-color: #e0e6f0;
-            --accent-color: #4fd1c5;
-            --border-color: #30363d;
-            --progress-bg: #21262d;
-        }
-        body {
-            margin: 0;
-            font-family: 'Nunito', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            padding: 40px 20px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-        .report-header {
-            background: rgba(79, 209, 197, 0.15);
-            padding: 35px 30px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        .school-logo {
-            width: 90px;
-            height: 90px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 4px solid rgba(255,255,255,0.2);
-        }
-        .school-name {
-            font-size: 34px;
-            font-weight: 700;
-            margin: 0;
-            color: var(--accent-color);
-        }
-        .report-subtitle {
-            font-size: 19px;
-            opacity: 0.9;
-            margin: 5px 0;
-        }
-        .learner-info {
-            padding: 25px 30px;
-            text-align: center;
-            background: rgba(255,255,255,0.03);
-        }
-        .learner-name {
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin: 0 0 8px 0;
-        }
-        .learner-class {
-            font-size: 19px;
-            opacity: 0.9;
-        }
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .report-table th {
-            background: rgba(79, 209, 197, 0.2);
-            padding: 18px;
-            text-align: left;
-            font-size: 18px;
-            color: var(--accent-color);
-        }
-        .report-table td {
-            padding: 20px 18px;
-            border-top: 1px solid var(--border-color);
-        }
-        .subject {
-            font-size: 19px;
-            font-weight: 600;
-        }
-        .mark-section {
-            text-align: right;
-        }
-        .percentage {
-            font-size: 36px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-        .progress-container {
-            width: 100%;
-            height: 16px;
-            background: var(--progress-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        .progress-bar {
-            height: 100%;
-            border-radius: 8px;
-            transition: width 0.6s ease, background 0.4s ease;
-            width: 0%;
-        }
-        .assess-text {
-            font-size: 14px;
-            opacity: 0.85;
-        }
-        .no-data {
-            text-align: center;
-            padding: 100px 20px;
-            font-size: 20px;
-            opacity: 0.7;
-        }
-        .print-btn {
-            display: block;
-            margin: 50px auto;
-            padding: 16px 44px;
-            background: var(--accent-color);
-            color: black;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .print-btn:hover {
-            transform: scale(1.05);
-        }
-        @media print {
-            body { background: white; color: black; padding: 20px; }
-            .container { box-shadow: none; border-radius: 0; }
-            .report-header { background: #f0f8f8 !important; }
-            .school-logo { border: 3px solid #ccc; }
-            .print-btn { display: none; }
-            .progress-bar { background: #4fd1c5 !important; }
-            .school-name, .learner-name { color: #000 !important; }
-        }
-        @media (max-width: 768px) {
-            .percentage { font-size: 30px; }
-            .learner-name { font-size: 24px; }
-            .school-name { font-size: 28px; }
-            .school-logo { width: 70px; height: 70px; }
-        }
-        @media print {
-    .no-print { display: none !important; }
-    body { padding: 0; background: white; }
-    .container { width: 100%; max-width: none; box-shadow: none; border: none; }
-}
-    </style>
+   
+    :root {
+        --bg-color:       #0d1117;
+        --card-bg:        #1b1b1b;
+        --text-color:     #e2e8f0;
+        --secondary-text: #8b949e;
+        --accent-color:   #4fd1c5;           /* teal – used sparingly */
+        --border-color:   rgba(255, 255, 255, 0.05);
+        --glass-bg:       rgba(255, 255, 255, 0.03);
+        --shadow-soft:    0 4px 20px rgba(0,0,0,0.3);
+        --progress-low:   rgba(248,81,73,0.8);    /* red for <40% */
+        --progress-mid:   rgba(79,209,197,0.8);   /* teal for 40–79% */
+        --progress-high:  rgba(35,134,54,0.8);    /* green for ≥80% */
+        --progress-bg:    rgba(255,255,255,0.04);
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 40px 20px;
+        min-height: 100vh;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-color);
+    }
+
+    .report-header {
+        background: var(--glass-bg);
+        padding: 35px 30px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .school-logo {
+        width: 90px;
+        height: 90px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 2px solid var(--border-color);
+    }
+
+    .school-name {
+        font-size: 34px;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-color);
+    }
+
+    .report-subtitle {
+        font-size: 19px;
+        color: var(--secondary-text);
+        margin: 5px 0;
+    }
+
+    .learner-info {
+        padding: 25px 30px;
+        text-align: center;
+        background: var(--glass-bg);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .learner-name {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-color);
+        margin: 0 0 8px;
+    }
+
+    .learner-class {
+        font-size: 19px;
+        color: var(--secondary-text);
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .report-table th {
+        background: var(--glass-bg);
+        padding: 18px;
+        text-align: left;
+        font-size: 18px;
+        color: var(--text-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .report-table td {
+        padding: 20px 18px;
+        border-top: 1px solid var(--border-color);
+        color: var(--secondary-text);
+    }
+
+    .subject {
+        font-size: 19px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .mark-section {
+        text-align: right;
+    }
+
+    .percentage {
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .progress-container {
+        width: 100%;
+        height: 16px;
+        background: var(--progress-bg);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 8px;
+        transition: width 0.6s ease;
+        width: 0%;
+    }
+
+    .assess-text {
+        font-size: 14px;
+        color: var(--secondary-text);
+        opacity: 0.9;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 100px 20px;
+        font-size: 20px;
+        color: var(--secondary-text);
+        opacity: 0.8;
+    }
+
+    .print-btn {
+        display: block;
+        margin: 50px auto;
+        padding: 16px 44px;
+        background: var(--button-bg);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .print-btn:hover {
+        background: var(--button-hover-bg);
+        border-color: var(--accent-color);
+        transform: scale(1.03);
+    }
+
+    @media print {
+        body { background: white; color: black; padding: 20px; }
+        .container { box-shadow: none; border-radius: 0; border: none; }
+        .report-header { background: #f8f9fa !important; }
+        .school-logo { border: 2px solid #ccc; }
+        .print-btn { display: none; }
+        .progress-bar { background: #4fd1c5 !important; } /* teal prints well */
+        .school-name, .learner-name { color: #000 !important; }
+        .report-table th { background: #f0f0f0 !important; }
+        .report-table td { border-color: #ddd !important; }
+    }
+
+    @media (max-width: 768px) {
+        body { padding: 20px 10px; }
+        .container { padding: 20px; }
+        .percentage { font-size: 30px; }
+        .learner-name { font-size: 24px; }
+        .school-name { font-size: 28px; }
+        .school-logo { width: 70px; height: 70px; }
+    }
+</style>
 </head>
 <body>
     <div class="container">

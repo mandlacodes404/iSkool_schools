@@ -264,7 +264,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 80px; /* taller base height for better visibility and comfort */
+            height: 70px; /* taller base height for better visibility and comfort */
             background: rgba(66, 65, 65, 0.35);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -272,7 +272,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
             z-index: 4000;
             justify-content: space-around;
-            align-items: center;
+            align-items: flex-start;
             box-sizing: border-box;
             transition: padding-bottom 0.3s ease, height 0.3s ease;
         }
@@ -287,7 +287,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; /* align content to the top */
-            padding-top: 1px; /* pushes icons and text higher inside the taller bar */
+            padding-top: 5px; /* pushes icons and text higher inside the taller bar */
             transition: all 0.2s;
         }
 
@@ -324,8 +324,8 @@ $schoolLogo = 'uploads/schools/default_school.png';
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
                 padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(80px + env(safe-area-inset-bottom));
-                height: calc(80px + constant(safe-area-inset-bottom));
+                height: calc(70px + env(safe-area-inset-bottom));
+                height: calc(70px + constant(safe-area-inset-bottom));
             }
 
             .sidebar a.desktop-only { display: none; }

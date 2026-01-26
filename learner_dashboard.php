@@ -490,11 +490,15 @@ iframe {
 
 .main-header {
     padding: 10px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: linear-gradient(180deg, rgba(26, 32, 44, 0.8), var(--bg-color));
+    border-bottom: 1px solid var(--border-color);          /* faint rim like sidebar */
+    background: rgba(26, 25, 25, 0.92);                    /* almost exact sidebar bg #1a1919 with slight transparency */
+    backdrop-filter: blur(10px);                           /* glass effect – premium dim look */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .main-header .logo-container {
@@ -505,9 +509,9 @@ iframe {
 
 .main-header .school-name {
     font-size: 18px;
-    font-weight: 500;
-    color: var(--text-color);
-    display: none;
+    font-weight: 600;
+    color: var(--text-color);           /* soft white #e2e8f0 */
+    display: none;                      /* hidden on mobile – already good */
 }
 
 @media (min-width: 769px) {
@@ -849,14 +853,14 @@ iframe {
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 80px; /* taller base height for comfort and clear labels */
+            height: 70px; /* taller base height for comfort and clear labels */
            background: rgba(92, 89, 89, 0.35);  /* ← Exact same transparent dark as teacher */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
             justify-content: space-around;
-            align-items: center;
+            align-items: flex-start;
             z-index: 4000;
             box-sizing: border-box;
             transition: padding-bottom 0.3s ease, height 0.3s ease;
@@ -872,7 +876,7 @@ iframe {
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; /* pushes content up */
-            padding-top: 1px; /* lifts icons + text higher together */
+            padding-top: 5px; /* lifts icons + text higher together */
             transition: all 0.2s;
         }
 
@@ -897,8 +901,8 @@ iframe {
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
                 padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(80px + env(safe-area-inset-bottom));
-                height: calc(80px + constant(safe-area-inset-bottom));
+                height: calc(70px + env(safe-area-inset-bottom));
+                height: calc(70px + constant(safe-area-inset-bottom));
             }
 
             iframe {
