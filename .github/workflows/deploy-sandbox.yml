@@ -1,0 +1,28 @@
+name: 🚀 Deploy to Sandbox
+on:
+  push:
+    branches:
+      - dev  # This only runs when you push to your 'dev' branch
+
+jobs:
+  web-deploy:
+    name: 🎉 Sync to Sandbox
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v3
+
+    - name: 📂 Sync Files via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        # This tells GitHub to put files in your new sandbox folder
+        # Updated to point to your specific sandbox folder
+        server-dir: sandbox/
+        # We exclude git files so they don't clutter your server
+        exclude: |
+          **/.git*
+          **/.github*
+          **/node_modules/**
