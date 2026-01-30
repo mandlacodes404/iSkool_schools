@@ -1,11 +1,36 @@
 <?php
 session_start();
+require_once 'config.php';
+
 if (!isset($_SESSION['email'])) {
     exit('Unauthorized');
 }
 
 $learnerEmail = $_SESSION['email'];
 $defaultPic = 'default.png';
+
+// --- FETCH LEARNER INFO FOR INITIALS ---
+$learnerName           = $_SESSION['name'] ?? '';
+$learnerSurname        = '';
+$learnerProfilePicture = 'default.png';
+
+$stmt = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
+$stmt->bind_param("s", $learnerEmail);
+$stmt->execute();
+$res = $stmt->get_result();
+
+if ($row = $res->fetch_assoc()) {
+    $learnerName           = $row['name'] ?: $learnerName;
+    $learnerSurname        = $row['surname'] ?: '';
+    $learnerProfilePicture = $row['profile_picture'] ?: 'default.png';
+}
+$stmt->close();
+
+// Generate Initials (MM)
+$firstInitial = !empty($learnerName) ? strtoupper(substr(trim($learnerName), 0, 1)) : '';
+$lastInitial  = !empty($learnerSurname) ? strtoupper(substr(trim($learnerSurname), 0, 1)) : '';
+$initials     = $firstInitial . $lastInitial;
+if (empty($initials)) { $initials = "??"; }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -285,29 +310,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    removeBtn.addEventListener('click', () => {
-        if (!confirm('Remove profile picture?')) return;
+  removeBtn.addEventListener('click', () => {
+    if (!confirm('Remove profile picture?')) return;
 
-        const iframeWindow = window.parent;
-        if (iframeWindow) {
-            const avatar = iframeWindow.document.querySelector('.learner-avatar');
-            if (avatar) {
-                avatar.src = 'uploads/learners/<?= $defaultPic ?>?v=' + Date.now();
+    const iframeWindow = window.parent; // This is the Dashboard
+    
+    fetch('upload_profile.php', {
+        method: 'POST',
+        body: new URLSearchParams({ remove: '1' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && iframeWindow) {
+            // Find the wrapper in the Sidebar (Parent)
+            const avatarWrapper = iframeWindow.document.querySelector('.profile-picture-wrapper');
+            
+            if (avatarWrapper) {
+                // We use the initials we calculated in PHP at the top
+                const phpInitials = <?= json_encode($initials) ?>;
+                
+                // REBUILD THE INITIALS DIV (Exactly like the Dashboard's style)
+                // REBUILD WITH THE CHARCOAL & SILVER STYLE
+                avatarWrapper.innerHTML = `
+                    <div class="initials-avatar" style="
+                        width: 40px; 
+                        height: 40px; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        background-color: #2d2d2d; 
+                        color: #a0a0a0; 
+                        font-size: 14px; 
+                        font-weight: 800; 
+                        border: 3px solid #757272ff; 
+                        user-select: none; 
+                        text-transform: uppercase; 
+                        letter-spacing: -1px;
+                    ">
+                        ${phpInitials}
+                    </div>
+                `;
             }
-
-            fetch('upload_profile.php', {
-                method: 'POST',
-                body: new URLSearchParams({ remove: '1' })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    alert(data.error || 'Failed');
-                location.reload();
-                }
-            });
+            alert('Profile picture removed!');
+        } else {
+            alert(data.error || 'Failed to remove');
         }
-    });
+    })
+    .catch(err => alert('Connection error'));
+});
 
     syncPushBtn.addEventListener('click', () => {
     // Check if the function exists on the parent dashboard

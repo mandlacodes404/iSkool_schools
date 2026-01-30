@@ -2,7 +2,7 @@
 session_start();
 require_once 'config.php';
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: login.php");
     exit;
 }

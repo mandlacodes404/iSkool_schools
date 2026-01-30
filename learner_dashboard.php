@@ -97,10 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
     exit();
 }
 
-//────────────────────────────────────────────────────────────────────────
-//                 Learner profile info 
-//────────────────────────────────────────────────────────────────────────
-// Default fallback values
+
 //────────────────────────────────────────────────────────────────────────
 //         Learner profile info 
 //────────────────────────────────────────────────────────────────────────
@@ -1297,21 +1294,53 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
     });
 
-    const avatar = document.querySelector(".learner-avatar");
+    const avatarWrapper = document.querySelector(".profile-picture-wrapper");
     const profileInput = document.getElementById("profileInput");
-    if (avatar && profileInput) {
-        avatar.addEventListener("click", () => profileInput.click());
+
+    if (avatarWrapper && profileInput) {
         profileInput.addEventListener("change", function (e) {
             const file = e.target.files[0];
             if (!file) return;
-            avatar.src = URL.createObjectURL(file);
+
+            // 1. Show the processing loader
+            const globalLoader = document.getElementById("loaderOverlay");
+            if (globalLoader) globalLoader.style.display = 'flex';
+
             const fd = new FormData();
             fd.append("profile", file);
+
             fetch("upload_profile.php", { method: "POST", body: fd })
                 .then(r => r.json())
                 .then(data => {
-                    if (data.success) avatar.src = "Uploads/learners/" + data.file;
-                    else alert(data.error || "Upload failed");
+                    if (globalLoader) globalLoader.style.display = 'none';
+
+                    if (data.success) {
+                        // 2. Build the correct path (lowercase 'uploads')
+                        const newImageUrl = "uploads/learners/" + data.file + "?t=" + new Date().getTime();
+                        
+                        // 3. Find or Create the image tag
+                        let img = avatarWrapper.querySelector('img');
+                        
+                        if (!img) {
+                            // If user had initials, replace them with a new img tag
+                            avatarWrapper.innerHTML = `
+                                <img src="${newImageUrl}" 
+                                     alt="Profile Picture" 
+                                     class="learner-avatar"
+                                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
+                            `;
+                        } else {
+                            // If image already existed, just update the source
+                            img.src = newImageUrl;
+                        }
+                    } else {
+                        alert(data.error || "Upload failed");
+                    }
+                })
+                .catch(err => {
+                    if (globalLoader) globalLoader.style.display = 'none';
+                    console.error("Upload Error:", err);
+                    alert("A connection error occurred during upload.");
                 });
         });
     }
