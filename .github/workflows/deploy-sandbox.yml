@@ -19,8 +19,8 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         # This tells GitHub to put files in your new sandbox folder
-        # Updated to point to your specific sandbox folder
-        server-dir: sandbox/
+       # Use the exact folder name cPanel created for the subdomain
+        server-dir: sandbox.iskool.online/ 
         # We exclude git files so they don't clutter your server
         exclude: |
           **/.git*
