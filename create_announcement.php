@@ -37,7 +37,30 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-$name  = $_SESSION['name'] ?? $email;
+
+// --- UPDATE THIS PART ---
+$teacherDisplayName = "Teacher"; // Fallback
+$stmtUser = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
+$stmtUser->bind_param("s", $email);
+$stmtUser->execute();
+$userData = $stmtUser->get_result()->fetch_assoc();
+
+if ($userData) {
+    $tTitle   = $userData['title'] ?? '';
+    $tName    = $userData['name'] ?? '';
+    $tSurname = $userData['surname'] ?? '';
+    
+    // Get first letter of Name (e.g., 'K' from 'Kumari')
+    $firstInitial = !empty($tName) ? strtoupper(substr(trim($tName), 0, 1)) . "." : "";
+    
+    // Create the format: Mrs K. Patel
+    $teacherDisplayName = trim("$tTitle $firstInitial $tSurname");
+}
+$stmtUser->close();
+
+// Use this for the email footer too
+$name = $teacherDisplayName; 
+// ------------------------
 $message = "";
 
 // ────────────────────────────────────────────────────────────────────────
@@ -149,14 +172,17 @@ while ($recipient = $recipients->fetch_assoc()) {
 $cleanBaseUrl = rtrim(BASE_URL, '/');
 $announcementLink = $cleanBaseUrl . "/learner_dashboard.php?page=view_announcements_user.php"; 
 
-// 2. Update the Push Function call
+// Find this block around line 143:
 if ($subResult->num_rows > 0) {
+    // --- UPDATE THIS LINE ---
+    $fullPushTitle = $teacherDisplayName . ": " . $title; 
+
     $isPushSent = sendPushToUser(
         $conn, 
         $currentEmail, 
-        "📢 New Announcement: " . $title, 
+        $fullPushTitle, // <--- We use the new formatted title here
         $msg,
-        $announcementLink // <--- This tells the phone where to go
+        $announcementLink
     );
 }
 

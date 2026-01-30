@@ -1,12 +1,32 @@
 <?php
 session_start();
-if (!isset($_SESSION['teacher'])) {
+require_once 'config.php'; // 1. Added config to talk to DB
+
+if (!isset($_SESSION['email'])) {
     exit('Unauthorized');
 }
 
 $teacherEmail = $_SESSION['email'];
 $teacherName  = $_SESSION['name'] ?? 'Teacher';
+$teacherSurname = '';
 $defaultPic   = 'default_teacher.png';
+
+// 2. Fetch the latest name/surname for Initials
+$stmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ?");
+$stmt->bind_param("s", $teacherEmail);
+$stmt->execute();
+$res = $stmt->get_result();
+if ($row = $res->fetch_assoc()) {
+    $teacherName = $row['name'] ?: $teacherName;
+    $teacherSurname = $row['surname'] ?: '';
+}
+$stmt->close();
+
+// 3. Generate Initials
+$firstInitial = !empty($teacherName) ? strtoupper(substr(trim($teacherName), 0, 1)) : '';
+$lastInitial  = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurname), 0, 1)) : '';
+$initials     = $firstInitial . $lastInitial;
+if (empty($initials)) { $initials = "T"; }
 ?>
 
 <!DOCTYPE html>
@@ -17,16 +37,16 @@ $defaultPic   = 'default_teacher.png';
     <title>Teacher Settings • iSkool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-    :root {
-        --bg: #000000;
-        --card: rgba(15, 15, 15, 0.82);
-        --glass-border: rgba(255, 255, 255, 0.09);
-        --text: #ffffff;
-        --text-muted: #b0b0b0;
-        --accent: #4fd1c5;
-        --danger: #ff4444;
-        --hover-glow: 0 0 22px rgba(79, 209, 197, 0.45);
-    }
+   :root {
+            --bg: #000000;
+            --card: rgba(15, 15, 15, 0.82);
+            --glass-border: rgba(255, 255, 255, 0.09);
+            --text: #ffffff;
+            --text-muted: #b0b0b0;
+            --accent: #4fd1c5;
+            --danger: #ff4444;
+            --hover-glow: 0 0 22px rgba(79, 209, 197, 0.45);
+        }
 
     * { box-sizing: border-box; }
 
@@ -195,16 +215,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // REMOVE BUTTON — instant default + cache buster
+// REMOVE BUTTON
     removeBtn.addEventListener('click', () => {
         if (!confirm('Remove profile picture?')) return;
 
         const parentWin = window.parent;
-        const avatar = parentWin?.document?.querySelector('.teacher-avatar');
-
-        if (avatar) {
-            avatar.src = 'uploads/teachers/<?= $defaultPic ?>?v=' + Date.now();
-        }
+        // Target the wrapper on the dashboard sidebar
+        const avatarWrapper = parentWin?.document?.querySelector('.profile-picture-wrapper');
 
         fetch('upload_profile.php', {
             method: 'POST',
@@ -213,7 +230,32 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(r => r.json())
         .then(data => {
-            if (!data.success) alert(data.error || 'Failed to remove');
+            if (data.success && avatarWrapper) {
+                // Get initials from PHP
+                const teacherInitials = <?= json_encode($initials) ?>;
+                
+                // REVERT TO INITIALS STYLE (Charcoal/Silver)
+                avatarWrapper.innerHTML = `
+                    <div class="initials-avatar" style="
+                     width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2d2d2d; 
+    color: #a0a0a0;            
+    font-size: 16px; 
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+
+                    ">
+                        ${teacherInitials}
+                    </div>
+                `;
+            } else if (!data.success) {
+                alert(data.error || 'Failed to remove');
+            }
         })
         .catch(() => alert('Network error'));
     });

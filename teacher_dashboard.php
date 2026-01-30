@@ -521,16 +521,55 @@ document.addEventListener('DOMContentLoaded', function() {
         iframe.src = savedPage;
     }
 
-    // Profile upload
-    avatar?.addEventListener('click', () => input.click());
+    // ——————————————————————————————————————————————————————————————————————————————
+    // 3. PROFILE UPLOAD (Fixed: Handles Initials & No-Refresh)
+    // ——————————————————————————————————————————————————————————————————————————————
+    const avatarWrapper = document.querySelector('.profile-picture-wrapper');
+
+    // Click wrapper to trigger file input
+    avatarWrapper?.addEventListener('click', () => input.click());
+
     input.addEventListener('change', e => {
         const file = e.target.files[0];
         if (file) {
-            avatar.src = URL.createObjectURL(file);
-            const fd = new FormData(); fd.append('profile', file);
-            fetch('upload_teacher_profile.php', {method:'POST', body:fd})
+            const fd = new FormData(); 
+            fd.append('profile', file);
+            
+            // Show loader while uploading
+            if (loader) loader.style.display = 'flex';
+
+            fetch('upload_teacher_profile.php', { method: 'POST', body: fd })
                 .then(r => r.json())
-                .then(d => { if(d.success) avatar.src = 'Uploads/teachers/' + d.file + '?t=' + Date.now(); });
+                .then(d => {
+                    if (loader) loader.style.display = 'none';
+                    
+                    if (d.success) {
+                        const newUrl = 'uploads/teachers/' + d.file + '?t=' + Date.now();
+                        
+                        // Check if an <img> tag exists yet
+                        let img = avatarWrapper.querySelector('img');
+                        
+                        if (img) {
+                            // OPTION A: If image exists, just update the source
+                            img.src = newUrl;
+                        } else {
+                            // OPTION B: If initials are showing, replace them with a new <img> tag
+                            avatarWrapper.innerHTML = `
+                                <img src="${newUrl}" 
+                                     alt="Profile Picture" 
+                                     class="teacher-avatar"
+                                    
+                            `;
+                        }
+                    } else {
+                        alert(d.error || "Upload failed");
+                    }
+                })
+                .catch(err => {
+                    if (loader) loader.style.display = 'none';
+                    console.error(err);
+                    alert("Connection error");
+                });
         }
     });
 
