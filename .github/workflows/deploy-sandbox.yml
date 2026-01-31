@@ -1,4 +1,5 @@
 name: 🚀 Deploy to Sandbox
+
 on:
   push:
     branches:
@@ -9,28 +10,31 @@ jobs:
     name: 🎉 Sync to Sandbox
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
 
-    - name: 📂 Sync Files via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        # This tells GitHub to put files in your new sandbox folder
-       # Use the exact folder name cPanel created for the subdomain
-        server-dir: sandbox.iskool.online/ 
-        # We exclude git files so they don't clutter your server
-        exclude: |
-          **/.git*
-          **/.github*
-          **/node_modules/**
-          **/vendor/**                 # ← this is the most important one right now
-          **/tests/**
-          **/storage/logs/**
-          **/.env
-          composer.lock                # usually don't need to upload this
-         
-        log-level: verbose                   # ← add this temporarily → shows exactly where it fails
-        # dry-run: true                      # ← uncomment for a test run (no actual upload)
+      - name: 📂 Sync Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: sandbox.iskool.online/   # trailing / is recommended for consistency
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github
+            **/.github/**
+            **/node_modules/**
+            **/vendor/**
+            **/tests/**
+            **/storage/logs/**
+            **/.env*
+            composer.lock
+            # Add more if needed, e.g.:
+            # **/.DS_Store
+            # **/*.log
+          log-level: verbose               # Shows detailed skip/upload info – keep for now
+          dry-run: true                    # Set to false (or remove) after testing
+          # Optional: If you ever want aggressive cleanup (careful!):
+          # dangerous-clean-slate: false   # default is false
