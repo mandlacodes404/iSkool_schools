@@ -19,18 +19,18 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /home/iskowdbw/sandbox.iskool.online/   # looks correct for add-on domain
+          # We use the relative path from your FTP login root
+          server-dir: sandbox.iskool.online/
           exclude: |
             **/.git*
             **/.git*/**
-            **/.github
-            **/.github/**
+            **/.github*
+            **/.github*/**
             **/node_modules/**
             **/vendor/**
             **/tests/**
             **/storage/logs/**
             **/.env*
             composer.lock
+            .gitignore
           log-level: verbose
-          # dry-run: true   # ← COMMENT OUT or DELETE this line (or set to false)
-          # dangerous-clean-slate: true   # keep commented for now
