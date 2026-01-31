@@ -1,4 +1,5 @@
 name: 🚀 Deploy to Production
+
 on:
   push:
     branches:
@@ -9,21 +10,27 @@ jobs:
     name: 🎉 Sync to Live Site
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
 
-    - name: 📂 Sync Files via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        # Destination is your main website folder
-        server-dir: public_html/ 
-        exclude: |
-          **/.git*
-          **/.github*
-          **/vendor/**
-          **/node_modules/**
-          **/sandbox.iskool.online/**
-          **/cgi-bin/**
+      - name: 📂 Sync Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Destination for your main site
+          server-dir: public_html/ 
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github*
+            **/.github*/**
+            **/vendor/**
+            **/node_modules/**
+            **/sandbox.iskool.online/**
+            **/cgi-bin/**
+            **/.env*
+            composer.lock
+            .gitignore
+          log-level: verbose
