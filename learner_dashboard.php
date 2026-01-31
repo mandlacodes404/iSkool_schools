@@ -210,7 +210,7 @@ if (!empty($joinedClassIds)) {
 :root {
     --bg-color: #0d1117;
     --sidebar-bg: #1a202c;
-    --text-color: #e2e8f0;
+    --text-color: #f7f;
     --accent-color765: #4fd1c5;
     --secondary-accent: #f6877a;
     --card-bg: #1a202c;
