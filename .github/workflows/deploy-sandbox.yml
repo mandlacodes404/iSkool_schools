@@ -32,3 +32,5 @@ jobs:
           **/.env
           composer.lock                # usually don't need to upload this
       # Optional: add more if you have other big folders
+      log-level: verbose                   # ← add this temporarily → shows exactly where it fails
+      # dry-run: true                      # ← uncomment for a test run (no actual upload)
