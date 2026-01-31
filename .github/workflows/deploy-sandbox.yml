@@ -13,16 +13,19 @@ jobs:
       uses: actions/checkout@v3
 
     - name: 📂 Sync Files via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        # This tells GitHub to put files in your new sandbox folder
-       # Use the exact folder name cPanel created for the subdomain
-        server-dir: sandbox.iskool.online/ 
-        # We exclude git files so they don't clutter your server
-        exclude: |
-          **/.git*
-          **/.github*
-          **/node_modules/**
+  uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+  with:
+    server: ${{ secrets.FTP_SERVER }}
+    username: ${{ secrets.FTP_USERNAME }}
+    password: ${{ secrets.FTP_PASSWORD }}
+    server-dir: sandbox.iskool.online/     # ← added trailing slash (recommended)
+    exclude: |
+      **/.git*
+      **/.github*
+      **/node_modules/**
+      **/vendor/**                 # ← this is the most important one right now
+      **/tests/**
+      **/storage/logs/**
+      **/.env
+      composer.lock                # usually don't need to upload this
+      # Optional: add more if you have other big folders
