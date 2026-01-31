@@ -3,7 +3,7 @@ name: 🚀 Deploy to Sandbox
 on:
   push:
     branches:
-      - dev  # This only runs when you push to your 'dev' branch
+      - dev
 
 jobs:
   web-deploy:
@@ -19,7 +19,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /home/iskowdbw/sandbox.iskool.online/
+          server-dir: /home/iskowdbw/sandbox.iskool.online/   # looks correct for add-on domain
           exclude: |
             **/.git*
             **/.git*/**
@@ -31,10 +31,6 @@ jobs:
             **/storage/logs/**
             **/.env*
             composer.lock
-            # Add more if needed, e.g.:
-            # **/.DS_Store
-            # **/*.log
-          log-level: verbose               # Shows detailed skip/upload info – keep for now
-          dry-run: true                    # Set to false (or remove) after testing
-          # Optional: If you ever want aggressive cleanup (careful!):
-          # dangerous-clean-slate: false   # default is false
+          log-level: verbose
+          # dry-run: true   # ← COMMENT OUT or DELETE this line (or set to false)
+          # dangerous-clean-slate: true   # keep commented for now
