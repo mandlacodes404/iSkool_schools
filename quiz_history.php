@@ -1154,24 +1154,22 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         }
     }
 
-   // --- 5. THE "CLOSE" FIX (Global Click Handler) ---
-    window.onclick = function(event) {
-        const gModal = document.getElementById('gradeModal');
-        const rModal = document.getElementById('reportModal');
-        const closeG = document.getElementById('closeModal');
-        const closeR = document.getElementById('closeReportModal');
+  // Fix close button for gradeModal (mobile-friendly)
+const closeModalBtn = document.getElementById('closeModal');
+if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('gradeModal').style.display = 'none';
+    });
 
-        // Close Grade Modal logic
-        if (event.target === gModal || event.target === closeG) {
-            if (gModal) gModal.style.display = 'none';
-        }
-        
-        // Close Report Modal logic
-        // We check if they clicked the overlay OR the X button specifically
-        if (event.target === rModal || event.target === closeR || closeR.contains(event.target)) {
-            closeReportModalNow();
-        }
-    };
+    // Also support touch devices better
+    closeModalBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('gradeModal').style.display = 'none';
+    }, { passive: false });
+}
 
     // Keyboard support: Close with Escape key
     document.addEventListener('keydown', (e) => {
