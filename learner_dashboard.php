@@ -23,6 +23,8 @@
  * @since       2025-12-14
  * @link        https://iskool.online
  */
+
+// Pilot Program - Simulated Tweak 2026
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
