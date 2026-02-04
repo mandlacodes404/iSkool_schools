@@ -866,7 +866,7 @@ iframe {
     z-index: 4000;
     box-sizing: border-box;
     transition: padding-bottom 0.3s ease, height 0.3s ease;
-   border-top: 1px solid rgba(255, 255, 255, 0.12);
+   border-top: 3px solid rgba(255, 255, 255, 0.12);
 }
 
 
