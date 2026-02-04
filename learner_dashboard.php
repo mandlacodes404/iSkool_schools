@@ -860,7 +860,7 @@ iframe {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);   /* ← soft dark shadow */
     justify-content: space-around;
     align-items: flex-start;                      /* content pushed to top */
-    padding-top: 6px;                             /* breathing room at top */
+    padding-top: 9px;                             /* breathing room at top */
     padding-bottom: env(safe-area-inset-bottom);
     padding-bottom: constant(safe-area-inset-bottom);
     z-index: 4000;
