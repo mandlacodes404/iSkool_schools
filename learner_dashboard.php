@@ -860,7 +860,7 @@ iframe {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);   /* ← soft dark shadow */
     justify-content: space-around;
     align-items: flex-start;                      /* content pushed to top */
-    padding-top: 9px;                             /* breathing room at top */
+    padding-top: 10px;                             /* breathing room at top */
     padding-bottom: env(safe-area-inset-bottom);
     padding-bottom: constant(safe-area-inset-bottom);
     z-index: 4000;
@@ -1050,6 +1050,24 @@ iframe {
         border: 4px solid #757272ff !important;
     }
 }
+/* SVG icons – consistent with platform style */
+.sidebar a svg,
+#mobileBottomNav a svg,
+.main-header button svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    flex-shrink: 0;
+    transition: stroke 0.3s ease;
+}
+
+.sidebar a:hover svg,
+.sidebar a.active svg,
+#mobileBottomNav a:hover svg,
+#mobileBottomNav a.active svg,
+.main-header button:hover svg {
+    stroke: var(--accent-color);
+}
 </style>
 </head>
 <body>
@@ -1079,32 +1097,32 @@ iframe {
     <div class="sidebar-links">
         <a href="learner_manual.php" target="mainFrame" data-page="learner_manual.php"
            class="<?= $currentPage === 'learner_manual.php' ? 'active' : '' ?>">
-            <i class="fas fa-home"></i><span>Home</span>
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Home</span>
         </a>
 
         <a href="quiz_list.php" target="mainFrame" class="desktop-only" data-page="quiz_list.php"
            class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
-            <i class="fas fa-question-circle"></i><span>Quiz</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
         <a href="learner_assignments.php" target="mainFrame" class="desktop-only" data-page="learner_assignments.php"
            class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
-            <i class="fas fa-file-alt"></i><span>Assignments</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
         <a href="view_resources_user.php" target="mainFrame" class="desktop-only" data-page="view_resources_user.php"
            class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
-            <i class="fas fa-book"></i><span>Resources</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
         <a href="quiz_history.php" target="mainFrame" data-page="quiz_history.php"
            class="<?= $currentPage === 'quiz_history.php' ? 'active' : '' ?>">
-            <i class="fas fa-chart-bar"></i><span>Grades</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Grades</span>
         </a>
 
         <a href="view_announcements_user.php" target="mainFrame" class="desktop-only" data-page="view_announcements_user.php"
            class="<?= $currentPage === 'view_announcements_user.php' ? 'active' : '' ?>">
-            <i class="fas fa-bullhorn"></i><span>Announcements</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
 
@@ -1112,17 +1130,17 @@ iframe {
 
         <a href="learner_evaluations.php" target="mainFrame" data-page="learner_evaluations.php"
            class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
-            <i class="fas fa-star"></i><span>Teacher Evaluations</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
         <a href="discussions.php" target="mainFrame" data-page="discussions.php"
            class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
-            <i class="fas fa-comments"></i><span>Discussions</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
         <?php if (empty($joinedClassIds)): ?>
             <button type="button" onclick="toggleJoinClassForm()" data-page="join-class"
                     class="<?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
-                <i class="fas fa-plus-circle"></i><span>Join a Class</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Join a Class</span>
             </button>
             <div class="join-class-form" id="joinClassForm" style="display: none;">
                 <p style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
@@ -1140,7 +1158,7 @@ iframe {
             </div>
         <?php else: ?>
             <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn">
-                <i class="fas fa-school"></i><span>My Class</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>My Class</span>
             </button>
             <div class="join-status"><i class="fas fa-check"></i><span>Joined Class</span></div>
         <?php endif; ?>
@@ -1164,7 +1182,7 @@ iframe {
     </div>
     
     <button id="settingsBtn">
-        <i class="fas fa-gear"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
 </div>
 
@@ -1445,19 +1463,19 @@ function toggleJoinClassForm() {
 <nav id="mobileBottomNav">
     <a href="quiz_list.php" target="mainFrame" data-page="quiz_list.php"
        class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
-        <i class="fas fa-question-circle"></i>Quiz
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </a>
     <a href="learner_assignments.php" target="mainFrame" data-page="learner_assignments.php"
        class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
-        <i class="fas fa-file-alt"></i>Assignments
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </a>
     <a href="view_resources_user.php" target="mainFrame" data-page="view_resources_user.php"
        class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
-        <i class="fas fa-book"></i>Resources
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
     </a>
     <a href="view_announcements_user.php" target="mainFrame" data-page="view_announcements_user.php"
        class="<?= $currentPage === 'view_announcements_user.php' ? 'active' : '' ?>">
-        <i class="fas fa-bullhorn"></i>Announcements
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Announcements
     </a>
 </nav>
 
