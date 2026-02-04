@@ -866,6 +866,7 @@ iframe {
     z-index: 4000;
     box-sizing: border-box;
     transition: padding-bottom 0.3s ease, height 0.3s ease;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
 
