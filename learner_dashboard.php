@@ -845,45 +845,49 @@ iframe {
     opacity: 0;
 }
 
-        /* Mobile Bottom Navigation - Improved for better visibility on all phones */
-        #mobileBottomNav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px; /* taller base height for comfort and clear labels */
-           background: rgba(92, 89, 89, 0.35);  /* ← Exact same transparent dark as teacher */
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            justify-content: space-around;
-            align-items: flex-start;
-            z-index: 4000;
-            box-sizing: border-box;
-            transition: padding-bottom 0.3s ease, height 0.3s ease;
-        }
+        /* Mobile Bottom Navigation - Now fully consistent with platform style */
+#mobileBottomNav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;                                 /* your preferred height */
+    background: rgba(27, 27, 27, 0.85);           /* ← #1b1b1b with transparency – exact platform charcoal glass */
+    backdrop-filter: blur(20px);                  /* ← premium blur like other glass elements */
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);  /* ← faint platform border */
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);   /* ← soft dark shadow */
+    justify-content: space-around;
+    align-items: flex-start;                      /* content pushed to top */
+    padding-top: 6px;                             /* breathing room at top */
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: constant(safe-area-inset-bottom);
+    z-index: 4000;
+    box-sizing: border-box;
+    transition: padding-bottom 0.3s ease, height 0.3s ease;
+}
+
 
         #mobileBottomNav a {
-            color: #e2e8f0; /* matches your main text color - clearer than #b4b8c2 */
-            text-decoration: none;
-            font-size: 11px;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* pushes content up */
-            padding-top: 5px; /* lifts icons + text higher together */
-            transition: all 0.2s;
-        }
+    color: var(--text-color);                     /* ← #e2e8f0 – clear white/off-white */
+    text-decoration: none;
+    font-size: 11px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0;
+    transition: all 0.2s ease;
+}
 
         #mobileBottomNav a i {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
+    font-size: 20px;
+    margin-bottom: 3px;                           /* tighter spacing */
+    color: var(--secondary-text);                 /* muted gray #8b949e by default */
+}
         #mobileBottomNav a.active,
         #mobileBottomNav a:hover {
             color: var(--accent-color);
