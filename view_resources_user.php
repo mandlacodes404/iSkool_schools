@@ -371,7 +371,7 @@ if (!$classId) {
     position: absolute;
     top: 12px;
     right: 16px;
-    font-size: 48px;            /* BIG for easy tapping */
+    font-size: 28px;            /* BIG for easy tapping */
     font-weight: bold;
     color: white;
     background: rgba(0,0,0,0.6);
@@ -458,7 +458,7 @@ if (!$classId) {
     
     
     .close-modal {
-        font-size: 36px;
+        font-size: 24px;
         width: 52px;
         height: 52px;
         line-height: 50px;
