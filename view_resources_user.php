@@ -497,6 +497,143 @@ if (!$classId) {
 
             
         }
+
+        /* ─────────────────────────────────────────────── */
+/*     RESOURCE OPTIONS POPUP / BOTTOM SHEET      */
+/* ─────────────────────────────────────────────── */
+
+.resource-popup {
+    position: fixed;
+    bottom: -100%; /* hidden by default */
+    left: 0;
+    right: 0;
+    background: #161b22;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    z-index: 1500;
+    transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.resource-popup.active {
+    bottom: 0;
+}
+
+.popup-handle {
+    width: 40px;
+    height: 5px;
+    background: #4a5568;
+    border-radius: 999px;
+    margin: 12px auto;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #30363d;
+}
+
+.popup-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #e0e6f0;
+}
+
+.close-popup {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.popup-content {
+    padding: 20px;
+}
+
+#popupDate {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #e0e6f0;
+}
+
+.download-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: rgba(79, 209, 197, 0.2);
+    color: #4fd1c5;
+    text-align: center;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.download-btn:hover {
+    background: #4fd1c5;
+    color: #0d1117;
+}
+
+/* Backdrop for mobile */
+#resourceBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1400;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+#resourceBackdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ─────────────────────────────────────────────── */
+/*     DESKTOP – ANCHORED POPOVER                 */
+/* ─────────────────────────────────────────────── */
+
+@media (min-width: 769px) {
+    .resource-popup {
+        position: absolute;
+        bottom: auto;
+        top: auto;
+        left: auto;
+        right: auto;
+        width: 280px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        transform: translateY(10px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .resource-popup.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .popup-handle,
+    .close-popup {
+        display: none; /* no handle or X on desktop popover */
+    }
+
+    .popup-header {
+        padding: 12px 16px;
+    }
+
+    .popup-content {
+        padding: 12px 16px;
+    }
+}
     </style>
 </head>
 <body>
@@ -542,7 +679,10 @@ if (!$classId) {
                             elseif (in_array($fileExt, ['jpg', 'jpeg', 'png'])) $iconClass = 'fas fa-file-image';
                             elseif ($fileExt === 'zip') $iconClass = 'fas fa-file-archive';
                             ?>
-                            <div class="resource" data-title="<?= htmlspecialchars($res['title']) ?>" data-teacher="<?= htmlspecialchars($teacher) ?>">
+                            <div class="resource" 
+     data-title="<?= htmlspecialchars($res['title']) ?>" 
+     data-teacher="<?= htmlspecialchars($teacher) ?>"
+     data-date="<?= date("F j, Y, g:i a", strtotime($res['uploaded_at'])) ?>">
                                 <div class="resource-header">
                                     <i class="<?= $iconClass ?> file-icon"></i>
                                     <h3>
@@ -554,9 +694,9 @@ if (!$classId) {
                                             <?= htmlspecialchars($res['title']) ?>   <!-- ORIGINAL TITLE ONLY -->
                                         </a>
                                     </h3>
-                                    <button class="toggle-details" onclick="event.stopPropagation(); toggleDetails(this)" aria-label="Toggle resource details">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
+                                    <button class="menu-dots" type="button" aria-label="Resource options">
+    <i class="fas fa-ellipsis-v"></i>
+</button>
                                 </div>
                                 <div class="resource-details">
                                     <p><strong>Date:</strong> <?= date("F j, Y, g:i a", strtotime($res['uploaded_at'])) ?></p>
@@ -596,86 +736,87 @@ if (!$classId) {
 </div>
     </div>
 
+    <!-- Resource Options Popup (shared, content filled dynamically) -->
+<div id="resourcePopup" class="resource-popup">
+    <div class="popup-handle"></div> <!-- drag handle for mobile -->
+    <div class="popup-header">
+        <h4>Resource Details</h4>
+        <button class="close-popup" aria-label="Close">×</button>
+    </div>
+    <div class="popup-content">
+        <p id="popupDate"><strong>Date:</strong> —</p>
+        <a id="popupDownload" href="#" class="download-btn" download>Download File</a>
+    </div>
+</div>
+
     <script>
-        // Toggle teacher section
-        function toggleTeacher(button) {
-            const section = button.closest('.teacher-section');
-            const resources = section.querySelector('.teacher-resources');
-            const icon = button.querySelector('.toggle-teacher i');
-            
-            resources.classList.toggle('collapsed');
-            icon.style.transform = resources.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+// Toggle teacher section
+function toggleTeacher(button) {
+    const section = button.closest('.teacher-section');
+    const resources = section.querySelector('.teacher-resources');
+    const icon = button.querySelector('.toggle-teacher i');
+    
+    resources.classList.toggle('collapsed');
+    icon.style.transform = resources.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+// Search and sort with teacher grouping
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+let searchTimeout;
+
+function filterAndSortResources() {
+    const searchTerm = searchInput.value.toLowerCase();
+
+    document.querySelectorAll('.teacher-section').forEach(section => {
+        const teacherName = section.querySelector('.teacher-header h3').textContent.toLowerCase().replace(/\s*\(\d+ file.*\)/, '');
+        const resources = section.querySelectorAll('.resource');
+        let visibleCount = 0;
+
+        resources.forEach(resource => {
+            const title = resource.dataset.title.toLowerCase();
+            const matches = title.includes(searchTerm) || teacherName.includes(searchTerm);
+            resource.style.display = matches ? 'block' : 'none';
+            if (matches) visibleCount++;
+        });
+
+        const header = section.querySelector('.teacher-header');
+        if (visibleCount === 0) {
+            section.style.display = 'none';
+        } else {
+            section.style.display = 'block';
+            header.style.display = 'flex';
         }
+    });
+}
 
-        // Toggle resource details
-        function toggleDetails(button) {
-            event.stopPropagation();
-            const details = button.parentElement.nextElementSibling;
-            const isExpanded = details.style.display === 'block';
-            details.style.display = isExpanded ? 'none' : 'block';
-            button.classList.toggle('active', !isExpanded);
-            button.querySelector('i').classList.toggle('fa-chevron-down', isExpanded);
-            button.querySelector('i').classList.toggle('fa-chevron-up', !isExpanded);
-        }
+if (searchInput && sortSelect) {
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterAndSortResources, 300);
+    });
+    sortSelect.addEventListener('change', filterAndSortResources);
+}
 
-        // Search and sort with teacher grouping
-        const searchInput = document.getElementById('searchInput');
-        const sortSelect = document.getElementById('sortSelect');
-        let searchTimeout;
-
-        function filterAndSortResources() {
-            const searchTerm = searchInput.value.toLowerCase();
-
-            document.querySelectorAll('.teacher-section').forEach(section => {
-                const teacherName = section.querySelector('.teacher-header h3').textContent.toLowerCase().replace(/\s*\(\d+ file.*\)/, '');
-                const resources = section.querySelectorAll('.resource');
-                let visibleCount = 0;
-
-                resources.forEach(resource => {
-                    const title = resource.dataset.title.toLowerCase();
-                    const matches = title.includes(searchTerm) || teacherName.includes(searchTerm);
-                    resource.style.display = matches ? 'block' : 'none';
-                    if (matches) visibleCount++;
-                });
-
-                const header = section.querySelector('.teacher-header');
-                if (visibleCount === 0) {
-                    section.style.display = 'none';
-                } else {
-                    section.style.display = 'block';
-                    header.style.display = 'flex';
-                }
-            });
-        }
-
-        if (searchInput && sortSelect) {
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(filterAndSortResources, 300);
-            });
-            sortSelect.addEventListener('change', filterAndSortResources);
-        }
-
-    // Preview modal logic
-const previewModal   = document.getElementById('previewModal');
-const previewImage   = document.getElementById('previewImage');
-const previewIframe  = document.getElementById('previewIframe');
+// Preview modal logic
+const previewModal    = document.getElementById('previewModal');
+const previewImage    = document.getElementById('previewImage');
+const previewIframe   = document.getElementById('previewIframe');
 const previewFallback = document.getElementById('previewFallback');
-const downloadLink   = document.getElementById('downloadLink');
-const closeModalBtn  = document.querySelector('#previewModal .close-modal');
+const downloadLink    = document.getElementById('downloadLink');
+const closeModalBtn   = document.querySelector('#previewModal .close-modal');
 
 document.querySelectorAll('.download-link').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         
-        const previewUrl = this.dataset.preview;   // empty if not previewable
+        const previewUrl = this.dataset.preview;
         const fullUrl    = this.dataset.full;
         const title      = this.closest('.resource').querySelector('h3 a').textContent.trim();
         const ext        = fullUrl.split('.').pop().toLowerCase();
 
-        // Reset elements
-        previewImage.style.display   = 'none';
-        previewIframe.style.display  = 'none';
+        previewImage.style.display    = 'none';
+        previewIframe.style.display   = 'none';
         previewFallback.style.display = 'none';
 
         let canPreview = false;
@@ -687,14 +828,14 @@ document.querySelectorAll('.download-link').forEach(link => {
                 canPreview = true;
             } 
             else if (ext === 'pdf') {
-                previewIframe.src = previewUrl;   // or previewUrl + '#view=FitH' for better fit
+                previewIframe.src = previewUrl;
                 previewIframe.style.display = 'block';
                 canPreview = true;
             }
         }
 
         downloadLink.href = fullUrl;
-        downloadLink.download = title + '.' + ext;
+        downloadLink.download = title + (ext ? '.' + ext : '');
 
         if (!canPreview) {
             previewFallback.style.display = 'block';
@@ -704,28 +845,87 @@ document.querySelectorAll('.download-link').forEach(link => {
     });
 });
 
-// Close handlers
 function closePreview() {
     previewModal.style.display = 'none';
-    // Clean up to prevent memory / reload issues
-    previewImage.src = '';
-    previewIframe.src = '';
+    previewImage.src    = '';
+    previewIframe.src   = '';
+    if (previewFallback) previewFallback.style.display = 'none';
 }
 
 closeModalBtn.addEventListener('click', closePreview);
 
-// Close by clicking backdrop (optional but nice on mobile)
 previewModal.addEventListener('click', function(e) {
     if (e.target === this) closePreview();
 });
 
-// Escape key
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && previewModal.style.display === 'flex') {
-        closePreview();
+// NEW: Resource popup / bottom sheet logic
+const resourcePopup = document.getElementById('resourcePopup');
+const popupBackdrop = document.createElement('div');
+popupBackdrop.id = 'resourceBackdrop';
+document.body.appendChild(popupBackdrop);
+
+let currentDotsBtn = null;
+
+document.querySelectorAll('.menu-dots').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        const isActive = resourcePopup.classList.contains('active') && currentDotsBtn === this;
+
+        if (isActive) {
+            closeResourcePopup();
+            return;
+        }
+
+        closeResourcePopup();
+
+        currentDotsBtn = this;
+
+        const resource = this.closest('.resource');
+        // Note: since we removed .resource-details, we need another way to get date
+        // For now using a fallback — you can store date in data attribute later
+        const dateText = resource.dataset.date || 'Date not available';
+        const downloadUrl = resource.querySelector('.download-link').dataset.full;
+        const title = resource.querySelector('h3 a').textContent.trim();
+
+        document.getElementById('popupDate').innerHTML = `<strong>Date:</strong> ${dateText}`;
+        document.getElementById('popupDownload').href = downloadUrl;
+        document.getElementById('popupDownload').download = title;
+
+        resourcePopup.classList.add('active');
+        popupBackdrop.classList.add('active');
+
+        // Desktop positioning
+        if (window.innerWidth >= 769) {
+            const rect = this.getBoundingClientRect();
+            resourcePopup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+            resourcePopup.style.right = `${window.innerWidth - rect.right}px`;
+            resourcePopup.style.left = 'auto';
+        }
+    });
+});
+
+function closeResourcePopup() {
+    resourcePopup.classList.remove('active');
+    popupBackdrop.classList.remove('active');
+    currentDotsBtn = null;
+}
+
+popupBackdrop.addEventListener('click', closeResourcePopup);
+
+resourcePopup.addEventListener('click', function(e) {
+    if (e.target.classList.contains('close-popup')) {
+        closeResourcePopup();
     }
 });
 
-    </script>
+// Single Escape handler for both popup and preview
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeResourcePopup();
+        if (previewModal.style.display === 'flex') closePreview();
+    }
+});
+</script>
 </body>
 </html>
