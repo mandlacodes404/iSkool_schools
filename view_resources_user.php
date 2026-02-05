@@ -406,11 +406,15 @@ if (!$classId) {
     -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
 }
 
+/* Very important for mobile fit */
 #previewImage,
 #previewIframe {
-    max-width: 100%;
+    width: 100% !important;           /* ← force full width */
+    max-width: 100% !important;
+    height: auto !important;          /* let height adjust naturally */
     max-height: 100%;
-    object-fit: contain;
+    object-fit: contain;              /* keeps aspect ratio */
+    display: block;                   /* removes any weird inline spacing */
 }
 
 #previewIframe {
@@ -453,6 +457,15 @@ if (!$classId) {
         max-width: 1100px;
         height: 90vh;
         border-radius: 16px;
+        
+    }
+    
+    #previewImage,
+    #previewIframe {
+        max-width: 90%;           /* or 1000px or whatever looks good */
+        width: auto;
+        height: auto;
+        max-height: 85vh;
     }
     
     .close-modal {
@@ -492,6 +505,23 @@ if (!$classId) {
             .resource-details p {
                 font-size: 12px;
             }
+            #previewImage,
+    #previewIframe {
+        width: 100vw !important;      /* even stronger – full viewport width */
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .preview-container {
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden !important;   /* ← kill horizontal scroll */
+    }
+    
+    /* Optional: give a bit more vertical breathing room */
+    .modal-content {
+        padding-top: 70px;  /* space for the big close button */
+    }
 
             
         }
