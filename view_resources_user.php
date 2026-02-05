@@ -511,7 +511,7 @@ if (!$classId) {
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
     box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-    z-index: 1500;
+    z-index: 5000;
     transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     max-height: 40vh;
     overflow-y: auto;
