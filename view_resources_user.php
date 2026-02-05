@@ -377,8 +377,8 @@ if (!$classId) {
     background: rgba(0,0,0,0.6);
     border: none;
     border-radius: 50%;
-    width: 64px;
-    height: 64px;
+    width: 31px;
+    height: 31px;
     line-height: 60px;
     text-align: center;
     cursor: pointer;
@@ -459,8 +459,8 @@ if (!$classId) {
     
     .close-modal {
         font-size: 24px;
-        width: 52px;
-        height: 52px;
+        width: 28px;
+        height: 28px;
         line-height: 50px;
     }
 }
