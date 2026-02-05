@@ -395,7 +395,7 @@ if (!$classId) {
     transform: scale(1.1);
 }
 
-        .preview-container {
+.preview-container {
     flex: 1;
     width: 100%;
     background: #000;
@@ -403,18 +403,14 @@ if (!$classId) {
     align-items: center;
     justify-content: center;
     overflow: auto;
-    -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Very important for mobile fit */
 #previewImage,
 #previewIframe {
-    width: 100% !important;           /* ← force full width */
-    max-width: 100% !important;
-    height: auto !important;          /* let height adjust naturally */
+    max-width: 100%;
     max-height: 100%;
-    object-fit: contain;              /* keeps aspect ratio */
-    display: block;                   /* removes any weird inline spacing */
+    object-fit: contain;
 }
 
 #previewIframe {
@@ -460,13 +456,6 @@ if (!$classId) {
         
     }
     
-    #previewImage,
-    #previewIframe {
-        max-width: 90%;           /* or 1000px or whatever looks good */
-        width: auto;
-        height: auto;
-        max-height: 85vh;
-    }
     
     .close-modal {
         font-size: 36px;
@@ -505,23 +494,6 @@ if (!$classId) {
             .resource-details p {
                 font-size: 12px;
             }
-            #previewImage,
-    #previewIframe {
-        width: 100vw !important;      /* even stronger – full viewport width */
-        max-width: 100vw !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    .preview-container {
-        padding: 0;
-        margin: 0;
-        overflow-x: hidden !important;   /* ← kill horizontal scroll */
-    }
-    
-    /* Optional: give a bit more vertical breathing room */
-    .modal-content {
-        padding-top: 70px;  /* space for the big close button */
-    }
 
             
         }
