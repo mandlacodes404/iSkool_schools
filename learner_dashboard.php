@@ -25,6 +25,7 @@
  */
 
 // Pilot Program - Simulated Tweak 2026
+//New work-flow
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
