@@ -345,88 +345,123 @@ if (!$classId) {
             100% { transform: rotate(360deg); }
         }
 
-        #previewModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
+       #previewModal {
+    display: none;
+    position: fixed;
+    inset: 0;                   /* top/right/bottom/left = 0 */
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px); /* nice touch if supported */
+}
 
         .modal-content {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--card-radius);
-            max-width: 90%;
-            max-height: 90%;
-            overflow: auto;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
+    width: 100%;
+    height: 100%;
+    background: #0d1117;
+    border-radius: 0;           /* no rounded corners on mobile → full screen feel */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
-        .modal-content img {
-            max-width: 100%;
-            max-height: 70vh;
-            border-radius: var(--card-radius);
-        }
+.close-modal {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 48px;            /* BIG for easy tapping */
+    font-weight: bold;
+    color: white;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    line-height: 60px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 2100;
+    padding: 0;
+    transition: all 0.2s;
+}
 
-        .modal-content iframe {
-            width: 100%;
-            height: 70vh;
-            border: none;
-            border-radius: var(--card-radius);
-        }
+       
 
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
+        .close-modal:hover,
+.close-modal:active {
+    background: rgba(79, 209, 197, 0.8);  /* teal accent on press */
+    transform: scale(1.1);
+}
 
-        .modal-actions a,
-        .modal-actions button {
-            background: var(--button-bg);
-            color: var(--text-color);
-            border: none;
-            padding: 8px 16px;
-            border-radius: var(--card-radius);
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            transition: background 0.3s ease;
-        }
+        .preview-container {
+    flex: 1;
+    width: 100%;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
 
-        .modal-actions a:hover,
-        .modal-actions button:hover {
-            background: var(--accent-color);
-            color: var(--bg-color);
-        }
+#previewImage,
+#previewIframe {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
 
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--button-bg);
-            color: var(--text-color);
-            border: none;
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease;
-        }
+#previewIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+.modal-fallback {
+    color: #e0e6f0;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 1.2em;
+}
 
-        .close-modal:hover {
-            background: var(--accent-color);
-            color: var(--bg-color);
-        }
+.modal-actions {
+    padding: 16px;
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    text-align: center;
+}
+
+.modal-actions a {
+    background: rgba(79, 209, 197, 0.2);
+    color: #4fd1c5;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.modal-actions a:hover {
+    background: #4fd1c5;
+    color: #0d1117;
+}
+
+/* Desktop – smaller modal */
+@media (min-width: 769px) {
+    .modal-content {
+        width: 90%;
+        max-width: 1100px;
+        height: 90vh;
+        border-radius: 16px;
+    }
+    
+    .close-modal {
+        font-size: 36px;
+        width: 52px;
+        height: 52px;
+        line-height: 50px;
+    }
+}
 
         @media (max-width: 768px) {
             .container {
@@ -458,9 +493,7 @@ if (!$classId) {
                 font-size: 12px;
             }
 
-            .modal-content iframe {
-                height: 50vh;
-            }
+            
         }
     </style>
 </head>
@@ -541,15 +574,24 @@ if (!$classId) {
         </div>
 
         <div id="previewModal">
-            <div class="modal-content">
-                <button class="close-modal" aria-label="Close preview">Close</button>
-                <img id="previewImage" alt="Resource Preview">
-                <iframe id="previewIframe"></iframe>
-                <div class="modal-actions">
-                    <a id="fullDocumentLink" href="#" target="_blank">View Full Document</a>
-                </div>
+    <div class="modal-content">
+        <button class="close-modal" aria-label="Close preview">×</button>
+        
+        <div class="preview-container">
+            <img id="previewImage" alt="Preview" style="display:none;">
+            <iframe id="previewIframe" style="display:none;"></iframe>
+            
+            <div id="previewFallback" class="modal-fallback" style="display:none;">
+                <p>Preview not supported for this file type on your device.</p>
+                <p>You can still download it below.</p>
             </div>
         </div>
+        
+        <div class="modal-actions">
+            <a id="downloadLink" href="#" download>Download File</a>
+        </div>
+    </div>
+</div>
     </div>
 
     <script>
@@ -612,50 +654,76 @@ if (!$classId) {
             sortSelect.addEventListener('change', filterAndSortResources);
         }
 
-        // Preview modal
-        const previewModal = document.getElementById('previewModal');
-        const previewImage = document.getElementById('previewImage');
-        const previewIframe = document.getElementById('previewIframe');
-        const closeModal = document.querySelector('.close-modal');
-        const fullDocumentLink = document.getElementById('fullDocumentLink');
+    // Preview modal logic
+const previewModal   = document.getElementById('previewModal');
+const previewImage   = document.getElementById('previewImage');
+const previewIframe  = document.getElementById('previewIframe');
+const previewFallback = document.getElementById('previewFallback');
+const downloadLink   = document.getElementById('downloadLink');
+const closeModalBtn  = document.querySelector('#previewModal .close-modal');
 
-        document.querySelectorAll('.download-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const fileUrl = link.dataset.preview;
-                const fullUrl = link.dataset.full;
-                const fileExt = fileUrl ? fileUrl.split('.').pop().toLowerCase() : '';
+document.querySelectorAll('.download-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const previewUrl = this.dataset.preview;   // empty if not previewable
+        const fullUrl    = this.dataset.full;
+        const title      = this.closest('.resource').querySelector('h3 a').textContent.trim();
+        const ext        = fullUrl.split('.').pop().toLowerCase();
 
-                previewImage.style.display = 'none';
-                previewIframe.style.display = 'none';
-                fullDocumentLink.href = fullUrl;
+        // Reset elements
+        previewImage.style.display   = 'none';
+        previewIframe.style.display  = 'none';
+        previewFallback.style.display = 'none';
 
-                if (fileUrl && ['jpg', 'jpeg', 'png'].includes(fileExt)) {
-                    previewImage.src = fileUrl;
-                    previewImage.style.display = 'block';
-                } else if (fileUrl && fileExt === 'pdf') {
-                    previewIframe.src = fileUrl;
-                    previewIframe.style.display = 'block';
-                } else {
-                    window.open(fullUrl, '_blank');
-                    return;
-                }
+        let canPreview = false;
 
-                previewModal.style.display = 'flex';
-            });
-        });
-
-        closeModal.addEventListener('click', () => {
-            previewModal.style.display = 'none';
-            previewImage.src = '';
-            previewIframe.src = '';
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && previewModal.style.display === 'flex') {
-                closeModal.click();
+        if (previewUrl) {
+            if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                previewImage.src = previewUrl;
+                previewImage.style.display = 'block';
+                canPreview = true;
+            } 
+            else if (ext === 'pdf') {
+                previewIframe.src = previewUrl;   // or previewUrl + '#view=FitH' for better fit
+                previewIframe.style.display = 'block';
+                canPreview = true;
             }
-        });
+        }
+
+        downloadLink.href = fullUrl;
+        downloadLink.download = title + '.' + ext;
+
+        if (!canPreview) {
+            previewFallback.style.display = 'block';
+        }
+
+        previewModal.style.display = 'flex';
+    });
+});
+
+// Close handlers
+function closePreview() {
+    previewModal.style.display = 'none';
+    // Clean up to prevent memory / reload issues
+    previewImage.src = '';
+    previewIframe.src = '';
+}
+
+closeModalBtn.addEventListener('click', closePreview);
+
+// Close by clicking backdrop (optional but nice on mobile)
+previewModal.addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+});
+
+// Escape key
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && previewModal.style.display === 'flex') {
+        closePreview();
+    }
+});
+
     </script>
 </body>
 </html>
