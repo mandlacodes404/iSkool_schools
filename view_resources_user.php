@@ -561,7 +561,7 @@ if (!$classId) {
 }
 
 .menu-dots i {
-    font-size: 26px;                   /* Bigger dots – adjust to 28px or 30px if still too small */
+    font-size: 20px;                   /* Bigger dots – adjust to 28px or 30px if still too small */
 }
 
 .menu-dots:hover,
