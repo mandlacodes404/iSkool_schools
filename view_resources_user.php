@@ -511,7 +511,7 @@ if (!$classId) {
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
     box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-    z-index: 5000;
+    z-index: 9999;
     transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     max-height: 40vh;
     overflow-y: auto;
@@ -537,10 +537,38 @@ if (!$classId) {
     border-bottom: 1px solid #30363d;
 }
 
+
 .popup-header h4 {
     margin: 0;
     font-size: 16px;
     color: #e0e6f0;
+}
+/* Three vertical dots – no background, bigger icon, clean look */
+.menu-dots {
+    background: none !important;       /* Force no background (removes any white/fill) */
+    border: none;
+    color: var(--text-color);          /* White / light color */
+    font-size: 0;
+    width: 48px;                       /* Larger touch area */
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.15s;
+    padding: 0;
+    margin-right: -8px;                /* Pulls it closer to right edge if needed */
+}
+
+.menu-dots i {
+    font-size: 26px;                   /* Bigger dots – adjust to 28px or 30px if still too small */
+}
+
+.menu-dots:hover,
+.menu-dots:focus,
+.menu-dots:active {
+    color: var(--accent-color);        /* Teal on interaction */
+    transform: scale(1.15);            /* Slight grow feedback */
 }
 
 .close-popup {
@@ -584,7 +612,7 @@ if (!$classId) {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.6);
-    z-index: 1400;
+    z-index: 9000;
     display: none;
     opacity: 0;
     transition: opacity 0.4s;
