@@ -65,7 +65,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link rel="manifest" href="https://iskool.online/manifest.json">
    
     <meta name="theme-color" content="#1E1C37">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
