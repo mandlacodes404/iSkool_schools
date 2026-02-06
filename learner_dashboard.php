@@ -290,7 +290,7 @@ body {
 .sidebar button,
 .sidebar .footer,
 .sidebar .logout {
-    color: #757779ff;
+    color: #e2e8f0;;             /* sidebar text colour*/
     text-decoration: none;
     padding: 10px 12px;
     margin-bottom: 0px;
@@ -1034,11 +1034,11 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #2d2d2d; /* Charcoal Background */
-    color: #a0a0a0;            /* Muted Silver/Grey text */
+    background-color: #242222ff; /* Charcoal Background */
+    color: #8b8989ff;            /* Muted Silver/Grey text */
     font-size: 14px;
     font-weight: 800;
-    border: 3px solid #757272ff;
+    border: 1.5px solid #8b8989ff;
     user-select: none;
     text-transform: uppercase;
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
@@ -1050,7 +1050,7 @@ iframe {
         width: 70px !important;
         height: 70px !important;
         font-size: 24px !important;
-        border: 4px solid #757272ff !important;
+        border: 1.5px solid #8b8989ff!important;
     }
 }
 /* SVG icons – consistent with platform style */
