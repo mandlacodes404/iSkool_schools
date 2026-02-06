@@ -100,7 +100,7 @@ if ($result && $row = $result->fetch_assoc()) {
         position: fixed;
         width: 100%;
         height: 100%;
-        background: #0d1117;
+        background: #1a1919; /* CHANGE THIS from #0d1117 */;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -397,7 +397,7 @@ button:hover {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(13, 17, 23, 0.85);
+       background: #1a1919; /* CHANGE THIS from #0d1117 */
         backdrop-filter: blur(6px);
         display: none;
         justify-content: center;
