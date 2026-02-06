@@ -371,7 +371,7 @@ if (!$classId) {
     position: absolute;
     top: 12px;
     right: 16px;
-    font-size: 28px;            /* BIG for easy tapping */
+    font-size: 28px;
     font-weight: bold;
     color: white;
     background: rgba(0,0,0,0.6);
@@ -379,11 +379,18 @@ if (!$classId) {
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    line-height: 60px;
+    
+    /* --- KEY CHANGES START HERE --- */
+    display: flex;          /* Enables Flexbox */
+    align-items: center;    /* Centers vertically */
+    justify-content: center; /* Centers horizontally */
+    line-height: 1;         /* Reset line height */
+    padding-bottom: 4px;    /* Tiny nudge up - usually needed for the '×' character */
+    /* ------------------------------ */
+    
     text-align: center;
     cursor: pointer;
     z-index: 2100;
-    padding: 0;
     transition: all 0.2s;
 }
 
@@ -461,7 +468,8 @@ if (!$classId) {
         font-size: 24px;
         width: 34px;
         height: 34px;
-        line-height: 50px;
+        line-height: 1;      /* Keep this at 1 */
+        padding-bottom: 3px; /* Nudge for desktop size */
     }
 }
 
