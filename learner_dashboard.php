@@ -1038,7 +1038,7 @@ iframe {
     color: #8b8989ff;            /* Muted Silver/Grey text */
     font-size: 14px;
     font-weight: 800;
-    border: 1.5px solid #8b8989ff;
+    border: 2px solid #8b8989ff;
     user-select: none;
     text-transform: uppercase;
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
