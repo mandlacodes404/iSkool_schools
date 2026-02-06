@@ -83,7 +83,7 @@ if ($result && $row = $result->fetch_assoc()) {
     margin: 0;
     padding: 0;
     height: 100%;
-    background: #0E0E0E; /* Gemini Neutral Black */
+    background: #1a1919; /* Gemini Neutral Black */
     font-family: 'Inter', 'Nunito', sans-serif;
     color: #E3E3E3;
     overflow-x: hidden;
