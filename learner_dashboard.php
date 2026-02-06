@@ -290,7 +290,7 @@ body {
 .sidebar button,
 .sidebar .footer,
 .sidebar .logout {
-    color: #e2e8f0;;             /* sidebar text colour*/
+    color: #b2b5b9ff;;             /* sidebar text colour*/
     text-decoration: none;
     padding: 10px 12px;
     margin-bottom: 0px;
@@ -1034,7 +1034,7 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #242222ff; /* Charcoal Background */
+    background-color: #121212; /* Charcoal Background */
     color: #8b8989ff;            /* Muted Silver/Grey text */
     font-size: 14px;
     font-weight: 800;
