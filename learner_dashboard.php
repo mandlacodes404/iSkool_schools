@@ -1617,7 +1617,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.0"></script>
-<script src="assets/js/assignments.js?v=1.0"></script>
+<script src="assets/js/quiz.js?v=1.1"></script>
+<script src="assets/js/assignments.js?v=1.1"></script>
 </body>
 </html>
