@@ -29,7 +29,7 @@
 
 /* 3. The Quiz Card - The exact "Pro" look from our test */
 .quiz-card {
-    background: rgba(255, 255, 255, 0.05); /* That subtle glass effect */
+    background: #1a1919; /* That subtle glass effect */
     padding: 18px;
     border-radius: 14px;
     margin: 12px 0;
@@ -62,7 +62,7 @@
 
 .quiz-info-text i {
     margin-right: 5px;
-    color: #4fd1c5; /* Icons match the brand color */
+    color:  #888888; /* Icons match the brand color */
 }
 
 /* 5. The Start Button - High Contrast Pro Style */
