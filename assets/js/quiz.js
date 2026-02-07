@@ -5,6 +5,10 @@ window.fetchQuizzes = async function() {
     localStorage.setItem("lastLearnerPage", "quiz_list.php");
     // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("quiz_list.php");
+    // 2. Highlighting Bridge
+    if (typeof window.setActive === 'function') {
+        window.setActive("quiz_list.php");
+    }
     
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');

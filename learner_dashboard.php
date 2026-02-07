@@ -1463,7 +1463,13 @@ if (iframe) iframe.style.display = 'block';
     if (window.innerWidth > 768 && localStorage.getItem("sidebarCollapsed") === "true") {
         sidebar.classList.add("collapsed");
     }
-    setActive("<?= $currentPage ?>");
+    // Init UI Highlighter
+    const lastSaved = localStorage.getItem("lastLearnerPage");
+    if (lastSaved === "quiz_list.php") {
+        window.setActive("quiz_list.php");
+    } else {
+        window.setActive("<?= $currentPage ?>");
+    }
     loader.style.display = "none";
 });
 
