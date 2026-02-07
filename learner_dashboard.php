@@ -1257,14 +1257,18 @@ document.addEventListener("DOMContentLoaded", function () {
    if (targetPage) {
         iframe.src = targetPage;
         window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (savedPage) {
-        // --- ADD THIS SPECIFIC CHECK ---
+   } else if (savedPage) {
+        // API-Driven Pages (No Iframe)
         if (savedPage === "quiz_list.php") {
-            window.fetchQuizzes(); // If it's the quiz, run the function
-            } else if (savedPage === "assignment_list.php") { // <--- ADD THIS
-        window.fetchAssignments();
-        } else if (savedPage !== "learner_manual.php") {
-            iframe.src = savedPage; // If it's anything else, use the iframe
+            window.fetchQuizzes();
+        } else if (savedPage === "assignment_list.php") {
+            window.fetchAssignments();
+        } else if (savedPage === "resource_list.php") { // <--- ADDED RESOURCES
+            window.fetchResources();
+        } 
+        // Standard Iframe Pages
+        else if (savedPage !== "learner_manual.php") {
+            iframe.src = savedPage;
         }
     }
 
@@ -1278,7 +1282,7 @@ document.addEventListener("DOMContentLoaded", function () {
      
 // Stop the iframe from loading if it's a Quiz or an Assignment API call
 const onClick = link.getAttribute('onclick') || "";
-if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments')) return;
+if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments') || onClick.includes('fetchResources')) return;
            // Clear any previous timer to prevent multiple loaders
         clearTimeout(loaderTimeout);
 
@@ -1334,6 +1338,7 @@ if (iframe) iframe.style.display = 'block';
         iframe.style.display = "block";
         setActive("learner_settings.php"); 
         if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
+        if (apiArea) apiArea.style.display = 'none';
     });
 
     const avatarWrapper = document.querySelector(".profile-picture-wrapper");
@@ -1473,7 +1478,10 @@ if (iframe) iframe.style.display = 'block';
         window.setActive("quiz_list.php");
         } else if (lastSaved === "assignment_list.php") { // <--- ADD THIS
     window.setActive("assignment_list.php");
-    } else {
+    } else if (lastSaved === "resource_list.php") {
+    window.setActive("resource_list.php");
+}
+    else {
         window.setActive("<?= $currentPage ?>");
     }
     loader.style.display = "none";
