@@ -1068,9 +1068,10 @@ iframe {
     transition: stroke 0.3s ease;
 }
 @media (max-width: 768px) {
+    /* Perspective is key for the 3D 'pop' */
     body {
-        perspective: 1000px;
-        background-color: #f4f4f4; /* Match your app background */
+        perspective: 1200px;
+        overflow-x: hidden;
     }
 
     .main-content {
@@ -1078,22 +1079,22 @@ iframe {
         transform-style: preserve-3d;
     }
 
-    @keyframes mobileCardFlip {
+    @keyframes mobileHorizontalFlip {
         0% {
-            /* Start upside down and backwards */
-            transform: rotateX(180deg);
+            /* Start rotated 180 degrees sideways and slightly smaller */
+            transform: rotateY(-180deg) scale(0.8);
             opacity: 0;
         }
         100% {
-            /* Flip to the front */
-            transform: rotateX(0deg);
+            /* Spin to front and full size */
+            transform: rotateY(0deg) scale(1);
             opacity: 1;
         }
     }
 
     .mobile-first-load {
-        /* "Back" cubic-bezier gives it a little bounce at the end */
-        animation: mobileCardFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        /* Duration 0.8s with a 'spring' ease-out */
+        animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 }
 
