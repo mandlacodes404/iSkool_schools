@@ -1124,7 +1124,7 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Grades</span>
         </a>
 
-        <a href="view_announcements_user.php" target="mainFrame" data-page="view_announcements_user.php"
+        <a href="javascript:void(0)" onclick="fetchAnnouncements()" data-page="view_announcements_user.php"
            class="<?= $currentPage === 'view_announcements_user.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
@@ -1265,7 +1265,9 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchAssignments();
         } else if (savedPage === "resource_list.php") { // <--- ADDED RESOURCES
             window.fetchResources();
-        } 
+        } else if (savedPage === "announcement_list.php") {
+    window.fetchAnnouncements();
+}
         // Standard Iframe Pages
         else if (savedPage !== "learner_manual.php") {
             iframe.src = savedPage;
@@ -1282,7 +1284,7 @@ document.addEventListener("DOMContentLoaded", function () {
      
 // Stop the iframe from loading if it's a Quiz or an Assignment API call
 const onClick = link.getAttribute('onclick') || "";
-if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments') || onClick.includes('fetchResources')) return;
+if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments') || onClick.includes('fetchResources') || onClick.includes('fetchAnnouncements')) return;
            // Clear any previous timer to prevent multiple loaders
         clearTimeout(loaderTimeout);
 
@@ -1480,6 +1482,8 @@ if (iframe) iframe.style.display = 'block';
     window.setActive("assignment_list.php");
     } else if (lastSaved === "resource_list.php") {
     window.setActive("resource_list.php");
+} else if (lastSaved === "announcement_list.php") {
+    window.setActive("announcement_list.php");
 }
     else {
         window.setActive("<?= $currentPage ?>");
@@ -1628,5 +1632,6 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/quiz.js?v=1.1"></script>
 <script src="assets/js/assignments.js?v=1.1"></script>
 <script src="assets/js/resources.js?v=1.0"></script>
+<script src="assets/js/announcements.js?v=1.0"></script>
 </body>
 </html>

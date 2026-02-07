@@ -80,7 +80,7 @@ function renderQuizCards(groupedData) {
                             <i class="fas fa-calendar"></i> ${quiz.start_time}
                         </div>
                     </div>
-                    <button class="quiz-start-btn" onclick="window.location.href='take_quiz.php?id=${quiz.id}'">
+                    <button class="quiz-start-btn" onclick="window.location.href='quiz_instructions.php?id=${quiz.id}'">
                         START
                     </button>
                 </div>`;
