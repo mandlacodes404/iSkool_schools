@@ -48,18 +48,36 @@ $stmt->bind_param("ii", $classId, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
+// --- NEW: Helper function to format bytes into readable units ---
+function formatSizeUnits($bytes) {
+    if ($bytes >= 1073741824) { $bytes = number_format($bytes / 1073741824, 2) . ' GB'; }
+    elseif ($bytes >= 1048576) { $bytes = number_format($bytes / 1048576, 2) . ' MB'; }
+    elseif ($bytes >= 1024) { $bytes = number_format($bytes / 1024, 2) . ' KB'; }
+    elseif ($bytes > 1) { $bytes = $bytes . ' bytes'; }
+    elseif ($bytes == 1) { $bytes = $bytes . ' byte'; }
+    else { $bytes = '0 bytes'; }
+    return $bytes;
+}
+
 $groupedResources = [];
 while ($row = $result->fetch_assoc()) {
     $teacher = trim($row['teacher_display']) ?: 'Unknown Teacher';
-    $fileExt = strtolower(pathinfo($row['filename'], PATHINFO_EXTENSION));
+    $filename = $row['filename'];
+    $fileExt = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     
+    // Determine the physical path to check size
+    // Adjust '../resources/' to match your actual server directory
+    $filePath = "../resources/" . $filename; 
+    $fileSize = (file_exists($filePath)) ? formatSizeUnits(filesize($filePath)) : "Unknown Size";
+
     $groupedResources[$teacher][] = [
         'id'          => $row['id'],
         'title'       => $row['resource_title'],
-        'filename'    => $row['filename'],
+        'filename'    => $filename,
         'uploaded_at' => date("F j, Y", strtotime($row['uploaded_at'])),
         'ext'         => $fileExt,
-        'path'        => 'resources/' . rawurlencode($row['filename'])
+        'size'        => $fileSize, // <--- ADDED THIS
+        'path'        => 'resources/' . rawurlencode($filename)
     ];
 }
 

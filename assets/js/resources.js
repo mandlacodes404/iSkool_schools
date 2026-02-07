@@ -49,7 +49,12 @@ function renderResourceCards(data) {
                     <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                         <i class="${icon}" style="color: #4fd1c5; font-size: 20px;"></i>
                         <div>
-                            <h4 style="margin:0; font-size:15px;">${file.title}</h4>
+                            <h4 style="margin:0; font-size:15px;">
+    ${file.title} 
+    <span style="font-size: 11px; color: #aaa; font-weight: normal; margin-left: 5px;">
+        (${file.size})
+    </span>
+</h4>
                             <small style="color:#888;">Uploaded: ${file.uploaded_at}</small>
                         </div>
                     </div>
