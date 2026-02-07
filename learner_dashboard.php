@@ -1226,7 +1226,7 @@ iframe {
     </div>
 
     <div id="api-content-area" style="display:none;"></div>
-<iframe id="mainFrame" name="mainFrame" src="learner_manual.php"></iframe>
+<iframe id="mainFrame" name="mainFrame" src="about:blank" style="display:none;"></iframe>
 </div>
 
 <div id="loaderOverlay">
@@ -1518,7 +1518,10 @@ if (iframe) iframe.style.display = 'block';
     else {
         window.setActive("<?= $currentPage ?>");
     }
-    loader.style.display = "none";
+    // At the very end of your script
+if (!savedPage) {
+    window.fetchManual(); 
+}
 });
 
 function toggleJoinClassForm() {
