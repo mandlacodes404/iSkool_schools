@@ -1254,12 +1254,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const targetPage = urlParams.get('page'); // From Push Notifications
     const savedPage = localStorage.getItem("lastLearnerPage");
 
-    if (targetPage) {
+   if (targetPage) {
         iframe.src = targetPage;
-        // Clean URL so refresh doesn't keep reloading the notification link
         window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (savedPage && savedPage !== "learner_manual.php") {
-        iframe.src = savedPage;
+    } else if (savedPage) {
+        // --- ADD THIS SPECIFIC CHECK ---
+        if (savedPage === "quiz_list.php") {
+            window.fetchQuizzes(); // If it's the quiz, run the function
+        } else if (savedPage !== "learner_manual.php") {
+            iframe.src = savedPage; // If it's anything else, use the iframe
+        }
     }
 
    // ────────────────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@
 let learnerQuizCache = null;
 
 window.fetchQuizzes = async function() {
+    localStorage.setItem("lastLearnerPage", "quiz_list.php");
     // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("quiz_list.php");
     
