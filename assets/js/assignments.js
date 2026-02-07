@@ -80,7 +80,7 @@ function renderAssignmentCards(groupedData) {
                         </div>
                         <div class="quiz-info-text">
                             <i class="fas fa-chalkboard"></i> ${task.class_name} | 
-                            <span style="color: ${task.is_past_due ? '#f85149' : '#888'}">
+                            <span style="color: ${task.is_past_due ? '#888' : '#888'}">
                                 <i class="fas fa-clock"></i> Due: ${task.due_date}
                             </span>
                         </div>
@@ -98,14 +98,13 @@ function renderAssignmentCards(groupedData) {
                         </div>
                     </div>
 
-                    <div style="text-align: right; min-width: 120px;">
+                    <div style="text-align: right; min-width: 120px; display: flex; align-items: center; justify-content: flex-end;">
                         <a href="${task.is_past_due ? '#' : 'submit_assignment.php?assignment_id=' + task.id}" 
                            class="quiz-start-btn" 
                            style="${task.is_past_due ? 'background: #333; cursor: not-allowed;' : ''}"
                            ${task.is_past_due ? 'onclick="return false;"' : ''}>
                            ${btnText}
                         </a>
-                        ${task.is_past_due ? '<div style="color:#f85149; font-size:11px; margin-top:5px; font-weight:700;">CLOSED</div>' : ''}
                     </div>
                 </div>`;
         });
