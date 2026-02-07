@@ -58,17 +58,19 @@ function renderQuizCards(groupedData) {
         return;
     }
 
-    let html = '<h2 class="quiz-section-title">Your Quizzes</h2>';
+    // This matches the h2 style in your CSS
+    let html = '<h2>Your Quizzes</h2>';
     
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        html += `<h3 class="subject-header">${subject}</h3>`;
+        // This matches the h3 style in your CSS
+        html += `<h3>${subject}</h3>`;
         
         quizzes.forEach(quiz => {
             html += `
                 <div class="quiz-card">
-                    <div class="quiz-details">
+                    <div>
                         <h4>${quiz.title}</h4>
-                        <div class="quiz-meta">
+                        <div class="quiz-info-text">
                             <i class="fas fa-clock"></i> ${quiz.duration} mins | 
                             <i class="fas fa-calendar"></i> ${quiz.start_time}
                         </div>
