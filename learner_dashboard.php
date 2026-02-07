@@ -1068,8 +1068,9 @@ iframe {
     transition: stroke 0.3s ease;
 }
 @media (max-width: 768px) {
+    /* The stage for 3D */
     body {
-        perspective: 1200px; /* Stronger 3D depth */
+        perspective: 1200px; 
         overflow-x: hidden;
     }
 
@@ -1080,17 +1081,18 @@ iframe {
 
     @keyframes mobileAppTwist {
         0% {
-            /* Starts smaller, rotated 30 degrees, and blurred */
-            transform: rotateY(-35deg) rotateX(10deg) scale(0.8) translateX(50px);
-            filter: brightness(0.5) blur(5px);
+            /* Start: Rotated, small, and deep in the background */
+            transform: rotateY(-40deg) rotateX(15deg) scale(0.7) translateX(100px);
+            filter: brightness(0.4) blur(4px);
             opacity: 0;
         }
-        70% {
-            /* Slight overshoot for that "springy" feel */
-            transform: rotateY(5deg) rotateX(-2deg) scale(1.02);
+        60% {
+            /* Overshoot: slightly larger and tilted the other way */
+            transform: rotateY(5deg) rotateX(-5deg) scale(1.03);
+            filter: brightness(1.1) blur(0);
         }
         100% {
-            /* Snaps to perfect position */
+            /* Final: Snap to perfect center */
             transform: rotateY(0deg) rotateX(0deg) scale(1) translateX(0);
             filter: brightness(1) blur(0);
             opacity: 1;
@@ -1098,8 +1100,8 @@ iframe {
     }
 
     .mobile-first-load {
-        /* Slightly longer duration for a smoother "premium" feel */
-        animation: mobileAppTwist 1.1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        /* 1.2 seconds makes it feel more expensive/fluid */
+        animation: mobileAppTwist 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
     }
 }
 
@@ -1299,28 +1301,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // UPDATE THIS LINE: Change localStorage to sessionStorage
     const savedPage = sessionStorage.getItem("lastLearnerPage");
 
-   if (targetPage) {
+  if (targetPage) {
+        // 1. Priority: Notifications/Direct Links
         iframe.src = targetPage;
         window.history.replaceState({}, document.title, window.location.pathname);
-   } else if (savedPage) {
-        // API-Driven Pages (No Iframe)
-        if (savedPage === "quiz_list.php") {
+    } else if (savedPage) {
+        // 2. Priority: API-Driven Pages (Special Logic)
+        if (savedPage.includes("quiz_list.php")) {
             window.fetchQuizzes();
-        } else if (savedPage === "assignment_list.php") {
+        } else if (savedPage.includes("assignment_list.php")) {
             window.fetchAssignments();
-        } else if (savedPage === "resource_list.php") { // <--- ADDED RESOURCES
+        } else if (savedPage.includes("resource_list.php")) {
             window.fetchResources();
-        } else if (savedPage === "announcement_list.php") {
-    window.fetchAnnouncements();
-} else if (savedPage === "discussion_list.php") {
-    window.fetchDiscussions();
-} 
+        } else if (savedPage.includes("announcement_list.php")) {
+            window.fetchAnnouncements();
+        } else if (savedPage.includes("discussion_list.php")) {
+            window.fetchDiscussions();
+        } 
         else {
-            // FIX: Instead of learner_manual.php, we load the actual saved page!
+            // 3. IMPORTANT: Standard Iframe Pages (profile, settings, manual, etc.)
+            // Don't remove this! It's why your refresh was failing.
             iframe.src = savedPage;
         }
     } else {
-        // Only if there is NO saved page and NO target page, we default to manual
+        // 4. Fallback: No session, no link -> Show the Manual
         iframe.src = "learner_manual.php";
     }
 
