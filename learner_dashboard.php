@@ -1067,7 +1067,34 @@ iframe {
     flex-shrink: 0;
     transition: stroke 0.3s ease;
 }
+@media (max-width: 768px) {
+    /* Create the 3D space */
+    body {
+        perspective: 1500px;
+    }
 
+    .main-content {
+        transform-style: preserve-3d;
+    }
+
+    /* The "Canvas" style animation */
+    @keyframes mobileAppTwist {
+        0% {
+            transform: rotateY(-18deg) translateX(40px) scale(0.92);
+            filter: brightness(0.6);
+            opacity: 0;
+        }
+        100% {
+            transform: rotateY(0deg) translateX(0) scale(1);
+            filter: brightness(1);
+            opacity: 1;
+        }
+    }
+
+    .mobile-first-load {
+        animation: mobileAppTwist 0.85s cubic-bezier(0.15, 1, 0.3, 1.1) forwards;
+    }
+}
 
 </style>
 </head>
@@ -1245,11 +1272,25 @@ document.addEventListener("DOMContentLoaded", function () {
     let loaderTimeout; // <--- ADD THIS LINE HERE
 
     // ────────────────────────────────────────────────────────────────────────
+    // NEW: MOBILE TWIST LOGIC (Add this here)
+    // ────────────────────────────────────────────────────────────────────────
+    const isMobile = window.innerWidth <= 768;
+    // We check sessionStorage for "lastLearnerPage" to see if this is a fresh start
+    if (isMobile && !sessionStorage.getItem("lastLearnerPage")) {
+        const mainContent = document.querySelector(".main-content");
+        mainContent.classList.add("mobile-first-load");
+        setTimeout(() => {
+            mainContent.classList.remove("mobile-first-load");
+        }, 1000);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
     // 1. SMART LOAD LOGIC (Deep Linking + Refresh Persistence)
     // ────────────────────────────────────────────────────────────────────────
     const urlParams = new URLSearchParams(window.location.search);
     const targetPage = urlParams.get('page'); // From Push Notifications
-    const savedPage = localStorage.getItem("lastLearnerPage");
+    // UPDATE THIS LINE: Change localStorage to sessionStorage
+    const savedPage = sessionStorage.getItem("lastLearnerPage");
 
    if (targetPage) {
         iframe.src = targetPage;
@@ -1275,7 +1316,7 @@ document.addEventListener("DOMContentLoaded", function () {
             savedPage !== "discussion_list.php" &&
             savedPage !== "announcement_list.php"
         ) {
-            iframe.src = savedPage;
+           iframe.src = "learner_manual.php";;
         }
     }
 
@@ -1344,7 +1385,8 @@ if (iframe) iframe.style.display = 'block';
             const fullPage = win.location.pathname.split("/").pop() + win.location.search;
             
             if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== "") {
-                localStorage.setItem("lastLearnerPage", fullPage);
+               // UPDATE THIS LINE: Change localStorage to sessionStorage
+                sessionStorage.setItem("lastLearnerPage", fullPage);
                 const filename = win.location.pathname.split("/").pop();
                 setActive(filename);
             }
@@ -1498,7 +1540,7 @@ if (iframe) iframe.style.display = 'block';
         sidebar.classList.add("collapsed");
     }
     // Init UI Highlighter
-    const lastSaved = localStorage.getItem("lastLearnerPage");
+    const lastSaved = sessionStorage.getItem("lastLearnerPage");
     if (lastSaved === "quiz_list.php") {
         window.setActive("quiz_list.php");
         } else if (lastSaved === "assignment_list.php") { // <--- ADD THIS
