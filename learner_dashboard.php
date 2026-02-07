@@ -1096,7 +1096,7 @@ iframe {
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
-        <a href="learner_manual.php" target="mainFrame" class="desktop-only" data-page="learner_manual.php"
+        <a href="javascript:void(0)" onclick="fetchManual()" class="desktop-only" data-page="learner_manual.php"
            class="<?= $currentPage === 'learner_manual.php' ? 'active' : '' ?>">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -1266,6 +1266,8 @@ document.addEventListener("DOMContentLoaded", function () {
     window.fetchAnnouncements();
 } else if (savedPage === "discussion_list.php") {
     window.fetchDiscussions();
+} else if (savedPage === "learner_manual.php") { // <--- ADD THIS
+    window.fetchManual();
 }
        else if (
             savedPage !== "learner_manual.php" && 
@@ -1289,7 +1291,8 @@ document.addEventListener("DOMContentLoaded", function () {
      
 // Stop the iframe from loading if it's a Quiz or an Assignment API call
 const onClick = link.getAttribute('onclick') || "";
-const isApiCall = onClick.includes('fetchQuizzes') || 
+const isApiCall = onClick.includes('fetchManual') ||
+                  onClick.includes('fetchQuizzes') || 
                   onClick.includes('fetchAssignments') || 
                   onClick.includes('fetchResources') ||
                   onClick.includes('fetchDiscussions') || 
@@ -1509,6 +1512,8 @@ if (iframe) iframe.style.display = 'block';
     window.setActive("announcement_list.php");
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
+} else if (lastSaved === "learner_manual.php") { // <--- ADD THIS
+    window.setActive("learner_manual.php");
 }
     else {
         window.setActive("<?= $currentPage ?>");
@@ -1526,14 +1531,13 @@ function toggleJoinClassForm() {
 
 <nav id="mobileBottomNav">
 
- <a href="learner_manual.php" target="mainFrame" data-page="learner_manual.php"
+ <<a href="javascript:void(0)" onclick="fetchManual()" data-page="learner_manual.php"
        class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
 </svg>Home
     </a>
-
 
     <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php"
        class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
@@ -1659,5 +1663,6 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/resources.js?v=1.0"></script>
 <script src="assets/js/announcements.js?v=1.0"></script>
 <script src="assets/js/discussions.js?v=1.0"></script>
+<script src="assets/js/learner_manual.js?v=1.0"></script>
 </body>
 </html>
