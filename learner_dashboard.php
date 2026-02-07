@@ -1068,31 +1068,38 @@ iframe {
     transition: stroke 0.3s ease;
 }
 @media (max-width: 768px) {
-    /* Create the 3D space */
     body {
-        perspective: 1500px;
+        perspective: 1200px; /* Stronger 3D depth */
+        overflow-x: hidden;
     }
 
     .main-content {
         transform-style: preserve-3d;
+        backface-visibility: hidden;
     }
 
-    /* The "Canvas" style animation */
     @keyframes mobileAppTwist {
         0% {
-            transform: rotateY(-18deg) translateX(40px) scale(0.92);
-            filter: brightness(0.6);
+            /* Starts smaller, rotated 30 degrees, and blurred */
+            transform: rotateY(-35deg) rotateX(10deg) scale(0.8) translateX(50px);
+            filter: brightness(0.5) blur(5px);
             opacity: 0;
         }
+        70% {
+            /* Slight overshoot for that "springy" feel */
+            transform: rotateY(5deg) rotateX(-2deg) scale(1.02);
+        }
         100% {
-            transform: rotateY(0deg) translateX(0) scale(1);
-            filter: brightness(1);
+            /* Snaps to perfect position */
+            transform: rotateY(0deg) rotateX(0deg) scale(1) translateX(0);
+            filter: brightness(1) blur(0);
             opacity: 1;
         }
     }
 
     .mobile-first-load {
-        animation: mobileAppTwist 0.85s cubic-bezier(0.15, 1, 0.3, 1.1) forwards;
+        /* Slightly longer duration for a smoother "premium" feel */
+        animation: mobileAppTwist 1.1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }
 }
 
@@ -1307,17 +1314,14 @@ document.addEventListener("DOMContentLoaded", function () {
     window.fetchAnnouncements();
 } else if (savedPage === "discussion_list.php") {
     window.fetchDiscussions();
-}
-       else if (
-            savedPage !== "learner_manual.php" && 
-            savedPage !== "quiz_list.php" && 
-            savedPage !== "assignment_list.php" && 
-            savedPage !== "resource_list.php" && 
-            savedPage !== "discussion_list.php" &&
-            savedPage !== "announcement_list.php"
-        ) {
-           iframe.src = "learner_manual.php";;
+} 
+        else {
+            // FIX: Instead of learner_manual.php, we load the actual saved page!
+            iframe.src = savedPage;
         }
+    } else {
+        // Only if there is NO saved page and NO target page, we default to manual
+        iframe.src = "learner_manual.php";
     }
 
    // ────────────────────────────────────────────────────────────────────────
