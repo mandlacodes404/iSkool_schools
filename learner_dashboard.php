@@ -1093,7 +1093,7 @@ iframe {
     }
 
     .mobile-first-load {
-        /* Duration 0.8s with a 'spring' ease-out */
+        /* Duration 0.6s with a 'spring' ease-out */
         animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 }
