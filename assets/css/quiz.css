@@ -1,11 +1,30 @@
 /* assets/css/quiz.css */
 
 /* 1. The Container - This replicates the dashboard environment */
+/* 1. The Container - Updated for Scrolling */
 #api-content-area {
     padding: 25px;
     color: #ffffff;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
+
+    /* --- ADD THESE TO FIX SCROLLING --- */
+    height: calc(100vh - 70px); /* Adjust 70px if your top header is taller */
+    overflow-y: auto;           /* This enables the scrollbar */
+    box-sizing: border-box;     /* Keeps padding from breaking layout */
+    padding-bottom: 120px;      /* Extra space so the last card isn't stuck at the bottom */
+}
+
+/* 2. Make the scrollbar look professional (Matches Chrome/Edge/Safari) */
+#api-content-area::-webkit-scrollbar {
+    width: 6px;
+}
+#api-content-area::-webkit-scrollbar-thumb {
+    background: rgba(79, 209, 197, 0.4);
+    border-radius: 10px;
+}
+#api-content-area::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* 2. Section Headers */
