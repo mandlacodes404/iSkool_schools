@@ -1502,7 +1502,7 @@ function toggleJoinClassForm() {
        class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </a>
-    <a href="learner_assignments.php" target="mainFrame" data-page="learner_assignments.php"
+    <a href="javascript:void(0)" onclick="fetchAssignments()" data-page="learner_assignments.php"
        class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </a>
