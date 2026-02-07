@@ -1114,7 +1114,7 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
-        <a href="view_resources_user.php" target="mainFrame" class="desktop-only" data-page="view_resources_user.php"
+        <a href="javascript:void(0)" onclick="fetchResources()" class="desktop-only" data-page="view_resources_user.php"
            class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
@@ -1506,7 +1506,7 @@ function toggleJoinClassForm() {
        class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </a>
-    <a href="view_resources_user.php" target="mainFrame" data-page="view_resources_user.php"
+    <a href="javascript:void(0)" onclick="fetchResources()" data-page="view_resources_user.php"
        class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
     </a>
@@ -1619,5 +1619,6 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 
 <script src="assets/js/quiz.js?v=1.1"></script>
 <script src="assets/js/assignments.js?v=1.1"></script>
+<script src="assets/js/resources.js?v=1.0"></script>
 </body>
 </html>
