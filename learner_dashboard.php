@@ -1068,40 +1068,32 @@ iframe {
     transition: stroke 0.3s ease;
 }
 @media (max-width: 768px) {
-    /* The stage for 3D */
     body {
-        perspective: 1200px; 
-        overflow-x: hidden;
+        perspective: 1000px;
+        background-color: #f4f4f4; /* Match your app background */
     }
 
     .main-content {
-        transform-style: preserve-3d;
         backface-visibility: hidden;
+        transform-style: preserve-3d;
     }
 
-    @keyframes mobileAppTwist {
+    @keyframes mobileCardFlip {
         0% {
-            /* Start: Rotated, small, and deep in the background */
-            transform: rotateY(-40deg) rotateX(15deg) scale(0.7) translateX(100px);
-            filter: brightness(0.4) blur(4px);
+            /* Start upside down and backwards */
+            transform: rotateX(180deg);
             opacity: 0;
         }
-        60% {
-            /* Overshoot: slightly larger and tilted the other way */
-            transform: rotateY(5deg) rotateX(-5deg) scale(1.03);
-            filter: brightness(1.1) blur(0);
-        }
         100% {
-            /* Final: Snap to perfect center */
-            transform: rotateY(0deg) rotateX(0deg) scale(1) translateX(0);
-            filter: brightness(1) blur(0);
+            /* Flip to the front */
+            transform: rotateX(0deg);
             opacity: 1;
         }
     }
 
     .mobile-first-load {
-        /* 1.2 seconds makes it feel more expensive/fluid */
-        animation: mobileAppTwist 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        /* "Back" cubic-bezier gives it a little bounce at the end */
+        animation: mobileCardFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 }
 
@@ -1318,13 +1310,24 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
-        else {
-            // 3. IMPORTANT: Standard Iframe Pages (profile, settings, manual, etc.)
-            // Don't remove this! It's why your refresh was failing.
+      // 2. YOUR CASE: If it's NOT an API page AND NOT the manual, 
+        // load the specific saved page into the iframe (like profile.php)
+        else if (
+            savedPage !== "learner_manual.php" && 
+            savedPage !== "quiz_list.php" && 
+            savedPage !== "assignment_list.php" && 
+            savedPage !== "resource_list.php" && 
+            savedPage !== "discussion_list.php" &&
+            savedPage !== "announcement_list.php"
+        ) {
             iframe.src = savedPage;
         }
+        // 3. If it IS the manual, just load the manual
+        else {
+            iframe.src = "learner_manual.php";
+        }
     } else {
-        // 4. Fallback: No session, no link -> Show the Manual
+        // FRESH START: No saved page at all (Trigger Twist here)
         iframe.src = "learner_manual.php";
     }
 
