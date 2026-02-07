@@ -1129,14 +1129,11 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-
-     
-
         <a href="learner_evaluations.php" target="mainFrame" data-page="learner_evaluations.php"
            class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
-        <a href="discussions.php" target="mainFrame" data-page="discussions.php"
+        <a href="javascript:void(0)" onclick="fetchDiscussions()" data-page="discussions.php"
            class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
@@ -1267,12 +1264,15 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchResources();
         } else if (savedPage === "announcement_list.php") {
     window.fetchAnnouncements();
+} else if (savedPage === "discussion_list.php") {
+    window.fetchDiscussions();
 }
        else if (
             savedPage !== "learner_manual.php" && 
             savedPage !== "quiz_list.php" && 
             savedPage !== "assignment_list.php" && 
             savedPage !== "resource_list.php" && 
+            savedPage !== "discussion_list.php" &&
             savedPage !== "announcement_list.php"
         ) {
             iframe.src = savedPage;
@@ -1291,7 +1291,8 @@ document.addEventListener("DOMContentLoaded", function () {
 const onClick = link.getAttribute('onclick') || "";
 const isApiCall = onClick.includes('fetchQuizzes') || 
                   onClick.includes('fetchAssignments') || 
-                  onClick.includes('fetchResources') || 
+                  onClick.includes('fetchResources') ||
+                  onClick.includes('fetchDiscussions') || 
                   onClick.includes('fetchAnnouncements');
 
 if (isApiCall) {
@@ -1506,6 +1507,8 @@ if (iframe) iframe.style.display = 'block';
     window.setActive("resource_list.php");
 } else if (lastSaved === "announcement_list.php") {
     window.setActive("announcement_list.php");
+} else if (lastSaved === "discussion_list.php") {
+    window.setActive("discussion_list.php");
 }
     else {
         window.setActive("<?= $currentPage ?>");
@@ -1655,5 +1658,6 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/assignments.js?v=1.1"></script>
 <script src="assets/js/resources.js?v=1.0"></script>
 <script src="assets/js/announcements.js?v=1.0"></script>
+<script src="assets/js/discussions.js?v=1.0"></script>
 </body>
 </html>
