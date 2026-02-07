@@ -1,0 +1,16 @@
+/* assets/css/quiz.css */
+#api-content-area {
+    padding: 20px;
+    color: white;
+    font-family: 'Inter', sans-serif; /* Or your dashboard font */
+}
+
+/* This ensures the quiz cards have the hover effect we saw during testing */
+.quiz-card {
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.quiz-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: translateY(-2px);
+}

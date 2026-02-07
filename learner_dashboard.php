@@ -207,6 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="stylesheet" href="assets/css/quiz.css">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1103,7 +1104,7 @@ iframe {
 </svg><span>Home</span>
         </a>
 
-        <a href="quiz_list.php" target="mainFrame" class="desktop-only" data-page="quiz_list.php"
+        <a href="javascript:void(0)" onclick="fetchQuizzes()" class="desktop-only" data-page="quiz_list.php"
            class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
@@ -1227,7 +1228,8 @@ iframe {
         <?php endif; ?>
     </div>
 
-    <iframe name="mainFrame" src="learner_manual.php"></iframe>
+    <div id="api-content-area" style="display:none;"></div>
+<iframe id="mainFrame" name="mainFrame" src="learner_manual.php"></iframe>
 </div>
 
 <div id="loaderOverlay">
@@ -1241,6 +1243,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const iframe         = document.querySelector('iframe[name="mainFrame"]');
     const sidebar        = document.querySelector(".sidebar");
     const myClassContent = document.getElementById("myClassContent");
+    const apiArea = document.getElementById('api-content-area');
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();
     let loaderTimeout; // <--- ADD THIS LINE HERE
 
@@ -1266,6 +1269,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
+            // If this is the Quiz API link, don't run the standard iframe loader
+if (link.getAttribute('onclick')?.includes('fetchQuizzes')) return;
            // Clear any previous timer to prevent multiple loaders
         clearTimeout(loaderTimeout);
 
@@ -1284,6 +1289,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
                 iframe.style.display = "block";
+                if (apiArea) apiArea.style.display = 'none';
+if (iframe) iframe.style.display = 'block';
             }
         });
     });
@@ -1376,7 +1383,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 4. SIDEBAR & MY CLASS (Your original working logic)
     // ────────────────────────────────────────────────────────────────────────
     const navItems = document.querySelectorAll("[data-page]");
-    function setActive(page) {
+    window.setActive = function(page) {
         navItems.forEach(item => {
             item.classList.toggle("active", item.getAttribute("data-page") === page);
         });
@@ -1399,6 +1406,7 @@ document.addEventListener("DOMContentLoaded", function () {
         iframe.style.display = "none";
         setActive("my-class");
         if (window.innerWidth <= 768) toggleSidebar();
+        if (apiArea) apiArea.style.display = "none";
     };
 
     window.toggleParentDropdown = () => {
@@ -1474,7 +1482,7 @@ function toggleJoinClassForm() {
     </a>
 
 
-    <a href="quiz_list.php" target="mainFrame" data-page="quiz_list.php"
+    <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php"
        class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </a>
@@ -1592,5 +1600,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
+
+<script src="assets/js/quiz.js"></script>
 </body>
 </html>
