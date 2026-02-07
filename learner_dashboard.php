@@ -1268,8 +1268,13 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (savedPage === "announcement_list.php") {
     window.fetchAnnouncements();
 }
-        // Standard Iframe Pages
-        else if (savedPage !== "learner_manual.php") {
+       else if (
+            savedPage !== "learner_manual.php" && 
+            savedPage !== "quiz_list.php" && 
+            savedPage !== "assignment_list.php" && 
+            savedPage !== "resource_list.php" && 
+            savedPage !== "announcement_list.php"
+        ) {
             iframe.src = savedPage;
         }
     }
@@ -1284,7 +1289,24 @@ document.addEventListener("DOMContentLoaded", function () {
      
 // Stop the iframe from loading if it's a Quiz or an Assignment API call
 const onClick = link.getAttribute('onclick') || "";
-if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments') || onClick.includes('fetchResources') || onClick.includes('fetchAnnouncements')) return;
+const isApiCall = onClick.includes('fetchQuizzes') || 
+                  onClick.includes('fetchAssignments') || 
+                  onClick.includes('fetchResources') || 
+                  onClick.includes('fetchAnnouncements');
+
+if (isApiCall) {
+    // 1. Close the sidebar on mobile even for API calls
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove("active");
+        if (mobileOverlay) mobileOverlay.style.display = "none";
+    }
+    // 2. Clear UI states
+    if (myClassContent) myClassContent.classList.remove("active");
+    if (iframe) iframe.style.display = "none";
+    if (apiArea) apiArea.style.display = "block";
+    
+    return; // Now we stop the iframe loader logic
+}
            // Clear any previous timer to prevent multiple loaders
         clearTimeout(loaderTimeout);
 
