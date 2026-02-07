@@ -1109,7 +1109,7 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
-        <a href="learner_assignments.php" target="mainFrame" class="desktop-only" data-page="learner_assignments.php"
+        <a href="javascript:void(0)" onclick="fetchAssignments()" class="desktop-only" data-page="learner_assignments.php"
            class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
@@ -1261,6 +1261,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // --- ADD THIS SPECIFIC CHECK ---
         if (savedPage === "quiz_list.php") {
             window.fetchQuizzes(); // If it's the quiz, run the function
+            } else if (savedPage === "assignment_list.php") { // <--- ADD THIS
+        window.fetchAssignments();
         } else if (savedPage !== "learner_manual.php") {
             iframe.src = savedPage; // If it's anything else, use the iframe
         }
@@ -1273,8 +1275,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
-            // If this is the Quiz API link, don't run the standard iframe loader
-if (link.getAttribute('onclick')?.includes('fetchQuizzes')) return;
+     
+// Stop the iframe from loading if it's a Quiz or an Assignment API call
+const onClick = link.getAttribute('onclick') || "";
+if (onClick.includes('fetchQuizzes') || onClick.includes('fetchAssignments')) return;
            // Clear any previous timer to prevent multiple loaders
         clearTimeout(loaderTimeout);
 
@@ -1467,6 +1471,8 @@ if (iframe) iframe.style.display = 'block';
     const lastSaved = localStorage.getItem("lastLearnerPage");
     if (lastSaved === "quiz_list.php") {
         window.setActive("quiz_list.php");
+        } else if (lastSaved === "assignment_list.php") { // <--- ADD THIS
+    window.setActive("assignment_list.php");
     } else {
         window.setActive("<?= $currentPage ?>");
     }
@@ -1612,5 +1618,6 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/quiz.js?v=1.0"></script>
+<script src="assets/js/assignments.js?v=1.0"></script>
 </body>
 </html>

@@ -1,82 +1,58 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTPS']) ? "https" : "http") . "://" . $_SERVER['HTTP_HOST']);
 
 session_start();
 require_once dirname(__DIR__) . '/config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
+    http_response_code(401);
     echo json_encode(["error" => "Unauthorized"]);
     exit();
 }
 
 $studentEmail = $_SESSION['email'];
+$currentDateTime = date('Y-m-d H:i:s');
 
-// Get current academic year
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-if ($currentYearResult->num_rows === 0) {
-    echo json_encode(["error" => "No active year"]);
-    exit();
-}
-$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
+// 1. Get Academic Year
+$yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$current_academic_year_id = (int)$yearRes->fetch_assoc()['id'];
 
-// Get joined classes
-$stmt = $conn->prepare("
-    SELECT DISTINCT class_id 
-    FROM class_students 
-    WHERE student_email = ? 
-      AND academic_year_id = ?
-");
-$stmt->bind_param("si", $studentEmail, $current_academic_year_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$joinedClassIds = [];
-while ($row = $result->fetch_assoc()) {
-    $joinedClassIds[] = (int)$row['class_id'];
-}
-$stmt->close();
-
-if (empty($joinedClassIds)) {
-    echo json_encode([]);
-    exit();
-}
-
-// Fetch assignments
-$placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-$types = str_repeat('i', count($joinedClassIds)) . 'i';
-
+// 2. Get Assignments with Submission Status
 $sql = "
     SELECT 
-        a.id,
-        a.title AS assignment_title,
-        a.description,
-        a.due_date,
-        a.file_url,
+        a.id, a.title, a.description, a.due_date, a.file_url,
         c.name AS class_name,
-        CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display
+        CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display,
+        s.file_url AS submission_url
     FROM assignments a
     JOIN classes c ON a.class_id = c.id
-    LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
-    WHERE a.class_id IN ($placeholders)
+    JOIN class_students cs ON a.class_id = cs.class_id
+    LEFT JOIN users u ON a.created_by = u.email
+    LEFT JOIN submissions s ON a.id = s.assignment_id AND s.student_email = ?
+    WHERE cs.student_email = ? 
       AND a.academic_year_id = ?
-    ORDER BY a.due_date ASC, u.surname ASC
+    ORDER BY a.due_date ASC
 ";
 
 $stmt = $conn->prepare($sql);
-$bind_params = $joinedClassIds;
-$bind_params[] = $current_academic_year_id;
-$stmt->bind_param($types, ...$bind_params);
+$stmt->bind_param("ssi", $studentEmail, $studentEmail, $current_academic_year_id);
 $stmt->execute();
-$assignments = $stmt->get_result();
-$stmt->close();
+$result = $stmt->get_result();
 
-// Group by teacher
-$groupedAssignments = [];
-while ($row = $assignments->fetch_assoc()) {
-    $teacher = trim($row['teacher_display']);
-    if (empty($teacher)) $teacher = 'Unknown Teacher';
-    $groupedAssignments[$teacher][] = $row;
+$grouped = [];
+while ($row = $result->fetch_assoc()) {
+    $isPastDue = (!empty($row['due_date']) && $row['due_date'] < $currentDateTime);
+    
+    $grouped[$row['teacher_display']][] = [
+        'id' => $row['id'],
+        'title' => $row['title'],
+        'description' => $row['description'],
+        'due_date' => $row['due_date'] ? date('M j, Y, g:i A', strtotime($row['due_date'])) : 'No Due Date',
+        'is_past_due' => $isPastDue,
+        'teacher_file' => $row['file_url'],
+        'submission_file' => $row['submission_url'],
+        'class_name' => $row['class_name']
+    ];
 }
-
-echo json_encode($groupedAssignments);
-?>
+echo json_encode($grouped);
