@@ -1,32 +1,36 @@
-let announcementCache = null;
+window.announcementCache = null;
 
 window.fetchAnnouncements = async function() {
-    localStorage.setItem("lastLearnerPage", "announcement_list.php");
+    if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+
+    // 3. Match your main script's use of sessionStorage
+    sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
     if (typeof window.setActive === 'function') window.setActive("announcement_list.php");
 
     const apiArea = document.getElementById('api-content-area');
     const loader = document.getElementById("loaderOverlay");
 
-    // UI Toggle
-    document.getElementById('mainFrame').style.display = 'none';
-    apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (apiArea) apiArea.style.display = 'block';
 
-    if (announcementCache) {
-        renderAnnouncements(announcementCache);
+    if (window.announcementCache) {
+        renderAnnouncements(window.announcementCache);
+        if (loader) loader.style.display = 'none'; 
         return;
     }
 
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_announcements.php');
+       const response = await fetch('api/get_announcements.php');
         const data = await response.json();
-        announcementCache = data;
+        window.announcementCache = data; // Store in global cache
         renderAnnouncements(data);
     } catch (error) {
         apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading announcements.</p>";
     } finally {
         if (loader) loader.style.display = 'none';
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 

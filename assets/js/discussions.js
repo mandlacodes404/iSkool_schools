@@ -1,31 +1,38 @@
-let discussionCache = null;
+window.discussionCache = null;
 
 window.fetchDiscussions = async function() {
-    localStorage.setItem("lastLearnerPage", "discussion_list.php");
+    if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+
+    // 3. Consistency: Use sessionStorage to match Main Script
+    sessionStorage.setItem("lastLearnerPage", "discussion_list.php");
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
 
     const apiArea = document.getElementById('api-content-area');
     const loader = document.getElementById("loaderOverlay");
 
-    document.getElementById('mainFrame').style.display = 'none';
-    apiArea.style.display = 'block';
+    // UI Toggle
+    if (iframe) iframe.style.display = 'none';
+    if (apiArea) apiArea.style.display = 'block';
 
-    if (discussionCache) {
-        renderDiscussions(discussionCache);
+    // 4. SMART CACHE CHECK
+    if (window.discussionCache) {
+        renderDiscussions(window.discussionCache);
+        if (loader) loader.style.display = 'none'; 
         return;
     }
 
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_discussions.php');
+       const response = await fetch('api/get_discussions.php');
         const data = await response.json();
-        discussionCache = data;
+        window.discussionCache = data; // Store globally
         renderDiscussions(data);
     } catch (error) {
         apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading discussions.</p>";
     } finally {
         if (loader) loader.style.display = 'none';
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 

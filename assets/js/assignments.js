@@ -1,9 +1,12 @@
 /* assets/js/assignments.js */
-let learnerAssignmentCache = null;
+window.learnerAssignmentCache = null; // Changed 'let' to 'window.
 
 window.fetchAssignments = async function() {
-    // 1. SAVE STATE: For Refresh Persistence
-    localStorage.setItem("lastLearnerPage", "assignment_list.php");
+    // 1. Kill any pending loader timer from the main script immediately
+    if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+
+    // 2. SAVE STATE: Match your main script's use of sessionStorage
+    sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
 
     // 2. UI Setup & Highlighting
     if (typeof window.setActive === 'function') window.setActive("assignment_list.php");
@@ -18,10 +21,9 @@ window.fetchAssignments = async function() {
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 4. SMART CACHE CHECK (Fast Loading)
-    if (learnerAssignmentCache) {
-        renderAssignmentCards(learnerAssignmentCache);
-        if (loader) loader.style.display = 'none';
+    if (window.learnerAssignmentCache) {
+        renderAssignmentCards(window.learnerAssignmentCache);
+        if (loader) loader.style.display = 'none'; // Hide loader if it was already showing
         return; 
     }
 
@@ -32,8 +34,8 @@ window.fetchAssignments = async function() {
         const response = await fetch('api/get_assignments.php');
         if (!response.ok) throw new Error('Failed to fetch assignments');
         
-        const groupedData = await response.json();
-        learnerAssignmentCache = groupedData; 
+       const groupedData = await response.json();
+        window.learnerAssignmentCache = groupedData; // Save to global window object
         renderAssignmentCards(groupedData);
     } catch (error) {
         console.error("Assignment Fetch Error:", error);
@@ -47,6 +49,7 @@ window.fetchAssignments = async function() {
         }
     } finally {
         if (loader) loader.style.display = 'none';
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 

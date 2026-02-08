@@ -1,33 +1,39 @@
 /* assets/js/resources.js */
-let resourceCache = null;
+window.resourceCache = null;
 
 window.fetchResources = async function() {
-    localStorage.setItem("lastLearnerPage", "resource_list.php");
+   if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+
+    // 3. Match your main script's use of sessionStorage
+    sessionStorage.setItem("lastLearnerPage", "resource_list.php");
     if (typeof window.setActive === 'function') window.setActive("resource_list.php");
 
     const apiArea = document.getElementById('api-content-area');
     const loader = document.getElementById("loaderOverlay");
 
     // UI Toggle
-    document.getElementById('mainFrame').style.display = 'none';
-    apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (apiArea) apiArea.style.display = 'block';
 
-    if (resourceCache) {
-        renderResourceCards(resourceCache);
+    // 4. SMART CACHE CHECK (The "Instant" feel)
+    if (window.resourceCache) {
+        renderResourceCards(window.resourceCache);
+        if (loader) loader.style.display = 'none'; 
         return;
     }
 
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_resources.php');
+       const response = await fetch('api/get_resources.php');
         const data = await response.json();
-        resourceCache = data;
+        window.resourceCache = data; // Store in global window object
         renderResourceCards(data);
     } catch (error) {
         apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading resources.</p>";
     } finally {
         if (loader) loader.style.display = 'none';
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 

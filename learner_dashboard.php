@@ -1402,9 +1402,12 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchDiscussions') || 
                           onClick.includes('fetchAnnouncements');
 
-        // CHECK CACHE: If the data exists, we don't want a loader!
-        const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
-                         (onClick.includes('fetchAssignments') && window.learnerAssignmentCache);
+        // Inside your Main Script's link click listener:
+const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
+                 (onClick.includes('fetchAssignments') && window.learnerAssignmentCache) ||
+                 (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
+                 (onClick.includes('fetchResources') && window.resourceCache) ||
+                 (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
         if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
@@ -1800,10 +1803,10 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.2"></script>
-<script src="assets/js/assignments.js?v=1.2"></script>
-<script src="assets/js/resources.js?v=1.1"></script>
-<script src="assets/js/announcements.js?v=1.1"></script>
-<script src="assets/js/discussions.js?v=1.1"></script>
+<script src="assets/js/quiz.js?v=1.3"></script>
+<script src="assets/js/assignments.js?v=1.3"></script>
+<script src="assets/js/resources.js?v=1.2"></script>
+<script src="assets/js/announcements.js?v=1.2"></script>
+<script src="assets/js/discussions.js?v=1.2"></script>
 </body>
 </html>
