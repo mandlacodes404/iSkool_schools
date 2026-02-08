@@ -5,21 +5,22 @@ window.fetchDiscussions = async function() {
 
     // 3. Consistency: Use sessionStorage to match Main Script
     sessionStorage.setItem("lastLearnerPage", "discussion_list.php");
+    // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
-
-    const apiArea = document.getElementById('api-content-area');
-    const loader = document.getElementById("loaderOverlay");
-
-    // UI Toggle
-    if (iframe) iframe.style.display = 'none';
-    if (apiArea) apiArea.style.display = 'block';
-
-    // 4. SMART CACHE CHECK
-    if (window.discussionCache) {
-        renderDiscussions(window.discussionCache);
-        if (loader) loader.style.display = 'none'; 
-        return;
+    // 2. Highlighting Bridge
+    if (typeof window.setActive === 'function') {
+        window.setActive("discussion_list.php");
     }
+
+      const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const loader = document.getElementById("loaderOverlay");
+    const myClassContent = document.getElementById("myClassContent");
+
+    // 2. UI Preparation
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (myClassContent) myClassContent.classList.remove("active");
 
     if (loader) loader.style.display = 'flex';
 

@@ -7,20 +7,20 @@ window.fetchResources = async function() {
     // 3. Match your main script's use of sessionStorage
     sessionStorage.setItem("lastLearnerPage", "resource_list.php");
     if (typeof window.setActive === 'function') window.setActive("resource_list.php");
-
-    const apiArea = document.getElementById('api-content-area');
-    const loader = document.getElementById("loaderOverlay");
-
-    // UI Toggle
-    if (iframe) iframe.style.display = 'none';
-    if (apiArea) apiArea.style.display = 'block';
-
-    // 4. SMART CACHE CHECK (The "Instant" feel)
-    if (window.resourceCache) {
-        renderResourceCards(window.resourceCache);
-        if (loader) loader.style.display = 'none'; 
-        return;
+    // 2. Highlighting Bridge
+    if (typeof window.setActive === 'function') {
+        window.setActive("resource_list.php");
     }
+
+     const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const loader = document.getElementById("loaderOverlay");
+    const myClassContent = document.getElementById("myClassContent");
+
+    // 2. UI Preparation
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (myClassContent) myClassContent.classList.remove("active");
 
     if (loader) loader.style.display = 'flex';
 

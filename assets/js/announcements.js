@@ -6,18 +6,20 @@ window.fetchAnnouncements = async function() {
     // 3. Match your main script's use of sessionStorage
     sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
     if (typeof window.setActive === 'function') window.setActive("announcement_list.php");
-
-    const apiArea = document.getElementById('api-content-area');
-    const loader = document.getElementById("loaderOverlay");
-
-    if (iframe) iframe.style.display = 'none';
-    if (apiArea) apiArea.style.display = 'block';
-
-    if (window.announcementCache) {
-        renderAnnouncements(window.announcementCache);
-        if (loader) loader.style.display = 'none'; 
-        return;
+    // 2. Highlighting Bridge
+    if (typeof window.setActive === 'function') {
+        window.setActive("announcement_list.php");
     }
+
+      const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const loader = document.getElementById("loaderOverlay");
+    const myClassContent = document.getElementById("myClassContent");
+
+    // 2. UI Preparation
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (myClassContent) myClassContent.classList.remove("active");
 
     if (loader) loader.style.display = 'flex';
 
