@@ -1185,12 +1185,12 @@ button:hover svg {
     justify-content: center;
     transition: color 0.2s, transform 0.2s;
     margin-top: -5px; 
-    margin-right: -10px;
+    margin-right: -20px;
 }
 
 .desktop-close-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
 }
 
 
