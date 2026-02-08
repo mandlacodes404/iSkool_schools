@@ -249,7 +249,7 @@ body {
     flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    transition: width var(--transition-speed) ease, left var(--transition-speed) ease;
+    transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
     position: fixed;
     top: 0;
     left: 0;
@@ -477,13 +477,12 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-left: var(--sidebar-width);
-    transition: margin-left var(--transition-speed) ease;
+   
 }
 
-.sidebar.collapsed ~ .main-content {
+/*.sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed-width);
-}
+}*/
 
 iframe {
     border: none;
@@ -1097,16 +1096,46 @@ iframe {
         animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 }
+/* Desktop slide-in menu (no overlay/dim) */
+.sidebar.desktop-open {
+    left: 0 !important;
+    transform: translateX(0) !important;
+}
 
+/* Default hidden on desktop - slide from left */
+@media (min-width: 769px) {
+    .sidebar {
+        left: -100%;                    /* Start hidden off-screen */
+        transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
+        width: var(--sidebar-width);    /* Keep your 240px width */
+        box-shadow: 4px 0 20px rgba(0,0,0,0.35); /* subtle shadow when open */
+        z-index: 2000;                  /* Above main content but below header if needed */
+    }
+
+    .sidebar.desktop-open {
+        left: 0;
+    }
+
+    /* No permanent sidebar anymore - remove collapsed logic */
+    .sidebar.collapsed,
+    .sidebar.collapsed ~ .main-content {
+        margin-left: 0 !important;
+        width: 0 !important;
+    }
+
+    /* Main content full width now (no margin for sidebar) */
+    .main-content {
+        margin-left: 0 !important;
+        transition: none; /* no shift needed */
+    }
+}
 </style>
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
 <div class="sidebar">
-    <button class="desktop-toggle-btn" onclick="toggleDesktopSidebar()" title="Toggle Sidebar">
-        <i class="fas fa-bars"></i>
-    </button>
+    
     <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
     <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
         <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
@@ -1203,6 +1232,11 @@ iframe {
     <button id="mobileToggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
+
+    <!-- New desktop hamburger (only visible on desktop) -->
+    <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+    </button>
     
     <div class="logo-container">
         <img src="<?= htmlspecialchars($schoolLogo) ?>" 
@@ -1257,6 +1291,7 @@ iframe {
     <div id="api-content-area" style="display:none;"></div>
 <iframe id="mainFrame" name="mainFrame" src="learner_manual.php"></iframe>
 </div>
+
 
 <div id="loaderOverlay">
     <div class="loader-text">Processing...</div>
@@ -1369,11 +1404,15 @@ if (isApiCall) {
             loader.style.display = 'flex';
         }, 800);
 
-            // 2. MOBILE AUTO-CLOSE: Remove active class and hide the overlay
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove("active");
-                if (mobileOverlay) mobileOverlay.style.display = "none";
-            }
+        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
+    sidebar.classList.remove("active");
+    sidebar.classList.remove("desktop-open");
+    
+    // Only handle mobile overlay
+    if (window.innerWidth <= 768 && mobileOverlay) {
+        mobileOverlay.style.display = "none";
+    }
+}
 
             // 3. UI RESET: If clicking a standard page, hide the "My Class" view
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
@@ -1481,17 +1520,26 @@ if (iframe) iframe.style.display = 'block';
         });
     }
 
-    window.toggleSidebar = function () {
-        sidebar.classList.toggle("active");
-        mobileOverlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
-    };
+window.toggleSidebar = function (forceClose = false) {
+    const isCurrentlyOpen = sidebar.classList.contains("active");
 
-    window.toggleDesktopSidebar = function () {
-        if (window.innerWidth > 768) {
-            sidebar.classList.toggle("collapsed");
-            localStorage.setItem("sidebarCollapsed", sidebar.classList.contains("collapsed"));
+    if (forceClose || isCurrentlyOpen) {
+        sidebar.classList.remove("active");
+        sidebar.classList.remove("desktop-open"); // safety net
+        if (window.innerWidth <= 768) {
+            mobileOverlay.style.display = "none";
         }
-    };
+    } else {
+        // Only allow open on mobile
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add("active");
+            mobileOverlay.style.display = "block";
+        }
+        // Desktop open is handled by desktopToggle listener — do nothing here
+    }
+};
+
+
 
     window.showMyClass = function () {
         myClassContent.classList.add("active");
@@ -1547,10 +1595,7 @@ if (iframe) iframe.style.display = 'block';
 
     mobileOverlay.addEventListener("click", toggleSidebar);
 
-    // Init UI
-    if (window.innerWidth > 768 && localStorage.getItem("sidebarCollapsed") === "true") {
-        sidebar.classList.add("collapsed");
-    }
+    
     // Init UI Highlighter
     const lastSaved = sessionStorage.getItem("lastLearnerPage");
     if (lastSaved === "quiz_list.php") {
@@ -1567,6 +1612,23 @@ if (iframe) iframe.style.display = 'block';
     else {
         window.setActive("<?= $currentPage ?>");
     }
+
+    // Desktop slide-in (no backdrop)
+const desktopToggle = document.getElementById('desktopMenuToggle');
+
+if (desktopToggle) {
+    desktopToggle.addEventListener('click', () => {
+        sidebar.classList.add('desktop-open');
+        sidebar.classList.remove('active'); // prevent mobile style conflict
+    });
+
+    // Optional: close with Esc key
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && sidebar.classList.contains('desktop-open')) {
+            sidebar.classList.remove('desktop-open');
+        }
+    });
+}
     loader.style.display = "none";
 });
 
@@ -1576,6 +1638,7 @@ function toggleJoinClassForm() {
 }
 </script>
 
+<div id="desktopBackdrop" class="desktop-backdrop"></div>
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
 
 <nav id="mobileBottomNav">
