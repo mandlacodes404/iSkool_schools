@@ -1172,6 +1172,36 @@ button:hover svg {
     stroke: #4fd1c5; /* Your theme color */
     transform: scale(1.1);
 }
+
+/* Styling for the new X button */
+.desktop-close-btn {
+    background: transparent;
+    border: none;
+    color: #8b949e; /* Muted gray */
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.desktop-close-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.desktop-close-btn:hover {
+    color: #4fd1c5; /* Your theme color */
+    transform: scale(1.1);
+}
+
+/* THE MAGIC: Hide on mobile, show on desktop */
+@media (max-width: 768px) {
+    .desktop-close-btn {
+        display: none !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -1179,19 +1209,29 @@ button:hover svg {
 
 <div class="sidebar">
     
-    <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
-    <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
-        <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
-             alt="Profile Picture" 
-             class="learner-avatar"
-             style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
-    <?php else: ?>
-        <div class="initials-avatar">
-            <?= htmlspecialchars($initials) ?>
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+        
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
+            <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
+                <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
+                     alt="Profile Picture" 
+                     class="learner-avatar"
+                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
+            <?php else: ?>
+                <div class="initials-avatar">
+                    <?= htmlspecialchars($initials) ?>
+                </div>
+            <?php endif; ?>
+            <input type="file" id="profileInput" accept="image/*" style="display:none;">
         </div>
-    <?php endif; ?>
-    <input type="file" id="profileInput" accept="image/*" style="display:none;">
-</div>
+
+        <button type="button" class="desktop-close-btn" onclick="toggleSidebar(true)" aria-label="Close Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
@@ -1584,10 +1624,11 @@ const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) |
 window.toggleSidebar = function (forceClose = false) {
     const isCurrentlyOpen = sidebar.classList.contains("active");
 
+    // If forceClose is true (from the X button) or it's already open, close it
     if (forceClose || isCurrentlyOpen) {
         sidebar.classList.remove("active");
-        sidebar.classList.remove("desktop-open"); // safety net
-        if (window.innerWidth <= 768) {
+        sidebar.classList.remove("desktop-open"); 
+        if (mobileOverlay) {
             mobileOverlay.style.display = "none";
         }
     } else {
@@ -1679,8 +1720,9 @@ const desktopToggle = document.getElementById('desktopMenuToggle');
 
 if (desktopToggle) {
     desktopToggle.addEventListener('click', () => {
-        sidebar.classList.add('desktop-open');
-        sidebar.classList.remove('active'); // prevent mobile style conflict
+        // Change .add to .toggle so the hamburger can also close it
+        sidebar.classList.toggle('desktop-open'); 
+        sidebar.classList.remove('active'); // prevents mobile style conflict
     });
 
     // Optional: close with Esc key
