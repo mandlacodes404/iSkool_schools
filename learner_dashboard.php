@@ -262,7 +262,7 @@ body {
     scrollbar-width: none; /* Hides scrollbar track in Firefox */
     
    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    font-weight: 400;
+    font-weight: 200;
 
     /* THE CURVES: Only top-right and bottom-right */
     border-top-right-radius: 20px;
@@ -311,7 +311,7 @@ body {
     transition: background var(--transition-speed) ease, transform 0.15s ease;
     white-space: nowrap;
     overflow: hidden;
-    font-weight: 400;
+    font-weight: 200;
     background: none;
     border: none;
     cursor: pointer;
