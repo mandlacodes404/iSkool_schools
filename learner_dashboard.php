@@ -263,6 +263,13 @@ body {
     
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
     font-weight: 400;
+
+    /* THE CURVES: Only top-right and bottom-right */
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    
+    /* THE BORDER: A subtle "rim" makes the curve look premium */
+    border-right: 1px solid rgba(226, 65, 65, 0.08);
 }
 
 .sidebar::-webkit-scrollbar {
