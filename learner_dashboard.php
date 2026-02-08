@@ -288,7 +288,7 @@ body {
     text-overflow: ellipsis;
     max-width: 100%;
     transition: opacity var(--transition-speed) ease, font-size var(--transition-speed) ease;
-    font-weight: 400;
+    font-weight: 200;
 }
 
 .sidebar.collapsed h2 {
