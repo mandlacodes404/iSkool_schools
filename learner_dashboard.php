@@ -1150,6 +1150,21 @@ iframe {
         display: none;
     }
 }
+
+/* Ensure SVG icons align perfectly inside buttons */
+button svg {
+    display: block;
+    width: 22px;   /* Adjust size as needed */
+    height: 22px;
+    margin: 0 auto;
+    transition: transform 0.2s ease;
+}
+
+/* Optional: Add a slight "hover" effect */
+button:hover svg {
+    stroke: #4fd1c5; /* Your theme color */
+    transform: scale(1.1);
+}
 </style>
 </head>
 <body>
@@ -1250,13 +1265,20 @@ iframe {
 <div class="main-content">
   
     <div class="main-header">
-    <button id="mobileToggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
+   <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
     </button>
 
-    <!-- New desktop hamburger (only visible on desktop) -->
-    <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
+    <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open Desktop Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
     </button>
     
     <div class="logo-container">
