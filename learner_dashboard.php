@@ -1129,6 +1129,27 @@ iframe {
         transition: none; /* no shift needed */
     }
 }
+#desktopMenuToggle {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    #desktopMenuToggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    #desktopMenuToggle {
+        display: none;
+    }
+}
 </style>
 </head>
 <body>
