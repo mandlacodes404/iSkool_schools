@@ -1425,12 +1425,11 @@ if (isApiCall) {
             loader.style.display = 'flex';
         }, 800);
 
-     // AUTO-CLOSE MENU — now runs for ALL links (API + normal)
-if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
+        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
     sidebar.classList.remove("active");
     sidebar.classList.remove("desktop-open");
     
-    // Only handle mobile overlay (no desktop dim anyway)
+    // Only handle mobile overlay
     if (window.innerWidth <= 768 && mobileOverlay) {
         mobileOverlay.style.display = "none";
     }
