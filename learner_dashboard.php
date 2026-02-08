@@ -1184,6 +1184,8 @@ button:hover svg {
     align-items: center;
     justify-content: center;
     transition: color 0.2s, transform 0.2s;
+    margin-top: -5px; 
+    margin-right: -10px;
 }
 
 .desktop-close-btn svg {
@@ -1191,10 +1193,7 @@ button:hover svg {
     height: 20px;
 }
 
-.desktop-close-btn:hover {
-    color: #4fd1c5; /* Your theme color */
-    transform: scale(1.1);
-}
+
 
 /* THE MAGIC: Hide on mobile, show on desktop */
 @media (max-width: 768px) {
