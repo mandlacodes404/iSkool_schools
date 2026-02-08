@@ -1392,55 +1392,74 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. LOADER & MOBILE AUTO-CLOSE (Teacher-style navigation)
     // ────────────────────────────────────────────────────────────────────────
     
-   document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
+    // We target ALL links in the sidebar and bottom nav to ensure menu closes
+  document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
     link.addEventListener('click', () => {
+
         const onClick = link.getAttribute('onclick') || "";
-        
-        // 1. Check if this is an API call
         const isApiCall = onClick.includes('fetchQuizzes') || 
                           onClick.includes('fetchAssignments') || 
                           onClick.includes('fetchResources') ||
                           onClick.includes('fetchDiscussions') || 
                           onClick.includes('fetchAnnouncements');
 
-        // 2. CHECK THE CACHE: If we already have the data, don't show the loader
-        // (Assumes your quiz.js uses the variable learnerQuizCache)
-        const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
-                         (onClick.includes('fetchAssignments') && window.learnerAssignmentCache);
+        // 1. AUTO-CLOSE MENU — always (this is what you gained)
+        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
+            sidebar.classList.remove("active");
+            sidebar.classList.remove("desktop-open");
+            if (window.innerWidth <= 768 && mobileOverlay) {
+                mobileOverlay.style.display = "none";
+            }
+        }
 
-        // 3. Clear any existing timer
+        // 2. Get current iframe page to detect same-page clicks
+        let currentIframePage = '';
+        try {
+            if (iframe.contentWindow && iframe.contentWindow.location) {
+                currentIframePage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
+            }
+        } catch (e) {}
+
+        // Target page from link (for iframe links)
+        const targetHref = link.getAttribute('href') || '';
+        const isSamePage = targetHref && currentIframePage && targetHref.includes(currentIframePage);
+
+        // 3. Clear old timeout
         clearTimeout(loaderTimeout);
 
-        // 4. ONLY start the loader timer if it's NOT cached and NOT a repeat click
-        if (!isCached) {
+        // 4. Show loader ONLY if:
+        //    - Not API call AND not same page repeat
+        //    - OR first-time API call
+        const shouldShowLoader = 
+            (!isApiCall && !isSamePage) || 
+            (isApiCall && apiArea.innerHTML.trim() === '');
+
+        if (shouldShowLoader) {
             loaderTimeout = setTimeout(() => {
                 loader.style.display = 'flex';
             }, 800);
         }
 
-        // 5. UI Logic (Sidebar & Display)
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove("active");
-            if (mobileOverlay) mobileOverlay.style.display = "none";
-        }
-
+        // 5. UI prep
         if (isApiCall) {
             if (myClassContent) myClassContent.classList.remove("active");
             if (iframe) iframe.style.display = "none";
             if (apiArea) apiArea.style.display = "block";
-            
-            // IMPORTANT: If it's cached, hide the loader immediately just in case
-            if (isCached) {
-                clearTimeout(loaderTimeout);
-                loader.style.display = 'none';
-            }
         } else {
-            // Standard iframe link logic
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
                 iframe.style.display = "block";
                 if (apiArea) apiArea.style.display = 'none';
             }
+        }
+
+        // 6. Fallback hide for iframe (if load event skips)
+        if (!isApiCall) {
+            setTimeout(() => {
+                if (loader.style.display === 'flex') {
+                    loader.style.display = 'none';
+                }
+            }, 5000); // max 5s — adjust if needed
         }
     });
 });
