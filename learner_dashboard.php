@@ -1393,58 +1393,52 @@ document.addEventListener("DOMContentLoaded", function () {
     // ────────────────────────────────────────────────────────────────────────
     
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
-    document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
-        link.addEventListener('click', () => {
-     
-// Stop the iframe from loading if it's a Quiz or an Assignment API call
-const onClick = link.getAttribute('onclick') || "";
-const isApiCall = onClick.includes('fetchQuizzes') || 
-                  onClick.includes('fetchAssignments') || 
-                  onClick.includes('fetchResources') ||
-                  onClick.includes('fetchDiscussions') || 
-                  onClick.includes('fetchAnnouncements');
+  document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
+    link.addEventListener('click', () => {
 
-if (isApiCall) {
-    // 1. Close the sidebar on mobile even for API calls
-    if (window.innerWidth <= 768) {
-        sidebar.classList.remove("active");
-        if (mobileOverlay) mobileOverlay.style.display = "none";
-    }
-    // 2. Clear UI states
-    if (myClassContent) myClassContent.classList.remove("active");
-    if (iframe) iframe.style.display = "none";
-    if (apiArea) apiArea.style.display = "block";
-    
-   
-}
-           // Clear any previous timer to prevent multiple loaders
+        const onClick = link.getAttribute('onclick') || "";
+        const isApiCall = onClick.includes('fetchQuizzes') || 
+                          onClick.includes('fetchAssignments') || 
+                          onClick.includes('fetchResources') ||
+                          onClick.includes('fetchDiscussions') || 
+                          onClick.includes('fetchAnnouncements');
+
+        // 1. AUTO-CLOSE MENU — always for both modes
+        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
+            sidebar.classList.remove("active");
+            sidebar.classList.remove("desktop-open");
+            if (window.innerWidth <= 768 && mobileOverlay) {
+                mobileOverlay.style.display = "none";
+            }
+        }
+
+        // 2. Clear any old loader timeout
         clearTimeout(loaderTimeout);
 
-        // SET A DELAY: Only show the loader if it takes longer than 250ms
-        loaderTimeout = setTimeout(() => {
-            loader.style.display = 'flex';
-        }, 800);
+        // 3. Decide whether to show loader at all
+        const shouldShowLoader = !isApiCall || (isApiCall && apiArea.innerHTML.trim() === '');  // only first time for API
 
-  // AUTO-CLOSE MENU — now runs for ALL links (API + normal)
-if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
-    sidebar.classList.remove("active");
-    sidebar.classList.remove("desktop-open");
-    
-    // Only handle mobile overlay (no desktop dim anyway)
-    if (window.innerWidth <= 768 && mobileOverlay) {
-        mobileOverlay.style.display = "none";
-    }
-}
+        if (shouldShowLoader) {
+            loaderTimeout = setTimeout(() => {
+                loader.style.display = 'flex';
+            }, 800);
+        }
 
-            // 3. UI RESET: If clicking a standard page, hide the "My Class" view
+        if (isApiCall) {
+            // API-specific: prepare UI
+            if (myClassContent) myClassContent.classList.remove("active");
+            if (iframe) iframe.style.display = "none";
+            if (apiArea) apiArea.style.display = "block";
+        } else {
+            // Normal iframe page
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
                 iframe.style.display = "block";
                 if (apiArea) apiArea.style.display = 'none';
-if (iframe) iframe.style.display = 'block';
             }
-        });
+        }
     });
+});
 
     // LOADER: Hide when iframe finishes loading
     iframe?.addEventListener('load', () => {
