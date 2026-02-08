@@ -1,8 +1,9 @@
 /* assets/js/quiz.js */
-let learnerQuizCache = null;
+window.learnerQuizCache = null; // Use window so main script can see it
 
 window.fetchQuizzes = async function() {
-    localStorage.setItem("lastLearnerPage", "quiz_list.php");
+   clearTimeout(window.loaderTimeout); // Kill the main script's timer immediately
+    sessionStorage.setItem("lastLearnerPage", "quiz_list.php"); // Match sessionStorage
     // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("quiz_list.php");
     // 2. Highlighting Bridge
@@ -21,10 +22,10 @@ window.fetchQuizzes = async function() {
     if (myClassContent) myClassContent.classList.remove("active");
 
     // 3. Cache Check (The "Instant" feel)
-    if (learnerQuizCache) {
-        renderQuizCards(learnerQuizCache);
-        if (loader) loader.style.display = 'none';
-        return; 
+    if (window.learnerQuizCache) {
+        renderQuizCards(window.learnerQuizCache);
+        loader.style.display = 'none'; // Hide if main script accidentally showed it
+        return;
     }
 
     // 4. Fetch Data (Only runs the first time)
@@ -51,6 +52,7 @@ window.fetchQuizzes = async function() {
         }
     } finally {
         if (loader) loader.style.display = 'none';
+        clearTimeout(window.loaderTimeout); // One last safety clear
     }
 };
 

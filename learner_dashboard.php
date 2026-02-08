@@ -1327,7 +1327,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const myClassContent = document.getElementById("myClassContent");
     const apiArea = document.getElementById('api-content-area');
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();
-    let loaderTimeout; // <--- ADD THIS LINE HERE
+    window.loaderTimeout = null;
 
     // ────────────────────────────────────────────────────────────────────────
     // NEW: MOBILE TWIST LOGIC (Add this here)
@@ -1395,7 +1395,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
   document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
     link.addEventListener('click', () => {
-
         const onClick = link.getAttribute('onclick') || "";
         const isApiCall = onClick.includes('fetchQuizzes') || 
                           onClick.includes('fetchAssignments') || 
@@ -1403,7 +1402,11 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchDiscussions') || 
                           onClick.includes('fetchAnnouncements');
 
-        // 1. AUTO-CLOSE MENU — always (this is what you gained)
+        // CHECK CACHE: If the data exists, we don't want a loader!
+        const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
+                         (onClick.includes('fetchAssignments') && window.learnerAssignmentCache);
+
+        // 1. AUTO-CLOSE MENU
         if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
             sidebar.classList.remove("active");
             sidebar.classList.remove("desktop-open");
@@ -1412,30 +1415,22 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // 2. Get current iframe page to detect same-page clicks
+        // 2. Detect same-page clicks
         let currentIframePage = '';
         try {
             if (iframe.contentWindow && iframe.contentWindow.location) {
                 currentIframePage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
             }
         } catch (e) {}
-
-        // Target page from link (for iframe links)
         const targetHref = link.getAttribute('href') || '';
         const isSamePage = targetHref && currentIframePage && targetHref.includes(currentIframePage);
 
         // 3. Clear old timeout
-        clearTimeout(loaderTimeout);
+        clearTimeout(window.loaderTimeout);
 
-        // 4. Show loader ONLY if:
-        //    - Not API call AND not same page repeat
-        //    - OR first-time API call
-        const shouldShowLoader = 
-            (!isApiCall && !isSamePage) || 
-            (isApiCall && apiArea.innerHTML.trim() === '');
-
-        if (shouldShowLoader) {
-            loaderTimeout = setTimeout(() => {
+        // 4. SMART LOADER: Only show if NOT cached and NOT a same-page repeat
+        if (!isCached && !isSamePage) {
+            window.loaderTimeout = setTimeout(() => {
                 loader.style.display = 'flex';
             }, 800);
         }
@@ -1445,6 +1440,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (myClassContent) myClassContent.classList.remove("active");
             if (iframe) iframe.style.display = "none";
             if (apiArea) apiArea.style.display = "block";
+            
+            // If it's cached, ensure the loader is hidden immediately
+            if (isCached) loader.style.display = 'none';
         } else {
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
@@ -1452,22 +1450,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (apiArea) apiArea.style.display = 'none';
             }
         }
-
-        // 6. Fallback hide for iframe (if load event skips)
-        if (!isApiCall) {
-            setTimeout(() => {
-                if (loader.style.display === 'flex') {
-                    loader.style.display = 'none';
-                }
-            }, 5000); // max 5s — adjust if needed
-        }
     });
 });
 
     // LOADER: Hide when iframe finishes loading
     iframe?.addEventListener('load', () => {
         // 1. CANCEL THE TIMER (This prevents the loader from showing for fast pages)
-    clearTimeout(loaderTimeout);
+   clearTimeout(window.loaderTimeout); // Change to window.loaderTimeout
 
     // 2. Hide it if it's already visible
     loader.style.display = 'none';
