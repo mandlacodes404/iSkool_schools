@@ -1392,45 +1392,50 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. LOADER & MOBILE AUTO-CLOSE (Teacher-style navigation)
     // ────────────────────────────────────────────────────────────────────────
     
-    // We target ALL links in the sidebar and bottom nav to ensure menu closes
-  document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
+   document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
     link.addEventListener('click', () => {
-
         const onClick = link.getAttribute('onclick') || "";
+        
+        // 1. Check if this is an API call
         const isApiCall = onClick.includes('fetchQuizzes') || 
                           onClick.includes('fetchAssignments') || 
                           onClick.includes('fetchResources') ||
                           onClick.includes('fetchDiscussions') || 
                           onClick.includes('fetchAnnouncements');
 
-        // 1. AUTO-CLOSE MENU — always for both modes
-        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
-            sidebar.classList.remove("active");
-            sidebar.classList.remove("desktop-open");
-            if (window.innerWidth <= 768 && mobileOverlay) {
-                mobileOverlay.style.display = "none";
-            }
-        }
+        // 2. CHECK THE CACHE: If we already have the data, don't show the loader
+        // (Assumes your quiz.js uses the variable learnerQuizCache)
+        const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
+                         (onClick.includes('fetchAssignments') && window.learnerAssignmentCache);
 
-        // 2. Clear any old loader timeout
+        // 3. Clear any existing timer
         clearTimeout(loaderTimeout);
 
-        // 3. Decide whether to show loader at all
-        const shouldShowLoader = !isApiCall || (isApiCall && apiArea.innerHTML.trim() === '');  // only first time for API
-
-        if (shouldShowLoader) {
+        // 4. ONLY start the loader timer if it's NOT cached and NOT a repeat click
+        if (!isCached) {
             loaderTimeout = setTimeout(() => {
                 loader.style.display = 'flex';
             }, 800);
         }
 
+        // 5. UI Logic (Sidebar & Display)
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove("active");
+            if (mobileOverlay) mobileOverlay.style.display = "none";
+        }
+
         if (isApiCall) {
-            // API-specific: prepare UI
             if (myClassContent) myClassContent.classList.remove("active");
             if (iframe) iframe.style.display = "none";
             if (apiArea) apiArea.style.display = "block";
+            
+            // IMPORTANT: If it's cached, hide the loader immediately just in case
+            if (isCached) {
+                clearTimeout(loaderTimeout);
+                loader.style.display = 'none';
+            }
         } else {
-            // Normal iframe page
+            // Standard iframe link logic
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
                 iframe.style.display = "block";
