@@ -3,33 +3,45 @@ window.announcementCache = null;
 window.fetchAnnouncements = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 3. Match your main script's use of sessionStorage
+    // 1. SAVE STATE & UI Highlighting
     sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
     if (typeof window.setActive === 'function') window.setActive("announcement_list.php");
-    // 2. Highlighting Bridge
-    if (typeof window.setActive === 'function') {
-        window.setActive("announcement_list.php");
+
+    // 2. UPDATE DYNAMIC HEADER
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Announcements', mode: 'standard' });
     }
 
-      const apiArea = document.getElementById('api-content-area');
+    const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const loader = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 2. UI Preparation
+    // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
+    // 4. CACHE CHECK (Instant Load)
+    if (window.announcementCache) {
+        renderAnnouncements(window.announcementCache);
+        if (loader) loader.style.display = 'none';
+        return;
+    }
+
     if (loader) loader.style.display = 'flex';
 
     try {
-       const response = await fetch('api/get_announcements.php');
+        const response = await fetch('api/get_announcements.php');
+        if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
-        window.announcementCache = data; // Store in global cache
+        window.announcementCache = data; 
         renderAnnouncements(data);
     } catch (error) {
-        apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading announcements.</p>";
+        console.error("Fetch Error:", error);
+        if (apiArea) {
+            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading announcements.</p>";
+        }
     } finally {
         if (loader) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -38,15 +50,19 @@ window.fetchAnnouncements = async function() {
 
 function renderAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    // Remove redundant <h2> from empty state
     if (Object.keys(data).length === 0) {
-        apiArea.innerHTML = "<h2>Announcements</h2><p style='text-align:center; color:#888;'>No announcements found.</p>";
+        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No announcements found.</p>";
         return;
     }
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    let html = '<h2>Class Announcements</h2>';
+    // Remove redundant <h2> 'Class Announcements' - Header already shows it!
+    let html = ''; 
 
     for (const [teacher, items] of Object.entries(data)) {
         html += `
