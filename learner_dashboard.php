@@ -1749,18 +1749,12 @@ function toggleJoinClassForm() {
     if (form) form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
-// dynamic header script
+// --- DYNAMIC UI COMMAND CENTER ---
 window.configureHeader = function(config) {
     let { title, mode } = config;
     
-    // Use the dynamic name from your DB logic
-    const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
-    
-    // Logic: If title is Home, empty, or the manual file, use the DB School Name
-    if (!title || title === 'Home' || title === 'learner_manual.php') {
-        title = schoolName;
-    }
-
+    // Select our UI elements
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
     const titleEl = document.getElementById('headerTitle');
     const logoEl = document.getElementById('headerLogo');
     const mobileBtn = document.getElementById('mobileToggle');
@@ -1768,24 +1762,30 @@ window.configureHeader = function(config) {
     const backBtn = document.getElementById('headerBackBtn');
     const rightSide = document.getElementById('headerRight');
 
-    // Apply the title (either the specific page name or the School Name)
+    // Handle School Name Logic
+    const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
+    if (!title || title === 'Home' || title === 'learner_manual.php') {
+        title = schoolName;
+    }
     if (titleEl) titleEl.innerText = title;
 
     if (mode === 'detail') {
-        // Detail mode: Show Back, hide menu and logo
-        if (mobileBtn) mobileBtn.style.display = 'none';
+        // --- DETAIL MODE: IM-MER-SIVE ---
+        if (mobileBottomNav) mobileBottomNav.style.display = 'none'; 
+        if (mobileBtn) mobileBtn.style.display = 'none';             
         if (desktopBtn) desktopBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'none';
-        
-        if (backBtn) backBtn.style.display = 'flex'; 
         if (rightSide) rightSide.style.visibility = 'hidden'; 
+        
+        if (backBtn) backBtn.style.display = 'flex';                 
     } else {
-        // Standard mode: Handle buttons based on screen size
+        // --- STANDARD MODE: EXPLORATION ---
+        if (mobileBottomNav) mobileBottomNav.style.display = 'flex'; 
         if (backBtn) backBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'block';
         if (rightSide) rightSide.style.visibility = 'visible';
 
-        // Check screen width to decide which toggle to show (Prevents 2 buttons)
+        // Decide which menu button to show based on screen size
         if (window.innerWidth <= 768) {
             if (mobileBtn) mobileBtn.style.display = 'block';
             if (desktopBtn) desktopBtn.style.display = 'none';
@@ -1795,35 +1795,56 @@ window.configureHeader = function(config) {
         }
     }
 };
+
+// --- BACK BUTTON NAVIGATION LOGIC ---
 window.handleHeaderBack = function() {
-    const currentTitle = document.getElementById('headerTitle').innerText;
+    const titleEl = document.getElementById('headerTitle');
+    const currentTitle = titleEl ? titleEl.innerText : '';
     
-    // Logic: Where to go when back is pressed
+    // 1. If coming back from Quiz Instructions
     if (currentTitle === 'Instructions') {
-        fetchQuizzes(); 
-    } else {
-        // Reset to Home/Manual state
-        document.getElementById('api-content-area').style.display = 'none';
-        document.getElementById('mainFrame').style.display = 'block';
-        window.configureHeader({ title: '<?= htmlspecialchars($schoolName) ?>', mode: 'standard' });
+        if (typeof fetchQuizzes === 'function') fetchQuizzes(); 
+    } 
+    // 2. If coming back from any other "Detail" page (like viewing an assignment)
+    else {
+        // Show the Iframe, hide the API area
+        const apiArea = document.getElementById('api-content-area');
+        const iframe = document.getElementById('mainFrame');
+        
+        if (apiArea) apiArea.style.display = 'none';
+        if (iframe) iframe.style.display = 'block';
+
+        // Reset Header AND Bottom Nav to Standard
+        window.configureHeader({ title: 'Home', mode: 'standard' });
+        
+        // Ensure sidebar highlighting is correct
+        if (typeof window.setActive === 'function') window.setActive("learner_manual.php");
     }
 };
 
-// This script stays in learner_dashboard.php
+// --- IFRAME MONITOR (The "Safety Net") ---
 const mainFrame = document.getElementById('mainFrame');
 
 if (mainFrame) {
     mainFrame.onload = function() {
-        // Get the filename from the iframe's current location
-        const path = mainFrame.contentWindow.location.pathname;
-        const page = path.split("/").pop();
+        try {
+            const path = mainFrame.contentWindow.location.pathname;
+            const page = path.split("/").pop();
 
-        // Check if the page loading inside is the manual
-        if (page === 'learner_manual.php' || page === '') {
-            if (typeof window.configureHeader === 'function') {
-                // This triggers our 'School Name' exception in configureHeader
+            // PAGES THAT SHOULD SHOW THE BOTTOM NAV (Standard)
+            if (page === 'learner_manual.php' || page === '' || page === 'index.php') {
                 window.configureHeader({ title: 'Home', mode: 'standard' });
+            } 
+            // PAGES THAT SHOULD HIDE BOTTOM NAV (Detail)
+            else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
+                let detailTitle = 'Details';
+                if (page.includes('quiz')) detailTitle = 'Instructions';
+                if (page.includes('assignment')) detailTitle = 'Submission';
+
+                window.configureHeader({ title: detailTitle, mode: 'detail' });
             }
+        } catch (e) {
+            console.error("Iframe navigation error (Cross-Origin):", e);
         }
     };
 }
@@ -1962,7 +1983,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.8"></script>
+<script src="assets/js/quiz.js?v=1.9"></script>
 <script src="assets/js/assignments.js?v=1.5"></script>
 <script src="assets/js/resources.js?v=1.5"></script>
 <script src="assets/js/announcements.js?v=1.4"></script>

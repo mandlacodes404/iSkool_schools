@@ -2,10 +2,10 @@
 window.learnerQuizCache = null; 
 
 window.fetchQuizzes = async function() {
-    clearTimeout(window.loaderTimeout);
+    if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastLearnerPage", "quiz_list.php");
 
-    // 1. Use the new Dynamic Header instead of the old updateHeaderTitle
+    // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
     if (typeof window.configureHeader === 'function') {
         window.configureHeader({ title: 'Quizzes', mode: 'standard' });
     }
@@ -52,7 +52,7 @@ window.fetchQuizzes = async function() {
         }
     } finally {
         if (loader) loader.style.display = 'none';
-        clearTimeout(window.loaderTimeout);
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
@@ -60,7 +60,7 @@ window.loadQuizInstructions = async function(quizId) {
     const apiArea = document.getElementById('api-content-area');
     const loader = document.getElementById("loaderOverlay");
 
-    // 1. Set Header to Detail Mode (Shows Back Button)
+    // 1. DETAIL MODE: Hides Bottom Nav, Hides Sidebar Toggle, Shows Back Button
     if (typeof window.configureHeader === 'function') {
         window.configureHeader({ title: 'Instructions', mode: 'detail' });
     }
@@ -107,11 +107,12 @@ window.loadQuizInstructions = async function(quizId) {
                     <p style="font-size: 13px; color: #8b949e;">Focus Tracking and Session Integrity are monitored.</p>
                 </div>
 
-                <button class="start-btn" 
-                    style="${data.isContinuing ? 'background-color: #e67e22;' : ''}"
-                    onclick="window.location.href='take_quiz.php?quiz_id=${quizId}'">
-                    ${data.isContinuing ? 'Continue Quiz' : 'Start Quiz'}
-                </button>
+                <form action="take_quiz.php" method="GET" style="margin-top: 35px; text-align:center;">
+                    <input type="hidden" name="quiz_id" value="${quizId}">
+                    <button type="submit" class="start-btn" style="${data.isContinuing ? 'background-color: #e67e22;' : ''}">
+                        ${data.isContinuing ? 'Continue Quiz' : 'Start Quiz'}
+                    </button>
+                </form>
             </div>
         `;
 
@@ -129,7 +130,7 @@ function renderQuizCards(groupedData) {
     let html = ''; 
     
     if (!groupedData || Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<h3 style='text-align:center; margin-top:50px; color: #888;'>No quizzes available.</h3>";
+        apiArea.innerHTML = "<p style='text-align:center; margin-top:60px; color: #888;'>No quizzes available.</p>";
         return;
     }
     
@@ -159,14 +160,12 @@ function renderQuizCards(groupedData) {
                 actionBtn = `<button class="quiz-start-btn" style="background: #fdd663; color: #000; cursor: default;">SCHEDULED</button>`;
             }
             else if (quiz.attempt_status === 'in_progress') {
-    // Change this to use loadQuizInstructions instead of window.location
-    actionBtn = `<button class="quiz-start-btn" style="background: #e67e22;" onclick="loadQuizInstructions(${quiz.id})">CONTINUE</button>`;
-}
+                actionBtn = `<button class="quiz-start-btn" style="background: #e67e22;" onclick="loadQuizInstructions(${quiz.id})">CONTINUE</button>`;
+            }
             else {
                 actionBtn = `<button class="quiz-start-btn" onclick="loadQuizInstructions(${quiz.id})">START</button>`;
             }
 
-            // EXACT ORIGINAL STYLE/CLASSES PRESERVED
             html += `
                 <div class="quiz-card">
                     <div>
