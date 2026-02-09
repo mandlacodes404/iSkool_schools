@@ -1043,20 +1043,21 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     cursor: pointer;
     z-index: 100;
 }
+.quiz-footer-space {
+    margin-top: 40px;
+    /* This ensures we don't get cut off by the bottom of the screen */
+    padding-bottom: calc(50px + env(safe-area-inset-bottom));
+}
     </style>
 </head>
 <body>
     <div class="container">
-    <?php if ($isMobileApp): ?>
-    <div class="mobile-exit-nav">
-        <button type="button" onclick="confirmExit()" class="btn-exit">
-            <i class="fas fa-chevron-left"></i> Exit Quiz
-        </button>
-    </div>
-    <?php endif; ?>
+    <script>
+        if (window.self === window.top) {
+            document.write('<h2><i class="fas fa-poll"></i> <?= htmlspecialchars($quizTitle) ?></h2>');
+        }
+    </script>
 
-    
-        <h2><i class="fas fa-poll"></i> <?= htmlspecialchars($quizTitle) ?></h2>
         <div class="quiz-info">
             Duration: <?= $quizDuration ?> minutes
             <span class="status-badge <?= htmlspecialchars($status) ?>"><?= ucfirst(htmlspecialchars($status)) ?></span>
@@ -1118,10 +1119,10 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
             endforeach; 
             ?>
 
-            <div class="nav-buttons <?= ($layoutType === 'single_page') ? 'hidden' : '' ?>" style="margin-bottom: 20px;">
-                <button type="button" id="prevBtn" class="modal-btn cancel" onclick="changeQuestion(-1)">Previous</button>
-                <button type="button" id="nextBtn" class="modal-btn" onclick="changeQuestion(1)">Next</button>
-            </div>
+            <div class="nav-buttons quiz-footer-space <?= ($layoutType === 'single_page') ? 'hidden' : '' ?>">
+    <button type="button" id="prevBtn" class="modal-btn cancel" onclick="changeQuestion(-1)">Previous</button>
+    <button type="button" id="nextBtn" class="modal-btn" onclick="changeQuestion(1)">Next</button>
+</div>
            <button class="submit-btn" type="button" onclick="submitQuiz()" ...>Submit Quiz</button>
         </form>
         <div id="timeUpModal">
@@ -1149,6 +1150,15 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
     </div>
     <script>
+        // Notify Dashboard of the current state
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.parent && typeof window.parent.configureHeader === 'function') {
+        window.parent.configureHeader({ 
+            title: <?= json_encode($quizTitle) ?>, 
+            mode: 'detail' 
+        });
+    }
+});
         let isSubmitting = false;
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
         // We default to 0, but if PHP has a saved step from the DB, we use that
@@ -1184,11 +1194,15 @@ let currentStep = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 
             }, 1000);
         }
 
-        function showTimeUpModal() {
-            isSubmitting = true; // Set this to true here
-            document.getElementById('timeUpModal').style.display = 'flex';
-            setTimeout(() => document.getElementById('quizForm').submit(), 3000);
-        }
+      function showTimeUpModal() {
+    isSubmitting = true; 
+    // Optimization: Tell parent we are done so it can prep the UI
+    if (window.parent && typeof window.parent.configureHeader === 'function') {
+        window.parent.configureHeader({ mode: 'standard' });
+    }
+    document.getElementById('timeUpModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('quizForm').submit(), 3000);
+}
 
         function showSubmitModal() {
             document.getElementById('submitModal').style.display = 'flex';
@@ -1199,9 +1213,14 @@ let currentStep = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 
         }
 
         function submitQuiz() {
-            isSubmitting = true; // Set this to true here
-            document.getElementById('quizForm').submit();
+    if (confirm("Are you sure you want to submit your quiz?")) {
+        isSubmitting = true; 
+        if (window.parent && typeof window.parent.configureHeader === 'function') {
+            window.parent.configureHeader({ mode: 'standard' });
         }
+        document.getElementById('quizForm').submit();
+    }
+}
 
         function toggleFlag(button, questionId) {
             button.classList.toggle('flagged');
@@ -1363,15 +1382,15 @@ function loadAnswers() {
     });
 });
 
-        function confirmExit() {
-    if (confirm("Are you sure you want to exit? Your progress may not be saved.")) {
-        // If opened via target="_blank", this closes the tab and returns to the app
-        window.close();
-        
-        // Fallback if window.close() is blocked:
-        setTimeout(() => {
+function confirmExit() {
+    if (confirm("Are you sure you want to exit? Your progress is saved, but the timer will continue to run.")) {
+        // If we are inside the dashboard iframe
+        if (window.parent && typeof window.parent.handleHeaderBack === 'function') {
+            window.parent.handleHeaderBack();
+        } else {
+            // Fallback for standalone mode
             window.location.href = 'quiz_list.php';
-        }, 100);
+        }
     }
 }
 
@@ -1429,9 +1448,8 @@ function trackSpeed() {
 function jumpToQuestion(n) {
     trackSpeed(); 
 
-    // FIX: Block backwards navigation using isLinear
     if ((isLinear == '1' || isLinear == 'is_linear') && n < currentStep) {
-        alert("This quiz is in Linear Mode. You cannot go back to previous questions.");
+        alert("This quiz is in Linear Mode. You cannot go back.");
         return;
     }
 
@@ -1439,7 +1457,17 @@ function jumpToQuestion(n) {
         currentStep = n;
         showQuestion(currentStep);
     } else {
-        questions[n].scrollIntoView({ behavior: 'smooth' });
+        // Offset for the fixed dashboard header (approx 70px)
+        const offset = 70; 
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = questions[n].getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
     }
 }
 
