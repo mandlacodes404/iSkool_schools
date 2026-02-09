@@ -1151,6 +1151,22 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     </div>
     <script>
         // Notify Dashboard of the current state
+function syncWithDashboard() {
+    if (window.parent && typeof window.parent.configureHeader === 'function') {
+        window.parent.configureHeader({ 
+            title: <?= json_encode($quizTitle) ?>, 
+            mode: 'detail' 
+        });
+        console.log("Dashboard Header Synced");
+    } else {
+        // If it fails, try once more in 500ms
+        console.warn("Dashboard sync failed, retrying...");
+        setTimeout(syncWithDashboard, 500);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', syncWithDashboard);
+        // Notify Dashboard of the current state
 document.addEventListener('DOMContentLoaded', function() {
     if (window.parent && typeof window.parent.configureHeader === 'function') {
         window.parent.configureHeader({ 
