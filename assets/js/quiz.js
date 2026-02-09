@@ -76,32 +76,39 @@ function renderQuizCards(groupedData) {
                     </h3>
                 </div>
                 <div class="teacher-quizzes">`;
+                
+            quizzes.forEach(quiz => {
+    const now = new Date();
+    
+    // Safety check: handle null or undefined start_time
+    let isScheduled = false;
+    let startTimeStr = quiz.start_time || "";
+    
+    if (startTimeStr) {
+        // Cross-browser fix: replace dashes with slashes for Safari/Older browsers
+        const startTime = new Date(startTimeStr.replace(/-/g, "/"));
+        isScheduled = (quiz.status === 'Scheduled' && startTime > now);
+    }
 
-        quizzes.forEach(quiz => {
-            const now = new Date();
-            const startTime = new Date(quiz.start_time.replace(/-/g, "/")); // Cross-browser fix
-            const isClosed = quiz.status === 'Closed';
-            const isScheduled = quiz.status === 'Scheduled' && startTime > now;
-            
-            let actionBtn = '';
+    const isClosed = quiz.status === 'Closed';
+    let actionBtn = '';
 
-            // 1. Logic for Button Text and State (Matching your PHP)
-            if (quiz.attempt_status === 'submitted') {
-                actionBtn = `<a class='btn disabled' style='background: #27ae60; opacity: 1;'><i class='fas fa-check-double'></i> Completed</a>`;
-            } 
-            else if (isClosed) {
-                actionBtn = `<a class='btn disabled'>Quiz Closed</a>`;
-            } 
-            else if (isScheduled) {
-                // For JS, we just show the time. (Optional: You could add a live countdown here)
-                actionBtn = `<span class="countdown">Starts: ${quiz.start_time}</span>`;
-            } 
-            else if (quiz.attempt_status === 'in_progress') {
-                actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}' style='background: #e67e22;'>Continue Quiz</a>`;
-            } 
-            else {
-                actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}'>Start Quiz</a>`;
-            }
+    // 1. Logic for Button Text and State
+    if (quiz.attempt_status === 'submitted') {
+        actionBtn = `<a class='btn disabled' style='background: #27ae60; opacity: 1;'><i class='fas fa-check-double'></i> Completed</a>`;
+    } 
+    else if (isClosed) {
+        actionBtn = `<a class='btn disabled'>Quiz Closed</a>`;
+    } 
+    else if (isScheduled) {
+        actionBtn = `<span class="countdown">Starts: ${startTimeStr}</span>`;
+    } 
+    else if (quiz.attempt_status === 'in_progress') {
+        actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}' style='background: #e67e22;'>Continue Quiz</a>`;
+    } 
+    else {
+        actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}'>Start Quiz</a>`;
+    }
 
             html += `
                 <div class="quiz ${isClosed ? 'closed' : ''}">
