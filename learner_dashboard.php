@@ -1304,33 +1304,50 @@ button:hover svg {
 <div class="main-content">
   
     <div class="main-header">
-   <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    </button>
-
-    <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open Desktop Menu">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    </button>
     
-    <div class="logo-container">
-        <img src="<?= htmlspecialchars($schoolLogo) ?>" 
+    <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
+        <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open Desktop Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <button id="headerBackBtn" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="handleHeaderBack()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
+        <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>" 
              alt="School Logo" 
              style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:3px solid #757272ff;">
         <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
     </div>
-    
-    <button id="settingsBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+
+    <div id="headerRight" style="flex: 1; display: flex; justify-content: flex-end;">
+        <button id="settingsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
+    </div>
 </div>
+    
+   
 
     <div class="my-class-content" id="myClassContent">
         <h3>My Class</h3>
@@ -1731,6 +1748,53 @@ function toggleJoinClassForm() {
     const form = document.getElementById("joinClassForm");
     if (form) form.style.display = form.style.display === "none" ? "block" : "none";
 }
+
+//dynamic header script
+window.configureHeader = function(config) {
+    const { title, mode } = config;
+    
+    const titleEl = document.getElementById('headerTitle');
+    const logoEl = document.getElementById('headerLogo');
+    const mobileBtn = document.getElementById('mobileToggle');
+    const desktopBtn = document.getElementById('desktopMenuToggle');
+    const backBtn = document.getElementById('headerBackBtn');
+    const rightSide = document.getElementById('headerRight');
+    const header = document.querySelector('.main-header');
+
+    if (title) titleEl.innerText = title;
+
+    if (mode === 'detail') {
+        // Show Back button, hide logo and menu toggles
+        mobileBtn.style.display = 'none';
+        if(desktopBtn) desktopBtn.style.display = 'none';
+        logoEl.style.display = 'none';
+        
+        backBtn.style.display = 'block';
+        rightSide.style.visibility = 'hidden'; // Keeps the space so title stays centered
+    } else {
+        // Standard mode: Show menu and logo, hide back button
+        mobileBtn.style.display = 'block';
+        if(desktopBtn) desktopBtn.style.display = 'block';
+        logoEl.style.display = 'block';
+        
+        backBtn.style.display = 'none';
+        rightSide.style.visibility = 'visible';
+    }
+};
+
+window.handleHeaderBack = function() {
+    const currentTitle = document.getElementById('headerTitle').innerText;
+    
+    // Logic: Where to go when back is pressed
+    if (currentTitle === 'Instructions') {
+        fetchQuizzes(); 
+    } else {
+        // Reset to Home/Manual state
+        document.getElementById('api-content-area').style.display = 'none';
+        document.getElementById('mainFrame').style.display = 'block';
+        window.configureHeader({ title: '<?= htmlspecialchars($schoolName) ?>', mode: 'standard' });
+    }
+};
 </script>
 
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
@@ -1866,7 +1930,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.7"></script>
+<script src="assets/js/quiz.js?v=1.8"></script>
 <script src="assets/js/assignments.js?v=1.3"></script>
 <script src="assets/js/resources.js?v=1.3"></script>
 <script src="assets/js/announcements.js?v=1.3"></script>
