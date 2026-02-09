@@ -1,36 +1,48 @@
+/* assets/js/discussions.js */
 window.discussionCache = null;
 
 window.fetchDiscussions = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 3. Consistency: Use sessionStorage to match Main Script
+    // 1. SAVE STATE & UI Highlighting
     sessionStorage.setItem("lastLearnerPage", "discussion_list.php");
-    // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
-    // 2. Highlighting Bridge
-    if (typeof window.setActive === 'function') {
-        window.setActive("discussion_list.php");
+
+    // 2. UPDATE DYNAMIC HEADER
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Discussions', mode: 'standard' });
     }
 
-      const apiArea = document.getElementById('api-content-area');
+    const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const loader = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 2. UI Preparation
+    // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
+    // 4. CACHE CHECK
+    if (window.discussionCache) {
+        renderDiscussions(window.discussionCache);
+        if (loader) loader.style.display = 'none';
+        return;
+    }
+
     if (loader) loader.style.display = 'flex';
 
     try {
-       const response = await fetch('api/get_discussions.php');
+        const response = await fetch('api/get_discussions.php');
+        if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
-        window.discussionCache = data; // Store globally
+        window.discussionCache = data; 
         renderDiscussions(data);
     } catch (error) {
-        apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading discussions.</p>";
+        console.error("Discussion Fetch Error:", error);
+        if (apiArea) {
+            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading discussions.</p>";
+        }
     } finally {
         if (loader) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -39,13 +51,14 @@ window.fetchDiscussions = async function() {
 
 function renderDiscussions(data) {
     const apiArea = document.getElementById('api-content-area');
-    
+    if (!apiArea) return;
+
+    // Start with the Action Header (New Button only, Title is in the Main Header now)
     let html = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0;">Class Discussions</h2>
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px; padding: 0 10px;">
             <button onclick="window.open('create_discussion.php', '_blank')" 
-                    style="background:rgba(79, 209, 197, 0.1); color:#4fd1c5; border:1px solid #4fd1c5; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">
-                <i class="fas fa-plus"></i> New
+                    style="background:rgba(79, 209, 197, 0.1); color:#4fd1c5; border:1px solid rgba(79,209,197,0.3); padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold; transition: 0.3s;">
+                <i class="fas fa-plus"></i> Start Discussion
             </button>
         </div>
     `;
