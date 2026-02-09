@@ -1963,7 +1963,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/quiz.js?v=1.8"></script>
-<script src="assets/js/assignments.js?v=1.4"></script>
+<script src="assets/js/assignments.js?v=1.5"></script>
 <script src="assets/js/resources.js?v=1.3"></script>
 <script src="assets/js/announcements.js?v=1.3"></script>
 <script src="assets/js/discussions.js?v=1.3"></script>

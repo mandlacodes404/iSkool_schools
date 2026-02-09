@@ -2,37 +2,37 @@
 window.learnerAssignmentCache = null;
 
 window.fetchAssignments = async function() {
-    // 1. Kill any pending loader timer
+    // 1. Clear any existing timers
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 2. SAVE STATE
+    // 2. Set the UI State
     sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
-
-    // 3. UPDATE HEADER: Set title to Assignments and ensure mode is 'standard'
-    if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Assignments', mode: 'standard' });
-    }
-
-    // 4. UI Setup & Highlighting
     if (typeof window.setActive === 'function') window.setActive("assignment_list.php");
-    
+
+    // 3. Elements
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const loader = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 5. UI Swap
+    // 4. Update Header (Safely)
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Assignments', mode: 'standard' });
+    }
+
+    // 5. Immediate UI Swap
     if (apiArea) apiArea.style.display = 'block';
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 6. Cache Check
+    // 6. CACHE LOGIC: Ensure loader hides here too!
     if (window.learnerAssignmentCache) {
         renderAssignmentCards(window.learnerAssignmentCache);
-        if (loader) loader.style.display = 'none';
+        if (loader) loader.style.display = 'none'; // Critical: Stop loader for cached data
         return; 
     }
 
+    // 7. FETCH LOGIC
     if (loader) loader.style.display = 'flex';
 
     try {
@@ -40,7 +40,7 @@ window.fetchAssignments = async function() {
         if (!response.ok) throw new Error('Failed to fetch assignments');
         
         const groupedData = await response.json();
-        window.learnerAssignmentCache = groupedData; 
+        window.learnerAssignmentCache = groupedData;
         renderAssignmentCards(groupedData);
     } catch (error) {
         console.error("Assignment Fetch Error:", error);
@@ -48,12 +48,14 @@ window.fetchAssignments = async function() {
             apiArea.innerHTML = `
                 <div style="text-align:center; margin-top:50px; padding:20px;">
                     <p style="color: #ff5555;">Unable to load assignments.</p>
-                    <button onclick="window.learnerAssignmentCache=null; fetchAssignments()" 
+                    <button onclick="window.learnerAssignmentCache=null; window.fetchAssignments()" 
                             class="quiz-start-btn">Try Again</button>
                 </div>`;
         }
     } finally {
+        // 8. ALWAYS hide the loader, even if it fails
         if (loader) loader.style.display = 'none';
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
