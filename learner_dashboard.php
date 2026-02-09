@@ -1779,8 +1779,8 @@ window.configureHeader = function(config) {
         
         if (backBtn) backBtn.style.display = 'flex';                 
     } else {
-        // --- STANDARD MODE: EXPLORATION ---
-        if (mobileBottomNav) mobileBottomNav.style.display = 'flex'; 
+        // TO THIS:
+        if (mobileBottomNav) mobileBottomNav.style.display = ''; 
         if (backBtn) backBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'block';
         if (rightSide) rightSide.style.visibility = 'visible';
@@ -1848,6 +1848,23 @@ if (mainFrame) {
         }
     };
 }
+window.loadHome = function() {
+    // 1. Reset Visibility
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = 'learner_manual.php'; // Force iframe back to home
+    }
+
+    // 2. Reset Header & Show Bottom Nav
+    window.configureHeader({ title: 'Home', mode: 'standard' });
+
+    // 3. Update Active State
+    if (typeof window.setActive === 'function') window.setActive("learner_manual.php");
+};
 </script>
 
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
@@ -1855,8 +1872,8 @@ if (mainFrame) {
 
 <nav id="mobileBottomNav">
 
- <a href="learner_manual.php" target="mainFrame" data-page="learner_manual.php"
-       class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+ 
+      <a href="javascript:void(0)" onclick="loadHome()" data-page="learner_manual.php" id="nav-home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -1864,16 +1881,13 @@ if (mainFrame) {
     </a>
 
 
-    <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php"
-       class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+    <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php" id="nav-quiz">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </a>
-    <a href="javascript:void(0)" onclick="fetchAssignments()" data-page="learner_assignments.php"
-       class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
+    <a href="javascript:void(0)" onclick="fetchAssignments()" data-page="learner_assignments.php" id="nav-assignments">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </a>
-    <a href="javascript:void(0)" onclick="fetchResources()" data-page="view_resources_user.php"
-       class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
+     <a href="javascript:void(0)" onclick="fetchResources()" data-page="view_resources_user.php" id="nav-resources">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
     </a>
    
@@ -1983,7 +1997,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.9"></script>
+<script src="assets/js/quiz.js?v=2.0"></script>
 <script src="assets/js/assignments.js?v=1.5"></script>
 <script src="assets/js/resources.js?v=1.5"></script>
 <script src="assets/js/announcements.js?v=1.4"></script>
