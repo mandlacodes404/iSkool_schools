@@ -1749,7 +1749,7 @@ function toggleJoinClassForm() {
     if (form) form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
-//dynamic header script
+// dynamic header script
 window.configureHeader = function(config) {
     const { title, mode } = config;
     
@@ -1759,29 +1759,32 @@ window.configureHeader = function(config) {
     const desktopBtn = document.getElementById('desktopMenuToggle');
     const backBtn = document.getElementById('headerBackBtn');
     const rightSide = document.getElementById('headerRight');
-    const header = document.querySelector('.main-header');
 
     if (title) titleEl.innerText = title;
 
     if (mode === 'detail') {
-        // Show Back button, hide logo and menu toggles
+        // Detail mode: Show Back, hide menu and logo
         mobileBtn.style.display = 'none';
         if(desktopBtn) desktopBtn.style.display = 'none';
         logoEl.style.display = 'none';
-        
-        backBtn.style.display = 'block';
-        rightSide.style.visibility = 'hidden'; // Keeps the space so title stays centered
+        backBtn.style.display = 'flex'; // Using flex to keep alignment
+        rightSide.style.visibility = 'hidden'; 
     } else {
-        // Standard mode: Show menu and logo, hide back button
-        mobileBtn.style.display = 'block';
-        if(desktopBtn) desktopBtn.style.display = 'block';
-        logoEl.style.display = 'block';
-        
+        // Standard mode: Be smart about which menu button to show
         backBtn.style.display = 'none';
+        logoEl.style.display = 'block';
         rightSide.style.visibility = 'visible';
+
+        // Check screen width to decide which toggle to show
+        if (window.innerWidth <= 768) {
+            mobileBtn.style.display = 'block';
+            if(desktopBtn) desktopBtn.style.display = 'none';
+        } else {
+            mobileBtn.style.display = 'none';
+            if(desktopBtn) desktopBtn.style.display = 'block';
+        }
     }
 };
-
 window.handleHeaderBack = function() {
     const currentTitle = document.getElementById('headerTitle').innerText;
     
