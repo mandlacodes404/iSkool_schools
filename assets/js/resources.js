@@ -10,7 +10,7 @@ window.fetchResources = async function() {
 
     // 2. UPDATE DYNAMIC HEADER
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Study Resources', mode: 'standard' });
+        window.configureHeader({ title: 'Resources', mode: 'standard' });
     }
 
     const apiArea = document.getElementById('api-content-area');
