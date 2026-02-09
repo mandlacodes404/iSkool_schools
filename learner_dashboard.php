@@ -1751,8 +1751,17 @@ function toggleJoinClassForm() {
 
 // dynamic header script
 window.configureHeader = function(config) {
-    const { title, mode } = config;
+    let { title, mode } = config;
     
+    // 1. HOME PAGE EXCEPTION
+    // Replace "Your School Name" with your actual institution name
+    const schoolName = "Your School Name"; 
+    
+    // If title is Home, empty, or the specific manual filename, use School Name
+    if (!title || title === 'Home' || title === 'learner_manual.php') {
+        title = schoolName;
+    }
+
     const titleEl = document.getElementById('headerTitle');
     const logoEl = document.getElementById('headerLogo');
     const mobileBtn = document.getElementById('mobileToggle');
@@ -1760,28 +1769,30 @@ window.configureHeader = function(config) {
     const backBtn = document.getElementById('headerBackBtn');
     const rightSide = document.getElementById('headerRight');
 
-    if (title) titleEl.innerText = title;
+    // Apply the title (either the specific page name or the School Name)
+    if (titleEl) titleEl.innerText = title;
 
     if (mode === 'detail') {
         // Detail mode: Show Back, hide menu and logo
-        mobileBtn.style.display = 'none';
-        if(desktopBtn) desktopBtn.style.display = 'none';
-        logoEl.style.display = 'none';
-        backBtn.style.display = 'flex'; // Using flex to keep alignment
-        rightSide.style.visibility = 'hidden'; 
+        if (mobileBtn) mobileBtn.style.display = 'none';
+        if (desktopBtn) desktopBtn.style.display = 'none';
+        if (logoEl) logoEl.style.display = 'none';
+        
+        if (backBtn) backBtn.style.display = 'flex'; 
+        if (rightSide) rightSide.style.visibility = 'hidden'; 
     } else {
-        // Standard mode: Be smart about which menu button to show
-        backBtn.style.display = 'none';
-        logoEl.style.display = 'block';
-        rightSide.style.visibility = 'visible';
+        // Standard mode: Handle buttons based on screen size
+        if (backBtn) backBtn.style.display = 'none';
+        if (logoEl) logoEl.style.display = 'block';
+        if (rightSide) rightSide.style.visibility = 'visible';
 
-        // Check screen width to decide which toggle to show
+        // Check screen width to decide which toggle to show (Prevents 2 buttons)
         if (window.innerWidth <= 768) {
-            mobileBtn.style.display = 'block';
-            if(desktopBtn) desktopBtn.style.display = 'none';
+            if (mobileBtn) mobileBtn.style.display = 'block';
+            if (desktopBtn) desktopBtn.style.display = 'none';
         } else {
-            mobileBtn.style.display = 'none';
-            if(desktopBtn) desktopBtn.style.display = 'block';
+            if (mobileBtn) mobileBtn.style.display = 'none';
+            if (desktopBtn) desktopBtn.style.display = 'block';
         }
     }
 };
