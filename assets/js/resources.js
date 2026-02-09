@@ -2,35 +2,47 @@
 window.resourceCache = null;
 
 window.fetchResources = async function() {
-   if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+    if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 3. Match your main script's use of sessionStorage
+    // 1. SAVE STATE & UI Highlighting
     sessionStorage.setItem("lastLearnerPage", "resource_list.php");
     if (typeof window.setActive === 'function') window.setActive("resource_list.php");
-    // 2. Highlighting Bridge
-    if (typeof window.setActive === 'function') {
-        window.setActive("resource_list.php");
+
+    // 2. UPDATE DYNAMIC HEADER
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Study Resources', mode: 'standard' });
     }
 
-     const apiArea = document.getElementById('api-content-area');
+    const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const loader = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 2. UI Preparation
+    // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
+    // 4. CACHE CHECK (Instant Load)
+    if (window.resourceCache) {
+        renderResourceCards(window.resourceCache);
+        if (loader) loader.style.display = 'none';
+        return;
+    }
+
     if (loader) loader.style.display = 'flex';
 
     try {
-       const response = await fetch('api/get_resources.php');
+        const response = await fetch('api/get_resources.php');
+        if (!response.ok) throw new Error('Failed to fetch resources');
         const data = await response.json();
-        window.resourceCache = data; // Store in global window object
+        window.resourceCache = data; 
         renderResourceCards(data);
     } catch (error) {
-        apiArea.innerHTML = "<p style='color:red; text-align:center;'>Error loading resources.</p>";
+        console.error("Resource Fetch Error:", error);
+        if (apiArea) {
+            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading resources.</p>";
+        }
     } finally {
         if (loader) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -39,12 +51,16 @@ window.fetchResources = async function() {
 
 function renderResourceCards(data) {
     const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    // Remove redundant <h2> from empty state
     if (Object.keys(data).length === 0) {
-        apiArea.innerHTML = "<h2>Resources</h2><p style='text-align:center; color:#888;'>No resources found.</p>";
+        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No resources found.</p>";
         return;
     }
 
-    let html = '<h2>Study Resources</h2>';
+    // Start building HTML - No redundant <h2> here
+    let html = ''; 
 
     for (const [teacher, files] of Object.entries(data)) {
         html += `<h3>${teacher}</h3>`;
