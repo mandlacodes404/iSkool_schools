@@ -910,7 +910,7 @@ iframe {
         /* Mobile Layout - Show bottom nav + safe area support */
         @media (max-width: 768px) {
             #mobileBottomNav {
-                display: flex !important;
+                display: flex;
             }
 
             /* Critical: Lifts the entire bar on iPhone & Android gesture navigation */
@@ -1771,16 +1771,25 @@ window.configureHeader = function(config) {
 
     if (mode === 'detail') {
         // --- DETAIL MODE: IM-MER-SIVE ---
-        if (mobileBottomNav) mobileBottomNav.style.display = 'none'; 
+        // This will now successfully hide the nav because the CSS isn't using !important anymore
+        if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
+        
         if (mobileBtn) mobileBtn.style.display = 'none';             
         if (desktopBtn) desktopBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'none';
         if (rightSide) rightSide.style.visibility = 'hidden'; 
-        
         if (backBtn) backBtn.style.display = 'flex';                 
     } else {
-        // TO THIS:
-        if (mobileBottomNav) mobileBottomNav.style.display = ''; 
+        // --- STANDARD MODE: EXPLORATION ---
+        // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
+        if (mobileBottomNav) {
+            if (window.innerWidth <= 768) {
+                mobileBottomNav.style.display = 'flex';
+            } else {
+                mobileBottomNav.style.display = 'none';
+            }
+        }
+        
         if (backBtn) backBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'block';
         if (rightSide) rightSide.style.visibility = 'visible';
