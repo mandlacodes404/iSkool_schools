@@ -1753,11 +1753,10 @@ function toggleJoinClassForm() {
 window.configureHeader = function(config) {
     let { title, mode } = config;
     
-    // 1. HOME PAGE EXCEPTION
-    // Replace "Your School Name" with your actual institution name
-    const schoolName = "Your School Name"; 
+    // Use the dynamic name from your DB logic
+    const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
     
-    // If title is Home, empty, or the specific manual filename, use School Name
+    // Logic: If title is Home, empty, or the manual file, use the DB School Name
     if (!title || title === 'Home' || title === 'learner_manual.php') {
         title = schoolName;
     }
