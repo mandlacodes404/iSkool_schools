@@ -61,32 +61,68 @@ function renderQuizCards(groupedData) {
     if (!apiArea) return;
 
     if (!groupedData || Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<h3 style='text-align:center; margin-top:50px; color: #888;'>No quizzes available for this year.</h3>";
+        apiArea.innerHTML = "<p class='empty'>No quizzes available for your class.</p>";
         return;
     }
 
-    // This matches the h2 style in your CSS
-    let html = '<h2>Your Quizzes</h2>';
+    let html = '<h2>Quizzes</h2>';
     
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        // This matches the h3 style in your CSS
-        html += `<h3>${subject}</h3>`;
-        
+        html += `
+            <div class="teacher-section">
+                <div class="teacher-header">
+                    <h3><i class="fas fa-book-open"></i> ${subject} 
+                        <span class="file-count">(${quizzes.length} quiz${quizzes.length > 1 ? 'zes' : ''})</span>
+                    </h3>
+                </div>
+                <div class="teacher-quizzes">`;
+
         quizzes.forEach(quiz => {
+            const now = new Date();
+            const startTime = new Date(quiz.start_time.replace(/-/g, "/")); // Cross-browser fix
+            const isClosed = quiz.status === 'Closed';
+            const isScheduled = quiz.status === 'Scheduled' && startTime > now;
+            
+            let actionBtn = '';
+
+            // 1. Logic for Button Text and State (Matching your PHP)
+            if (quiz.attempt_status === 'submitted') {
+                actionBtn = `<a class='btn disabled' style='background: #27ae60; opacity: 1;'><i class='fas fa-check-double'></i> Completed</a>`;
+            } 
+            else if (isClosed) {
+                actionBtn = `<a class='btn disabled'>Quiz Closed</a>`;
+            } 
+            else if (isScheduled) {
+                // For JS, we just show the time. (Optional: You could add a live countdown here)
+                actionBtn = `<span class="countdown">Starts: ${quiz.start_time}</span>`;
+            } 
+            else if (quiz.attempt_status === 'in_progress') {
+                actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}' style='background: #e67e22;'>Continue Quiz</a>`;
+            } 
+            else {
+                actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}'>Start Quiz</a>`;
+            }
+
             html += `
-                <div class="quiz-card">
-                    <div>
-                        <h4>${quiz.title}</h4>
-                        <div class="quiz-info-text">
-                            <i class="fas fa-clock"></i> ${quiz.duration} mins | 
-                            <i class="fas fa-calendar"></i> ${quiz.start_time}
-                        </div>
+                <div class="quiz ${isClosed ? 'closed' : ''}">
+                    <div class="quiz-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="quiz-main-icon" style="width:24px; height:24px;">
+                            <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                        <h3>
+                            ${quiz.title}
+                            ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; margin-left:6px;" title="Counts toward term mark"></i>' : ''}
+                        </h3>
                     </div>
-                    <button class="quiz-start-btn" onclick="window.location.href='quiz_instructions.php?id=${quiz.id}'">
-                        START
-                    </button>
+                    <div class="quiz-details" style="display: block; background: transparent;">
+                        <p><strong>Duration:</strong> ${quiz.duration} mins</p>
+                        <p><strong>Action:</strong> ${actionBtn}</p>
+                    </div>
                 </div>`;
         });
+
+        html += `</div></div>`;
     }
+    
     apiArea.innerHTML = html;
 }
