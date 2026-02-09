@@ -61,75 +61,62 @@ function renderQuizCards(groupedData) {
     if (!apiArea) return;
 
     if (!groupedData || Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<p class='empty'>No quizzes available for your class.</p>";
+        apiArea.innerHTML = "<h3 style='text-align:center; margin-top:50px; color: #888;'>No quizzes available for this year.</h3>";
         return;
     }
 
-    let html = '<h2>Quizzes</h2>';
+    // Back to your original H2 style
+    let html = '<h2>Your Quizzes</h2>';
     
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        html += `
-            <div class="teacher-section">
-                <div class="teacher-header">
-                    <h3><i class="fas fa-book-open"></i> ${subject} 
-                        <span class="file-count">(${quizzes.length} quiz${quizzes.length > 1 ? 'zes' : ''})</span>
-                    </h3>
-                </div>
-                <div class="teacher-quizzes">`;
-                
-            quizzes.forEach(quiz => {
-    const now = new Date();
-    
-    // Safety check: handle null or undefined start_time
-    let isScheduled = false;
-    let startTimeStr = quiz.start_time || "";
-    
-    if (startTimeStr) {
-        // Cross-browser fix: replace dashes with slashes for Safari/Older browsers
-        const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-        isScheduled = (quiz.status === 'Scheduled' && startTime > now);
-    }
+        // Back to your original H3 style
+        html += `<h3>${subject}</h3>`;
+        
+        quizzes.forEach(quiz => {
+            const now = new Date();
+            let isScheduled = false;
+            let startTimeStr = quiz.start_time || "";
+            
+            // Logic Fix: Only format if time exists to prevent crash
+            if (startTimeStr) {
+                const startTime = new Date(startTimeStr.replace(/-/g, "/"));
+                isScheduled = (quiz.status === 'Scheduled' && startTime > now);
+            }
 
-    const isClosed = quiz.status === 'Closed';
-    let actionBtn = '';
+            const isClosed = quiz.status === 'Closed';
+            let actionBtn = '';
 
-    // 1. Logic for Button Text and State
-    if (quiz.attempt_status === 'submitted') {
-        actionBtn = `<a class='btn disabled' style='background: #27ae60; opacity: 1;'><i class='fas fa-check-double'></i> Completed</a>`;
-    } 
-    else if (isClosed) {
-        actionBtn = `<a class='btn disabled'>Quiz Closed</a>`;
-    } 
-    else if (isScheduled) {
-        actionBtn = `<span class="countdown">Starts: ${startTimeStr}</span>`;
-    } 
-    else if (quiz.attempt_status === 'in_progress') {
-        actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}' style='background: #e67e22;'>Continue Quiz</a>`;
-    } 
-    else {
-        actionBtn = `<a class='btn' href='quiz_instructions.php?quiz_id=${quiz.id}'>Start Quiz</a>`;
-    }
+            // Logic Fix: Use dynamic buttons based on status
+            if (quiz.attempt_status === 'submitted') {
+                actionBtn = `<button class="quiz-start-btn" style="background: #27ae60; cursor: default;">COMPLETED</button>`;
+            } 
+            else if (isClosed) {
+                actionBtn = `<button class="quiz-start-btn" style="opacity: 0.5; cursor: not-allowed;">CLOSED</button>`;
+            } 
+            else if (isScheduled) {
+                actionBtn = `<button class="quiz-start-btn" style="background: #fdd663; color: #000; cursor: default;">SCHEDULED</button>`;
+            }
+            else if (quiz.attempt_status === 'in_progress') {
+                actionBtn = `<button class="quiz-start-btn" style="background: #e67e22;" onclick="window.location.href='quiz_instructions.php?quiz_id=${quiz.id}'">CONTINUE</button>`;
+            } 
+            else {
+                // Default Start button
+                actionBtn = `<button class="quiz-start-btn" onclick="window.location.href='quiz_instructions.php?quiz_id=${quiz.id}'">START</button>`;
+            }
 
+            // RESTORING YOUR EXACT ORIGINAL STYLE/CLASSES
             html += `
-                <div class="quiz ${isClosed ? 'closed' : ''}">
-                    <div class="quiz-header">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="quiz-main-icon" style="width:24px; height:24px;">
-                            <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                        </svg>
-                        <h3>
-                            ${quiz.title}
-                            ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; margin-left:6px;" title="Counts toward term mark"></i>' : ''}
-                        </h3>
+                <div class="quiz-card">
+                    <div>
+                        <h4>${quiz.title} ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; font-size: 0.8em;"></i>' : ''}</h4>
+                        <div class="quiz-info-text">
+                            <i class="fas fa-clock"></i> ${quiz.duration} mins | 
+                            <i class="fas fa-calendar"></i> ${startTimeStr}
+                        </div>
                     </div>
-                    <div class="quiz-details" style="display: block; background: transparent;">
-                        <p><strong>Duration:</strong> ${quiz.duration} mins</p>
-                        <p><strong>Action:</strong> ${actionBtn}</p>
-                    </div>
+                    ${actionBtn}
                 </div>`;
         });
-
-        html += `</div></div>`;
     }
-    
     apiArea.innerHTML = html;
 }
