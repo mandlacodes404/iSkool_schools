@@ -1160,7 +1160,7 @@ function syncWithDashboard() {
         console.log("Dashboard Header Synced");
     } else {
         // If it fails, try once more in 500ms
-        console.warn("Dashboard sync failed, retrying...");
+        console.warn("Dashboard sync failed, retrying....");
         setTimeout(syncWithDashboard, 500);
     }
 }
