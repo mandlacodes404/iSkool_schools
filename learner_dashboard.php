@@ -1809,6 +1809,25 @@ window.handleHeaderBack = function() {
         window.configureHeader({ title: '<?= htmlspecialchars($schoolName) ?>', mode: 'standard' });
     }
 };
+
+// This script stays in learner_dashboard.php
+const mainFrame = document.getElementById('mainFrame');
+
+if (mainFrame) {
+    mainFrame.onload = function() {
+        // Get the filename from the iframe's current location
+        const path = mainFrame.contentWindow.location.pathname;
+        const page = path.split("/").pop();
+
+        // Check if the page loading inside is the manual
+        if (page === 'learner_manual.php' || page === '') {
+            if (typeof window.configureHeader === 'function') {
+                // This triggers our 'School Name' exception in configureHeader
+                window.configureHeader({ title: 'Home', mode: 'standard' });
+            }
+        }
+    };
+}
 </script>
 
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
