@@ -1,14 +1,19 @@
 /* assets/js/assignments.js */
-window.learnerAssignmentCache = null; // Changed 'let' to 'window.
+window.learnerAssignmentCache = null;
 
 window.fetchAssignments = async function() {
-    // 1. Kill any pending loader timer from the main script immediately
+    // 1. Kill any pending loader timer
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 2. SAVE STATE: Match your main script's use of sessionStorage
+    // 2. SAVE STATE
     sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
 
-    // 2. UI Setup & Highlighting
+    // 3. UPDATE HEADER: Set title to Assignments and ensure mode is 'standard'
+    if (typeof window.configureHeader === 'function') {
+        window.configureHeader({ title: 'Assignments', mode: 'standard' });
+    }
+
+    // 4. UI Setup & Highlighting
     if (typeof window.setActive === 'function') window.setActive("assignment_list.php");
     
     const apiArea = document.getElementById('api-content-area');
@@ -16,26 +21,26 @@ window.fetchAssignments = async function() {
     const loader = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 3. UI Swap
+    // 5. UI Swap
     if (apiArea) apiArea.style.display = 'block';
     if (iframe) iframe.style.display = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
+    // 6. Cache Check
     if (window.learnerAssignmentCache) {
         renderAssignmentCards(window.learnerAssignmentCache);
-        if (loader) loader.style.display = 'none'; // Hide loader if it was already showing
+        if (loader) loader.style.display = 'none';
         return; 
     }
 
-    // 5. Fetch Data from the new PHP API
     if (loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch('api/get_assignments.php');
         if (!response.ok) throw new Error('Failed to fetch assignments');
         
-       const groupedData = await response.json();
-        window.learnerAssignmentCache = groupedData; // Save to global window object
+        const groupedData = await response.json();
+        window.learnerAssignmentCache = groupedData; 
         renderAssignmentCards(groupedData);
     } catch (error) {
         console.error("Assignment Fetch Error:", error);
@@ -43,29 +48,34 @@ window.fetchAssignments = async function() {
             apiArea.innerHTML = `
                 <div style="text-align:center; margin-top:50px; padding:20px;">
                     <p style="color: #ff5555;">Unable to load assignments.</p>
-                    <button onclick="learnerAssignmentCache=null; fetchAssignments()" 
+                    <button onclick="window.learnerAssignmentCache=null; fetchAssignments()" 
                             class="quiz-start-btn">Try Again</button>
                 </div>`;
         }
     } finally {
         if (loader) loader.style.display = 'none';
-        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
+// ... renderAssignmentCards remains mostly the same, 
+// but ensure it doesn't hardcode a <h2> title if the header is doing the work now!
+
 function renderAssignmentCards(groupedData) {
-    const apiArea = document.getElementById('api-content-area');
+   const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // Handle Empty State: Removed the <h2> title
     if (Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<h2>Assignments</h2><p style='text-align:center; color:#888; margin-top:40px;'>No assignments found.</p>";
+        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No assignments found.</p>";
         return;
     }
 
-    let html = '<h2>Your Assignments</h2>';
+    // Start building HTML without the redundant 'Your Assignments' header
+    let html = ''; 
     
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<h3>${teacher}</h3>`;
+        // Teacher name as the grouping header
+        html += `<h3 style="margin: 20px 15px 10px;">${teacher}</h3>`;
         
         tasks.forEach(task => {
             // Logic for status colors and icons
