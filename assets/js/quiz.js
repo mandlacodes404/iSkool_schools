@@ -1,8 +1,20 @@
 /* assets/js/quiz.js */
 window.learnerQuizCache = null; // Use window so main script can see it
 
+window.updateHeaderTitle = function(newTitle) {
+    const headerTitle = document.getElementById('headerTitle');
+    if (headerTitle) {
+        headerTitle.style.opacity = '0'; // Optional: fade out
+        setTimeout(() => {
+            headerTitle.innerText = newTitle;
+            headerTitle.style.opacity = '1'; // Optional: fade in
+        }, 150);
+    }
+};
+
 window.fetchQuizzes = async function() {
    clearTimeout(window.loaderTimeout); // Kill the main script's timer immediately
+   window.updateHeaderTitle("Quizzes"); // Instant feedback for the user
     sessionStorage.setItem("lastLearnerPage", "quiz_list.php"); // Match sessionStorage
     // 1. Sidebar Highlight
     if (typeof window.setActive === 'function') window.setActive("quiz_list.php");
@@ -10,6 +22,9 @@ window.fetchQuizzes = async function() {
     if (typeof window.setActive === 'function') {
         window.setActive("quiz_list.php");
     }
+    // 1. Change the Header Title instead of adding a new header
+    const headerTitle = document.getElementById('headerTitle');
+    if (headerTitle) headerTitle.innerText = "Quizzes";
     
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
@@ -60,17 +75,16 @@ function renderQuizCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // We NO LONGER put the header here. We only put the cards.
+    let html = ''; 
+    
     if (!groupedData || Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<h3 style='text-align:center; margin-top:50px; color: #888;'>No quizzes available for this year.</h3>";
+        apiArea.innerHTML = "<h3 style='text-align:center; margin-top:50px; color: #888;'>No quizzes available.</h3>";
         return;
     }
-
-    // Back to your original H2 style
-    let html = '<h2>Your Quizzes</h2>';
     
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        // Back to your original H3 style
-        html += `<h3>${subject}</h3>`;
+        html += `<h3 style="margin: 20px 15px 10px;">${subject}</h3>`;
         
         quizzes.forEach(quiz => {
             const now = new Date();

@@ -1236,45 +1236,38 @@ button:hover svg {
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
-        <a href="learner_manual.php" target="mainFrame" class="desktop-only" data-page="learner_manual.php"
-           class="<?= $currentPage === 'learner_manual.php' ? 'active' : '' ?>">
+        <a href="learner_manual.php" target="mainFrame" class="desktop-only" 
+       onclick="updateHeaderTitle('<?= htmlspecialchars($schoolName) ?>'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
 </svg><span>Home</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchQuizzes()" class="desktop-only" data-page="quiz_list.php"
-           class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAssignments()" class="desktop-only" data-page="learner_assignments.php"
-           class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchResources()" class="desktop-only" data-page="view_resources_user.php"
-           class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
+       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
-        <a href="quiz_history.php" target="mainFrame" data-page="quiz_history.php"
-           class="<?= $currentPage === 'quiz_history.php' ? 'active' : '' ?>">
+        <a href="quiz_history.php" target="mainFrame" onclick="updateHeaderTitle('My Grades'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Grades</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAnnouncements()" data-page="view_announcements_user.php"
-           class="<?= $currentPage === 'view_announcements_user.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-        <a href="learner_evaluations.php" target="mainFrame" data-page="learner_evaluations.php"
-           class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
+        <a href="learner_evaluations.php" target="mainFrame" onclick="updateHeaderTitle('Teacher Evaluations'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions()" data-page="discussions.php"
-           class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
@@ -1331,7 +1324,7 @@ button:hover svg {
         <img src="<?= htmlspecialchars($schoolLogo) ?>" 
              alt="School Logo" 
              style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:3px solid #757272ff;">
-        <span class="school-name"><?= htmlspecialchars($schoolName) ?></span>
+        <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
     </div>
     
     <button id="settingsBtn">
@@ -1873,7 +1866,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/quiz.js?v=1.6"></script>
+<script src="assets/js/quiz.js?v=1.7"></script>
 <script src="assets/js/assignments.js?v=1.3"></script>
 <script src="assets/js/resources.js?v=1.3"></script>
 <script src="assets/js/announcements.js?v=1.3"></script>
