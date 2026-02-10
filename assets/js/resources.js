@@ -90,12 +90,7 @@ function renderResourceCards(data) {
     <i class="fas fa-eye"></i>
 </a>
 
-                        <a href="${file.path}" 
-                           download="${file.title}" 
-                           class="quiz-start-btn" 
-                           style="padding: 6px 12px; font-size: 11px; text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                           <i class="fas fa-download"></i> SAVE
-                        </a>
+                       
                     </div>
                 </div>`;
         });
