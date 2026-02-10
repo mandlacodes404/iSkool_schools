@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         $insertStmt->close();
     }
 
-    header("Location: learner_assignments.php?submitted=1");
+    echo json_encode(['success' => true]);
     exit();
 }
 ?>
@@ -506,10 +506,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         const fullDocumentLink = document.getElementById("fullDocumentLink");
 
         if (form) {
-            form.addEventListener("submit", () => {
-                loader.style.display = "flex"; // Show loader on form submit
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault(); // STOP the page from reloading/redirecting
+        loader.style.display = "flex";
+
+        const formData = new FormData(form);
+
+        try {
+            // Send the data to the same file (submit_assignment.php)
+            const response = await fetch(window.location.href, {
+                method: "POST",
+                body: formData
             });
+
+            // Parse the JSON response from PHP
+            const result = await response.json();
+
+            if (result.success) {
+                // If the upload worked, trigger the Dashboard to show the list
+                if (window.parent && typeof window.parent.fetchAssignments === 'function') {
+                    window.parent.fetchAssignments();
+                    
+                    // Hide the iframe immediately
+                    if (window.parent.document.getElementById('mainFrame')) {
+                        window.parent.document.getElementById('mainFrame').style.display = 'none';
+                    }
+                }
+            } else {
+                alert("Submission failed: " + (result.error || "Unknown error"));
+                loader.style.display = "none";
+            }
+        } catch (error) {
+            console.error("Submission Error:", error);
+            alert("A connection error occurred. Please try again.");
+            loader.style.display = "none";
         }
+    });
+}
 
         function showPreview(link) {
             const fileUrl = link.dataset.preview;
