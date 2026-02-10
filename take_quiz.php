@@ -1048,9 +1048,52 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     /* This ensures we don't get cut off by the bottom of the screen */
     padding-bottom: calc(50px + env(safe-area-inset-bottom));
 }
+.floating-back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 30px;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.floating-back-btn:hover {
+    background: #fff;
+    transform: translateX(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Ensure the rest of the quiz doesn't start underneath the button */
+.container {
+    margin-top: 60px !important;
+}
+
+@media (max-width: 768px) {
+    .floating-back-btn {
+        top: 10px;
+        left: 10px;
+        padding: 6px 12px;
+    }
+}
+
     </style>
 </head>
 <body>
+    <a href="javascript:void(0)" class="floating-back-btn" onclick="confirmExit()">
+    <i class="fas fa-arrow-left"></i> Exit Quiz
+</a>
     <div class="container">
     <script>
         if (window.self === window.top) {
@@ -1150,34 +1193,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
     </div>
     <script>
-        // Notify Dashboard of the current state
-function syncWithDashboard() {
-    // 1. Identify the quiz title safely from PHP
-    const quizTitle = <?= json_encode($quizTitle) ?>;
-    
-    console.log("Attempting to sync quiz header...");
-    
-    try {
-        // 2. Check if we are inside an iframe and the parent is ready
-        if (window.parent && typeof window.parent.configureHeader === 'function') {
-            
-            window.parent.configureHeader({ 
-                title: quizTitle, 
-                mode: 'detail' 
-            });
-            
-            console.log("✅ Quiz Header Synced: " + quizTitle);
-        } else {
-            // 3. Retry logic: if the dashboard is still loading, wait 800ms
-            console.warn("⚠️ Dashboard not ready yet, retrying sync...");
-            setTimeout(syncWithDashboard, 800);
-        }
-    } catch (e) {
-        // This usually triggers if you are testing on different local addresses 
-        // (e.g., localhost vs 127.0.0.1)
-        console.error("❌ Cross-origin communication blocked by browser.", e);
-    }
-}
+      
 
 document.addEventListener('DOMContentLoaded', syncWithDashboard);
         // Notify Dashboard of the current state
@@ -1414,13 +1430,8 @@ function loadAnswers() {
 
 function confirmExit() {
     if (confirm("Are you sure you want to exit? Your progress is saved, but the timer will continue to run.")) {
-        // If we are inside the dashboard iframe
-        if (window.parent && typeof window.parent.handleHeaderBack === 'function') {
-            window.parent.handleHeaderBack();
-        } else {
-            // Fallback for standalone mode
-            window.location.href = 'quiz_list.php';
-        }
+        // This will navigate the whole dashboard back to the home page
+        window.parent.location.href = 'learner_dashboard.php'; 
     }
 }
 
