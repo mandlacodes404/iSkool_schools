@@ -2,7 +2,7 @@
 session_start();
 include("config.php");
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
 }

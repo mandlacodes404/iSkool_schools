@@ -16,7 +16,7 @@ if (!isset($_GET['assignment_id'])) {
 
 $assignment_id = intval($_GET['assignment_id']);
 
-// Fetch assignment details
+// Fetch assignment detail
 $stmt = $conn->prepare("SELECT * FROM assignments WHERE id = ?");
 if (!$stmt) {
     die("Prepare failed: " . $conn->error);
