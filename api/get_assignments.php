@@ -20,14 +20,14 @@ $current_academic_year_id = (int)$yearRes->fetch_assoc()['id'];
 
 // 2. Get Assignments with Submission Status
 $sql = "
-    SELECT 
+    SELECT DISTINCT
         a.id, a.title, a.description, a.due_date, a.file_url,
         c.name AS class_name,
         CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display,
         s.file_url AS submission_url
     FROM assignments a
     JOIN classes c ON a.class_id = c.id
-    JOIN class_students cs ON a.class_id = cs.class_id
+    JOIN class_students cs ON a.class_id = cs.class_id AND cs.academic_year_id = ?
     LEFT JOIN users u ON a.created_by = u.email
     LEFT JOIN submissions s ON a.id = s.assignment_id AND s.student_email = ?
     WHERE cs.student_email = ? 
@@ -36,7 +36,8 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssi", $studentEmail, $studentEmail, $current_academic_year_id);
+// We now have 4 parameters: academic_year_id, student_email, student_email, academic_year_id
+$stmt->bind_param("issi", $current_academic_year_id, $studentEmail, $studentEmail, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
