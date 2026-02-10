@@ -84,10 +84,11 @@ function renderResourceCards(data) {
                         </div>
                     </div>
 
-                    <div style="display:flex; gap:12px; align-items:center;">
-                        <a href="${file.path}" target="_blank" style="color: #4fd1c5; text-decoration: none; font-size: 13px; font-weight: 600;">
-                            <i class="fas fa-eye"></i>
-                        </a>
+                    <a href="javascript:void(0)" 
+   onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')" 
+   style="color: #4fd1c5; text-decoration: none; font-size: 18px; padding: 5px;">
+    <i class="fas fa-eye"></i>
+</a>
 
                         <a href="${file.path}" 
                            download="${file.title}" 
@@ -111,9 +112,7 @@ function getFileIcon(ext) {
 
 // Reuse your Menu Logic
 window.openResourceMenu = function(btn) {
-    const card = btn.closest('.resource-item');
-    const path = card.dataset.path;
-    const title = card.dataset.title;
+    
     
     // Here you would trigger your #resourcePopup logic from the original file
     // For now, let's keep it simple:
