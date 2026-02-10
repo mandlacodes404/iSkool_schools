@@ -1812,34 +1812,40 @@ window.handleHeaderBack = function() {
     const titleEl = document.getElementById('headerTitle');
     const currentTitle = titleEl ? titleEl.innerText : '';
 
-    // --- NEW: QUIZ PROTECTION LOGIC ---
-    // If the iframe contains a quiz and it has the exit confirmation function, run it first.
+    // 1. QUIZ PROTECTION: If taking a quiz, ask before leaving
     if (iframe && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
         iframe.contentWindow.confirmExit();
-        return; // Stop here! The quiz will decide if we actually leave.
+        return; 
     }
 
-    // --- YOUR EXISTING LOGIC (RETAINED) ---
-    
-    // 1. If coming back from Quiz Instructions (API Area)
-    if (currentTitle === 'Instructions') {
-        if (typeof fetchQuizzes === 'function') fetchQuizzes(); 
-    } 
-    // 2. If coming back from any other "Detail" page (like viewing an assignment)
-    else {
-        // Show the Iframe, hide the API area
-        const apiArea = document.getElementById('api-content-area');
-        
-        if (apiArea) apiArea.style.display = 'none';
-        if (iframe) iframe.style.display = 'block';
-
-        // Reset Header AND Bottom Nav to Standard
-        window.configureHeader({ title: 'Home', mode: 'standard' });
-        
-        // Ensure sidebar highlighting is correct
-        if (typeof window.setActive === 'function') {
-            window.setActive("learner_manual.php");
+    // 2. ASSIGNMENTS: If coming back from Submission detail
+    if (currentTitle === 'Submission') {
+        if (typeof fetchAssignments === 'function') {
+            window.fetchAssignments(); // Triggers API fetch and switches UI to 'standard'
+            return;
         }
+    }
+
+    // 3. QUIZZES: If coming back from Instructions
+    if (currentTitle === 'Instructions') {
+        if (typeof fetchQuizzes === 'function') {
+            window.fetchQuizzes(); 
+            return;
+        }
+    } 
+
+    // 4. GENERAL FALLBACK: Return to Home/Manual
+    const apiArea = document.getElementById('api-content-area');
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = 'learner_manual.php';
+    }
+
+    window.configureHeader({ title: 'Home', mode: 'standard' });
+    
+    if (typeof window.setActive === 'function') {
+        window.setActive("learner_manual.php");
     }
 };
 
