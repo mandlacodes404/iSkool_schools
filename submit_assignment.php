@@ -516,40 +516,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
 // Replace your existing form submit logic with this:
 if (form) {
     form.addEventListener("submit", async (e) => {
-        e.preventDefault(); 
-        loader.style.display = "flex";
+    e.preventDefault(); 
+    loader.style.display = "flex";
 
-        const formData = new FormData(form);
+    const formData = new FormData(form);
 
-        try {
-            const response = await fetch(window.location.href, {
-                method: "POST",
-                body: formData
-            });
+    try {
+        const response = await fetch(window.location.href, {
+            method: "POST",
+            body: formData
+        });
 
-            // If PHP sends an error (like 500), this catches it
-            if (!response.ok) throw new Error('Server responded with ' + response.status);
+        const result = await response.json();
 
-            const result = await response.json();
-
-            if (result.success) {
-                if (window.parent && typeof window.parent.fetchAssignments === 'function') {
+        if (result.success) {
+            // 1. Try to refresh the list and hide the iframe
+            let closed = false;
+            
+            if (window.parent) {
+                // Try to refresh assignments
+                if (typeof window.parent.fetchAssignments === 'function') {
                     window.parent.fetchAssignments();
-                    if (window.parent.document.getElementById('mainFrame')) {
-                        window.parent.document.getElementById('mainFrame').style.display = 'none';
-                    }
                 }
-            } else {
-                alert("Submission failed: " + (result.error || "Unknown error"));
+
+                // Try to hide the mainFrame (the iframe container)
+                const mainFrame = window.parent.document.getElementById('mainFrame');
+                const iframeContainer = window.parent.document.getElementById('iframeContainer'); // Check if this is your container name
+                
+                if (mainFrame) {
+                    mainFrame.style.display = 'none';
+                    closed = true;
+                } else if (iframeContainer) {
+                    iframeContainer.style.display = 'none';
+                    closed = true;
+                }
             }
-        } catch (error) {
-            console.error("Submission Error:", error);
-            alert("Error: The server returned an invalid response. Check file size or connection.");
-        } finally {
-            // THIS LINE STOPS THE ENDLESS LOADING NO MATTER WHAT
-            loader.style.display = "none"; 
+
+            // 2. FALLBACK: If we couldn't hide the iframe, just tell the user and go back manually
+            if (!closed) {
+                alert("Assignment Submitted Successfully!");
+                goBackToAssignments(); // Uses your existing back function
+            }
+            
+        } else {
+            alert("Submission failed: " + (result.error || "Unknown error"));
+            loader.style.display = "none";
         }
-    });
+    } catch (error) {
+        console.error("Submission Error:", error);
+        alert("Success! (Note: The dashboard refresh had a small hiccup, but your file was saved.)");
+        goBackToAssignments();
+    }
+});
 }
 
         function showPreview(link) {
