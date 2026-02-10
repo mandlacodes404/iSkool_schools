@@ -47,45 +47,54 @@ $submission = $subStmt->get_result()->fetch_assoc();
 $subStmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
-    // Handle submission form
+    header('Content-Type: application/json'); // Ensure the browser knows this is JSON
+    
     $submission_text = $_POST['submission_text'] ?? null;
     $fileUrl = $submission['file_url'] ?? null;
 
+    // 1. Handle File Upload
     if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === 0) {
         $uploadDir = "assignment_submissions/";
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
+        
         $filename = time() . "_" . basename($_FILES['submission_file']['name']);
         $fileUrl = $uploadDir . $filename;
+        
         if (!move_uploaded_file($_FILES['submission_file']['tmp_name'], $fileUrl)) {
-            die("Failed to upload file.");
+            echo json_encode(['success' => false, 'error' => 'Failed to move uploaded file.']);
+            exit();
         }
     }
 
+    // 2. Database Operations
     if ($submission) {
-        // Update existing submission
-        $updateStmt = $conn->prepare("UPDATE submissions SET submission_text = ?, file_url = ?, submitted_at = NOW() WHERE id = ?");
+        // UPDATE: Changed submission_text to text_answer to match your DB
+        $updateStmt = $conn->prepare("UPDATE submissions SET text_answer = ?, file_url = ?, submitted_at = NOW() WHERE id = ?");
         if (!$updateStmt) {
-            die("Prepare failed: " . $conn->error);
+            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
+            exit();
         }
         $updateStmt->bind_param("ssi", $submission_text, $fileUrl, $submission['id']);
-        if (!$updateStmt->execute()) {
-            die("Execute failed: " . $updateStmt->error);
-        }
+        $execute = $updateStmt->execute();
         $updateStmt->close();
     } else {
-        // Insert new submission
+        // INSERT: Already using text_answer
         $insertStmt = $conn->prepare("INSERT INTO submissions (assignment_id, student_email, text_answer, file_url) VALUES (?, ?, ?, ?)");
         if (!$insertStmt) {
-            die("Prepare failed: " . $conn->error);
+            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
+            exit();
         }
         $insertStmt->bind_param("isss", $assignment_id, $email, $submission_text, $fileUrl);
-        if (!$insertStmt->execute()) {
-            die("Execute failed: " . $insertStmt->error);
-        }
+        $execute = $insertStmt->execute();
         $insertStmt->close();
     }
 
-    echo json_encode(['success' => true]);
+    // 3. Final Response
+    if ($execute) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => "Execute failed: " . $conn->error]);
+    }
     exit();
 }
 ?>
