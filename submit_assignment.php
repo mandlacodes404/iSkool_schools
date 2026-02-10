@@ -402,6 +402,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
                 height: 50vh;
             }
         }
+        .floating-back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 30px;
+    color: var(--accent-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.floating-back-btn:hover {
+    background: var(--button-hover-bg);
+    transform: translateX(-3px);
+}
+
+/* Adjust container to not hide under the button on mobile */
+@media (max-width: 768px) {
+    .container { margin-top: 40px; }
+}
     </style>
 </head>
 <body>
@@ -445,7 +475,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
             </form>
         <?php endif; ?>
 
-        <a href="learner_assignments.php" class="back-link">← Back to Assignments</a>
+        <a href="javascript:void(0)" class="floating-back-btn" onclick="goBackToAssignments()">
+    <i class="fas fa-arrow-left"></i> Back
+</a>
 
         <div id="loaderOverlay">
             <div class="loader-text">Processing...</div>
@@ -520,6 +552,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
                 closeModal.click();
             }
         });
+
+        function goBackToAssignments() {
+    // Check if we are inside the dashboard iframe
+    if (window.parent && typeof window.parent.fetchAssignments === 'function') {
+        // 1. Trigger the dashboard's function to show the list
+        window.parent.fetchAssignments();
+        
+        // 2. (Optional) If your dashboard doesn't automatically hide the iframe, 
+        // we can force it from here:
+        if (window.parent.document.getElementById('mainFrame')) {
+            window.parent.document.getElementById('mainFrame').style.display = 'none';
+        }
+    } else {
+        // Fallback for direct access
+        window.location.href = 'learner_dashboard.php';
+    }
+}
     </script>
 </body>
 </html>
