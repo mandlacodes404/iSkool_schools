@@ -103,13 +103,17 @@ function renderAssignmentCards(groupedData) {
                         
                         <div style="margin-top: 15px; display: flex; gap: 15px;">
                             ${task.teacher_file ? `
-                                <a href="${task.teacher_file}" target="_blank" style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
-                                    <i class="fas fa-paperclip"></i> Teacher Attachment
-                                </a>` : ''}
+                               <a href="javascript:void(0)" 
+   onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')" 
+   style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
+    <i class="fas fa-paperclip"></i> Teacher Attachment
+</a>` : ''}
                             ${task.submission_file ? `
-                                <a href="${task.submission_file}" target="_blank" style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
-                                    <i class="fas fa-eye"></i> View My Work
-                                </a>` : ''}
+                               <a href="javascript:void(0)" 
+   onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')" 
+   style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
+    <i class="fas fa-eye"></i> View My Work
+</a>` : ''}
                         </div>
                     </div>
 
