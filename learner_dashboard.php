@@ -1851,12 +1851,18 @@ if (mainFrame) {
             const path = mainFrame.contentWindow.location.pathname;
             const page = path.split("/").pop();
 
-            // PAGES THAT SHOULD SHOW THE BOTTOM NAV (Standard)
-            if (page === 'learner_manual.php' || page === '' || page === 'index.php') {
+           if (page === 'learner_manual.php' || page === '' || page === 'index.php') {
                 window.configureHeader({ title: 'Home', mode: 'standard' });
             } 
-            // PAGES THAT SHOULD HIDE BOTTOM NAV (Detail)
             else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
+                
+                // If we are actually TAKING the quiz, don't force a title here.
+                // The syncWithDashboard() inside take_quiz.php will handle it.
+                if (page === 'take_quiz.php') {
+                    window.configureHeader({ mode: 'detail' }); 
+                    return; 
+                }
+
                 let detailTitle = 'Details';
                 if (page.includes('quiz')) detailTitle = 'Instructions';
                 if (page.includes('assignment')) detailTitle = 'Submission';
