@@ -1152,16 +1152,30 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
     <script>
         // Notify Dashboard of the current state
 function syncWithDashboard() {
-    if (window.parent && typeof window.parent.configureHeader === 'function') {
-        window.parent.configureHeader({ 
-            title: <?= json_encode($quizTitle) ?>, 
-            mode: 'detail' 
-        });
-        console.log("Dashboard Header Synced");
-    } else {
-        // If it fails, try once more in 500ms
-        console.warn("Dashboard sync failed, retrying...");
-        setTimeout(syncWithDashboard, 500);
+    // 1. Identify the quiz title safely from PHP
+    const quizTitle = <?= json_encode($quizTitle) ?>;
+    
+    console.log("Attempting to sync quiz header...");
+    
+    try {
+        // 2. Check if we are inside an iframe and the parent is ready
+        if (window.parent && typeof window.parent.configureHeader === 'function') {
+            
+            window.parent.configureHeader({ 
+                title: quizTitle, 
+                mode: 'detail' 
+            });
+            
+            console.log("✅ Quiz Header Synced: " + quizTitle);
+        } else {
+            // 3. Retry logic: if the dashboard is still loading, wait 800ms
+            console.warn("⚠️ Dashboard not ready yet, retrying sync...");
+            setTimeout(syncWithDashboard, 800);
+        }
+    } catch (e) {
+        // This usually triggers if you are testing on different local addresses 
+        // (e.g., localhost vs 127.0.0.1)
+        console.error("❌ Cross-origin communication blocked by browser.", e);
     }
 }
 

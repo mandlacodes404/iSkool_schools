@@ -1807,10 +1807,20 @@ window.configureHeader = function(config) {
 
 // --- BACK BUTTON NAVIGATION LOGIC ---
 window.handleHeaderBack = function() {
+    const iframe = document.getElementById('mainFrame');
     const titleEl = document.getElementById('headerTitle');
     const currentTitle = titleEl ? titleEl.innerText : '';
+
+    // --- NEW: QUIZ PROTECTION LOGIC ---
+    // If the iframe contains a quiz and it has the exit confirmation function, run it first.
+    if (iframe && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
+        iframe.contentWindow.confirmExit();
+        return; // Stop here! The quiz will decide if we actually leave.
+    }
+
+    // --- YOUR EXISTING LOGIC (RETAINED) ---
     
-    // 1. If coming back from Quiz Instructions
+    // 1. If coming back from Quiz Instructions (API Area)
     if (currentTitle === 'Instructions') {
         if (typeof fetchQuizzes === 'function') fetchQuizzes(); 
     } 
@@ -1818,7 +1828,6 @@ window.handleHeaderBack = function() {
     else {
         // Show the Iframe, hide the API area
         const apiArea = document.getElementById('api-content-area');
-        const iframe = document.getElementById('mainFrame');
         
         if (apiArea) apiArea.style.display = 'none';
         if (iframe) iframe.style.display = 'block';
@@ -1827,7 +1836,9 @@ window.handleHeaderBack = function() {
         window.configureHeader({ title: 'Home', mode: 'standard' });
         
         // Ensure sidebar highlighting is correct
-        if (typeof window.setActive === 'function') window.setActive("learner_manual.php");
+        if (typeof window.setActive === 'function') {
+            window.setActive("learner_manual.php");
+        }
     }
 };
 
