@@ -53,37 +53,48 @@ function renderResourceCards(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    // Remove redundant <h2> from empty state
     if (Object.keys(data).length === 0) {
         apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No resources found.</p>";
         return;
     }
 
-    // Start building HTML - No redundant <h2> here
     let html = ''; 
 
     for (const [teacher, files] of Object.entries(data)) {
-        html += `<h3>${teacher}</h3>`;
+        html += `<h3 style="margin: 20px 15px 10px;">${teacher}</h3>`;
         files.forEach(file => {
             const icon = getFileIcon(file.ext);
+            
             html += `
-                <div class="quiz-card resource-item" data-title="${file.title}" data-date="${file.uploaded_at}" data-path="${file.path}">
+                <div class="quiz-card resource-item">
                     <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                         <i class="${icon}" style="color: #4fd1c5; font-size: 20px;"></i>
                         <div>
                             <h4 style="margin:0; font-size:15px;">
-    ${file.title} 
-    <span style="font-size: 11px; color: #aaa; font-weight: normal; margin-left: 5px;">
-        (${file.size})
-    </span>
-</h4>
-                            <small style="color:#888;">Uploaded: ${file.uploaded_at}</small>
+                                ${file.title} 
+                                <span style="font-size: 11px; color: #aaa; font-weight: normal; margin-left: 5px;">
+                                    (${file.size || 'N/A'})
+                                </span>
+                            </h4>
+                            <div style="margin-top: 4px;">
+                                <small style="color:#888;">
+                                    <i class="fas fa-calendar-alt" style="font-size: 10px;"></i> Uploaded: ${file.uploaded_at}
+                                </small>
+                            </div>
                         </div>
                     </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <button onclick="openResourceMenu(this)" class="menu-dots" style="background:none; border:none; color:white; cursor:pointer;">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
+
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <a href="${file.path}" target="_blank" style="color: #4fd1c5; text-decoration: none; font-size: 13px; font-weight: 600;">
+                            <i class="fas fa-eye"></i>
+                        </a>
+
+                        <a href="${file.path}" 
+                           download="${file.title}" 
+                           class="quiz-start-btn" 
+                           style="padding: 6px 12px; font-size: 11px; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                           <i class="fas fa-download"></i> SAVE
+                        </a>
                     </div>
                 </div>`;
         });
