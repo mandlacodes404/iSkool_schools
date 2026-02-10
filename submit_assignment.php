@@ -469,7 +469,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         <?php else: ?>
             <form method="POST" enctype="multipart/form-data">
                 <label for="submission_text">Submission Text (optional):</label>
-                <textarea name="submission_text" rows="6"><?= htmlspecialchars($submission['submission_text'] ?? '') ?></textarea>
+                <textarea name="submission_text" rows="6"><?= htmlspecialchars($submission['text_answer'] ?? '') ?></textarea>
 
                 <label for="submission_file">Upload File (optional):</label>
                 <?php if (!empty($submission['file_url'])): ?>
@@ -513,42 +513,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         const previewIframe = document.getElementById("previewIframe");
         const closeModal = document.querySelector(".close-modal");
         const fullDocumentLink = document.getElementById("fullDocumentLink");
-
-        if (form) {
+// Replace your existing form submit logic with this:
+if (form) {
     form.addEventListener("submit", async (e) => {
-        e.preventDefault(); // STOP the page from reloading/redirecting
+        e.preventDefault(); 
         loader.style.display = "flex";
 
         const formData = new FormData(form);
 
         try {
-            // Send the data to the same file (submit_assignment.php)
             const response = await fetch(window.location.href, {
                 method: "POST",
                 body: formData
             });
 
-            // Parse the JSON response from PHP
+            // If PHP sends an error (like 500), this catches it
+            if (!response.ok) throw new Error('Server responded with ' + response.status);
+
             const result = await response.json();
 
             if (result.success) {
-                // If the upload worked, trigger the Dashboard to show the list
                 if (window.parent && typeof window.parent.fetchAssignments === 'function') {
                     window.parent.fetchAssignments();
-                    
-                    // Hide the iframe immediately
                     if (window.parent.document.getElementById('mainFrame')) {
                         window.parent.document.getElementById('mainFrame').style.display = 'none';
                     }
                 }
             } else {
                 alert("Submission failed: " + (result.error || "Unknown error"));
-                loader.style.display = "none";
             }
         } catch (error) {
             console.error("Submission Error:", error);
-            alert("A connection error occurred. Please try again.");
-            loader.style.display = "none";
+            alert("Error: The server returned an invalid response. Check file size or connection.");
+        } finally {
+            // THIS LINE STOPS THE ENDLESS LOADING NO MATTER WHAT
+            loader.style.display = "none"; 
         }
     });
 }
