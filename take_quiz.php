@@ -1092,7 +1092,7 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
 </head>
 <body>
     <a href="javascript:void(0)" class="floating-back-btn" onclick="confirmExit()">
-    <i class="fas fa-arrow-left"></i> Exit Quiz
+    <i class="fas fa-arrow-left"></i> 
 </a>
     <div class="container">
     <script>
@@ -1193,45 +1193,6 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
         </div>
     </div>
     <script>
-        // Notify Dashboard of the current state
-function syncWithDashboard() {
-    // 1. Identify the quiz title safely from PHP
-    const quizTitle = <?= json_encode($quizTitle) ?>;
-    
-    console.log("Attempting to sync quiz header...");
-    
-    try {
-        // 2. Check if we are inside an iframe and the parent is ready
-        if (window.parent && typeof window.parent.configureHeader === 'function') {
-            
-            window.parent.configureHeader({ 
-                title: quizTitle, 
-                mode: 'detail' 
-            });
-            
-            console.log("✅ Quiz Header Synced: " + quizTitle);
-        } else {
-            // 3. Retry logic: if the dashboard is still loading, wait 800ms
-            console.warn("⚠️ Dashboard not ready yet, retrying sync...");
-            setTimeout(syncWithDashboard, 800);
-        }
-    } catch (e) {
-        // This usually triggers if you are testing on different local addresses 
-        // (e.g., localhost vs 127.0.0.1)
-        console.error("❌ Cross-origin communication blocked by browser.", e);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', syncWithDashboard);
-        // Notify Dashboard of the current state
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.parent && typeof window.parent.configureHeader === 'function') {
-        window.parent.configureHeader({ 
-            title: <?= json_encode($quizTitle) ?>, 
-            mode: 'detail' 
-        });
-    }
-});
         let isSubmitting = false;
         let timeLeft = <?= max(0, $actualTimeLeft) ?>;
         // We default to 0, but if PHP has a saved step from the DB, we use that
@@ -1267,12 +1228,8 @@ let currentStep = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 
             }, 1000);
         }
 
-      function showTimeUpModal() {
+   function showTimeUpModal() {
     isSubmitting = true; 
-    // Optimization: Tell parent we are done so it can prep the UI
-    if (window.parent && typeof window.parent.configureHeader === 'function') {
-        window.parent.configureHeader({ mode: 'standard' });
-    }
     document.getElementById('timeUpModal').style.display = 'flex';
     setTimeout(() => document.getElementById('quizForm').submit(), 3000);
 }
@@ -1285,12 +1242,9 @@ let currentStep = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 
             document.getElementById('submitModal').style.display = 'none';
         }
 
-        function submitQuiz() {
+function submitQuiz() {
     if (confirm("Are you sure you want to submit your quiz?")) {
         isSubmitting = true; 
-        if (window.parent && typeof window.parent.configureHeader === 'function') {
-            window.parent.configureHeader({ mode: 'standard' });
-        }
         document.getElementById('quizForm').submit();
     }
 }
