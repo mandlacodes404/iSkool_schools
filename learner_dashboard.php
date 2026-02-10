@@ -207,6 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="stylesheet" href="assets/css/quiz.css?v=1.2">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -248,7 +249,7 @@ body {
     flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    transition: width var(--transition-speed) ease, left var(--transition-speed) ease;
+    transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
     position: fixed;
     top: 0;
     left: 0;
@@ -260,8 +261,15 @@ body {
     overflow-x: hidden; /* Prevents horizontal scroll entirely */
     scrollbar-width: none; /* Hides scrollbar track in Firefox */
     
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-    font-weight: 400;
+   border-right: 1px solid rgba(255, 255, 255, 0.08);
+    font-weight: 100;
+
+    /* THE CURVES: Only top-right and bottom-right */
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    
+    /* THE BORDER: A subtle "rim" makes the curve look premium */
+    border-right: 1px solid rgba(190, 188, 188, 0.08);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -280,7 +288,7 @@ body {
     text-overflow: ellipsis;
     max-width: 100%;
     transition: opacity var(--transition-speed) ease, font-size var(--transition-speed) ease;
-    font-weight: 400;
+    font-weight: 100;
 }
 
 .sidebar.collapsed h2 {
@@ -303,7 +311,7 @@ body {
     transition: background var(--transition-speed) ease, transform 0.15s ease;
     white-space: nowrap;
     overflow: hidden;
-    font-weight: 400;
+    font-weight: 100;
     background: none;
     border: none;
     cursor: pointer;
@@ -476,13 +484,12 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-left: var(--sidebar-width);
-    transition: margin-left var(--transition-speed) ease;
+   
 }
 
-.sidebar.collapsed ~ .main-content {
+/*.sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed-width);
-}
+}*/
 
 iframe {
     border: none;
@@ -903,7 +910,7 @@ iframe {
         /* Mobile Layout - Show bottom nav + safe area support */
         @media (max-width: 768px) {
             #mobileBottomNav {
-                display: flex !important;
+                display: flex;
             }
 
             /* Critical: Lifts the entire bar on iPhone & Android gesture navigation */
@@ -1066,7 +1073,134 @@ iframe {
     flex-shrink: 0;
     transition: stroke 0.3s ease;
 }
+@media (max-width: 768px) {
+    /* Perspective is key for the 3D 'pop' */
+    body {
+        perspective: 1200px;
+        overflow-x: hidden;
+    }
 
+    .main-content {
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+    }
+
+    @keyframes mobileHorizontalFlip {
+        0% {
+            /* Start rotated 180 degrees sideways and slightly smaller */
+            transform: rotateY(-180deg) scale(0.8);
+            opacity: 0;
+        }
+        100% {
+            /* Spin to front and full size */
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+        }
+    }
+
+    .mobile-first-load {
+        /* Duration 0.6s with a 'spring' ease-out */
+        animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+}
+/* Desktop slide-in menu (no overlay/dim) */
+.sidebar.desktop-open {
+    left: 0 !important;
+    transform: translateX(0) !important;
+}
+
+/* Default hidden on desktop - slide from left */
+@media (min-width: 769px) {
+    .sidebar {
+        left: -100%;                    /* Start hidden off-screen */
+        transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
+        width: var(--sidebar-width);    /* Keep your 240px width */
+        box-shadow: 4px 0 20px rgba(0,0,0,0.35); /* subtle shadow when open */
+        z-index: 2000;                  /* Above main content but below header if needed */
+    }
+
+    .sidebar.desktop-open {
+        left: 0;
+    }
+
+    /* No permanent sidebar anymore - remove collapsed logic */
+    .sidebar.collapsed,
+    .sidebar.collapsed ~ .main-content {
+        margin-left: 0 !important;
+        width: 0 !important;
+    }
+
+    /* Main content full width now (no margin for sidebar) */
+    .main-content {
+        margin-left: 0 !important;
+        transition: none; /* no shift needed */
+    }
+}
+#desktopMenuToggle {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    #desktopMenuToggle {
+        display: block;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    #desktopMenuToggle {
+        display: none;
+    }
+}
+
+/* Ensure SVG icons align perfectly inside buttons */
+button svg {
+    display: block;
+    width: 22px;   /* Adjust size as needed */
+    height: 22px;
+    margin: 0 auto;
+    transition: transform 0.2s ease;
+}
+
+/* Optional: Add a slight "hover" effect */
+button:hover svg {
+    stroke: #4fd1c5; /* Your theme color */
+    transform: scale(1.1);
+}
+
+/* Styling for the new X button */
+.desktop-close-btn {
+    background: transparent;
+    border: none;
+    color: #8b949e; /* Muted gray */
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+    margin-top: -5px; 
+    margin-right: -20px;
+}
+
+.desktop-close-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+
+
+/* THE MAGIC: Hide on mobile, show on desktop */
+@media (max-width: 768px) {
+    .desktop-close-btn {
+        display: none !important;
+    }
+}
 
 </style>
 </head>
@@ -1074,69 +1208,67 @@ iframe {
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
 <div class="sidebar">
-    <button class="desktop-toggle-btn" onclick="toggleDesktopSidebar()" title="Toggle Sidebar">
-        <i class="fas fa-bars"></i>
-    </button>
-    <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
-    <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
-        <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
-             alt="Profile Picture" 
-             class="learner-avatar"
-             style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
-    <?php else: ?>
-        <div class="initials-avatar">
-            <?= htmlspecialchars($initials) ?>
+    
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+        
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
+            <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
+                <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
+                     alt="Profile Picture" 
+                     class="learner-avatar"
+                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
+            <?php else: ?>
+                <div class="initials-avatar">
+                    <?= htmlspecialchars($initials) ?>
+                </div>
+            <?php endif; ?>
+            <input type="file" id="profileInput" accept="image/*" style="display:none;">
         </div>
-    <?php endif; ?>
-    <input type="file" id="profileInput" accept="image/*" style="display:none;">
-</div>
+
+        <button type="button" class="desktop-close-btn" onclick="toggleSidebar(true)" aria-label="Close Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
-        <a href="learner_manual.php" target="mainFrame" class="desktop-only" data-page="learner_manual.php"
-           class="<?= $currentPage === 'learner_manual.php' ? 'active' : '' ?>">
+        <a href="learner_manual.php" target="mainFrame" class="desktop-only" 
+       onclick="updateHeaderTitle('<?= htmlspecialchars($schoolName) ?>'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
 </svg><span>Home</span>
         </a>
 
-        <a href="quiz_list.php" target="mainFrame" class="desktop-only" data-page="quiz_list.php"
-           class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
-        <a href="learner_assignments.php" target="mainFrame" class="desktop-only" data-page="learner_assignments.php"
-           class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
-        <a href="view_resources_user.php" target="mainFrame" class="desktop-only" data-page="view_resources_user.php"
-           class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
+       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" class="desktop-only">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
-        <a href="quiz_history.php" target="mainFrame" data-page="quiz_history.php"
-           class="<?= $currentPage === 'quiz_history.php' ? 'active' : '' ?>">
+        <a href="quiz_history.php" target="mainFrame" onclick="updateHeaderTitle('My Grades'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Grades</span>
         </a>
 
-        <a href="view_announcements_user.php" target="mainFrame" data-page="view_announcements_user.php"
-           class="<?= $currentPage === 'view_announcements_user.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-
-     
-
-        <a href="learner_evaluations.php" target="mainFrame" data-page="learner_evaluations.php"
-           class="<?= $currentPage === 'learner_evaluations.php' ? 'active' : '' ?>">
+        <a href="learner_evaluations.php" target="mainFrame" onclick="updateHeaderTitle('Teacher Evaluations'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
-        <a href="discussions.php" target="mainFrame" data-page="discussions.php"
-           class="<?= $currentPage === 'discussions.php' ? 'active' : '' ?>">
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
@@ -1173,21 +1305,50 @@ iframe {
 <div class="main-content">
   
     <div class="main-header">
-    <button id="mobileToggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </button>
     
-    <div class="logo-container">
-        <img src="<?= htmlspecialchars($schoolLogo) ?>" 
+    <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
+        <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open Desktop Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <button id="headerBackBtn" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="handleHeaderBack()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
+        <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>" 
              alt="School Logo" 
              style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:3px solid #757272ff;">
-        <span class="school-name"><?= htmlspecialchars($schoolName) ?></span>
+        <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
     </div>
-    
-    <button id="settingsBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+
+    <div id="headerRight" style="flex: 1; display: flex; justify-content: flex-end;">
+        <button id="settingsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
+    </div>
 </div>
+    
+   
 
     <div class="my-class-content" id="myClassContent">
         <h3>My Class</h3>
@@ -1227,8 +1388,10 @@ iframe {
         <?php endif; ?>
     </div>
 
-    <iframe name="mainFrame" src="learner_manual.php"></iframe>
+    <div id="api-content-area" style="display:none;"></div>
+<iframe id="mainFrame" name="mainFrame" src="learner_manual.php"></iframe>
 </div>
+
 
 <div id="loaderOverlay">
     <div class="loader-text">Processing...</div>
@@ -1241,22 +1404,67 @@ document.addEventListener("DOMContentLoaded", function () {
     const iframe         = document.querySelector('iframe[name="mainFrame"]');
     const sidebar        = document.querySelector(".sidebar");
     const myClassContent = document.getElementById("myClassContent");
+    const apiArea = document.getElementById('api-content-area');
     const mobileOverlay  = document.getElementById("mobileOverlay") || createMobileOverlay();
-    let loaderTimeout; // <--- ADD THIS LINE HERE
+    window.loaderTimeout = null;
+
+    // ────────────────────────────────────────────────────────────────────────
+    // NEW: MOBILE TWIST LOGIC (Add this here)
+    // ────────────────────────────────────────────────────────────────────────
+    const isMobile = window.innerWidth <= 768;
+    // We check sessionStorage for "lastLearnerPage" to see if this is a fresh start
+    if (isMobile && !sessionStorage.getItem("lastLearnerPage")) {
+        const mainContent = document.querySelector(".main-content");
+        mainContent.classList.add("mobile-first-load");
+        setTimeout(() => {
+            mainContent.classList.remove("mobile-first-load");
+        }, 1000);
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // 1. SMART LOAD LOGIC (Deep Linking + Refresh Persistence)
     // ────────────────────────────────────────────────────────────────────────
     const urlParams = new URLSearchParams(window.location.search);
     const targetPage = urlParams.get('page'); // From Push Notifications
-    const savedPage = localStorage.getItem("lastLearnerPage");
+    // UPDATE THIS LINE: Change localStorage to sessionStorage
+    const savedPage = sessionStorage.getItem("lastLearnerPage");
 
-    if (targetPage) {
+  if (targetPage) {
+        // 1. Priority: Notifications/Direct Links
         iframe.src = targetPage;
-        // Clean URL so refresh doesn't keep reloading the notification link
         window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (savedPage && savedPage !== "learner_manual.php") {
-        iframe.src = savedPage;
+    } else if (savedPage) {
+        // 2. Priority: API-Driven Pages (Special Logic)
+        if (savedPage.includes("quiz_list.php")) {
+            window.fetchQuizzes();
+        } else if (savedPage.includes("assignment_list.php")) {
+            window.fetchAssignments();
+        } else if (savedPage.includes("resource_list.php")) {
+            window.fetchResources();
+        } else if (savedPage.includes("announcement_list.php")) {
+            window.fetchAnnouncements();
+        } else if (savedPage.includes("discussion_list.php")) {
+            window.fetchDiscussions();
+        } 
+      // 2. YOUR CASE: If it's NOT an API page AND NOT the manual, 
+        // load the specific saved page into the iframe (like profile.php)
+        else if (
+            savedPage !== "learner_manual.php" && 
+            savedPage !== "quiz_list.php" && 
+            savedPage !== "assignment_list.php" && 
+            savedPage !== "resource_list.php" && 
+            savedPage !== "discussion_list.php" &&
+            savedPage !== "announcement_list.php"
+        ) {
+            iframe.src = savedPage;
+        }
+        // 3. If it IS the manual, just load the manual
+        else {
+            iframe.src = "learner_manual.php";
+        }
+    } else {
+        // FRESH START: No saved page at all (Trigger Twist here)
+        iframe.src = "learner_manual.php";
     }
 
    // ────────────────────────────────────────────────────────────────────────
@@ -1264,34 +1472,73 @@ document.addEventListener("DOMContentLoaded", function () {
     // ────────────────────────────────────────────────────────────────────────
     
     // We target ALL links in the sidebar and bottom nav to ensure menu closes
-    document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
-        link.addEventListener('click', () => {
-           // Clear any previous timer to prevent multiple loaders
-        clearTimeout(loaderTimeout);
+  document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
+    link.addEventListener('click', () => {
+        const onClick = link.getAttribute('onclick') || "";
+        const isApiCall = onClick.includes('fetchQuizzes') || 
+                          onClick.includes('fetchAssignments') || 
+                          onClick.includes('fetchResources') ||
+                          onClick.includes('fetchDiscussions') || 
+                          onClick.includes('fetchAnnouncements');
 
-        // SET A DELAY: Only show the loader if it takes longer than 250ms
-        loaderTimeout = setTimeout(() => {
-            loader.style.display = 'flex';
-        }, 800);
+        // Inside your Main Script's link click listener:
+const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
+                 (onClick.includes('fetchAssignments') && window.learnerAssignmentCache) ||
+                 (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
+                 (onClick.includes('fetchResources') && window.resourceCache) ||
+                 (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
 
-            // 2. MOBILE AUTO-CLOSE: Remove active class and hide the overlay
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove("active");
-                if (mobileOverlay) mobileOverlay.style.display = "none";
+        // 1. AUTO-CLOSE MENU
+        if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
+            sidebar.classList.remove("active");
+            sidebar.classList.remove("desktop-open");
+            if (window.innerWidth <= 768 && mobileOverlay) {
+                mobileOverlay.style.display = "none";
             }
+        }
 
-            // 3. UI RESET: If clicking a standard page, hide the "My Class" view
+        // 2. Detect same-page clicks
+        let currentIframePage = '';
+        try {
+            if (iframe.contentWindow && iframe.contentWindow.location) {
+                currentIframePage = iframe.contentWindow.location.pathname.split("/").pop() + iframe.contentWindow.location.search;
+            }
+        } catch (e) {}
+        const targetHref = link.getAttribute('href') || '';
+        const isSamePage = targetHref && currentIframePage && targetHref.includes(currentIframePage);
+
+        // 3. Clear old timeout
+        clearTimeout(window.loaderTimeout);
+
+        // 4. SMART LOADER: Only show if NOT cached and NOT a same-page repeat
+        if (!isCached && !isSamePage) {
+            window.loaderTimeout = setTimeout(() => {
+                loader.style.display = 'flex';
+            }, 800);
+        }
+
+        // 5. UI prep
+        if (isApiCall) {
+            if (myClassContent) myClassContent.classList.remove("active");
+            if (iframe) iframe.style.display = "none";
+            if (apiArea) apiArea.style.display = "block";
+            
+            // If it's cached, ensure the loader is hidden immediately
+            if (isCached) loader.style.display = 'none';
+        } else {
             if (link.getAttribute('target') === 'mainFrame' && myClassContent) {
                 myClassContent.classList.remove("active");
                 iframe.style.display = "block";
+                if (apiArea) apiArea.style.display = 'none';
             }
-        });
+        }
     });
+});
 
     // LOADER: Hide when iframe finishes loading
     iframe?.addEventListener('load', () => {
         // 1. CANCEL THE TIMER (This prevents the loader from showing for fast pages)
-    clearTimeout(loaderTimeout);
+   clearTimeout(window.loaderTimeout); // Change to window.loaderTimeout
 
     // 2. Hide it if it's already visible
     loader.style.display = 'none';
@@ -1300,7 +1547,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const fullPage = win.location.pathname.split("/").pop() + win.location.search;
             
             if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== "") {
-                localStorage.setItem("lastLearnerPage", fullPage);
+               // UPDATE THIS LINE: Change localStorage to sessionStorage
+                sessionStorage.setItem("lastLearnerPage", fullPage);
                 const filename = win.location.pathname.split("/").pop();
                 setActive(filename);
             }
@@ -1319,6 +1567,7 @@ document.addEventListener("DOMContentLoaded", function () {
         iframe.style.display = "block";
         setActive("learner_settings.php"); 
         if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
+        if (apiArea) apiArea.style.display = 'none';
     });
 
     const avatarWrapper = document.querySelector(".profile-picture-wrapper");
@@ -1376,29 +1625,40 @@ document.addEventListener("DOMContentLoaded", function () {
     // 4. SIDEBAR & MY CLASS (Your original working logic)
     // ────────────────────────────────────────────────────────────────────────
     const navItems = document.querySelectorAll("[data-page]");
-    function setActive(page) {
+    window.setActive = function(page) {
         navItems.forEach(item => {
             item.classList.toggle("active", item.getAttribute("data-page") === page);
         });
     }
 
-    window.toggleSidebar = function () {
-        sidebar.classList.toggle("active");
-        mobileOverlay.style.display = sidebar.classList.contains("active") ? "block" : "none";
-    };
+window.toggleSidebar = function (forceClose = false) {
+    const isCurrentlyOpen = sidebar.classList.contains("active");
 
-    window.toggleDesktopSidebar = function () {
-        if (window.innerWidth > 768) {
-            sidebar.classList.toggle("collapsed");
-            localStorage.setItem("sidebarCollapsed", sidebar.classList.contains("collapsed"));
+    // If forceClose is true (from the X button) or it's already open, close it
+    if (forceClose || isCurrentlyOpen) {
+        sidebar.classList.remove("active");
+        sidebar.classList.remove("desktop-open"); 
+        if (mobileOverlay) {
+            mobileOverlay.style.display = "none";
         }
-    };
+    } else {
+        // Only allow open on mobile
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add("active");
+            mobileOverlay.style.display = "block";
+        }
+        // Desktop open is handled by desktopToggle listener — do nothing here
+    }
+};
+
+
 
     window.showMyClass = function () {
         myClassContent.classList.add("active");
         iframe.style.display = "none";
         setActive("my-class");
         if (window.innerWidth <= 768) toggleSidebar();
+        if (apiArea) apiArea.style.display = "none";
     };
 
     window.toggleParentDropdown = () => {
@@ -1447,11 +1707,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     mobileOverlay.addEventListener("click", toggleSidebar);
 
-    // Init UI
-    if (window.innerWidth > 768 && localStorage.getItem("sidebarCollapsed") === "true") {
-        sidebar.classList.add("collapsed");
+    
+    // Init UI Highlighter
+    const lastSaved = sessionStorage.getItem("lastLearnerPage");
+    if (lastSaved === "quiz_list.php") {
+        window.setActive("quiz_list.php");
+        } else if (lastSaved === "assignment_list.php") { // <--- ADD THIS
+    window.setActive("assignment_list.php");
+    } else if (lastSaved === "resource_list.php") {
+    window.setActive("resource_list.php");
+} else if (lastSaved === "announcement_list.php") {
+    window.setActive("announcement_list.php");
+} else if (lastSaved === "discussion_list.php") {
+    window.setActive("discussion_list.php");
+}
+    else {
+        window.setActive("<?= $currentPage ?>");
     }
-    setActive("<?= $currentPage ?>");
+
+    // Desktop slide-in (no backdrop)
+const desktopToggle = document.getElementById('desktopMenuToggle');
+
+if (desktopToggle) {
+    desktopToggle.addEventListener('click', () => {
+        // Change .add to .toggle so the hamburger can also close it
+        sidebar.classList.toggle('desktop-open'); 
+        sidebar.classList.remove('active'); // prevents mobile style conflict
+    });
+
+    // Optional: close with Esc key
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && sidebar.classList.contains('desktop-open')) {
+            sidebar.classList.remove('desktop-open');
+        }
+    });
+}
     loader.style.display = "none";
 });
 
@@ -1459,14 +1749,164 @@ function toggleJoinClassForm() {
     const form = document.getElementById("joinClassForm");
     if (form) form.style.display = form.style.display === "none" ? "block" : "none";
 }
+
+// --- DYNAMIC UI COMMAND CENTER ---
+window.configureHeader = function(config) {
+    let { title, mode } = config;
+    
+    // Select our UI elements
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    const titleEl = document.getElementById('headerTitle');
+    const logoEl = document.getElementById('headerLogo');
+    const mobileBtn = document.getElementById('mobileToggle');
+    const desktopBtn = document.getElementById('desktopMenuToggle');
+    const backBtn = document.getElementById('headerBackBtn');
+    const rightSide = document.getElementById('headerRight');
+
+    // Handle School Name Logic
+    const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
+    if (!title || title === 'Home' || title === 'learner_manual.php') {
+        title = schoolName;
+    }
+    if (titleEl) titleEl.innerText = title;
+
+    if (mode === 'detail') {
+        // --- DETAIL MODE: IM-MER-SIVE ---
+        // This will now successfully hide the nav because the CSS isn't using !important anymore
+        if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
+        
+        if (mobileBtn) mobileBtn.style.display = 'none';             
+        if (desktopBtn) desktopBtn.style.display = 'none';
+        if (logoEl) logoEl.style.display = 'none';
+        if (rightSide) rightSide.style.visibility = 'hidden'; 
+        if (backBtn) backBtn.style.display = 'flex';                 
+    } else {
+        // --- STANDARD MODE: EXPLORATION ---
+        // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
+        if (mobileBottomNav) {
+            if (window.innerWidth <= 768) {
+                mobileBottomNav.style.display = 'flex';
+            } else {
+                mobileBottomNav.style.display = 'none';
+            }
+        }
+        
+        if (backBtn) backBtn.style.display = 'none';
+        if (logoEl) logoEl.style.display = 'block';
+        if (rightSide) rightSide.style.visibility = 'visible';
+
+        // Decide which menu button to show based on screen size
+        if (window.innerWidth <= 768) {
+            if (mobileBtn) mobileBtn.style.display = 'block';
+            if (desktopBtn) desktopBtn.style.display = 'none';
+        } else {
+            if (mobileBtn) mobileBtn.style.display = 'none';
+            if (desktopBtn) desktopBtn.style.display = 'block';
+        }
+    }
+};
+
+// --- BACK BUTTON NAVIGATION LOGIC ---
+window.handleHeaderBack = function() {
+    const iframe = document.getElementById('mainFrame');
+    const titleEl = document.getElementById('headerTitle');
+    const currentTitle = titleEl ? titleEl.innerText : '';
+
+    // 1. QUIZ PROTECTION: If taking a quiz, ask before leaving
+    if (iframe && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
+        iframe.contentWindow.confirmExit();
+        return; 
+    }
+
+    // 2. ASSIGNMENTS: If coming back from Submission detail
+    if (currentTitle === 'Submission') {
+        if (typeof fetchAssignments === 'function') {
+            window.fetchAssignments(); // Triggers API fetch and switches UI to 'standard'
+            return;
+        }
+    }
+
+    // 3. QUIZZES: If coming back from Instructions
+    if (currentTitle === 'Instructions') {
+        if (typeof fetchQuizzes === 'function') {
+            window.fetchQuizzes(); 
+            return;
+        }
+    } 
+
+    // 4. GENERAL FALLBACK: Return to Home/Manual
+    const apiArea = document.getElementById('api-content-area');
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = 'learner_manual.php';
+    }
+
+    window.configureHeader({ title: 'Home', mode: 'standard' });
+    
+    if (typeof window.setActive === 'function') {
+        window.setActive("learner_manual.php");
+    }
+};
+
+// --- IFRAME MONITOR (The "Safety Net") ---
+const mainFrame = document.getElementById('mainFrame');
+
+if (mainFrame) {
+    mainFrame.onload = function() {
+        try {
+            const path = mainFrame.contentWindow.location.pathname;
+            const page = path.split("/").pop();
+
+           if (page === 'learner_manual.php' || page === '' || page === 'index.php') {
+                window.configureHeader({ title: 'Home', mode: 'standard' });
+            } 
+            else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
+                
+                // If we are actually TAKING the quiz, don't force a title here.
+                // The syncWithDashboard() inside take_quiz.php will handle it.
+                if (page === 'take_quiz.php') {
+                    window.configureHeader({ mode: 'detail' }); 
+                    return; 
+                }
+
+                let detailTitle = 'Details';
+                if (page.includes('quiz')) detailTitle = 'Instructions';
+                if (page.includes('assignment')) detailTitle = 'Submission';
+
+                window.configureHeader({ title: detailTitle, mode: 'detail' });
+            }
+        } catch (e) {
+            console.error("Iframe navigation error (Cross-Origin):", e);
+        }
+    };
+}
+window.loadHome = function() {
+    // 1. Reset Visibility
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = 'learner_manual.php'; // Force iframe back to home
+    }
+
+    // 2. Reset Header & Show Bottom Nav
+    window.configureHeader({ title: 'Home', mode: 'standard' });
+
+    // 3. Update Active State
+    if (typeof window.setActive === 'function') window.setActive("learner_manual.php");
+};
 </script>
 
+<div id="desktopBackdrop" class="desktop-backdrop"></div>
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
 
 <nav id="mobileBottomNav">
 
- <a href="learner_manual.php" target="mainFrame" data-page="learner_manual.php"
-       class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+ 
+      <a href="javascript:void(0)" onclick="loadHome()" data-page="learner_manual.php" id="nav-home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -1474,16 +1914,13 @@ function toggleJoinClassForm() {
     </a>
 
 
-    <a href="quiz_list.php" target="mainFrame" data-page="quiz_list.php"
-       class="<?= $currentPage === 'quiz_list.php' ? 'active' : '' ?>">
+    <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php" id="nav-quiz">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </a>
-    <a href="learner_assignments.php" target="mainFrame" data-page="learner_assignments.php"
-       class="<?= $currentPage === 'learner_assignments.php' ? 'active' : '' ?>">
+    <a href="javascript:void(0)" onclick="fetchAssignments()" data-page="learner_assignments.php" id="nav-assignments">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </a>
-    <a href="view_resources_user.php" target="mainFrame" data-page="view_resources_user.php"
-       class="<?= $currentPage === 'view_resources_user.php' ? 'active' : '' ?>">
+     <a href="javascript:void(0)" onclick="fetchResources()" data-page="view_resources_user.php" id="nav-resources">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
     </a>
    
@@ -1592,5 +2029,13 @@ document.addEventListener("DOMContentLoaded", function () {
 function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
+
+<script src="assets/js/main.js?v=1.0"></script>
+<script src="assets/js/quiz.js?v=2.0"></script>
+<script src="assets/js/assignments.js?v=1.7"></script>
+<script src="assets/js/resources.js?v=1.9"></script>
+<script src="assets/js/announcements.js?v=1.4"></script>
+<script src="assets/js/discussions.js?v=1.4"></script>
+<?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

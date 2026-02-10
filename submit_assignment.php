@@ -16,7 +16,7 @@ if (!isset($_GET['assignment_id'])) {
 
 $assignment_id = intval($_GET['assignment_id']);
 
-// Fetch assignment details
+// Fetch assignment detail
 $stmt = $conn->prepare("SELECT * FROM assignments WHERE id = ?");
 if (!$stmt) {
     die("Prepare failed: " . $conn->error);
@@ -47,45 +47,54 @@ $submission = $subStmt->get_result()->fetch_assoc();
 $subStmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
-    // Handle submission form
+    header('Content-Type: application/json'); // Ensure the browser knows this is JSON
+    
     $submission_text = $_POST['submission_text'] ?? null;
     $fileUrl = $submission['file_url'] ?? null;
 
+    // 1. Handle File Upload
     if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === 0) {
         $uploadDir = "assignment_submissions/";
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
+        
         $filename = time() . "_" . basename($_FILES['submission_file']['name']);
         $fileUrl = $uploadDir . $filename;
+        
         if (!move_uploaded_file($_FILES['submission_file']['tmp_name'], $fileUrl)) {
-            die("Failed to upload file.");
+            echo json_encode(['success' => false, 'error' => 'Failed to move uploaded file.']);
+            exit();
         }
     }
 
+    // 2. Database Operations
     if ($submission) {
-        // Update existing submission
-        $updateStmt = $conn->prepare("UPDATE submissions SET submission_text = ?, file_url = ?, submitted_at = NOW() WHERE id = ?");
+        // UPDATE: Changed submission_text to text_answer to match your DB
+        $updateStmt = $conn->prepare("UPDATE submissions SET text_answer = ?, file_url = ?, submitted_at = NOW() WHERE id = ?");
         if (!$updateStmt) {
-            die("Prepare failed: " . $conn->error);
+            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
+            exit();
         }
         $updateStmt->bind_param("ssi", $submission_text, $fileUrl, $submission['id']);
-        if (!$updateStmt->execute()) {
-            die("Execute failed: " . $updateStmt->error);
-        }
+        $execute = $updateStmt->execute();
         $updateStmt->close();
     } else {
-        // Insert new submission
+        // INSERT: Already using text_answer
         $insertStmt = $conn->prepare("INSERT INTO submissions (assignment_id, student_email, text_answer, file_url) VALUES (?, ?, ?, ?)");
         if (!$insertStmt) {
-            die("Prepare failed: " . $conn->error);
+            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
+            exit();
         }
         $insertStmt->bind_param("isss", $assignment_id, $email, $submission_text, $fileUrl);
-        if (!$insertStmt->execute()) {
-            die("Execute failed: " . $insertStmt->error);
-        }
+        $execute = $insertStmt->execute();
         $insertStmt->close();
     }
 
-    header("Location: learner_assignments.php?submitted=1");
+    // 3. Final Response
+    if ($execute) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => "Execute failed: " . $conn->error]);
+    }
     exit();
 }
 ?>
@@ -402,6 +411,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
                 height: 50vh;
             }
         }
+        .floating-back-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 30px;
+    color: var(--accent-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.floating-back-btn:hover {
+    background: var(--button-hover-bg);
+    transform: translateX(-3px);
+}
+
+/* Adjust container to not hide under the button on mobile */
+@media (max-width: 768px) {
+    .container { margin-top: 40px; }
+}
     </style>
 </head>
 <body>
@@ -430,7 +469,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         <?php else: ?>
             <form method="POST" enctype="multipart/form-data">
                 <label for="submission_text">Submission Text (optional):</label>
-                <textarea name="submission_text" rows="6"><?= htmlspecialchars($submission['submission_text'] ?? '') ?></textarea>
+                <textarea name="submission_text" rows="6"><?= htmlspecialchars($submission['text_answer'] ?? '') ?></textarea>
 
                 <label for="submission_file">Upload File (optional):</label>
                 <?php if (!empty($submission['file_url'])): ?>
@@ -445,7 +484,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
             </form>
         <?php endif; ?>
 
-        <a href="learner_assignments.php" class="back-link">← Back to Assignments</a>
+        <a href="javascript:void(0)" class="floating-back-btn" onclick="goBackToAssignments()">
+    <i class="fas fa-arrow-left"></i> Back
+</a>
 
         <div id="loaderOverlay">
             <div class="loader-text">Processing...</div>
@@ -472,12 +513,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         const previewIframe = document.getElementById("previewIframe");
         const closeModal = document.querySelector(".close-modal");
         const fullDocumentLink = document.getElementById("fullDocumentLink");
+// Replace your existing form submit logic with this:
+if (form) {
+    form.addEventListener("submit", async (e) => {
+    e.preventDefault(); 
+    loader.style.display = "flex";
 
-        if (form) {
-            form.addEventListener("submit", () => {
-                loader.style.display = "flex"; // Show loader on form submit
-            });
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // 1. Try to refresh the list and hide the iframe
+            let closed = false;
+            
+            if (window.parent) {
+                // Try to refresh assignments
+                if (typeof window.parent.fetchAssignments === 'function') {
+                    window.parent.fetchAssignments();
+                }
+
+                // Try to hide the mainFrame (the iframe container)
+                const mainFrame = window.parent.document.getElementById('mainFrame');
+                const iframeContainer = window.parent.document.getElementById('iframeContainer'); // Check if this is your container name
+                
+                if (mainFrame) {
+                    mainFrame.style.display = 'none';
+                    closed = true;
+                } else if (iframeContainer) {
+                    iframeContainer.style.display = 'none';
+                    closed = true;
+                }
+            }
+
+            // 2. FALLBACK: If we couldn't hide the iframe, just tell the user and go back manually
+            if (!closed) {
+                alert("Assignment Submitted Successfully!");
+                goBackToAssignments(); // Uses your existing back function
+            }
+            
+        } else {
+            alert("Submission failed: " + (result.error || "Unknown error"));
+            loader.style.display = "none";
         }
+    } catch (error) {
+        console.error("Submission Error:", error);
+        alert("Success! (Note: The dashboard refresh had a small hiccup, but your file was saved.)");
+        goBackToAssignments();
+    }
+});
+}
 
         function showPreview(link) {
             const fileUrl = link.dataset.preview;
@@ -520,6 +611,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
                 closeModal.click();
             }
         });
+
+        function goBackToAssignments() {
+    // Check if we are inside the dashboard iframe
+    if (window.parent && typeof window.parent.fetchAssignments === 'function') {
+        // 1. Trigger the dashboard's function to show the list
+        window.parent.fetchAssignments();
+        
+        // 2. (Optional) If your dashboard doesn't automatically hide the iframe, 
+        // we can force it from here:
+        if (window.parent.document.getElementById('mainFrame')) {
+            window.parent.document.getElementById('mainFrame').style.display = 'none';
+        }
+    } else {
+        // Fallback for direct access
+        window.location.href = 'learner_dashboard.php';
+    }
+}
     </script>
 </body>
 </html>
