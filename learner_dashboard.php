@@ -1238,8 +1238,7 @@ button:hover svg {
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
-        <a href="learner_manual.php" target="mainFrame" class="desktop-only" 
-       onclick="updateHeaderTitle('<?= htmlspecialchars($schoolName) ?>'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
+      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -1390,7 +1389,7 @@ button:hover svg {
     </div>
 
     <div id="api-content-area" style="display:none;"></div>
-<iframe id="mainFrame" name="mainFrame" src="learner_manual.php"></iframe>
+<iframe id="mainFrame" name="mainFrame" src="about:blank" style="display:none;"></iframe>
 </div>
 
 
@@ -1462,13 +1461,25 @@ document.addEventListener("DOMContentLoaded", function () {
         ) {
             iframe.src = savedPage;
         }
-        // 3. If it IS the manual, just load the manual
+       // 3. If it IS the manual, trigger the function to load from /partials
         else {
-            iframe.src = "learner_manual.php";
+            if (typeof loadManual === "function") {
+                loadManual();
+            } else {
+                // Emergency Fallback
+                iframe.style.display = "block";
+                iframe.src = "learner_manual.php";
+            }
         }
     } else {
-        // FRESH START: No saved page at all (Trigger Twist here)
-        iframe.src = "learner_manual.php";
+        // FRESH START: No saved page at all (Trigger the new Manual logic)
+        if (typeof loadManual === "function") {
+            loadManual();
+        } else {
+            // Emergency Fallback
+            iframe.style.display = "block";
+            iframe.src = "learner_manual.php";
+        }
     }
 
    // ────────────────────────────────────────────────────────────────────────
@@ -1479,7 +1490,8 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
     link.addEventListener('click', () => {
         const onClick = link.getAttribute('onclick') || "";
-        const isApiCall = onClick.includes('fetchQuizzes') || 
+        const isApiCall = onClick.includes('loadManual') || 
+                          onClick.includes('fetchQuizzes') || 
                           onClick.includes('fetchAssignments') || 
                           onClick.includes('fetchResources') ||
                           onClick.includes('fetchDiscussions') ||
@@ -1487,7 +1499,8 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
-const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
+const isCached = (onClick.includes('loadManual') && window.manualCache) ||
+                 (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
                  (onClick.includes('fetchAssignments') && window.learnerAssignmentCache) ||
                  (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
                  (onClick.includes('fetchResources') && window.resourceCache) ||
@@ -1722,6 +1735,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive("assignment_list.php");
     } else if (lastSaved === "resource_list.php") {
     window.setActive("resource_list.php");
+ } else if (lastSaved === "partials/manual.html") {
+    window.setActive("partials/manual.html");
 } else if (lastSaved === "announcement_list.php") {
     window.setActive("announcement_list.php");
 } else if (lastSaved === "evaluation_list.php") {
@@ -1773,9 +1788,10 @@ window.configureHeader = function(config) {
 
     // Handle School Name Logic
     const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
-    if (!title || title === 'Home' || title === 'learner_manual.php') {
-        title = schoolName;
-    }
+   // Update this to include the folder path if that's what you're saving
+if (!title || title === 'Home' || title === 'partials/manual.html' || title === 'learner_manual.php') {
+    title = schoolName;
+}
     if (titleEl) titleEl.innerText = title;
 
     if (mode === 'detail') {
@@ -1852,8 +1868,9 @@ window.handleHeaderBack = function() {
 
     window.configureHeader({ title: 'Home', mode: 'standard' });
     
+    // Update Active UI using the full path
     if (typeof window.setActive === 'function') {
-        window.setActive("learner_manual.php");
+        window.setActive("partials/manual.html");
     }
 };
 
@@ -1866,9 +1883,9 @@ if (mainFrame) {
             const path = mainFrame.contentWindow.location.pathname;
             const page = path.split("/").pop();
 
-           if (page === 'learner_manual.php' || page === '' || page === 'index.php') {
-                window.configureHeader({ title: 'Home', mode: 'standard' });
-            } 
+           if (page === 'learner_manual.php' || page === 'manual.html' || page === '' || page === 'index.php') {
+    window.configureHeader({ title: 'Home', mode: 'standard' });
+}
             else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
                 
                 // If we are actually TAKING the quiz, don't force a title here.
@@ -1897,14 +1914,15 @@ window.loadHome = function() {
     if (apiArea) apiArea.style.display = 'none';
     if (iframe) {
         iframe.style.display = 'block';
-        iframe.src = 'learner_manual.php'; // Force iframe back to home
+        iframe.src = 'about:blank' // Force iframe back to home
     }
 
     // 2. Reset Header & Show Bottom Nav
     window.configureHeader({ title: 'Home', mode: 'standard' });
 
-    // 3. Update Active State
-    if (typeof window.setActive === 'function') window.setActive("learner_manual.php");
+   if (typeof window.setActive === 'function') {
+        window.setActive("partials/manual.html");
+    }
 };
 </script>
 
@@ -1915,6 +1933,7 @@ window.loadHome = function() {
 
  
       <a href="javascript:void(0)" onclick="loadHome()" data-page="learner_manual.php" id="nav-home">
+        
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
@@ -2039,6 +2058,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/main.js?v=1.0"></script>
+<script src="assets/js/manual.js?v=1.0"></script>
 <script src="assets/js/quiz.js?v=2.0"></script>
 <script src="assets/js/assignments.js?v=1.7"></script>
 <script src="assets/js/resources.js?v=1.9"></script>
