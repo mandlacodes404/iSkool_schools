@@ -20,7 +20,7 @@
     width: 6px;
 }
 #api-content-area::-webkit-scrollbar-thumb {
-    background: rgba(79, 209, 197, 0.4);
+    background: rgba(26, 25, 25, 0.92); 
     border-radius: 10px;
 }
 #api-content-area::-webkit-scrollbar-track {
