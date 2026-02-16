@@ -1,0 +1,72 @@
+/* Exact preservation of Learner Manual Styles */
+.manual-container {
+    --bg-color: #0d1117;
+    --card-bg: #1a1919;
+    --text-color: #e2e8f0;
+    --accent-teal: #4fd1c5;
+    --border-radius: 18px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+}
+
+.manual-container .section {
+    background-color: var(--card-bg) !important;
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-top: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.manual-container .section:hover {
+    border-color: rgba(79, 209, 197, 0.3);
+}
+
+.manual-container .section h2 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.5px;
+}
+
+.manual-container .section h2 svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    fill: var(--accent-teal);
+}
+
+.manual-container .section p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #aaa;
+}
+
+.manual-container ul {
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.manual-container ul li {
+    margin-bottom: 12px;
+    position: relative;
+    font-size: 15px;
+}
+
+.manual-container ul li::before {
+    content: "•";
+    color: var(--accent-teal);
+    font-weight: bold;
+    display: inline-block; 
+    width: 1em;
+    margin-left: -1em;
+}
+
+.manual-container strong {
+    color: #fff;
+    font-weight: 700;
+}
