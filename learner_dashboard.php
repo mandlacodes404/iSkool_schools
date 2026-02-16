@@ -1265,7 +1265,7 @@ button:hover svg {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-        <a href="learner_evaluations.php" target="mainFrame" onclick="updateHeaderTitle('Teacher Evaluations'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
+        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
         <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')">
@@ -1443,6 +1443,8 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchResources();
         } else if (savedPage.includes("announcement_list.php")) {
             window.fetchAnnouncements();
+        } else if (savedPage.includes("evaluation_list.php")) {
+            window.fetchAnnouncements();
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
@@ -1454,6 +1456,7 @@ document.addEventListener("DOMContentLoaded", function () {
             savedPage !== "assignment_list.php" && 
             savedPage !== "resource_list.php" && 
             savedPage !== "discussion_list.php" &&
+             savedPage !== "evaluation_list.php" &&
             savedPage !== "announcement_list.php"
         ) {
             iframe.src = savedPage;
@@ -1478,7 +1481,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const isApiCall = onClick.includes('fetchQuizzes') || 
                           onClick.includes('fetchAssignments') || 
                           onClick.includes('fetchResources') ||
-                          onClick.includes('fetchDiscussions') || 
+                          onClick.includes('fetchDiscussions') ||
+                          onClick.includes('fetchEvaluations') || 
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
@@ -1486,6 +1490,7 @@ const isCached = (onClick.includes('fetchQuizzes') && window.learnerQuizCache) |
                  (onClick.includes('fetchAssignments') && window.learnerAssignmentCache) ||
                  (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
                  (onClick.includes('fetchResources') && window.resourceCache) ||
+                 (onClick.includes('fetchEvaluations') && window.evaluationCache) ||
                  (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
@@ -1718,6 +1723,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive("resource_list.php");
 } else if (lastSaved === "announcement_list.php") {
     window.setActive("announcement_list.php");
+} else if (lastSaved === "evaluation_list.php") {
+    window.setActive("evaluation_list.php");
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
 }
@@ -2035,6 +2042,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/assignments.js?v=1.7"></script>
 <script src="assets/js/resources.js?v=1.9"></script>
 <script src="assets/js/announcements.js?v=1.4"></script>
+<script src="assets/js/evaluations.js?v=1.0"></script>
 <script src="assets/js/discussions.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
