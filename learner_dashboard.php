@@ -1448,6 +1448,15 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
+
+        // THE FIX FOR REFRESH:
+        if (savedPage === "partials/manual.html" || savedPage === "learner_manual.php") {
+            if (apiArea) apiArea.style.display = "block"; // SHOW THIS
+            if (iframe) iframe.style.display = "none";    // HIDE THIS
+            if (typeof loadManual === "function") {
+                loadManual();
+            }
+        }
       // 2. YOUR CASE: If it's NOT an API page AND NOT the manual, 
         // load the specific saved page into the iframe (like profile.php)
         else if (
@@ -1860,12 +1869,17 @@ window.handleHeaderBack = function() {
 
     // 4. GENERAL FALLBACK: Return to Home/Manual
     const apiArea = document.getElementById('api-content-area');
-    if (apiArea) apiArea.style.display = 'none';
-    if (iframe) {
-        iframe.style.display = 'block';
-        iframe.src = 'learner_manual.php';
-    }
+    if (apiArea) apiArea.style.display = 'block'; // Show API
+    if (iframe) iframe.style.display = 'none';   // Hide Iframe
 
+    if (typeof window.loadManual === 'function') {
+        window.loadManual();
+    } else {
+        if (iframe) {
+            iframe.style.display = 'block';
+            iframe.src = 'learner_manual.php';
+        }
+    }
     window.configureHeader({ title: 'Home', mode: 'standard' });
     
     // Update Active UI using the full path
@@ -1911,18 +1925,20 @@ window.loadHome = function() {
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     
-    if (apiArea) apiArea.style.display = 'none';
+    // Switch visibility to the API Area
+    if (apiArea) apiArea.style.display = 'block';
     if (iframe) {
-        iframe.style.display = 'block';
-        iframe.src = 'about:blank' // Force iframe back to home
+        iframe.style.display = 'none';
+        iframe.src = 'about:blank'; 
     }
+      
 
+    if (typeof window.setActive === 'function') {
+        window.setActive("partials/manual.html");
+    }
     // 2. Reset Header & Show Bottom Nav
     window.configureHeader({ title: 'Home', mode: 'standard' });
 
-   if (typeof window.setActive === 'function') {
-        window.setActive("partials/manual.html");
-    }
 };
 </script>
 
