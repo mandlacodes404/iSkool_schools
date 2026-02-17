@@ -36,7 +36,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const response = await fetch('partials/manual.html?v=1.1');
         const html = await response.text();
         
-        // Ensure your manual.css is linked
+        // Ensure your manual.css is  linked
         if (!document.getElementById('manual-style')) {
             const link = document.createElement('link');
             link.id = 'manual-style';
