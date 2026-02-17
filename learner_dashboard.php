@@ -1932,7 +1932,7 @@ window.loadHome = function() {
 <nav id="mobileBottomNav">
 
  
-      <a href="javascript:void(0)" onclick="loadHome()" data-page="learner_manual.php" id="nav-home">
+      <a href="javascript:void(0)" onclick="loadManual()" data-page="partials/manual.html" id="nav-home">
         
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
