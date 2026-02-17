@@ -52,5 +52,6 @@ window.loadManual = async function(containerId = 'api-content-area') {
         apiArea.innerHTML = "<p style='color:red; text-align:center; margin-top:50px;'>Manual could not be loaded.</p>";
     } finally {
         if (loader) loader.style.display = 'none';
+         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
