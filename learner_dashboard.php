@@ -206,7 +206,7 @@ if (!empty($joinedClassIds)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
-    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.1">
     <link rel="stylesheet" href="assets/css/quiz.css?v=1.3">
     <link rel="stylesheet" href="assets/css/manual.css?v=1.0">
     <meta name="theme-color" content="#1a1919">
