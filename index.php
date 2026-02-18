@@ -1,6 +1,6 @@
 <?php
 /**
- * iSkool - Login & Registration Page
+ * iSkool - Login & Registration 
  *
  * Entry point for user authentication and account creation.
  * Features:
