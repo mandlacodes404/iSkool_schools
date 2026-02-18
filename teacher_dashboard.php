@@ -174,7 +174,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     transition: all 0.2s ease;
     white-space: nowrap;
     overflow: hidden;
-    font-weight: 300;
+    font-weight: 200;
 }
 /* --- Add this right before your first @media line --- */
 .sidebar-footer {
