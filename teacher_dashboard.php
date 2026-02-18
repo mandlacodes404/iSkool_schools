@@ -479,21 +479,72 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </div>
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
-    <div class="sidebar-links" style="margin-top:20px;">
-        <a href="teacher_manual.php" target="mainFrame" class="<?= $currentPage==='teacher_manual.php'?'active':'' ?>"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="create_quiz.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_quiz.php'?'active':'' ?>"><i class="fas fa-question-circle"></i><span>Create Quiz</span></a>
-        <a href="teacher_quizzes.php" target="mainFrame" class="<?= $currentPage==='teacher_quizzes.php'?'active':'' ?>"><i class="fas fa-list-check"></i><span>View Quizzes</span></a>
-        <a href="create_assignment.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_assignment.php'?'active':'' ?>"><i class="fas fa-file-alt"></i><span>Create Assignment</span></a>
-        <a href="teacher_assignments.php" target="mainFrame" class="<?= $currentPage==='teacher_assignments.php'?'active':'' ?>"><i class="fas fa-folder-open"></i><span>Assignments</span></a>
-        <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>"><i class="fas fa-bullhorn"></i><span>Create Announcement</span></a>
-        <a href="teacher_announcements.php" target="mainFrame" class="<?= $currentPage==='teacher_announcements.php'?'active':'' ?>"><i class="fas fa-bell"></i><span>Announcements</span></a>
-        <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>"><i class="fas fa-chart-bar"></i><span>Learner Grades</span></a>
-        <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>"><i class="fas fa-book"></i><span>Upload Resource</span></a>
-        <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>"><i class="fas fa-clipboard-check"></i><span>Release Evaluation</span></a>
-        <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>"><i class="fas fa-chart-line"></i><span>Evaluations</span></a>
-        <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>"><i class="fas fa-comments"></i><span>Discussions</span></a>
-        <a href="teacher_analytics.php" target="mainFrame"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
-    </div>
+   <div class="sidebar-links" style="margin-top:20px;">
+    <a href="teacher_manual.php" target="mainFrame" class="<?= $currentPage==='teacher_manual.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+    </a>
+
+    <a href="create_quiz.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_quiz.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        <span>Create Quiz</span>
+    </a>
+
+    <a href="teacher_quizzes.php" target="mainFrame" class="<?= $currentPage==='teacher_quizzes.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span>View Quizzes</span>
+    </a>
+
+    <a href="create_assignment.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_assignment.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+        <span>Create Assignment</span>
+    </a>
+
+    <a href="teacher_assignments.php" target="mainFrame" class="<?= $currentPage==='teacher_assignments.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <span>Assignments</span>
+    </a>
+
+    <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        <span>Create Announcement</span>
+    </a>
+
+    <a href="teacher_announcements.php" target="mainFrame" class="<?= $currentPage==='teacher_announcements.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span>Announcements</span>
+    </a>
+
+    <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+        <span>Learner Grades</span>
+    </a>
+
+    <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Upload Resource</span>
+    </a>
+
+    <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
+        <span>Release Evaluation</span>
+    </a>
+
+    <a href="view_evaluation_results.php" target="mainFrame" class="desktop-only <?= $currentPage==='view_evaluation_results.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span>Evaluations</span>
+    </a>
+
+    <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Discussions</span>
+    </a>
+
+    <a href="teacher_analytics.php" target="mainFrame">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+        <span>Analytics</span>
+    </a>
+</div>
    
 
     <div class="sidebar-footer">
