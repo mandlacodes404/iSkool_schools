@@ -67,7 +67,7 @@ if ($result && $row = $result->fetch_assoc()) {
 
 <meta name="theme-color" content="#1a1919">
 
-<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
