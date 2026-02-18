@@ -42,6 +42,7 @@ $is_mobile = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <title>Quiz Instructions</title>
     <style>
     :root {

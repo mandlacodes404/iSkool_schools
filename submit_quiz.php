@@ -149,6 +149,7 @@ function render_page($title, $icon, $message, $accent = "#4fd1c5") {
     <head>
         <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= $title ?></title>
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
         <style>
