@@ -111,14 +111,20 @@ $schoolLogo = 'uploads/schools/default_school.png';
     box-sizing: border-box;
     position: fixed;
     top: 0;
-    left: 0;
+   left: -240px; /* Hide it to the left */
+   visibility: hidden; /* Add this */
+    opacity: 0;         /* Add this */
     height: 100vh;
     z-index: 5000;
     overflow-y: auto;
     box-shadow: 2px 0 8px rgba(0,0,0,0.2);
     transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
 }
-.sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+.sidebar.desktop-open, .sidebar.active {
+    left: 0;
+    visibility: visible;
+    opacity: 1;
+}
 
 /* Desktop: Round toggle button */
 .sidebar-header {
@@ -151,12 +157,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
 @media (max-width: 768px) {
     .round-toggle { display: none !important; }
 }
-.sidebar.collapsed .round-toggle { opacity: 0; pointer-events: none; position: absolute; left: 50%; transform: translateX(-50%); }
-.sidebar.collapsed:hover .round-toggle { opacity: 1; pointer-events: all; }
+
 
 .teacher-name { margin-top: 8px; font-size: 18px; color: #fff; }
 .teacher-email { font-size: 12px; color: #aaa; margin-top: 4px; }
-.sidebar.collapsed .teacher-name, .sidebar.collapsed .teacher-email { opacity: 0; height: 0; overflow: hidden; margin: 0; }
 
 /* UPDATED SIDEBAR LINKS */
 .sidebar a, .sidebar .footer {
@@ -187,21 +191,17 @@ $schoolLogo = 'uploads/schools/default_school.png';
 }
 .sidebar a:hover { background: rgba(79,209,197,0.08); transform: translateX(3px); }
 .sidebar a.active { background: rgba(79,209,197,0.2); border-left: 4px solid var(--accent-color); }
-.sidebar.collapsed a { justify-content: center; padding: 12px; }
-.sidebar.collapsed a span { display: none; }
 .sidebar a i { font-size: 16px; margin-right: 10px; }  /* smaller icon and closer to text */
-.sidebar.collapsed a i { margin-right: 0; }
 .sidebar .footer { position: absolute; bottom: 15px; width: calc(100% - 40px); font-size: 12px; opacity: 0.7; text-align: center; }
 
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: var(--sidebar-width);
+           margin-left: 0;
             transition: margin-left var(--transition-speed) ease;
             display: flex;
             flex-direction: column;
         }
-        .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); }
 
         .main-header {
             padding: 12px 18px;
@@ -422,6 +422,34 @@ $schoolLogo = 'uploads/schools/default_school.png';
 @media (max-width: 480px) {
     .initials-avatar { font-size: 24px; }
 }
+
+/* Styling the new Desktop Button */
+.desktop-only-btn {
+    display: none; /* Hidden by default (Mobile) */
+    background: #000000;
+    border: 2px solid #333;
+    color: #e2e8f0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-right: 15px;
+}
+
+.desktop-only-btn:hover {
+    background: #111;
+    transform: scale(1.05);
+}
+
+/* Show it only on Desktop */
+@media (min-width: 769px) {
+    .desktop-only-btn {
+        display: flex; /* Appears on screens wider than 768px */
+    }
+}
     </style>
 </head>
 <body>
@@ -479,6 +507,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <div class="main-header">
         
 <button id="mobileToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+<button id="desktopMenuToggle" class="desktop-only-btn">
+        <i class="fas fa-bars"></i>
+    </button>
         
         <div class="logo-container">
             <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:3px solid #757272ff;">
@@ -511,6 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const input = document.getElementById('teacherProfileInput');
     const iframe = document.querySelector('iframe');
     const loader = document.getElementById('loaderOverlay');
+    document.getElementById('desktopMenuToggle')?.addEventListener('click', toggleDesktopSidebar);
 
     // ——————————————————————————————————————————————————————————————————————————————
     // 1. RESTORE STATE: Check if we have a saved page from before the refresh
@@ -587,6 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sidebar.classList.remove('active');
                 if (overlay) overlay.style.display = 'none';
             }
+            sidebar.classList.remove('desktop-open');
         });
     });
 
@@ -626,19 +660,19 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.style.display = 'none';
     });
 
-    // Desktop collapse
     window.toggleDesktopSidebar = () => {
-        if (window.innerWidth > 768) {
-            sidebar.classList.toggle('collapsed');
-            const collapsed = sidebar.classList.contains('collapsed');
-            localStorage.setItem('sidebarCollapsed', collapsed);
-            
-            const svg = document.querySelector('#toggleIcon svg');
-            if (svg) {
-                svg.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
-            }
+    if (window.innerWidth > 768) {
+        // We switch from 'collapsed' to 'desktop-open'
+        sidebar.classList.toggle('desktop-open'); 
+        
+        // Optional: Keep the icon rotation if you like it
+        const collapsed = !sidebar.classList.contains('desktop-open');
+        const svg = document.querySelector('#toggleIcon svg');
+        if (svg) {
+            svg.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
         }
-    };
+    }
+};
 
     // Restore desktop state
     if (window.innerWidth > 768) {
