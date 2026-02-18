@@ -88,7 +88,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0d1117;
@@ -174,6 +174,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     transition: all 0.2s ease;
     white-space: nowrap;
     overflow: hidden;
+    font-weight: 300;
 }
 /* --- Add this right before your first @media line --- */
 .sidebar-footer {
