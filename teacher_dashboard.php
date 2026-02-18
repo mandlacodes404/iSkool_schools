@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const input = document.getElementById('teacherProfileInput');
     const iframe = document.querySelector('iframe');
     const loader = document.getElementById('loaderOverlay');
-    document.getElementById('desktopMenuToggle')?.addEventListener('click', toggleDesktopSidebar);
+    
 
     // ——————————————————————————————————————————————————————————————————————————————
     // 1. RESTORE STATE: Check if we have a saved page from before the refresh
@@ -660,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.style.display = 'none';
     });
 
-    window.toggleDesktopSidebar = () => {
+    window.toggleDesktopSidebar = function() {
     if (window.innerWidth > 768) {
         // We switch from 'collapsed' to 'desktop-open'
         sidebar.classList.toggle('desktop-open'); 
@@ -677,9 +677,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore desktop state
     if (window.innerWidth > 768) {
         const saved = localStorage.getItem('sidebarCollapsed') === 'true';
-        if (saved) {
-            sidebar.classList.add('collapsed');
-        }
+       if (saved) {
+    sidebar.classList.add('desktop-open');
+}
     }
 
     // Settings
@@ -696,6 +696,7 @@ document.addEventListener('DOMContentLoaded', function() {
             overlay.style.display = 'none';
         }
     });
+    document.getElementById('desktopMenuToggle')?.addEventListener('click', toggleDesktopSidebar);
 });
 </script>
 </body>
