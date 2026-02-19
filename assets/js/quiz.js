@@ -179,8 +179,10 @@ function renderQuizCards(groupedData) {
                     <div>
                         <h4>${quiz.title} ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; font-size: 0.8em;"></i>' : ''}</h4>
                         <div class="quiz-info-text">
-                            <i class="fas fa-clock"></i> ${quiz.duration} mins | 
-                            <i class="fas fa-calendar"></i> ${displayDate}
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                             ${quiz.duration} mins | 
+                              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px; margin-left: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                              ${displayDate}
                         </div>
                     </div>
                     ${actionBtn}
