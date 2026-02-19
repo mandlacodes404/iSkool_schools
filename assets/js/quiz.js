@@ -180,7 +180,7 @@ function renderQuizCards(groupedData) {
                         <h4>${quiz.title} ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; font-size: 0.8em;"></i>' : ''}</h4>
                         <div class="quiz-info-text">
                             <i class="fas fa-clock"></i> ${quiz.duration} mins | 
-                            <i class="fas fa-calendar"></i> ${startTimeStr}
+                            <i class="fas fa-calendar"></i> ${displayDate}
                         </div>
                     </div>
                     ${actionBtn}
