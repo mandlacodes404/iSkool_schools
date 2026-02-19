@@ -1,5 +1,12 @@
 /* assets/js/quiz.js */
 window.learnerQuizCache = null; 
+const formatQuizDate = (dateStr) => {
+    if (!dateStr) return "TBD";
+    const date = new Date(dateStr.replace(/-/g, "/"));
+    return date.toLocaleString('en-GB', { 
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true 
+    });
+};
 
 window.fetchQuizzes = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -128,7 +135,8 @@ function renderQuizCards(groupedData) {
     if (!apiArea) return;
 
     let html = ''; 
-    
+    const now = new Date(); // <--- FIX 1: Define 'now' here!
+
     if (!groupedData || Object.keys(groupedData).length === 0) {
         apiArea.innerHTML = "<p style='text-align:center; margin-top:60px; color: #888;'>No quizzes available.</p>";
         return;
@@ -138,7 +146,7 @@ function renderQuizCards(groupedData) {
         html += `<h3 style="margin: 20px 15px 10px;">${subject}</h3>`;
         
         quizzes.forEach(quiz => {
-            const now = new Date();
+            const displayDate = formatQuizDate(quiz.start_time); // Clean version
             let isScheduled = false;
             let startTimeStr = quiz.start_time || "";
             
