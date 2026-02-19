@@ -451,12 +451,13 @@ body {
 
 .desktop-toggle-btn {
     background: none;
-    border: none;
+    border: 2px solid #333;
     color: var(--text-color);
     font-size: 18px;
     cursor: pointer;
     padding: 10px;
     display: none;
+    border-radius: 17px;
     align-items: center;
     justify-content: center;
     transition: color 0.3s ease;
