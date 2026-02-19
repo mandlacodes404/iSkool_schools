@@ -89,13 +89,20 @@
     background: #4fd1c5;
     color: #1a1919;
     border: none;
-    padding: 10px 25px;
-    border-radius: 10px;
-    font-weight: 800;
+    /* Reduced padding: 6px top/bottom, 16px left/right */
+    padding: 6px 16px; 
+    border-radius: 6px;
+    /* Lower weight and size for a cleaner look */
+    font-weight: 600;
+    font-size: 12px;
     cursor: pointer;
-    font-size: 14px;
     transition: all 0.2s ease;
     text-transform: uppercase;
+    /* Added spacing to keep uppercase text readable at small sizes */
+    letter-spacing: 0.5px;
+    /* Ensures buttons don't jump size when text changes (e.g., START vs CLOSED) */
+    min-width: 100px;
+    text-align: center;
 }
 
 .quiz-start-btn:hover {
