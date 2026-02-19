@@ -428,11 +428,11 @@ $schoolLogo = 'uploads/schools/default_school.png';
 .desktop-only-btn {
     display: none; /* Hidden by default (Mobile) */
     background: #000000;
-    border: 2px solid #333;
+    border: 1px solid #333;
     color: #e2e8f0;
     width: 40px;
     height: 40px;
-    border-radius: 17%;
+    border-radius: 19%;
     cursor: pointer;
     align-items: center;
     justify-content: center;
