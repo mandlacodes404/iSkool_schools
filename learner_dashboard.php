@@ -450,14 +450,12 @@ body {
 }
 
 .desktop-toggle-btn {
-    background: none;
-    border: 1px solid #333;
+    background: none; 
     color: var(--text-color);
     font-size: 18px;
     cursor: pointer;
     padding: 10px;
     display: none;
-    border-radius: 19px;
     align-items: center;
     justify-content: center;
     transition: color 0.3s ease;
@@ -1146,6 +1144,8 @@ iframe {
     #desktopMenuToggle {
         display: block;
         background: none;
+        border: 1px solid #333;
+        border-radius: 19px;
         border: none;
         color: var(--text-color);
         font-size: 24px;
