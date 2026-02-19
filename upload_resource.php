@@ -127,8 +127,8 @@ $userQuery->bind_param("ii", $classId, $current_academic_year_id);
     $isPushSent = sendPushToUser(
         $conn, 
         $currentEmail, 
-        "📚 New Resource: " . $title, 
-        "A new study material has been uploaded for your class.",
+        $title, 
+        "A study material has been uploaded.",
         $resourceLink // <--- Passes the deep link to the mobile device
     );
 }

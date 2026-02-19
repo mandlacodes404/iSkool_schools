@@ -432,7 +432,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     color: #e2e8f0;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 8%;
     cursor: pointer;
     align-items: center;
     justify-content: center;
