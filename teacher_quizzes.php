@@ -282,11 +282,16 @@ $stmt->close();
                                     ?>
                                     <div class="quiz" data-quiz-id="<?= $quiz['id'] ?>" data-title="<?= htmlspecialchars($quiz['title']) ?>" data-duration="<?= $quiz['duration'] ?>">
                                         <div class="quiz-header">
-                                            <i class="fas fa-poll quiz-icon"></i>
+                                           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="quiz-icon">
+                                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                            </svg>
                                             <h3><?= htmlspecialchars($quiz['title']) ?></h3>
-                                            <span class="status-badge <?= $status ?>"><?= ucfirst($status) ?></span>
                                             <button class="toggle-details" onclick="toggleDetails(this)">
-                                                <i class="fas fa-chevron-down"></i>
+                                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                  <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg>
                                             </button>
                                         </div>
                                         <div class="quiz-details">
@@ -315,14 +320,16 @@ $stmt->close();
                                             </p>
                                             <p><a class="results-link" href="teacher_quiz_results.php?quiz_id=<?= $quiz['id'] ?>">View Student Results</a></p>
                                             <p>
-    <button class="integrity-report-btn" 
-            style="background:#f39c12; color:white; border:none; padding:8px 14px; border-radius:var(--card-radius); font-weight:700; cursor:pointer;"
-            data-quiz-id="<?= $quiz['id'] ?>" 
-            data-quiz-title="<?= htmlspecialchars($quiz['title']) ?>">
-        <i class="fas fa-shield-alt"></i> Integrity Report
-    </button>
-</p>
-                                            <p><a class="edit-link" href="edit_quiz.php?quiz_id=<?= $quiz['id'] ?>">Edit Quiz</a></p>
+                                              <button class="integrity-report-btn" 
+                                                    style="background:#f39c12; color:white; border:none; padding:8px 14px; border-radius:var(--card-radius); font-weight:700; cursor:pointer;"
+                                                     data-quiz-id="<?= $quiz['id'] ?>" 
+                                                     data-quiz-title="<?= htmlspecialchars($quiz['title']) ?>">
+                                                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                 </svg> Integrity Report
+                                              </button>
+                                             </p>
+                                           
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
