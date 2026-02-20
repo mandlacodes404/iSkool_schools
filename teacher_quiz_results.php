@@ -289,21 +289,13 @@ function formatDuration($seconds) {
 </head>
 <body>
 
-<h2>📊 Results for "<?= htmlspecialchars($quizTitle) ?>"</h2>
+<h2><?= htmlspecialchars($quizTitle) ?></h2>
 
-<div class="sort-options">
-    Sort by:
-    <a href="?quiz_id=<?= $quizId ?>&sort=score_desc">Score ↓</a>
-    <a href="?quiz_id=<?= $quizId ?>&sort=score_asc">Score ↑</a>
-    <a href="?quiz_id=<?= $quizId ?>&sort=submitted_at_desc">Date ↓</a>
-    <a href="?quiz_id=<?= $quizId ?>&sort=submitted_at_asc">Date ↑</a>
-    <a href="?quiz_id=<?= $quizId ?>&sort=time_asc">Time Taken ↑</a>
-    <a href="?quiz_id=<?= $quizId ?>&sort=time_desc">Time Taken ↓</a>
-</div>
+
 
 <?php if ($results->num_rows > 0): ?>
     <div style="text-align: right;">
-        <a href="?quiz_id=<?= $quizId ?>&export=csv" class="export-btn">📥 Download CSV</a>
+       
     </div>
     <table>
         <tr>
@@ -321,7 +313,7 @@ function formatDuration($seconds) {
                 <td><?= htmlspecialchars($row['total']) ?></td>
                 <td><?= formatDuration($row['time_taken']) ?></td>
                 <td><?= date("F j, Y, g:i a", strtotime($row['submitted_at'])) ?></td>
-                <td><a href="review_quiz.php?result_id=<?= $row['result_id'] ?>&by=teacher" class="review-link">Review</a></td>
+                <td><a href="review_quiz.php?result_id=<?= $row['result_id'] ?>&by=teacher" class="review-link">Script</a></td>
             </tr>
         <?php endwhile; ?>
     </table>

@@ -219,10 +219,8 @@ $results->data_seek(0); // Reset result pointer for table rendering
     </style>
 </head>
 <body>
-    <h2>Grades for "<?= htmlspecialchars($quizTitle) ?>"</h2>
-    <input type="text" id="searchBox" placeholder="Search by student name..." autocomplete="off">
-    <ul id="suggestions" style="list-style:none; padding:0; margin-top:5px;"></ul>
-    <button class="download-btn" onclick="downloadMarks()">Download Marks</button>
+    <h2><?= htmlspecialchars($quizTitle) ?></h2>
+    
 
     <?php if ($results->num_rows > 0): ?>
         <table>
