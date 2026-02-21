@@ -195,24 +195,24 @@ const timer = setInterval(() => {
     timeLeft--;
     countdownElement.textContent = timeLeft;
     
-    if (timeLeft <= 0) {
-        clearInterval(timer);
-        
-        // 1. Check if we are inside the Iframe (which we should be)
-        if (window.self !== window.top) {
-            /**
-             * WORLD CLASS REDIRECT:
-             * We tell the Parent (learner_dashboard.php) to reload itself 
-             * with the 'page' parameter set to 'quiz_history.php'.
-             * Your dashboard script (Section 1) will see this and 
-             * automatically load Grades into the iframe.
-             */
-           window.parent.location.search = '?page=quiz_history.php';
-        } else {
-            // 2. Fallback: If for some reason the page is opened directly
-            window.location.href = 'learner_dashboard.php?page=quiz_history.php';
-        }
+if (timeLeft <= 0) {
+    clearInterval(timer);
+    
+    /**
+     * SMART SESSION REDIRECT:
+     * We save the target page to sessionStorage so your Dashboard's 
+     * "Smart Load Logic" can find it even if the URL parameter fails.
+     */
+    sessionStorage.setItem("lastLearnerPage", "quiz_history.php");
+
+    // 2. Redirect to your NEW dashboard filename
+    if (window.self !== window.top) {
+        // From inside the iframe, tell the parent to reload the new dashboard
+        window.parent.location.href = 'index.php'; 
+    } else {
+        window.location.href = 'index.php';
     }
+}
 }, 1000);
         </script>
     </body>
