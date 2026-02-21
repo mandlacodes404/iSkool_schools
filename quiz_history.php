@@ -90,7 +90,10 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-function formatDuration($seconds) {
+function formatDuration($seconds, $maxSeconds = null) {
+    if ($maxSeconds !== null && $seconds > $maxSeconds) {
+        $seconds = $maxSeconds;
+    }
     $minutes = floor($seconds / 60);
     $secs = $seconds % 60;
     return "{$minutes}m {$secs}s";
@@ -835,7 +838,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         <div class="header">
             
             <h2>
-                Grades
+              
                 <?php if ($viewerRole === 'parent'): ?>
                     <small>— <?= htmlspecialchars($targetEmail) ?></small>
                 <?php endif; ?>
@@ -920,7 +923,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                                             <p class="notice">Marks not published yet.</p>
                                         <?php endif; ?>
                                         <p><strong>Duration:</strong> <?= intval($row['duration']) ?> min</p>
-                                        <p><strong>Time Taken:</strong> <?= formatDuration($row['time_taken']) ?></p>
+                                        <p><strong>Time Taken:</strong> <?= formatDuration($row['time_taken'], $row['duration'] * 60) ?></p>
                                         <p><strong>Taken on:</strong> <?= date('F j, Y, g:i a', strtotime($row['submitted_at'])) ?></p>
                                     </div>
                                 </div>
