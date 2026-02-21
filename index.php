@@ -201,18 +201,18 @@ if ($result && $row = $result->fetch_assoc()) {
     
 
 #iskool-brand {
-    display: flex; /* Changed from 'none' to 'flex' to center the SVG */
+    display: flex;
     justify-content: center;
     align-items: center;
     margin: 0 auto 20px auto;
     padding: 10px;
-    /* This ensures it scales nicely on mobile */
     width: 100%;
+    box-sizing: border-box; /* ← ADD THIS */
 }
 
 #iskool-brand svg {
-    width: 100px; 
-    height: 100px;
+    width: 90px; 
+    height: 90px;
     /* Optional: very subtle glow to make the white pop against the dark box */
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
 }
@@ -238,15 +238,16 @@ if ($result && $row = $result->fetch_assoc()) {
     }
 }
 
- .container {
+.container {
     background: transparent;
     box-shadow: none;
     width: 90%;
     max-width: 400px;
-
-    /* ADD THIS — hides it without shifting anything */
     opacity: 0;
     transition: opacity 1s ease;
+    display: flex;          /* ← ADD THIS */
+    flex-direction: column; /* ← ADD THIS */
+    align-items: center;    /* ← ADD THIS */
 }
 
 .container.show {
