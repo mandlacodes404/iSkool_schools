@@ -207,7 +207,7 @@ const timer = setInterval(() => {
              * Your dashboard script (Section 1) will see this and 
              * automatically load Grades into the iframe.
              */
-            window.parent.location.href = 'learner_dashboard.php?page=quiz_history.php';
+           window.parent.location.search = '?page=quiz_history.php';
         } else {
             // 2. Fallback: If for some reason the page is opened directly
             window.location.href = 'learner_dashboard.php?page=quiz_history.php';
