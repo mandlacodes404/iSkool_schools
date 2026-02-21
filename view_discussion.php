@@ -18,18 +18,19 @@ $is_in_class = $user_role === 'learner' && $conn->query("SELECT 1 FROM class_stu
 
 if (!$is_in_class && !$is_tagged_teacher) die("Access denied.");
 
-$creator_query = $conn->query("SELECT profile_picture FROM users WHERE email = '{$disc['creator_email']}'");
+$creator_query = $conn->query("SELECT profile_picture, name, surname FROM users WHERE email = '{$disc['creator_email']}'");
 $creator_row = $creator_query->fetch_assoc();
 $creator_pic = $creator_row['profile_picture'] ?? 'default.png';
-$creator_display = $disc['creator_anonymous'] && $user_role === 'learner' 
-    ? 'Anonymous' 
-    : ($disc['creator_name'] ?: 'Learner');
+$creator_full_name = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
+$creator_display = $disc['creator_anonymous'] && $user_role === 'learner'
+    ? 'Anonymous'
+    : ($creator_full_name ?: ($disc['creator_name'] ?: 'Learner'));
 
 $replies_query = $conn->query("
-    SELECT r.*, u.profile_picture,
+    SELECT r.*, u.profile_picture, u.name AS u_name, u.surname AS u_surname,
            CASE 
                WHEN r.replier_anonymous = 1 AND '$user_role' = 'learner' THEN 'Anonymous'
-               ELSE COALESCE(r.replier_name, 'Learner')
+               ELSE TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,'')))
            END AS replier_display,
            (r.replier_email = '$user_email') AS is_me
     FROM discussion_replies r
@@ -1192,6 +1193,156 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     // ── SCROLL TO BOTTOM ON LOAD ──
     const scroll = document.getElementById('postsScroll');
     if (scroll) scroll.scrollTop = scroll.scrollHeight;
+
+    // ── LIVE POLLING ──
+    const DISC_ID   = <?= $disc_id ?>;
+    const USER_EMAIL = <?= json_encode($user_email) ?>;
+    const USER_ROLE  = <?= json_encode($user_role) ?>;
+    let lastReplyId  = <?= !empty($replies) ? (int)end($replies)['id'] : 0 ?>;
+    let isPolling    = false;
+    let pollInterval = null;
+
+    function formatPostDate(dateStr) {
+        const d = new Date(dateStr.replace(' ', 'T'));
+        return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })
+            + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function buildPostCard(r) {
+        const isMe       = r.is_me == 1;
+        const showAvatar = !(r.replier_anonymous == 1 && USER_ROLE === 'learner');
+        const displayName = (r.replier_anonymous == 1 && USER_ROLE === 'learner') ? 'Anonymous' : (r.replier_display || 'Learner');
+        const initial    = displayName.charAt(0).toUpperCase();
+        const avatarHTML = showAvatar
+            ? `<img src="uploads/learners/${r.profile_picture || 'default.png'}" class="post-avatar"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+               <div class="post-avatar-placeholder" style="display:none;">${initial}</div>`
+            : `<div class="post-avatar-placeholder">?</div>`;
+
+        let quoteHTML = '';
+        if (r.quote_author) {
+            quoteHTML = `<div class="reply-quote">
+                <div class="quote-author">${escHtml(r.quote_author)}</div>
+                <div class="quote-text">${escHtml(r.quote_text)}${r.quote_text.length >= 100 ? '…' : ''}</div>
+            </div>`;
+        }
+
+        let attachHTML = '';
+        if (r.attachment) {
+            const ext = r.attachment.split('.').pop().toLowerCase();
+            const path = 'uploads/discussions/' + r.attachment;
+            const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
+            attachHTML = `<div class="post-attachment">` + (isImg
+                ? `<img src="${path}" alt="Attachment" onclick="openMedia('${path}','image')">`
+                : `<div class="pdf-link" onclick="openMedia('${path}','pdf')">
+                       <i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span>
+                   </div>`) + `</div>`;
+        }
+
+        const replyBtn = `<button class="action-btn reply-btn"
+            onclick="setReply(${r.id}, '${escHtml(displayName)}', '${escHtml((r.message||'').substring(0,100))}')">
+            <i class="fas fa-reply"></i> Reply
+        </button>`;
+        const reportBtn = (USER_ROLE === 'learner' && !isMe)
+            ? `<button class="action-btn report-btn" onclick="showReportModal(${r.id}, ${DISC_ID})">
+                   <i class="fas fa-flag"></i> Report
+               </button>` : '';
+
+        const meBadge = isMe ? `<span class="me-tag">You</span>` : '';
+
+        return `<div class="post-card ${isMe ? 'is-me' : ''}" data-id="${r.id}" style="animation: fadeUp 0.35s ease both;">
+            <div class="post-header">
+                ${avatarHTML}
+                <div class="post-meta">
+                    <div class="post-author">${escHtml(displayName)} ${meBadge}</div>
+                    <div class="post-time">${formatPostDate(r.created_at)}</div>
+                </div>
+            </div>
+            ${quoteHTML}
+            <div class="post-body">${escHtml(r.message || '').replace(/\n/g, '<br>')}</div>
+            ${attachHTML}
+            <div class="post-footer">${replyBtn}${reportBtn}</div>
+        </div>`;
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
+
+    async function pollReplies() {
+        if (isPolling) return;
+        isPolling = true;
+        try {
+            const res = await fetch(`api/get_new_replies.php?discussion_id=${DISC_ID}&after_id=${lastReplyId}`);
+            if (!res.ok) return;
+            const newReplies = await res.json();
+            if (!Array.isArray(newReplies) || newReplies.length === 0) return;
+
+            const postsScroll = document.getElementById('postsScroll');
+            const bottom      = document.getElementById('bottom');
+            const wasAtBottom = postsScroll.scrollHeight - postsScroll.scrollTop - postsScroll.clientHeight < 80;
+
+            newReplies.forEach(r => {
+                const card = document.createElement('div');
+                card.innerHTML = buildPostCard(r).trim();
+                postsScroll.insertBefore(card.firstChild, bottom);
+                lastReplyId = Math.max(lastReplyId, r.id);
+            });
+
+            if (wasAtBottom) {
+                postsScroll.scrollTop = postsScroll.scrollHeight;
+            } else {
+                showNewMessageBanner(newReplies.length);
+            }
+        } catch (e) {
+            // Silently fail — don't interrupt the user
+        } finally {
+            isPolling = false;
+        }
+    }
+
+    // New-message nudge banner
+    function showNewMessageBanner(count) {
+        let banner = document.getElementById('newMsgBanner');
+        if (!banner) {
+            banner = document.createElement('button');
+            banner.id = 'newMsgBanner';
+            banner.style.cssText = `
+                position: sticky; bottom: 12px; left: 50%; transform: translateX(-50%);
+                background: var(--accent); color: #0d1117;
+                border: none; border-radius: 20px; padding: 8px 18px;
+                font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
+                cursor: pointer; display: block; margin: 0 auto;
+                box-shadow: 0 4px 16px rgba(79,209,197,0.4);
+                animation: fadeUp 0.3s ease;
+                z-index: 50;
+            `;
+            banner.onclick = () => {
+                scroll.scrollTop = scroll.scrollHeight;
+                banner.remove();
+            };
+            document.getElementById('postsScroll').appendChild(banner);
+        }
+        banner.textContent = `↓ ${count} new message${count > 1 ? 's' : ''}`;
+    }
+
+    // Start polling every 4 seconds
+    pollInterval = setInterval(pollReplies, 4000);
+
+    // Stop polling when tab is hidden to save resources
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearInterval(pollInterval);
+        } else {
+            pollReplies(); // Immediately catch up
+            pollInterval = setInterval(pollReplies, 4000);
+        }
+    });
 
     // ── BACK NAVIGATION ──
     function goBackToDiscussions() {
