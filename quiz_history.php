@@ -846,7 +846,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
 
            <div style="text-align:center; margin:30px 0;">
     <button onclick="generateProgressReport()" class="report-button">
-    <i class="fas fa-file-invoice"></i> Generate Progress Report
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Generate Progress Report
 </button>
 </div>
             <?php if (!empty($groupedResults)): ?>
@@ -873,7 +873,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                             <span class="file-count">(<?= count($quizzes) ?> assessment<?= count($quizzes) > 1 ? 's' : '' ?>)</span>
                         </h3>
                         <button class="toggle-teacher" type="button">
-                            <i class="fas fa-chevron-down"></i>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                     </div>
 
@@ -883,7 +883,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                             <button type="button" class="toggle-term-marks" 
                                     style="background:none; border:none; color:#8b949e; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:5px;" 
                                     onclick="event.stopPropagation(); toggleTermMarks(this)">
-                                <i class="fas fa-calculator"></i> TERM MARKS
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg> TERM MARKS
                             </button>
                         </div>
 
@@ -896,18 +896,22 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
                                      data-score="<?= $isUnpublished ? '0' : $row['score'] ?>" 
                                      data-total="<?= $row['total'] ?>">
                                     <div class="quiz-header">
-                                        <i class="<?= $isUnpublished ? 'fas fa-lock lock-icon' : 'fas fa-poll quiz-icon' ?>"></i>
+                                        <?php if ($isUnpublished): ?>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<?php else: ?>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="quiz-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+<?php endif; ?>
                                         <h3>
                                             <?= $row['publish_marks'] == 1 
                                                 ? '<a href="review_quiz.php?result_id='.htmlspecialchars($row['result_id']).'">'.htmlspecialchars($row['quiz_title']).'</a>'
                                                 : htmlspecialchars($row['quiz_title']) ?>
                                             <?php if (!empty($row['is_summative'])): ?>
-                                                <i class="fas fa-check-circle" style="color:#4fd1c5; margin-left:6px; font-size:0.9em;" title="Counts toward term mark"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px;" title="Counts toward term mark"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                                             <?php endif; ?>
                                         </h3>
                                         <button class="toggle-details" onclick="event.stopPropagation(); toggleDetails(this)">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </button>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s ease;"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
                                     </div>
                                     <div class="quiz-details">
                                         <?php if ($row['publish_marks'] == 1): ?>
@@ -989,7 +993,7 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         <hr style="width: 100%; border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
 
         <div class="modal-description" style="text-align: left; color: #8b949e; font-size: 12px; line-height: 1.6; font-weight: normal;">
-            <p style="margin: 0 0 5px 0;"><i class="fas fa-info-circle" style="margin-right: 5px;"></i> <strong>How to read this:</strong></p>
+            <p style="margin: 0 0 5px 0;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> <strong>How to read this:</strong></p>
             <ul style="list-style: none; padding: 0; margin: 0;">
                 <li><span style="color: #00aaff;">●</span> The <b>Blue Dot</b> is your personal score.</li>
                 <li><span style="color: #ff4d4d;">|</span> The <b>Red Line</b> is the lowest score in class.</li>
@@ -1023,13 +1027,13 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
     }
 
     function toggleDetails(btn) {
-        event.stopPropagation();
-        const details = btn.parentElement.nextElementSibling;
-        const expanded = details.style.display === 'block';
-        details.style.display = expanded ? 'none' : 'block';
-        btn.querySelector('i').classList.toggle('fa-chevron-down', expanded);
-        btn.querySelector('i').classList.toggle('fa-chevron-up', !expanded);
-    }
+    event.stopPropagation();
+    const details = btn.parentElement.nextElementSibling;
+    const expanded = details.style.display === 'block';
+    details.style.display = expanded ? 'none' : 'block';
+    const svg = btn.querySelector('svg');
+    if (svg) svg.style.transform = expanded ? 'rotate(0deg)' : 'rotate(180deg)';
+}
 
     function toggleTermMarks(btn) {
         const section = btn.closest('.teacher-section');
@@ -1040,11 +1044,11 @@ function renderTermMarksTable($quizzes, $selectedTerm) {
         if (isInTermMode) {
             original.style.display = 'block';
             termView.style.display = 'none';
-            btn.innerHTML = '<i class="fas fa-calculator"></i> TERM MARKS';
+           btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg> TERM MARKS';
         } else {
             original.style.display = 'none';
             termView.style.display = 'block';
-            btn.innerHTML = '<i class="fas fa-list"></i> QUIZ LIST';
+           btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> QUIZ LIST';
         }
     }
 
