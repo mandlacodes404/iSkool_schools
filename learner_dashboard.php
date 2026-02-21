@@ -1575,9 +1575,13 @@ const isCached = (onClick.includes('loadManual') && window.manualCache) ||
             const win = iframe.contentWindow;
             const fullPage = win.location.pathname.split("/").pop() + win.location.search;
             
-            if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== "") {
-               // UPDATE THIS LINE: Change localStorage to sessionStorage
-                sessionStorage.setItem("lastLearnerPage", fullPage);
+            // ADD these to the exclusion list:
+if (fullPage && 
+    !fullPage.startsWith('blank.php') && 
+    !fullPage.startsWith('submit_quiz.php') &&   // ADD THIS
+    !fullPage.startsWith('take_quiz.php') &&      // ADD THIS (safety)
+    fullPage !== "") {
+    sessionStorage.setItem("lastLearnerPage", fullPage);
                 const filename = win.location.pathname.split("/").pop();
                 setActive(filename);
             }
@@ -1900,9 +1904,6 @@ if (mainFrame) {
 
            if (page === 'learner_manual.php' || page === 'manual.html' || page === '' || page === 'index.php') {
     window.configureHeader({ title: 'Home', mode: 'standard' });
-}
-else if (page === 'quiz_history.php') {
-    window.configureHeader({ title: 'My Grades', mode: 'standard' });
 }
             else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
                 

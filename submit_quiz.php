@@ -198,36 +198,38 @@ const timer = setInterval(() => {
 if (timeLeft <= 0) {
     clearInterval(timer);
 
-    // 1. Update the "Memory" so a refresh doesn't break anything
-    sessionStorage.setItem("lastLearnerPage", "quiz_history.php");
+    if (window.parent && window.parent !== window) {
+        const p = window.parent;
 
-    // 2. Talk to the Parent (The Dashboard Brain)
-    if (window.parent && window.parent.document) {
-        const p = window.parent; // Shortcut to parent window
+        // A. Set session memory FIRST
+        sessionStorage.setItem("lastLearnerPage", "quiz_history.php");
 
-        // A. Reset the UI: Show Sidebar/Nav and Logo again
+        // B. Configure header immediately (before src change causes flicker)
         if (typeof p.configureHeader === 'function') {
             p.configureHeader({ title: 'My Grades', mode: 'standard' });
         }
 
-        // B. Toggle Visibility: Hide the API area, Show the Iframe
+        // C. Get references
         const apiArea = p.document.getElementById('api-content-area');
-        const iframe = p.document.getElementById('mainFrame');
-        
+        const iframe  = p.document.getElementById('mainFrame');
+
+        // D. Show iframe FIRST, then change src (prevents blank flash)
         if (apiArea) apiArea.style.display = 'none';
         if (iframe) {
             iframe.style.display = 'block';
-            iframe.src = 'quiz_history.php'; // Load the actual grades
+            // Small delay lets the display change render before src swap
+            setTimeout(() => {
+                iframe.src = 'quiz_history.php';
+            }, 50);
         }
 
-        // C. Update Sidebar Highlight
+        // E. Update sidebar highlight
         if (typeof p.setActive === 'function') {
             p.setActive('quiz_history.php');
         }
 
     } else {
-        // Fallback: If not in an iframe, just go to the dashboard
-        window.location.href = 'index.php';
+        window.location.href = 'learner_dashboard.php';
     }
 }
 }, 1000);
