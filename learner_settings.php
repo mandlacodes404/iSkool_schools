@@ -280,7 +280,7 @@ if (empty($initials)) { $initials = "??"; }
                 </li>
 
                 <li>
-                    <a href="logout.php" target="_top" class="btn logout-link" onclick="localStorage.removeItem('lastLearnerPage');">
+                    <a href="logout.php" target="_top" class="btn logout-link" onclick="sessionStorage.removeItem('lastLearnerPage');">
     <i class="fas fa-sign-out-alt"></i> Logout
 </a>
                 </li>
@@ -322,38 +322,13 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(res => res.json())
     .then(data => {
         if (data.success && iframeWindow) {
-            // Find the wrapper in the Sidebar (Parent)
-            const avatarWrapper = iframeWindow.document.querySelector('.profile-picture-wrapper');
-            
-            if (avatarWrapper) {
-                // We use the initials we calculated in PHP at the top
-                const phpInitials = <?= json_encode($initials) ?>;
-                
-                // REBUILD THE INITIALS DIV (Exactly like the Dashboard's style)
-                // REBUILD WITH THE CHARCOAL & SILVER STYLE
-                avatarWrapper.innerHTML = `
-                    <div class="initials-avatar" style="
-                        width: 40px; 
-                        height: 40px; 
-                        border-radius: 50%; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center; 
-                        background-color: #2d2d2d; 
-                        color: #a0a0a0; 
-                        font-size: 14px; 
-                        font-weight: 800; 
-                        border: 3px solid #757272ff; 
-                        user-select: none; 
-                        text-transform: uppercase; 
-                        letter-spacing: -1px;
-                    ">
-                        ${phpInitials}
-                    </div>
-                `;
-            }
-            alert('Profile picture removed!');
-        } else {
+    // Use the brain's safe reset function instead of innerHTML
+    if (typeof iframeWindow.resetAvatarUI === 'function') {
+        const phpInitials = <?= json_encode($initials) ?>;
+        iframeWindow.resetAvatarUI(phpInitials);
+    }
+    alert('Profile picture removed!');
+} else {
             alert(data.error || 'Failed to remove');
         }
     })

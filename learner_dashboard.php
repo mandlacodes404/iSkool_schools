@@ -1605,57 +1605,75 @@ if (fullPage &&
         if (apiArea) apiArea.style.display = 'none';
     });
 
-    const avatarWrapper = document.querySelector(".profile-picture-wrapper");
-    const profileInput = document.getElementById("profileInput");
+   const avatarWrapper = document.querySelector(".profile-picture-wrapper");
+const profileInput = document.getElementById("profileInput");
 
-    if (avatarWrapper && profileInput) {
-        profileInput.addEventListener("change", function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
+// Shared function to update avatar instantly in the sidebar
+window.updateAvatarUI = function(imageUrl) {
+    let img = avatarWrapper.querySelector('img.learner-avatar');
+    if (img) {
+        // Already has a photo — just swap the src
+        img.src = imageUrl;
+    } else {
+        // Had initials — remove initials div, create img, keep file input intact
+        const initialsDiv = avatarWrapper.querySelector('.initials-avatar');
+        if (initialsDiv) initialsDiv.remove();
 
-            // 1. Show the processing loader
-            const globalLoader = document.getElementById("loaderOverlay");
-            if (globalLoader) globalLoader.style.display = 'flex';
+        const newImg = document.createElement('img');
+        newImg.alt = "Profile Picture";
+        newImg.className = "learner-avatar";
+        newImg.style.cssText = "width:40px;height:40px;border-radius:50%;object-fit:cover;border:3px solid #757272ff;";
+        newImg.src = imageUrl;
 
-            const fd = new FormData();
-            fd.append("profile", file);
-
-            fetch("upload_profile.php", { method: "POST", body: fd })
-                .then(r => r.json())
-                .then(data => {
-                    if (globalLoader) globalLoader.style.display = 'none';
-
-                    if (data.success) {
-                        // 2. Build the correct path (lowercase 'uploads')
-                        const newImageUrl = "uploads/learners/" + data.file + "?t=" + new Date().getTime();
-                        
-                        // 3. Find or Create the image tag
-                        let img = avatarWrapper.querySelector('img');
-                        
-                        if (!img) {
-                            // If user had initials, replace them with a new img tag
-                            avatarWrapper.innerHTML = `
-                                <img src="${newImageUrl}" 
-                                     alt="Profile Picture" 
-                                     class="learner-avatar"
-                                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
-                            `;
-                        } else {
-                            // If image already existed, just update the source
-                            img.src = newImageUrl;
-                        }
-                    } else {
-                        alert(data.error || "Upload failed");
-                    }
-                })
-                .catch(err => {
-                    if (globalLoader) globalLoader.style.display = 'none';
-                    console.error("Upload Error:", err);
-                    alert("A connection error occurred during upload.");
-                });
-        });
+        // Insert BEFORE the file input so input stays in DOM
+        avatarWrapper.insertBefore(newImg, profileInput);
     }
+};
 
+// Shared function to revert back to initials
+window.resetAvatarUI = function(initials) {
+    const img = avatarWrapper.querySelector('img.learner-avatar');
+    if (img) img.remove();
+
+    if (!avatarWrapper.querySelector('.initials-avatar')) {
+        const div = document.createElement('div');
+        div.className = 'initials-avatar';
+        div.textContent = initials;
+        avatarWrapper.insertBefore(div, profileInput);
+    }
+};
+
+if (avatarWrapper && profileInput) {
+    profileInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Show instant preview BEFORE upload completes (no loader needed)
+        const previewUrl = URL.createObjectURL(file);
+        window.updateAvatarUI(previewUrl);
+
+        const fd = new FormData();
+        fd.append("profile", file);
+
+        fetch("upload_profile.php", { method: "POST", body: fd })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Swap blob preview with real permanent server URL
+                    const serverUrl = "uploads/learners/" + data.file + "?t=" + Date.now();
+                    window.updateAvatarUI(serverUrl);
+                } else {
+                    alert(data.error || "Upload failed");
+                }
+                profileInput.value = ''; // Reset so same file can be picked again
+            })
+            .catch(err => {
+                console.error("Upload Error:", err);
+                alert("A connection error occurred during upload.");
+                profileInput.value = '';
+            });
+    });
+}
     // ────────────────────────────────────────────────────────────────────────
     // 4. SIDEBAR & MY CLASS (Your original working logic)
     // ────────────────────────────────────────────────────────────────────────
