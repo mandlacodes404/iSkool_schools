@@ -491,7 +491,7 @@ $learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
 
     <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-        <small style="color:#8b949e;">This assignment automatically belongs to the current term.</small>
+       
     </div>
 
     <label for="attachment">Attachment (optional):</label>

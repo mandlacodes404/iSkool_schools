@@ -1104,7 +1104,6 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
 
         <div class="quiz-info">
             Duration: <?= $quizDuration ?> minutes
-            <span class="status-badge <?= htmlspecialchars($status) ?>"><?= ucfirst(htmlspecialchars($status)) ?></span>
         </div>
         <div id="timer" aria-live="polite">
             <div class="timer-circle">

@@ -1811,16 +1811,22 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
     if (titleEl) titleEl.innerText = title;
 
     if (mode === 'detail') {
-        // --- DETAIL MODE: IM-MER-SIVE ---
-        // This will now successfully hide the nav because the CSS isn't using !important anymore
-        if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
-        
-        if (mobileBtn) mobileBtn.style.display = 'none';             
-        if (desktopBtn) desktopBtn.style.display = 'none';
+    if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
+    if (mobileBtn) mobileBtn.style.display = 'none';             
+    if (desktopBtn) desktopBtn.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'flex';
+
+    if (window.innerWidth <= 768) {
+        // MOBILE: Hide logo but show the title text to fill the space
+        if (logoEl) logoEl.style.display = 'none';
+        if (titleEl) titleEl.style.display = 'block';  // ← SHOW TEXT
+        if (rightSide) rightSide.style.visibility = 'visible';
+    } else {
+        // DESKTOP: Immersive — hide both logo and right side
         if (logoEl) logoEl.style.display = 'none';
         if (rightSide) rightSide.style.visibility = 'hidden'; 
-        if (backBtn) backBtn.style.display = 'flex';                 
-    } else {
+    }
+} else {
         // --- STANDARD MODE: EXPLORATION ---
         // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
         if (mobileBottomNav) {
@@ -1833,6 +1839,7 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         
         if (backBtn) backBtn.style.display = 'none';
         if (logoEl) logoEl.style.display = 'block';
+if (window.innerWidth <= 768 && titleEl) titleEl.style.display = 'none'; // ← HIDE TEXT on mobile in standard mode
         if (rightSide) rightSide.style.visibility = 'visible';
 
         // Decide which menu button to show based on screen size

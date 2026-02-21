@@ -480,7 +480,7 @@ if ($subResult->num_rows > 0) {
 
     <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-        <small style="color:#8b949e;">This announcement automatically belongs to the current term.<br></small>
+        
     </div>
 
     <label for="send_to">Send Email Alert To:</label>

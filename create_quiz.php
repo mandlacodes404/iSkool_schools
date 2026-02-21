@@ -607,7 +607,11 @@ input[type="radio"]:checked + .mode-card i {
 </style>
 </head>
 <body>
-  <h1><i class="fas fa-poll"></i> Create a New Quiz</h1>
+  <h1><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="quiz-icon">
+                                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                            </svg> Create a New Quiz</h1>
   <form id="quizForm" action="create_quiz.php" method="POST" enctype="multipart/form-data">
     <label>Quiz Title:</label>
     <input type="text" name="quiz_title" required aria-label="Quiz title">
@@ -653,7 +657,7 @@ input[type="radio"]:checked + .mode-card i {
 
   <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-        <small style="color:#8b949e;">This quiz will automatically belong to the current term.
+      
        </small>
     </div>
 

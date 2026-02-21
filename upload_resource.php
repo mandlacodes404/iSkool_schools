@@ -627,7 +627,7 @@ $userQuery->bind_param("ii", $classId, $current_academic_year_id);
 
         <div style="background:#1a202c; padding:18px; border-radius:12px; border-left:5px solid #4fd1c5; margin:28px 0 10px; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.35rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-        <small style="color:#8b949e;">This resource will automatically belong to the current term.<br>You (Super Admin) control the current term globally.</small>
+        
     </div>
 
         <label for="resource">Select File:</label>
