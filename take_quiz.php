@@ -569,9 +569,18 @@ $loadStmt->close();
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Desktop: shift content left so palette + timer have breathing room */
+@media (min-width: 769px) {
+    .container {
+        margin-left: 40px;      /* left breathing room */
+        margin-right: 260px;    /* leaves space for the 220px palette + gap */
+        max-width: none;
+    }
+}
 
         h2 {
             font-size: 28px;
@@ -602,30 +611,50 @@ $loadStmt->close();
         }
 
         #timer {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            color: var(--text-color);
-            padding: 10px 20px;
-            border-radius: var(--card-radius);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            font-size: 18px;
-            font-weight: 600;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    color: var(--text-color);
+    padding: 10px 20px;
+    border-radius: var(--card-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    font-weight: 600;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Mobile: ensure it's always visible above content */
+    min-width: 130px;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+}
 
-        @media (min-width: 769px) {
-            #timer {
-                left: auto;
-                right: 20px;
-                transform: none;
-            }
-        }
+@media (min-width: 769px) {
+    #timer {
+        left: auto;
+        right: 20px;
+        transform: none;
+        top: 20px;
+    }
+}
+
+/* Mobile: pin to top, full width strip */
+@media (max-width: 768px) {
+    #timer {
+        top: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        border-radius: 0;
+        box-sizing: border-box;
+        justify-content: center;
+        z-index: 1001;
+    }
+}
 
         .timer-circle {
             width: 40px;
@@ -1079,6 +1108,14 @@ body { padding: 0 !important; margin: 0 !important; background-color: #000 !impo
 /* Ensure the rest of the quiz doesn't start underneath the button */
 .container {
     margin-top: 60px !important;
+}
+/* ADD THIS RIGHT HERE */
+@media (max-width: 768px) {
+    .container {
+        margin-top: 70px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 }
 
 @media (max-width: 768px) {
