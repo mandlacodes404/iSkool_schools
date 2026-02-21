@@ -1901,6 +1901,9 @@ if (mainFrame) {
            if (page === 'learner_manual.php' || page === 'manual.html' || page === '' || page === 'index.php') {
     window.configureHeader({ title: 'Home', mode: 'standard' });
 }
+else if (page === 'quiz_history.php') {
+    window.configureHeader({ title: 'My Grades', mode: 'standard' });
+}
             else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
                 
                 // If we are actually TAKING the quiz, don't force a title here.

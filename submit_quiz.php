@@ -197,19 +197,36 @@ const timer = setInterval(() => {
     
 if (timeLeft <= 0) {
     clearInterval(timer);
-    
-    /**
-     * SMART SESSION REDIRECT:
-     * We save the target page to sessionStorage so your Dashboard's 
-     * "Smart Load Logic" can find it even if the URL parameter fails.
-     */
+
+    // 1. Update the "Memory" so a refresh doesn't break anything
     sessionStorage.setItem("lastLearnerPage", "quiz_history.php");
 
-    // 2. Redirect to your NEW dashboard filename
-    if (window.self !== window.top) {
-        // From inside the iframe, tell the parent to reload the new dashboard
-        window.parent.location.href = 'index.php'; 
+    // 2. Talk to the Parent (The Dashboard Brain)
+    if (window.parent && window.parent.document) {
+        const p = window.parent; // Shortcut to parent window
+
+        // A. Reset the UI: Show Sidebar/Nav and Logo again
+        if (typeof p.configureHeader === 'function') {
+            p.configureHeader({ title: 'My Grades', mode: 'standard' });
+        }
+
+        // B. Toggle Visibility: Hide the API area, Show the Iframe
+        const apiArea = p.document.getElementById('api-content-area');
+        const iframe = p.document.getElementById('mainFrame');
+        
+        if (apiArea) apiArea.style.display = 'none';
+        if (iframe) {
+            iframe.style.display = 'block';
+            iframe.src = 'quiz_history.php'; // Load the actual grades
+        }
+
+        // C. Update Sidebar Highlight
+        if (typeof p.setActive === 'function') {
+            p.setActive('quiz_history.php');
+        }
+
     } else {
+        // Fallback: If not in an iframe, just go to the dashboard
         window.location.href = 'index.php';
     }
 }
