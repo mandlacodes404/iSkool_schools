@@ -82,7 +82,7 @@ if ($termRow = $termStmt->fetch_assoc()) {
 
 // Fetch all quiz results
 $sql = "
-    SELECT DISTINCT 
+    SELECT 
         r.id AS result_id, r.score, r.total, r.submitted_at, r.time_taken,
         q.id AS quiz_id, q.title AS quiz_title, q.duration, q.publish_marks,
         q.is_summative, q.weight_percent, q.term_number,
@@ -92,17 +92,18 @@ $sql = "
     FROM quiz_results r
     JOIN quizzes q ON r.quiz_id = q.id
     JOIN class_students cs ON q.class_id = cs.class_id 
-                         AND cs.student_email = ? 
+                         AND cs.student_email = r.user_email        -- ties class to THIS learner's result
                          AND cs.academic_year_id = ?
-    LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
+    LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by 
+                                  AND ts.class_id = q.class_id
     LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
-    WHERE r.user_email = ? 
+    WHERE r.user_email = ?                                           -- only this learner's results
       AND q.academic_year_id = ?
     ORDER BY display_group ASC, r.submitted_at DESC
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssii", $targetEmail, $current_academic_year_id, $targetEmail, $current_academic_year_id);
+$stmt->bind_param("isi", $current_academic_year_id, $targetEmail, $current_academic_year_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
