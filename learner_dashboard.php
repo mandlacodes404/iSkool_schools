@@ -1461,16 +1461,18 @@ document.addEventListener("DOMContentLoaded", function () {
       // 2. YOUR CASE: If it's NOT an API page AND NOT the manual, 
         // load the specific saved page into the iframe (like profile.php)
         else if (
-            savedPage !== "learner_manual.php" && 
-            savedPage !== "quiz_list.php" && 
-            savedPage !== "assignment_list.php" && 
-            savedPage !== "resource_list.php" && 
-            savedPage !== "discussion_list.php" &&
-             savedPage !== "evaluation_list.php" &&
-            savedPage !== "announcement_list.php"
-        ) {
-            iframe.src = savedPage;
-        }
+    savedPage !== "learner_manual.php" && 
+    savedPage !== "quiz_list.php" && 
+    savedPage !== "assignment_list.php" && 
+    savedPage !== "resource_list.php" && 
+    savedPage !== "discussion_list.php" &&
+    savedPage !== "evaluation_list.php" &&
+    savedPage !== "announcement_list.php"
+) {
+    iframe.style.display = 'block';   // ← ADD THIS
+    if (apiArea) apiArea.style.display = 'none'; // ← ADD THIS
+    iframe.src = savedPage;
+}
        // 3. If it IS the manual, trigger the function to load from /partials
         else {
             if (typeof loadManual === "function") {
@@ -1902,22 +1904,27 @@ if (mainFrame) {
             const path = mainFrame.contentWindow.location.pathname;
             const page = path.split("/").pop();
 
-           if (page === 'learner_manual.php' || page === 'manual.html' || page === '' || page === 'index.php') {
-    window.configureHeader({ title: 'Home', mode: 'standard' });
-}
-            else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || page === 'submit_assignment.php') {
-                
-                // If we are actually TAKING the quiz, don't force a title here.
-                // The syncWithDashboard() inside take_quiz.php will handle it.
+            if (page === 'learner_manual.php' || page === 'manual.html' || 
+                page === '' || page === 'index.php') {
+                window.configureHeader({ title: 'Home', mode: 'standard' });
+            }
+            // ADD THIS BLOCK ↓
+            else if (page === 'quiz_history.php') {
+                mainFrame.style.display = 'block';
+                const apiArea = document.getElementById('api-content-area');
+                if (apiArea) apiArea.style.display = 'none';
+                window.configureHeader({ title: 'My Grades', mode: 'standard' });
+            }
+            // END ADD ↑
+            else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || 
+                     page === 'submit_assignment.php') {
                 if (page === 'take_quiz.php') {
                     window.configureHeader({ mode: 'detail' }); 
                     return; 
                 }
-
                 let detailTitle = 'Details';
                 if (page.includes('quiz')) detailTitle = 'Instructions';
                 if (page.includes('assignment')) detailTitle = 'Submission';
-
                 window.configureHeader({ title: detailTitle, mode: 'detail' });
             }
         } catch (e) {

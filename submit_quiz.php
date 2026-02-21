@@ -201,29 +201,27 @@ if (timeLeft <= 0) {
     if (window.parent && window.parent !== window) {
         const p = window.parent;
 
-        // A. Set session memory FIRST
-        sessionStorage.setItem("lastLearnerPage", "quiz_history.php");
+        // Update session memory
+        try { p.sessionStorage.setItem("lastLearnerPage", "quiz_history.php"); } catch(e) {}
 
-        // B. Configure header immediately (before src change causes flicker)
+        const apiArea = p.document.getElementById('api-content-area');
+        const mainFrame = p.document.getElementById('mainFrame'); // USE mainFrame not iframe
+
+        // Configure header first
         if (typeof p.configureHeader === 'function') {
             p.configureHeader({ title: 'My Grades', mode: 'standard' });
         }
 
-        // C. Get references
-        const apiArea = p.document.getElementById('api-content-area');
-        const iframe  = p.document.getElementById('mainFrame');
-
-        // D. Show iframe FIRST, then change src (prevents blank flash)
+        // Show iframe, hide API area
         if (apiArea) apiArea.style.display = 'none';
-        if (iframe) {
-            iframe.style.display = 'block';
-            // Small delay lets the display change render before src swap
+        if (mainFrame) {
+            mainFrame.style.display = 'block'; // MUST show it first!
             setTimeout(() => {
-                iframe.src = 'quiz_history.php';
+                mainFrame.src = 'quiz_history.php';
             }, 50);
         }
 
-        // E. Update sidebar highlight
+        // Update sidebar highlight
         if (typeof p.setActive === 'function') {
             p.setActive('quiz_history.php');
         }
