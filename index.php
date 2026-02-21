@@ -213,8 +213,6 @@ if ($result && $row = $result->fetch_assoc()) {
 #iskool-brand svg {
     width: 90px; 
     height: 90px;
-    /* Optional: very subtle glow to make the white pop against the dark box */
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
 }
 /* Make sure the container displays properly on mobile */
 @media (max-width: 480px) {

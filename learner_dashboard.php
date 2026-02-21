@@ -1146,7 +1146,6 @@ iframe {
         background: none;
         border: 1px solid #333;
         border-radius: 19px;
-        border: none;
         color: var(--text-color);
         font-size: 24px;
         cursor: pointer;
