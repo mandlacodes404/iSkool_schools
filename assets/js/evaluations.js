@@ -70,9 +70,7 @@ function renderEvaluationsUI(data) {
                 </div>`;
 
             if (evaluation.submitted) {
-                html += `<div style="text-align:center; padding:40px; color: #238636; font-style:italic;">
-                            
-                         </div>`;
+                
             } else {
                 html += `
                 <div class="eval-description">${evaluation.description || ''}</div>
