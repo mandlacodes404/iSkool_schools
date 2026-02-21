@@ -94,7 +94,7 @@ function renderAssignmentCards(groupedData) {
             : `<svg viewBox="0 0 24 24" width="18" height="18" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`);
 
     // 4. Everything else
-    const btnText = task.is_past_due ? 'LOCKED' : (isDone ? 'UPDATE' : 'SUBMIT');
+   
 
 
 
@@ -141,14 +141,15 @@ function renderAssignmentCards(groupedData) {
                         </div>
                     </div>
 
-                    <div style="text-align: right; min-width: 120px; display: flex; align-items: center; justify-content: flex-end;">
-                        <a href="${task.is_past_due ? '#' : 'submit_assignment.php?assignment_id=' + task.id}" 
-                           class="quiz-start-btn" 
-                           style="${task.is_past_due ? 'background: #333; cursor: not-allowed;' : ''}"
-                           ${task.is_past_due ? 'onclick="return false;"' : ''}>
-                           ${btnText}
-                        </a>
-                    </div>
+                    <div style="text-align: right; min-width: 80px; display: flex; align-items: center; justify-content: flex-end;">
+    ${task.is_past_due 
+        ? `<span style="color:#8b949e; font-weight:700; font-size:13px;">Locked</span>`
+        : `<a href="submit_assignment.php?assignment_id=${task.id}" 
+              style="color:${isDone ? '#4fd1c5' : '#e67e22'}; font-weight:700; font-size:13px; text-decoration:none;">
+              ${isDone ? 'Update' : 'Submit'}
+           </a>`
+    }
+</div>
                 </div>`;
         });
     }

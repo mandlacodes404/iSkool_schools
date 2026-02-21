@@ -158,21 +158,21 @@ function renderQuizCards(groupedData) {
             const isClosed = quiz.status === 'Closed';
             let actionBtn = '';
 
-            if (quiz.attempt_status === 'submitted') {
-                actionBtn = `<button class="quiz-start-btn" style="background: #27ae60; cursor: default;">COMPLETED</button>`;
-            } 
-            else if (isClosed) {
-                actionBtn = `<button class="quiz-start-btn" style="opacity: 0.5; cursor: not-allowed;">CLOSED</button>`;
-            } 
-            else if (isScheduled) {
-                actionBtn = `<button class="quiz-start-btn" style="background: #fdd663; color: #000; cursor: default;">SCHEDULED</button>`;
-            }
-            else if (quiz.attempt_status === 'in_progress') {
-                actionBtn = `<button class="quiz-start-btn" style="background: #e67e22;" onclick="loadQuizInstructions(${quiz.id})">CONTINUE</button>`;
-            }
-            else {
-                actionBtn = `<button class="quiz-start-btn" onclick="loadQuizInstructions(${quiz.id})">START</button>`;
-            }
+           if (quiz.attempt_status === 'submitted') {
+    actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:13px;">✓ Completed</span>`;
+} 
+else if (isClosed) {
+    actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:13px;">Closed</span>`;
+} 
+else if (isScheduled) {
+    actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:13px;">Scheduled</span>`;
+}
+else if (quiz.attempt_status === 'in_progress') {
+    actionBtn = `<span style="color:#e67e22; font-weight:700; font-size:13px; cursor:pointer;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
+}
+else {
+    actionBtn = `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
+}
 
             html += `
                 <div class="quiz-card">
