@@ -1,6 +1,7 @@
 window.teacherEvaluationCache = null;
 
 window.fetchTeacherEvaluations = async function() {
+    clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_evaluations");
     if (typeof window.setTeacherActive === 'function') {
         window.setTeacherActive("teacher_evaluations");
@@ -33,7 +34,7 @@ window.fetchTeacherEvaluations = async function() {
             </p>`;
     } finally {
         if (loader) loader.style.display = 'none';
-          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+         
     }
 };
 

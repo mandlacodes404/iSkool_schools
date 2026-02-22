@@ -1,6 +1,7 @@
 window.teacherAnnouncementCache = null;
 
 window.fetchTeacherAnnouncements = async function() {
+    clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_announcements");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_announcements");
 
@@ -31,7 +32,7 @@ window.fetchTeacherAnnouncements = async function() {
             </p>`;
     } finally {
         if (loader) loader.style.display = 'none';
-         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+         
     }
 };
 
