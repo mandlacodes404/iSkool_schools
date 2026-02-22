@@ -10,17 +10,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // DEFINE FUNCTIONS FIRST
     // ─────────────────────────────────────────────
     window.loadTeacherManual = async function() {
-        sessionStorage.setItem("lastTeacherPage", "teacher_manual");
-        if (typeof window.setTeacherActive === 'function') {
-            window.setTeacherActive("teacher_manual");
-        }
-        if (apiArea) apiArea.style.display = 'block';
-        if (iframe)  iframe.style.display  = 'none';
+    sessionStorage.setItem("lastTeacherPage", "teacher_manual");
+    if (typeof window.setTeacherActive === 'function') {
+        window.setTeacherActive("teacher_manual");
+    }
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe)  iframe.style.display  = 'none';
 
-        const response = await fetch('teacher_manual.php');
-        const html = await response.text();
-        apiArea.innerHTML = html;
-    };
+    const response = await fetch('partials/teacher_manual.html');
+    const html = await response.text();
+    apiArea.innerHTML = html;
+};
 
     // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
