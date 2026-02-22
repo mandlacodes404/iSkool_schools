@@ -618,7 +618,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 </nav>
 
 <script src="assets/js/teacher/dashboard.js?v=1.2"></script>
-<script src="assets/js/teacher/announcements.js?v=1.3"></script>
-<script src="assets/js/teacher/evaluations.js?v=1.2"></script>
+<script src="assets/js/teacher/announcements.js?v=1.4"></script>
+<script src="assets/js/teacher/evaluations.js?v=1.3"></script>
 </body>
 </html>

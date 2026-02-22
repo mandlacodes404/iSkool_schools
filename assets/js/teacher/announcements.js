@@ -32,7 +32,7 @@ window.fetchTeacherAnnouncements = async function() {
             </p>`;
     } finally {
         if (loader) loader.style.display = 'none';
-         
+          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
