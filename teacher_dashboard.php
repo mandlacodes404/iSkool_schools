@@ -86,7 +86,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.4">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
@@ -522,7 +522,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Learner Grades</span>
     </a>
 
-    <a href="upload_resource.php" target="mainFrame" class="desktop-only <?= $currentPage==='upload_resource.php'?'active':'' ?>">
+    <a href="javascript:void(0)" data-page="teacher_resources" class="desktop-only" onclick="fetchTeacherResources()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         <span>Upload Resource</span>
     </a>
@@ -606,7 +606,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Assignments</span>
     </a>
 
-    <a href="upload_resource.php" target="mainFrame" class="<?= $currentPage==='upload_resource.php'?'active':'' ?>">
+   <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         <span>Resources</span>
     </a>
@@ -617,8 +617,9 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=1.5"></script>
+<script src="assets/js/teacher/dashboard.js?v=1.6"></script>
 <script src="assets/js/teacher/announcements.js?v=1.4"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.3"></script>
+<script src="assets/js/teacher/resources.js?v=1.0"></script>
 </body>
 </html>

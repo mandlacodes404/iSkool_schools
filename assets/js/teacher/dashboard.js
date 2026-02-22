@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.fetchTeacherAnnouncements();
     } else if (savedPage === "teacher_evaluations") {
         window.fetchTeacherEvaluations();
+    } else if (savedPage === "teacher_resources") {
+    window.fetchTeacherResources();
     } else if (savedPage === "teacher_manual") {
         window.loadTeacherManual();
     } else {
