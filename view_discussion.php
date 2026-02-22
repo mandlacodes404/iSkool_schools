@@ -7,28 +7,30 @@ if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['learner', 'teac
 }
 
 $user_email = $_SESSION['email'];
-$user_role = $_SESSION['role'];
-$disc_id = (int)($_GET['id'] ?? 0);
+$user_role  = $_SESSION['role'];
+$disc_id    = (int)($_GET['id'] ?? 0);
 
 $disc = $conn->query("SELECT d.*, c.name as class_name FROM class_discussions d JOIN classes c ON d.class_id = c.id WHERE d.id = $disc_id")->fetch_assoc();
 if (!$disc) die("Discussion not found.");
 
 $is_tagged_teacher = $user_role === 'teacher' && $conn->query("SELECT 1 FROM discussion_teachers WHERE discussion_id = $disc_id AND teacher_email = '$user_email'")->num_rows > 0;
-$is_in_class = $user_role === 'learner' && $conn->query("SELECT 1 FROM class_students WHERE class_id = {$disc['class_id']} AND student_email = '$user_email'")->num_rows > 0;
+$is_in_class       = $user_role === 'learner' && $conn->query("SELECT 1 FROM class_students WHERE class_id = {$disc['class_id']} AND student_email = '$user_email'")->num_rows > 0;
 
 if (!$is_in_class && !$is_tagged_teacher) die("Access denied.");
 
-$creator_query = $conn->query("SELECT profile_picture, name, surname FROM users WHERE email = '{$disc['creator_email']}'");
-$creator_row = $creator_query->fetch_assoc();
-$creator_pic = $creator_row['profile_picture'] ?? 'default.png';
-$creator_full_name = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
-$creator_display = $disc['creator_anonymous'] && $user_role === 'learner'
+// ── Creator info (full name + surname) ──
+$creator_query    = $conn->query("SELECT profile_picture, name, surname FROM users WHERE email = '{$disc['creator_email']}'");
+$creator_row      = $creator_query->fetch_assoc();
+$creator_pic      = $creator_row['profile_picture'] ?? 'default.png';
+$creator_fullname = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
+$creator_display  = ($disc['creator_anonymous'] && $user_role === 'learner')
     ? 'Anonymous'
-    : ($creator_full_name ?: ($disc['creator_name'] ?: 'Learner'));
+    : ($creator_fullname ?: ($disc['creator_name'] ?: 'Learner'));
 
+// ── Replies (full name + surname from users table) ──
 $replies_query = $conn->query("
-    SELECT r.*, u.profile_picture, u.name AS u_name, u.surname AS u_surname,
-           CASE 
+    SELECT r.*, u.profile_picture,
+           CASE
                WHEN r.replier_anonymous = 1 AND '$user_role' = 'learner' THEN 'Anonymous'
                ELSE TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,'')))
            END AS replier_display,
@@ -40,34 +42,30 @@ $replies_query = $conn->query("
 ");
 $replies = $replies_query ? $replies_query->fetch_all(MYSQLI_ASSOC) : [];
 
+// ── Handle POST ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'reply') {
-        $message = trim($_POST['message'] ?? '');
-        $anonymous = !empty($_POST['anonymous']);
+        $message         = trim($_POST['message'] ?? '');
+        $anonymous       = !empty($_POST['anonymous']);
         $parent_reply_id = !empty($_POST['reply_to']) ? (int)$_POST['reply_to'] : null;
-        $attachment = null;
-
-        $replier_full_name = $anonymous ? NULL : trim(($_SESSION['name'] ?? '') . ' ' . ($_SESSION['surname'] ?? ''));
+        $attachment      = null;
+        $replier_fullname = $anonymous ? NULL : trim(($_SESSION['name'] ?? '') . ' ' . ($_SESSION['surname'] ?? ''));
 
         $upload_dir = __DIR__ . '/uploads/discussions/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
         if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['attachment'];
-            $allowed = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
+            $file    = $_FILES['attachment'];
+            $allowed = ['jpg','jpeg','png','gif','pdf'];
+            $ext     = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             if (in_array($ext, $allowed) && $file['size'] <= 10 * 1024 * 1024) {
                 $filename = uniqid('disc_') . '.' . $ext;
-                $path = $upload_dir . $filename;
-                if (move_uploaded_file($file['tmp_name'], $path)) {
+                if (move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
                     $attachment = $filename;
                 } else {
-                    $_SESSION['upload_error'] = "Upload failed. Check folder permissions for 'uploads/discussions/'.";
+                    $_SESSION['upload_error'] = "Upload failed. Check folder permissions.";
                 }
             } else {
                 $_SESSION['upload_error'] = "Invalid file type or too large (max 10MB).";
@@ -76,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
         if (!empty($message) || $attachment) {
             $stmt = $conn->prepare("INSERT INTO discussion_replies (discussion_id, parent_reply_id, message, replier_email, replier_anonymous, replier_name, attachment) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iississ", $disc_id, $parent_reply_id, $message, $user_email, $anonymous, $replier_full_name, $attachment);
+            $stmt->bind_param("iississ", $disc_id, $parent_reply_id, $message, $user_email, $anonymous, $replier_fullname, $attachment);
             $stmt->execute();
             $stmt->close();
             header("Location: view_discussion.php?id=$disc_id#bottom");
@@ -85,11 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     }
 
     if ($action === 'report') {
-        $reply_id = !empty($_POST['reply_id']) ? (int)$_POST['reply_id'] : null;
+        $reply_id      = !empty($_POST['reply_id']) ? (int)$_POST['reply_id'] : null;
         $discussion_id = (int)$_POST['discussion_id'];
-        $reason = $_POST['reason'] ?? 'other';
-        $comment = trim($_POST['comment'] ?? '');
-
+        $reason        = $_POST['reason'] ?? 'other';
+        $comment       = trim($_POST['comment'] ?? '');
         $stmt = $conn->prepare("INSERT INTO discussion_reports (discussion_id, reply_id, reporter_email, reason, comment) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("iisss", $discussion_id, $reply_id, $user_email, $reason, $comment);
         $stmt->execute();
@@ -98,6 +95,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
         header("Location: view_discussion.php?id=$disc_id");
         exit();
     }
+}
+
+// ── Date label helper (PHP) ──
+function dateLabel(string $dateStr): string {
+    $ts        = strtotime($dateStr);
+    $today     = strtotime('today');
+    $yesterday = strtotime('yesterday');
+    if ($ts >= $today)     return 'Today';
+    if ($ts >= $yesterday) return 'Yesterday';
+    return date('l, j F Y', $ts);
 }
 ?>
 <!DOCTYPE html>
@@ -151,135 +158,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
             z-index: 100;
             flex-shrink: 0;
         }
-
         .top-nav .page-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
+            font-size: 15px; font-weight: 700; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
         }
-
         .top-nav button {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 18px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.2s, color 0.2s;
-            flex-shrink: 0;
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 18px; cursor: pointer; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background 0.2s, color 0.2s; flex-shrink: 0;
         }
-
         .top-nav button:hover { background: rgba(255,255,255,0.06); color: var(--text); }
         .top-nav .info-btn { color: var(--accent); }
+        @media (max-width: 768px) { .top-nav { display: flex; } }
 
-        @media (max-width: 768px) {
-            .top-nav { display: flex; }
-        }
-
-        /* ── LAYOUT WRAPPER ── */
+        /* ── LAYOUT ── */
         .page-layout {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            max-width: 960px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
-            gap: 0;
+            flex: 1; display: flex; overflow: hidden;
+            max-width: 960px; width: 100%; margin: 0 auto; padding: 0 20px;
         }
+        @media (max-width: 768px) { .page-layout { padding: 0; max-width: 100%; } }
 
-        @media (max-width: 768px) {
-            .page-layout { padding: 0; max-width: 100%; }
-        }
-
-        /* ── THREAD PANEL (left/main) ── */
         .thread-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 0;
+            flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
         }
 
-        /* ── TOPIC HEADER (desktop only) ── */
+        /* ── TOPIC HEADER (desktop) ── */
         .topic-header {
             padding: 24px 0 16px 0;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
-
         .topic-header .class-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--accent-dim);
-            border: 1px solid rgba(79,209,197,0.2);
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--accent-dim); border: 1px solid rgba(79,209,197,0.2);
+            color: var(--accent); font-size: 11px; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
         }
-
-        .topic-header h1 {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-            line-height: 1.3;
-        }
-
+        .topic-header h1 { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.3; }
         .topic-header .meta {
-            margin-top: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-top: 6px; font-size: 12px; color: var(--text-muted);
+            display: flex; align-items: center; gap: 12px;
         }
-
         .reply-count-pill {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: var(--text-muted);
+            background: var(--surface-2); border: 1px solid var(--border);
+            padding: 2px 8px; border-radius: 20px; font-size: 11px; color: var(--text-muted);
         }
-
-        @media (max-width: 768px) {
-            .topic-header { display: none; }
-        }
+        @media (max-width: 768px) { .topic-header { display: none; } }
 
         /* ── SCROLL AREA ── */
         .posts-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--surface-2) transparent;
+            flex: 1; overflow-y: auto; padding: 20px 0;
+            display: flex; flex-direction: column; gap: 2px;
+            scrollbar-width: thin; scrollbar-color: var(--surface-2) transparent;
         }
-
         .posts-scroll::-webkit-scrollbar { width: 4px; }
         .posts-scroll::-webkit-scrollbar-track { background: transparent; }
         .posts-scroll::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+        @media (max-width: 768px) { .posts-scroll { padding: 12px; gap: 4px; } }
 
-        @media (max-width: 768px) {
-            .posts-scroll { padding: 12px 12px; gap: 4px; }
+        /* ── DATE SEPARATOR ── */
+        .date-separator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0 10px 0;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            flex-shrink: 0;
+        }
+        .date-separator::before,
+        .date-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
         }
 
         /* ── POST CARD ── */
@@ -291,519 +248,236 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
             transition: border-color 0.2s;
             position: relative;
             border-left: 3px solid transparent;
+            animation: fadeUp 0.3s ease both;
         }
-
         .post-card:hover { border-color: rgba(255,255,255,0.1); }
+        .post-card.is-op  { background: rgba(79,209,197,0.04); border-color: rgba(79,209,197,0.15); border-left-color: var(--accent); }
+        .post-card.is-me  { border-left-color: var(--my-line); }
+        .post-card.active { border-color: var(--border-hover); box-shadow: 0 0 0 1px rgba(79,209,197,0.15); }
 
-        .post-card.is-op {
-            background: rgba(79,209,197,0.04);
-            border-color: rgba(79,209,197,0.15);
-            border-left-color: var(--accent);
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .post-card.is-me {
-            border-left-color: var(--my-line);
-        }
-
-        .post-card.is-teacher {
-            border-left-color: var(--teacher-line);
-        }
-
-        .post-card.active {
-            border-color: var(--border-hover);
-            box-shadow: 0 0 0 1px rgba(79,209,197,0.15);
-        }
-
-        /* ── POST HEADER ROW ── */
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+        /* ── POST HEADER ── */
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 
         .post-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-            flex-shrink: 0;
+            width: 32px; height: 32px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--border); flex-shrink: 0;
         }
-
         .post-avatar-placeholder {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--surface-2);
-            border: 2px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--text-muted);
-            flex-shrink: 0;
-            text-transform: uppercase;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--surface-2); border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800; color: var(--text-muted);
+            flex-shrink: 0; text-transform: uppercase;
         }
-
         .post-meta { flex: 1; min-width: 0; }
-
         .post-author {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 13px; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: 6px;
         }
-
         .op-tag, .me-tag, .teacher-tag {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 1px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            font-size: 10px; font-weight: 700;
+            padding: 1px 6px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
-
-        .op-tag   { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
-        .me-tag   { background: rgba(79,209,197,0.1); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
+        .op-tag      { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
+        .me-tag      { background: rgba(79,209,197,0.1); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
         .teacher-tag { background: rgba(246,135,122,0.1); color: var(--teacher-line); border: 1px solid rgba(246,135,122,0.2); }
 
-        .post-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 1px;
-        }
+        .post-time { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
         /* ── REPLY QUOTE ── */
         .reply-quote {
             background: rgba(255,255,255,0.03);
             border-left: 3px solid var(--accent);
             border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
+            padding: 8px 12px; margin-bottom: 10px;
+            font-size: 12px; color: var(--text-muted);
         }
-
-        .reply-quote .quote-author {
-            color: var(--accent);
-            font-weight: 700;
-            margin-bottom: 2px;
-            font-size: 11px;
-        }
-
+        .reply-quote .quote-author { color: var(--accent); font-weight: 700; margin-bottom: 2px; font-size: 11px; }
         .reply-quote .quote-text {
-            line-height: 1.4;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            line-height: 1.4; overflow: hidden;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
 
         /* ── POST BODY ── */
-        .post-body {
-            font-size: 14px;
-            line-height: 1.65;
-            color: var(--text);
-            word-wrap: break-word;
-            white-space: pre-wrap;
-        }
+        .post-body { font-size: 14px; line-height: 1.65; color: var(--text); word-wrap: break-word; white-space: pre-wrap; }
 
         /* ── ATTACHMENT ── */
         .post-attachment {
-            margin-top: 12px;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            border: 1px solid var(--border);
-            display: inline-block;
-            max-width: 280px;
+            margin-top: 12px; border-radius: var(--radius-sm);
+            overflow: hidden; border: 1px solid var(--border);
+            display: inline-block; max-width: 280px;
         }
-
-        .post-attachment img {
-            width: 100%;
-            display: block;
-            cursor: zoom-in;
-            transition: opacity 0.2s;
-        }
-
+        .post-attachment img { width: 100%; display: block; cursor: zoom-in; transition: opacity 0.2s; }
         .post-attachment img:hover { opacity: 0.9; }
-
         .post-attachment .pdf-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            background: rgba(79,209,197,0.06);
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background 0.2s;
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; background: rgba(79,209,197,0.06);
+            color: var(--accent); cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.2s;
         }
-
         .post-attachment .pdf-link:hover { background: rgba(79,209,197,0.12); }
 
-        /* ── POST FOOTER ACTIONS ── */
+        /* ── POST FOOTER ── */
         .post-footer {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
         }
-
         .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-family: 'Nunito', sans-serif;
-            transition: background 0.15s, color 0.15s;
+            background: none; border: none; color: var(--text-muted);
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            padding: 4px 10px; border-radius: 6px;
+            display: flex; align-items: center; gap: 5px;
+            font-family: 'Nunito', sans-serif; transition: background 0.15s, color 0.15s;
         }
-
-        .action-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-        .action-btn.reply-btn:hover { color: var(--accent); }
+        .action-btn:hover           { background: rgba(255,255,255,0.05); color: var(--text); }
+        .action-btn.reply-btn:hover  { color: var(--accent); }
         .action-btn.report-btn:hover { color: var(--danger); }
 
-        /* ── INPUT AREA ── */
-        .compose-area {
-            flex-shrink: 0;
-            padding: 16px 0 20px 0;
-            border-top: 1px solid var(--border);
-        }
+        /* ── COMPOSE AREA ── */
+        .compose-area { flex-shrink: 0; padding: 16px 0 20px 0; border-top: 1px solid var(--border); }
+        @media (max-width: 768px) { .compose-area { padding: 12px; } }
 
-        @media (max-width: 768px) {
-            .compose-area { padding: 12px; border-top: 1px solid var(--border); }
-        }
-
-        /* Reply preview strip */
         #replyPreview {
-            display: none;
-            background: var(--accent-dim);
-            border: 1px solid rgba(79,209,197,0.2);
-            border-radius: var(--radius-sm);
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
-            display: none;
-            align-items: center;
-            gap: 8px;
+            display: none; background: var(--accent-dim);
+            border: 1px solid rgba(79,209,197,0.2); border-radius: var(--radius-sm);
+            padding: 8px 12px; margin-bottom: 10px;
+            font-size: 12px; color: var(--text-muted);
+            align-items: center; gap: 8px;
         }
-
-        #replyPreview .rp-label { color: var(--accent); font-weight: 700; flex-shrink: 0; }
-        #replyPreview .rp-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
+        #replyPreview .rp-label  { color: var(--accent); font-weight: 700; flex-shrink: 0; }
+        #replyPreview .rp-text   { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #replyPreview .cancel-reply {
-            background: none;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-            flex-shrink: 0;
-            padding: 0 4px;
+            background: none; border: none; color: var(--danger);
+            cursor: pointer; font-size: 16px; line-height: 1; flex-shrink: 0; padding: 0 4px;
         }
 
-        /* File preview */
         #filePreview {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
+            display: none; align-items: center; gap: 8px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 8px 12px;
+            margin-bottom: 10px; font-size: 12px; color: var(--text-muted);
         }
-
         #filePreview img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; }
         #filePreview .clear-file { background: none; border: none; color: var(--danger); cursor: pointer; margin-left: auto; font-size: 16px; }
 
-        /* Compose box */
         .compose-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            transition: border-color 0.2s;
-            overflow: hidden;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); transition: border-color 0.2s; overflow: hidden;
         }
-
         .compose-box:focus-within { border-color: rgba(79,209,197,0.4); }
-
         .compose-box textarea {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-family: 'Nunito', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 14px 16px 8px 16px;
-            resize: none;
-            outline: none;
-            min-height: 48px;
-            max-height: 140px;
-            line-height: 1.5;
+            width: 100%; background: transparent; border: none; color: var(--text);
+            font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+            padding: 14px 16px 8px 16px; resize: none; outline: none;
+            min-height: 48px; max-height: 140px; line-height: 1.5;
         }
-
         .compose-box textarea::placeholder { color: var(--text-muted); }
 
         .compose-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
-            border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 4px;
+            padding: 8px 12px; border-top: 1px solid var(--border);
         }
-
         .tool-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 6px;
-            font-size: 15px;
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; padding: 6px 8px; border-radius: 6px;
             transition: background 0.15s, color 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+            font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
         }
-
         .tool-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-
-        .tool-btn.anon-btn { color: var(--text-muted); }
         .tool-btn.anon-btn input { display: none; }
-
+        .tool-btn.anon-btn       { color: var(--text-muted); }
         .tool-btn.anon-btn.anon-on { color: var(--accent); }
-
         .spacer { flex: 1; }
-
         .post-btn {
-            background: var(--accent);
-            color: #0d1117;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 13px;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: var(--accent); color: #0d1117; border: none;
+            padding: 8px 18px; border-radius: 8px;
+            font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
             transition: background 0.2s, transform 0.1s;
         }
-
-        .post-btn:hover { background: #38b2ac; }
+        .post-btn:hover  { background: #38b2ac; }
         .post-btn:active { transform: scale(0.97); }
 
         /* ── NOTICES ── */
-        .notice-bar {
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 12px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
+        .notice-bar { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 13px; font-weight: 600; }
         .notice-bar.success { background: rgba(35,134,54,0.2); border: 1px solid rgba(35,134,54,0.4); color: #3fb950; }
         .notice-bar.error   { background: rgba(248,81,73,0.15); border: 1px solid rgba(248,81,73,0.3); color: var(--danger); }
 
-        /* ── PRIVACY MODAL ── */
+        /* ── INFO MODAL ── */
         .info-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            z-index: 10002;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 10002;
+            align-items: center; justify-content: center;
         }
-
         .info-modal-content {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 28px 24px;
-            border-radius: 20px;
-            max-width: 320px;
-            width: 90%;
-            text-align: center;
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 28px 24px; border-radius: 20px;
+            max-width: 320px; width: 90%; text-align: center;
             animation: popIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
         }
-
         @keyframes popIn {
             from { transform: scale(0.85); opacity: 0; }
             to   { transform: scale(1); opacity: 1; }
         }
-
         .info-modal-content h3 { color: var(--accent); font-size: 17px; margin-bottom: 10px; }
         .info-modal-content p  { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
         .info-modal-content button {
-            margin-top: 18px;
-            background: var(--accent);
-            color: #0d1117;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-weight: 800;
-            cursor: pointer;
-            font-family: 'Nunito', sans-serif;
+            margin-top: 18px; background: var(--accent); color: #0d1117;
+            border: none; padding: 10px 24px; border-radius: 8px;
+            font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif;
         }
 
         /* ── REPORT MODAL ── */
         #reportModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            z-index: 10001;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 10001;
+            align-items: center; justify-content: center;
         }
-
         .report-modal-inner {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 28px;
-            border-radius: 20px;
-            max-width: 420px;
-            width: 90%;
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 28px; border-radius: 20px; max-width: 420px; width: 90%;
             animation: popIn 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
         }
-
-        .report-modal-inner h3 {
-            color: var(--danger);
-            font-size: 17px;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .report-modal-inner h3 { color: var(--danger); font-size: 17px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
         .report-modal-inner select,
         .report-modal-inner textarea {
-            width: 100%;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 13px;
-            margin-bottom: 12px;
-            outline: none;
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: var(--radius-sm);
+            padding: 10px 12px; font-family: 'Nunito', sans-serif;
+            font-size: 13px; margin-bottom: 12px; outline: none;
         }
-
         .report-modal-inner select:focus,
         .report-modal-inner textarea:focus { border-color: rgba(248,81,73,0.4); }
-
         .report-modal-inner textarea { height: 90px; resize: none; }
-
         .report-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
-
         .btn-cancel-report {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 9px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            font-size: 13px;
+            background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 9px 18px; border-radius: 8px; cursor: pointer;
+            font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
         }
-
         .btn-submit-report {
-            background: var(--danger);
-            border: none;
-            color: white;
-            padding: 9px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 800;
-            font-size: 13px;
+            background: var(--danger); border: none; color: white;
+            padding: 9px 18px; border-radius: 8px; cursor: pointer;
+            font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
         }
 
         /* ── MEDIA OVERLAY ── */
-        #mediaOverlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 99999;
-            flex-direction: column;
-        }
-
-        #mediaOverlay .overlay-nav {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            background: rgba(0,0,0,0.4);
-        }
-
-        #mediaOverlay .overlay-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: auto;
-            padding: 20px;
-        }
-
-        #mediaOverlay img {
-            max-width: 100%;
-            max-height: 90vh;
-            border-radius: 8px;
-        }
-
-        #mediaOverlay iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-
+        #mediaOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 99999; flex-direction: column; }
+        #mediaOverlay .overlay-nav { display: flex; align-items: center; padding: 14px 16px; background: rgba(0,0,0,0.4); }
+        #mediaOverlay .overlay-content { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 20px; }
+        #mediaOverlay img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+        #mediaOverlay iframe { width: 100%; height: 100%; border: none; background: white; }
         .close-media {
-            background: var(--accent);
-            color: #0d1117;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: var(--accent); color: #0d1117; border: none;
+            padding: 8px 18px; border-radius: 20px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
             font-family: 'Nunito', sans-serif;
-        }
-
-        /* ── POST ENTRY ANIMATION ── */
-        .post-card {
-            animation: fadeUp 0.3s ease both;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -811,16 +485,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
 <!-- Mobile Top Nav -->
 <div class="top-nav">
-    <button onclick="goBackToDiscussions()" title="Back">
-        <i class="fas fa-chevron-left"></i>
-    </button>
+    <button onclick="goBackToDiscussions()" title="Back"><i class="fas fa-chevron-left"></i></button>
     <div class="page-title"><?= htmlspecialchars($disc['title']) ?></div>
-    <button class="info-btn" onclick="toggleInfoModal()" title="Privacy info">
-        <i class="fas fa-info-circle"></i>
-    </button>
+    <button class="info-btn" onclick="toggleInfoModal()" title="Privacy info"><i class="fas fa-info-circle"></i></button>
 </div>
 
-<!-- Privacy Info Modal -->
+<!-- Privacy Modal -->
 <div id="infoModal" class="info-modal" onclick="toggleInfoModal()">
     <div class="info-modal-content" onclick="event.stopPropagation()">
         <h3><i class="fas fa-user-shield"></i> Privacy & Anonymity</h3>
@@ -856,9 +526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 <!-- Media Overlay -->
 <div id="mediaOverlay">
     <div class="overlay-nav">
-        <button class="close-media" onclick="closeMedia()">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
+        <button class="close-media" onclick="closeMedia()"><i class="fas fa-arrow-left"></i> Back</button>
     </div>
     <div class="overlay-content" id="mediaContent"></div>
 </div>
@@ -869,10 +537,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
         <!-- Desktop Topic Header -->
         <div class="topic-header">
-            <div class="class-badge">
-                <i class="fas fa-chalkboard"></i>
-                <?= htmlspecialchars($disc['class_name']) ?>
-            </div>
+            <div class="class-badge"><i class="fas fa-chalkboard"></i> <?= htmlspecialchars($disc['class_name']) ?></div>
             <h1><?= htmlspecialchars($disc['title']) ?></h1>
             <div class="meta">
                 <span><?= count($replies) ?> <?= count($replies) === 1 ? 'reply' : 'replies' ?></span>
@@ -888,33 +553,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
         <!-- Notices -->
         <?php if (isset($report_msg)): ?>
-            <div class="notice-bar success" style="margin-top:12px;">
-                <i class="fas fa-check-circle"></i> <?= htmlspecialchars($report_msg) ?>
-            </div>
+            <div class="notice-bar success" style="margin-top:12px;"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($report_msg) ?></div>
         <?php endif; ?>
         <?php if (isset($_SESSION['upload_error'])): ?>
-            <div class="notice-bar error" style="margin-top:12px;">
-                <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($_SESSION['upload_error']) ?>
-            </div>
+            <div class="notice-bar error" style="margin-top:12px;"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($_SESSION['upload_error']) ?></div>
             <?php unset($_SESSION['upload_error']); ?>
         <?php endif; ?>
 
         <!-- Posts Scroll -->
         <div class="posts-scroll" id="postsScroll">
 
-            <!-- ── ORIGINAL POST ── -->
             <?php
-            $is_op_me = $disc['creator_email'] === $user_email;
+            // ── Track the last printed date to know when to inject a separator ──
+            $lastPrintedDate = null;
+            $today_ts        = strtotime('today');
+            $yesterday_ts    = strtotime('yesterday');
+
+            // Helper to build separator HTML
+            function separatorHTML(string $label): string {
+                return '<div class="date-separator"><span>' . htmlspecialchars($label) . '</span></div>';
+            }
+
+            // ── ORIGINAL POST ──
+            $is_op_me       = $disc['creator_email'] === $user_email;
             $show_op_avatar = !($disc['creator_anonymous'] && $user_role === 'learner');
-            $op_initials = strtoupper(substr($creator_display, 0, 1));
+            $op_initials    = strtoupper(substr($creator_display, 0, 1));
+            $op_date_key    = date('Y-m-d', strtotime($disc['created_at']));
+            $op_label       = dateLabel($disc['created_at']);
+
+            // Print separator for OP date
+            echo separatorHTML($op_label);
+            $lastPrintedDate = $op_date_key;
             ?>
-            <div class="post-card is-op <?= $is_op_me ? 'is-me' : '' ?>" data-id="0"
-                 style="animation-delay: 0ms;">
+
+            <div class="post-card is-op <?= $is_op_me ? 'is-me' : '' ?>" data-id="0" style="animation-delay:0ms;">
                 <div class="post-header">
                     <?php if ($show_op_avatar): ?>
-                        <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>"
-                             class="post-avatar"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="uploads/learners/<?= htmlspecialchars($creator_pic) ?>" class="post-avatar"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                         <div class="post-avatar-placeholder" style="display:none;"><?= $op_initials ?></div>
                     <?php else: ?>
                         <div class="post-avatar-placeholder">?</div>
@@ -925,25 +601,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                             <span class="op-tag">OP</span>
                             <?php if ($is_op_me): ?><span class="me-tag">You</span><?php endif; ?>
                         </div>
-                        <div class="post-time"><?= date('M j, Y · g:i a', strtotime($disc['created_at'])) ?></div>
+                        <div class="post-time"><?= date('g:i a', strtotime($disc['created_at'])) ?></div>
                     </div>
                 </div>
 
                 <div class="post-body"><?= htmlspecialchars($disc['initial_message']) ?></div>
 
                 <?php if (!empty($disc['attachment'])):
-                    $ext = strtolower(pathinfo($disc['attachment'], PATHINFO_EXTENSION));
-                    $path = 'uploads/discussions/' . $disc['attachment'];
+                    $ext      = strtolower(pathinfo($disc['attachment'], PATHINFO_EXTENSION));
+                    $path     = 'uploads/discussions/' . $disc['attachment'];
                     $is_image = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                 ?>
                     <div class="post-attachment">
                         <?php if ($is_image): ?>
-                            <img src="<?= $path ?>" alt="Attachment"
-                                 onclick="openMedia('<?= $path ?>', 'image')">
+                            <img src="<?= $path ?>" alt="Attachment" onclick="openMedia('<?= $path ?>','image')">
                         <?php else: ?>
-                            <div class="pdf-link" onclick="openMedia('<?= $path ?>', 'pdf')">
-                                <i class="fas fa-file-pdf fa-lg"></i>
-                                <span>Open PDF Document</span>
+                            <div class="pdf-link" onclick="openMedia('<?= $path ?>','pdf')">
+                                <i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -951,12 +625,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
                 <div class="post-footer">
                     <?php if ($is_in_class): ?>
-                        <button class="action-btn reply-btn" onclick="setReply(0, '<?= htmlspecialchars(addslashes($creator_display)) ?>', <?= json_encode(substr($disc['initial_message'], 0, 100)) ?>)">
+                        <button class="action-btn reply-btn" onclick="setReply(0,'<?= htmlspecialchars(addslashes($creator_display)) ?>',<?= json_encode(substr($disc['initial_message'],0,100)) ?>)">
                             <i class="fas fa-reply"></i> Reply
                         </button>
                     <?php endif; ?>
                     <?php if ($user_role === 'learner' && !$is_op_me): ?>
-                        <button class="action-btn report-btn" onclick="showReportModal(0, <?= $disc_id ?>)">
+                        <button class="action-btn report-btn" onclick="showReportModal(0,<?= $disc_id ?>)">
                             <i class="fas fa-flag"></i> Report
                         </button>
                     <?php endif; ?>
@@ -965,14 +639,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
 
             <!-- ── REPLIES ── -->
             <?php foreach ($replies as $idx => $r):
-                $reply_pic = $r['profile_picture'] ?? 'default.png';
-                $is_me = (bool)$r['is_me'];
-                $is_teacher_reply = ($user_role === 'learner' && !$r['replier_anonymous'] && str_contains(strtolower($r['replier_display']), 'mr') || str_contains(strtolower($r['replier_display']), 'ms') || str_contains(strtolower($r['replier_display']), 'mrs') || str_contains(strtolower($r['replier_display']), 'dr'));
-                $show_avatar = !($r['replier_anonymous'] && $user_role === 'learner');
-                $r_initials = strtoupper(substr($r['replier_display'], 0, 1));
-                $delay = min($idx * 40, 400);
+                $reply_ts    = strtotime($r['created_at']);
+                $reply_date_key = date('Y-m-d', $reply_ts);
+                $reply_label    = dateLabel($r['created_at']);
 
-                // Build parent preview
+                // Print date separator when date changes
+                if ($reply_date_key !== $lastPrintedDate) {
+                    echo separatorHTML($reply_label);
+                    $lastPrintedDate = $reply_date_key;
+                }
+
+                $reply_pic   = $r['profile_picture'] ?? 'default.png';
+                $is_me       = (bool)$r['is_me'];
+                $show_avatar = !($r['replier_anonymous'] && $user_role === 'learner');
+                $r_initials  = strtoupper(substr($r['replier_display'], 0, 1));
+                $delay       = min($idx * 40, 400);
+
+                // Build parent quote preview
                 $parent_preview = null;
                 if ($r['parent_reply_id'] !== null) {
                     if ($r['parent_reply_id'] == 0) {
@@ -993,13 +676,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                     }
                 }
             ?>
-            <div class="post-card <?= $is_me ? 'is-me' : '' ?>" data-id="<?= $r['id'] ?>"
-                 style="animation-delay: <?= $delay ?>ms;">
+            <div class="post-card <?= $is_me ? 'is-me' : '' ?>" data-id="<?= $r['id'] ?>" style="animation-delay:<?= $delay ?>ms;">
                 <div class="post-header">
                     <?php if ($show_avatar): ?>
-                        <img src="uploads/learners/<?= htmlspecialchars($reply_pic) ?>"
-                             class="post-avatar"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="uploads/learners/<?= htmlspecialchars($reply_pic) ?>" class="post-avatar"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                         <div class="post-avatar-placeholder" style="display:none;"><?= $r_initials ?></div>
                     <?php else: ?>
                         <div class="post-avatar-placeholder">?</div>
@@ -1009,7 +690,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                             <?= htmlspecialchars($r['replier_display']) ?>
                             <?php if ($is_me): ?><span class="me-tag">You</span><?php endif; ?>
                         </div>
-                        <div class="post-time"><?= date('M j, Y · g:i a', strtotime($r['created_at'])) ?></div>
+                        <div class="post-time"><?= date('g:i a', strtotime($r['created_at'])) ?></div>
                     </div>
                 </div>
 
@@ -1023,18 +704,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                 <div class="post-body"><?= nl2br(htmlspecialchars($r['message'] ?? '')) ?></div>
 
                 <?php if (!empty($r['attachment'])):
-                    $ext = strtolower(pathinfo($r['attachment'], PATHINFO_EXTENSION));
-                    $path = 'uploads/discussions/' . $r['attachment'];
+                    $ext      = strtolower(pathinfo($r['attachment'], PATHINFO_EXTENSION));
+                    $path     = 'uploads/discussions/' . $r['attachment'];
                     $is_image = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                 ?>
                     <div class="post-attachment">
                         <?php if ($is_image): ?>
-                            <img src="<?= $path ?>" alt="Attachment"
-                                 onclick="openMedia('<?= $path ?>', 'image')">
+                            <img src="<?= $path ?>" alt="Attachment" onclick="openMedia('<?= $path ?>','image')">
                         <?php else: ?>
-                            <div class="pdf-link" onclick="openMedia('<?= $path ?>', 'pdf')">
-                                <i class="fas fa-file-pdf fa-lg"></i>
-                                <span>Open PDF Document</span>
+                            <div class="pdf-link" onclick="openMedia('<?= $path ?>','pdf')">
+                                <i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -1043,13 +722,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                 <div class="post-footer">
                     <?php if ($is_in_class): ?>
                         <button class="action-btn reply-btn"
-                                onclick="setReply(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['replier_display'])) ?>', <?= json_encode(substr($r['message'] ?? '', 0, 100)) ?>)">
+                                onclick="setReply(<?= $r['id'] ?>,'<?= htmlspecialchars(addslashes($r['replier_display'])) ?>',<?= json_encode(substr($r['message'] ?? '',0,100)) ?>)">
                             <i class="fas fa-reply"></i> Reply
                         </button>
                     <?php endif; ?>
                     <?php if ($user_role === 'learner' && !$is_me): ?>
-                        <button class="action-btn report-btn"
-                                onclick="showReportModal(<?= $r['id'] ?>, <?= $disc_id ?>)">
+                        <button class="action-btn report-btn" onclick="showReportModal(<?= $r['id'] ?>,<?= $disc_id ?>)">
                             <i class="fas fa-flag"></i> Report
                         </button>
                     <?php endif; ?>
@@ -1063,50 +741,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
         <!-- ── COMPOSE AREA ── -->
         <?php if ($is_in_class): ?>
         <div class="compose-area">
-            <!-- Reply preview strip -->
             <div id="replyPreview">
                 <span class="rp-label">Replying to:</span>
                 <span class="rp-text" id="previewText"></span>
                 <button class="cancel-reply" onclick="cancelReply()" type="button">✕</button>
             </div>
-
-            <!-- File preview -->
             <div id="filePreview">
                 <img id="previewImg" src="" alt="Preview" style="display:none;">
                 <span id="fileName"></span>
                 <button class="clear-file" type="button" onclick="clearAttachment()">✕</button>
             </div>
-
             <form method="POST" enctype="multipart/form-data" id="replyForm">
                 <input type="hidden" name="action" value="reply">
                 <input type="hidden" name="reply_to" id="replyTo" value="0">
-
                 <div class="compose-box">
-                    <textarea name="message"
-                              rows="1"
-                              placeholder="Add to the discussion…"
-                              id="composeTextarea"
-                              autofocus></textarea>
+                    <textarea name="message" rows="1" placeholder="Add to the discussion…" id="composeTextarea" autofocus></textarea>
                     <div class="compose-toolbar">
-                        <!-- Attach -->
                         <label class="tool-btn" title="Attach image or PDF">
                             <i class="fas fa-paperclip"></i>
-                            <input type="file" name="attachment" id="attachmentInput"
-                                   accept="image/*,.pdf" style="display:none;">
+                            <input type="file" name="attachment" id="attachmentInput" accept="image/*,.pdf" style="display:none;">
                         </label>
-
-                        <!-- Anonymous toggle -->
                         <label class="tool-btn anon-btn anon-on" id="anonLabel" title="Post anonymously">
-                            <input type="checkbox" name="anonymous" id="anon" checked
-                                   onchange="toggleAnonStyle(this)">
+                            <input type="checkbox" name="anonymous" id="anon" checked onchange="toggleAnonStyle(this)">
                             <i class="fas fa-user-secret"></i> Anon
                         </label>
-
                         <div class="spacer"></div>
-
-                        <button type="submit" class="post-btn">
-                            <i class="fas fa-paper-plane"></i> Post Reply
-                        </button>
+                        <button type="submit" class="post-btn"><i class="fas fa-paper-plane"></i> Post Reply</button>
                     </div>
                 </div>
             </form>
@@ -1122,8 +782,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
         document.getElementById('replyTo').value = msgId;
         document.getElementById('previewText').textContent =
             authorName + ': ' + previewText.substring(0, 80) + (previewText.length > 80 ? '…' : '');
-        const rp = document.getElementById('replyPreview');
-        rp.style.display = 'flex';
+        document.getElementById('replyPreview').style.display = 'flex';
         document.getElementById('composeTextarea').focus();
     }
 
@@ -1132,7 +791,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
         document.getElementById('replyPreview').style.display = 'none';
     }
 
-    // ── ANON STYLE TOGGLE ──
     function toggleAnonStyle(cb) {
         document.getElementById('anonLabel').classList.toggle('anon-on', cb.checked);
     }
@@ -1140,10 +798,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     // ── REPORT MODAL ──
     function showReportModal(replyId, discId) {
         document.getElementById('reportReplyId').value = replyId > 0 ? replyId : '';
-        document.getElementById('reportDiscId').value = discId;
+        document.getElementById('reportDiscId').value  = discId;
         document.getElementById('reportModal').style.display = 'flex';
     }
-
     function closeReportModal() {
         document.getElementById('reportModal').style.display = 'none';
     }
@@ -1157,19 +814,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     // ── FILE ATTACHMENT PREVIEW ──
     document.getElementById('attachmentInput')?.addEventListener('change', function(e) {
         const file = e.target.files[0];
-        const preview = document.getElementById('filePreview');
+        const preview    = document.getElementById('filePreview');
         const previewImg = document.getElementById('previewImg');
-        const fileName = document.getElementById('fileName');
-
+        const fileName   = document.getElementById('fileName');
         if (file) {
             preview.style.display = 'flex';
-            fileName.textContent = file.name;
+            fileName.textContent  = file.name;
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
-                reader.onload = e => {
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                };
+                reader.onload = e => { previewImg.src = e.target.result; previewImg.style.display = 'block'; };
                 reader.readAsDataURL(file);
             } else {
                 previewImg.style.display = 'none';
@@ -1191,88 +844,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
     });
 
     // ── SCROLL TO BOTTOM ON LOAD ──
-    const scroll = document.getElementById('postsScroll');
-    if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    const postsScroll = document.getElementById('postsScroll');
+    if (postsScroll) postsScroll.scrollTop = postsScroll.scrollHeight;
 
-    // ── LIVE POLLING ──
-    const DISC_ID   = <?= $disc_id ?>;
-    const USER_EMAIL = <?= json_encode($user_email) ?>;
-    const USER_ROLE  = <?= json_encode($user_role) ?>;
-    let lastReplyId  = <?= !empty($replies) ? (int)end($replies)['id'] : 0 ?>;
-    let isPolling    = false;
-    let pollInterval = null;
-
-    function formatPostDate(dateStr) {
-        const d = new Date(dateStr.replace(' ', 'T'));
-        return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })
-            + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+    // ── DATE SEPARATOR HELPERS ──
+    function makeDateSeparator(label) {
+        const div = document.createElement('div');
+        div.className = 'date-separator';
+        div.innerHTML = `<span>${label}</span>`;
+        return div;
     }
 
+    function getDateLabel(dateStr) {
+        const d         = new Date(dateStr.replace(' ', 'T'));
+        const today     = new Date(); today.setHours(0,0,0,0);
+        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        const dc        = new Date(d); dc.setHours(0,0,0,0);
+        if (dc.getTime() === today.getTime())     return 'Today';
+        if (dc.getTime() === yesterday.getTime()) return 'Yesterday';
+        return d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    }
+
+    function getDateKey(dateStr) {
+        return dateStr.substring(0, 10); // 'YYYY-MM-DD'
+    }
+
+    // ── HTML ESCAPE ──
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // ── FORMAT TIME ONLY (for live cards) ──
+    function formatTimeOnly(dateStr) {
+        const d = new Date(dateStr.replace(' ', 'T'));
+        return d.toLocaleTimeString('en-GB', { hour:'numeric', minute:'2-digit', hour12: true });
+    }
+
+    // ── BUILD POST CARD (for live polling) ──
     function buildPostCard(r) {
-        const isMe       = r.is_me == 1;
-        const showAvatar = !(r.replier_anonymous == 1 && USER_ROLE === 'learner');
+        const isMe        = r.is_me == 1;
+        const showAvatar  = !(r.replier_anonymous == 1 && USER_ROLE === 'learner');
         const displayName = (r.replier_anonymous == 1 && USER_ROLE === 'learner') ? 'Anonymous' : (r.replier_display || 'Learner');
-        const initial    = displayName.charAt(0).toUpperCase();
+        const initial     = displayName.charAt(0).toUpperCase();
+
         const avatarHTML = showAvatar
             ? `<img src="uploads/learners/${r.profile_picture || 'default.png'}" class="post-avatar"
                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                <div class="post-avatar-placeholder" style="display:none;">${initial}</div>`
             : `<div class="post-avatar-placeholder">?</div>`;
 
-        let quoteHTML = '';
-        if (r.quote_author) {
-            quoteHTML = `<div class="reply-quote">
-                <div class="quote-author">${escHtml(r.quote_author)}</div>
-                <div class="quote-text">${escHtml(r.quote_text)}${r.quote_text.length >= 100 ? '…' : ''}</div>
-            </div>`;
-        }
+        const quoteHTML = r.quote_author
+            ? `<div class="reply-quote">
+                   <div class="quote-author">${escHtml(r.quote_author)}</div>
+                   <div class="quote-text">${escHtml(r.quote_text || '')}${(r.quote_text||'').length >= 100 ? '…' : ''}</div>
+               </div>` : '';
 
         let attachHTML = '';
         if (r.attachment) {
-            const ext = r.attachment.split('.').pop().toLowerCase();
-            const path = 'uploads/discussions/' + r.attachment;
+            const ext   = r.attachment.split('.').pop().toLowerCase();
+            const path  = 'uploads/discussions/' + r.attachment;
             const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
-            attachHTML = `<div class="post-attachment">` + (isImg
+            attachHTML  = `<div class="post-attachment">` + (isImg
                 ? `<img src="${path}" alt="Attachment" onclick="openMedia('${path}','image')">`
-                : `<div class="pdf-link" onclick="openMedia('${path}','pdf')">
-                       <i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span>
-                   </div>`) + `</div>`;
+                : `<div class="pdf-link" onclick="openMedia('${path}','pdf')"><i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span></div>`)
+                + `</div>`;
         }
 
-        const replyBtn = `<button class="action-btn reply-btn"
-            onclick="setReply(${r.id}, '${escHtml(displayName)}', '${escHtml((r.message||'').substring(0,100))}')">
-            <i class="fas fa-reply"></i> Reply
-        </button>`;
+        const replyBtn  = `<button class="action-btn reply-btn" onclick="setReply(${r.id},'${escHtml(displayName)}','${escHtml((r.message||'').substring(0,100))}')"><i class="fas fa-reply"></i> Reply</button>`;
         const reportBtn = (USER_ROLE === 'learner' && !isMe)
-            ? `<button class="action-btn report-btn" onclick="showReportModal(${r.id}, ${DISC_ID})">
-                   <i class="fas fa-flag"></i> Report
-               </button>` : '';
+            ? `<button class="action-btn report-btn" onclick="showReportModal(${r.id},${DISC_ID})"><i class="fas fa-flag"></i> Report</button>` : '';
+        const meBadge   = isMe ? `<span class="me-tag">You</span>` : '';
 
-        const meBadge = isMe ? `<span class="me-tag">You</span>` : '';
-
-        return `<div class="post-card ${isMe ? 'is-me' : ''}" data-id="${r.id}" style="animation: fadeUp 0.35s ease both;">
+        return `<div class="post-card ${isMe ? 'is-me' : ''}" data-id="${r.id}" style="animation:fadeUp 0.35s ease both;">
             <div class="post-header">
                 ${avatarHTML}
                 <div class="post-meta">
                     <div class="post-author">${escHtml(displayName)} ${meBadge}</div>
-                    <div class="post-time">${formatPostDate(r.created_at)}</div>
+                    <div class="post-time">${formatTimeOnly(r.created_at)}</div>
                 </div>
             </div>
             ${quoteHTML}
-            <div class="post-body">${escHtml(r.message || '').replace(/\n/g, '<br>')}</div>
+            <div class="post-body">${escHtml(r.message || '').replace(/\n/g,'<br>')}</div>
             ${attachHTML}
             <div class="post-footer">${replyBtn}${reportBtn}</div>
         </div>`;
     }
 
-    function escHtml(str) {
-        return String(str)
-            .replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;')
-            .replace(/'/g,'&#39;');
-    }
+    // ── LIVE POLLING ──
+    const DISC_ID    = <?= $disc_id ?>;
+    const USER_EMAIL = <?= json_encode($user_email) ?>;
+    const USER_ROLE  = <?= json_encode($user_role) ?>;
+    let lastReplyId  = <?= !empty($replies) ? (int)end($replies)['id'] : 0 ?>;
+    let lastSeenDateKey = <?= !empty($replies) ? json_encode(date('Y-m-d', strtotime(end($replies)['created_at']))) : json_encode(date('Y-m-d', strtotime($disc['created_at']))) ?>;
+    let isPolling    = false;
+    let pollInterval = null;
 
     async function pollReplies() {
         if (isPolling) return;
@@ -1283,11 +950,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
             const newReplies = await res.json();
             if (!Array.isArray(newReplies) || newReplies.length === 0) return;
 
-            const postsScroll = document.getElementById('postsScroll');
             const bottom      = document.getElementById('bottom');
             const wasAtBottom = postsScroll.scrollHeight - postsScroll.scrollTop - postsScroll.clientHeight < 80;
 
             newReplies.forEach(r => {
+                // Inject date separator if date changed
+                const dk = getDateKey(r.created_at);
+                if (dk !== lastSeenDateKey) {
+                    postsScroll.insertBefore(makeDateSeparator(getDateLabel(r.created_at)), bottom);
+                    lastSeenDateKey = dk;
+                }
+
                 const card = document.createElement('div');
                 card.innerHTML = buildPostCard(r).trim();
                 postsScroll.insertBefore(card.firstChild, bottom);
@@ -1300,54 +973,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
                 showNewMessageBanner(newReplies.length);
             }
         } catch (e) {
-            // Silently fail — don't interrupt the user
+            // Silently fail
         } finally {
             isPolling = false;
         }
     }
 
-    // New-message nudge banner
     function showNewMessageBanner(count) {
         let banner = document.getElementById('newMsgBanner');
         if (!banner) {
             banner = document.createElement('button');
             banner.id = 'newMsgBanner';
             banner.style.cssText = `
-                position: sticky; bottom: 12px; left: 50%; transform: translateX(-50%);
-                background: var(--accent); color: #0d1117;
-                border: none; border-radius: 20px; padding: 8px 18px;
-                font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
-                cursor: pointer; display: block; margin: 0 auto;
-                box-shadow: 0 4px 16px rgba(79,209,197,0.4);
-                animation: fadeUp 0.3s ease;
-                z-index: 50;
+                position:sticky; bottom:12px; left:50%; transform:translateX(-50%);
+                background:var(--accent); color:#0d1117; border:none; border-radius:20px;
+                padding:8px 18px; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
+                cursor:pointer; display:block; margin:0 auto;
+                box-shadow:0 4px 16px rgba(79,209,197,0.4); z-index:50;
             `;
-            banner.onclick = () => {
-                scroll.scrollTop = scroll.scrollHeight;
-                banner.remove();
-            };
-            document.getElementById('postsScroll').appendChild(banner);
+            banner.onclick = () => { postsScroll.scrollTop = postsScroll.scrollHeight; banner.remove(); };
+            postsScroll.appendChild(banner);
         }
         banner.textContent = `↓ ${count} new message${count > 1 ? 's' : ''}`;
     }
 
-    // Start polling every 4 seconds
     pollInterval = setInterval(pollReplies, 4000);
 
-    // Stop polling when tab is hidden to save resources
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             clearInterval(pollInterval);
         } else {
-            pollReplies(); // Immediately catch up
+            pollReplies();
             pollInterval = setInterval(pollReplies, 4000);
         }
     });
 
     // ── BACK NAVIGATION ──
     function goBackToDiscussions() {
-        if (document.referrer.includes('learner_dashboard.php') ||
-            document.referrer.includes('teacher_dashboard.php')) {
+        if (document.referrer.includes('learner_dashboard.php') || document.referrer.includes('teacher_dashboard.php')) {
             history.back();
         } else {
             const role = '<?= $_SESSION['role'] ?>';
@@ -1360,21 +1023,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_in_class) {
         const overlay = document.getElementById('mediaOverlay');
         const content = document.getElementById('mediaContent');
         overlay.style.display = 'flex';
-        content.innerHTML = type === 'image'
-            ? `<img src="${path}" alt="Preview">`
-            : `<iframe src="${path}"></iframe>`;
+        content.innerHTML = type === 'image' ? `<img src="${path}" alt="Preview">` : `<iframe src="${path}"></iframe>`;
         history.pushState({ viewingMedia: true }, '');
     }
-
     function closeMedia() {
         document.getElementById('mediaOverlay').style.display = 'none';
         document.getElementById('mediaContent').innerHTML = '';
     }
-
-    window.onpopstate = function(event) {
-        if (document.getElementById('mediaOverlay').style.display === 'flex') {
-            closeMedia();
-        }
+    window.onpopstate = function() {
+        if (document.getElementById('mediaOverlay').style.display === 'flex') closeMedia();
     };
 </script>
 </body>
