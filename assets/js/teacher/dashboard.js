@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (savedPage === "teacher_announcements") {
         window.fetchTeacherAnnouncements();
+        } else if (savedPage === "teacher_evaluations") {
+    window.fetchTeacherEvaluations();
     } else {
         if (apiArea) apiArea.style.display = 'block';
     }
