@@ -7,19 +7,35 @@ document.addEventListener('DOMContentLoaded', function () {
     window.loaderTimeout = null;
 
     // ─────────────────────────────────────────────
+    // DEFINE FUNCTIONS FIRST
+    // ─────────────────────────────────────────────
+    window.loadTeacherManual = async function() {
+        sessionStorage.setItem("lastTeacherPage", "teacher_manual");
+        if (typeof window.setTeacherActive === 'function') {
+            window.setTeacherActive("teacher_manual");
+        }
+        if (apiArea) apiArea.style.display = 'block';
+        if (iframe)  iframe.style.display  = 'none';
+
+        const response = await fetch('teacher_manual.php');
+        const html = await response.text();
+        apiArea.innerHTML = html;
+    };
+
+    // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
     // ─────────────────────────────────────────────
     const savedPage = sessionStorage.getItem("lastTeacherPage");
 
-   if (savedPage === "teacher_announcements") {
-    window.fetchTeacherAnnouncements();
-} else if (savedPage === "teacher_evaluations") {
-    window.fetchTeacherEvaluations();
-} else if (savedPage === "teacher_manual") {
-    window.loadTeacherManual();
-} else {
-    window.loadTeacherManual(); // default home
-}
+    if (savedPage === "teacher_announcements") {
+        window.fetchTeacherAnnouncements();
+    } else if (savedPage === "teacher_evaluations") {
+        window.fetchTeacherEvaluations();
+    } else if (savedPage === "teacher_manual") {
+        window.loadTeacherManual();
+    } else {
+        window.loadTeacherManual();
+    }
 
     // ─────────────────────────────────────────────
     // ACTIVE STATE
