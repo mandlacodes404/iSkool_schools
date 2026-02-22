@@ -86,7 +86,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.5">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
@@ -507,10 +507,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Assignments</span>
     </a>
 
-    <a href="create_announcement.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_announcement.php'?'active':'' ?>">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-        <span>Create Announcement</span>
-    </a>
 
    <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
@@ -618,7 +614,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 </nav>
 
 <script src="assets/js/teacher/dashboard.js?v=1.6"></script>
-<script src="assets/js/teacher/announcements.js?v=1.4"></script>
+<script src="assets/js/teacher/announcements.js?v=1.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.3"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 </body>
