@@ -482,7 +482,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
    <div class="sidebar-links" style="margin-top:20px;">
-    <a href="teacher_manual.php" target="mainFrame" class="<?= $currentPage==='teacher_manual.php'?'active':'' ?>">
+    <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         <span>Home</span>
     </a>
@@ -617,7 +617,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=1.2"></script>
+<script src="assets/js/teacher/dashboard.js?v=1.3"></script>
 <script src="assets/js/teacher/announcements.js?v=1.4"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.3"></script>
 </body>
