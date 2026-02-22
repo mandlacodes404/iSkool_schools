@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (savedPage === "teacher_announcements") {
         window.fetchTeacherAnnouncements();
     } else {
-        // default home — we'll build this later
         if (apiArea) apiArea.style.display = 'block';
     }
 
@@ -51,23 +50,65 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     window.toggleDesktopSidebar = function() {
         sidebar.classList.toggle('desktop-open');
+
+        // Keep the icon rotation
+        const collapsed = !sidebar.classList.contains('desktop-open');
+        const svg = document.querySelector('#toggleIcon svg');
+        if (svg) {
+            svg.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
     };
 
     document.getElementById('desktopMenuToggle')
         ?.addEventListener('click', toggleDesktopSidebar);
 
     // ─────────────────────────────────────────────
-    // AUTO CLOSE SIDEBAR ON NAV CLICK
+    // RESTORE DESKTOP SIDEBAR STATE
+    // ─────────────────────────────────────────────
+    if (window.innerWidth > 768) {
+        const saved = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (saved) {
+            sidebar.classList.add('desktop-open');
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // AUTO CLOSE SIDEBAR ON NAV CLICK + LOADER
     // ─────────────────────────────────────────────
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
-            if (sidebar.classList.contains('active') || 
+            clearTimeout(window.loaderTimeout);
+
+            window.loaderTimeout = setTimeout(() => {
+                loader.style.display = 'flex';
+            }, 800);
+
+            if (sidebar.classList.contains('active') ||
                 sidebar.classList.contains('desktop-open')) {
                 sidebar.classList.remove('active');
                 sidebar.classList.remove('desktop-open');
                 if (overlay) overlay.style.display = 'none';
             }
         });
+    });
+
+    // ─────────────────────────────────────────────
+    // IFRAME LOAD — HIDE LOADER + SAVE STATE
+    // ─────────────────────────────────────────────
+    iframe?.addEventListener('load', () => {
+        clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
+
+        try {
+            const fullPage = iframe.contentWindow.location.pathname.split("/").pop()
+                           + iframe.contentWindow.location.search;
+
+            if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
+                sessionStorage.setItem("lastTeacherPage", fullPage);
+            }
+        } catch (e) {
+            console.log("External or restricted page loaded, cannot save state.");
+        }
     });
 
     // ─────────────────────────────────────────────
@@ -80,12 +121,12 @@ document.addEventListener('DOMContentLoaded', function () {
             iframe.src = 'teacher_settings.php';
         }
         if (apiArea) apiArea.style.display = 'none';
-        toggleSidebar(true);
-    });
 
-    iframe?.addEventListener('load', () => {
-        clearTimeout(window.loaderTimeout);
-        if (loader) loader.style.display = 'none';
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        toggleSidebar(true);
     });
 
     // ─────────────────────────────────────────────
@@ -100,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Instant preview before upload completes
         const previewUrl = URL.createObjectURL(file);
         updateTeacherAvatar(previewUrl);
 
