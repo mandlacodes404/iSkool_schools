@@ -1167,29 +1167,26 @@ iframe {
     }
 }
 
-/* Styling for the new X button */
 .desktop-close-btn {
-    background: transparent;
-    border: none;
-    color: #8b949e; /* Muted gray */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #000000;
+    border: 2px solid #333;
+    color: #e2e8f0;
+    font-size: 18px;
     cursor: pointer;
-    padding: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s, transform 0.2s;
-    margin-top: -5px; 
-    margin-right: -20px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
-.desktop-close-btn svg {
-    width: 17px;
-    height: 17px;
+.desktop-close-btn:hover {
+    background: #111111;
 }
 
-
-
-/* THE MAGIC: Hide on mobile, show on desktop */
 @media (max-width: 768px) {
     .desktop-close-btn {
         display: none !important;
@@ -1220,11 +1217,12 @@ iframe {
         </div>
 
         <button type="button" class="desktop-close-btn" onclick="toggleSidebar(true)" aria-label="Close Menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+        <line x1="7" y1="3" x2="7" y2="21"></line>
+    </svg>
+</button>
     </div>
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
