@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.fetchTeacherResources();
     } else if (savedPage === "teacher_manual") {
         window.loadTeacherManual();
+    } else if (savedPage === "teacher_grades") {
+    window.fetchTeacherGrades();
     } else {
         window.loadTeacherManual();
     }
@@ -117,21 +119,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // IFRAME LOAD — HIDE LOADER + SAVE STATE
     // ─────────────────────────────────────────────
-    iframe?.addEventListener('load', () => {
-        clearTimeout(window.loaderTimeout);
-        if (loader) loader.style.display = 'none';
+  iframe?.addEventListener('load', () => {
+    clearTimeout(window.loaderTimeout);
+    if (loader) loader.style.display = 'none';
 
-        try {
-            const fullPage = iframe.contentWindow.location.pathname.split("/").pop()
-                           + iframe.contentWindow.location.search;
+    try {
+        const fullPage = iframe.contentWindow.location.pathname.split("/").pop()
+                       + iframe.contentWindow.location.search;
 
-            if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
+        if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
+            // If it's quiz grades or edit marks, save as teacher_grades
+            // so refresh brings back the grades list not the iframe
+            if (fullPage.startsWith('quiz_grades.php') || fullPage.startsWith('edit_marks.php')) {
+                sessionStorage.setItem("lastTeacherPage", "teacher_grades");
+            } else {
                 sessionStorage.setItem("lastTeacherPage", fullPage);
             }
-        } catch (e) {
-            console.log("External or restricted page loaded, cannot save state.");
         }
-    });
+    } catch (e) {
+        console.log("External or restricted page loaded, cannot save state.");
+    }
+});
 
     // ─────────────────────────────────────────────
     // SETTINGS BUTTON

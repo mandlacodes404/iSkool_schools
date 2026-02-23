@@ -86,7 +86,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.6">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
@@ -513,10 +513,15 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Announcements</span>
     </a>
 
-    <a href="learner_grades.php" target="mainFrame" class="<?= $currentPage==='learner_grades.php'?'active':'' ?>">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
-        <span>Learner Grades</span>
-    </a>
+    <a href="javascript:void(0)" data-page="teacher_grades" onclick="fetchTeacherGrades()">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+    </svg>
+    <span>Grades</span>
+</a>
 
     <a href="javascript:void(0)" data-page="teacher_resources" class="desktop-only" onclick="fetchTeacherResources()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -611,9 +616,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=1.6"></script>
+<script src="assets/js/teacher/dashboard.js?v=1.7"></script>
 <script src="assets/js/teacher/announcements.js?v=1.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.4"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
+<script src="assets/js/teacher/grades.js?v=1.0"></script>
 </body>
 </html>
