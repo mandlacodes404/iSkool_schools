@@ -128,13 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
                        + iframe.contentWindow.location.search;
 
         if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
-            // If it's quiz grades or edit marks, save as teacher_grades
-            // so refresh brings back the grades list not the iframe
-            if (fullPage.startsWith('quiz_grades.php') || fullPage.startsWith('edit_marks.php')) {
-                sessionStorage.setItem("lastTeacherPage", "teacher_grades");
-            } else {
-                sessionStorage.setItem("lastTeacherPage", fullPage);
-            }
+            sessionStorage.setItem("lastTeacherPage", fullPage);
         }
     } catch (e) {
         console.log("External or restricted page loaded, cannot save state.");

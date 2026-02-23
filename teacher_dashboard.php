@@ -86,7 +86,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.7">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
@@ -616,10 +616,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=1.7"></script>
+<script src="assets/js/teacher/dashboard.js?v=1.8"></script>
 <script src="assets/js/teacher/announcements.js?v=1.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.4"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
-<script src="assets/js/teacher/grades.js?v=1.0"></script>
+<script src="assets/js/teacher/grades.js?v=1.1"></script>
 </body>
 </html>

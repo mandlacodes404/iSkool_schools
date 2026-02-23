@@ -1,5 +1,9 @@
-window.teacherGradesCache = null;
+window.teacherGradesCache  = null;
+window.currentQuizData     = null;
 
+// ─────────────────────────────────────────────
+// GRADES LIST
+// ─────────────────────────────────────────────
 window.fetchTeacherGrades = async function() {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_grades");
@@ -65,9 +69,7 @@ function renderTeacherGrades(data) {
     } else {
         data.forEach(termData => {
             html += `
-                <div class="teacher-term-divider">
-                    Term ${termData.term}
-                </div>`;
+                <div class="teacher-term-divider">Term ${termData.term}</div>`;
 
             termData.classes.forEach(cls => {
                 html += `
@@ -76,14 +78,13 @@ function renderTeacherGrades(data) {
 
                 cls.quizzes.forEach(quiz => {
                     html += `
-                        <div class="teacher-resource-card" onclick="openQuizGrades(${quiz.id})">
+                        <div class="teacher-resource-card" onclick="openQuizGrades(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">
                             <div class="teacher-resource-icon">
                                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                             </div>
                             <div class="teacher-resource-info">
@@ -110,7 +111,6 @@ function renderTeacherGrades(data) {
                     <button onclick="closeAddQuizModal()" class="teacher-modal-close">&times;</button>
                 </div>
                 <div class="teacher-modal-body">
-
                     <div class="teacher-grades-info" style="margin-bottom:16px;">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px;">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -135,7 +135,7 @@ function renderTeacherGrades(data) {
 
                     <div id="weightContainer" style="display:none;margin-top:12px;">
                         <label class="teacher-modal-label">Weight %</label>
-                        <input type="number" id="quizWeight" class="teacher-modal-input" 
+                        <input type="number" id="quizWeight" class="teacher-modal-input"
                             min="0" max="100" step="0.1" placeholder="e.g. 30" style="max-width:150px;">
                     </div>
 
@@ -152,6 +152,207 @@ function renderTeacherGrades(data) {
     loadGradesClasses();
 }
 
+// ─────────────────────────────────────────────
+// QUIZ GRADES VIEW
+// ─────────────────────────────────────────────
+window.openQuizGrades = async function(quizId, quizTitle) {
+    const apiArea = document.getElementById('api-content-area');
+    const loader  = document.getElementById('loaderOverlay');
+
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        window.currentQuizData = data;
+        renderQuizGrades(data);
+    } catch (e) {
+        if (apiArea) apiArea.innerHTML = `
+            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+                Error loading grades.
+            </p>`;
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
+};
+
+function renderQuizGrades(data) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    let html = `
+        <div class="teacher-resources-header">
+            <button class="teacher-back-btn" onclick="fetchTeacherGrades()">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back to Grades
+            </button>
+        </div>
+
+        <h3 class="teacher-quiz-grades-title">${data.quiz_title}</h3>
+        <p class="teacher-quiz-grades-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</p>`;
+
+    if (data.learners.length === 0) {
+        html += `<p class="teacher-empty-state">No learners found in this class.</p>`;
+    } else {
+        html += `<div class="teacher-grades-table-wrapper">
+            <table class="teacher-grades-table">
+                <thead>
+                    <tr>
+                        <th>Learner</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        data.learners.forEach(learner => {
+            const score = learner.score !== null
+                ? `${learner.score} / ${learner.total}`
+                : '<span style="color:#555e6a;">Not recorded</span>';
+            const perc  = learner.percentage
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${learner.percentage}</span>`
+                : '<span style="color:#555e6a;">—</span>';
+
+            html += `
+                <tr>
+                    <td>${learner.name}</td>
+                    <td>${score}</td>
+                    <td>${perc}</td>
+                    <td>
+                        <button class="teacher-edit-marks-btn" 
+                            onclick="openEditMarks('${learner.email.replace(/'/g, "\\'")}', '${learner.name.replace(/'/g, "\\'")}', ${data.quiz_id}, '${data.quiz_title.replace(/'/g, "\\'")}', ${learner.score ?? 'null'}, ${learner.total ?? 100})">
+                            Edit
+                        </button>
+                    </td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+    }
+
+    apiArea.innerHTML = html;
+}
+
+function getGradeBadgeClass(percentage) {
+    const val = parseFloat(percentage);
+    if (val >= 75) return 'grade-high';
+    if (val >= 50) return 'grade-mid';
+    return 'grade-low';
+}
+
+// ─────────────────────────────────────────────
+// EDIT MARKS VIEW
+// ─────────────────────────────────────────────
+window.openEditMarks = function(email, name, quizId, quizTitle, currentScore, currentTotal) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    const scoreVal = currentScore !== null ? currentScore : '';
+    const totalVal = currentTotal !== null ? currentTotal : 100;
+
+    apiArea.innerHTML = `
+        <div class="teacher-resources-header">
+            <button class="teacher-back-btn" onclick="renderQuizGrades(window.currentQuizData)">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back to ${quizTitle}
+            </button>
+        </div>
+
+        <div class="teacher-edit-marks-box">
+            <h3 class="teacher-edit-marks-title">Edit Marks</h3>
+            <p class="teacher-edit-marks-meta">
+                <strong>${name}</strong><br>
+                <span style="color:#8b949e;">${quizTitle}</span>
+            </p>
+
+            <label class="teacher-modal-label">Score Received</label>
+            <input type="number" step="0.01" id="editScore" class="teacher-modal-input" 
+                value="${scoreVal}" placeholder="e.g. 15">
+
+            <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
+            <input type="number" step="0.01" id="editTotal" class="teacher-modal-input" 
+                value="${totalVal}" placeholder="e.g. 20">
+
+            <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+            <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
+
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button class="teacher-modal-cancel" style="flex:1;" 
+                    onclick="renderQuizGrades(window.currentQuizData)">Cancel</button>
+                <button class="teacher-modal-submit" style="flex:2;" 
+                    id="saveMarksBtn"
+                    onclick="saveMarks('${email.replace(/'/g, "\\'")}', ${quizId})">
+                    Save Marks
+                </button>
+            </div>
+        </div>`;
+};
+
+window.saveMarks = async function(email, quizId) {
+    const score     = document.getElementById('editScore').value;
+    const total     = document.getElementById('editTotal').value;
+    const errorDiv  = document.getElementById('editMarksError');
+    const successDiv = document.getElementById('editMarksSuccess');
+    const saveBtn   = document.getElementById('saveMarksBtn');
+    const loader    = document.getElementById('loaderOverlay');
+
+    errorDiv.style.display   = 'none';
+    successDiv.style.display = 'none';
+
+    if (score === '') { errorDiv.textContent = 'Please enter a score.'; errorDiv.style.display = 'block'; return; }
+    if (!total)       { errorDiv.textContent = 'Please enter the total.'; errorDiv.style.display = 'block'; return; }
+
+    const fd = new FormData();
+    fd.append('quiz_id',    quizId);
+    fd.append('user_email', email);
+    fd.append('score',      score);
+    fd.append('total',      total);
+
+    saveBtn.disabled    = true;
+    saveBtn.textContent = 'Saving...';
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            successDiv.textContent = 'Marks saved successfully!';
+            successDiv.style.display = 'block';
+
+            // Update the cached quiz data so when we go back the table is fresh
+            window.currentQuizData = null;
+            setTimeout(async () => {
+                const res2  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
+                const fresh = await res2.json();
+                window.currentQuizData = fresh;
+                renderQuizGrades(fresh);
+            }, 800);
+        } else {
+            errorDiv.textContent = data.error || 'Failed to save marks.';
+            errorDiv.style.display = 'block';
+        }
+    } catch (e) {
+        errorDiv.textContent = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        saveBtn.disabled    = false;
+        saveBtn.textContent = 'Save Marks';
+        if (loader) loader.style.display = 'none';
+    }
+};
+
+// ─────────────────────────────────────────────
+// ADD QUIZ MODAL
+// ─────────────────────────────────────────────
 async function loadGradesClasses() {
     try {
         const res  = await fetch('api/teacher/get_classes.php');
@@ -183,9 +384,9 @@ window.openAddQuizModal = function() {
 window.closeAddQuizModal = function() {
     const modal = document.getElementById('addQuizModal');
     if (modal) modal.style.display = 'none';
-    document.getElementById('quizTitle').value      = '';
-    document.getElementById('quizClass').value      = '';
-    document.getElementById('quizSummative').checked = false;
+    document.getElementById('quizTitle').value       = '';
+    document.getElementById('quizClass').value       = '';
+    document.getElementById('quizSummative').checked  = false;
     document.getElementById('weightContainer').style.display = 'none';
     document.getElementById('addQuizError').style.display    = 'none';
 };
@@ -235,17 +436,5 @@ window.submitAddQuiz = async function() {
         submitBtn.disabled    = false;
         submitBtn.textContent = 'Add Quiz';
         if (loader) loader.style.display = 'none';
-    }
-};
-
-window.openQuizGrades = function(quizId) {
-    sessionStorage.setItem("lastTeacherPage", "teacher_grades");
-    const apiArea = document.getElementById('api-content-area');
-    const iframe  = document.getElementById('mainFrame');
-
-    if (apiArea) apiArea.style.display = 'none';
-    if (iframe) {
-        iframe.style.display = 'block';
-        iframe.src = `quiz_grades.php?quiz_id=${quizId}`;
     }
 };
