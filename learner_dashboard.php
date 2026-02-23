@@ -1138,40 +1138,33 @@ iframe {
 }
 #desktopMenuToggle {
     display: none;
+    background: #000000;
+    border: 2px solid #333;
+    color: #e2e8f0;
+    width: 40px;
+    height: 40px;
+    border-radius: 19%;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-right: 15px;
+}
+
+#desktopMenuToggle:hover {
+    background: #111111;
 }
 
 @media (min-width: 769px) {
     #desktopMenuToggle {
-        display: block;
-        background: none;
-        border: 1px solid #333;
-        border-radius: 9px;
-        color: var(--text-color);
-        font-size: 24px;
-        cursor: pointer;
-        padding: 8px 12px;
+        display: flex;
     }
 }
 
 @media (max-width: 768px) {
     #desktopMenuToggle {
-        display: none;
+        display: none !important;
     }
-}
-
-/* Ensure SVG icons align perfectly inside buttons */
-button svg {
-    display: block;
-    width: 22px;   /* Adjust size as needed */
-    height: 22px;
-    margin: 0 auto;
-    transition: transform 0.2s ease;
-}
-
-/* Optional: Add a slight "hover" effect */
-button:hover svg {
-    stroke: #4fd1c5; /* Your theme color */
-    transform: scale(1.1);
 }
 
 /* Styling for the new X button */
@@ -1315,13 +1308,13 @@ button:hover svg {
             </svg>
         </button>
 
-        <button id="desktopMenuToggle" class="desktop-menu-toggle" type="button" aria-label="Open Desktop Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
+       <button id="desktopMenuToggle" type="button" aria-label="Open Desktop Menu">
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+</button>
 
         <button id="headerBackBtn" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="handleHeaderBack()">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
