@@ -523,16 +523,14 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Upload Resource</span>
     </a>
 
-    <a href="create_evaluation.php" target="mainFrame" class="desktop-only <?= $currentPage==='create_evaluation.php'?'active':'' ?>">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
-        <span>Release Evaluation</span>
-    </a>
-
-    <a href="javascript:void(0)" data-page="teacher_evaluations" class="desktop-only" onclick="fetchTeacherEvaluations()">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-        <span>Evaluations</span>
-    </a>
-
+    <a href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations()">
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
+    <span>Evaluations</span>
+</a>
     <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         <span>Discussions</span>
@@ -615,7 +613,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
 <script src="assets/js/teacher/dashboard.js?v=1.6"></script>
 <script src="assets/js/teacher/announcements.js?v=1.5"></script>
-<script src="assets/js/teacher/evaluations.js?v=1.3"></script>
+<script src="assets/js/teacher/evaluations.js?v=1.4"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 </body>
 </html>
