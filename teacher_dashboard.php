@@ -201,12 +201,15 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
         /* Main Content */
         .main-content {
-            flex: 1;
-           margin-left: 0;
-            transition: margin-left var(--transition-speed) ease;
-            display: flex;
-            flex-direction: column;
-        }
+    flex: 1;
+    margin-left: 0;
+    min-width: 0;
+    transition: margin-left var(--transition-speed) ease;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+}
 
         .main-header {
             padding: 12px 18px;
@@ -454,6 +457,11 @@ $schoolLogo = 'uploads/schools/default_school.png';
     .desktop-only-btn {
         display: flex; /* Appears on screens wider than 768px */
     }
+}
+#api-content-area {
+    position: relative !important;
+    left: 0 !important;
+    width: 100% !important;
 }
     </style>
 </head>
