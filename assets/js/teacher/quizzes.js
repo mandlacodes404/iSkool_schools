@@ -492,70 +492,312 @@ window.openCreateQuiz = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('create_quiz.php');
-        const html = await res.text();
+        // Load classes and term info in parallel
+        const [classRes, termRes] = await Promise.all([
+            fetch('api/teacher/get_classes.php'),
+            fetch('api/teacher/get_quizzes.php')
+        ]);
+        const classes = await classRes.json();
+        const quizData = await termRes.json();
+        const currentTerm = quizData.current_term || 1;
 
-        // Extract just the body content
-        const parser = new DOMParser();
-        const doc    = parser.parseFromString(html, 'text/html');
-
-        // Inject a back button at the top
-        const backBtn = document.createElement('div');
-        backBtn.style.marginBottom = '20px';
-        backBtn.innerHTML = `
-            <button class="teacher-back-btn" onclick="fetchTeacherQuizzes()">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                Back to Quizzes
-            </button>`;
-
-        const body = doc.body;
-
-        // Re-execute scripts from the fetched page
-        const scripts = body.querySelectorAll('script');
-        apiArea.innerHTML = '';
-        apiArea.appendChild(backBtn);
-        apiArea.innerHTML += body.innerHTML;
-
-        scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
-            newScript.textContent = oldScript.textContent;
-            document.body.appendChild(newScript);
+        let classOptions = '<option value="">-- Select Class --</option>';
+        classes.forEach(c => {
+            classOptions += `<option value="${c.id}">${c.name}</option>`;
         });
 
-        // Override the form submit to go back to quiz list on success
-        const form = apiArea.querySelector('#quizForm');
-        if (form) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const loader = document.getElementById('loaderOverlay');
-                if (loader) loader.style.display = 'flex';
+        apiArea.innerHTML = `
+            <div class="teacher-resources-header">
+                <button class="teacher-back-btn" onclick="fetchTeacherQuizzes()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Back to Quizzes
+                </button>
+            </div>
 
-                const fd = new FormData(form);
-                try {
-                    const res  = await fetch('create_quiz.php', { method: 'POST', body: fd });
-                    const data = await res.json();
-                    if (data.success) {
-                        window.teacherQuizzesCache = null;
-                        fetchTeacherQuizzes();
-                    } else {
-                        alert(data.message || 'Failed to create quiz.');
-                    }
-                } catch (err) {
-                    alert('Something went wrong. Please try again.');
-                } finally {
-                    if (loader) loader.style.display = 'none';
+            <div style="max-width:700px;margin:0 auto;">
+                <h2 style="color:#4fd1c5;font-size:22px;margin:0 0 24px;font-weight:800;">Create a New Quiz</h2>
+
+                <form id="createQuizForm" enctype="multipart/form-data">
+
+                    <label class="teacher-modal-label">Quiz Title *</label>
+                    <input type="text" name="quiz_title" class="teacher-modal-input" 
+                        placeholder="e.g. Chapter 3 Test" required>
+
+                    <label class="teacher-modal-label">Assign to Class *</label>
+                    <select name="class_id" class="teacher-modal-input" required>
+                        ${classOptions}
+                    </select>
+
+                    <label class="teacher-modal-label">Duration (minutes) *</label>
+                    <input type="number" name="duration" class="teacher-modal-input" 
+                        min="1" max="180" placeholder="e.g. 60" required style="max-width:160px;">
+
+                    <label class="teacher-modal-label">Start Time *</label>
+                    <input type="datetime-local" name="start_time" class="teacher-modal-input" required>
+
+                    <label class="teacher-modal-label">Quiz Status</label>
+                    <select name="status" class="teacher-modal-input">
+                        <option value="Scheduled">Scheduled (Opens at start time)</option>
+                        <option value="Open">Open (Available immediately)</option>
+                        <option value="Closed">Closed (Not accessible)</option>
+                    </select>
+
+                    <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
+                        <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
+                            <input type="checkbox" name="publish_marks" value="1" 
+                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
+                            Publish marks immediately after submission
+                        </label>
+
+                        <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
+                            <input type="checkbox" name="is_summative" value="1" id="cqSummative"
+                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;"
+                                onchange="toggleCqWeight()">
+                            Counts toward official term mark
+                        </label>
+
+                        <div id="cqWeightContainer" style="display:none;margin-left:28px;">
+                            <label class="teacher-modal-label">Weight % of term mark</label>
+                            <input type="number" name="weight_percent" id="cqWeight" 
+                                class="teacher-modal-input" min="0" max="100" step="0.1" 
+                                placeholder="e.g. 30" style="max-width:150px;">
+                        </div>
+
+                        <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;">
+                            <input type="checkbox" name="force_email" value="1"
+                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;margin-top:2px;flex-shrink:0;">
+                            <span>Learners automatically get mobile notifications. Tick this box to also send email notifications (not recommended — heavy on server).</span>
+                        </label>
+                    </div>
+
+                    <!-- Term Info -->
+                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:16px;margin:20px 0;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#4fd1c5;">Posting to: TERM ${currentTerm}</div>
+                        <div style="font-size:13px;color:#8b949e;margin-top:4px;">This quiz belongs to the current active term.</div>
+                    </div>
+
+                    <!-- Layout Mode -->
+                    <label class="teacher-modal-label" style="margin-bottom:10px;">Quiz Layout Mode</label>
+                    <div style="display:flex;gap:12px;margin-bottom:8px;">
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="layout_mode" value="single_page" checked 
+                                style="display:none;" onchange="toggleCqMultiPage(this)">
+                            <div class="cq-mode-card" id="cqModeSingle" 
+                                style="background:#1a1919;border:2px solid #4fd1c5;border-radius:10px;padding:16px;text-align:center;transition:all 0.3s;">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:6px;">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <div style="font-weight:700;color:#e2e8f0;font-size:14px;">Single Page</div>
+                            </div>
+                        </label>
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="layout_mode" value="multi_page" 
+                                style="display:none;" onchange="toggleCqMultiPage(this)">
+                            <div class="cq-mode-card" id="cqModeMulti"
+                                style="background:#1a1919;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;text-align:center;transition:all 0.3s;">
+                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#8b949e" stroke-width="2" fill="none" style="margin-bottom:6px;">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                </svg>
+                                <div style="font-weight:700;color:#8b949e;font-size:14px;">Multi-Page</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="cqMultiPageOptions" style="display:none;background:rgba(79,209,197,0.04);border:1px dashed rgba(79,209,197,0.3);border-radius:10px;padding:16px;margin-bottom:16px;">
+                        <div style="font-size:12px;font-weight:800;color:#4fd1c5;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Multi-Page Security</div>
+                        <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;margin-bottom:10px;cursor:pointer;">
+                            <input type="checkbox" name="shuffle_questions" value="1"
+                                style="width:16px;height:16px;accent-color:#4fd1c5;margin-top:2px;flex-shrink:0;">
+                            <span><strong>Shuffle Questions</strong> — every learner gets questions in a different order.</span>
+                        </label>
+                        <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;">
+                            <input type="checkbox" name="is_linear" value="1"
+                                style="width:16px;height:16px;accent-color:#4fd1c5;margin-top:2px;flex-shrink:0;">
+                            <span><strong>Linear Progression</strong> — learners cannot go back to previous questions.</span>
+                        </label>
+                    </div>
+
+                    <!-- Questions -->
+                    <div style="margin-top:24px;">
+                        <div style="font-size:15px;font-weight:800;color:#e2e8f0;margin-bottom:16px;">Questions</div>
+                        <div id="cqQuestionsContainer"></div>
+                        <button type="button" onclick="addCqQuestion()"
+                            style="width:100%;background:rgba(34,197,94,0.1);border:1px dashed rgba(34,197,94,0.4);color:#22c55e;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:24px;">
+                            + Add Another Question
+                        </button>
+                    </div>
+
+                    <div id="cqError" style="color:#ff5555;font-size:14px;margin-bottom:12px;display:none;"></div>
+
+                    <div style="display:flex;gap:12px;margin-bottom:40px;">
+                        <button type="button" onclick="fetchTeacherQuizzes()" class="teacher-modal-cancel" style="flex:1;padding:14px;">
+                            Cancel
+                        </button>
+                        <button type="submit" class="teacher-modal-submit" id="cqSubmitBtn" style="flex:2;padding:14px;font-size:15px;">
+                            Create Quiz
+                        </button>
+                    </div>
+
+                </form>
+            </div>`;
+
+        // Add first question automatically
+        addCqQuestion();
+
+        // Handle form submit
+        const form = document.getElementById('createQuizForm');
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('cqError');
+            const submitBtn = document.getElementById('cqSubmitBtn');
+            errorDiv.style.display = 'none';
+
+            submitBtn.disabled    = true;
+            submitBtn.textContent = 'Creating...';
+            if (loader) loader.style.display = 'flex';
+
+            const fd = new FormData(form);
+            try {
+                const res  = await fetch('create_quiz.php', { method: 'POST', body: fd });
+                const text = await res.text();
+                let data;
+                try { data = JSON.parse(text); }
+                catch(_) { throw new Error('Invalid server response'); }
+
+                if (data.success) {
+                    window.teacherQuizzesCache = null;
+                    fetchTeacherQuizzes();
+                } else {
+                    errorDiv.textContent = data.message || 'Failed to create quiz.';
+                    errorDiv.style.display = 'block';
                 }
-            });
-        }
+            } catch (err) {
+                errorDiv.textContent = 'Something went wrong. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled    = false;
+                submitBtn.textContent = 'Create Quiz';
+                if (loader) loader.style.display = 'none';
+            }
+        });
+
     } catch (e) {
+        console.error(e);
         if (apiArea) apiArea.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading create quiz form.
             </p>`;
     } finally {
         if (loader) loader.style.display = 'none';
+    }
+};
+
+// ─────────────────────────────────────────────
+// CREATE QUIZ HELPERS
+// ─────────────────────────────────────────────
+let cqQuestionIndex = 0;
+
+window.addCqQuestion = function() {
+    const container = document.getElementById('cqQuestionsContainer');
+    if (!container) return;
+
+    const i   = cqQuestionIndex;
+    const div = document.createElement('div');
+    div.id    = `cq-question-${i}`;
+    div.style.cssText = 'background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;';
+
+    div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span style="font-size:15px;font-weight:800;color:#4fd1c5;">Question ${i + 1}</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span id="cq-pts-display-${i}" style="font-size:13px;color:#4fd1c5;font-weight:700;">1 pt</span>
+                ${i > 0 ? `<button type="button" onclick="removeCqQuestion(${i})"
+                    style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">
+                    Remove
+                </button>` : ''}
+            </div>
+        </div>
+
+        <label class="teacher-modal-label">Question Text *</label>
+        <input type="text" name="question[]" class="teacher-modal-input" 
+            placeholder="Enter your question..." required>
+
+        <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
+        <input type="file" name="question_images[]" accept="image/*"
+            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
+
+        <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
+        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            placeholder="Choice 1" required style="margin-bottom:8px;">
+        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            placeholder="Choice 2" required style="margin-bottom:8px;">
+        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            placeholder="Choice 3" style="margin-bottom:8px;">
+        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            placeholder="Choice 4" style="margin-bottom:8px;">
+
+        <label class="teacher-modal-label" style="margin-top:4px;">Correct Answer</label>
+        <select name="correct_choice[]" class="teacher-modal-input">
+            <option value="0">Choice 1</option>
+            <option value="1">Choice 2</option>
+            <option value="2">Choice 3</option>
+            <option value="3">Choice 4</option>
+        </select>
+
+        <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
+        <input type="number" name="points[]" min="1" value="1" 
+            class="teacher-modal-input" style="max-width:100px;"
+            oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : '')">`;
+
+    container.appendChild(div);
+    cqQuestionIndex++;
+};
+
+window.removeCqQuestion = function(i) {
+    const el = document.getElementById(`cq-question-${i}`);
+    if (el) el.remove();
+};
+
+window.toggleCqWeight = function() {
+    const cb        = document.getElementById('cqSummative');
+    const container = document.getElementById('cqWeightContainer');
+    if (container) container.style.display = cb.checked ? 'block' : 'none';
+};
+
+window.toggleCqMultiPage = function(radio) {
+    const multiOptions = document.getElementById('cqMultiPageOptions');
+    const singleCard   = document.getElementById('cqModeSingle');
+    const multiCard    = document.getElementById('cqModeMulti');
+
+    if (radio.value === 'multi_page') {
+        if (multiOptions) multiOptions.style.display = 'block';
+        if (singleCard) {
+            singleCard.style.borderColor = 'rgba(255,255,255,0.1)';
+            singleCard.querySelector('svg').style.stroke = '#8b949e';
+            singleCard.querySelector('div').style.color  = '#8b949e';
+        }
+        if (multiCard) {
+            multiCard.style.borderColor = '#4fd1c5';
+            multiCard.querySelector('svg').style.stroke = '#4fd1c5';
+            multiCard.querySelector('div').style.color  = '#e2e8f0';
+        }
+    } else {
+        if (multiOptions) multiOptions.style.display = 'none';
+        if (singleCard) {
+            singleCard.style.borderColor = '#4fd1c5';
+            singleCard.querySelector('svg').style.stroke = '#4fd1c5';
+            singleCard.querySelector('div').style.color  = '#e2e8f0';
+        }
+        if (multiCard) {
+            multiCard.style.borderColor = 'rgba(255,255,255,0.1)';
+            multiCard.querySelector('svg').style.stroke = '#8b949e';
+            multiCard.querySelector('div').style.color  = '#8b949e';
+        }
     }
 };
 
