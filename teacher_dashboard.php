@@ -628,6 +628,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
-<script src="assets/js/teacher/analytics.js?v=1.0"></script>
+
 </body>
 </html>
