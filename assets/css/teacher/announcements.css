@@ -915,3 +915,145 @@
     color: #8b949e;
     white-space: nowrap;
 }
+/* ── ASSIGNMENTS ── */
+.teacher-assignment-card {
+    background: #1a1919;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.teacher-assignment-card:hover {
+    border-color: rgba(79,209,197,0.2);
+}
+
+.teacher-assignment-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    cursor: pointer;
+}
+
+.teacher-assignment-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.teacher-assignment-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 160px;
+}
+
+.teacher-assignment-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.teacher-assignment-progress-label {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.teacher-assignment-file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #4fd1c5;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    background: rgba(79,209,197,0.08);
+    border: 1px solid rgba(79,209,197,0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.teacher-assignment-file-link:hover {
+    background: rgba(79,209,197,0.15);
+}
+
+.teacher-assignment-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8b949e;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.teacher-assignment-download-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #e2e8f0;
+}
+
+.teacher-assignment-submissions {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.15);
+}
+
+.teacher-assignment-desc {
+    font-size: 14px;
+    color: #8b949e;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.teacher-sub-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.teacher-sub-badge.submitted {
+    background: rgba(34,197,94,0.15);
+    color: #22c55e;
+}
+
+.teacher-sub-badge.not-submitted {
+    background: rgba(248,81,73,0.15);
+    color: #f85149;
+}
+
+.teacher-sub-file-link {
+    color: #4fd1c5;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.teacher-sub-file-link:hover {
+    text-decoration: underline;
+}
+
+.teacher-sub-text {
+    font-size: 13px;
+    color: #c9d1d9;
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.5;
+    max-width: 300px;
+}
