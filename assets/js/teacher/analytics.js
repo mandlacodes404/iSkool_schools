@@ -472,22 +472,28 @@ function renderTopPerformers(classId, term, girls, boys) {
 // SUBJECT MODAL
 // ─────────────────────────────────────────────
 window.openSubjectModal = function(classId, currentSubject, className) {
+    const modal = document.getElementById('subjectModal');
+    if (!modal) return;
     analyticsCurrentClassId = classId;
-    document.getElementById('subjectModalClassName').textContent = className;
-    document.getElementById('subjectInput').value = currentSubject || '';
-    document.getElementById('subjectModal').style.display = 'flex';
-    setTimeout(() => document.getElementById('subjectInput').focus(), 100);
+    const nameEl = document.getElementById('subjectModalClassName');
+    if (nameEl) nameEl.textContent = className;
+    const input = document.getElementById('subjectInput');
+    if (input) input.value = currentSubject || '';
+    modal.style.display = 'flex';
+    setTimeout(() => input?.focus(), 100);
 };
 
 window.closeSubjectModal = function() {
-    document.getElementById('subjectModal').style.display = 'none';
+    const modal = document.getElementById('subjectModal');
+    if (modal) modal.style.display = 'none';
 };
 
 window.saveSubject = async function() {
-    const input   = document.getElementById('subjectInput');
-    const subject = input.value.trim();
-    const loader  = document.getElementById('loaderOverlay');
+    const input  = document.getElementById('subjectInput');
+    const loader = document.getElementById('loaderOverlay');
+    if (!input) return;
 
+    const subject = input.value.trim();
     if (!subject) {
         input.style.borderColor = '#f85149';
         setTimeout(() => input.style.borderColor = '', 1500);
@@ -505,15 +511,12 @@ window.saveSubject = async function() {
         const data = await res.json();
 
         if (data.success) {
-            // Update all subject labels for this class across all terms
             document.querySelectorAll(
                 `[id^="aclass-${analyticsCurrentClassId}-"] .teacher-analytics-subject`
             ).forEach(el => {
-                el.textContent  = data.subject_name;
+                el.textContent = data.subject_name;
                 el.classList.remove('unset');
             });
-
-            // Clear cache so next load reflects new subject
             window.teacherAnalyticsCache = null;
             closeSubjectModal();
         } else {

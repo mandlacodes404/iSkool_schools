@@ -92,7 +92,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
-     
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -628,6 +628,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
-
+<script src="assets/js/teacher/analytics.js?v=1.1"></script>
 </body>
 </html>
