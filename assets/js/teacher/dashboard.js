@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (savedPage === "teacher_announcements") {
         window.fetchTeacherAnnouncements();
+    } else if (savedPage === "teacher_quizzes") {
+    window.fetchTeacherQuizzes();
     } else if (savedPage === "teacher_evaluations") {
         window.fetchTeacherEvaluations();
     } else if (savedPage === "teacher_resources") {
