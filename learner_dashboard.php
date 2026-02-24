@@ -1184,7 +1184,15 @@ iframe {
 }
 
 .desktop-close-btn:hover {
-    background: #111111;
+    /* Remove hover/highlight effect so it stays visually constant */
+    background: #000000 !important;
+    color: #e2e8f0 !important;
+    transform: none !important;
+}
+
+.desktop-close-btn:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 @media (max-width: 768px) {
