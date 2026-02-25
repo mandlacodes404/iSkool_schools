@@ -7,20 +7,20 @@ document.addEventListener('DOMContentLoaded', function () {
     window.loaderTimeout = null;
 
     // ─────────────────────────────────────────────
-    // DEFINE FUNCTIONS FIRST
+    // LOAD TEACHER MANUAL (defined once only)
     // ─────────────────────────────────────────────
     window.loadTeacherManual = async function() {
-    sessionStorage.setItem("lastTeacherPage", "teacher_manual");
-    if (typeof window.setTeacherActive === 'function') {
-        window.setTeacherActive("teacher_manual");
-    }
-    if (apiArea) apiArea.style.display = 'block';
-    if (iframe)  iframe.style.display  = 'none';
+        sessionStorage.setItem("lastTeacherPage", "teacher_manual");
+        if (typeof window.setTeacherActive === 'function') {
+            window.setTeacherActive("teacher_manual");
+        }
+        if (apiArea) apiArea.style.display = 'block';
+        if (iframe)  iframe.style.display  = 'none';
 
-    const response = await fetch('partials/teacher_manual.html');
-    const html = await response.text();
-    apiArea.innerHTML = html;
-};
+        const response = await fetch('partials/teacher_manual.html');
+        const html = await response.text();
+        if (apiArea) apiArea.innerHTML = html;
+    };
 
     // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
@@ -30,17 +30,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (savedPage === "teacher_announcements") {
         window.fetchTeacherAnnouncements();
     } else if (savedPage === "teacher_quizzes") {
-    window.fetchTeacherQuizzes();
+        window.fetchTeacherQuizzes();
     } else if (savedPage === "teacher_evaluations") {
         window.fetchTeacherEvaluations();
     } else if (savedPage === "teacher_resources") {
-    window.fetchTeacherResources();
+        window.fetchTeacherResources();
     } else if (savedPage === "teacher_assignments") {
-    window.fetchTeacherAssignments();
-    } else if (savedPage === "teacher_manual") {
-        window.loadTeacherManual();
+        window.fetchTeacherAssignments();
+    } else if (savedPage === "teacher_analytics") {
+        window.fetchTeacherAnalytics();
     } else if (savedPage === "teacher_grades") {
-    window.fetchTeacherGrades();
+        window.fetchTeacherGrades();
     } else {
         window.loadTeacherManual();
     }
@@ -78,8 +78,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     window.toggleDesktopSidebar = function() {
         sidebar.classList.toggle('desktop-open');
-
-        // Keep the icon rotation
         const collapsed = !sidebar.classList.contains('desktop-open');
         const svg = document.querySelector('#toggleIcon svg');
         if (svg) {
@@ -106,7 +104,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
             clearTimeout(window.loaderTimeout);
-
             window.loaderTimeout = setTimeout(() => {
                 loader.style.display = 'flex';
             }, 800);
@@ -123,21 +120,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // IFRAME LOAD — HIDE LOADER + SAVE STATE
     // ─────────────────────────────────────────────
-  iframe?.addEventListener('load', () => {
-    clearTimeout(window.loaderTimeout);
-    if (loader) loader.style.display = 'none';
+    iframe?.addEventListener('load', () => {
+        clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
 
-    try {
-        const fullPage = iframe.contentWindow.location.pathname.split("/").pop()
-                       + iframe.contentWindow.location.search;
-
-        if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
-            sessionStorage.setItem("lastTeacherPage", fullPage);
+        try {
+            const fullPage = iframe.contentWindow.location.pathname.split("/").pop()
+                           + iframe.contentWindow.location.search;
+            if (fullPage && !fullPage.startsWith('blank.php') && fullPage !== '') {
+                sessionStorage.setItem("lastTeacherPage", fullPage);
+            }
+        } catch (e) {
+            console.log("External or restricted page loaded, cannot save state.");
         }
-    } catch (e) {
-        console.log("External or restricted page loaded, cannot save state.");
-    }
-});
+    });
 
     // ─────────────────────────────────────────────
     // SETTINGS BUTTON
@@ -169,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Instant preview before upload completes
         const previewUrl = URL.createObjectURL(file);
         updateTeacherAvatar(previewUrl);
 
@@ -206,23 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
             avatarWrapper.insertBefore(newImg, profileInput);
         }
     }
-    window.loadTeacherManual = async function() {
-    sessionStorage.setItem("lastTeacherPage", "teacher_manual");
-    if (typeof window.setTeacherActive === 'function') {
-        window.setTeacherActive("teacher_manual");
-    }
-
-    const apiArea = document.getElementById('api-content-area');
-    const iframe  = document.getElementById('mainFrame');
-
-    if (apiArea) apiArea.style.display = 'block';
-    if (iframe)  iframe.style.display  = 'none';
-
-    const response = await fetch('teacher_manual.php');
-    const html = await response.text();
-    apiArea.innerHTML = html;
-};
 
     if (loader) loader.style.display = 'none';
-     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+    clearTimeout(window.loaderTimeout);
 });
