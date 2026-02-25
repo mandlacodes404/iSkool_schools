@@ -40,19 +40,31 @@ $stmt = $conn->prepare("
     GROUP BY d.id
     ORDER BY d.created_at DESC
 ");
+
+// Check if prepare failed
+if (!$stmt) {
+    echo json_encode(['error' => 'Query prepare failed: ' . $conn->error]);
+    ob_end_flush(); exit();
+}
+
 $stmt->bind_param("si", $teacher_email, $current_academic_year_id);
-$stmt->execute();
+
+if (!$stmt->execute()) {
+    echo json_encode(['error' => 'Query execute failed: ' . $stmt->error]);
+    ob_end_flush(); exit();
+}
+
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 $discussions = [];
 foreach ($rows as $d) {
     $discussions[] = [
-        'id'           => $d['id'],
-        'title'        => $d['title'],
-        'class_name'   => $d['class_name'],
-        'reply_count'  => (int)$d['reply_count'],
-        'created_at'   => date('M j, Y', strtotime($d['created_at']))
+        'id'          => $d['id'],
+        'title'       => $d['title'],
+        'class_name'  => $d['class_name'],
+        'reply_count' => (int)$d['reply_count'],
+        'created_at'  => date('M j, Y', strtotime($d['created_at']))
     ];
 }
 
@@ -72,8 +84,20 @@ $rptStmt = $conn->prepare("
       )
     ORDER BY dr.reported_at DESC
 ");
+
+// Check if prepare failed
+if (!$rptStmt) {
+    echo json_encode(['error' => 'Reports query prepare failed: ' . $conn->error]);
+    ob_end_flush(); exit();
+}
+
 $rptStmt->bind_param("is", $current_academic_year_id, $teacher_email);
-$rptStmt->execute();
+
+if (!$rptStmt->execute()) {
+    echo json_encode(['error' => 'Reports query execute failed: ' . $rptStmt->error]);
+    ob_end_flush(); exit();
+}
+
 $rptRows = $rptStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $rptStmt->close();
 
