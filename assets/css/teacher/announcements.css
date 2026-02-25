@@ -1,4 +1,7 @@
 #api-content-area {
+    position: relative;
+    left: 0;
+    width: 100%;
     height: calc(100vh - 60px);
     overflow-y: auto;
     padding: 20px;

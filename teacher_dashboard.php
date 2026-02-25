@@ -87,7 +87,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=2.2">
     
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -458,11 +458,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         display: flex; /* Appears on screens wider than 768px */
     }
 }
-#api-content-area {
-    position: relative !important;
-    left: 0 !important;
-    width: 100% !important;
-}
+
     </style>
 </head>
 <body>
