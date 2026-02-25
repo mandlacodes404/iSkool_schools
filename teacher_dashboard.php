@@ -23,7 +23,7 @@
  */
 ob_start();
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 session_start();
@@ -83,16 +83,13 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <!DOCTYPE html>
 <html>
 <head>
-   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=2.2">
-    
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=1.9">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -201,15 +198,12 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
         /* Main Content */
         .main-content {
-    flex: 1;
-    margin-left: 0;
-    min-width: 0;
-    transition: margin-left var(--transition-speed) ease;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow: hidden;
-}
+            flex: 1;
+           margin-left: 0;
+            transition: margin-left var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+        }
 
         .main-header {
             padding: 12px 18px;
@@ -458,7 +452,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
         display: flex; /* Appears on screens wider than 768px */
     }
 }
-
     </style>
 </head>
 <body>
@@ -547,14 +540,11 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Discussions</span>
     </a>
 
-    <a href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics()">
-    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-    </svg>
-    <span>Analytics</span>
-</a>
+    <a href="teacher_analytics.php" target="mainFrame">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+        <span>Analytics</span>
+    </a>
+</div>
    
 
     <div class="sidebar-footer">
@@ -625,13 +615,12 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=2.3"></script>
+<script src="assets/js/teacher/dashboard.js?v=2.0"></script>
 <script src="assets/js/teacher/quizzes.js?v=1.1"></script>
 <script src="assets/js/teacher/announcements.js?v=1.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.4"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
-<script src="assets/js/teacher/analytics.js?v=1.2"></script>
 </body>
 </html>
