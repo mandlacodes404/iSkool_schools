@@ -29,14 +29,13 @@ if (!$current_academic_year_id) {
 
 // ── Discussions tagged to this teacher ──
 $stmt = $conn->prepare("
-    SELECT d.id, d.title, d.created_at, c.name AS class_name,
-           COUNT(r.id) AS reply_count
+    SELECT d.*, c.name as class_name, COUNT(r.id) as reply_count
     FROM class_discussions d
     JOIN discussion_teachers dt ON d.id = dt.discussion_id
     JOIN classes c ON d.class_id = c.id
     LEFT JOIN discussion_replies r ON d.id = r.discussion_id
-    WHERE dt.teacher_email = ?
-      AND d.academic_year_id = ?
+    WHERE dt.teacher_email = ? 
+    AND d.academic_year_id = ? 
     GROUP BY d.id
     ORDER BY d.created_at DESC
 ");
@@ -70,18 +69,13 @@ foreach ($rows as $d) {
 
 // ── Reports ──
 $rptStmt = $conn->prepare("
-    SELECT dr.reason, dr.comment,
-           d.title,
-           r.message AS reply_text,
-           u.name AS reporter_name
+    SELECT dr.*, d.title, r.message as reply_text, u.name as reporter_name
     FROM discussion_reports dr
     LEFT JOIN class_discussions d ON dr.discussion_id = d.id
     LEFT JOIN discussion_replies r ON dr.reply_id = r.id
     LEFT JOIN users u ON dr.reporter_email = u.email
-    WHERE d.academic_year_id = ?
-      AND d.id IN (
-          SELECT discussion_id FROM discussion_teachers WHERE teacher_email = ?
-      )
+    WHERE d.academic_year_id = ? 
+    AND d.id IN (SELECT discussion_id FROM discussion_teachers WHERE teacher_email = ?)
     ORDER BY dr.reported_at DESC
 ");
 
