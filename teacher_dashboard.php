@@ -86,7 +86,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.2">
     <title>Teacher Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
@@ -536,7 +536,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </svg>
     <span>Evaluations</span>
 </a>
-    <a href="teacher_discussions.php" target="mainFrame" class="<?= $currentPage==='teacher_discussions.php'?'active':'' ?>">
+   <a href="javascript:void(0)" data-page="teacher_discussions" onclick="fetchTeacherDiscussions()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         <span>Discussions</span>
     </a>
@@ -616,13 +616,14 @@ $schoolLogo = 'uploads/schools/default_school.png';
     </a>
 </nav>
 
-<script src="assets/js/teacher/dashboard.js?v=3.3"></script>
+<script src="assets/js/teacher/dashboard.js?v=3.4"></script>
 <script src="assets/js/teacher/quizzes.js?v=1.1"></script>
 <script src="assets/js/teacher/announcements.js?v=1.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.4"></script>
 <script src="assets/js/teacher/resources.js?v=1.0"></script>
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
+<script src="assets/js/teacher/discussions.js?v=1.0"></script>
 <script src="assets/js/teacher/analytics.js?v=1.0"></script>
 </body>
 </html>
