@@ -59,26 +59,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // SIDEBAR TOGGLE — MOBILE
     // ─────────────────────────────────────────────
-   window.toggleDesktopSidebar = function() {
+ window.toggleDesktopSidebar = function() {
     sidebar.classList.toggle('desktop-open');
-    const isOpen = sidebar.classList.contains('desktop-open');
-
-    if (window.innerWidth > 768) {
-        overlay.style.opacity = isOpen ? '1' : '0';
-        overlay.style.pointerEvents = isOpen ? 'all' : 'none';
-    }
-
     const svg = document.querySelector('#toggleIcon svg');
     if (svg) {
+        const isOpen = sidebar.classList.contains('desktop-open');
         svg.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
     }
 };
 
-  overlay?.addEventListener('click', () => {
+ overlay?.addEventListener('click', () => {
     if (window.innerWidth > 768) {
         sidebar.classList.remove('desktop-open');
-        overlay.style.opacity = '0';
-        overlay.style.pointerEvents = 'none';
     } else {
         toggleSidebar(true);
     }
