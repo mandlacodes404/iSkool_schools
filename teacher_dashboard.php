@@ -453,6 +453,14 @@ $schoolLogo = 'uploads/schools/default_school.png';
         display: flex; /* Appears on screens wider than 768px */
     }
 }
+/* Desktop overlay when sidebar is open */
+@media (min-width: 769px) {
+    .sidebar.desktop-open ~ #mobileOverlay {
+        opacity: 1;
+        pointer-events: all;
+        display: block;
+    }
+}
     </style>
 </head>
 <body>
