@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 sidebar.classList.contains('desktop-open')) {
                 sidebar.classList.remove('active');
                 sidebar.classList.remove('desktop-open');
-                if (overlay) overlay.style.display = 'none';
+                
             }
         });
     });
