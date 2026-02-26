@@ -396,7 +396,12 @@ function renderCalendar(month, year, events) {
                 <div class="cal-tooltip">
                     ${dayEvents.map(e => `
                         <div class="cal-tooltip-item cal-tooltip-${e.type}">
-                            ${e.type === 'assignment' ? '📝' : e.type === 'quiz' ? '📊' : '🔔'}
+                            ${e.type === 'assignment' 
+    ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#a78bfa" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
+    : e.type === 'quiz' 
+    ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+    : `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f59e0b" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`
+}
                             ${e.title}${e.class_name ? ` <span style="opacity:0.6;">— ${e.class_name}</span>` : ''}
                         </div>`).join('')}
                 </div>` : ''}
@@ -407,7 +412,7 @@ function renderCalendar(month, year, events) {
 
         <!-- Reminder Modal -->
         <div id="reminderModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;">
-            <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:320px;">
+           <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <span style="font-weight:800;color:#e2e8f0;">Add Reminder</span>
                     <button onclick="closeReminderModal()" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;">&times;</button>
