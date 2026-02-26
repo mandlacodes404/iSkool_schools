@@ -105,10 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
-            clearTimeout(window.loaderTimeout);
-            window.loaderTimeout = setTimeout(() => {
-                loader.style.display = 'flex';
-            }, 800);
 
             if (sidebar.classList.contains('active') ||
                 sidebar.classList.contains('desktop-open')) {
