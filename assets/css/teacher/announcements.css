@@ -1327,3 +1327,97 @@
         pointer-events: all;
     }
 }
+/* ── DASHBOARD HOME LAYOUT ── */
+.dashboard-home-layout {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    align-items: flex-start;
+}
+
+.dashboard-snapshot-panel {
+    width: 30%;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+}
+
+.dashboard-manual-panel {
+    flex: 1;
+    min-width: 0;
+}
+
+.snap-panel-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+}
+
+.snap-card {
+    background: #1a1919;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.snap-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.snap-card-empty {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.snap-card-empty:hover {
+    transform: none;
+}
+
+.snap-card-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+}
+
+.snap-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.snap-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #8b949e;
+}
+
+.snap-status-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.snap-empty-text {
+    font-size: 13px;
+    color: #555e6a;
+}

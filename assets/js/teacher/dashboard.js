@@ -9,18 +9,116 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // LOAD TEACHER MANUAL (defined once only)
     // ─────────────────────────────────────────────
-    window.loadTeacherManual = async function() {
-        sessionStorage.setItem("lastTeacherPage", "teacher_manual");
-        if (typeof window.setTeacherActive === 'function') {
-            window.setTeacherActive("teacher_manual");
-        }
-        if (apiArea) apiArea.style.display = 'block';
-        if (iframe)  iframe.style.display  = 'none';
+   window.loadTeacherManual = async function() {
+    sessionStorage.setItem("lastTeacherPage", "teacher_manual");
+    if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_manual");
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe)  iframe.style.display  = 'none';
 
-        const response = await fetch('partials/teacher_manual.html');
-        const html = await response.text();
+    try {
+        const [manualRes, snapshotRes] = await Promise.all([
+            fetch('partials/teacher_manual.html'),
+            fetch('api/teacher/get_dashboard_snapshot.php')
+        ]);
+        const manualHtml = await manualRes.text();
+        const snapshot   = await snapshotRes.json();
+
+        // Desktop: two column layout. Mobile: manual only
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            apiArea.innerHTML = manualHtml;
+        } else {
+            apiArea.innerHTML = `
+                <div class="dashboard-home-layout">
+                    <div class="dashboard-snapshot-panel">
+                        ${renderSnapshotPanel(snapshot)}
+                    </div>
+                    <div class="dashboard-manual-panel">
+                        ${manualHtml}
+                    </div>
+                </div>`;
+        }
+    } catch(e) {
+        console.error('Home load error:', e);
+        const res = await fetch('partials/teacher_manual.html');
+        const html = await res.text();
         if (apiArea) apiArea.innerHTML = html;
-    };
+    }
+};
+
+function renderSnapshotPanel(data) {
+    const cards = [
+        {
+            key:     'quiz',
+            data:    data.quiz,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
+            label:   'Latest Quiz',
+            color:   '#4fd1c5',
+            onclick: 'fetchTeacherQuizzes()',
+            empty:   'No quizzes created yet',
+            meta:    data.quiz ? `${data.quiz.class_name} &bull; ${data.quiz.start_time}` : '',
+            badge:   data.quiz ? `<span class="snap-status-badge" style="background:${data.quiz.status === 'Open' ? 'rgba(242,140,56,0.15)' : 'rgba(107,114,128,0.15)'};color:${data.quiz.status === 'Open' ? '#f28c38' : '#6b7280'}">${data.quiz.status}</span>` : ''
+        },
+        {
+            key:     'assignment',
+            data:    data.assignment,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
+            label:   'Upcoming Assignment',
+            color:   '#a78bfa',
+            onclick: 'fetchTeacherAssignments()',
+            empty:   'No upcoming assignments',
+            meta:    data.assignment ? `${data.assignment.class_name} &bull; Due ${data.assignment.due_date}` : '',
+            badge:   data.assignment ? `<span class="snap-status-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa;">in ${data.assignment.days_left} day${data.assignment.days_left !== 1 ? 's' : ''}</span>` : ''
+        },
+        {
+            key:     'announcement',
+            data:    data.announcement,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
+            label:   'Latest Announcement',
+            color:   '#f59e0b',
+            onclick: 'fetchTeacherAnnouncements()',
+            empty:   'No announcements sent yet',
+            meta:    data.announcement ? `${data.announcement.class_name} &bull; ${data.announcement.created_at}` : '',
+            badge:   ''
+        },
+        {
+            key:     'discussion',
+            data:    data.discussion,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#34d399" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+            label:   'Latest Discussion',
+            color:   '#34d399',
+            onclick: 'fetchTeacherDiscussions()',
+            empty:   'No discussions yet',
+            meta:    data.discussion ? `${data.discussion.class_name} &bull; ${data.discussion.created_at}` : '',
+            badge:   data.discussion ? `<span class="snap-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;">${data.discussion.reply_count} ${data.discussion.reply_count === 1 ? 'reply' : 'replies'}</span>` : ''
+        }
+    ];
+
+    let html = `<div class="snap-panel-title">Quick Snapshot</div>`;
+
+    cards.forEach(card => {
+        if (!card.data) {
+            html += `
+                <div class="snap-card snap-card-empty">
+                    <div class="snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+                    <div class="snap-empty-text">${card.empty}</div>
+                </div>`;
+        } else {
+            html += `
+                <div class="snap-card" onclick="${card.onclick}">
+                    <div class="snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+                    <div class="snap-card-title">${card.data.title}</div>
+                    <div class="snap-card-meta">
+                        ${card.meta}
+                        ${card.badge}
+                    </div>
+                </div>`;
+        }
+    });
+
+    return html;
+}
 
     // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
