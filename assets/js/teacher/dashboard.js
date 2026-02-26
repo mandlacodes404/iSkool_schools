@@ -59,21 +59,41 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // SIDEBAR TOGGLE — MOBILE
     // ─────────────────────────────────────────────
-    window.toggleSidebar = function(forceClose = false) {
-        const isOpen = sidebar.classList.contains('active');
-        if (forceClose || isOpen) {
-            sidebar.classList.remove('active');
-            sidebar.classList.remove('desktop-open');
-            if (overlay) overlay.style.display = 'none';
-        } else {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.add('active');
-                if (overlay) overlay.style.display = 'block';
-            }
-        }
-    };
+    window.toggleDesktopSidebar = function() {
+    sidebar.classList.toggle('desktop-open');
+    const isOpen = sidebar.classList.contains('desktop-open');
 
-    overlay?.addEventListener('click', () => toggleSidebar(true));
+    // Show/hide dim overlay on desktop only
+    if (window.innerWidth > 768) {
+        if (isOpen) {
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'all';
+            overlay.style.display = 'block';
+        } else {
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+            overlay.style.display = 'none';
+        }
+    }
+
+    const svg = document.querySelector('#toggleIcon svg');
+    if (svg) {
+        svg.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+    }
+};
+
+   overlay?.addEventListener('click', () => {
+    if (window.innerWidth > 768) {
+        // Desktop: close desktop sidebar + remove dim
+        sidebar.classList.remove('desktop-open');
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.display = 'none';
+    } else {
+        // Mobile: existing behavior
+        toggleSidebar(true);
+    }
+});
 
     // ─────────────────────────────────────────────
     // SIDEBAR TOGGLE — DESKTOP
