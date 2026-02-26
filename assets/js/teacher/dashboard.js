@@ -59,21 +59,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────
     // SIDEBAR TOGGLE — MOBILE
     // ─────────────────────────────────────────────
-    window.toggleDesktopSidebar = function() {
+   window.toggleDesktopSidebar = function() {
     sidebar.classList.toggle('desktop-open');
     const isOpen = sidebar.classList.contains('desktop-open');
 
-    // Show/hide dim overlay on desktop only
     if (window.innerWidth > 768) {
-        if (isOpen) {
-            overlay.style.opacity = '1';
-            overlay.style.pointerEvents = 'all';
-            overlay.style.display = 'block';
-        } else {
-            overlay.style.opacity = '0';
-            overlay.style.pointerEvents = 'none';
-            overlay.style.display = 'none';
-        }
+        overlay.style.opacity = isOpen ? '1' : '0';
+        overlay.style.pointerEvents = isOpen ? 'all' : 'none';
     }
 
     const svg = document.querySelector('#toggleIcon svg');
@@ -82,15 +74,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 };
 
-   overlay?.addEventListener('click', () => {
+  overlay?.addEventListener('click', () => {
     if (window.innerWidth > 768) {
-        // Desktop: close desktop sidebar + remove dim
         sidebar.classList.remove('desktop-open');
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
-        overlay.style.display = 'none';
     } else {
-        // Mobile: existing behavior
         toggleSidebar(true);
     }
 });
