@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 if (session_status() === PHP_SESSION_NONE) session_start();
 ob_start();
 header('Content-Type: application/json');
-require_once 'config.php';
+require_once dirname(__DIR__, 2) . '/config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     echo json_encode(['error' => 'Unauthorized']);
