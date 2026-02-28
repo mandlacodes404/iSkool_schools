@@ -208,7 +208,7 @@ if (!empty($joinedClassIds)) {
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/quiz.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/manual.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/manual.css?v=1.2">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
