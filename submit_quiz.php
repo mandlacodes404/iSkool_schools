@@ -8,7 +8,7 @@ ini_set('error_log', 'php_errors.log');
 session_start();
 require_once 'config.php';
 
-// === NEW: Fetch current academic year (this is the only addition here) ===
+// === Fetch current academic year ===
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
     die("No active academic year set. Contact your admin.");
@@ -21,15 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['email']) || $_SES
     exit();
 }
 
-$quizId = intval($_POST['quiz_id']);
+$quizId    = intval($_POST['quiz_id']);
 $userEmail = $_SESSION['email'];
 
-// 2. Prevent Double Submissions (Crucial for data integrity)
+// 2. Prevent Double Submissions
 $checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE user_email = ? AND quiz_id = ?");
 $checkStmt->bind_param("si", $userEmail, $quizId);
 $checkStmt->execute();
 if ($checkStmt->get_result()->num_rows > 0) {
-    header("Location: learner_dashboard.php"); 
+    header("Location: learner_dashboard.php");
     exit();
 }
 $checkStmt->close();
@@ -41,29 +41,30 @@ $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
 if (!$quiz) { header("Location: learner_dashboard.php"); exit(); }
 
-$quizTitle = $quiz['title'];
+$quizTitle    = $quiz['title'];
 $publishMarks = (int)$quiz['publish_marks'];
-$status = $quiz['status'] ?? 'Open';
+$status       = $quiz['status'] ?? 'Open';
 $quizStmt->close();
 
 // 4. Handle Closed Status
 if ($status === 'Closed') {
-    render_page("Quiz Closed", "fas fa-ban", "The quiz \"<strong>" . htmlspecialchars($quizTitle) . "</strong>\" is closed and cannot be submitted.", "#f85149");
+    render_page("closed", $quizTitle, 0, 0, null);
     exit();
 }
 
 // 5. Grading Preparation
 $startTimePost = isset($_POST['start_time']) ? intval($_POST['start_time']) : 0;
-$timeTaken = ($startTimePost > 0) ? max(0, time() - $startTimePost) : null;
+$timeTaken     = ($startTimePost > 0) ? max(0, time() - $startTimePost) : null;
 
 // Fetch Correct Answers
-$sql = "SELECT q.id as qid, q.points, c.id as cid FROM quizquestions q 
-        JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND c.is_correct = 1";
+$sql  = "SELECT q.id as qid, q.points, c.id as cid FROM quizquestions q 
+         JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND c.is_correct = 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $quizId);
 $stmt->execute();
 $res = $stmt->get_result();
-$correctAnswers = [];
+
+$correctAnswers       = [];
 $totalPointsAvailable = 0;
 while ($row = $res->fetch_assoc()) {
     $correctAnswers[$row['qid']] = ['cid' => $row['cid'], 'pts' => (int)$row['points']];
@@ -78,7 +79,9 @@ if (empty($finalAnswers)) {
     $savedStmt->bind_param("si", $userEmail, $quizId);
     $savedStmt->execute();
     $savedRes = $savedStmt->get_result();
-    while ($sRow = $savedRes->fetch_assoc()) { $finalAnswers[$sRow['question_id']] = $sRow['selected_choice_id']; }
+    while ($sRow = $savedRes->fetch_assoc()) {
+        $finalAnswers[$sRow['question_id']] = $sRow['selected_choice_id'];
+    }
     $savedStmt->close();
 }
 
@@ -93,16 +96,10 @@ foreach ($correctAnswers as $qid => $data) {
 // 8. DATABASE UPDATES (Transaction-style)
 $conn->begin_transaction();
 try {
-    // A. Insert Result Record — UPDATED with academic_year_id
+    // A. Insert Result Record
     $insRes = $conn->prepare("
         INSERT INTO quiz_results (
-            user_email, 
-            quiz_id, 
-            score, 
-            total, 
-            time_taken, 
-            submitted_at,
-            academic_year_id
+            user_email, quiz_id, score, total, time_taken, submitted_at, academic_year_id
         ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
     ");
     $insRes->bind_param("siiiis", $userEmail, $quizId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
@@ -135,104 +132,526 @@ try {
 
 // 9. Render Final Page
 if ($publishMarks === 0) {
-    render_page("Submitted!", "fas fa-lock", "The results for \"<strong>" . htmlspecialchars($quizTitle) . "</strong>\" have not yet been published. Your score has been recorded.");
+    render_page("pending", $quizTitle, $earnedScore, $totalPointsAvailable, $timeTaken);
 } else {
-    $timeStr = $timeTaken ? floor($timeTaken/60) . " min " . ($timeTaken%60) . " sec" : "N/A";
-    render_page("Quiz Result", "fas fa-poll", "You scored <strong>$earnedScore</strong> / <strong>$totalPointsAvailable</strong><br><small>Time Taken: $timeStr</small>");
+    render_page("result", $quizTitle, $earnedScore, $totalPointsAvailable, $timeTaken);
 }
 
-// Helper for UI Consistency
-function render_page($title, $icon, $message, $accent = "#4fd1c5") {
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER FUNCTION — Platform-consistent styling
+// ─────────────────────────────────────────────────────────────────────────────
+function render_page($type, $quizTitle, $score, $total, $timeTaken) {
+    $percentage  = ($total > 0) ? round(($score / $total) * 100) : 0;
+    $timeStr     = $timeTaken ? floor($timeTaken / 60) . "m " . ($timeTaken % 60) . "s" : null;
+
+    // Score circle maths: r=54 → circumference = 2π×54 ≈ 339.3
+    $circumference = 339.3;
+    $offset        = $circumference - ($percentage / 100) * $circumference;
+
+    // Colour based on percentage
+    if ($percentage >= 80)      $scoreColor = '#22c55e';
+    elseif ($percentage >= 60)  $scoreColor = '#4fd1c5';
+    elseif ($percentage >= 40)  $scoreColor = '#f59e0b';
+    else                        $scoreColor = '#f85149';
     ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-        <title><?= $title ?></title>
-        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-        <style>
-            :root { --bg-color: #0d1117; --card-bg: #1a202c; --text-color: #e2e8f0; }
-            body { font-family: 'Nunito', sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-            .container { max-width: 450px; width: 90%; padding: 30px; background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-            h1 { color: <?= $accent ?>; margin-bottom: 10px; font-size: 1.8rem; }
-            p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
-            
-            /* The 5-Second Wheel */
-            .timer-container { position: relative; width: 70px; height: 70px; margin: 15px auto; }
-            .timer-svg { transform: rotate(-90deg); width: 70px; height: 70px; }
-            .timer-circle {
-                fill: none; stroke: <?= $accent ?>; stroke-width: 10;
-                stroke-dasharray: 201; stroke-dashoffset: 201; stroke-linecap: round;
-                animation: progress-wheel 10s linear forwards;
-            }
-            .timer-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 5; }
-            @keyframes progress-wheel { from { stroke-dashoffset: 201; } to { stroke-dashoffset: 0; } }
-            .redirect-text { font-size: 0.85rem; color: <?= $accent ?>; opacity: 0.8; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1><i class="<?= $icon ?>"></i> <?= $title ?></h1>
-            <p><?= $message ?></p>
-            
-            <div class="timer-container">
-                <svg class="timer-svg">
-                    <circle class="timer-bg" cx="35" cy="35" r="32"></circle>
-                    <circle class="timer-circle" cx="35" cy="35" r="32"></circle>
-                </svg>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        <?php
+        if ($type === 'closed')  echo 'Quiz Closed';
+        elseif ($type === 'pending') echo 'Submitted!';
+        else echo 'Quiz Result';
+        ?>
+    </title>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:          #0d1117;
+            --surface:     #161b22;
+            --surface2:    #1c2128;
+            --border:      rgba(255,255,255,0.07);
+            --text:        #e2e8f0;
+            --muted:       #8b949e;
+            --teal:        #4fd1c5;
+            --teal-dim:    rgba(79,209,197,0.12);
+            --teal-glow:   rgba(79,209,197,0.25);
+            --score-color: <?= $scoreColor ?>;
+            --radius:      16px;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* ── CARD ─────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+            animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
+
+        /* ── TOP ACCENT BAR ───────────────────────────────── */
+        .card-bar {
+            height: 4px;
+            width: 100%;
+        }
+        .card-bar.result  { background: linear-gradient(90deg, var(--score-color), transparent); }
+        .card-bar.pending { background: linear-gradient(90deg, var(--teal), transparent); }
+        .card-bar.closed  { background: linear-gradient(90deg, #f85149, transparent); }
+
+        /* ── HEADER ───────────────────────────────────────── */
+        .card-header {
+            padding: 28px 28px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .quiz-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .quiz-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        /* ── SCORE CIRCLE ─────────────────────────────────── */
+        .score-section {
+            padding: 32px 28px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .circle-wrap {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .circle-svg {
+            transform: rotate(-90deg);
+            display: block;
+        }
+
+        .circle-track {
+            fill: none;
+            stroke: rgba(255,255,255,0.06);
+            stroke-width: 10;
+        }
+
+        .circle-fill {
+            fill: none;
+            stroke: var(--score-color);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: <?= $circumference ?>;
+            stroke-dashoffset: <?= $circumference ?>; /* starts empty */
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .circle-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .circle-pct {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--score-color);
+            line-height: 1;
+        }
+
+        .circle-sub {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* ── STATS ROW ────────────────────────────────────── */
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* ── PENDING / CLOSED STATE ───────────────────────── */
+        .state-section {
+            padding: 36px 28px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            text-align: center;
+        }
+
+        .state-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .state-icon.pending { background: var(--teal-dim); }
+        .state-icon.closed  { background: rgba(248,81,73,0.1); }
+
+        .state-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .state-msg {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        /* ── COUNTDOWN ────────────────────────────────────── */
+        .countdown-section {
+            padding: 20px 28px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .countdown-ring {
+            position: relative;
+            width: 56px;
+            height: 56px;
+        }
+
+        .countdown-ring svg {
+            transform: rotate(-90deg);
+            display: block;
+        }
+
+        .ring-track {
+            fill: none;
+            stroke: rgba(255,255,255,0.06);
+            stroke-width: 4;
+        }
+
+        .ring-fill {
+            fill: none;
+            stroke: var(--teal);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 138.2;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .ring-num {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--teal);
+        }
+
+        .countdown-text {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── CLOSED ONLY: no countdown ───────────────────── */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 12px 24px;
+            background: var(--teal-dim);
+            color: var(--teal);
+            border: 1px solid rgba(79,209,197,0.3);
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background: rgba(79,209,197,0.2); }
+    </style>
+</head>
+<body>
+
+<?php if ($type === 'result'): ?>
+<!-- ═══════════════════════════════════════════════
+     RESULT — score published
+═══════════════════════════════════════════════ -->
+<div class="card">
+    <div class="card-bar result"></div>
+
+    <div class="card-header">
+        <div class="quiz-label">Quiz Complete</div>
+        <div class="quiz-title"><?= htmlspecialchars($quizTitle) ?></div>
+    </div>
+
+    <div class="score-section">
+        <!-- Animated circle -->
+        <div class="circle-wrap">
+            <svg class="circle-svg" width="140" height="140" viewBox="0 0 140 140">
+                <circle class="circle-track" cx="70" cy="70" r="54"/>
+                <circle class="circle-fill"  cx="70" cy="70" r="54" id="scoreFill"/>
+            </svg>
+            <div class="circle-text">
+                <span class="circle-pct" id="percDisplay">0%</span>
+                <span class="circle-sub"><?= $score ?> / <?= $total ?> pts</span>
             </div>
-            
-            <p class="redirect-text">Saving to Grades <span id="countdown">10</span>s...</p>
         </div>
 
-        <script>
-           let timeLeft = 10;
-const countdownElement = document.getElementById('countdown');
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-val" style="color:var(--score-color);"><?= $score ?></div>
+                <div class="stat-lbl">Points</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val"><?= $total ?></div>
+                <div class="stat-lbl">Total</div>
+            </div>
+            <?php if ($timeStr): ?>
+            <div class="stat-box">
+                <div class="stat-val" style="font-size:15px;"><?= $timeStr ?></div>
+                <div class="stat-lbl">Time</div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
-const timer = setInterval(() => {
-    timeLeft--;
-    countdownElement.textContent = timeLeft;
-    
-if (timeLeft <= 0) {
-    clearInterval(timer);
+    <!-- Countdown -->
+    <div class="countdown-section">
+        <div class="countdown-ring">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="ring-track" cx="28" cy="28" r="22"/>
+                <circle class="ring-fill"  cx="28" cy="28" r="22" id="ringFill"/>
+            </svg>
+            <div class="ring-num" id="ringNum">10</div>
+        </div>
+        <div class="countdown-text">Saving to Grades…</div>
+    </div>
+</div>
 
-    if (window.parent && window.parent !== window) {
-        const p = window.parent;
+<?php elseif ($type === 'pending'): ?>
+<!-- ═══════════════════════════════════════════════
+     PENDING — marks not published yet
+═══════════════════════════════════════════════ -->
+<div class="card">
+    <div class="card-bar pending"></div>
 
-        // Update session memory
-        try { p.sessionStorage.setItem("lastLearnerPage", "quiz_history.php"); } catch(e) {}
+    <div class="card-header">
+        <div class="quiz-label">Submitted</div>
+        <div class="quiz-title"><?= htmlspecialchars($quizTitle) ?></div>
+    </div>
 
-        const apiArea = p.document.getElementById('api-content-area');
-        const mainFrame = p.document.getElementById('mainFrame'); // USE mainFrame not iframe
+    <div class="state-section">
+        <div class="state-icon pending">
+            <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="2" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+        </div>
+        <div class="state-title">Marks Pending</div>
+        <div class="state-msg">
+            Your answers have been saved. Your teacher will publish the results soon.
+        </div>
+        <?php if ($timeStr): ?>
+        <div style="font-size:13px;color:var(--muted);">Time taken: <strong style="color:var(--text);"><?= $timeStr ?></strong></div>
+        <?php endif; ?>
+    </div>
 
-        // Configure header first
-        if (typeof p.configureHeader === 'function') {
-            p.configureHeader({ title: 'My Grades', mode: 'standard' });
+    <div class="countdown-section">
+        <div class="countdown-ring">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="ring-track" cx="28" cy="28" r="22"/>
+                <circle class="ring-fill"  cx="28" cy="28" r="22" id="ringFill"/>
+            </svg>
+            <div class="ring-num" id="ringNum">10</div>
+        </div>
+        <div class="countdown-text">Returning to Grades…</div>
+    </div>
+</div>
+
+<?php else: ?>
+<!-- ═══════════════════════════════════════════════
+     CLOSED — quiz no longer accepting submissions
+═══════════════════════════════════════════════ -->
+<div class="card">
+    <div class="card-bar closed"></div>
+
+    <div class="card-header">
+        <div class="quiz-label">Unavailable</div>
+        <div class="quiz-title"><?= htmlspecialchars($quizTitle) ?></div>
+    </div>
+
+    <div class="state-section">
+        <div class="state-icon closed">
+            <svg viewBox="0 0 24 24" width="32" height="32" stroke="#f85149" stroke-width="2" fill="none">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+        </div>
+        <div class="state-title">Quiz Closed</div>
+        <div class="state-msg">
+            This quiz is no longer accepting submissions.
+        </div>
+        <button class="back-btn" onclick="goToGrades()">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Grades
+        </button>
+    </div>
+</div>
+
+<?php endif; ?>
+
+<script>
+// ── SHARED: navigate to grades (works inside iframe or standalone) ─────────
+function goToGrades() {
+    if (window.parent && window.parent !== window &&
+        typeof window.parent.fetchGrades === 'function') {
+        // Inside learner dashboard iframe
+        try { window.parent.sessionStorage.setItem('lastLearnerPage', 'grades'); } catch(e) {}
+        window.parent.fetchGrades();
+        if (typeof window.parent.setActive === 'function') {
+            window.parent.setActive('grades');
         }
-
-        // Show iframe, hide API area
-        if (apiArea) apiArea.style.display = 'none';
-        if (mainFrame) {
-            mainFrame.style.display = 'block'; // MUST show it first!
-            setTimeout(() => {
-                mainFrame.src = 'quiz_history.php';
-            }, 50);
+        if (typeof window.parent.configureHeader === 'function') {
+            window.parent.configureHeader({ title: 'My Grades', mode: 'standard' });
         }
-
-        // Update sidebar highlight
-        if (typeof p.setActive === 'function') {
-            p.setActive('quiz_history.php');
-        }
-
+        // Invalidate cache so grades refreshes with latest result
+        window.parent.learnerGradesCache = null;
     } else {
+        // Standalone / direct access fallback
         window.location.href = 'learner_dashboard.php';
     }
 }
-}, 1000);
-        </script>
-    </body>
-    </html>
+
+<?php if ($type !== 'closed'): ?>
+// ── COUNTDOWN + SCORE ANIMATION ──────────────────────────────────────────
+(function() {
+    const TOTAL    = 10;
+    const ringFill = document.getElementById('ringFill');
+    const ringNum  = document.getElementById('ringNum');
+    // r=22 → circumference = 2π×22 ≈ 138.2
+    const CIRC     = 138.2;
+    let timeLeft   = TOTAL;
+
+    <?php if ($type === 'result'): ?>
+    // Animate score circle after a short delay
+    const TARGET_OFFSET = <?= $offset ?>;
+    const TARGET_PCT    = <?= $percentage ?>;
+    const percDisplay   = document.getElementById('percDisplay');
+    const scoreFill     = document.getElementById('scoreFill');
+
+    setTimeout(() => {
+        scoreFill.style.strokeDashoffset = TARGET_OFFSET;
+        // Count up percentage text
+        let cur = 0;
+        const step = Math.ceil(TARGET_PCT / 40);
+        const counter = setInterval(() => {
+            cur = Math.min(cur + step, TARGET_PCT);
+            percDisplay.textContent = cur + '%';
+            if (cur >= TARGET_PCT) clearInterval(counter);
+        }, 30);
+    }, 300);
+    <?php endif; ?>
+
+    // Countdown tick
+    const tick = setInterval(() => {
+        timeLeft--;
+        if (ringNum)  ringNum.textContent = timeLeft;
+
+        // Drain the ring clockwise
+        const progress  = (TOTAL - timeLeft) / TOTAL;
+        const newOffset = CIRC * (1 - progress);
+        if (ringFill) ringFill.style.strokeDashoffset = newOffset;
+
+        if (timeLeft <= 0) {
+            clearInterval(tick);
+            goToGrades();
+        }
+    }, 1000);
+})();
+<?php endif; ?>
+</script>
+
+</body>
+</html>
     <?php
 }
