@@ -208,7 +208,7 @@ if (!empty($joinedClassIds)) {
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/quiz.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/manual.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/manual.css?v=1.1">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2119,7 +2119,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/main.js?v=1.0"></script>
-<script src="assets/js/manual.js?v=1.1"></script>
+<script src="assets/js/manual.js?v=1.2"></script>
 <script src="assets/js/quiz.js?v=2.6"></script>
 <script src="assets/js/assignments.js?v=2.2"></script>
 <script src="assets/js/resources.js?v=2.0"></script>
