@@ -8,6 +8,47 @@ const formatQuizDate = (dateStr) => {
     });
 };
 
+function startQuizCountdowns() {
+    const countdowns = document.querySelectorAll('.quiz-countdown');
+    if (!countdowns.length) return;
+
+    countdowns.forEach(el => {
+        const startMs = parseInt(el.dataset.startMs || el.dataset.start);
+        const quizId  = el.dataset.quizId;
+
+        const tick = setInterval(() => {
+            const diff = startMs - Date.now();
+
+            if (diff <= 0) {
+                clearInterval(tick);
+                // Smooth swap to Start button
+                el.style.transition = 'opacity 0.4s';
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    el.outerHTML = `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;"
+                                         onclick="loadQuizInstructions(${quizId})">Start</span>`;
+                }, 400);
+                return;
+            }
+
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            if (h > 0) {
+                el.textContent = `Starts in ${h}h ${m}m ${s}s`;
+            } else if (m > 0) {
+                el.textContent = `Starts in ${m}m ${s}s`;
+            } else {
+                el.textContent = `Starts in ${s}s`;
+            }
+        }, 1000);
+
+        // Run immediately so there's no 1s delay on first render
+        tick();
+    });
+}
+
 window.fetchQuizzes = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastLearnerPage", "quiz_list.php");
@@ -164,8 +205,15 @@ function renderQuizCards(groupedData) {
 else if (isClosed) {
     actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:13px;">Closed</span>`;
 } 
+// TO:
 else if (isScheduled) {
-    actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:13px;">Scheduled</span>`;
+    const startTime = new Date(startTimeStr.replace(/-/g, "/"));
+    actionBtn = `<span class="quiz-countdown" 
+                       data-start="${startTime.getTime()}" 
+                       data-quiz-id="${quiz.id}"
+                       style="color:#fdd663; font-weight:700; font-size:13px;">
+                    Calculating...
+                 </span>`;
 }
 else if (quiz.attempt_status === 'in_progress') {
     actionBtn = `<span style="color:#e67e22; font-weight:700; font-size:13px; cursor:pointer;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
@@ -190,4 +238,5 @@ else {
         });
     }
     apiArea.innerHTML = html;
+    startQuizCountdowns();
 }
