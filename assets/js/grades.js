@@ -567,7 +567,7 @@ function renderGrades(data) {
     // Header
     html += `
         <div class="grades-header">
-            <h2 class="grades-title">My Grades</h2>
+            
             <div class="grades-header-right">
                 ${groups.length > 0 ? `
                 <input type="text" class="grades-search" id="gradesSearch"

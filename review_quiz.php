@@ -234,7 +234,15 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
     <?php endforeach; ?>
 
     <div style="text-align: center; margin-top: 40px;">
-        <a href="<?= $backLink ?>" class="back-btn"><i class="fas fa-arrow-left"></i> Back to List</a>
+       <button onclick="
+    if (window.parent && typeof window.parent.fetchGrades === 'function') {
+        window.parent.fetchGrades();
+    } else {
+        window.location.href = '<?= $backLink ?>';
+    }
+" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Back to List
+</button>
     </div>
 </div>
 
