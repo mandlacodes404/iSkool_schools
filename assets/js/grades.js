@@ -13,6 +13,11 @@ window.fetchGrades = async function () {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem('lastLearnerPage', 'grades');
 
+      // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
+    if (typeof window.configureHeader === 'function') {
+        window.configureHeader({ title: 'Grades', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
     const loader  = document.getElementById('loaderOverlay');
