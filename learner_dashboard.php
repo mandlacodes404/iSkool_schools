@@ -1256,9 +1256,17 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
-        <a href="quiz_history.php" target="mainFrame" onclick="updateHeaderTitle('My Grades'); document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Grades</span>
-        </a>
+        <a href="javascript:void(0)"
+   onclick="fetchGrades(); updateHeaderTitle('My Grades')"
+   data-page="grades">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6"  y1="20" x2="6"  y2="14"/>
+    </svg>
+    <span>Grades</span>
+</a>
 
         <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
@@ -1442,6 +1450,8 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchResources();
         } else if (savedPage.includes("announcement_list.php")) {
             window.fetchAnnouncements();
+        } else if (savedPage === 'grades') {
+            window.fetchGrades();
         } else if (savedPage.includes("evaluation_list.php")) {
             window.fetchAnnouncements();
         } else if (savedPage.includes("discussion_list.php")) {
@@ -1465,6 +1475,7 @@ document.addEventListener("DOMContentLoaded", function () {
     savedPage !== "resource_list.php" && 
     savedPage !== "discussion_list.php" &&
     savedPage !== "evaluation_list.php" &&
+    savedPage !== "grades" &&
     savedPage !== "announcement_list.php"
 ) {
     iframe.style.display = 'block';   // ← ADD THIS
@@ -1505,7 +1516,8 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchAssignments') || 
                           onClick.includes('fetchResources') ||
                           onClick.includes('fetchDiscussions') ||
-                          onClick.includes('fetchEvaluations') || 
+                          onClick.includes('fetchEvaluations') ||
+                          onClick.includes('fetchGrades') || 
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
@@ -1515,6 +1527,7 @@ const isCached = (onClick.includes('loadManual') && window.manualCache) ||
                  (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
                  (onClick.includes('fetchResources') && window.resourceCache) ||
                  (onClick.includes('fetchEvaluations') && window.evaluationCache) ||
+                 (onClick.includes('fetchGrades') && window.learnerGradesCache) ||
                  (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
@@ -1579,7 +1592,8 @@ const isCached = (onClick.includes('loadManual') && window.manualCache) ||
 if (fullPage && 
     !fullPage.startsWith('blank.php') && 
     !fullPage.startsWith('submit_quiz.php') &&   // ADD THIS
-    !fullPage.startsWith('take_quiz.php') &&      // ADD THIS (safety)
+    !fullPage.startsWith('take_quiz.php') && 
+    !fullPage.startsWith('quiz_history.php') &&  // ← ADD THIS    
     fullPage !== "") {
     sessionStorage.setItem("lastLearnerPage", fullPage);
                 const filename = win.location.pathname.split("/").pop();
@@ -1773,6 +1787,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive("announcement_list.php");
 } else if (lastSaved === "evaluation_list.php") {
     window.setActive("evaluation_list.php");
+} else if (lastSaved === 'grades') {
+    window.setActive('grades');
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
 }
@@ -1931,13 +1947,7 @@ if (mainFrame) {
                 page === '' || page === 'index.php') {
                 window.configureHeader({ title: 'Home', mode: 'standard' });
             }
-            // ADD THIS BLOCK ↓
-            else if (page === 'quiz_history.php') {
-                mainFrame.style.display = 'block';
-                const apiArea = document.getElementById('api-content-area');
-                if (apiArea) apiArea.style.display = 'none';
-                window.configureHeader({ title: 'My Grades', mode: 'standard' });
-            }
+            
             // END ADD ↑
             else if (page === 'quiz_instructions.php' || page === 'take_quiz.php' || 
                      page === 'submit_assignment.php') {
@@ -2114,6 +2124,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/assignments.js?v=2.2"></script>
 <script src="assets/js/resources.js?v=2.0"></script>
 <script src="assets/js/announcements.js?v=1.4"></script>
+<script src="assets/js/grades.js?v=1.0"></script>
 <script src="assets/js/evaluations.js?v=1.1"></script>
 <script src="assets/js/discussions.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>
