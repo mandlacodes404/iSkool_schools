@@ -2124,7 +2124,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/assignments.js?v=2.2"></script>
 <script src="assets/js/resources.js?v=2.0"></script>
 <script src="assets/js/announcements.js?v=1.4"></script>
-<script src="assets/js/grades.js?v=1.0"></script>
+<script src="assets/js/grades.js?v=1.1"></script>
 <script src="assets/js/evaluations.js?v=1.1"></script>
 <script src="assets/js/discussions.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>
