@@ -32,21 +32,17 @@ if ($class_id <= 0) {
     echo json_encode(['error' => 'Please select a class.']); exit();
 }
 
-// ── Verify teacher owns/teaches this class ──
+// TO: (just verify the class exists in this school's database)
 $classCheck = $conn->prepare("
-    SELECT c.id, c.name 
-    FROM classes c
-    JOIN teacher_subjects ts ON ts.class_id = c.id
-    WHERE ts.teacher_email = ? AND c.id = ?
-    LIMIT 1
+    SELECT id, name FROM classes WHERE id = ? LIMIT 1
 ");
-$classCheck->bind_param("si", $teacherEmail, $class_id);
+$classCheck->bind_param("i", $class_id);
 $classCheck->execute();
 $classRow = $classCheck->get_result()->fetch_assoc();
 $classCheck->close();
 
 if (!$classRow) {
-    echo json_encode(['error' => 'You do not teach this class.']); exit();
+    echo json_encode(['error' => 'Invalid class selected.']); exit();
 }
 
 $className = $classRow['name'];
