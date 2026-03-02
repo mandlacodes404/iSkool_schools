@@ -313,6 +313,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             align-items: center;
             padding: 0 20px;
             gap: 0;
+             border-top: 1px solid #21262d;  /* ← DELETE THIS LINE */
             overflow-x: auto;
             scrollbar-width: none;
         }
