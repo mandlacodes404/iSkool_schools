@@ -1275,6 +1275,18 @@ iframe {
         <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
+
+        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" class="desktop-only">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <line x1="12" y1="6" x2="16" y2="6"/>
+        <line x1="12" y1="10" x2="16" y2="10"/>
+        <line x1="12" y1="14" x2="16" y2="14"/>
+    </svg>
+    <span>Syllabus</span>
+</a>
         <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
