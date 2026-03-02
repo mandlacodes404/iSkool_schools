@@ -29,7 +29,6 @@ window.loadManual = async function(containerId = 'api-content-area') {
     if (loader) loader.style.display = 'flex';
 
     try {
-        // Fetch both in parallel
         const [manualRes, homeRes] = await Promise.all([
             fetch('partials/manual.html?v=1.1'),
             fetch('api/learner/get_home_data.php')
@@ -110,7 +109,8 @@ function buildHomeLayout(data, manualHtml) {
 
 // ─────────────────────────────────────────────
 // RECENT ACTIVITY
-// FIX: items are now clickable and navigate to the relevant section
+// FIX: added quiz to iconMap and actionMap
+// FIX: items are now clickable with cursor:pointer
 // ─────────────────────────────────────────────
 function buildRecentActivity(recent) {
     if (!recent.length) {
@@ -118,16 +118,31 @@ function buildRecentActivity(recent) {
     }
 
     const iconMap = {
-        announcement: { stroke: '#4fd1c5', path: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>` },
-        resource:     { stroke: '#f28c38', path: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>` },
-        assignment:   { stroke: '#a78bfa', path: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>` }
+        announcement: {
+            stroke: '#4fd1c5',
+            path: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`
+        },
+        resource: {
+            stroke: '#f28c38',
+            path: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`
+        },
+        assignment: {
+            stroke: '#a78bfa',
+            path: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>`
+        },
+        // NEW: quiz icon added
+        quiz: {
+            stroke: '#fdd663',
+            path: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`
+        }
     };
 
-    // FIX: each item navigates to the relevant section when clicked
     const actionMap = {
         announcement: 'fetchAnnouncements()',
         resource:     'fetchResources()',
-        assignment:   'fetchAssignments()'
+        assignment:   'fetchAssignments()',
+        // NEW: quiz navigates to quiz list
+        quiz:         'window.learnerQuizCache=null; fetchQuizzes()'
     };
 
     return recent.map(item => {
@@ -152,7 +167,7 @@ function buildRecentActivity(recent) {
 
 // ─────────────────────────────────────────────
 // TO-DO LIST
-// FIX: cache is cleared before navigating so learner always sees fresh data
+// FIX: cache cleared before navigating so list is always fresh
 // ─────────────────────────────────────────────
 function buildTodoList(todo) {
     if (!todo.length) {
@@ -165,7 +180,6 @@ function buildTodoList(todo) {
         evaluation: '#a78bfa'
     };
 
-    // FIX: clear relevant cache before navigating so list is always fresh
     const actionMap = {
         quiz:       'window.learnerQuizCache=null; fetchQuizzes()',
         assignment: 'window.learnerAssignmentCache=null; fetchAssignments()',
