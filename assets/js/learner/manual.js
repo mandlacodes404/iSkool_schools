@@ -1,5 +1,7 @@
-window.manualCache    = null;
-window.homeDataCache  = null;
+window.manualCache       = null;
+window.homeDataCache     = null;
+window.learnerCalState   = { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+window.learnerCalEvents  = [];
 
 window.loadManual = async function(containerId = 'api-content-area') {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -23,6 +25,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
     // Serve from cache instantly
     if (window.manualCache && window.homeDataCache) {
         apiArea.innerHTML = buildHomeLayout(window.homeDataCache, window.manualCache);
+        afterHomeRender();
         return;
     }
 
@@ -49,6 +52,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         window.homeDataCache = homeData;
 
         apiArea.innerHTML = buildHomeLayout(homeData, manualHtml);
+        afterHomeRender();
 
     } catch (error) {
         console.error('Home load failed:', error);
@@ -60,12 +64,25 @@ window.loadManual = async function(containerId = 'api-content-area') {
     }
 };
 
+// Called after home HTML is injected — loads calendar on desktop only
+function afterHomeRender() {
+    if (window.innerWidth > 768) {
+        window.loadLearnerCalendar(
+            window.learnerCalState.month,
+            window.learnerCalState.year
+        );
+    }
+}
+
 // ─────────────────────────────────────────────
 // BUILD LAYOUT
 // ─────────────────────────────────────────────
 function buildHomeLayout(data, manualHtml) {
     const todo   = data.todo   || [];
     const recent = data.recent || [];
+
+    // Cap to-do at 3 — earliest due / most urgent first
+    const todoSlice = todo.slice(0, 3);
 
     return `
         <div class="learner-home-wrapper">
@@ -85,7 +102,7 @@ function buildHomeLayout(data, manualHtml) {
                     ${buildRecentActivity(recent)}
                 </div>
 
-                <!-- TO-DO -->
+                <!-- TO-DO (capped at 3) -->
                 <div class="learner-home-panel" style="margin-top:16px;">
                     <div class="learner-home-panel-title">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -94,7 +111,23 @@ function buildHomeLayout(data, manualHtml) {
                         </svg>
                         To-Do
                     </div>
-                    ${buildTodoList(todo)}
+                    ${buildTodoList(todoSlice)}
+                </div>
+
+                <!-- CALENDAR (desktop only — populated by loadLearnerCalendar) -->
+                <div class="learner-home-panel learner-cal-panel" style="margin-top:16px; display:none;">
+                    <div class="learner-home-panel-title">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        My Calendar
+                    </div>
+                    <div id="learner-cal-container">
+                        <div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>
+                    </div>
                 </div>
 
             </div>
@@ -108,9 +141,147 @@ function buildHomeLayout(data, manualHtml) {
 }
 
 // ─────────────────────────────────────────────
+// LEARNER CALENDAR
+// ─────────────────────────────────────────────
+window.loadLearnerCalendar = async function(month, year) {
+    // Only show on desktop
+    if (window.innerWidth <= 768) return;
+
+    const panel     = document.querySelector('.learner-cal-panel');
+    const container = document.getElementById('learner-cal-container');
+    if (!panel || !container) return;
+
+    panel.style.display = 'block';
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>`;
+
+    try {
+        const res  = await fetch(`api/learner/get_calendar_events.php?month=${month}&year=${year}`);
+        const data = await res.json();
+        window.learnerCalEvents = data.events || [];
+        renderLearnerCalendar(month, year, window.learnerCalEvents);
+    } catch(e) {
+        container.innerHTML = `<div style="color:#ff5555;font-size:13px;text-align:center;">Failed to load calendar</div>`;
+    }
+};
+
+function renderLearnerCalendar(month, year, events) {
+    const container = document.getElementById('learner-cal-container');
+    if (!container) return;
+
+    const monthNames  = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
+    const today       = new Date();
+    const firstDay    = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const startOffset = (firstDay === 0 ? 6 : firstDay - 1);
+
+    // Group events by day
+    const eventMap = {};
+    events.forEach(e => {
+        const day = parseInt(e.date.split('-')[2]);
+        if (!eventMap[day]) eventMap[day] = [];
+        eventMap[day].push(e);
+    });
+
+    let html = `
+        <div class="cal-header">
+            <button class="cal-nav" onclick="learnerCalPrev()">&#8249;</button>
+            <span class="cal-month-title">${monthNames[month-1]} ${year}</span>
+            <button class="cal-nav" onclick="learnerCalNext()">&#8250;</button>
+        </div>
+        <div class="cal-grid">
+            <div class="cal-day-label">Mo</div>
+            <div class="cal-day-label">Tu</div>
+            <div class="cal-day-label">We</div>
+            <div class="cal-day-label">Th</div>
+            <div class="cal-day-label">Fr</div>
+            <div class="cal-day-label">Sa</div>
+            <div class="cal-day-label">Su</div>`;
+
+    // Empty cells
+    for (let i = 0; i < startOffset; i++) {
+        html += `<div class="cal-cell empty"></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isToday   = (d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
+        const dayEvents = eventMap[d] || [];
+
+        const hasAssignment   = dayEvents.some(e => e.type === 'assignment');
+        const hasQuizDone     = dayEvents.some(e => e.subtype === 'quiz_done');
+        const hasQuizUpcoming = dayEvents.some(e => e.subtype === 'quiz_upcoming');
+        const hasAcademic     = dayEvents.some(e => e.type === 'academic');
+
+        html += `
+            <div class="cal-cell ${isToday ? 'cal-today' : ''} ${dayEvents.length > 0 ? 'cal-has-events' : ''}">
+                <span class="cal-day-num">${d}</span>
+                <div class="cal-dots">
+                    ${hasAssignment   ? '<span class="cal-dot dot-assignment"></span>'    : ''}
+                    ${hasQuizUpcoming ? '<span class="cal-dot dot-quiz"></span>'          : ''}
+                    ${hasQuizDone     ? '<span class="cal-dot dot-quiz-done"></span>'     : ''}
+                    ${hasAcademic     ? '<span class="cal-dot dot-academic"></span>'      : ''}
+                </div>
+                ${dayEvents.length > 0 ? `
+                <div class="cal-tooltip">
+                    ${dayEvents.map(e => {
+                        // Pick icon + colour per type
+                        const isAssignment   = e.type === 'assignment';
+                        const isQuizDone     = e.subtype === 'quiz_done';
+                        const isQuizUpcoming = e.subtype === 'quiz_upcoming';
+                        const isAcademic     = e.type === 'academic';
+
+                        const color = isAssignment   ? '#a78bfa'
+                                    : isQuizUpcoming ? '#fdd663'
+                                    : isQuizDone     ? '#4fd1c5'
+                                    : '#f472b6'; // academic
+
+                        const icon = isAssignment
+                            ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="${color}" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
+                            : (isQuizDone || isQuizUpcoming)
+                            ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="${color}" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`
+                            : `<svg viewBox="0 0 24 24" width="12" height="12" stroke="${color}" stroke-width="2" fill="none" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+
+                        return `
+                            <div class="cal-tooltip-item" style="color:${color};">
+                                ${icon}
+                                <span>${e.tooltip}</span>
+                            </div>`;
+                    }).join('')}
+                </div>` : ''}
+            </div>`;
+    }
+
+    html += `</div>
+
+        <!-- Dot Legend -->
+        <div class="cal-legend">
+            <span><span class="cal-dot dot-assignment"></span> Assignment</span>
+            <span><span class="cal-dot dot-quiz"></span> Quiz</span>
+            <span><span class="cal-dot dot-quiz-done"></span> Completed</span>
+            <span><span class="cal-dot dot-academic"></span> Academic</span>
+        </div>`;
+
+    container.innerHTML = html;
+}
+
+window.learnerCalPrev = function() {
+    let { month, year } = window.learnerCalState;
+    month--;
+    if (month < 1) { month = 12; year--; }
+    window.learnerCalState = { month, year };
+    window.loadLearnerCalendar(month, year);
+};
+
+window.learnerCalNext = function() {
+    let { month, year } = window.learnerCalState;
+    month++;
+    if (month > 12) { month = 1; year++; }
+    window.learnerCalState = { month, year };
+    window.loadLearnerCalendar(month, year);
+};
+
+// ─────────────────────────────────────────────
 // RECENT ACTIVITY
-// FIX: added quiz to iconMap and actionMap
-// FIX: items are now clickable with cursor:pointer
 // ─────────────────────────────────────────────
 function buildRecentActivity(recent) {
     if (!recent.length) {
@@ -130,7 +301,6 @@ function buildRecentActivity(recent) {
             stroke: '#a78bfa',
             path: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>`
         },
-        // NEW: quiz icon added
         quiz: {
             stroke: '#fdd663',
             path: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`
@@ -141,7 +311,6 @@ function buildRecentActivity(recent) {
         announcement: 'fetchAnnouncements()',
         resource:     'fetchResources()',
         assignment:   'fetchAssignments()',
-        // NEW: quiz navigates to quiz list
         quiz:         'window.learnerQuizCache=null; fetchQuizzes()'
     };
 
@@ -167,7 +336,6 @@ function buildRecentActivity(recent) {
 
 // ─────────────────────────────────────────────
 // TO-DO LIST
-// FIX: cache cleared before navigating so list is always fresh
 // ─────────────────────────────────────────────
 function buildTodoList(todo) {
     if (!todo.length) {
@@ -187,7 +355,7 @@ function buildTodoList(todo) {
     };
 
     return todo.map(item => {
-        const color  = colorMap[item.type]  || '#4fd1c5';
+        const color  = colorMap[item.type] || '#4fd1c5';
         const action = actionMap[item.type] || '';
         return `
             <div class="learner-home-todo-item" onclick="${action}" style="--todo-color:${color}; cursor:pointer;">

@@ -219,3 +219,7 @@
         display: block;
     }
 }
+.dot-quiz-done  { background: #4fd1c5; }
+.dot-academic   { background: #f472b6; }
+.cal-legend     { display:flex; gap:12px; flex-wrap:wrap; padding:10px 4px 4px; font-size:11px; color:#8b949e; }
+.cal-legend span { display:flex; align-items:center; gap:5px; }
