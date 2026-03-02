@@ -547,6 +547,8 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <span>Discussions</span>
     </a>
 
+    <button onclick="openSBODrawer()">📚 Post Syllabus</button>
+
     <a href="teacher_analytics.php" target="mainFrame" to href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics()">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
         <span>Analytics</span>
@@ -630,6 +632,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
 <script src="assets/js/teacher/discussions.js?v=1.0"></script>
+<script src="assets/js/teacher/sbo.js?v=1.0"></script>
 <script src="assets/js/teacher/analytics.js?v=1.0"></script>
 </body>
 </html>
