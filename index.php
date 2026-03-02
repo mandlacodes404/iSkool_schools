@@ -240,7 +240,7 @@ if ($result && $row = $result->fetch_assoc()) {
     background: transparent;
     box-shadow: none;
     width: 90%;
-    max-width: 400px;
+    max-width: 480px;
     opacity: 0;
     transition: opacity 1s ease;
     display: flex;          /* ← ADD THIS */
@@ -270,13 +270,16 @@ if ($result && $row = $result->fetch_assoc()) {
         font-size: 14px;
     }
 
-    .form-box {
-        display: none;
-    }
+    /* TO: */
+.form-box {
+    display: none;
+    width: 100%;
+}
 
-    .form-box.active {
-        display: block;
-    }
+.form-box.active {
+    display: block;
+    width: 100%;
+}
 
     .error-message {
         color: #ff5555;
@@ -292,7 +295,7 @@ if ($result && $row = $result->fetch_assoc()) {
         font-size: 14px;
     }
 
- input[type="text"],
+input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
@@ -300,13 +303,14 @@ select {
     background: #1E1F20;
     color: #fff;
     border: 1px solid transparent;
-    padding: 12px 45px;         /* ← KEY CHANGE: less vertical (12px), more horizontal (32px) */
-    border-radius: 30px;        /* ← Slightly larger radius for smoother long pill */
+    padding: 12px 20px;
+    border-radius: 30px;
     box-sizing: border-box;
     font-size: 16px;
     transition: all 0.3s ease;
     margin-bottom: 12px;
-    width: 100%;                /* Ensures they stretch full width nicely */
+    width: 100%;
+    display: block;
 }
 
 input:focus, select:focus {
@@ -715,7 +719,7 @@ c107 -34 196 -113 244 -217 18 -41 22 -68 23 -145 0 -84 -3 -102 -28 -151 -58
                     <input type="text" name="surname" placeholder="Surname" required>
                 </div>
 
-                <input type="email" name="email" placeholder="Email" required><br>
+                <input type="email" name="email" placeholder="Email" required>
                 <div class="password-wrapper">
                     <input type="password" name="password" id="register-password" placeholder="Password" required>
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
