@@ -1276,7 +1276,7 @@ iframe {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" class="desktop-only">
+        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" >
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
