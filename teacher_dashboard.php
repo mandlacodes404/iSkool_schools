@@ -313,7 +313,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
             align-items: center;
             padding: 0 20px;
             gap: 0;
-             border-top: 1px solid #21262d;  /* ← DELETE THIS LINE */
             overflow-x: auto;
             scrollbar-width: none;
         }
@@ -716,7 +715,9 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <input type="file" id="topNavProfileInput" accept="image/*">
     </div>
 
-</div>   
+</div> 
+</div>    
+
         
 
         <!-- ROW 2: tab links (desktop only) -->
