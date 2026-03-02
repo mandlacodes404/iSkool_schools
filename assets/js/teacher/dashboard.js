@@ -379,6 +379,7 @@ function renderCalendar(month, year, events) {
         const hasAssignment = dayEvents.some(e => e.type === 'assignment');
         const hasQuiz       = dayEvents.some(e => e.type === 'quiz');
         const hasReminder   = dayEvents.some(e => e.type === 'reminder');
+        const hasAcademic   = dayEvents.some(e => e.type === 'academic');
 
         const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 
@@ -391,6 +392,7 @@ function renderCalendar(month, year, events) {
                     ${hasAssignment ? '<span class="cal-dot dot-assignment"></span>' : ''}
                     ${hasQuiz       ? '<span class="cal-dot dot-quiz"></span>'       : ''}
                     ${hasReminder   ? '<span class="cal-dot dot-reminder"></span>'   : ''}
+                    ${hasAcademic   ? '<span class="cal-dot dot-academic"></span>'   : ''}
                 </div>
                 ${dayEvents.length > 0 ? `
                 <div class="cal-tooltip">
@@ -398,9 +400,11 @@ function renderCalendar(month, year, events) {
                         <div class="cal-tooltip-item cal-tooltip-${e.type}">
                             ${e.type === 'assignment' 
     ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#a78bfa" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
-    : e.type === 'quiz' 
-    ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
-    : `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f59e0b" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`
+   : e.type === 'quiz' 
+? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+: e.type === 'academic'
+? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f472b6" stroke-width="2" fill="none" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`
+: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f59e0b" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`
 }
                             ${e.title}${e.class_name ? ` <span style="opacity:0.6;">— ${e.class_name}</span>` : ''}
                         </div>`).join('')}
@@ -410,24 +414,70 @@ function renderCalendar(month, year, events) {
 
     html += `</div>
 
-        <!-- Reminder Modal -->
-        <div id="reminderModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;">
-           <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                    <span style="font-weight:800;color:#e2e8f0;">Add Reminder</span>
-                    <button onclick="closeReminderModal()" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;">&times;</button>
-                </div>
-                <label class="teacher-modal-label">Reminder Title</label>
-                <input type="text" id="reminderTitle" class="teacher-modal-input" placeholder="e.g. Create Test">
-                <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
-                <input type="date" id="reminderDate" class="teacher-modal-input">
-                <div id="reminderError" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></div>
-                <div style="display:flex;gap:10px;margin-top:16px;">
-                    <button onclick="closeReminderModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                    <button onclick="saveReminder()" class="teacher-modal-submit" style="flex:1;">Save</button>
-                </div>
+       <!-- Add Event Modal — two tabs -->
+<div id="reminderModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;">
+    <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span style="font-weight:800;color:#e2e8f0;">Add to Calendar</span>
+            <button onclick="closeReminderModal()" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+            <button id="tabReminder"
+                onclick="switchCalTab('reminder')"
+                style="flex:1;padding:8px;border-radius:8px;border:1px solid #4fd1c5;background:rgba(79,209,197,0.15);color:#4fd1c5;font-weight:800;font-size:13px;cursor:pointer;">
+                Personal Reminder
+            </button>
+            <button id="tabAcademic"
+                onclick="switchCalTab('academic')"
+                style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b949e;font-weight:800;font-size:13px;cursor:pointer;">
+                Academic Event
+            </button>
+        </div>
+
+        <!-- REMINDER TAB -->
+        <div id="calTabReminder">
+            <label class="teacher-modal-label">Reminder Title</label>
+            <input type="text" id="reminderTitle" class="teacher-modal-input" placeholder="e.g. Create Test">
+            <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+            <input type="date" id="reminderDate" class="teacher-modal-input">
+            <div id="reminderError" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button onclick="closeReminderModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
+                <button onclick="saveReminder()" class="teacher-modal-submit" style="flex:1;">Save</button>
             </div>
-        </div>`;
+        </div>
+
+        <!-- ACADEMIC EVENT TAB -->
+        <div id="calTabAcademic" style="display:none;">
+            <label class="teacher-modal-label">Event Title</label>
+            <input type="text" id="academicTitle" class="teacher-modal-input" placeholder="e.g. Term 2 Test Week">
+            <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+            <input type="date" id="academicDate" class="teacher-modal-input">
+            <label class="teacher-modal-label" style="margin-top:12px;">Event Type</label>
+            <select id="academicType" class="teacher-modal-input">
+                <option value="test">Test</option>
+                <option value="exam">Exam</option>
+                <option value="holiday">Holiday</option>
+                <option value="event">School Event</option>
+                <option value="other">Other</option>
+            </select>
+            <label class="teacher-modal-label" style="margin-top:12px;">Class</label>
+            <select id="academicClass" class="teacher-modal-input">
+                <option value="">Loading classes...</option>
+            </select>
+            <div id="academicError" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button onclick="closeReminderModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
+                <button onclick="saveAcademicEvent()" class="teacher-modal-submit" style="flex:1;">Post Event</button>
+            </div>
+        </div>
+
+    </div>
+</div>`;
 
     container.innerHTML = html;
 }
@@ -448,12 +498,32 @@ window.calNext = function() {
     window.loadCalendar(month, year);
 };
 
+// FROM:
 window.openReminderModal = function(dateStr = '') {
     const modal = document.getElementById('reminderModal');
     if (!modal) return;
     document.getElementById('reminderTitle').value = '';
     document.getElementById('reminderDate').value  = dateStr;
     document.getElementById('reminderError').style.display = 'none';
+    modal.style.display = 'flex';
+};
+
+// TO:
+window.openReminderModal = function(dateStr = '') {
+    const modal = document.getElementById('reminderModal');
+    if (!modal) return;
+    // Reset reminder tab
+    document.getElementById('reminderTitle').value = '';
+    document.getElementById('reminderDate').value  = dateStr;
+    document.getElementById('reminderError').style.display = 'none';
+    // Reset academic tab
+    document.getElementById('academicTitle').value = '';
+    document.getElementById('academicDate').value  = dateStr;
+    document.getElementById('academicError').style.display = 'none';
+    // Always open on reminder tab
+    switchCalTab('reminder');
+    // Pre-load classes for academic tab
+    window.loadAcademicClasses();
     modal.style.display = 'flex';
 };
 
@@ -475,6 +545,75 @@ window.saveReminder = async function() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, date })
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeReminderModal();
+            window.loadCalendar(window.calendarState.month, window.calendarState.year);
+        } else {
+            err.textContent = data.error || 'Failed to save.';
+            err.style.display = 'block';
+        }
+    } catch(e) {
+        err.textContent = 'Connection error.';
+        err.style.display = 'block';
+    }
+};
+
+// ── TAB SWITCHER ──
+window.switchCalTab = function(tab) {
+    const isReminder = tab === 'reminder';
+
+    document.getElementById('calTabReminder').style.display = isReminder ? 'block' : 'none';
+    document.getElementById('calTabAcademic').style.display = isReminder ? 'none'  : 'block';
+
+    const btnR = document.getElementById('tabReminder');
+    const btnA = document.getElementById('tabAcademic');
+
+    btnR.style.background   = isReminder ? 'rgba(79,209,197,0.15)' : 'transparent';
+    btnR.style.borderColor  = isReminder ? '#4fd1c5' : 'rgba(255,255,255,0.1)';
+    btnR.style.color        = isReminder ? '#4fd1c5' : '#8b949e';
+
+    btnA.style.background   = isReminder ? 'transparent' : 'rgba(244,114,182,0.15)';
+    btnA.style.borderColor  = isReminder ? 'rgba(255,255,255,0.1)' : '#f472b6';
+    btnA.style.color        = isReminder ? '#8b949e' : '#f472b6';
+};
+
+// ── LOAD CLASSES INTO ACADEMIC DROPDOWN ──
+window.loadAcademicClasses = async function() {
+    const select = document.getElementById('academicClass');
+    if (!select) return;
+    try {
+        const res     = await fetch('api/teacher/get_classes.php');
+        const classes = await res.json();
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(c => {
+            select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    } catch(e) {
+        select.innerHTML = '<option value="">Failed to load</option>';
+    }
+};
+
+// ── SAVE ACADEMIC EVENT ──
+window.saveAcademicEvent = async function() {
+    const title     = document.getElementById('academicTitle').value.trim();
+    const date      = document.getElementById('academicDate').value;
+    const eventType = document.getElementById('academicType').value;
+    const classId   = document.getElementById('academicClass').value;
+    const err       = document.getElementById('academicError');
+
+    err.style.display = 'none';
+
+    if (!title)   { err.textContent = 'Please enter a title.';    err.style.display = 'block'; return; }
+    if (!date)    { err.textContent = 'Please select a date.';    err.style.display = 'block'; return; }
+    if (!classId) { err.textContent = 'Please select a class.';   err.style.display = 'block'; return; }
+
+    try {
+        const res  = await fetch('api/teacher/save_academic_event.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ title, event_date: date, event_type: eventType, class_id: parseInt(classId) })
         });
         const data = await res.json();
         if (data.success) {

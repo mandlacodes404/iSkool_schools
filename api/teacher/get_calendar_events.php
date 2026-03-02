@@ -87,5 +87,30 @@ foreach ($rows as $row) {
     ];
 }
 
+// ── Academic events (class-specific, created by this teacher) ──
+$stmt = $conn->prepare("
+    SELECT ae.id, ae.title, ae.event_date, ae.event_type, c.name AS class_name
+    FROM academic_events ae
+    JOIN classes c ON ae.class_id = c.id
+    WHERE ae.created_by = ?
+      AND ae.academic_year_id = ?
+      AND ae.event_date BETWEEN ? AND ?
+    ORDER BY ae.event_date ASC
+");
+$stmt->bind_param("siss", $email, $current_year_id, $monthStart, $monthEnd);
+$stmt->execute();
+$rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+foreach ($rows as $row) {
+    $events[] = [
+        'id'         => $row['id'],
+        'date'       => $row['event_date'],
+        'title'      => $row['title'],
+        'class_name' => $row['class_name'],
+        'event_type' => $row['event_type'],
+        'type'       => 'academic'
+    ];
+}
+
 echo json_encode(['events' => $events, 'month' => $month, 'year' => $year]);
-?>
