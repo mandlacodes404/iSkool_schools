@@ -1452,6 +1452,8 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchAnnouncements();
         } else if (savedPage === 'grades') {
             window.fetchGrades();
+         } else if (savedPage === 'syllabus') {
+            window.fetchSyllabus();
         } else if (savedPage.includes("evaluation_list.php")) {
             window.fetchAnnouncements();
         } else if (savedPage.includes("discussion_list.php")) {
@@ -1475,6 +1477,7 @@ document.addEventListener("DOMContentLoaded", function () {
     savedPage !== "resource_list.php" && 
     savedPage !== "discussion_list.php" &&
     savedPage !== "evaluation_list.php" &&
+    savedPage !== "syllabus" &&
     savedPage !== "grades" &&
     savedPage !== "announcement_list.php"
 ) {
@@ -1517,7 +1520,8 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchResources') ||
                           onClick.includes('fetchDiscussions') ||
                           onClick.includes('fetchEvaluations') ||
-                          onClick.includes('fetchGrades') || 
+                          onClick.includes('fetchGrades') ||
+                          onClick.includes('fetchSyllabus') || 
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
@@ -1528,6 +1532,7 @@ const isCached = (onClick.includes('loadManual') && window.manualCache) ||
                  (onClick.includes('fetchResources') && window.resourceCache) ||
                  (onClick.includes('fetchEvaluations') && window.evaluationCache) ||
                  (onClick.includes('fetchGrades') && window.learnerGradesCache) ||
+                 (onClick.includes('fetchSyllabus') && window.syllabusCache) ||
                  (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
@@ -1789,6 +1794,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive("evaluation_list.php");
 } else if (lastSaved === 'grades') {
     window.setActive('grades');
+} else if (lastSaved === 'syllabus') {
+    window.setActive('syllabus');
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
 }
@@ -2127,6 +2134,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/grades.js?v=1.2"></script>
 <script src="assets/js/learner/evaluations.js?v=1.1"></script>
 <script src="assets/js/learner/discussions.js?v=1.4"></script>
+<script src="assets/js/learner/syllabus.js?v=1.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
