@@ -777,6 +777,8 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
         </nav>
     </div>
+    </div>
+
     <!-- ── END TOP NAV ── -->
 
     <div id="api-content-area" style="display:none; flex:1; overflow-y:auto; padding:20px; box-sizing:border-box;"></div>
