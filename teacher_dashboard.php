@@ -313,7 +313,6 @@ $schoolLogo = 'uploads/schools/default_school.png';
             align-items: center;
             padding: 0 20px;
             gap: 0;
-            border-top: 1px solid #21262d;
             overflow-x: auto;
             scrollbar-width: none;
         }
@@ -628,57 +627,96 @@ $schoolLogo = 'uploads/schools/default_school.png';
             </div>
 
             <!-- Right: avatar + dropdown -->
-            <div class="top-nav-avatar-btn">
-                <div class="top-nav-avatar" onclick="toggleAvatarDropdown()" id="topNavAvatar">
-                    <?php if (!empty($teacherProfile) && $teacherProfile !== 'default.png'): ?>
-                        <img src="uploads/teachers/<?= htmlspecialchars($teacherProfile) ?>"
-                             alt="Profile" id="topNavAvatarImg">
-                    <?php else: ?>
-                        <span class="initials-sm" id="topNavAvatarInitials">
-                            <?= htmlspecialchars($teacherInitials) ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
+         <!-- Search + Avatar -->
+<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
 
-                <!-- Dropdown -->
-                <div class="avatar-dropdown" id="avatarDropdown">
-                    <div class="avatar-dropdown-header">
-                        <div class="avatar-dropdown-name"><?= htmlspecialchars($teacherFullName) ?></div>
-                        <div class="avatar-dropdown-email"><?= htmlspecialchars($teacherEmail) ?></div>
-                    </div>
-                    <button class="avatar-dropdown-item" onclick="triggerTopNavUpload()">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
-                             stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        Upload Photo
-                    </button>
-                    <button class="avatar-dropdown-item" onclick="loadTeacherSettings(); closeAvatarDropdown();">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
-                             stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                        Settings
-                    </button>
-                    <button class="avatar-dropdown-item danger"
-                            onclick="window.location.href='logout.php'">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
-                             stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Sign Out
-                    </button>
-                </div>
-
-                <!-- Hidden file input for top nav upload -->
-                <input type="file" id="topNavProfileInput" accept="image/*">
-            </div>
+    <!-- SEARCH BAR -->
+    <div style="position:relative;" id="teacherSearchWrapper">
+        <div style="display:flex;align-items:center;gap:8px;
+                    background:#21262d;border:1px solid #30363d;
+                    border-radius:6px;padding:6px 12px;
+                    transition:border-color 0.2s ease;width:220px;"
+             id="teacherSearchBox">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="#8b949e"
+                 stroke-width="2" fill="none" flex-shrink="0">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="teacherSearchInput"
+                   placeholder="Search..."
+                   autocomplete="off"
+                   style="background:none;border:none;outline:none;
+                          color:#e2e8f0;font-size:13px;font-weight:600;
+                          font-family:'Nunito',sans-serif;width:100%;"/>
+            <span style="font-size:11px;color:#555e6a;
+                         border:1px solid #30363d;border-radius:4px;
+                         padding:1px 5px;font-family:'Nunito',sans-serif;">/</span>
         </div>
+
+        <!-- SUGGESTIONS DROPDOWN -->
+        <div id="teacherSearchSuggestions"
+             style="display:none;position:absolute;top:calc(100% + 6px);
+                    left:0;right:0;background:#161b22;
+                    border:1px solid #30363d;border-radius:8px;
+                    overflow:hidden;z-index:9000;
+                    box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
+    <!-- AVATAR -->
+    <div class="top-nav-avatar-btn">
+        <div class="top-nav-avatar" onclick="toggleAvatarDropdown()" id="topNavAvatar">
+            <?php if (!empty($teacherProfile) && $teacherProfile !== 'default.png'): ?>
+                <img src="uploads/teachers/<?= htmlspecialchars($teacherProfile) ?>"
+                     alt="Profile" id="topNavAvatarImg">
+            <?php else: ?>
+                <span class="initials-sm" id="topNavAvatarInitials">
+                    <?= htmlspecialchars($teacherInitials) ?>
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <!-- Dropdown -->
+        <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="avatar-dropdown-header">
+                <div class="avatar-dropdown-name"><?= htmlspecialchars($teacherFullName) ?></div>
+                <div class="avatar-dropdown-email"><?= htmlspecialchars($teacherEmail) ?></div>
+            </div>
+            <button class="avatar-dropdown-item" onclick="triggerTopNavUpload()">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Upload Photo
+            </button>
+            <button class="avatar-dropdown-item"
+                    onclick="loadTeacherSettings(); closeAvatarDropdown();">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Settings
+            </button>
+            <button class="avatar-dropdown-item danger"
+                    onclick="window.location.href='logout.php'">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Sign Out
+            </button>
+        </div>
+
+        <input type="file" id="topNavProfileInput" accept="image/*">
+    </div>
+
+</div>   
+        
 
         <!-- ROW 2: tab links (desktop only) -->
         <nav class="top-nav-row2" id="topNavRow2">
@@ -876,6 +914,116 @@ window.loadTeacherSettings = function() {
     if (iframe)  { iframe.style.display = 'block'; iframe.src = 'teacher_settings.php'; }
     if (apiArea) apiArea.style.display  = 'none';
 };
+
+// ── TEACHER NAVIGATION SEARCH ──
+(function() {
+    const navLinks = [
+        { label: 'Home',           keywords: ['home','manual'],          action: () => { loadTeacherManual(); } },
+        { label: 'Quizzes',        keywords: ['quiz','quizzes'],         action: () => { fetchTeacherQuizzes(); } },
+        { label: 'Assignments',    keywords: ['assign','assignments'],   action: () => { fetchTeacherAssignments(); } },
+        { label: 'Announcements',  keywords: ['announce','announcements'],action: () => { fetchTeacherAnnouncements(); } },
+        { label: 'Grades',         keywords: ['grade','grades','marks'], action: () => { fetchTeacherGrades(); } },
+        { label: 'Resources',      keywords: ['resource','upload'],      action: () => { fetchTeacherResources(); } },
+        { label: 'Discussions',    keywords: ['discuss','discussions'],  action: () => { fetchTeacherDiscussions(); } },
+        { label: 'Evaluations',    keywords: ['eval','evaluations'],     action: () => { fetchTeacherEvaluations(); setTopNavTab('tab-evaluations'); } },
+        { label: 'Analytics',      keywords: ['analyt','analytics'],     action: () => { fetchTeacherAnalytics(); setTopNavTab('tab-analytics'); } },
+        { label: 'Settings',       keywords: ['setting','settings'],     action: () => { loadTeacherSettings(); setTopNavTab('tab-settings'); } },
+        { label: 'Syllabus',       keywords: ['syllab','syllabus'],      action: () => { openSBODrawer(); setTopNavTab('tab-syllabus'); } },
+        { label: 'Calendar',       keywords: ['calendar','remind'],      action: () => { loadTeacherManual(); setTopNavTab('tab-calendar'); } },
+    ];
+
+    const input       = document.getElementById('teacherSearchInput');
+    const suggestions = document.getElementById('teacherSearchSuggestions');
+    const searchBox   = document.getElementById('teacherSearchBox');
+
+    if (!input) return;
+
+    // Focus styling
+    input.addEventListener('focus', () => {
+        searchBox.style.borderColor = '#4fd1c5';
+    });
+    input.addEventListener('blur', () => {
+        searchBox.style.borderColor = '#30363d';
+    });
+
+    input.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+
+        if (!query) {
+            suggestions.style.display = 'none';
+            suggestions.innerHTML = '';
+            return;
+        }
+
+        const matches = navLinks.filter(link =>
+            link.keywords.some(k => k.startsWith(query)) ||
+            link.label.toLowerCase().startsWith(query)
+        );
+
+        if (!matches.length) {
+            suggestions.style.display = 'none';
+            suggestions.innerHTML = '';
+            return;
+        }
+
+        suggestions.innerHTML = matches.map((m, i) => `
+            <div class="teacher-search-suggestion" data-index="${i}"
+                 style="display:flex;align-items:center;gap:10px;
+                        padding:10px 14px;cursor:pointer;
+                        font-size:13px;font-weight:700;
+                        color:#c9d1d9;font-family:'Nunito',sans-serif;
+                        transition:background 0.15s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14"
+                     stroke="#8b949e" stroke-width="2" fill="none">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                ${m.label}
+            </div>
+        `).join('');
+
+        // Hover effect
+        suggestions.querySelectorAll('.teacher-search-suggestion').forEach((el, i) => {
+            el.addEventListener('mouseenter', () => {
+                el.style.background = '#21262d';
+                el.style.color = '#e2e8f0';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.background = '';
+                el.style.color = '#c9d1d9';
+            });
+            el.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // prevents blur firing before click
+                matches[i].action();
+                input.value = '';
+                suggestions.style.display = 'none';
+                suggestions.innerHTML = '';
+            });
+        });
+
+        suggestions.style.display = 'block';
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('teacherSearchWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            suggestions.style.display = 'none';
+            suggestions.innerHTML = '';
+            input.value = '';
+            searchBox.style.borderColor = '#30363d';
+        }
+    });
+
+    // Hide search on mobile
+    const style = document.createElement('style');
+    style.textContent = `
+        @media (max-width: 768px) {
+            #teacherSearchWrapper { display: none !important; }
+        }
+    `;
+    document.head.appendChild(style);
+})();
 </script>
 
 <script src="assets/js/teacher/dashboard.js?v=4.3"></script>
