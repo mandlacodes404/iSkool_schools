@@ -777,7 +777,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
         </nav>
     </div>
-    </div>
+    
 
     <!-- ── END TOP NAV ── -->
 
