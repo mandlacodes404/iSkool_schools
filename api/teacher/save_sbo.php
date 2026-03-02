@@ -101,7 +101,7 @@ foreach ($learners as $learner) {
         $conn,
         $learner['student_email'],
         "📚 Term {$term} Syllabus — {$className}",
-        "{$teacherName} has posted the {$subject} syllabus for Term {$term}.",
+        "Term {$term} syllabus has been posted for {$subject} by {$teacherName}",
         'learner_dashboard.php'
     );
 }
