@@ -235,7 +235,16 @@ function startQuizCountdowns() {
             }
         }, 1000);
 
-        // Run immediately so there's no 1s delay on first render
-        tick();
+         // Run immediately so there's no 1s delay on first render
+        const diff0 = startMs - Date.now();
+        if (diff0 > 0) {
+            const h = Math.floor(diff0 / 3600000);
+            const m = Math.floor((diff0 % 3600000) / 60000);
+            const s = Math.floor((diff0 % 60000) / 1000);
+            if (h > 0)      el.textContent = `Starts in ${h}h ${m}m ${s}s`;
+            else if (m > 0) el.textContent = `Starts in ${m}m ${s}s`;
+            else            el.textContent = `Starts in ${s}s`;
+        }
     });
 }
+   
