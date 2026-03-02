@@ -67,7 +67,7 @@ while ($row = $result->fetch_assoc()) {
     
     // Determine the physical path to check size
     // Adjust '../resources/' to match your actual server directory
-    $filePath = "../resources/" . $filename; 
+    $filePath = __DIR__ . "/../../resources/" . $filename; 
     $fileSize = (file_exists($filePath)) ? formatSizeUnits(filesize($filePath)) : "Unknown Size";
 
     $groupedResources[$teacher][] = [
