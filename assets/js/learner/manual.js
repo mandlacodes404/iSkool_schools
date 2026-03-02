@@ -110,6 +110,7 @@ function buildHomeLayout(data, manualHtml) {
 
 // ─────────────────────────────────────────────
 // RECENT ACTIVITY
+// FIX: items are now clickable and navigate to the relevant section
 // ─────────────────────────────────────────────
 function buildRecentActivity(recent) {
     if (!recent.length) {
@@ -122,10 +123,20 @@ function buildRecentActivity(recent) {
         assignment:   { stroke: '#a78bfa', path: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>` }
     };
 
+    // FIX: each item navigates to the relevant section when clicked
+    const actionMap = {
+        announcement: 'fetchAnnouncements()',
+        resource:     'fetchResources()',
+        assignment:   'fetchAssignments()'
+    };
+
     return recent.map(item => {
-        const icon = iconMap[item.type] || iconMap.announcement;
+        const icon   = iconMap[item.type] || iconMap.announcement;
+        const action = actionMap[item.type] || '';
         return `
-            <div class="learner-home-activity-item">
+            <div class="learner-home-activity-item"
+                 onclick="${action}"
+                 style="cursor:pointer;">
                 <div class="learner-home-activity-icon">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="${icon.stroke}" stroke-width="2" fill="none">
                         ${icon.path}
@@ -141,6 +152,7 @@ function buildRecentActivity(recent) {
 
 // ─────────────────────────────────────────────
 // TO-DO LIST
+// FIX: cache is cleared before navigating so learner always sees fresh data
 // ─────────────────────────────────────────────
 function buildTodoList(todo) {
     if (!todo.length) {
@@ -153,17 +165,18 @@ function buildTodoList(todo) {
         evaluation: '#a78bfa'
     };
 
+    // FIX: clear relevant cache before navigating so list is always fresh
     const actionMap = {
-        quiz:       'fetchQuizzes()',
-        assignment: 'fetchAssignments()',
-        evaluation: 'fetchEvaluations()'
+        quiz:       'window.learnerQuizCache=null; fetchQuizzes()',
+        assignment: 'window.learnerAssignmentCache=null; fetchAssignments()',
+        evaluation: 'window.evaluationCache=null; fetchEvaluations()'
     };
 
     return todo.map(item => {
         const color  = colorMap[item.type]  || '#4fd1c5';
         const action = actionMap[item.type] || '';
         return `
-            <div class="learner-home-todo-item" onclick="${action}" style="--todo-color:${color};">
+            <div class="learner-home-todo-item" onclick="${action}" style="--todo-color:${color}; cursor:pointer;">
                 <div class="learner-home-todo-dot" style="background:${color};"></div>
                 <div class="learner-home-todo-info">
                     <div class="learner-home-todo-title">${item.title}</div>

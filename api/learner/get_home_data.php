@@ -34,6 +34,7 @@ $recent = [];
 
 // ────────────────────────────────────────────
 // TO-DO 1: Quizzes not yet attempted
+// FIX: was 'published' — correct status is 'Open'
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
     SELECT q.id, q.title, q.start_time
@@ -41,7 +42,7 @@ $stmt = $conn->prepare("
     LEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_email = ?
     WHERE q.class_id = ?
       AND q.academic_year_id = ?
-      AND q.status = 'published'
+      AND q.status = 'Open'
       AND q.start_time <= ?
       AND qa.id IS NULL
     ORDER BY q.start_time ASC
@@ -89,6 +90,7 @@ $stmt->close();
 
 // ────────────────────────────────────────────
 // TO-DO 3: Evaluations not yet submitted
+// FIX: replaced raw query with prepared statement
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
     SELECT te.id, te.title,
@@ -103,9 +105,16 @@ $stmt->bind_param("i", $classId);
 $stmt->execute();
 $res = $stmt->get_result();
 while ($row = $res->fetch_assoc()) {
-    $hash  = hash('sha256', $email . $row['id'] . 'salt123');
-    $check = $conn->query("SELECT 1 FROM evaluation_responses WHERE evaluation_id = {$row['id']} AND unique_hash = '$hash'");
-    if ($check->num_rows === 0) {
+    $hash = hash('sha256', $email . $row['id'] . 'salt123');
+
+    // FIX: use prepared statement instead of raw query
+    $check = $conn->prepare("SELECT 1 FROM evaluation_responses WHERE evaluation_id = ? AND unique_hash = ?");
+    $check->bind_param("is", $row['id'], $hash);
+    $check->execute();
+    $checkResult = $check->get_result();
+    $check->close();
+
+    if ($checkResult->num_rows === 0) {
         $todo[] = [
             'type'  => 'evaluation',
             'id'    => $row['id'],
