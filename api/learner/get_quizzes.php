@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
 session_start();
-require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__, 2) . '/config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(["error" => "Unauthorized"]);

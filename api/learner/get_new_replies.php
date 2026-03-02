@@ -4,7 +4,7 @@
  * Returns new replies posted after a given reply ID for live polling.
  */
 session_start();
-require_once '../config.php';
+require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');
 

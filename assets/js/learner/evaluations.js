@@ -22,7 +22,7 @@ window.fetchEvaluations = async function() {
     // Inject CSS
     if (!document.getElementById('eval-style')) {
         const link = document.createElement('link');
-        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = 'assets/css/evaluations.css';
+        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = 'assets/css/learner/evaluations.css';
         document.head.appendChild(link);
     }
 
@@ -36,7 +36,7 @@ window.fetchEvaluations = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_evaluations.php');
+        const response = await fetch('api/learner/get_evaluations.php');
         const data = await response.json();
         window.evaluationCache = data; 
         renderEvaluationsUI(data); // Call the helper function here too

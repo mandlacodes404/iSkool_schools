@@ -32,7 +32,7 @@ window.fetchAnnouncements = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_announcements.php');
+        const response = await fetch('api/learner/get_announcements.php');
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         window.announcementCache = data; 

@@ -39,7 +39,7 @@ window.fetchQuizzes = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_quizzes.php');
+        const response = await fetch('api/learner/get_quizzes.php');
         if (!response.ok) throw new Error('Network response was not ok');
         
         const groupedData = await response.json();

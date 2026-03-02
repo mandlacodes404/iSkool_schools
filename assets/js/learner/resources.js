@@ -33,7 +33,7 @@ window.fetchResources = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_resources.php');
+        const response = await fetch('api/learner/get_resources.php');
         if (!response.ok) throw new Error('Failed to fetch resources');
         const data = await response.json();
         window.resourceCache = data; 

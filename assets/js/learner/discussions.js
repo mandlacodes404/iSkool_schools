@@ -33,7 +33,7 @@ window.fetchDiscussions = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_discussions.php');
+        const response = await fetch('api/learner/get_discussions.php');
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         window.discussionCache = data; 

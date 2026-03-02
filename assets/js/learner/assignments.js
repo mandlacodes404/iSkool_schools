@@ -36,7 +36,7 @@ window.fetchAssignments = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/get_assignments.php');
+        const response = await fetch('api/learner/get_assignments.php');
         if (!response.ok) throw new Error('Failed to fetch assignments');
         
         const groupedData = await response.json();

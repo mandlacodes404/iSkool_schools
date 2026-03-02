@@ -207,8 +207,8 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/quiz.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/manual.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.2">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2118,15 +2118,15 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
 </script>
 
-<script src="assets/js/main.js?v=1.0"></script>
-<script src="assets/js/manual.js?v=1.2"></script>
-<script src="assets/js/quiz.js?v=2.7"></script>
-<script src="assets/js/assignments.js?v=2.2"></script>
-<script src="assets/js/resources.js?v=2.0"></script>
-<script src="assets/js/announcements.js?v=1.4"></script>
-<script src="assets/js/grades.js?v=1.2"></script>
-<script src="assets/js/evaluations.js?v=1.1"></script>
-<script src="assets/js/discussions.js?v=1.4"></script>
+<script src="assets/js/learner/main.js?v=1.0"></script>
+<script src="assets/js/learner/manual.js?v=1.2"></script>
+<script src="assets/js/learner/quiz.js?v=2.7"></script>
+<script src="assets/js/learner/assignments.js?v=2.2"></script>
+<script src="assets/js/learner/resources.js?v=2.0"></script>
+<script src="assets/js/learner/announcements.js?v=1.4"></script>
+<script src="assets/js/learner/grades.js?v=1.2"></script>
+<script src="assets/js/learner/evaluations.js?v=1.1"></script>
+<script src="assets/js/learner/discussions.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
