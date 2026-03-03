@@ -75,7 +75,7 @@ window.loadQuizInstructions = async function(quizId) {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch(`api/get_quiz_instructions.php?quiz_id=${quizId}`);
+        const response = await fetch(`api/learner/get_quiz_instructions.php?quiz_id=${quizId}`);
         const data = await response.json();
 
         if (data.error) throw new Error(data.error);
