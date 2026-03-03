@@ -1,7 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
-header('Content-Type: application/json');
 require_once dirname(__DIR__, 2) . '/config.php';
+
+header('Content-Type: application/json');
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     echo json_encode(['error' => 'Unauthorized']); exit();
@@ -14,14 +14,29 @@ $yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMI
 if ($yearRes->num_rows === 0) { echo json_encode(['error' => 'No active year']); exit(); }
 $yearId = (int)$yearRes->fetch_assoc()['id'];
 
-// ── All classes for dropdown (same academic year) ──
-$classRows = $conn->query("
-    SELECT id, name FROM classes
-    WHERE academic_year_id = $yearId
-    ORDER BY name ASC
-")->fetch_all(MYSQLI_ASSOC);
+// ── Teacher's Classes ──
+$classStmt = $conn->prepare("
+    SELECT DISTINCT c.id, c.name
+    FROM classes c
+    JOIN teacher_subjects ts ON ts.class_id = c.id
+    WHERE ts.teacher_email = ? AND c.academic_year_id = ?
+    ORDER BY c.name ASC
+");
+$classStmt->bind_param("si", $email, $yearId);
+$classStmt->execute();
+$classRows = $classStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$classStmt->close();
 
-// ── SBOs created by this teacher ──
+if (empty($classRows)) {
+    echo json_encode(['classes' => [], 'briefs' => []]); exit();
+}
+
+$classIds = array_column($classRows, 'id');
+$placeholders = implode(',', array_fill(0, count($classIds), '?'));
+$types = str_repeat('i', count($classIds)) . 'i';
+$params = array_merge($classIds, [$yearId]);
+
+// ── Fetch all SBOs for teacher's classes ──
 $stmt = $conn->prepare("
     SELECT
         sb.id,
@@ -35,11 +50,11 @@ $stmt = $conn->prepare("
         c.name AS class_name
     FROM subject_briefs sb
     JOIN classes c ON sb.class_id = c.id
-    WHERE sb.created_by = ?
+    WHERE sb.class_id IN ($placeholders)
       AND sb.academic_year_id = ?
     ORDER BY c.name ASC, sb.term_number ASC, sb.subject_name ASC
 ");
-$stmt->bind_param("si", $email, $yearId);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -47,15 +62,15 @@ $stmt->close();
 $briefs = [];
 foreach ($rows as $row) {
     $briefs[] = [
-        'id'          => (int)$row['id'],
-        'class_id'    => (int)$row['class_id'],
-        'class_name'  => $row['class_name'],
-        'term'        => (int)$row['term_number'],
-        'subject'     => $row['subject_name'],
-        'topics'      => json_decode($row['topics'], true)      ?? [],
-        'assessments' => json_decode($row['assessments'], true) ?? [],
-        'notes'       => $row['notes'],
-        'updated_at'  => $row['updated_at'],
+        'id'         => (int)$row['id'],
+        'class_id'   => (int)$row['class_id'],
+        'class_name' => $row['class_name'],
+        'term'       => (int)$row['term_number'],
+        'subject'    => $row['subject_name'],
+        'topics'     => json_decode($row['topics'], true)      ?? [],
+        'assessments'=> json_decode($row['assessments'], true) ?? [],
+        'notes'      => $row['notes'],
+        'updated_at' => $row['updated_at'],
     ];
 }
 
