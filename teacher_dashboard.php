@@ -724,7 +724,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         <nav class="top-nav-row2" id="topNavRow2">
 
             <button class="top-nav-tab" id="tab-syllabus"
-                    onclick="openSBODrawer(); setTopNavTab('tab-syllabus')">
+                    onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
                      stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -1038,7 +1038,7 @@ window.loadTeacherSettings = function() {
 <script src="assets/js/teacher/grades.js?v=1.1"></script>
 <script src="assets/js/teacher/assignments.js?v=1.0"></script>
 <script src="assets/js/teacher/discussions.js?v=1.0"></script>
-<script src="assets/js/teacher/sbo.js?v=1.0"></script>
+<script src="assets/js/teacher/sbo.js?v=1.1"></script>
 <script src="assets/js/teacher/analytics.js?v=1.0"></script>
 </body>
 </html>
