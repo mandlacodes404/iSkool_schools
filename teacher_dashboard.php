@@ -795,8 +795,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
 <!-- Mobile Bottom Nav — UNCHANGED -->
 <nav id="mobileBottomNav">
-    <a href="create_quiz.php" target="mainFrame"
-       class="<?= $currentPage==='create_quiz.php'?'active':'' ?>">
+     <a href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -804,8 +803,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         </svg>
         <span>Quiz</span>
     </a>
-    <a href="create_assignment.php" target="mainFrame"
-       class="<?= $currentPage==='create_assignment.php'?'active':'' ?>">
+    <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -821,8 +819,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         </svg>
         <span>Resources</span>
     </a>
-    <a href="create_announcement.php" target="mainFrame"
-       class="<?= $currentPage==='create_announcement.php'?'active':'' ?>">
+    <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
             <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -909,7 +906,20 @@ function updateAllAvatars(url) {
     }
 }
 
-
+window.toggleSidebar = function() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    
+    if (sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+        if (overlay) overlay.style.opacity = '0';
+        if (overlay) overlay.style.pointerEvents = 'none';
+    } else {
+        sidebar.classList.add('active');
+        if (overlay) overlay.style.opacity = '1';
+        if (overlay) overlay.style.pointerEvents = 'all';
+    }
+};
 // ── SETTINGS LOADER ──
 window.loadTeacherSettings = function() {
     const apiArea = document.getElementById('api-content-area');
