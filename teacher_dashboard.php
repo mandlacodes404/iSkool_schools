@@ -930,64 +930,100 @@ window.loadTeacherSettings = function() {
 
     sessionStorage.setItem("lastTeacherPage", "teacher_settings");
 
+    // Grab current avatar
+    const avatarImg = document.querySelector('.sidebar .profile-picture-wrapper img.teacher-avatar');
+    const initialsEl = document.querySelector('.sidebar .profile-picture-wrapper .initials-avatar');
+    const avatarHTML = avatarImg
+        ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+
     apiArea.innerHTML = `
-        <div class="teacher-resources-header">
-            <h2 class="teacher-resources-title">Settings</h2>
-        </div>
+        <div style="padding:20px;">
 
-        <div style="max-width:440px;display:flex;flex-direction:column;gap:12px;">
+            <!-- CIRCULAR PROFILE -->
+            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
+                <div onclick="triggerTopNavUpload()"
+                     style="position:relative;width:100px;height:100px;border-radius:50%;
+                            background:#1b1b1b;border:3px solid #30363d;
+                            overflow:hidden;cursor:pointer;flex-shrink:0;
+                            transition:border-color 0.2s ease;"
+                     onmouseover="this.style.borderColor='#4fd1c5'; this.querySelector('.cam-overlay').style.opacity='1';"
+                     onmouseout="this.style.borderColor='#30363d'; this.querySelector('.cam-overlay').style.opacity='0';">
 
-            <div class="teacher-resource-card" onclick="triggerTopNavUpload()" style="cursor:pointer;gap:14px;">
-                <div class="teacher-resource-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                        ${avatarHTML}
+                    </div>
+
+                    <div class="cam-overlay"
+                         style="position:absolute;top:0;left:0;width:100%;height:100%;
+                                background:rgba(0,0,0,0.55);border-radius:50%;
+                                display:flex;flex-direction:column;align-items:center;
+                                justify-content:center;opacity:0;
+                                transition:opacity 0.2s ease;pointer-events:none;">
+                        <svg viewBox="0 0 24 24" width="26" height="26" stroke="#ffffff" stroke-width="2" fill="none">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span style="color:#fff;font-size:11px;font-weight:700;margin-top:4px;">Edit</span>
+                    </div>
                 </div>
-                <div class="teacher-resource-info">
-                    <div class="teacher-resource-name">Update Profile Picture</div>
-                    <div class="teacher-resource-meta">Upload a new photo</div>
-                </div>
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
+                <div style="margin-top:10px;font-size:13px;color:#8b949e;">Click to update photo</div>
             </div>
 
-            <div class="teacher-resource-card" onclick="removeTeacherProfilePicture()" style="cursor:pointer;gap:14px;">
-                <div class="teacher-resource-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                        <path d="M10 11v6M14 11v6"></path>
+            <div style="max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+
+                <div class="teacher-resource-card" onclick="triggerTopNavUpload()" style="cursor:pointer;gap:14px;">
+                    <div class="teacher-resource-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="teacher-resource-info">
+                        <div class="teacher-resource-name">Update Profile Picture</div>
+                        <div class="teacher-resource-meta">Upload a new photo</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </div>
-                <div class="teacher-resource-info">
-                    <div class="teacher-resource-name" style="color:#f85149;">Remove Profile Picture</div>
-                    <div class="teacher-resource-meta">Revert to initials avatar</div>
-                </div>
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-            </div>
 
-            <div class="teacher-resource-card" onclick="window.location.href='logout.php'" style="cursor:pointer;gap:14px;margin-top:8px;">
-                <div class="teacher-resource-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                <div class="teacher-resource-card" onclick="removeTeacherProfilePicture()" style="cursor:pointer;gap:14px;">
+                    <div class="teacher-resource-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                        </svg>
+                    </div>
+                    <div class="teacher-resource-info">
+                        <div class="teacher-resource-name" style="color:#f85149;">Remove Profile Picture</div>
+                        <div class="teacher-resource-meta">Revert to initials avatar</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </div>
-                <div class="teacher-resource-info">
-                    <div class="teacher-resource-name" style="color:#f85149;">Sign Out</div>
-                    <div class="teacher-resource-meta">Log out of your account</div>
-                </div>
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-            </div>
 
+                <div class="teacher-resource-card" onclick="window.location.href='logout.php'" style="cursor:pointer;gap:14px;margin-top:8px;">
+                    <div class="teacher-resource-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="teacher-resource-info">
+                        <div class="teacher-resource-name" style="color:#f85149;">Sign Out</div>
+                        <div class="teacher-resource-meta">Log out of your account</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+            </div>
         </div>`;
 };
 

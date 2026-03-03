@@ -1632,14 +1632,51 @@ if (fullPage &&
     if (apiArea) apiArea.style.display = 'block';
 
     sessionStorage.setItem("lastLearnerPage", "learner_settings");
-
     window.configureHeader({ title: 'Settings', mode: 'standard' });
+
+    // Grab current avatar src or initials
+    const avatarImg = document.querySelector('.profile-picture-wrapper img.learner-avatar');
+    const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
+    const avatarHTML = avatarImg
+        ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     apiArea.innerHTML = `
         <div style="padding:20px;">
-            <h2 style="color:#e2e8f0;margin:0 0 20px 0;font-size:20px;font-weight:800;">Settings</h2>
 
-            <div style="max-width:440px;display:flex;flex-direction:column;gap:12px;">
+            <!-- CIRCULAR PROFILE -->
+            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
+                <div onclick="document.getElementById('profileInput').click()"
+                     style="position:relative;width:100px;height:100px;border-radius:50%;
+                            background:#1b1b1b;border:3px solid #30363d;
+                            overflow:hidden;cursor:pointer;flex-shrink:0;
+                            transition:border-color 0.2s ease;"
+                     onmouseover="this.style.borderColor='#4fd1c5'; this.querySelector('.cam-overlay').style.opacity='1';"
+                     onmouseout="this.style.borderColor='#30363d'; this.querySelector('.cam-overlay').style.opacity='0';">
+
+                    <!-- Avatar (photo or initials) -->
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                        ${avatarHTML}
+                    </div>
+
+                    <!-- Camera hover overlay -->
+                    <div class="cam-overlay"
+                         style="position:absolute;top:0;left:0;width:100%;height:100%;
+                                background:rgba(0,0,0,0.55);border-radius:50%;
+                                display:flex;flex-direction:column;align-items:center;
+                                justify-content:center;opacity:0;
+                                transition:opacity 0.2s ease;pointer-events:none;">
+                        <svg viewBox="0 0 24 24" width="26" height="26" stroke="#ffffff" stroke-width="2" fill="none">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span style="color:#fff;font-size:11px;font-weight:700;margin-top:4px;">Edit</span>
+                    </div>
+                </div>
+                <div style="margin-top:10px;font-size:13px;color:#8b949e;">Click to update photo</div>
+            </div>
+
+            <div style="max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
 
                 <!-- Notification Help Box -->
                 <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);
