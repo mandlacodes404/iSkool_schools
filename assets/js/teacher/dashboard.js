@@ -148,6 +148,8 @@ function renderSnapshotPanel(data) {
         window.fetchTeacherDiscussions();
     } else if (savedPage === "teacher_grades") {
         window.fetchTeacherGrades();
+    } else if (savedPage === "teacher_syllabus") {
+        window.fetchTeacherSyllabus();
     } else {
         window.loadTeacherManual();
     }
