@@ -1624,15 +1624,166 @@ if (fullPage &&
     // ────────────────────────────────────────────────────────────────────────
     // 3. SETTINGS & PROFILE (Your original working logic)
     // ────────────────────────────────────────────────────────────────────────
-    document.getElementById("settingsBtn")?.addEventListener('click', function() {
-        loader.style.display = 'flex';
-        iframe.src = "learner_settings.php"; 
-        myClassContent.classList.remove("active");
-        iframe.style.display = "block";
-        setActive("learner_settings.php"); 
-        if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
-        if (apiArea) apiArea.style.display = 'none';
-    });
+    window.loadLearnerSettings = function() {
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+
+    if (iframe)  iframe.style.display  = 'none';
+    if (apiArea) apiArea.style.display = 'block';
+
+    sessionStorage.setItem("lastLearnerPage", "learner_settings");
+
+    window.configureHeader({ title: 'Settings', mode: 'standard' });
+
+    apiArea.innerHTML = `
+        <div style="padding:20px;">
+            <h2 style="color:#e2e8f0;margin:0 0 20px 0;font-size:20px;font-weight:800;">Settings</h2>
+
+            <div style="max-width:440px;display:flex;flex-direction:column;gap:12px;">
+
+                <!-- Notification Help Box -->
+                <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);
+                            border-left:4px solid #4fd1c5;border-radius:12px;padding:15px;margin-bottom:4px;">
+                    <div style="color:#4fd1c5;font-weight:800;font-size:14px;margin-bottom:8px;">
+                        💡 Notification Help
+                    </div>
+                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.7;">
+                        <li><strong style="color:#c9d1d9;">iPhone Users:</strong> You must "Add to Home Screen" first.</li>
+                        <li>Tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below if you aren't getting alerts.</li>
+                        <li>If prompted, select <strong style="color:#c9d1d9;">"Allow"</strong> on the system popup.</li>
+                    </ol>
+                </div>
+
+                <!-- Update Profile Picture -->
+                <div onclick="document.getElementById('profileInput').click()"
+                     style="display:flex;align-items:center;gap:14px;
+                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:12px;padding:16px;cursor:pointer;
+                            transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='#1b1b1b'">
+                    <div style="width:40px;height:40px;border-radius:10px;
+                                background:rgba(79,209,197,0.1);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#e2e8f0;font-weight:700;font-size:14px;">Update Profile Picture</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Upload a new photo</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+                <!-- Remove Profile Picture -->
+                <div onclick="removeLearnerProfilePicture()"
+                     style="display:flex;align-items:center;gap:14px;
+                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:12px;padding:16px;cursor:pointer;
+                            transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='#1b1b1b'">
+                    <div style="width:40px;height:40px;border-radius:10px;
+                                background:rgba(248,81,73,0.1);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#f85149;font-weight:700;font-size:14px;">Remove Profile Picture</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Revert to initials avatar</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+                <!-- Sync Notifications -->
+                <div onclick="requestIphonePush()"
+                     style="display:flex;align-items:center;gap:14px;
+                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:12px;padding:16px;cursor:pointer;
+                            transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='#1b1b1b'">
+                    <div style="width:40px;height:40px;border-radius:10px;
+                                background:rgba(79,209,197,0.1);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#e2e8f0;font-weight:700;font-size:14px;">Sync Notifications</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+                <!-- Sign Out -->
+                <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
+                     style="display:flex;align-items:center;gap:14px;
+                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:12px;padding:16px;cursor:pointer;
+                            margin-top:8px;transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='#1b1b1b'">
+                    <div style="width:40px;height:40px;border-radius:10px;
+                                background:rgba(248,81,73,0.1);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#f85149;font-weight:700;font-size:14px;">Sign Out</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+            </div>
+        </div>`;
+};
+document.getElementById("settingsBtn")?.addEventListener('click', function() {
+    loadLearnerSettings();
+    if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
+});
+
+window.removeLearnerProfilePicture = function() {
+    if (!confirm('Remove your profile picture?')) return;
+    fetch('upload_profile.php', {
+        method: 'POST',
+        body: new URLSearchParams({ remove: '1' })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const initials = '<?= htmlspecialchars($initials) ?>';
+            if (typeof window.resetAvatarUI === 'function') {
+                window.resetAvatarUI(initials);
+            }
+        } else {
+            alert(data.error || 'Failed to remove picture');
+        }
+    })
+    .catch(() => alert('Connection error'));
+};
 
    const avatarWrapper = document.querySelector(".profile-picture-wrapper");
 const profileInput = document.getElementById("profileInput");
