@@ -1,5 +1,6 @@
 /* assets/js/quiz.js */
 window.learnerQuizCache = null; 
+window.quizInstructionsCache = {};
 const formatQuizDate = (dateStr) => {
     if (!dateStr) return "TBD";
     const date = new Date(dateStr.replace(/-/g, "/"));
@@ -67,12 +68,21 @@ window.loadQuizInstructions = async function(quizId) {
     const apiArea = document.getElementById('api-content-area');
     const loader = document.getElementById("loaderOverlay");
 
-    // 1. DETAIL MODE: Hides Bottom Nav, Hides Sidebar Toggle, Shows Back Button
+  // Check cache FIRST before showing loader
+if (window.quizInstructionsCache[quizId]) {
     if (typeof window.configureHeader === 'function') {
         window.configureHeader({ title: 'Instructions', mode: 'detail' });
     }
+    apiArea.innerHTML = window.quizInstructionsCache[quizId];
+    if (loader) loader.style.display = 'none';
+    return;
+}
 
-    if (loader) loader.style.display = 'flex';
+// Only reach here if NOT cached
+if (typeof window.configureHeader === 'function') {
+    window.configureHeader({ title: 'Instructions', mode: 'detail' });
+}
+if (loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch(`api/learner/get_quiz_instructions.php?quiz_id=${quizId}`);
@@ -122,7 +132,10 @@ window.loadQuizInstructions = async function(quizId) {
                 </form>
             </div>
         `;
-
+         // Only cache if NOT a continuing attempt (status could change)
+if (!data.isContinuing) {
+    window.quizInstructionsCache[quizId] = apiArea.innerHTML;
+}
     } catch (err) {
         apiArea.innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
     } finally {
