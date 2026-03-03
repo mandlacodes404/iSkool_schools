@@ -1815,6 +1815,7 @@ window.removeLearnerProfilePicture = function() {
             if (typeof window.resetAvatarUI === 'function') {
                 window.resetAvatarUI(initials);
             }
+             loadLearnerSettings(); // ← ADDED
         } else {
             alert(data.error || 'Failed to remove picture');
         }
@@ -1879,6 +1880,7 @@ if (avatarWrapper && profileInput) {
                     // Swap blob preview with real permanent server URL
                     const serverUrl = "uploads/learners/" + data.file + "?t=" + Date.now();
                     window.updateAvatarUI(serverUrl);
+                     loadLearnerSettings(); // ← ADDED
                 } else {
                     alert(data.error || "Upload failed");
                 }

@@ -874,6 +874,7 @@ document.getElementById('topNavProfileInput').addEventListener('change', functio
             if (d.success) {
                 const url = 'uploads/teachers/' + d.file + '?t=' + Date.now();
                 updateAllAvatars(url);
+                loadTeacherSettings(); // ← ADDED
             } else {
                 alert(d.error || 'Upload failed');
             }
@@ -1051,6 +1052,7 @@ window.removeTeacherProfilePicture = function() {
                     wrapper.insertBefore(div, wrapper.querySelector('#teacherProfileInput'));
                 }
             }
+            loadTeacherSettings();
         } else {
             alert(data.error || 'Failed to remove picture');
         }
