@@ -479,6 +479,41 @@ function dateLabel(string $dateStr): string {
             cursor: pointer; display: flex; align-items: center; gap: 8px;
             font-family: 'Nunito', sans-serif;
         }
+
+        /* ── TYPING INDICATOR ── */
+.typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 2px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    min-height: 24px;
+}
+.typing-indicator.visible { display: flex; }
+
+.typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: typingBounce 1.2s infinite ease-in-out;
+    display: inline-block;
+}
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30%            { transform: translateY(-5px); opacity: 1; }
+}
     </style>
 </head>
 <body>
@@ -741,6 +776,13 @@ function dateLabel(string $dateStr): string {
         <!-- ── COMPOSE AREA ── -->
         <?php if ($is_in_class): ?>
         <div class="compose-area">
+            <!-- Typing Indicator -->
+<div class="typing-indicator" id="typingIndicator">
+    <div class="typing-dots">
+        <span></span><span></span><span></span>
+    </div>
+    <span id="typingText">Someone is typing...</span>
+</div>
             <div id="replyPreview">
                 <span class="rp-label">Replying to:</span>
                 <span class="rp-text" id="previewText"></span>
@@ -1033,6 +1075,68 @@ function dateLabel(string $dateStr): string {
     window.onpopstate = function() {
         if (document.getElementById('mediaOverlay').style.display === 'flex') closeMedia();
     };
+
+    // ── TYPING INDICATOR ──
+let typingTimeout = null;
+let typingPollInterval = null;
+
+// Send typing signal to server
+function sendTypingSignal() {
+    fetch('api/set_typing.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `discussion_id=${DISC_ID}`
+    }).catch(() => {});
+}
+
+// Poll for others typing
+async function pollTyping() {
+    try {
+        const res = await fetch(`api/get_typing.php?discussion_id=${DISC_ID}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const indicator = document.getElementById('typingIndicator');
+        const typingText = document.getElementById('typingText');
+        if (!indicator) return;
+
+        if (data.count > 0) {
+            typingText.textContent = data.count === 1
+                ? 'Someone is typing...'
+                : `${data.count} people are typing...`;
+            indicator.classList.add('visible');
+        } else {
+            indicator.classList.remove('visible');
+        }
+    } catch (e) {}
+}
+
+// Attach typing listener to textarea
+const composeTextarea = document.getElementById('composeTextarea');
+if (composeTextarea) {
+    composeTextarea.addEventListener('input', function() {
+        // Send signal immediately on keypress
+        sendTypingSignal();
+
+        // Reset the stop-typing timer
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            // After 5s of no typing, just let it expire naturally on server
+        }, 5000);
+    });
+}
+
+// Start polling for others typing every 2 seconds
+typingPollInterval = setInterval(pollTyping, 2000);
+
+// Clean up on page hide
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        clearInterval(typingPollInterval);
+    } else {
+        pollTyping();
+        typingPollInterval = setInterval(pollTyping, 2000);
+    }
+});
 </script>
 </body>
 </html>
