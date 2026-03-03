@@ -909,14 +909,107 @@ function updateAllAvatars(url) {
     }
 }
 
+
 // ── SETTINGS LOADER ──
 window.loadTeacherSettings = function() {
-    const loader  = document.getElementById('loaderOverlay');
-    const iframe  = document.getElementById('mainFrame');
     const apiArea = document.getElementById('api-content-area');
-    if (loader)  loader.style.display  = 'flex';
-    if (iframe)  { iframe.style.display = 'block'; iframe.src = 'teacher_settings.php'; }
-    if (apiArea) apiArea.style.display  = 'none';
+    const iframe  = document.getElementById('mainFrame');
+
+    if (iframe)  iframe.style.display  = 'none';
+    if (apiArea) apiArea.style.display = 'block';
+
+    sessionStorage.setItem("lastTeacherPage", "teacher_settings");
+
+    apiArea.innerHTML = `
+        <div class="teacher-resources-header">
+            <h2 class="teacher-resources-title">Settings</h2>
+        </div>
+
+        <div style="max-width:440px;display:flex;flex-direction:column;gap:12px;">
+
+            <div class="teacher-resource-card" onclick="triggerTopNavUpload()" style="cursor:pointer;gap:14px;">
+                <div class="teacher-resource-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <div class="teacher-resource-info">
+                    <div class="teacher-resource-name">Update Profile Picture</div>
+                    <div class="teacher-resource-meta">Upload a new photo</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+
+            <div class="teacher-resource-card" onclick="removeTeacherProfilePicture()" style="cursor:pointer;gap:14px;">
+                <div class="teacher-resource-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6M14 11v6"></path>
+                    </svg>
+                </div>
+                <div class="teacher-resource-info">
+                    <div class="teacher-resource-name" style="color:#f85149;">Remove Profile Picture</div>
+                    <div class="teacher-resource-meta">Revert to initials avatar</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+
+            <div class="teacher-resource-card" onclick="window.location.href='logout.php'" style="cursor:pointer;gap:14px;margin-top:8px;">
+                <div class="teacher-resource-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="teacher-resource-info">
+                    <div class="teacher-resource-name" style="color:#f85149;">Sign Out</div>
+                    <div class="teacher-resource-meta">Log out of your account</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+
+        </div>`;
+};
+
+window.removeTeacherProfilePicture = function() {
+    if (!confirm('Remove your profile picture?')) return;
+    fetch('upload_profile.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'remove=1'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const initials = '<?= htmlspecialchars($teacherInitials) ?>';
+            const topNav = document.getElementById('topNavAvatar');
+            if (topNav) topNav.innerHTML = `<span class="initials-sm">${initials}</span>`;
+            const wrapper = document.querySelector('.sidebar .profile-picture-wrapper');
+            if (wrapper) {
+                const img = wrapper.querySelector('img.teacher-avatar');
+                if (img) img.remove();
+                if (!wrapper.querySelector('.initials-avatar')) {
+                    const div = document.createElement('div');
+                    div.className = 'initials-avatar teacher-avatar';
+                    div.textContent = initials;
+                    wrapper.insertBefore(div, wrapper.querySelector('#teacherProfileInput'));
+                }
+            }
+        } else {
+            alert(data.error || 'Failed to remove picture');
+        }
+    })
+    .catch(() => alert('Connection error'));
 };
 
 // ── TEACHER NAVIGATION SEARCH ──
