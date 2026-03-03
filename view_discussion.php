@@ -480,27 +480,27 @@ function dateLabel(string $dateStr): string {
             font-family: 'Nunito', sans-serif;
         }
 
-        /* ── TYPING INDICATOR ── */
+/* ── TYPING INDICATOR ── */
 .typing-indicator {
     display: none;
     align-items: center;
-    gap: 8px;
-    padding: 6px 0 2px 0;
-    font-size: 12px;
+    gap: 10px;
+    padding: 8px 0 4px 0;
+    font-size: 14px;
     color: var(--text-muted);
-    font-weight: 600;
-    min-height: 24px;
+    font-weight: 700;
+    min-height: 32px;
 }
 .typing-indicator.visible { display: flex; }
 
 .typing-dots {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 5px;
 }
 .typing-dots span {
-    width: 6px;
-    height: 6px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     background: var(--accent);
     animation: typingBounce 1.2s infinite ease-in-out;
@@ -512,7 +512,7 @@ function dateLabel(string $dateStr): string {
 
 @keyframes typingBounce {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30%            { transform: translateY(-5px); opacity: 1; }
+    30%            { transform: translateY(-6px); opacity: 1; }
 }
     </style>
 </head>
@@ -805,10 +805,10 @@ function dateLabel(string $dateStr): string {
                         </label>
                         <label class="tool-btn anon-btn anon-on" id="anonLabel" title="Post anonymously">
                             <input type="checkbox" name="anonymous" id="anon" checked onchange="toggleAnonStyle(this)">
-                            <i class="fas fa-user-secret"></i> Anon
+                            <i class="fas fa-user-secret"></i> Anonymous
                         </label>
                         <div class="spacer"></div>
-                        <button type="submit" class="post-btn"><i class="fas fa-paper-plane"></i> Post Reply</button>
+                        <button type="submit" class="post-btn"><i class="fas fa-paper-plane"></i> Reply</button>
                     </div>
                 </div>
             </form>
