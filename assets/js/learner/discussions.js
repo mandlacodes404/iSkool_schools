@@ -442,7 +442,7 @@ async function pollTyping(discId) {
 // Poll new replies
 async function pollNewReplies(discId) {
     try {
-        const res  = await fetch(`api/get_new_replies.php?discussion_id=${discId}&after_id=${lastReplyId}`);
+        const res  = await fetch(`api/learner/get_new_replies.php?discussion_id=${discId}&after_id=${lastReplyId}`);
         if (!res.ok) return;
         const rows = await res.json();
         if (!Array.isArray(rows) || rows.length === 0) return;
