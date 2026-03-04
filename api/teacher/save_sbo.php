@@ -96,13 +96,15 @@ $learnersStmt->execute();
 $learners = $learnersStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $learnersStmt->close();
 
+$cleanBaseUrl = rtrim(BASE_URL, '/');
+
 foreach ($learners as $learner) {
     sendPushToUser(
         $conn,
         $learner['student_email'],
         "📚 Term {$term} Syllabus — {$className}",
         "Term {$term} syllabus has been posted for {$subject} by {$teacherName}",
-        'learner_dashboard.php'
+        $cleanBaseUrl . '/learner_dashboard.php?page=syllabus'
     );
 }
 
