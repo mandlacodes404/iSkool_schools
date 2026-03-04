@@ -1474,6 +1474,8 @@ document.addEventListener("DOMContentLoaded", function () {
         window.fetchQuizzes();
     } else if (targetPage === 'assignment_list.php') {
         window.fetchAssignments();
+    } else if (targetPage === 'evaluation_list.php') {
+        window.fetchEvaluations();
     } else if (targetPage === 'resource_list.php') {
         window.fetchResources();
     } else if (targetPage === 'grades') {
@@ -1501,7 +1503,7 @@ document.addEventListener("DOMContentLoaded", function () {
          } else if (savedPage === 'syllabus') {
             window.fetchSyllabus();
         } else if (savedPage.includes("evaluation_list.php")) {
-            window.fetchAnnouncements();
+            window.fetchEvaluaions();
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
