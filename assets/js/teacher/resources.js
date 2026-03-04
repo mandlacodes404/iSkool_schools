@@ -55,7 +55,7 @@ function renderTeacherResources(data) {
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No resources uploaded yet.</p>`;
         apiArea.innerHTML = html;
-        return;
+        
     }
 
     data.forEach(group => {
