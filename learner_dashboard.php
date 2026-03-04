@@ -1449,11 +1449,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const savedPage = sessionStorage.getItem("lastLearnerPage");
 
  if (targetPage) {
-    // 1. Priority: Notifications/Direct Links
     window.history.replaceState({}, document.title, window.location.pathname);
 
-    // Route API pages correctly instead of dumping into iframe
-    if (targetPage === 'announcement_list.php') {
+    if (targetPage === 'discussion') {
+        const discId = urlParams.get('id');
+        if (discId) {
+            window.loadDiscussionThread(discId);
+        } else {
+            window.fetchDiscussions();
+        }
+    } else if (targetPage === 'announcement_list.php') {
         window.fetchAnnouncements();
     } else if (targetPage === 'quiz_list.php') {
         window.fetchQuizzes();
@@ -1461,14 +1466,11 @@ document.addEventListener("DOMContentLoaded", function () {
         window.fetchAssignments();
     } else if (targetPage === 'resource_list.php') {
         window.fetchResources();
-    } else if (targetPage === 'discussion_list.php') {
-        window.fetchDiscussions();
     } else if (targetPage === 'grades') {
         window.fetchGrades();
     } else if (targetPage === 'syllabus') {
         window.fetchSyllabus();
     } else {
-        // Non-API pages (profile.php, etc.) still go into iframe
         if (apiArea) apiArea.style.display = 'none';
         iframe.style.display = 'block';
         iframe.src = targetPage;

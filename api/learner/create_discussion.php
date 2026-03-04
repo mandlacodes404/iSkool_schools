@@ -79,7 +79,7 @@ $dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
 $schoolName = ucwords(str_replace(['iskool_','_'], ['',''], $dbName));
 
 $cleanBaseUrl            = rtrim(BASE_URL, '/');
-$learnerDiscussionLink   = $cleanBaseUrl . '/learner_dashboard.php?page=discussions.php';
+$learnerDiscussionLink = $cleanBaseUrl . '/learner_dashboard.php?page=discussion&id=' . $disc_id;
 $teacherDiscussionLink   = $cleanBaseUrl . '/teacher_dashboard.php?page=discussions.php';
 
 $emailTemplate = function($recipientName, $recipientRole) use ($title, $message_text, $creator_display, $learnerDiscussionLink, $teacherDiscussionLink, $schoolName) {
