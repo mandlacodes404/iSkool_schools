@@ -1,6 +1,7 @@
 /* assets/js/learner/discussions.js */
 
 window.discussionCache     = null;
+window.discussionThreadCache = {};
 window.teacherListCache    = null;
 let discPollInterval       = null;
 let discTypingPollInterval = null;
@@ -137,10 +138,21 @@ function renderDiscussions(data) {
 // ─────────────────────────────────────────────
 window.loadDiscussionThread = async function(discId) {
     stopDiscPolling();
+    window._inDiscussionThread = true;
     if (window.configureHeader) window.configureHeader({ title: 'Discussion', mode: 'detail' });
 
     const apiArea = document.getElementById('api-content-area');
     const loader  = document.getElementById('loaderOverlay');
+
+    // Use cache if available
+    if (window.discussionThreadCache[discId]) {
+        renderThread(window.discussionThreadCache[discId]);
+        currentDiscId = discId;
+        discPollInterval       = setInterval(() => pollNewReplies(discId), 4000);
+        discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
+        return;
+    }
+
     if (loader) loader.style.display = 'flex';
 
     try {
@@ -149,6 +161,7 @@ window.loadDiscussionThread = async function(discId) {
         if (data.error) throw new Error(data.error);
 
         renderThread(data);
+        window.discussionThreadCache[discId] = data; // cache it
         currentDiscId = discId;
 
         // Start polling for new replies + typing
