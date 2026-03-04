@@ -80,6 +80,7 @@ window.fetchDiscussions = async function() {
     } finally {
         if (loader) loader.style.display = 'none';
          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        
     }
 };
 
@@ -166,15 +167,19 @@ function renderThread(data) {
 
     if (window.configureHeader) window.configureHeader({ title: escHtml(disc.title), mode: 'detail' });
 
+    // Track date separators
     let lastDate = null;
 
     function maybeDate(dateStr) {
-        const key = getDateKey(dateStr);
+        const key   = getDateKey(dateStr);
+        const label = getDateLabel(dateStr);
         if (key === lastDate) return '';
         lastDate = key;
-        return `<div class="date-separator"><span>${getDateLabel(dateStr)}</span></div>`;
+        return `<div class="disc-date-sep"><span>${label}</span></div>`;
     }
 
+    // Build OP card
+    const opInitial = disc.creator_display.charAt(0).toUpperCase();
     let postsHtml = maybeDate(disc.created_at);
     postsHtml += buildPostCard({
         id: 0,
@@ -190,12 +195,14 @@ function renderThread(data) {
         is_op: true,
     }, user_role, is_in_class, disc.id);
 
-    replies.forEach((r) => {
+    // Build reply cards
+    replies.forEach((r, i) => {
         postsHtml += maybeDate(r.created_at);
         postsHtml += buildPostCard(r, user_role, is_in_class, disc.id);
     });
 
-    lastReplyId     = replies.length > 0 ? replies[replies.length - 1].id : 0;
+    // Track last reply id for polling
+    lastReplyId    = replies.length > 0 ? replies[replies.length - 1].id : 0;
     lastSeenDateKey = replies.length > 0
         ? getDateKey(replies[replies.length - 1].created_at)
         : getDateKey(disc.created_at);
@@ -204,275 +211,67 @@ function renderThread(data) {
 
     apiArea.innerHTML = `
         <style>
-            :root {
-                --bg:           #0d1117;
-                --surface:      #1a1919;
-                --surface-2:    #222222;
-                --border:       rgba(255,255,255,0.07);
-                --border-hover: rgba(79,209,197,0.3);
-                --text:         #e2e8f0;
-                --text-muted:   #8b949e;
-                --accent:       #4fd1c5;
-                --accent-dim:   rgba(79,209,197,0.08);
-                --my-line:      #4fd1c5;
-                --danger:       #f85149;
-                --radius:       14px;
-                --radius-sm:    8px;
-            }
-
-            .disc-thread-wrap {
-                display: flex;
-                flex-direction: column;
-                height: calc(100vh - 120px);
-                max-width: 960px;
-                margin: 0 auto;
-                padding: 0 20px;
-                box-sizing: border-box;
-            }
-            @media (max-width: 768px) {
-                .disc-thread-wrap { padding: 0; height: calc(100vh - 110px); }
-            }
-
-            /* Topic header */
-            .topic-header {
-                padding: 24px 0 16px 0;
-                border-bottom: 1px solid var(--border);
-                flex-shrink: 0;
-            }
-            .topic-header .class-badge {
-                display: inline-flex; align-items: center; gap: 6px;
-                background: var(--accent-dim); border: 1px solid rgba(79,209,197,0.2);
-                color: var(--accent); font-size: 11px; font-weight: 700;
-                padding: 3px 10px; border-radius: 20px;
-                text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
-            }
-            .topic-header h1 { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.3; }
-            .topic-header .meta {
-                margin-top: 6px; font-size: 12px; color: var(--text-muted);
-                display: flex; align-items: center; gap: 12px;
-            }
-            .reply-count-pill {
-                background: var(--surface-2); border: 1px solid var(--border);
-                padding: 2px 8px; border-radius: 20px; font-size: 11px; color: var(--text-muted);
-            }
-            @media (max-width: 768px) { .topic-header { display: none; } }
-
-            /* Scroll area */
-            .posts-scroll {
-                flex: 1; overflow-y: auto; padding: 20px 0;
-                display: flex; flex-direction: column; gap: 2px;
-                scrollbar-width: thin; scrollbar-color: var(--surface-2) transparent;
-            }
-            .posts-scroll::-webkit-scrollbar { width: 4px; }
-            .posts-scroll::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
-            @media (max-width: 768px) { .posts-scroll { padding: 12px; gap: 4px; } }
-
-            /* Date separator */
-            .date-separator {
-                display: flex; align-items: center; gap: 12px;
-                margin: 16px 0 10px 0; color: var(--text-muted);
-                font-size: 11px; font-weight: 700;
-                text-transform: uppercase; letter-spacing: 0.8px; flex-shrink: 0;
-            }
-            .date-separator::before,.date-separator::after {
-                content: ''; flex: 1; height: 1px; background: var(--border);
-            }
-
-            /* Post card */
-            .post-card {
-                background: var(--surface); border: 1px solid var(--border);
-                border-radius: var(--radius); padding: 16px 18px;
-                transition: border-color 0.2s; position: relative;
-                border-left: 3px solid transparent;
-                animation: fadeUp 0.3s ease both;
-            }
-            .post-card:hover { border-color: rgba(255,255,255,0.1); }
-            .post-card.is-op { background: rgba(79,209,197,0.04); border-color: rgba(79,209,197,0.15); border-left-color: var(--accent); }
-            .post-card.is-me { border-left-color: var(--my-line); }
-            @keyframes fadeUp {
-                from { opacity: 0; transform: translateY(8px); }
-                to   { opacity: 1; transform: translateY(0); }
-            }
-
-            /* Post header */
-            .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-            .post-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
-            .post-avatar-placeholder {
-                width: 32px; height: 32px; border-radius: 50%;
-                background: var(--surface-2); border: 2px solid var(--border);
-                display: flex; align-items: center; justify-content: center;
-                font-size: 12px; font-weight: 800; color: var(--text-muted);
-                flex-shrink: 0; text-transform: uppercase;
-            }
-            .post-meta { flex: 1; min-width: 0; }
-            .post-author { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
-            .op-tag, .me-tag {
-                font-size: 10px; font-weight: 700; padding: 1px 6px;
-                border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px;
-            }
-            .op-tag { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
-            .me-tag { background: rgba(79,209,197,0.1); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); }
-            .post-time { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-
-            /* Reply quote */
-            .reply-quote {
-                background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent);
-                border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-                padding: 8px 12px; margin-bottom: 10px; font-size: 12px; color: var(--text-muted);
-            }
-            .reply-quote .quote-author { color: var(--accent); font-weight: 700; margin-bottom: 2px; font-size: 11px; }
-            .reply-quote .quote-text {
-                line-height: 1.4; overflow: hidden;
-                display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            }
-
-            /* Post body */
-            .post-body { font-size: 14px; line-height: 1.65; color: var(--text); word-wrap: break-word; white-space: pre-wrap; }
-
-            /* Attachment */
-            .post-attachment {
-                margin-top: 12px; border-radius: var(--radius-sm);
-                overflow: hidden; border: 1px solid var(--border);
-                display: inline-block; max-width: 280px;
-            }
-            .post-attachment img { width: 100%; display: block; cursor: zoom-in; transition: opacity 0.2s; }
-            .post-attachment img:hover { opacity: 0.9; }
-            .post-attachment .pdf-link {
-                display: flex; align-items: center; gap: 10px;
-                padding: 12px 16px; background: rgba(79,209,197,0.06);
-                color: var(--accent); cursor: pointer; font-size: 13px; font-weight: 600;
-            }
-            .post-attachment .pdf-link:hover { background: rgba(79,209,197,0.12); }
-
-            /* Post footer */
-            .post-footer {
-                display: flex; align-items: center; gap: 4px;
-                margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
-            }
-            .action-btn {
-                background: none; border: none; color: var(--text-muted);
-                font-size: 12px; font-weight: 600; cursor: pointer;
-                padding: 4px 10px; border-radius: 6px;
-                display: flex; align-items: center; gap: 5px;
-                font-family: 'Nunito', sans-serif; transition: background 0.15s, color 0.15s;
-            }
-            .action-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-            .action-btn.reply-btn:hover { color: var(--accent); }
-            .action-btn.report-btn:hover { color: var(--danger); }
-
+            .disc-thread-wrap { display:flex; flex-direction:column; height:calc(100vh - 120px); }
+            .disc-thread-header { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
+            .disc-thread-header .class-badge { display:inline-flex;align-items:center;gap:6px;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);color:#4fd1c5;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px; }
+            .disc-thread-header h2 { font-size:17px;font-weight:800;color:#e2e8f0;margin:0;line-height:1.3; }
+            .disc-thread-header .meta { font-size:12px;color:#8b949e;margin-top:4px; }
+            .disc-posts-scroll { flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:#1b1b1b transparent; }
+            .disc-date-sep { display:flex;align-items:center;gap:12px;margin:14px 0 8px;color:#8b949e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px; }
+            .disc-date-sep::before,.disc-date-sep::after { content:'';flex:1;height:1px;background:rgba(255,255,255,0.07); }
+            .disc-post-card { background:#1a1919;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;border-left:3px solid transparent;animation:discFadeUp 0.3s ease both; }
+            .disc-post-card.is-op { background:rgba(79,209,197,0.03);border-color:rgba(79,209,197,0.15);border-left-color:#4fd1c5; }
+            .disc-post-card.is-me { border-left-color:#4fd1c5; }
+            @keyframes discFadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+            .disc-post-header { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+            .disc-avatar { width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.1);flex-shrink:0; }
+            .disc-avatar-ph { width:30px;height:30px;border-radius:50%;background:#222;border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#8b949e;flex-shrink:0;text-transform:uppercase; }
+            .disc-author { font-size:13px;font-weight:700;color:#e2e8f0;display:flex;align-items:center;gap:6px; }
+            .disc-time { font-size:11px;color:#8b949e;margin-top:1px; }
+            .disc-tag { font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase; }
+            .disc-tag.op { background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid rgba(79,209,197,0.2); }
+            .disc-tag.me { background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid rgba(79,209,197,0.2); }
+            .disc-quote { background:rgba(255,255,255,0.03);border-left:3px solid #4fd1c5;border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#8b949e; }
+            .disc-quote-author { color:#4fd1c5;font-weight:700;margin-bottom:2px;font-size:11px; }
+            .disc-body { font-size:14px;line-height:1.65;color:#e2e8f0;word-wrap:break-word;white-space:pre-wrap; }
+            .disc-attachment { margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);display:inline-block;max-width:260px; }
+            .disc-attachment img { width:100%;display:block;cursor:zoom-in; }
+            .disc-pdf-link { display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(79,209,197,0.06);color:#4fd1c5;cursor:pointer;font-size:13px;font-weight:600; }
+            .disc-footer { display:flex;align-items:center;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06); }
+            .disc-action-btn { background:none;border:none;color:#8b949e;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;transition:0.15s; }
+            .disc-action-btn:hover { background:rgba(255,255,255,0.05);color:#e2e8f0; }
+            .disc-action-btn.reply:hover { color:#4fd1c5; }
+            .disc-action-btn.report:hover { color:#f85149; }
             /* Compose */
-            .compose-area { flex-shrink: 0; padding: 16px 0 20px 0; border-top: 1px solid var(--border); }
-            @media (max-width: 768px) { .compose-area { padding: 12px; } }
-
-            #discReplyPreview {
-                display: none; background: var(--accent-dim);
-                border: 1px solid rgba(79,209,197,0.2); border-radius: var(--radius-sm);
-                padding: 8px 12px; margin-bottom: 10px;
-                font-size: 12px; color: var(--text-muted);
-                align-items: center; gap: 8px;
-            }
-            #discReplyPreview.show { display: flex; }
-            #discReplyPreview .rp-label { color: var(--accent); font-weight: 700; flex-shrink: 0; }
-            #discReplyPreview .rp-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            #discReplyPreview .cancel-reply {
-                background: none; border: none; color: var(--danger);
-                cursor: pointer; font-size: 16px; line-height: 1; flex-shrink: 0; padding: 0 4px;
-            }
-
-            #discFilePreview {
-                display: none; align-items: center; gap: 8px;
-                background: var(--surface-2); border: 1px solid var(--border);
-                border-radius: var(--radius-sm); padding: 8px 12px;
-                margin-bottom: 10px; font-size: 12px; color: var(--text-muted);
-            }
-            #discFilePreview.show { display: flex; }
-            #discFilePreview img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; }
-            #discFilePreview .clear-file { background: none; border: none; color: var(--danger); cursor: pointer; margin-left: auto; font-size: 16px; }
-
-            .compose-box {
-                background: var(--surface); border: 1px solid var(--border);
-                border-radius: var(--radius); transition: border-color 0.2s; overflow: hidden;
-            }
-            .compose-box:focus-within { border-color: rgba(79,209,197,0.4); }
-            .compose-box textarea {
-                width: 100%; background: transparent; border: none; color: var(--text);
-                font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
-                padding: 14px 16px 8px 16px; resize: none; outline: none;
-                min-height: 48px; max-height: 140px; line-height: 1.5; box-sizing: border-box;
-            }
-            .compose-box textarea::placeholder { color: var(--text-muted); }
-            .compose-toolbar {
-                display: flex; align-items: center; gap: 4px;
-                padding: 8px 12px; border-top: 1px solid var(--border);
-            }
-            .tool-btn {
-                background: none; border: none; color: var(--text-muted);
-                cursor: pointer; padding: 6px 8px; border-radius: 6px;
-                transition: background 0.15s, color 0.15s;
-                display: flex; align-items: center; gap: 5px;
-                font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
-            }
-            .tool-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-            .tool-btn.anon-btn { color: var(--text-muted); }
-            .tool-btn.anon-btn.anon-on { color: var(--accent); }
-            .spacer { flex: 1; }
-            .post-btn {
-                background: var(--accent); color: #0d1117; border: none;
-                padding: 8px 18px; border-radius: 8px;
-                font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-                cursor: pointer; display: flex; align-items: center; gap: 6px;
-                transition: background 0.2s, transform 0.1s;
-            }
-            .post-btn:hover { background: #38b2ac; }
-            .post-btn:active { transform: scale(0.97); }
-            .post-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-            /* Typing indicator */
-            .typing-indicator {
-                display: none; align-items: center; gap: 10px;
-                padding: 8px 0 4px 0; font-size: 14px;
-                color: var(--text-muted); font-weight: 700; min-height: 32px;
-            }
-            .typing-indicator.visible { display: flex; }
-            .typing-dots { display: flex; align-items: center; gap: 5px; }
-            .typing-dots span {
-                width: 9px; height: 9px; border-radius: 50%;
-                background: var(--accent); display: inline-block;
-                animation: typingBounce 1.2s infinite ease-in-out;
-            }
-            .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-            .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-            @keyframes typingBounce {
-                0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-                30%          { transform: translateY(-6px); opacity: 1; }
-            }
-
-            /* New message banner */
-            #discNewMsgBanner {
-                position: sticky; bottom: 12px; left: 50%; transform: translateX(-50%);
-                background: var(--accent); color: #0d1117; border: none; border-radius: 20px;
-                padding: 8px 18px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px;
-                cursor: pointer; display: block; margin: 0 auto;
-                box-shadow: 0 4px 16px rgba(79,209,197,0.4); z-index: 50;
-            }
+            .disc-compose { flex-shrink:0;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.07); }
+            .disc-reply-preview { display:none;background:rgba(79,209,197,0.06);border:1px solid rgba(79,209,197,0.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#8b949e;align-items:center;gap:8px; }
+            .disc-reply-preview.show { display:flex; }
+            .disc-file-preview { display:none;align-items:center;gap:8px;background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#8b949e; }
+            .disc-file-preview.show { display:flex; }
+            .disc-file-preview img { width:32px;height:32px;object-fit:cover;border-radius:4px; }
+            .disc-compose-box { background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;transition:border-color 0.2s; }
+            .disc-compose-box:focus-within { border-color:rgba(79,209,197,0.4); }
+            .disc-compose-box textarea { width:100%;background:transparent;border:none;color:#e2e8f0;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;padding:12px 14px 8px;resize:none;outline:none;min-height:44px;max-height:120px;line-height:1.5;box-sizing:border-box; }
+            .disc-compose-box textarea::placeholder { color:#8b949e; }
+            .disc-toolbar { display:flex;align-items:center;gap:4px;padding:6px 10px;border-top:1px solid rgba(255,255,255,0.07); }
+            .disc-tool-btn { background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;transition:0.15s;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700; }
+            .disc-tool-btn:hover { background:rgba(255,255,255,0.06);color:#e2e8f0; }
+            .disc-tool-btn.anon-on { color:#4fd1c5; }
+            .disc-post-btn { background:#4fd1c5;color:#0d1117;border:none;padding:7px 16px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:auto;transition:0.2s; }
+            .disc-post-btn:hover { background:#38b2ac; }
+            /* Typing */
+            .disc-typing { display:none;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:#8b949e;font-weight:700;min-height:28px; }
+            .disc-typing.show { display:flex; }
+            .disc-typing-dots { display:flex;align-items:center;gap:4px; }
+            .disc-typing-dots span { width:8px;height:8px;border-radius:50%;background:#4fd1c5;animation:discTypeBounce 1.2s infinite ease-in-out;display:inline-block; }
+            .disc-typing-dots span:nth-child(2){animation-delay:0.2s}
+            .disc-typing-dots span:nth-child(3){animation-delay:0.4s}
+            @keyframes discTypeBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
         </style>
 
         <div class="disc-thread-wrap">
 
-            <!-- Desktop topic header -->
-            <div class="topic-header">
-                <div class="class-badge"><i class="fas fa-chalkboard"></i> ${escHtml(disc.class_name)}</div>
-                <h1>${escHtml(disc.title)}</h1>
-                <div class="meta">
-                    <span>${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}</span>
-                    <span class="reply-count-pill">
-                        <i class="fas fa-clock" style="margin-right:4px;"></i>
-                        Started ${new Date(disc.created_at.replace(' ','T')).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
-                    </span>
-                </div>
-            </div>
-
-            <div class="posts-scroll" id="discPostsScroll">
+            <div class="disc-posts-scroll" id="discPostsScroll">
                 ${postsHtml}
                 <div id="discBottom"></div>
             </div>
@@ -484,95 +283,96 @@ function renderThread(data) {
     const scroll = document.getElementById('discPostsScroll');
     if (scroll) scroll.scrollTop = scroll.scrollHeight;
 
+    // Wire up compose
     wireCompose(disc.id);
 }
 
 function buildPostCard(r, user_role, is_in_class, discId) {
-    const isOp       = r.is_op || false;
-    const isMe       = r.is_me == 1;
+    const isOp      = r.is_op || false;
+    const isMe      = r.is_me == 1;
     const showAvatar = !(r.replier_anonymous && user_role === 'learner');
     const initial    = (r.replier_display || '?').charAt(0).toUpperCase();
+    const picFolder  = 'uploads/learners/';
 
     const avatarHtml = showAvatar
-        ? `<img src="uploads/learners/${escHtml(r.profile_picture || 'default.png')}" class="post-avatar"
+        ? `<img src="${picFolder}${escHtml(r.profile_picture || 'default.png')}" class="disc-avatar"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-           <div class="post-avatar-placeholder" style="display:none;">${initial}</div>`
-        : `<div class="post-avatar-placeholder">?</div>`;
+           <div class="disc-avatar-ph" style="display:none;">${initial}</div>`
+        : `<div class="disc-avatar-ph">?</div>`;
 
-    const tags = (isOp ? `<span class="op-tag">OP</span>` : '') +
-                 (isMe ? `<span class="me-tag">You</span>` : '');
+    const tags = (isOp ? `<span class="disc-tag op">OP</span>` : '') +
+                 (isMe ? `<span class="disc-tag me">You</span>` : '');
 
     const quoteHtml = r.quote_author
-        ? `<div class="reply-quote">
-               <div class="quote-author">${escHtml(r.quote_author)}</div>
-               <div class="quote-text">${escHtml(r.quote_text || '')}${(r.quote_text||'').length >= 100 ? '…' : ''}</div>
+        ? `<div class="disc-quote">
+               <div class="disc-quote-author">${escHtml(r.quote_author)}</div>
+               <div>${escHtml(r.quote_text || '')}${(r.quote_text||'').length >= 100 ? '…' : ''}</div>
            </div>` : '';
 
     let attachHtml = '';
     if (r.attachment) {
-        const ext   = r.attachment.split('.').pop().toLowerCase();
-        const path  = 'uploads/discussions/' + r.attachment;
-        const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
-        attachHtml  = `<div class="post-attachment">` + (isImg
-            ? `<img src="${path}" alt="Attachment" onclick="discOpenMedia('${path}','image')">`
-            : `<div class="pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf fa-lg"></i><span>Open PDF Document</span></div>`)
+        const ext    = r.attachment.split('.').pop().toLowerCase();
+        const path   = 'uploads/discussions/' + r.attachment;
+        const isImg  = ['jpg','jpeg','png','gif','webp'].includes(ext);
+        attachHtml   = `<div class="disc-attachment">` + (isImg
+            ? `<img src="${path}" onclick="discOpenMedia('${path}','image')">`
+            : `<div class="disc-pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf"></i> Open PDF</div>`)
             + `</div>`;
     }
 
-    const replyBtn  = is_in_class
-        ? `<button class="action-btn reply-btn" onclick="discSetReply(${r.id || 0},'${escHtml(r.replier_display)}','${escHtml((r.message||'').substring(0,100))}')"><i class="fas fa-reply"></i> Reply</button>`
+    const replyBtn  = is_in_class && r.id !== undefined
+        ? `<button class="disc-action-btn reply" onclick="discSetReply(${r.id || 0},'${escHtml(r.replier_display)}','${escHtml((r.message||'').substring(0,80))}')"><i class="fas fa-reply"></i> Reply</button>`
         : '';
     const reportBtn = user_role === 'learner' && !isMe && r.id
-        ? `<button class="action-btn report-btn" onclick="discShowReport(${r.id},${discId})"><i class="fas fa-flag"></i> Report</button>`
+        ? `<button class="disc-action-btn report" onclick="discShowReport(${r.id},${discId})"><i class="fas fa-flag"></i> Report</button>`
         : '';
 
     return `
-        <div class="post-card ${isOp ? 'is-op' : ''} ${isMe ? 'is-me' : ''}" data-id="${r.id || 0}" style="animation:fadeUp 0.3s ease both;">
-            <div class="post-header">
+        <div class="disc-post-card ${isOp?'is-op':''} ${isMe?'is-me':''}" data-id="${r.id || 0}">
+            <div class="disc-post-header">
                 ${avatarHtml}
-                <div class="post-meta">
-                    <div class="post-author">${escHtml(r.replier_display)} ${tags}</div>
-                    <div class="post-time">${formatTime(r.created_at)}</div>
+                <div>
+                    <div class="disc-author">${escHtml(r.replier_display)} ${tags}</div>
+                    <div class="disc-time">${formatTime(r.created_at)}</div>
                 </div>
             </div>
             ${quoteHtml}
-            <div class="post-body">${escHtml(r.message || '')}</div>
+            <div class="disc-body">${escHtml(r.message || '')}</div>
             ${attachHtml}
-            <div class="post-footer">${replyBtn}${reportBtn}</div>
+            <div class="disc-footer">${replyBtn}${reportBtn}</div>
         </div>`;
 }
 
 function buildCompose(discId) {
     return `
-        <div class="compose-area">
-            <div class="typing-indicator" id="discTypingIndicator">
-                <div class="typing-dots"><span></span><span></span><span></span></div>
+        <div class="disc-compose">
+            <div class="disc-typing" id="discTypingIndicator">
+                <div class="disc-typing-dots"><span></span><span></span><span></span></div>
                 <span id="discTypingText">Someone is typing...</span>
             </div>
-            <div id="discReplyPreview">
-                <span class="rp-label">Replying to:</span>
-                <span class="rp-text" id="discPreviewText"></span>
-                <button class="cancel-reply" onclick="discCancelReply()" type="button">✕</button>
+            <div class="disc-reply-preview" id="discReplyPreview">
+                <span style="color:#4fd1c5;font-weight:700;flex-shrink:0;">Replying to:</span>
+                <span id="discPreviewText" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                <button onclick="discCancelReply()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
             </div>
-            <div id="discFilePreview">
-                <img id="discPreviewImg" src="" alt="Preview" style="display:none;">
+            <div class="disc-file-preview" id="discFilePreview">
+                <img id="discPreviewImg" src="" style="display:none;">
                 <span id="discFileName"></span>
-                <button class="clear-file" type="button" onclick="discClearFile()">✕</button>
+                <button onclick="discClearFile()" style="background:none;border:none;color:#f85149;cursor:pointer;margin-left:auto;font-size:16px;">✕</button>
             </div>
-            <div class="compose-box">
-                <textarea id="discTextarea" rows="1" placeholder="Add to the discussion…"></textarea>
-                <div class="compose-toolbar">
-                    <label class="tool-btn" title="Attach image or PDF">
+            <div class="disc-compose-box">
+                <textarea id="discTextarea" placeholder="Add to the discussion…" rows="1"></textarea>
+                <div class="disc-toolbar">
+                    <label class="disc-tool-btn" title="Attach file">
                         <i class="fas fa-paperclip"></i>
                         <input type="file" id="discFileInput" accept="image/*,.pdf" style="display:none;">
                     </label>
-                    <label class="tool-btn anon-btn anon-on" id="discAnonLabel" title="Post anonymously">
+                    <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
                         <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
-                        <i class="fas fa-user-secret"></i> Anonymous
+                        <i class="fas fa-user-secret"></i> Anon
                     </label>
-                    <div class="spacer"></div>
-                    <button class="post-btn" id="discPostBtn" onclick="discSubmitReply(${discId})">
-                        <i class="fas fa-paper-plane"></i> Reply
+                    <button class="disc-post-btn" onclick="discSubmitReply(${discId})">
+                        <i class="fas fa-paper-plane"></i> Post
                     </button>
                 </div>
             </div>

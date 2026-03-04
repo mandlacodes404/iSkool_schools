@@ -2122,6 +2122,14 @@ window.handleHeaderBack = function() {
         }
     } 
 
+    // 4. DISCUSSIONS: If coming back from a discussion thread
+if (currentTitle === 'Discussion') {
+    if (typeof fetchDiscussions === 'function') {
+        window.fetchDiscussions();
+        return;
+    }
+}
+
     // 4. GENERAL FALLBACK: Return to Home/Manual
     const apiArea = document.getElementById('api-content-area');
     if (apiArea) apiArea.style.display = 'block'; // Show API
@@ -2335,7 +2343,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/announcements.js?v=1.4"></script>
 <script src="assets/js/learner/grades.js?v=1.2"></script>
 <script src="assets/js/learner/evaluations.js?v=1.1"></script>
-<script src="assets/js/learner/discussions.js?v=1.7"></script>
+<script src="assets/js/learner/discussions.js?v=1.8"></script>
 <script src="assets/js/learner/syllabus.js?v=1.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
