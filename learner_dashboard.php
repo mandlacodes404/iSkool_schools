@@ -2130,6 +2130,13 @@ if (currentTitle === 'Discussion') {
     }
 }
 
+if (currentTitle === 'Review') {
+    if (typeof fetchGrades === 'function') {
+        window.fetchGrades();
+        return;
+    }
+}
+
     // 4. GENERAL FALLBACK: Return to Home/Manual
     const apiArea = document.getElementById('api-content-area');
     if (apiArea) apiArea.style.display = 'block'; // Show API
@@ -2341,7 +2348,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/assignments.js?v=2.2"></script>
 <script src="assets/js/learner/resources.js?v=2.0"></script>
 <script src="assets/js/learner/announcements.js?v=1.4"></script>
-<script src="assets/js/learner/grades.js?v=1.2"></script>
+<script src="assets/js/learner/grades.js?v=1.3"></script>
 <script src="assets/js/learner/evaluations.js?v=1.1"></script>
 <script src="assets/js/learner/discussions.js?v=2.2"></script>
 <script src="assets/js/learner/syllabus.js?v=1.0"></script>

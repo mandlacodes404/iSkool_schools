@@ -718,9 +718,9 @@ function buildQuizList(quizzes, gi) {
         const pct        = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
         const pillClass  = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
         const pillText   = published ? `${pct}%` : 'Pending';
-        const titleHtml  = published
-            ? `<a href="review_quiz.php?result_id=${q.result_id}">${escHtml(q.quiz_title)}</a>`
-            : escHtml(q.quiz_title);
+       const titleHtml  = published
+    ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="openQuizReview(${q.result_id})">${escHtml(q.quiz_title)}</span>`
+    : escHtml(q.quiz_title);
 
         const summBadge = q.is_summative
             ? `<span class="summative-badge">
@@ -831,7 +831,7 @@ function buildTermTable(quizzes, selectedTerm) {
         return `<tr>
             <td>
                 ${escHtml(q.quiz_title)}
-                <a href="review_quiz.php?result_id=${q.result_id}" class="review-link">[R]</a>
+                
             </td>
             <td>${w.toFixed(1)}%</td>
             <td>${q.score}/${q.total}</td>
@@ -1030,3 +1030,14 @@ function formatDate(dateStr) {
         hour: 'numeric', minute: '2-digit'
     });
 }
+
+window.openQuizReview = function(resultId) {
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (window.configureHeader) window.configureHeader({ title: 'Review', mode: 'detail' });
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe)  {
+        iframe.style.display = 'block';
+        iframe.src = `review_quiz.php?result_id=${resultId}`;
+    }
+};
