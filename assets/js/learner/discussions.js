@@ -165,7 +165,6 @@ function renderThread(data) {
     const { discussion: disc, replies, user_role, is_in_class } = data;
     const apiArea = document.getElementById('api-content-area');
 
-    if (window.configureHeader) window.configureHeader({ title: escHtml(disc.title), mode: 'detail' });
 
     // Track date separators
     let lastDate = null;
