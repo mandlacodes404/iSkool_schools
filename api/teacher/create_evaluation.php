@@ -73,8 +73,7 @@ if (isset($_POST['statements']) && is_array($_POST['statements'])) {
 
 // Notify learners
 $cleanBaseUrl = rtrim(BASE_URL, '/');
-$evalLink     = $cleanBaseUrl . "/learner_dashboard.php?page=learner_evaluations.php";
-
+$evalLink = $cleanBaseUrl . "/learner_dashboard.php?page=evaluation_list.php";
 $learnersQuery = $conn->prepare("
     SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
     FROM users u

@@ -79,8 +79,7 @@ $stmt->close();
 
 // Notify learners
 $cleanBaseUrl = rtrim(BASE_URL, '/');
-$resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=view_resources_user.php";
-
+$resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=resource_list.php";
 $learnerStmt = $conn->prepare("
     SELECT u.email, u.name 
     FROM users u

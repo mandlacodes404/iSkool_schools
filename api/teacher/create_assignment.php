@@ -104,8 +104,7 @@ $formatted_due_date = date("l, F j, Y", strtotime($due_date));
 
 // Assignment link
 $cleanBaseUrl   = rtrim(BASE_URL, '/');
-$assignmentLink = $cleanBaseUrl . "/learner_dashboard.php?page=learner_assignments.php";
-
+$assignmentLink = $cleanBaseUrl . "/learner_dashboard.php?page=assignment_list.php";
 // Email body
 $emailBody = '
 <!DOCTYPE html>
