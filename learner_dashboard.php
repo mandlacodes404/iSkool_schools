@@ -1452,13 +1452,19 @@ document.addEventListener("DOMContentLoaded", function () {
     window.history.replaceState({}, document.title, window.location.pathname);
 
     if (targetPage === 'discussion') {
-        const discId = urlParams.get('id');
-        if (discId) {
+    const discId = urlParams.get('id');
+    if (discId) {
+        // Wait for all scripts to finish loading
+        setTimeout(() => {
             window.loadDiscussionThread(discId);
-        } else {
+        }, 100);
+    } else {
+        setTimeout(() => {
             window.fetchDiscussions();
-        }
-    } else if (targetPage === 'announcement_list.php') {
+        }, 100);
+    }
+}
+     else if (targetPage === 'announcement_list.php') {
         window.fetchAnnouncements();
     } else if (targetPage === 'quiz_list.php') {
         window.fetchQuizzes();
