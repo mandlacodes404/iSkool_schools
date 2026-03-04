@@ -79,6 +79,7 @@ window.fetchDiscussions = async function() {
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading discussions.</p>`;
     } finally {
         if (loader) loader.style.display = 'none';
+         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
