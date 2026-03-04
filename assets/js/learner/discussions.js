@@ -1,4 +1,5 @@
 /* assets/js/learner/discussions.js */
+
 window.discussionCache     = null;
 window.teacherListCache    = null;
 let discPollInterval       = null;
@@ -467,6 +468,11 @@ async function pollNewReplies(discId) {
         });
 
         if (atBottom) scroll.scrollTop = scroll.scrollHeight;
+        // Update reply count in cache directly (no reload needed)
+        if (window.discussionCache) {
+            const disc = window.discussionCache.find(d => d.id == discId);
+            if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + rows.length;
+        }
     } catch (e) {}
 }
 
@@ -522,7 +528,11 @@ window.discSubmitReply = async function(discId) {
         }
 
         // Bust cache so list shows updated reply count
-        window.discussionCache = null;
+       // Update reply count in cache directly (no reload needed)
+if (window.discussionCache) {
+    const disc = window.discussionCache.find(d => d.id == discId);
+    if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
+}
 
     } catch (e) {
         alert(e.message || 'Failed to post reply');
