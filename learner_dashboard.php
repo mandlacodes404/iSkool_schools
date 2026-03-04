@@ -1448,11 +1448,33 @@ document.addEventListener("DOMContentLoaded", function () {
     // UPDATE THIS LINE: Change localStorage to sessionStorage
     const savedPage = sessionStorage.getItem("lastLearnerPage");
 
-  if (targetPage) {
-        // 1. Priority: Notifications/Direct Links
+ if (targetPage) {
+    // 1. Priority: Notifications/Direct Links
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    // Route API pages correctly instead of dumping into iframe
+    if (targetPage === 'announcement_list.php') {
+        window.fetchAnnouncements();
+    } else if (targetPage === 'quiz_list.php') {
+        window.fetchQuizzes();
+    } else if (targetPage === 'assignment_list.php') {
+        window.fetchAssignments();
+    } else if (targetPage === 'resource_list.php') {
+        window.fetchResources();
+    } else if (targetPage === 'discussion_list.php') {
+        window.fetchDiscussions();
+    } else if (targetPage === 'grades') {
+        window.fetchGrades();
+    } else if (targetPage === 'syllabus') {
+        window.fetchSyllabus();
+    } else {
+        // Non-API pages (profile.php, etc.) still go into iframe
+        if (apiArea) apiArea.style.display = 'none';
+        iframe.style.display = 'block';
         iframe.src = targetPage;
-        window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (savedPage) {
+    }
+} 
+    else if (savedPage) {
         // 2. Priority: API-Driven Pages (Special Logic)
         if (savedPage.includes("quiz_list.php")) {
             window.fetchQuizzes();
