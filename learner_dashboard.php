@@ -1454,11 +1454,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (targetPage === 'discussion') {
     const discId = urlParams.get('id');
     if (discId) {
-        // Wait for all scripts to finish loading
+        // Make sure apiArea is visible first
+        if (apiArea) apiArea.style.display = 'block';
+        if (iframe) iframe.style.display = 'none';
         setTimeout(() => {
             window.loadDiscussionThread(discId);
         }, 100);
     } else {
+        if (apiArea) apiArea.style.display = 'block';
+        if (iframe) iframe.style.display = 'none';
         setTimeout(() => {
             window.fetchDiscussions();
         }, 100);
