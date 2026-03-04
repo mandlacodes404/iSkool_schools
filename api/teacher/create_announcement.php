@@ -91,7 +91,7 @@ $recipientStmt->execute();
 $recipients = $recipientStmt->get_result();
 
 $cleanBaseUrl       = rtrim(BASE_URL, '/');
-$announcementLink   = $cleanBaseUrl . "/learner_dashboard.php?page=view_announcements_user.php";
+$announcementLink = $cleanBaseUrl . "/learner_dashboard.php?page=announcement_list.php";
 $fullPushTitle      = $teacherDisplayName . ": " . $title;
 
 while ($recipient = $recipients->fetch_assoc()) {
