@@ -1176,7 +1176,7 @@ $answeredCount = count($savedAnswers);
     let currentStep     = <?= isset($current_saved_step) ? (int)$current_saved_step : 0 ?>;
     let isSubmitting    = false;
     let oneMinShown     = false;
-    let lastActionTime  = Date.now();
+   
 
     const questions     = document.querySelectorAll('.question-card');
     const ringFill      = document.getElementById('ringFill');
@@ -1530,12 +1530,6 @@ function trackSpeed() {
     }
     lastActionTime = now;
 }
-
-// NOTE: trackSpeed() is already called inside changeQuestion() and jumpToQuestion()
-// in the original take_quiz.php — no change needed there.
-// Just make sure those calls remain:
-//   changeQuestion()  → calls trackSpeed() ✅
-//   jumpToQuestion()  → calls trackSpeed() ✅
 
     // ── LIGHTBOX ─────────────────────────────────────────────────────────────
     function openLightbox(img) {
