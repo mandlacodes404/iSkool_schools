@@ -1233,6 +1233,12 @@ $answeredCount = count($savedAnswers);
         if (LAYOUT === 'multi_page' || IS_LINEAR) {
             document.querySelector('.main-content').classList.add('multi-page-mode');
             showQuestion(currentStep);
+            if (IS_LINEAR) {
+    document.querySelectorAll('.p-item').forEach(item => {
+        item.style.cursor = 'default';
+        item.title = 'Linear mode — navigation locked';
+    });
+}
         } else {
             // Single page: mark all answered cards
             updateAllCardStates();
@@ -1277,21 +1283,19 @@ $answeredCount = count($savedAnswers);
     }
 
     function jumpToQuestion(n) {
-        trackSpeed();
-        if (IS_LINEAR && n < currentStep) {
-            alert("Linear mode: you cannot go back.");
-            return;
-        }
-        if (LAYOUT === 'multi_page' || IS_LINEAR) {
-            currentStep = n;
-            showQuestion(n);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            // Smooth scroll to question
-            const card = document.getElementById(`qcard-${n}`);
-            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    // Linear mode: palette is read-only, no jumping allowed at all
+    if (IS_LINEAR) return;
+
+    trackSpeed();
+    if (LAYOUT === 'multi_page') {
+        currentStep = n;
+        showQuestion(n);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        const card = document.getElementById(`qcard-${n}`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+}
 
     // ── STEP DOTS ────────────────────────────────────────────────────────────
     function updateStepDots() {
