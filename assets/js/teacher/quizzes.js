@@ -163,30 +163,38 @@ function renderTeacherQuizzes(data) {
                 </div>
                 <div class="teacher-modal-body" id="integrityModalBody">
                     <div id="integrityWarning">
-                        <div style="text-align:center;margin-bottom:20px;">
-                            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="margin-bottom:10px;">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
-                            <h3 style="color:#e2e8f0;margin:0;letter-spacing:1px;">ARTIFICIAL INVIGILATOR</h3>
-                            <p style="color:#8b949e;font-size:14px;">Behavioral Integrity Analysis Engine</p>
-                        </div>
-                        <p style="line-height:1.6;color:#cbd5e0;font-size:14px;">
-                            The Artificial Invigilator processes session logs and cross-references 
-                            <strong>tab-switching frequency</strong> with <strong>active question IDs</strong> 
-                            and <strong>layout constraints</strong> to determine risk levels.
-                        </p>
-                        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:15px;margin:20px 0;">
-                            <h4 style="margin:0 0 10px;font-size:14px;color:#4fd1c5;">Detection Logic:</h4>
-                            <ul style="margin:0;padding-left:20px;font-size:13px;color:#cbd5e0;line-height:1.8;">
-                                <li><strong>Multi-Page Precision:</strong> Direct link between events and specific questions.</li>
-                                <li><strong>Single-Page Viewport:</strong> Tracks question currently at top of screen.</li>
-                                <li><strong>Time-Stamp Analysis:</strong> Identifies rapid navigation through questions.</li>
-                            </ul>
-                        </div>
-                        <button class="teacher-modal-submit" style="width:100%;padding:15px;font-size:15px;"
-                            id="decodeBtn" onclick="decodeIntegrity()">
-                            DECODE LEARNER BEHAVIOR
-                        </button>
+                        <div style="text-align:center;margin-bottom:24px;">
+    <svg viewBox="0 0 24 24" width="44" height="44" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="margin-bottom:12px;">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    </svg>
+    <h3 style="color:#e2e8f0;margin:0 0 6px;letter-spacing:2px;font-size:16px;">INTEGRITY MONITOR</h3>
+    <p style="color:#4fd1c5;font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
+</div>
+
+<p style="line-height:1.8;color:#cbd5e0;font-size:14px;margin-bottom:20px;">
+    Every quiz session is recorded in real time. When a learner leaves the quiz environment — 
+    whether by switching tabs, minimizing the browser, or navigating away — the 
+    <strong style="color:#e2e8f0;">exact question they were on is logged and timestamped.</strong>
+</p>
+
+<div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:16px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span style="color:#4fd1c5;font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
+    </div>
+    <p style="margin:0;font-size:13px;color:#cbd5e0;line-height:1.7;">
+        This report shows you <strong style="color:#e2e8f0;">precisely where interruptions happened, 
+        question by question.</strong> No guesswork. No approximations. 
+        Each finding is backed by a timestamped session log.
+    </p>
+</div>
+
+<button class="teacher-modal-submit" style="width:100%;padding:15px;font-size:15px;letter-spacing:1px;"
+    id="decodeBtn" onclick="decodeIntegrity()">
+    VIEW SESSION REPORT
+</button>
                     </div>
                     <div id="integrityResults" style="display:none;"></div>
                 </div>
@@ -875,20 +883,16 @@ window.decodeIntegrity = async function() {
         </div>
 
         <!-- Event breakdown pills -->
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-            ${row.tab_switches > 0 ? `
-            <span style="background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.35);color:#4fa3ff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
-                ⇄ ${row.tab_switches} Tab Switch${row.tab_switches !== 1 ? 'es' : ''}
-            </span>` : ''}
-            ${row.quiz_exits > 0 ? `
-            <span style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.35);color:#f85149;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
-                ✕ ${row.quiz_exits} Quiz Exit${row.quiz_exits !== 1 ? 's' : ''}
-            </span>` : ''}
-            ${row.rapid_moves > 0 ? `
-            <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
-                ⚡ ${row.rapid_moves} Rapid Move${row.rapid_moves !== 1 ? 's' : ''}
-            </span>` : ''}
-        </div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+    ${row.switches > 0 ? `
+    <span style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.35);color:#f85149;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+        ⚑ ${row.switches} Interruption${row.switches !== 1 ? 's' : ''}
+    </span>` : ''}
+    ${row.rapid_moves > 0 ? `
+    <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+        ⚡ ${row.rapid_moves} Rapid Move${row.rapid_moves !== 1 ? 's' : ''}
+    </span>` : ''}
+</div>
 
         <!-- Flagged questions -->
         ${row.problem_questions && row.problem_questions !== 'N/A' ? `
