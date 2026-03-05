@@ -1339,7 +1339,7 @@ $answeredCount = count($savedAnswers);
 
     // ── LOAD ANSWERS ─────────────────────────────────────────────────────────
     function loadAnswers() {
-        const local = JSON.parse(sessionStorage.getItem('quiz_' + QUIZ_ID) || '{}');
+        const local = JSON.parse(sessionStorage.getItem('quiz_' + QUIZ_ID + '_' + '<?= $userEmail ?>') || '{}');
         const merged = { ...local, ...DB_ANSWERS };
 
         Object.entries(merged).forEach(([qid, cid]) => {
@@ -1352,7 +1352,7 @@ $answeredCount = count($savedAnswers);
         });
 
         // Restore flags
-        const flags = JSON.parse(sessionStorage.getItem('flags_' + QUIZ_ID) || '[]');
+        const flags = JSON.parse(sessionStorage.getItem('flags_' + QUIZ_ID + '_' + '<?= $userEmail ?>') || '[]');
         flags.forEach(qid => {
             const btn = document.querySelector(`.question-card[data-question-id="${qid}"] .flag-btn`);
             if (btn) btn.classList.add('flagged');
@@ -1366,7 +1366,7 @@ $answeredCount = count($savedAnswers);
             const m = r.name.match(/answers\[(\d+)\]/);
             if (m) obj[m[1]] = r.value;
         });
-        sessionStorage.setItem('quiz_' + QUIZ_ID, JSON.stringify(obj));
+        sessionStorage.setItem('quiz_' + QUIZ_ID + '_' + '<?= $userEmail ?>', JSON.stringify(obj));
     }
 
     // ── AUTO SAVE TO SERVER ──────────────────────────────────────────────────
@@ -1409,14 +1409,14 @@ $answeredCount = count($savedAnswers);
     // ── FLAG ─────────────────────────────────────────────────────────────────
     function toggleFlag(btn, qid) {
         btn.classList.toggle('flagged');
-        const flags = JSON.parse(sessionStorage.getItem('flags_' + QUIZ_ID) || '[]');
+        const flags = JSON.parse(sessionStorage.getItem('flags_' + QUIZ_ID + '_' + '<?= $userEmail ?>') || '[]');
         if (btn.classList.contains('flagged')) {
             if (!flags.includes(qid)) flags.push(qid);
         } else {
             const idx = flags.indexOf(qid);
             if (idx > -1) flags.splice(idx, 1);
         }
-        sessionStorage.setItem('flags_' + QUIZ_ID, JSON.stringify(flags));
+        sessionStorage.setItem('flags_' + QUIZ_ID + '_' + '<?= $userEmail ?>', JSON.stringify(flags));
         updatePalette();
     }
 
