@@ -76,7 +76,7 @@ $verifyQuiz->close();
 if (!$quizCheck || $quizCheck['class_id'] != $learnerClassId) { header("Location: quiz_list.php"); exit(); }
 
 // ── TIMER LOGIC ──────────────────────────────────────────────────────────────
-$checkAttempt = $conn->prepare("SELECT start_time, status, current_step FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+$checkAttempt = $conn->prepare("SELECT start_time, status, current_step, question_order FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
 $checkAttempt->bind_param("si", $userEmail, $quizId);
 $checkAttempt->execute();
 $attemptData = $checkAttempt->get_result()->fetch_assoc();
@@ -89,6 +89,7 @@ if (!$attemptData) {
     if ($insertAttempt->execute()) {
         $startTime = $currentTime;
         $current_saved_step = 0;
+        $saved_question_order = null;
     } else {
         die("Failed to create quiz attempt: " . $insertAttempt->error);
     }
@@ -97,6 +98,7 @@ if (!$attemptData) {
     if ($attemptData['status'] !== 'in_progress') { header("Location: quiz_results.php?quiz_id=" . $quizId); exit(); }
     $startTime = strtotime($attemptData['start_time']);
     $current_saved_step = isset($attemptData['current_step']) ? (int)$attemptData['current_step'] : 0;
+    $saved_question_order = $attemptData['question_order'] ?? null;
 }
 
 $durationSeconds = $quizDuration * 60;
@@ -149,16 +151,9 @@ $query->close();
 if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
     $questions = array_values($questions);
 
-    // Check if a saved order exists for this learner
-    $orderStmt = $conn->prepare("SELECT question_order FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
-    $orderStmt->bind_param("si", $userEmail, $quizId);
-    $orderStmt->execute();
-    $orderData = $orderStmt->get_result()->fetch_assoc();
-    $orderStmt->close();
-
-    if (!empty($orderData['question_order'])) {
-        // Returning learner — restore the exact same shuffle
-        $savedOrder = json_decode($orderData['question_order'], true);
+    if (!empty($saved_question_order)) {
+        // Returning learner — restore exact same shuffle
+        $savedOrder = json_decode($saved_question_order, true);
         $indexed = [];
         foreach ($questions as $q) { $indexed[$q['id']] = $q; }
         $questions = [];
@@ -170,9 +165,9 @@ if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
         shuffle($questions);
         foreach ($questions as &$q) { if (!empty($q['choices'])) shuffle($q['choices']); }
         unset($q);
-        $order = array_column($questions, 'id');
-        $saveOrder = $conn->prepare("UPDATE quiz_attempts SET question_order = ? WHERE user_email = ? AND quiz_id = ?");
+        $order   = array_column($questions, 'id');
         $encoded = json_encode($order);
+        $saveOrder = $conn->prepare("UPDATE quiz_attempts SET question_order = ? WHERE user_email = ? AND quiz_id = ?");
         $saveOrder->bind_param("ssi", $encoded, $userEmail, $quizId);
         $saveOrder->execute();
         $saveOrder->close();
