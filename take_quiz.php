@@ -1449,7 +1449,7 @@ $answeredCount = count($savedAnswers);
 // Track whether the page was hidden (tab switch) vs fully blurred (exit)
 let _tabHiddenAt   = null;   // timestamp when tab went hidden
 let _blurredAt     = null;   // timestamp when window lost focus
-const TAB_EXIT_THRESHOLD_MS = 800; // if blur fires >800ms after hide, treat as window exit
+const TAB_EXIT_THRESHOLD_MS = 2000; // if blur fires >2000ms after hide, treat as window exit
 
 function getCurrentQuestionId() {
     // For multi_page: currentStep is always the visible question index
@@ -1503,12 +1503,10 @@ window.addEventListener('blur', () => {
     _blurredAt = Date.now();
     const msSinceHide = _tabHiddenAt ? (_blurredAt - _tabHiddenAt) : Infinity;
 
-    // If blur fires significantly after visibilitychange, it's a true window exit
-    // (e.g. Alt+Tab to another app, minimize browser)
     if (msSinceHide > TAB_EXIT_THRESHOLD_MS) {
         logIntegrity('quiz_exit');
+        _tabHiddenAt = null;
     }
-    // Otherwise visibilitychange already handled it as tab_switch — don't double-log
 });
 
 // ── PAGE UNLOAD / NAVIGATION AWAY ────────────────────────────────────────
