@@ -119,10 +119,23 @@ if (loader) loader.style.display = 'flex';
                     <li>The timer starts immediately and cannot be paused.</li>
                 </ul>
 
-                <div class="ai-box">
-                    <h4 style="color: #4fd1c5; margin-top: 0;"><i class="fas fa-robot"></i> AI Invigilator Active</h4>
-                    <p style="font-size: 13px; color: #8b949e;">Focus Tracking and Session Integrity are monitored.</p>
-                </div>
+                ${data.layout_mode === 'multi_page' ? `
+<div class="ai-box">
+    <h4 style="color: #4fd1c5; margin-top: 0;">
+        <i class="fas fa-robot"></i> AI Invigilator Active
+    </h4>
+    <p style="font-size: 13px; color: #8b949e; margin: 0;">
+        Tab switching and quiz exits are monitored and logged per question.
+    </p>
+</div>` : `
+<div class="ai-box" style="border-color: rgba(139,148,158,0.3);">
+    <h4 style="color: #8b949e; margin-top: 0;">
+        <i class="fas fa-robot"></i> Session Monitoring Active
+    </h4>
+    <p style="font-size: 13px; color: #8b949e; margin: 0;">
+        Your session integrity is being tracked.
+    </p>
+</div>`}
 
                 <form action="take_quiz.php" method="GET" style="margin-top: 35px; text-align:center;">
                     <input type="hidden" name="quiz_id" value="${quizId}">

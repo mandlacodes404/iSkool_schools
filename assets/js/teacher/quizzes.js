@@ -858,35 +858,52 @@ window.decodeIntegrity = async function() {
                 </div>`;
 
             data.forEach(row => {
-                const layoutBadge = row.layout_mode === 'multi_page'
-                    ? `<span style="color:#4fd1c5;font-size:10px;border:1px solid #4fd1c5;padding:2px 5px;border-radius:4px;font-weight:bold;">MULTI-PAGE</span>`
-                    : `<span style="color:#a855f7;font-size:10px;border:1px solid #a855f7;padding:2px 5px;border-radius:4px;font-weight:bold;">SINGLE-PAGE</span>`;
-
                 html += `
-                    <div style="background:rgba(255,255,255,0.04);padding:15px;border-radius:12px;margin-bottom:15px;border-left:5px solid ${row.color};border-top:1px solid rgba(255,255,255,0.05);">
-                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                            <div>
-                                <strong style="color:#e0e6f0;font-size:15px;display:block;margin-bottom:4px;">${row.name}</strong>
-                                ${layoutBadge}
-                            </div>
-                            <span style="background:${row.color};color:white;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:900;text-transform:uppercase;">
-                                ${row.risk} RISK
-                            </span>
-                        </div>
-                        <div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;margin-bottom:10px;">
-                            <p style="margin:0;font-size:13px;line-height:1.5;color:#cbd5e0;">${row.narrative}</p>
-                        </div>
-                        ${row.problem_questions && row.problem_questions !== 'N/A' ? `
-                        <div style="margin-bottom:10px;padding:8px;background:rgba(248,81,73,0.05);border-radius:6px;border:1px solid rgba(248,81,73,0.2);">
-                            <small style="color:#f85149;font-weight:bold;font-size:11px;">
-                                Flags: Question(s) ${row.problem_questions}
-                            </small>
-                        </div>` : ''}
-                        <div style="display:flex;justify-content:space-between;opacity:0.6;">
-                            <small style="color:#8b949e;">Activity Count: <strong>${row.switches}</strong></small>
-                            <small style="color:#8b949e;font-size:10px;">Last Event: ${row.last_event_time}</small>
-                        </div>
-                    </div>`;
+    <div style="background:rgba(255,255,255,0.04);padding:15px;border-radius:12px;margin-bottom:15px;border-left:5px solid ${row.color};border-top:1px solid rgba(255,255,255,0.05);">
+        
+        <!-- Header: name + risk badge -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+            <strong style="color:#e0e6f0;font-size:15px;">${row.name}</strong>
+            <span style="background:${row.color};color:white;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:900;text-transform:uppercase;flex-shrink:0;margin-left:10px;">
+                ${row.risk} RISK
+            </span>
+        </div>
+
+        <!-- AI Narrative -->
+        <div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;margin-bottom:12px;">
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#cbd5e0;">${row.narrative}</p>
+        </div>
+
+        <!-- Event breakdown pills -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            ${row.tab_switches > 0 ? `
+            <span style="background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.35);color:#4fa3ff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                ⇄ ${row.tab_switches} Tab Switch${row.tab_switches !== 1 ? 'es' : ''}
+            </span>` : ''}
+            ${row.quiz_exits > 0 ? `
+            <span style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.35);color:#f85149;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                ✕ ${row.quiz_exits} Quiz Exit${row.quiz_exits !== 1 ? 's' : ''}
+            </span>` : ''}
+            ${row.rapid_moves > 0 ? `
+            <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                ⚡ ${row.rapid_moves} Rapid Move${row.rapid_moves !== 1 ? 's' : ''}
+            </span>` : ''}
+        </div>
+
+        <!-- Flagged questions -->
+        ${row.problem_questions && row.problem_questions !== 'N/A' ? `
+        <div style="margin-bottom:10px;padding:8px 12px;background:rgba(248,81,73,0.05);border-radius:6px;border:1px solid rgba(248,81,73,0.2);">
+            <small style="color:#f85149;font-weight:800;font-size:11px;letter-spacing:0.5px;">
+                ⚑ FLAGGED: Question(s) ${row.problem_questions}
+            </small>
+        </div>` : ''}
+
+        <!-- Footer -->
+        <div style="display:flex;justify-content:space-between;opacity:0.55;margin-top:4px;">
+            <small style="color:#8b949e;">Total Events: <strong>${row.switches}</strong></small>
+            <small style="color:#8b949e;font-size:10px;">Last Event: ${row.last_event_time}</small>
+        </div>
+    </div>`;
             });
 
             resultsDiv.innerHTML = html;
