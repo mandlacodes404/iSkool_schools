@@ -148,9 +148,35 @@ $query->close();
 
 if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
     $questions = array_values($questions);
-    shuffle($questions);
-    foreach ($questions as &$q) { if (!empty($q['choices'])) shuffle($q['choices']); }
-    unset($q);
+
+    // Check if a saved order exists for this learner
+    $orderStmt = $conn->prepare("SELECT question_order FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+    $orderStmt->bind_param("si", $userEmail, $quizId);
+    $orderStmt->execute();
+    $orderData = $orderStmt->get_result()->fetch_assoc();
+    $orderStmt->close();
+
+    if (!empty($orderData['question_order'])) {
+        // Returning learner — restore the exact same shuffle
+        $savedOrder = json_decode($orderData['question_order'], true);
+        $indexed = [];
+        foreach ($questions as $q) { $indexed[$q['id']] = $q; }
+        $questions = [];
+        foreach ($savedOrder as $qid) {
+            if (isset($indexed[$qid])) $questions[] = $indexed[$qid];
+        }
+    } else {
+        // First visit — shuffle and save the order
+        shuffle($questions);
+        foreach ($questions as &$q) { if (!empty($q['choices'])) shuffle($q['choices']); }
+        unset($q);
+        $order = array_column($questions, 'id');
+        $saveOrder = $conn->prepare("UPDATE quiz_attempts SET question_order = ? WHERE user_email = ? AND quiz_id = ?");
+        $encoded = json_encode($order);
+        $saveOrder->bind_param("ssi", $encoded, $userEmail, $quizId);
+        $saveOrder->execute();
+        $saveOrder->close();
+    }
 }
 
 $savedAnswers = [];
