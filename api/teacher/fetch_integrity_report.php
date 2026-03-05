@@ -62,7 +62,6 @@ while ($row = $result->fetch_assoc()) {
 
     $raw_ids = array_filter(explode(',', $row['question_ids'] ?? ''));
 
-    // Map to question numbers, remove duplicates
     $mapped = [];
     foreach ($raw_ids as $qid) {
         $qid = trim($qid);
@@ -91,16 +90,18 @@ foreach ($learners as $email => $data) {
     $name        = $data['name'];
     $events      = $data['events'];
 
-    $tab_count   = $events['tab_switch']['count']        ?? 0;
-    $exit_count  = $events['quiz_exit']['count']         ?? 0;
-    $rapid_count = $events['rapid_navigation']['count']  ?? 0;
-    $total       = $tab_count + $exit_count + $rapid_count;
+    $tab_qs      = $events['tab_switch']['questions']        ?? [];
+    $exit_qs     = $events['quiz_exit']['questions']         ?? [];
+    $rapid_count = $events['rapid_navigation']['count']      ?? 0;
 
-    $tab_qs      = $events['tab_switch']['questions']    ?? [];
-    $exit_qs     = $events['quiz_exit']['questions']     ?? [];
+    // Merge tab switches and exits — both mean left the quiz environment
+    $all_interruption_qs = array_unique(array_merge($tab_qs, $exit_qs));
+    sort($all_interruption_qs);
+
+    $total = count($all_interruption_qs) + $rapid_count;
 
     // ── Skip if nothing to report ─────────────────────────────────────────
-    if (empty($tab_qs) && empty($exit_qs) && $rapid_count === 0) {
+    if (empty($all_interruption_qs) && $rapid_count === 0) {
         continue;
     }
 
@@ -108,12 +109,8 @@ foreach ($learners as $email => $data) {
     $firstName = explode(' ', $name)[0];
     $sentences = [];
 
-    foreach ($tab_qs as $qNum) {
-        $sentences[] = "$firstName switched tabs whilst on Question $qNum.";
-    }
-
-    foreach ($exit_qs as $qNum) {
-        $sentences[] = "$firstName exited the quiz whilst on Question $qNum.";
+    foreach ($all_interruption_qs as $qNum) {
+        $sentences[] = "$firstName left the quiz environment whilst on Question $qNum.";
     }
 
     if ($rapid_count > 0) {
@@ -137,10 +134,10 @@ foreach ($learners as $email => $data) {
         $color = '#f85149';
     }
 
-    // ── Combine all flagged questions for display ──────────────────────────
-    $all_flagged_qs = array_unique(array_merge($tab_qs, $exit_qs));
-    sort($all_flagged_qs);
-    $clean_questions = !empty($all_flagged_qs) ? implode(', ', $all_flagged_qs) : 'N/A';
+    $clean_questions = !empty($all_interruption_qs) ? implode(', ', $all_interruption_qs) : 'N/A';
+
+    $tab_count  = $events['tab_switch']['count']  ?? 0;
+    $exit_count = $events['quiz_exit']['count']   ?? 0;
 
     $reportData[] = [
         'name'              => $name,
