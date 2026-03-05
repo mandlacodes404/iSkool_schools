@@ -1446,36 +1446,96 @@ $answeredCount = count($savedAnswers);
     }
 
     // ── INTEGRITY ────────────────────────────────────────────────────────────
-    function logIntegrity(eventType) {
-        if (isSubmitting) return;
-        const fd = new FormData();
-        fd.append('quiz_id', QUIZ_ID);
-        fd.append('event_type', eventType);
-        fd.append('layout_mode', LAYOUT);
+// Track whether the page was hidden (tab switch) vs fully blurred (exit)
+let _tabHiddenAt   = null;   // timestamp when tab went hidden
+let _blurredAt     = null;   // timestamp when window lost focus
+const TAB_EXIT_THRESHOLD_MS = 800; // if blur fires >800ms after hide, treat as window exit
 
-        let activeQid = null;
-        if (LAYOUT === 'multi_page' || IS_LINEAR) {
-            activeQid = questions[currentStep]?.getAttribute('data-question-id');
-        } else {
-            const closest = Array.from(questions).reduce((p, c) =>
-                Math.abs(c.getBoundingClientRect().top) < Math.abs(p.getBoundingClientRect().top) ? c : p
-            );
-            activeQid = closest.getAttribute('data-question-id');
-        }
-        fd.append('active_question_id', activeQid);
-        navigator.sendBeacon('log_integrity_event.php', fd);
+function getCurrentQuestionId() {
+    // For multi_page: currentStep is always the visible question index
+    // questions[] are the DOM cards with data-question-id = real DB question ID
+    if (LAYOUT === 'multi_page' || IS_LINEAR) {
+        return questions[currentStep]?.getAttribute('data-question-id') ?? null;
     }
+    // Single page: find the card closest to the top of the viewport
+    const closest = Array.from(questions).reduce((prev, curr) =>
+        Math.abs(curr.getBoundingClientRect().top) < Math.abs(prev.getBoundingClientRect().top)
+            ? curr : prev
+    );
+    return closest.getAttribute('data-question-id') ?? null;
+}
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') logIntegrity('tab_hidden');
-    });
-    window.addEventListener('blur', () => logIntegrity('window_blur'));
+function logIntegrity(eventType) {
+    if (isSubmitting) return;
 
-    function trackSpeed() {
-        const now = Date.now();
-        if ((now - lastActionTime) / 1000 < 2) logIntegrity('rapid_navigation');
-        lastActionTime = now;
+    // Only log multi_page — single page tracking is unreliable
+    if (LAYOUT !== 'multi_page' && !IS_LINEAR) return;
+
+    const activeQid = getCurrentQuestionId();
+    if (!activeQid) return;
+
+    const fd = new FormData();
+    fd.append('quiz_id',            QUIZ_ID);
+    fd.append('event_type',         eventType);
+    fd.append('layout_mode',        LAYOUT);
+    fd.append('active_question_id', activeQid);
+
+    // sendBeacon ensures the request fires even when the page is unloading
+    navigator.sendBeacon('log_integrity_event.php', fd);
+}
+
+// ── TAB VISIBILITY CHANGE ────────────────────────────────────────────────
+// Fires when the learner switches to another browser tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        _tabHiddenAt = Date.now();
+        logIntegrity('tab_switch');
+    } else {
+        // Tab became visible again — reset
+        _tabHiddenAt = null;
     }
+});
+
+// ── WINDOW BLUR ──────────────────────────────────────────────────────────
+// Fires when the learner Alt-Tabs or clicks outside the browser entirely.
+// We distinguish this from a tab switch by checking timing.
+window.addEventListener('blur', () => {
+    _blurredAt = Date.now();
+    const msSinceHide = _tabHiddenAt ? (_blurredAt - _tabHiddenAt) : Infinity;
+
+    // If blur fires significantly after visibilitychange, it's a true window exit
+    // (e.g. Alt+Tab to another app, minimize browser)
+    if (msSinceHide > TAB_EXIT_THRESHOLD_MS) {
+        logIntegrity('quiz_exit');
+    }
+    // Otherwise visibilitychange already handled it as tab_switch — don't double-log
+});
+
+// ── PAGE UNLOAD / NAVIGATION AWAY ────────────────────────────────────────
+// Catches the learner closing the tab, refreshing, or navigating away entirely
+window.addEventListener('pagehide', () => {
+    if (isSubmitting) return;
+    logIntegrity('quiz_exit');
+});
+
+// ── RAPID NAVIGATION ─────────────────────────────────────────────────────
+// Detects unusually fast flipping through questions (possible photo-taking)
+let lastActionTime = Date.now();
+
+function trackSpeed() {
+    const now     = Date.now();
+    const elapsed = (now - lastActionTime) / 1000; // seconds
+    if (elapsed < 2) {
+        logIntegrity('rapid_navigation');
+    }
+    lastActionTime = now;
+}
+
+// NOTE: trackSpeed() is already called inside changeQuestion() and jumpToQuestion()
+// in the original take_quiz.php — no change needed there.
+// Just make sure those calls remain:
+//   changeQuestion()  → calls trackSpeed() ✅
+//   jumpToQuestion()  → calls trackSpeed() ✅
 
     // ── LIGHTBOX ─────────────────────────────────────────────────────────────
     function openLightbox(img) {
