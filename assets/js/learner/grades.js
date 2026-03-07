@@ -1214,36 +1214,36 @@ function renderProgressReport(data) {
             }
 
             .pr-subject-card {
-                background: #161b22;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 12px;
-                padding: 18px;
-                position: relative;
-                overflow: hidden;
-                transition: border-color 0.2s, transform 0.2s;
-            }
+    background: #161b22;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 18px 18px 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.pr-subject-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-2px);
+}
+.pr-subject-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: var(--accent, #4a5568);
+}
+.pr-subject-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+    padding-right: 70px;
+    line-height: 1.3;
+    min-height: 32px;
+}
 
-            .pr-subject-card:hover {
-                border-color: rgba(255,255,255,0.12);
-                transform: translateY(-2px);
-            }
-
-            .pr-subject-card::before {
-                content: '';
-                position: absolute;
-                left: 0; top: 0; bottom: 0;
-                width: 3px;
-                border-radius: 3px 0 0 3px;
-            }
-
-            .pr-subject-name {
-                font-size: 13px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin-bottom: 12px;
-                padding-right: 60px;
-                line-height: 1.3;
-            }
 
             .pr-subject-pct {
                 position: absolute;
@@ -1355,32 +1355,29 @@ function renderProgressReport(data) {
         if (!subjects.length) return `<div class="pr-empty">No assessments found.</div>`;
 
         return subjects.map(s => {
-            const td  = s.terms[termNum] || {};
-            const pct = td.pct ?? null;
-            const c   = pctColor(pct);
+    const td  = s.terms[termNum] || {};
+    const pct = td.pct ?? null;
+    const c   = pctColor(pct);
 
-            return `
-                <div class="pr-subject-card" style="border-left-color:${c.border};">
-                    <div class="pr-subject-card" style="border-color:rgba(255,255,255,0.07);">
+    return `
+        <div class="pr-subject-card" style="--accent:${c.border};">
+            <div class="pr-subject-name">${escHtmlPr(s.name)}</div>
+            <div class="pr-subject-pct" style="color:${c.text};">
+                ${pct !== null ? pct + '%' : '—'}
+            </div>
+            ${pct !== null ? `
+                <div class="pr-subject-bar-track">
+                    <div class="pr-subject-bar-fill"
+                         style="width:${pct}%;background:${c.text};">
                     </div>
-                    <style>.pr-subject-card::before{background:${c.border};}</style>
-                    <div class="pr-subject-name">${escHtmlPr(s.name)}</div>
-                    <div class="pr-subject-pct" style="color:${c.text};">
-                        ${pct !== null ? pct + '%' : '—'}
-                    </div>
-                    ${pct !== null ? `
-                        <div class="pr-subject-bar-track">
-                            <div class="pr-subject-bar-fill"
-                                 style="width:${td.assessed || pct}%;background:${c.text};">
-                            </div>
-                        </div>
-                        <div class="pr-subject-meta">
-                            ${td.count} of ${td.total_count} assessment${td.total_count !== 1 ? 's' : ''} counted
-                            ${td.remaining > 0 ? `· ${td.remaining}% still to come` : '· Complete'}
-                        </div>
-                    ` : `<div class="pr-subject-no-data">No assessments this term</div>`}
-                </div>`;
-        }).join('');
+                </div>
+                <div class="pr-subject-meta">
+                    ${td.count} of ${td.total_count} assessment${td.total_count !== 1 ? 's' : ''} counted
+                    ${td.remaining > 0 ? `· ${td.remaining}% still to come` : '· Complete'}
+                </div>
+            ` : `<div class="pr-subject-no-data">No assessments this term</div>`}
+        </div>`;
+}).join('');
     }
 
     apiArea.innerHTML = `
