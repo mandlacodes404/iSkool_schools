@@ -688,16 +688,7 @@ function renderGrades(data) {
         </div>
     </div>
 
-    <!-- PROGRESS REPORT MODAL -->
-    <div class="report-modal-overlay" id="gradesReportModal">
-        <div class="report-modal-box">
-            <div class="report-modal-header">
-                <span>Academic Progress Report</span>
-                <button class="report-modal-close" onclick="closeGradesReport()">×</button>
-            </div>
-            <iframe id="gradesReportFrame" src=""></iframe>
-        </div>
-    </div>
+    
     `;
 
     html += `</div>`; // .grades-wrap
@@ -972,35 +963,520 @@ window.closeGradeStatsModal = function () {
 // ─────────────────────────────────────────────────────────────────────────────
 // PROGRESS REPORT MODAL
 // ─────────────────────────────────────────────────────────────────────────────
-window.generateGradesReport = function (targetEmail) {
-    const loader = document.getElementById('loaderOverlay');
-    const frame  = document.getElementById('gradesReportFrame');
-    const modal  = document.getElementById('gradesReportModal');
-    if (!frame || !modal) return;
+// ─────────────────────────────────────────────────────────────────────────────
+// PROGRESS REPORT — replaces the old iframe modal approach
+// Drop these two functions into grades.js, replacing generateGradesReport()
+// and closeGradesReport(). Remove the report modal HTML from renderGrades().
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.generateGradesReport = async function (targetEmail) {
+    const apiArea = document.getElementById('api-content-area');
+    const loader  = document.getElementById('loaderOverlay');
+    if (!apiArea) return;
 
     if (loader) loader.style.display = 'flex';
 
-    frame.onload = function () {
+    try {
+        const res  = await fetch(`api/learner/get_progress_report.php?learner=${encodeURIComponent(targetEmail)}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        renderProgressReport(data);
+    } catch (e) {
         if (loader) loader.style.display = 'none';
-        modal.classList.add('show');
-    };
-    frame.src = `progress_report.php?learner=${encodeURIComponent(targetEmail)}`;
-};
-
-window.closeGradesReport = function () {
-    const frame = document.getElementById('gradesReportFrame');
-    const modal = document.getElementById('gradesReportModal');
-    if (modal) modal.classList.remove('show');
-    if (frame) { frame.onload = null; frame.src = ''; }
-};
-
-// Keyboard close
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        window.closeGradeStatsModal();
-        window.closeGradesReport();
+        alert('Could not load progress report.');
+    } finally {
+        if (loader) loader.style.display = 'none';
     }
-});
+};
+
+function renderProgressReport(data) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    // Inject styles once
+    if (!document.getElementById('pr-styles')) {
+        const style = document.createElement('style');
+        style.id = 'pr-styles';
+        style.textContent = `
+            .pr-wrap {
+                max-width: 860px;
+                margin: 0 auto;
+                padding-bottom: 60px;
+                font-family: 'Nunito', sans-serif;
+            }
+
+            /* ── TOP BAR ── */
+            .pr-topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 24px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .pr-back-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #e2e8f0;
+                padding: 9px 16px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: 'Nunito', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .pr-back-btn:hover {
+                background: rgba(255,255,255,0.08);
+                border-color: rgba(255,255,255,0.15);
+            }
+
+            .pr-print-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                background: rgba(79,209,197,0.1);
+                border: 1px solid rgba(79,209,197,0.3);
+                color: #4fd1c5;
+                padding: 9px 16px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: 'Nunito', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .pr-print-btn:hover { background: rgba(79,209,197,0.2); }
+
+            /* ── HERO CARD ── */
+            .pr-hero {
+                background: #161b22;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 16px;
+                padding: 28px;
+                display: flex;
+                align-items: center;
+                gap: 24px;
+                margin-bottom: 24px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .pr-hero::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #4fd1c5, #22c55e, #4e79a7);
+            }
+
+            .pr-logo {
+                width: 72px;
+                height: 72px;
+                border-radius: 12px;
+                object-fit: cover;
+                border: 1px solid rgba(255,255,255,0.1);
+                flex-shrink: 0;
+                background: rgba(255,255,255,0.05);
+            }
+
+            .pr-hero-info { flex: 1; }
+
+            .pr-school-name {
+                font-size: 13px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: #4fd1c5;
+                margin-bottom: 6px;
+            }
+
+            .pr-learner-name {
+                font-size: 22px;
+                font-weight: 900;
+                color: #e2e8f0;
+                margin-bottom: 4px;
+            }
+
+            .pr-learner-meta {
+                font-size: 13px;
+                color: #8b949e;
+            }
+
+            .pr-overall-badge {
+                text-align: center;
+                flex-shrink: 0;
+            }
+
+            .pr-overall-circle {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border: 3px solid;
+                margin-bottom: 6px;
+            }
+
+            .pr-overall-pct {
+                font-size: 22px;
+                font-weight: 900;
+                line-height: 1;
+            }
+
+            .pr-overall-label {
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #8b949e;
+                margin-top: 2px;
+            }
+
+            .pr-overall-sub {
+                font-size: 11px;
+                color: #8b949e;
+            }
+
+            /* ── TERM TABS ── */
+            .pr-term-tabs {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .pr-term-tab {
+                flex: 1;
+                padding: 10px;
+                text-align: center;
+                background: #161b22;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+            }
+
+            .pr-term-tab:hover {
+                border-color: rgba(255,255,255,0.15);
+                background: rgba(255,255,255,0.04);
+            }
+
+            .pr-term-tab.active {
+                background: rgba(79,209,197,0.08);
+                border-color: rgba(79,209,197,0.35);
+            }
+
+            .pr-term-tab-label {
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #8b949e;
+                margin-bottom: 4px;
+            }
+
+            .pr-term-tab.active .pr-term-tab-label { color: #4fd1c5; }
+
+            .pr-term-tab-avg {
+                font-size: 18px;
+                font-weight: 900;
+                color: #e2e8f0;
+            }
+
+            .pr-term-tab.active .pr-term-tab-avg { color: #4fd1c5; }
+
+            .pr-term-tab-sub {
+                font-size: 10px;
+                color: #4a5568;
+                margin-top: 2px;
+            }
+
+            .pr-current-dot {
+                position: absolute;
+                top: 6px; right: 6px;
+                width: 6px; height: 6px;
+                border-radius: 50%;
+                background: #4fd1c5;
+            }
+
+            /* ── SUBJECT GRID ── */
+            .pr-subjects-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+
+            .pr-subject-card {
+                background: #161b22;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 12px;
+                padding: 18px;
+                position: relative;
+                overflow: hidden;
+                transition: border-color 0.2s, transform 0.2s;
+            }
+
+            .pr-subject-card:hover {
+                border-color: rgba(255,255,255,0.12);
+                transform: translateY(-2px);
+            }
+
+            .pr-subject-card::before {
+                content: '';
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                width: 3px;
+                border-radius: 3px 0 0 3px;
+            }
+
+            .pr-subject-name {
+                font-size: 13px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin-bottom: 12px;
+                padding-right: 60px;
+                line-height: 1.3;
+            }
+
+            .pr-subject-pct {
+                position: absolute;
+                top: 16px; right: 16px;
+                font-size: 24px;
+                font-weight: 900;
+                line-height: 1;
+            }
+
+            .pr-subject-bar-track {
+                height: 6px;
+                background: rgba(255,255,255,0.06);
+                border-radius: 100px;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+
+            .pr-subject-bar-fill {
+                height: 100%;
+                border-radius: 100px;
+                transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+            }
+
+            .pr-subject-meta {
+                font-size: 11px;
+                color: #4a5568;
+            }
+
+            .pr-subject-no-data {
+                font-size: 12px;
+                color: #4a5568;
+                font-style: italic;
+                padding: 10px 0 4px;
+            }
+
+            /* ── EMPTY STATE ── */
+            .pr-empty {
+                text-align: center;
+                color: #4a5568;
+                padding: 60px 20px;
+                font-size: 15px;
+            }
+
+            /* ── PRINT ── */
+            @media print {
+                .pr-topbar   { display: none !important; }
+                .pr-term-tabs { display: none !important; }
+                .pr-wrap     { padding: 0; }
+                .pr-hero     { background: #f8f9fa !important; color: #000 !important; }
+                .pr-subjects-grid { grid-template-columns: repeat(2,1fr); }
+                .pr-subject-card { background: #fff !important; border: 1px solid #ddd !important; }
+                .pr-subject-name { color: #000 !important; }
+            }
+
+            @media (max-width: 600px) {
+                .pr-subjects-grid { grid-template-columns: 1fr; }
+                .pr-hero { flex-direction: column; text-align: center; }
+                .pr-term-tabs { flex-wrap: wrap; }
+                .pr-term-tab { min-width: calc(50% - 4px); flex: none; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const currentTerm = data.current_term || 1;
+    const subjects    = data.subjects || [];
+
+    // ── Colour helper ──
+    function pctColor(v) {
+        if (v === null) return { text: '#4a5568', bg: 'rgba(74,85,104,0.15)', border: '#4a5568' };
+        if (v >= 80)   return { text: '#22c55e', bg: 'rgba(34,197,94,0.15)',   border: '#22c55e' };
+        if (v >= 60)   return { text: '#4fd1c5', bg: 'rgba(79,209,197,0.15)',  border: '#4fd1c5' };
+        if (v >= 40)   return { text: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: '#f59e0b' };
+        return           { text: '#f85149', bg: 'rgba(248,81,73,0.15)',    border: '#f85149' };
+    }
+
+    // ── Term averages ──
+    function termAvg(termNum) {
+        const vals = subjects
+            .map(s => s.terms[termNum]?.pct)
+            .filter(v => v !== null);
+        return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length) : null;
+    }
+
+    // ── Overall badge ──
+    const overallAvg = data.overall_avg;
+    const oc = pctColor(overallAvg);
+
+    // ── Term tabs HTML ──
+    const termTabsHtml = [1,2,3,4].map(t => {
+        const avg = termAvg(t);
+        const c   = pctColor(avg);
+        const hasData = subjects.some(s => s.terms[t]?.pct !== null);
+        return `
+            <div class="pr-term-tab ${t === currentTerm ? 'active' : ''} ${!hasData ? 'pr-term-disabled' : ''}"
+                 onclick="prSwitchTerm(${t})"
+                 style="${!hasData ? 'opacity:0.35;pointer-events:none;' : ''}">
+                ${t === currentTerm ? '<div class="pr-current-dot"></div>' : ''}
+                <div class="pr-term-tab-label">Term ${t}</div>
+                <div class="pr-term-tab-avg" style="color:${hasData ? c.text : '#4a5568'};">
+                    ${avg !== null ? avg + '%' : '—'}
+                </div>
+                <div class="pr-term-tab-sub">${t === currentTerm ? 'Current' : (hasData ? 'Completed' : 'Upcoming')}</div>
+            </div>`;
+    }).join('');
+
+    // ── Subject cards HTML ──
+    function buildSubjectCards(termNum) {
+        if (!subjects.length) return `<div class="pr-empty">No assessments found.</div>`;
+
+        return subjects.map(s => {
+            const td  = s.terms[termNum] || {};
+            const pct = td.pct ?? null;
+            const c   = pctColor(pct);
+
+            return `
+                <div class="pr-subject-card" style="border-left-color:${c.border};">
+                    <div class="pr-subject-card" style="border-color:rgba(255,255,255,0.07);">
+                    </div>
+                    <style>.pr-subject-card::before{background:${c.border};}</style>
+                    <div class="pr-subject-name">${escHtmlPr(s.name)}</div>
+                    <div class="pr-subject-pct" style="color:${c.text};">
+                        ${pct !== null ? pct + '%' : '—'}
+                    </div>
+                    ${pct !== null ? `
+                        <div class="pr-subject-bar-track">
+                            <div class="pr-subject-bar-fill"
+                                 style="width:${td.assessed || pct}%;background:${c.text};">
+                            </div>
+                        </div>
+                        <div class="pr-subject-meta">
+                            ${td.count} of ${td.total_count} assessment${td.total_count !== 1 ? 's' : ''} counted
+                            ${td.remaining > 0 ? `· ${td.remaining}% still to come` : '· Complete'}
+                        </div>
+                    ` : `<div class="pr-subject-no-data">No assessments this term</div>`}
+                </div>`;
+        }).join('');
+    }
+
+    apiArea.innerHTML = `
+        <div class="pr-wrap" id="pr-wrap">
+
+            <!-- TOP BAR -->
+            <div class="pr-topbar">
+                <button class="pr-back-btn" onclick="prBackToGrades()">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Back to Grades
+                </button>
+                <button class="pr-print-btn" onclick="window.print()">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Print Report
+                </button>
+            </div>
+
+            <!-- HERO -->
+            <div class="pr-hero">
+                <img src="${data.school_logo}" alt="School Logo" class="pr-logo"
+                     onerror="this.style.display='none'">
+                <div class="pr-hero-info">
+                    <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
+                    <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
+                    <div class="pr-learner-meta">
+                        ${escHtmlPr(data.learner_class)} &nbsp;·&nbsp;
+                        Term ${currentTerm} Progress Report &nbsp;·&nbsp;
+                        ${data.date}
+                    </div>
+                </div>
+                <div class="pr-overall-badge">
+                    <div class="pr-overall-circle"
+                         style="border-color:${oc.border};background:${oc.bg};">
+                        <div class="pr-overall-pct" style="color:${oc.text};">
+                            ${overallAvg !== null ? overallAvg + '%' : '—'}
+                        </div>
+                        <div class="pr-overall-label">Overall</div>
+                    </div>
+                    <div class="pr-overall-sub">Term ${currentTerm} Average</div>
+                </div>
+            </div>
+
+            <!-- TERM TABS -->
+            <div class="pr-term-tabs" id="pr-term-tabs">
+                ${termTabsHtml}
+            </div>
+
+            <!-- SUBJECT CARDS -->
+            <div class="pr-subjects-grid" id="pr-subjects-grid">
+                ${buildSubjectCards(currentTerm)}
+            </div>
+
+        </div>`;
+
+    // Store for term switching
+    apiArea._prData          = data;
+    apiArea._buildSubjectCards = buildSubjectCards;
+    apiArea._pctColor          = pctColor;
+}
+
+// ── Switch term tab ──
+window.prSwitchTerm = function (term) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea || !apiArea._prData) return;
+
+    // Update tab styles
+    document.querySelectorAll('.pr-term-tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i + 1 === term);
+    });
+
+    // Re-render subject cards
+    const grid = document.getElementById('pr-subjects-grid');
+    if (grid) grid.innerHTML = apiArea._buildSubjectCards(term);
+};
+
+// ── Back to grades ──
+window.prBackToGrades = function () {
+    window.learnerGradesCache = null; // force fresh reload
+    window.fetchGrades();
+};
+
+// ── HTML escape util (local to avoid conflict) ──
+function escHtmlPr(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+
+// ── Remove old modal approach — keep for compatibility but make it no-op ──
+window.closeGradesReport = function () {};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UTILITIES
