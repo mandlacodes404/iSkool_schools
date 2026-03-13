@@ -1039,6 +1039,8 @@ async function loadSection(section) {
         await loadSdTeachers();
     } else if (section === 'analytics') {
         await loadSdAnalytics();
+    } else if (section === 'settings') {
+        await loadSdSettings();
     } else if (section === 'learners') {
         await loadSdLearners();
     } else {
@@ -1383,5 +1385,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="assets/js/school/learners.js?v=1.0"></script>
 <script src="assets/js/school/teachers.js?v=1.0"></script>
 <script src="assets/js/school/analytics.js?v=1.2"></script>
+<script src="assets/js/school/settings.js?v=1.0"></script>
 </body>
 </html>
