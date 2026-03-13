@@ -1033,6 +1033,8 @@ async function loadSection(section) {
 
     if (section === 'overview') {
         await loadOverview();
+    } else if (section === 'classes') {
+        await loadSdClasses();
     } else {
         renderComingSoon(section);
     }
@@ -1368,5 +1370,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSection('overview');
 });
 </script>
+<script>
+// ── INLINE CLASSES SECTION ──
+</script>
+<script src="assets/js/school/classes.js?v=1.0"></script>
 </body>
 </html>
