@@ -1035,8 +1035,6 @@ async function loadSection(section) {
         await loadOverview();
     } else if (section === 'classes') {
         await loadSdClasses();
-    } else if (section === 'learners') {
-        await loadSdLearners();
     } else {
         renderComingSoon(section);
     }
@@ -1368,7 +1366,7 @@ function renderOverview(d) {
 // ═══════════════════════════════════
 // BOOT
 // ═══════════════════════════════════
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
     loadSection('overview');
 });
 </script>
@@ -1376,6 +1374,5 @@ window.addEventListener('load', () => {
 // ── INLINE CLASSES SECTION ──
 </script>
 <script src="assets/js/school/classes.js?v=1.0"></script>
-<script src="assets/js/school/learners.js?v=1.0"></script>
 </body>
 </html>
