@@ -348,8 +348,11 @@ function renderAnalytics(d, activeTerm) {
         ? d.school_overall_avg
         : (d.term_averages && d.term_averages[activeTerm - 1]?.avg) ?? null;
 
+    // Derive latest term that has data
+    const latestTerm = (d.term_averages || []).reduce((last, t) => t.avg !== null ? t.term : last, 1);
+
     const displayLearners = activeTerm === 0
-        ? d.enrolled
+        ? Math.max(...(d.term_averages || []).map(t => t.learners || 0))
         : (d.term_averages && d.term_averages[activeTerm - 1]?.learners) ?? 0;
 
     // ── Gender data for active term ──
@@ -546,7 +549,7 @@ function renderAnalytics(d, activeTerm) {
                 <div class="sda-card">
                     <div class="sda-card-title">
                         <span class="sda-card-dot" style="background:#22c55e;"></span>
-                        Most Improved (Term 1 → Term ${d.latest_term})
+                        Most Improved (Term 1 → Term ${latestTerm})
                     </div>
                     ${improvedRows}
                 </div>
