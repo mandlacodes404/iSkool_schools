@@ -1368,7 +1368,7 @@ function renderOverview(d) {
 // ═══════════════════════════════════
 // BOOT
 // ═══════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
     loadSection('overview');
 });
 </script>
