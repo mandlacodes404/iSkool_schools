@@ -330,41 +330,46 @@ function renderAnalytics(d, activeTerm) {
         </button>`).join('');
 
     // ── Class data filtered by term ──
-    const classData = d.class_comparison.map(cls => {
+    // API returns: class_performance[].terms = {1:avg, 2:avg, ...}, overall
+    const classData = (d.class_performance || []).map(cls => {
         const avg = activeTerm === 0
-            ? cls.avg
-            : cls.term_avgs[activeTerm - 1];
+            ? cls.overall
+            : (cls.terms ? cls.terms[activeTerm] : null);
         return { ...cls, display_avg: avg };
     }).sort((a, b) => (b.display_avg ?? -1) - (a.display_avg ?? -1));
 
     // ── Term trend data ──
-    const trendAvgs    = d.term_trend.map(t => t.avg);
-    const trendLabels  = d.term_trend.map(t => `Term ${t.term}`);
-    const trendLearners= d.term_trend.map(t => t.learners);
+    // API returns: term_averages[{term, avg, learners, submissions}]
+    const termAvgs    = (d.term_averages || []).map(t => t.avg);
+    const trendLabels = (d.term_averages || []).map(t => `Term ${t.term}`);
 
     // ── School avg for active term ──
     const displaySchoolAvg = activeTerm === 0
-        ? d.school_avg
-        : d.term_trend[activeTerm - 1]?.avg ?? null;
+        ? d.school_overall_avg
+        : (d.term_averages && d.term_averages[activeTerm - 1]?.avg) ?? null;
 
     const displayLearners = activeTerm === 0
-        ? d.active_learners
-        : d.term_trend[activeTerm - 1]?.learners ?? 0;
+        ? d.enrolled
+        : (d.term_averages && d.term_averages[activeTerm - 1]?.learners) ?? 0;
 
     // ── Gender data for active term ──
-    const maleAvg   = activeTerm === 0 ? d.gender_breakdown.male?.avg   : d.gender_breakdown.male?.term_avgs[activeTerm-1];
-    const femaleAvg = activeTerm === 0 ? d.gender_breakdown.female?.avg : d.gender_breakdown.female?.term_avgs[activeTerm-1];
-    const maleLearners   = d.gender_breakdown.male?.learners   ?? 0;
-    const femaleLearners = d.gender_breakdown.female?.learners ?? 0;
-
-    const genderMax = Math.max(maleAvg || 0, femaleAvg || 0, 1);
+    // API returns: gender_breakdown.male.terms = {1:avg,...}, overall
+    const maleAvg   = activeTerm === 0
+        ? d.gender_breakdown?.male?.overall
+        : d.gender_breakdown?.male?.terms?.[activeTerm] ?? null;
+    const femaleAvg = activeTerm === 0
+        ? d.gender_breakdown?.female?.overall
+        : d.gender_breakdown?.female?.terms?.[activeTerm] ?? null;
+    const maleLearners   = 0; // not returned by this API
+    const femaleLearners = 0;
 
     // ── Completion data ──
-    const completionRows = d.completion_by_class.map(c => {
+    // API returns: completion[{term, enrolled, submitted, rate}]
+    const completionRows = (d.completion || []).map(c => {
         const col = sdaCompletionColor(c.rate);
         return `
             <div class="sda-completion-row">
-                <div class="sda-completion-name">${c.class_name}</div>
+                <div class="sda-completion-name">Term ${c.term}</div>
                 <div class="sda-completion-bar-wrap">
                     <div class="sda-completion-bar" style="width:${c.rate}%;background:${col};"></div>
                 </div>
@@ -374,9 +379,10 @@ function renderAnalytics(d, activeTerm) {
     }).join('') || `<div class="sda-no-data" style="height:80px;">No data yet</div>`;
 
     // ── Top learners ──
+    // API returns: top_performers[{name, email, gender, classes, avg, submissions}]
     const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const topRows = d.top_learners.map((l, i) => {
-        const col = sdaAvgColor(l.avg_pct);
+    const topRows = (d.top_performers || []).map((l, i) => {
+        const col = sdaAvgColor(l.avg);
         return `
             <tr>
                 <td><span class="sda-rank ${rankClass(i)}">${i + 1}</span></td>
@@ -387,24 +393,25 @@ function renderAnalytics(d, activeTerm) {
                     </div>
                     <div class="sda-learner-class">${l.classes}</div>
                 </td>
-                <td><span class="sda-avg-pill ${col}">${l.avg_pct}%</span></td>
-                <td style="font-size:11px;color:#4a5568;">${l.quiz_count} quizzes</td>
+                <td><span class="sda-avg-pill ${col}">${l.avg}%</span></td>
+                <td style="font-size:11px;color:#4a5568;">${l.submissions} quizzes</td>
             </tr>`;
     }).join('') || `<tr><td colspan="4" style="text-align:center;color:#2d3340;font-style:italic;padding:20px;">No data yet</td></tr>`;
 
     // ── Most improved ──
-    const improvedRows = d.most_improved.length
+    // API returns: most_improved[{name, from_term, to_term, from_avg, to_avg, jump}]
+    const improvedRows = (d.most_improved || []).length
         ? d.most_improved.map(l => `
             <div class="sda-improved-row">
                 <div>
                     <div class="sda-improved-name">${l.name}</div>
                     <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-                        <span class="sda-improved-from">${l.t1_avg}%</span>
+                        <span class="sda-improved-from">T${l.from_term}: ${l.from_avg}%</span>
                         <span class="sda-improved-arrow">→</span>
-                        <span class="sda-improved-to">T${l.latest_term}: ${l.tn_avg}%</span>
+                        <span class="sda-improved-to">T${l.to_term}: ${l.to_avg}%</span>
                     </div>
                 </div>
-                <span class="sda-improved-badge">+${l.improvement}%</span>
+                <span class="sda-improved-badge">+${l.jump}%</span>
             </div>`).join('')
         : `<div class="sda-no-improved">Need data in at least 2 terms to show improvement</div>`;
 
@@ -440,7 +447,7 @@ function renderAnalytics(d, activeTerm) {
                     <div class="sda-kpi-label">Teachers</div>
                 </div>
                 <div class="sda-kpi c-purple">
-                    <div class="sda-kpi-val">${d.total_quizzes}</div>
+                    <div class="sda-kpi-val">${(d.class_performance||[]).reduce((s,c)=>s+(c.terms?Object.values(c.terms).filter(v=>v!==null).length:0),0)}</div>
                     <div class="sda-kpi-label">Assessments</div>
                 </div>
                 <div class="sda-kpi c-pink">
@@ -457,7 +464,7 @@ function renderAnalytics(d, activeTerm) {
                         School Average by Term
                     </div>
                     <div class="sda-chart-wrap h200">
-                        ${trendAvgs.some(v => v !== null)
+                        ${(d.term_averages||[]).some(v => v.avg !== null)
                             ? `<canvas id="sda-trend-chart"></canvas>`
                             : `<div class="sda-no-data">No assessment data yet</div>`}
                     </div>
@@ -568,11 +575,11 @@ function sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg) {
     // ── 1. Term Trend (line chart) ──
     const trendCtx = document.getElementById('sda-trend-chart')?.getContext('2d');
     if (trendCtx) {
-        const trendAvgs = d.term_trend.map(t => t.avg);
+        const trendAvgs = (d.term_averages || []).map(t => t.avg);
         const chart = new Chart(trendCtx, {
             type: 'line',
             data: {
-                labels: d.term_trend.map(t => `Term ${t.term}`),
+                labels: (d.term_averages || []).map(t => `Term ${t.term}`),
                 datasets: [{
                     label: 'School Avg %',
                     data: trendAvgs,
@@ -598,8 +605,8 @@ function sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg) {
                         callbacks: {
                             label: ctx => ctx.parsed.y !== null ? ` ${ctx.parsed.y}%` : ' No data',
                             afterLabel: ctx => {
-                                const t = d.term_trend[ctx.dataIndex];
-                                return t ? `${t.learners} learners · ${t.quizzes} quizzes` : '';
+                                const t = (d.term_averages || [])[ctx.dataIndex];
+                                return t ? `${t.learners} learners · ${t.submissions} submissions` : '';
                             }
                         }
                     }
@@ -731,7 +738,7 @@ function sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg) {
                 datasets: [
                     {
                         label: 'Boys',
-                        data: d.gender_breakdown.male?.term_avgs || [],
+                        data: [1,2,3,4].map(t => d.gender_breakdown?.male?.terms?.[t] ?? null),
                         backgroundColor: 'rgba(78,121,167,0.65)',
                         borderColor: '#4e79a7',
                         borderWidth: 2,
@@ -740,7 +747,7 @@ function sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg) {
                     },
                     {
                         label: 'Girls',
-                        data: d.gender_breakdown.female?.term_avgs || [],
+                        data: [1,2,3,4].map(t => d.gender_breakdown?.female?.terms?.[t] ?? null),
                         backgroundColor: 'rgba(225,87,89,0.65)',
                         borderColor: '#e15759',
                         borderWidth: 2,
