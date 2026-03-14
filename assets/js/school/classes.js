@@ -14,212 +14,217 @@ window._sdClassDetailCache = {};
         /* ── CLASS GRID ── */
         .sd-class-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            padding: 28px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+            padding: 24px;
         }
 
         .sd-class-card {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: border-color 0.15s;
             position: relative;
             overflow: hidden;
         }
+
+        /* Left accent bar — replaces top color bar */
         .sd-class-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: 14px 14px 0 0;
+            top: 10px; bottom: 10px;
+            left: 0;
+            width: 2px;
+            border-radius: 0 2px 2px 0;
         }
-        .sd-class-card.avg-green::before  { background: #22c55e; }
-        .sd-class-card.avg-orange::before { background: #f59e0b; }
-        .sd-class-card.avg-red::before    { background: #f85149; }
-        .sd-class-card.avg-gray::before   { background: #4a5568; }
+        .sd-class-card.avg-green::before  { background: var(--green); }
+        .sd-class-card.avg-orange::before { background: var(--orange); }
+        .sd-class-card.avg-red::before    { background: var(--red); }
+        .sd-class-card.avg-gray::before   { background: var(--text-dim); }
 
         .sd-class-card:hover {
-            border-color: rgba(79,209,197,0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border-color: var(--border-hover);
+            transform: none;
+            box-shadow: none;
         }
 
         .sd-class-card-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .sd-class-card-name {
-            font-size: 22px;
-            font-weight: 900;
-            color: #e2e8f0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
             line-height: 1;
         }
 
         .sd-class-card-avg {
-            font-size: 13px;
-            font-weight: 800;
-            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
             border-radius: 20px;
+            font-family: var(--font-mono);
         }
-        .sd-class-card-avg.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .sd-class-card-avg.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .sd-class-card-avg.red    { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .sd-class-card-avg.gray   { background: rgba(255,255,255,0.06); color: #8b949e; }
+        .sd-class-card-avg.green  { background: var(--green-dim);  color: var(--green);  }
+        .sd-class-card-avg.orange { background: var(--orange-dim); color: var(--orange); }
+        .sd-class-card-avg.red    { background: var(--red-dim);    color: var(--red);    }
+        .sd-class-card-avg.gray   { background: var(--surface2);   color: var(--text-muted); }
 
         .sd-class-stats {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 6px;
+            margin-bottom: 14px;
         }
 
         .sd-class-stat {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 8px;
-            padding: 10px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 6px;
             text-align: center;
         }
         .sd-class-stat-val {
-            font-size: 18px;
-            font-weight: 900;
-            color: #e2e8f0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
             line-height: 1;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
         }
         .sd-class-stat-label {
             font-size: 10px;
-            color: #8b949e;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .sd-class-teachers {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
         }
         .sd-class-teacher-chip {
             font-size: 11px;
-            font-weight: 700;
-            padding: 3px 10px;
+            font-weight: 500;
+            padding: 2px 8px;
             border-radius: 20px;
-            background: rgba(79,209,197,0.08);
-            border: 1px solid rgba(79,209,197,0.2);
-            color: #4fd1c5;
+            background: var(--teal-dim);
+            border: 1px solid var(--teal-border);
+            color: var(--teal);
+            font-family: var(--font-mono);
         }
         .sd-class-no-teachers {
             font-size: 11px;
-            color: #4a5568;
-            font-style: italic;
+            color: var(--text-dim);
         }
 
         .sd-class-arrow {
             position: absolute;
-            bottom: 16px;
-            right: 16px;
-            color: #4a5568;
-            transition: color 0.2s, transform 0.2s;
+            bottom: 14px;
+            right: 14px;
+            color: var(--border-hover);
+            transition: color 0.15s;
         }
-        .sd-class-card:hover .sd-class-arrow {
-            color: #4fd1c5;
-            transform: translateX(3px);
-        }
+        .sd-class-card:hover .sd-class-arrow { color: var(--teal); }
 
         /* ── DETAIL VIEW ── */
-        .sd-detail-shell {
-            padding: 28px;
-        }
+        .sd-detail-shell { padding: 24px; }
 
         .sd-detail-back {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-size: 13px;
-            font-weight: 700;
-            color: #8b949e;
+            font-weight: 500;
+            color: var(--text-muted);
             cursor: pointer;
-            margin-bottom: 24px;
-            transition: color 0.2s;
+            margin-bottom: 20px;
+            transition: color 0.15s;
             background: none;
             border: none;
-            font-family: 'Nunito', sans-serif;
+            font-family: var(--font);
             padding: 0;
         }
-        .sd-detail-back:hover { color: #e2e8f0; }
-        .sd-detail-back svg { width: 16px; height: 16px; stroke: currentColor; }
+        .sd-detail-back:hover { color: var(--text); }
+        .sd-detail-back svg   { width: 14px; height: 14px; stroke: currentColor; }
 
         .sd-detail-header {
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
         .sd-detail-class-name {
-            font-size: 28px;
-            font-weight: 900;
-            color: #e2e8f0;
-            margin-bottom: 4px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 3px;
         }
         .sd-detail-meta {
-            font-size: 13px;
-            color: #8b949e;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
         }
 
         /* ── SUBJECT BLOCK ── */
         .sd-subject-block {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            margin-bottom: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 12px;
             overflow: hidden;
+            transition: border-color 0.15s;
         }
+        .sd-subject-block:hover { border-color: var(--border-hover); }
 
         .sd-subject-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
             transition: background 0.15s;
         }
-        .sd-subject-header:hover { background: rgba(255,255,255,0.02); }
+        .sd-subject-header:hover { background: var(--surface2); }
 
         .sd-subject-name {
-            font-size: 15px;
-            font-weight: 800;
-            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
         }
         .sd-subject-name span {
             font-size: 11px;
-            font-weight: 700;
-            color: #4fd1c5;
+            font-weight: 500;
+            color: var(--teal);
             margin-left: 8px;
-            letter-spacing: 0.5px;
+            font-family: var(--font-mono);
         }
 
         .sd-subject-avg-badge {
-            font-size: 13px;
-            font-weight: 800;
-            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
             border-radius: 20px;
+            font-family: var(--font-mono);
         }
-        .sd-subject-avg-badge.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .sd-subject-avg-badge.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .sd-subject-avg-badge.red    { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .sd-subject-avg-badge.gray   { background: rgba(255,255,255,0.06); color: #8b949e; }
+        .sd-subject-avg-badge.green  { background: var(--green-dim);  color: var(--green);  }
+        .sd-subject-avg-badge.orange { background: var(--orange-dim); color: var(--orange); }
+        .sd-subject-avg-badge.red    { background: var(--red-dim);    color: var(--red);    }
+        .sd-subject-avg-badge.gray   { background: var(--surface2);   color: var(--text-muted); }
 
         /* ── LEARNER TABLE ── */
-        .sd-learner-table-wrap {
-            overflow-x: auto;
-        }
+        .sd-learner-table-wrap { overflow-x: auto; }
 
         .sd-learner-table {
             width: 100%;
@@ -228,74 +233,78 @@ window._sdClassDetailCache = {};
         }
 
         .sd-learner-table th {
-            padding: 10px 16px;
+            padding: 8px 14px;
             text-align: left;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            color: #8b949e;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
             white-space: nowrap;
-            background: rgba(255,255,255,0.02);
+            font-family: var(--font);
         }
 
         .sd-learner-table td {
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: #c9d1d9;
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
             white-space: nowrap;
         }
 
         .sd-learner-table tr:last-child td { border-bottom: none; }
-        .sd-learner-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .sd-learner-table tr:hover td      { background: var(--surface2); }
 
         .sd-learner-rank {
             font-size: 11px;
-            font-weight: 800;
-            color: #4a5568;
-            width: 24px;
+            font-weight: 500;
+            color: var(--text-dim);
+            width: 22px;
+            font-family: var(--font-mono);
         }
 
         .sd-learner-name-cell {
-            font-weight: 700;
-            color: #e2e8f0;
+            font-weight: 500;
+            color: var(--text);
             min-width: 160px;
         }
 
         .sd-learner-gender {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-family: var(--font-mono);
         }
-        .sd-learner-gender.male   { background: rgba(78,121,167,0.15); color: #4e79a7; }
-        .sd-learner-gender.female { background: rgba(225,87,89,0.15);  color: #e15759; }
-        .sd-learner-gender.other  { background: rgba(255,255,255,0.06); color: #8b949e; }
+        .sd-learner-gender.male   { background: var(--blue-dim);         color: var(--blue);   }
+        .sd-learner-gender.female { background: rgba(225,87,89,0.1);     color: #e15759;       }
+        .sd-learner-gender.other  { background: var(--surface2);         color: var(--text-muted); }
 
         .sd-quiz-score {
             font-size: 12px;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
             text-align: center;
-            min-width: 52px;
+            min-width: 48px;
             display: inline-block;
+            font-family: var(--font-mono);
         }
-        .sd-quiz-score.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .sd-quiz-score.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .sd-quiz-score.red    { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .sd-quiz-score.none   { background: rgba(255,255,255,0.04); color: #4a5568; font-style: italic; font-size: 11px; }
+        .sd-quiz-score.green  { background: var(--green-dim);  color: var(--green);  }
+        .sd-quiz-score.orange { background: var(--orange-dim); color: var(--orange); }
+        .sd-quiz-score.red    { background: var(--red-dim);    color: var(--red);    }
+        .sd-quiz-score.none   { background: var(--surface2);   color: var(--text-dim); font-size: 11px; }
 
         .sd-learner-avg {
-            font-size: 13px;
-            font-weight: 800;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
         }
-        .sd-learner-avg.green  { color: #22c55e; }
-        .sd-learner-avg.orange { color: #f59e0b; }
-        .sd-learner-avg.red    { color: #f85149; }
-        .sd-learner-avg.gray   { color: #4a5568; }
+        .sd-learner-avg.green  { color: var(--green);  }
+        .sd-learner-avg.orange { color: var(--orange); }
+        .sd-learner-avg.red    { color: var(--red);    }
+        .sd-learner-avg.gray   { color: var(--text-dim); }
 
         /* ── EMPTY STATE ── */
         .sd-classes-empty {
@@ -304,25 +313,24 @@ window._sdClassDetailCache = {};
             align-items: center;
             justify-content: center;
             padding: 80px 20px;
-            color: #4a5568;
+            color: var(--text-dim);
             text-align: center;
-            gap: 12px;
+            gap: 10px;
         }
-        .sd-classes-empty svg { opacity: 0.3; }
-        .sd-classes-empty h3  { color: #8b949e; font-size: 16px; }
+        .sd-classes-empty svg { opacity: 0.2; }
+        .sd-classes-empty h3  { color: var(--text-muted); font-size: 14px; font-weight: 600; }
 
         /* ── NO ASSESSMENTS ── */
         .sd-no-assessments {
-            padding: 30px 20px;
+            padding: 28px 16px;
             text-align: center;
-            color: #4a5568;
+            color: var(--text-dim);
             font-size: 13px;
-            font-style: italic;
         }
 
         @media (max-width: 600px) {
-            .sd-class-grid  { grid-template-columns: 1fr; padding: 16px; }
-            .sd-detail-shell { padding: 16px; }
+            .sd-class-grid   { grid-template-columns: 1fr; padding: 14px; }
+            .sd-detail-shell { padding: 14px; }
         }
     `;
     document.head.appendChild(s);
@@ -351,12 +359,12 @@ window.loadSdClasses = async function() {
     content.innerHTML = `
         <div class="sd-class-grid">
             ${[1,2,3,4].map(() => `
-                <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;">
-                    <div class="sd-skeleton" style="height:24px;width:60px;margin-bottom:16px;"></div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
-                        ${[1,2,3].map(() => `<div class="sd-skeleton" style="height:56px;border-radius:8px;"></div>`).join('')}
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;">
+                    <div class="sd-skeleton" style="height:20px;width:60px;margin-bottom:14px;"></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
+                        ${[1,2,3].map(() => `<div class="sd-skeleton" style="height:50px;border-radius:var(--radius);"></div>`).join('')}
                     </div>
-                    <div class="sd-skeleton" style="height:24px;width:80%;border-radius:20px;"></div>
+                    <div class="sd-skeleton" style="height:22px;width:70%;border-radius:20px;"></div>
                 </div>`).join('')}
         </div>`;
 
@@ -366,7 +374,7 @@ window.loadSdClasses = async function() {
         window._sdClassesCache = data;
         renderClassesGrid(data);
     } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;">Failed to load classes.</p>`;
+        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load classes.</p>`;
     }
 };
 
@@ -377,20 +385,20 @@ function renderClassesGrid(data) {
     if (!classes.length) {
         content.innerHTML = `
             <div class="sd-classes-empty">
-                <svg viewBox="0 0 24 24" width="56" height="56" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="var(--teal)" stroke-width="1.5" fill="none">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
                 <h3>No classes yet</h3>
-                <p>Classes will appear here once created.</p>
+                <p style="font-size:12px;">Classes will appear here once created.</p>
             </div>`;
         return;
     }
 
     content.innerHTML = `
-        <div style="padding:28px 28px 8px;">
-            <div style="font-size:22px;font-weight:900;color:#e2e8f0;margin-bottom:4px;">Classes</div>
-            <div style="font-size:13px;color:#8b949e;">${classes.length} class${classes.length !== 1 ? 'es' : ''} · Click a class to drill into learner performance</div>
+        <div style="padding:24px 24px 8px;">
+            <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:3px;">Classes</div>
+            <div style="font-size:12px;color:var(--text-muted);">${classes.length} class${classes.length !== 1 ? 'es' : ''} · Click a class to drill into learner performance</div>
         </div>
         <div class="sd-class-grid">
             ${classes.map(cls => {
@@ -423,7 +431,7 @@ function renderClassesGrid(data) {
                         </div>
                         <div class="sd-class-teachers">${teacherChips}</div>
                         <div class="sd-class-arrow">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
@@ -442,21 +450,20 @@ window.loadSdClassDetail = async function(classId, className) {
     // Skeleton
     content.innerHTML = `
         <div class="sd-detail-shell">
-            <div class="sd-skeleton" style="height:16px;width:100px;margin-bottom:24px;border-radius:6px;"></div>
-            <div class="sd-skeleton" style="height:28px;width:200px;margin-bottom:8px;"></div>
-            <div class="sd-skeleton" style="height:13px;width:160px;margin-bottom:28px;"></div>
+            <div class="sd-skeleton" style="height:14px;width:100px;margin-bottom:20px;border-radius:var(--radius);"></div>
+            <div class="sd-skeleton" style="height:20px;width:200px;margin-bottom:6px;"></div>
+            <div class="sd-skeleton" style="height:12px;width:160px;margin-bottom:20px;"></div>
             ${[1,2].map(() => `
-                <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;margin-bottom:20px;overflow:hidden;">
-                    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);">
-                        <div class="sd-skeleton" style="height:16px;width:160px;"></div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;">
+                    <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+                        <div class="sd-skeleton" style="height:14px;width:160px;"></div>
                     </div>
-                    <div style="padding:16px;">
-                        <div class="sd-skeleton" style="height:180px;border-radius:8px;"></div>
+                    <div style="padding:14px;">
+                        <div class="sd-skeleton" style="height:160px;border-radius:var(--radius);"></div>
                     </div>
                 </div>`).join('')}
         </div>`;
 
-    // Use cache if available
     if (window._sdClassDetailCache[classId]) {
         renderClassDetail(window._sdClassDetailCache[classId]);
         return;
@@ -472,12 +479,12 @@ window.loadSdClassDetail = async function(classId, className) {
         window._sdClassDetailCache[classId] = data;
         renderClassDetail(data);
     } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;">Failed to load class detail.</p>`;
+        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load class detail.</p>`;
     }
 };
 
 function renderClassDetail(data) {
-    const content = document.getElementById('sd-content');
+    const content  = document.getElementById('sd-content');
     const subjects = data.subjects || [];
 
     let subjectsHTML = '';
@@ -491,14 +498,12 @@ function renderClassDetail(data) {
         subjectsHTML = subjects.map((sub, si) => {
             const col = sdAvgColor(sub.subject_avg);
 
-            // Quiz column headers
             const quizHeaders = sub.quizzes.map(q =>
                 `<th title="${q.title}">T${q.term_number} · ${q.title.length > 12 ? q.title.substring(0,12)+'…' : q.title}</th>`
             ).join('');
 
-            // Learner rows
             const learnerRows = sub.learner_perf.map((l, li) => {
-                const avgCol = sdAvgColor(l.avg);
+                const avgCol      = sdAvgColor(l.avg);
                 const genderLabel = l.gender === 'male' ? 'Boy' : l.gender === 'female' ? 'Girl' : '—';
 
                 const quizCells = sub.quizzes.map(q => {
@@ -527,9 +532,9 @@ function renderClassDetail(data) {
                             ${sub.subject_name}
                             <span>${sub.quizzes.length} assessment${sub.quizzes.length !== 1 ? 's' : ''}</span>
                         </div>
-                        <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
                             <span class="sd-subject-avg-badge ${col}">${sub.subject_avg !== null ? sub.subject_avg + '%' : '—'}</span>
-                            <svg id="sd-chevron-${si}" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#8b949e" stroke-width="2.5" style="transition:transform 0.2s;">
+                            <svg id="sd-chevron-${si}" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition:transform 0.2s;">
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
                         </div>
@@ -559,7 +564,7 @@ function renderClassDetail(data) {
                     <line x1="19" y1="12" x2="5" y2="12"/>
                     <polyline points="12 19 5 12 12 5"/>
                 </svg>
-                All Classes
+                All classes
             </button>
 
             <div class="sd-detail-header">
@@ -578,7 +583,7 @@ window.toggleSubjectBlock = function(idx) {
     const body    = document.getElementById(`sd-subject-body-${idx}`);
     const chevron = document.getElementById(`sd-chevron-${idx}`);
     if (!body) return;
-    const isHidden = body.style.display === 'none';
+    const isHidden        = body.style.display === 'none';
     body.style.display    = isHidden ? '' : 'none';
     chevron.style.transform = isHidden ? '' : 'rotate(-90deg)';
 };
