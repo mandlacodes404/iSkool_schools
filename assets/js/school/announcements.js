@@ -398,10 +398,15 @@ function renderAnnouncements(data) {
         </div>`;
 }
 
-// ── Toggle expand/collapse ──
+// ── Toggle expand/collapse — direct DOM, no re-render ──
 window.sdanToggle = function(id) {
-    window._sdAnnExpanded = window._sdAnnExpanded === id ? null : id;
-    if (window._sdAnnCache) renderAnnouncements(window._sdAnnCache);
+    const card = document.getElementById('sdan-card-' + id);
+    if (!card) return;
+    const isExpanded = card.classList.contains('expanded');
+    // Collapse all
+    document.querySelectorAll('.sdan-card.expanded').forEach(c => c.classList.remove('expanded'));
+    // Expand this one if it wasn't already open
+    if (!isExpanded) card.classList.add('expanded');
 };
 
 // ── Filter ──
