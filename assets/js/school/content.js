@@ -422,12 +422,13 @@ function renderContentTab() {
     all.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
     const classOptions = (d.classes||[]).map(c =>
-        `<option value="${c.id}" ${f.class_id == c.id ? 'selected':''}}>${c.name}</option>`).join('');
+        `<option value="${c.id}" ${f.class_id == c.id ? 'selected':''}>${c.name}</option>`).join('');
     const teacherOptions = (d.teachers||[]).map(t =>
         `<option value="${t.email}" ${f.teacher_email===t.email?'selected':''}>${t.name}</option>`).join('');
 
     const rows = all.length ? all.map(item => {
         let typeBadge, subInfo, rightCol;
+        const clickable = `onclick="sdconViewItem('${item.type}', ${item.id})" style="cursor:pointer;"`;
 
         if (item.type === 'quiz') {
             typeBadge = item.is_summative
