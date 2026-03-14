@@ -2,9 +2,9 @@
 // CONTENT SECTION — assets/js/school/content.js
 // ══════════════════════════════════════════════════════════
 
-window._sdConCache   = null; // content data
-window._sdEvalCache  = null; // evaluations data
-window._sdConTab     = 'content'; // 'content' | 'evaluations'
+window._sdConCache   = null;
+window._sdEvalCache  = null;
+window._sdConTab     = 'content';
 window._sdConFilters = { class_id: 0, term: 0, teacher_email: '', type: '' };
 window._sdConSearch  = '';
 window._sdEvalFilters= { class_id: 0, term: 0, teacher_email: '' };
@@ -17,299 +17,356 @@ window._sdEvalOpen   = null;
     const s = document.createElement('style');
     s.id = 'sd-con-styles';
     s.textContent = `
-        .sdcon-shell { padding: 28px 28px 80px; max-width: 1200px; }
+        .sdcon-shell { padding: 24px 24px 80px; max-width: 1200px; }
 
-        /* Tab bar */
+        /* ── Tab bar — GitHub subnav style ── */
         .sdcon-tabs {
-            display: flex; gap: 4px;
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
-            width: fit-content;
-        }
-        .sdcon-tab {
-            font-size: 13px; font-weight: 800;
-            padding: 8px 20px; border-radius: 9px;
-            border: none; background: none;
-            color: #4a5568; cursor: pointer;
-            font-family: 'Nunito', sans-serif;
-            transition: all 0.18s;
-            display: flex; align-items: center; gap: 7px;
-        }
-        .sdcon-tab:hover { color: #8b949e; }
-        .sdcon-tab.active {
-            background: rgba(79,209,197,0.12);
-            border: 1px solid rgba(79,209,197,0.3);
-            color: #4fd1c5;
-        }
-        .sdcon-tab svg { width: 14px; height: 14px; stroke: currentColor; }
-
-        /* Stats row */
-        .sdcon-stats {
-            display: flex; gap: 10px; flex-wrap: wrap;
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 20px;
         }
-        .sdcon-stat {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-            padding: 12px 18px;
+        .sdcon-tab {
+            font-size: 14px;
+            font-weight: 400;
+            padding: 8px 14px;
+            border: none;
+            border-bottom: 2px solid transparent;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font);
+            transition: color 0.15s, border-color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            top: 1px;
         }
-        .sdcon-stat-val   { font-size: 20px; font-weight: 900; }
-        .sdcon-stat-label { font-size: 11px; color: #4a5568; font-weight: 700; margin-top: 2px; }
-        .sdcon-stat.c-teal   .sdcon-stat-val { color: #4fd1c5; }
-        .sdcon-stat.c-blue   .sdcon-stat-val { color: #4e79a7; }
-        .sdcon-stat.c-purple .sdcon-stat-val { color: #a78bfa; }
-        .sdcon-stat.c-orange .sdcon-stat-val { color: #f59e0b; }
-        .sdcon-stat.c-green  .sdcon-stat-val { color: #22c55e; }
+        .sdcon-tab:hover { color: var(--text); }
+        .sdcon-tab.active {
+            color: var(--text);
+            font-weight: 600;
+            border-bottom-color: #f78166;
+        }
+        .sdcon-tab svg { width: 14px; height: 14px; stroke: currentColor; opacity: 0.7; }
+        .sdcon-tab.active svg { opacity: 1; }
 
-        /* Toolbar */
+        /* ── Stats row ── */
+        .sdcon-stats {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .sdcon-stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
+            transition: border-color 0.15s;
+        }
+        .sdcon-stat:hover { border-color: var(--border-hover); }
+        .sdcon-stat-val {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+        }
+        .sdcon-stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .sdcon-stat.c-teal   .sdcon-stat-val { color: var(--teal);   }
+        .sdcon-stat.c-blue   .sdcon-stat-val { color: var(--blue);   }
+        .sdcon-stat.c-purple .sdcon-stat-val { color: var(--purple); }
+        .sdcon-stat.c-orange .sdcon-stat-val { color: var(--orange); }
+        .sdcon-stat.c-green  .sdcon-stat-val { color: var(--green);  }
+
+        /* ── Toolbar ── */
         .sdcon-toolbar {
             display: flex; align-items: center;
-            gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+            gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
         }
         .sdcon-search-wrap {
             position: relative; flex: 1;
-            min-width: 180px; max-width: 300px;
+            min-width: 180px; max-width: 280px;
         }
         .sdcon-search-wrap svg {
-            position: absolute; left: 11px; top: 50%;
+            position: absolute; left: 10px; top: 50%;
             transform: translateY(-50%);
-            width: 14px; height: 14px; stroke: #4a5568;
+            width: 13px; height: 13px;
+            stroke: var(--text-dim);
             pointer-events: none;
         }
         .sdcon-search {
             width: 100%;
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px 12px 8px 32px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 13px; font-weight: 600;
-            color: #e2e8f0; outline: none;
-            transition: border-color 0.2s;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 10px 6px 30px;
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.15s;
         }
-        .sdcon-search::placeholder { color: #4a5568; }
-        .sdcon-search:focus { border-color: rgba(79,209,197,0.4); }
+        .sdcon-search::placeholder { color: var(--text-dim); }
+        .sdcon-search:focus         { border-color: var(--border-hover); }
+
         .sdcon-select {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 12px; font-weight: 700;
-            color: #8b949e; outline: none; cursor: pointer;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.15s;
         }
-        .sdcon-select:focus { border-color: rgba(79,209,197,0.4); }
+        .sdcon-select:focus { border-color: var(--border-hover); }
+
         .sdcon-count {
-            font-size: 11px; font-weight: 800;
-            padding: 5px 12px; border-radius: 20px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            color: #4a5568; white-space: nowrap;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            white-space: nowrap;
             margin-left: auto;
+            font-family: var(--font-mono);
         }
 
-        /* Content table */
+        /* ── Content table ── */
         .sdcon-table-wrap { overflow-x: auto; }
         .sdcon-table {
-            width: 100%; border-collapse: collapse; font-size: 13px;
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
         }
         .sdcon-table th {
-            padding: 10px 14px;
+            padding: 8px 12px;
             text-align: left;
-            font-size: 10px; font-weight: 800;
-            letter-spacing: 1.5px; text-transform: uppercase;
-            color: #4a5568;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
             white-space: nowrap;
+            font-family: var(--font);
         }
         .sdcon-table td {
-            padding: 12px 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: #c9d1d9; vertical-align: middle;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            vertical-align: middle;
         }
         .sdcon-table tr:last-child td { border-bottom: none; }
-        .sdcon-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+        .sdcon-table tbody tr:hover td { background: var(--surface2); }
 
         /* Type badge */
         .sdcon-type {
-            font-size: 10px; font-weight: 800;
-            padding: 3px 9px; border-radius: 8px;
-            letter-spacing: 0.5px; text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 20px;
             white-space: nowrap;
+            font-family: var(--font-mono);
         }
-        .sdcon-type.quiz        { background: rgba(79,209,197,0.1);  color: #4fd1c5; }
-        .sdcon-type.summative   { background: rgba(34,197,94,0.1);   color: #22c55e; }
-        .sdcon-type.assignment  { background: rgba(78,121,167,0.1);  color: #4e79a7; }
-        .sdcon-type.resource    { background: rgba(167,139,250,0.1); color: #a78bfa; }
+        .sdcon-type.quiz       { background: var(--teal-dim);   color: var(--teal);   }
+        .sdcon-type.summative  { background: var(--green-dim);  color: var(--green);  }
+        .sdcon-type.assignment { background: var(--blue-dim);   color: var(--blue);   }
+        .sdcon-type.resource   { background: var(--purple-dim); color: var(--purple); }
 
-        .sdcon-title-cell { font-weight: 800; color: #e2e8f0; }
-        .sdcon-sub-cell   { font-size: 11px; color: #4a5568; margin-top: 2px; }
+        .sdcon-title-cell { font-weight: 500; color: var(--text); }
+        .sdcon-sub-cell   { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-family: var(--font-mono); }
 
         .sdcon-badge {
-            font-size: 10px; font-weight: 800;
-            padding: 2px 8px; border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
         }
-        .sdcon-badge.class { background: rgba(79,209,197,0.08); color: #4fd1c5; }
-        .sdcon-badge.term  { background: rgba(167,139,250,0.08); color: #a78bfa; }
+        .sdcon-badge.class { background: var(--teal-dim);   color: var(--teal);   }
+        .sdcon-badge.term  { background: var(--purple-dim); color: var(--purple); }
 
         .sdcon-avg {
-            font-size: 12px; font-weight: 800;
-            padding: 3px 10px; border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
         }
-        .sdcon-avg.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .sdcon-avg.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .sdcon-avg.red    { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .sdcon-avg.gray   { background: rgba(255,255,255,0.06); color: #4a5568; }
+        .sdcon-avg.green  { background: var(--green-dim);  color: var(--green);  }
+        .sdcon-avg.orange { background: var(--orange-dim); color: var(--orange); }
+        .sdcon-avg.red    { background: var(--red-dim);    color: var(--red);    }
+        .sdcon-avg.gray   { background: var(--surface2);   color: var(--text-dim); }
 
-        /* ── EVALUATIONS ── */
-        .sdeval-list { display: flex; flex-direction: column; gap: 12px; }
+        /* ── Evaluations ── */
+        .sdeval-list { display: flex; flex-direction: column; gap: 10px; }
 
         .sdeval-card {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px; overflow: hidden;
-            transition: border-color 0.2s;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: border-color 0.15s;
         }
-        .sdeval-card:hover { border-color: rgba(255,255,255,0.13); }
-        .sdeval-card.open  { border-color: rgba(79,209,197,0.25); }
+        .sdeval-card:hover { border-color: var(--border-hover); }
+        .sdeval-card.open  { border-color: var(--teal-border); }
 
         .sdeval-header {
             display: flex; align-items: center;
-            gap: 14px; padding: 16px 20px;
+            gap: 12px; padding: 14px 16px;
             cursor: pointer;
         }
 
         .sdeval-score-circle {
-            width: 52px; height: 52px; border-radius: 50%;
+            width: 44px; height: 44px;
+            border-radius: 50%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             flex-shrink: 0;
-            border: 3px solid;
+            border: 2px solid;
         }
-        .sdeval-score-circle.green  { border-color: #22c55e; background: rgba(34,197,94,0.08); }
-        .sdeval-score-circle.orange { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
-        .sdeval-score-circle.red    { border-color: #f85149; background: rgba(248,81,73,0.08); }
-        .sdeval-score-circle.gray   { border-color: #2d3340; background: rgba(255,255,255,0.03); }
-        .sdeval-score-num {
-            font-size: 16px; font-weight: 900; line-height: 1;
-        }
-        .sdeval-score-num.green  { color: #22c55e; }
-        .sdeval-score-num.orange { color: #f59e0b; }
-        .sdeval-score-num.red    { color: #f85149; }
-        .sdeval-score-num.gray   { color: #2d3340; }
-        .sdeval-score-label { font-size: 9px; color: #4a5568; font-weight: 700; }
+        .sdeval-score-circle.green  { border-color: var(--green);  background: var(--green-dim);  }
+        .sdeval-score-circle.orange { border-color: var(--orange); background: var(--orange-dim); }
+        .sdeval-score-circle.red    { border-color: var(--red);    background: var(--red-dim);    }
+        .sdeval-score-circle.gray   { border-color: var(--border-hover); background: var(--surface2); }
 
-        .sdeval-main { flex: 1; min-width: 0; }
-        .sdeval-title {
-            font-size: 14px; font-weight: 800; color: #e2e8f0;
-            margin-bottom: 5px;
+        .sdeval-score-num {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1;
+            font-family: var(--font-mono);
         }
-        .sdeval-meta {
-            display: flex; align-items: center;
-            gap: 8px; flex-wrap: wrap;
-        }
-        .sdeval-meta-text { font-size: 11px; color: #4a5568; }
+        .sdeval-score-num.green  { color: var(--green);  }
+        .sdeval-score-num.orange { color: var(--orange); }
+        .sdeval-score-num.red    { color: var(--red);    }
+        .sdeval-score-num.gray   { color: var(--text-dim); }
+        .sdeval-score-label { font-size: 9px; color: var(--text-dim); font-weight: 500; }
+
+        .sdeval-main  { flex: 1; min-width: 0; }
+        .sdeval-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+        .sdeval-meta  { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .sdeval-meta-text { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+
         .sdeval-badge {
-            font-size: 10px; font-weight: 800;
-            padding: 2px 8px; border-radius: 8px;
-            letter-spacing: 0.3px;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
         }
-        .sdeval-badge.class  { background: rgba(79,209,197,0.1);  color: #4fd1c5; }
-        .sdeval-badge.term   { background: rgba(167,139,250,0.1); color: #a78bfa; }
-        .sdeval-badge.active { background: rgba(34,197,94,0.1);   color: #22c55e; }
-        .sdeval-badge.closed { background: rgba(255,255,255,0.05); color: #4a5568; }
+        .sdeval-badge.class  { background: var(--teal-dim);   color: var(--teal);   }
+        .sdeval-badge.term   { background: var(--purple-dim); color: var(--purple); }
+        .sdeval-badge.active { background: var(--green-dim);  color: var(--green);  }
+        .sdeval-badge.closed { background: var(--surface2);   color: var(--text-dim); }
+
         .sdeval-resp-count {
-            font-size: 12px; font-weight: 800; color: #4fd1c5;
-            white-space: nowrap; flex-shrink: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-family: var(--font-mono);
         }
         .sdeval-chevron {
-            color: #2d3340; flex-shrink: 0;
+            color: var(--border-hover);
+            flex-shrink: 0;
             transition: transform 0.2s, color 0.2s;
         }
-        .sdeval-card.open .sdeval-chevron {
-            transform: rotate(180deg); color: #4fd1c5;
-        }
-        .sdeval-chevron svg { width: 16px; height: 16px; stroke: currentColor; }
+        .sdeval-card.open .sdeval-chevron { transform: rotate(180deg); color: var(--teal); }
+        .sdeval-chevron svg { width: 14px; height: 14px; stroke: currentColor; }
 
         /* Body */
         .sdeval-body {
             display: none;
-            padding: 0 20px 20px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 0 16px 16px;
+            border-top: 1px solid var(--border);
         }
         .sdeval-card.open .sdeval-body { display: block; }
 
         /* Statements */
-        .sdeval-statements { padding-top: 16px; margin-bottom: 16px; }
+        .sdeval-statements { padding-top: 14px; margin-bottom: 14px; }
         .sdeval-stmt-row {
-            display: flex; align-items: center; gap: 12px;
-            padding: 9px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
         }
         .sdeval-stmt-row:last-child { border-bottom: none; }
         .sdeval-stmt-text {
-            flex: 1; font-size: 13px; font-weight: 600; color: #c9d1d9;
+            flex: 1; font-size: 13px; font-weight: 400; color: var(--text-muted);
         }
         .sdeval-stmt-bar-wrap {
-            width: 120px; height: 6px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 3px; overflow: hidden; flex-shrink: 0;
+            width: 100px; height: 4px;
+            background: var(--surface2);
+            border-radius: 2px; overflow: hidden; flex-shrink: 0;
         }
-        .sdeval-stmt-bar { height: 100%; border-radius: 3px; }
+        .sdeval-stmt-bar { height: 100%; border-radius: 2px; }
         .sdeval-stmt-score {
-            font-size: 12px; font-weight: 800;
-            width: 32px; text-align: right; flex-shrink: 0;
+            font-size: 12px; font-weight: 600;
+            width: 28px; text-align: right; flex-shrink: 0;
+            font-family: var(--font-mono);
         }
 
-        /* Score label */
+        /* Score tag */
         .sdeval-score-tag {
-            font-size: 10px; font-weight: 800;
-            padding: 2px 8px; border-radius: 8px;
+            font-size: 10px; font-weight: 500;
+            padding: 2px 7px; border-radius: 20px;
             white-space: nowrap; flex-shrink: 0;
+            font-family: var(--font-mono);
         }
-        .sdeval-score-tag.s5 { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .sdeval-score-tag.s4 { background: rgba(79,209,197,0.12); color: #4fd1c5; }
-        .sdeval-score-tag.s3 { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .sdeval-score-tag.s2 { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .sdeval-score-tag.s1 { background: rgba(248,81,73,0.2);   color: #f85149; }
+        .sdeval-score-tag.s5 { background: var(--green-dim);  color: var(--green);  }
+        .sdeval-score-tag.s4 { background: var(--teal-dim);   color: var(--teal);   }
+        .sdeval-score-tag.s3 { background: var(--orange-dim); color: var(--orange); }
+        .sdeval-score-tag.s2 { background: var(--red-dim);    color: var(--red);    }
+        .sdeval-score-tag.s1 { background: var(--red-dim);    color: var(--red);    }
 
         /* Comments */
         .sdeval-comments-title {
-            font-size: 10px; font-weight: 800;
-            letter-spacing: 1.5px; text-transform: uppercase;
-            color: #4a5568; margin-bottom: 10px;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            color: var(--text-dim); margin-bottom: 8px;
         }
         .sdeval-comment {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-left: 3px solid rgba(79,209,197,0.3);
-            border-radius: 8px; padding: 12px 14px;
-            margin-bottom: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 2px solid var(--teal-border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            margin-bottom: 6px;
         }
         .sdeval-comment-text {
-            font-size: 13px; font-weight: 600; color: #c9d1d9;
-            line-height: 1.6; margin-bottom: 6px;
+            font-size: 13px; font-weight: 400; color: var(--text-muted);
+            line-height: 1.6; margin-bottom: 4px;
         }
-        .sdeval-comment-date { font-size: 11px; color: #2d3340; }
+        .sdeval-comment-date { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
 
         .sdeval-no-responses {
             text-align: center; padding: 20px;
-            color: #2d3340; font-size: 13px; font-style: italic;
+            color: var(--text-dim); font-size: 13px;
         }
 
         /* Empty state */
         .sdcon-empty {
             text-align: center; padding: 60px 20px;
-            color: #4a5568; font-size: 13px; font-style: italic;
+            color: var(--text-dim); font-size: 13px;
         }
 
         @media (max-width: 700px) {
-            .sdcon-shell { padding: 16px 14px 80px; }
-            .sdcon-tabs  { width: 100%; }
+            .sdcon-shell { padding: 14px 12px 80px; }
+            .sdcon-tabs  { width: 100%; overflow-x: auto; }
         }
     `;
     document.head.appendChild(s);
@@ -335,7 +392,7 @@ function sdevalScoreTag(v) {
     if (v >= 3.5) return '<span class="sdeval-score-tag s4">Good</span>';
     if (v >= 2.5) return '<span class="sdeval-score-tag s3">Neutral</span>';
     if (v >= 1.5) return '<span class="sdeval-score-tag s2">Poor</span>';
-    return '<span class="sdeval-score-tag s1">Very Poor</span>';
+    return '<span class="sdeval-score-tag s1">Very poor</span>';
 }
 function sdconTimeAgo(dateStr) {
     if (!dateStr) return '';
@@ -351,17 +408,15 @@ function sdconTimeAgo(dateStr) {
 window.loadSdContent = async function() {
     const content = document.getElementById('sd-content');
 
-    // Show skeleton
     content.innerHTML = `
         <div class="sdcon-shell">
-            <div class="sd-skeleton" style="height:44px;width:300px;border-radius:12px;margin-bottom:24px;"></div>
-            <div style="display:flex;gap:10px;margin-bottom:20px;">
-                ${[1,2,3,4].map(()=>`<div class="sd-skeleton" style="height:56px;width:100px;border-radius:10px;"></div>`).join('')}
+            <div class="sd-skeleton" style="height:38px;width:260px;border-radius:var(--radius);margin-bottom:20px;"></div>
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                ${[1,2,3,4].map(()=>`<div class="sd-skeleton" style="height:52px;width:90px;border-radius:var(--radius-lg);"></div>`).join('')}
             </div>
-            ${[1,2,3,4,5].map(()=>`<div class="sd-skeleton" style="height:52px;border-radius:8px;margin-bottom:6px;"></div>`).join('')}
+            ${[1,2,3,4,5].map(()=>`<div class="sd-skeleton" style="height:44px;border-radius:var(--radius);margin-bottom:4px;"></div>`).join('')}
         </div>`;
 
-    // Load both in parallel
     try {
         const [conRes, evalRes] = await Promise.all([
             fetch('api/school/get_content.php'),
@@ -371,7 +426,7 @@ window.loadSdContent = async function() {
         window._sdEvalCache = await evalRes.json();
         renderContentSection();
     } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;">Failed to load content.</p>`;
+        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load content.</p>`;
     }
 };
 
@@ -397,14 +452,12 @@ function renderContentTab() {
     const f = window._sdConFilters;
     const search = window._sdConSearch.toLowerCase().trim();
 
-    // Merge all content into one list
     let all = [
         ...d.quizzes,
         ...d.assignments,
         ...d.resources,
     ];
 
-    // Filter
     if (f.class_id)      all = all.filter(i => i.class_id == f.class_id);
     if (f.term)          all = all.filter(i => i.term == f.term);
     if (f.teacher_email) all = all.filter(i => i.teacher_email === f.teacher_email);
@@ -418,7 +471,6 @@ function renderContentTab() {
         i.class_name.toLowerCase().includes(search)
     );
 
-    // Sort by date desc
     all.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
     const classOptions = (d.classes||[]).map(c =>
@@ -442,11 +494,11 @@ function renderContentTab() {
         } else if (item.type === 'assignment') {
             typeBadge = `<span class="sdcon-type assignment">Assignment</span>`;
             subInfo   = item.due_date ? `Due: ${new Date(item.due_date).toLocaleDateString('en-ZA', {day:'numeric',month:'short'})}` : '';
-            rightCol  = `<span style="font-size:12px;color:#4a5568;">${item.submissions} submitted</span>`;
+            rightCol  = `<span style="font-size:12px;color:var(--text-dim);font-family:var(--font-mono);">${item.submissions} submitted</span>`;
         } else {
             typeBadge = `<span class="sdcon-type resource">Resource</span>`;
             subInfo   = item.file_type ? item.file_type.toUpperCase() : 'File';
-            rightCol  = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a5568" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+            rightCol  = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
         }
 
         return `
@@ -456,9 +508,9 @@ function renderContentTab() {
                     <div class="sdcon-title-cell">${item.title}</div>
                     <div class="sdcon-sub-cell">${subInfo}</div>
                 </td>
-                <td style="font-size:12px;color:#8b949e;">${item.teacher_name}</td>
+                <td style="font-size:12px;color:var(--text-muted);">${item.teacher_name}</td>
                 <td><span class="sdcon-badge class">${item.class_name}</span></td>
-                <td style="font-size:11px;color:#4a5568;">${sdconTimeAgo(item.created_at)}</td>
+                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${sdconTimeAgo(item.created_at)}</td>
                 <td>${rightCol}</td>
             </tr>`;
     }).join('') : `<tr><td colspan="6" class="sdcon-empty">No content found${search ? ' matching "'+search+'"':''}</td></tr>`;
@@ -466,7 +518,6 @@ function renderContentTab() {
     content.innerHTML = `
         <div class="sdcon-shell">
 
-            <!-- TABS -->
             <div class="sdcon-tabs">
                 <button class="sdcon-tab active" onclick="sdconSwitchTab('content')">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -486,7 +537,6 @@ function renderContentTab() {
                 </button>
             </div>
 
-            <!-- STATS -->
             <div class="sdcon-stats">
                 <div class="sdcon-stat c-teal">
                     <div class="sdcon-stat-val">${d.total_quizzes}</div>
@@ -506,7 +556,6 @@ function renderContentTab() {
                 </div>
             </div>
 
-            <!-- TOOLBAR -->
             <div class="sdcon-toolbar">
                 <div class="sdcon-search-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -516,37 +565,31 @@ function renderContentTab() {
                         value="${window._sdConSearch}"
                         oninput="sdconSearch(this.value)">
                 </div>
-
                 <select class="sdcon-select" onchange="sdconFilter('type', this.value)">
-                    <option value="">All Types</option>
+                    <option value="">All types</option>
                     <option value="quiz"       ${f.type==='quiz'?'selected':''}>Quizzes</option>
-                    <option value="summative"  ${f.type==='summative'?'selected':''}>Summative Only</option>
+                    <option value="summative"  ${f.type==='summative'?'selected':''}>Summative only</option>
                     <option value="assignment" ${f.type==='assignment'?'selected':''}>Assignments</option>
                     <option value="resource"   ${f.type==='resource'?'selected':''}>Resources</option>
                 </select>
-
                 <select class="sdcon-select" onchange="sdconFilter('class_id', this.value)">
-                    <option value="0">All Classes</option>
+                    <option value="0">All classes</option>
                     ${classOptions}
                 </select>
-
                 <select class="sdcon-select" onchange="sdconFilter('term', this.value)">
-                    <option value="0">All Terms</option>
+                    <option value="0">All terms</option>
                     <option value="1" ${f.term==1?'selected':''}>Term 1</option>
                     <option value="2" ${f.term==2?'selected':''}>Term 2</option>
                     <option value="3" ${f.term==3?'selected':''}>Term 3</option>
                     <option value="4" ${f.term==4?'selected':''}>Term 4</option>
                 </select>
-
                 <select class="sdcon-select" onchange="sdconFilter('teacher_email', this.value)">
-                    <option value="">All Teachers</option>
+                    <option value="">All teachers</option>
                     ${teacherOptions}
                 </select>
-
                 <span class="sdcon-count">${all.length} item${all.length!==1?'s':''}</span>
             </div>
 
-            <!-- TABLE -->
             <div class="sdcon-table-wrap">
                 <table class="sdcon-table">
                     <thead>
@@ -596,67 +639,51 @@ function renderEvaluationsTab() {
             ? `<div class="sdeval-score-num ${col}">${ev.overall_score}</div><div class="sdeval-score-label">/5</div>`
             : `<div class="sdeval-score-num gray">—</div><div class="sdeval-score-label">no data</div>`;
 
-        // Answer options config — matches teacher side
-        const answerOptions = [
-            { key: 'strongly_agree',    label: 'Strongly Agree',    color: '#22c55e' },
-            { key: 'agree',             label: 'Agree',             color: '#4fd1c5' },
-            { key: 'neutral',           label: 'Neutral',           color: '#f59e0b' },
-            { key: 'disagree',          label: 'Disagree',          color: '#f85149' },
-            { key: 'strongly_disagree', label: 'Strongly Disagree', color: '#991b1b' },
-        ];
-
-        // Statements with percentage breakdown bars
         const stmtRows = ev.statements.length ? ev.statements.map(st => {
-            // Build breakdown from avg_score + count
-            // API gives us avg_score and count — we approximate breakdown
-            // For actual breakdown we need counts per answer, but avg_score gives us the story
             const sc = sdevalScoreColor(st.avg_score);
             const scoreLabel = st.avg_score !== null
-                ? `<span style="font-size:12px;font-weight:900;color:${sc==='green'?'#22c55e':sc==='orange'?'#f59e0b':'#f85149'};">${st.avg_score}/5</span>`
+                ? `<span style="font-size:12px;font-weight:600;color:${sc==='green'?'var(--green)':sc==='orange'?'var(--orange)':'var(--red)'};font-family:var(--font-mono);">${st.avg_score}/5</span>`
                 : '—';
 
-            // Build percentage bars using breakdown if available, else show avg bar
             let barsHTML = '';
             if (st.breakdown && st.breakdown.length) {
                 barsHTML = st.breakdown.map(b => `
-                    <div style="margin-bottom:6px;">
-                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#4a5568;margin-bottom:3px;">
+                    <div style="margin-bottom:5px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-dim);margin-bottom:2px;font-family:var(--font-mono);">
                             <span>${b.label}</span>
                             <span style="color:${b.color};">${b.count} (${b.percentage}%)</span>
                         </div>
-                        <div style="height:7px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
-                            <div style="height:100%;width:${b.percentage}%;background:${b.color};border-radius:4px;transition:width 0.6s ease;"></div>
+                        <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;">
+                            <div style="height:100%;width:${b.percentage}%;background:${b.color};border-radius:2px;transition:width 0.6s ease;"></div>
                         </div>
                     </div>`).join('');
             } else {
-                // Fallback: single bar showing avg as percentage of 5
                 const pct = st.avg_score !== null ? Math.round((st.avg_score / 5) * 100) : 0;
-                const barColor = sc==='green'?'#22c55e':sc==='orange'?'#f59e0b':'#f85149';
+                const barColor = sc==='green'?'var(--green)':sc==='orange'?'var(--orange)':'var(--red)';
                 barsHTML = `
-                    <div style="margin-bottom:6px;">
-                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#4a5568;margin-bottom:3px;">
+                    <div style="margin-bottom:5px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-dim);margin-bottom:2px;font-family:var(--font-mono);">
                             <span>Average score</span>
                             <span style="color:${barColor};">${st.avg_score ?? '—'}/5</span>
                         </div>
-                        <div style="height:7px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
-                            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.6s ease;"></div>
+                        <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;">
+                            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:2px;transition:width 0.6s ease;"></div>
                         </div>
                     </div>`;
             }
 
             return `
-                <div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:12px;">
-                        <div style="font-size:13px;font-weight:700;color:#c9d1d9;flex:1;">${st.statement}</div>
+                <div style="padding:12px 0;border-bottom:1px solid var(--border);">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px;">
+                        <div style="font-size:13px;font-weight:400;color:var(--text-muted);flex:1;">${st.statement}</div>
                         ${scoreLabel}
                     </div>
                     ${barsHTML}
                 </div>`;
         }).join('') : `<div class="sdeval-no-responses">No responses yet</div>`;
 
-        // Comments
         const commentBlocks = ev.comments.length ? `
-            <div class="sdeval-comments-title">Anonymous Comments (${ev.comments.length})</div>
+            <div class="sdeval-comments-title">Anonymous comments (${ev.comments.length})</div>
             ${ev.comments.map(c => `
                 <div class="sdeval-comment">
                     <div class="sdeval-comment-text">"${c.text}"</div>
@@ -695,7 +722,6 @@ function renderEvaluationsTab() {
     content.innerHTML = `
         <div class="sdcon-shell">
 
-            <!-- TABS -->
             <div class="sdcon-tabs">
                 <button class="sdcon-tab" onclick="sdconSwitchTab('content')">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -715,11 +741,10 @@ function renderEvaluationsTab() {
                 </button>
             </div>
 
-            <!-- STATS -->
             <div class="sdcon-stats">
                 <div class="sdcon-stat c-teal">
                     <div class="sdcon-stat-val">${d.total_evals}</div>
-                    <div class="sdcon-stat-label">Total Evaluations</div>
+                    <div class="sdcon-stat-label">Total evaluations</div>
                 </div>
                 <div class="sdcon-stat c-blue">
                     <div class="sdcon-stat-val">${d.total_responses}</div>
@@ -727,11 +752,10 @@ function renderEvaluationsTab() {
                 </div>
                 <div class="sdcon-stat c-green">
                     <div class="sdcon-stat-val">${d.school_eval_avg !== null ? d.school_eval_avg + '/5' : '—'}</div>
-                    <div class="sdcon-stat-label">School Avg Score</div>
+                    <div class="sdcon-stat-label">School avg score</div>
                 </div>
             </div>
 
-            <!-- TOOLBAR -->
             <div class="sdcon-toolbar">
                 <div class="sdcon-search-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -741,31 +765,25 @@ function renderEvaluationsTab() {
                         value="${window._sdEvalSearch}"
                         oninput="sdevalSearch(this.value)">
                 </div>
-
                 <select class="sdcon-select" onchange="sdevalFilter('class_id', this.value)">
-                    <option value="0">All Classes</option>
+                    <option value="0">All classes</option>
                     ${classOptions}
                 </select>
-
                 <select class="sdcon-select" onchange="sdevalFilter('term', this.value)">
-                    <option value="0">All Terms</option>
+                    <option value="0">All terms</option>
                     <option value="1" ${f.term==1?'selected':''}>Term 1</option>
                     <option value="2" ${f.term==2?'selected':''}>Term 2</option>
                     <option value="3" ${f.term==3?'selected':''}>Term 3</option>
                     <option value="4" ${f.term==4?'selected':''}>Term 4</option>
                 </select>
-
                 <select class="sdcon-select" onchange="sdevalFilter('teacher_email', this.value)">
-                    <option value="">All Teachers</option>
+                    <option value="">All teachers</option>
                     ${teacherOptions}
                 </select>
-
                 <span class="sdcon-count">${list.length} evaluation${list.length!==1?'s':''}</span>
             </div>
 
-            <!-- EVALUATION CARDS -->
             <div class="sdeval-list">${cards}</div>
-
         </div>`;
 }
 
@@ -775,7 +793,6 @@ window.sdconSearch  = function(v)   { window._sdConSearch = v; renderContentTab(
 window.sdevalFilter = function(k,v) { window._sdEvalFilters[k] = (k==='class_id'||k==='term') ? parseInt(v) : v; renderEvaluationsTab(); };
 window.sdevalSearch = function(v)   { window._sdEvalSearch = v; renderEvaluationsTab(); };
 
-// ── Evaluation card toggle (direct DOM) ──
 window.sdevalToggle = function(id) {
     const card = document.getElementById('sdeval-card-' + id);
     if (!card) return;
@@ -784,12 +801,9 @@ window.sdevalToggle = function(id) {
     if (!isOpen) card.classList.add('open');
 };
 
-
 // ══════════════════════════════════════════════════════════
 // VIEW CONTENT MODAL
 // ══════════════════════════════════════════════════════════
-
-// Inject modal styles
 (function injectModalStyles() {
     if (document.getElementById('sdcon-modal-styles')) return;
     const s = document.createElement('style');
@@ -797,157 +811,151 @@ window.sdevalToggle = function(id) {
     s.textContent = `
         .sdcon-modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(6px);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
             z-index: 9000;
             display: flex; align-items: center; justify-content: center;
             padding: 20px;
         }
         .sdcon-modal-box {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            width: 100%; max-width: 700px;
+            background: var(--surface);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-lg);
+            width: 100%; max-width: 680px;
             max-height: 85vh;
             display: flex; flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
         }
         .sdcon-modal-header {
             display: flex; align-items: center;
             justify-content: space-between;
-            padding: 18px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
         .sdcon-modal-title {
-            font-size: 16px; font-weight: 900; color: #e2e8f0;
+            font-size: 15px; font-weight: 600; color: var(--text);
         }
         .sdcon-modal-close {
-            width: 32px; height: 32px;
-            border-radius: 50%; border: none;
-            background: rgba(255,255,255,0.06);
-            color: #8b949e; cursor: pointer;
-            font-size: 18px; line-height: 1;
+            width: 28px; height: 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-hover);
+            background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 16px; line-height: 1;
             display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
+            transition: all 0.15s;
         }
-        .sdcon-modal-close:hover { background: rgba(255,255,255,0.12); color: #e2e8f0; }
+        .sdcon-modal-close:hover { background: var(--surface2); color: var(--text); }
         .sdcon-modal-body {
-            flex: 1; overflow-y: auto; padding: 20px 24px;
+            flex: 1; overflow-y: auto; padding: 16px 20px;
         }
         .sdcon-modal-body::-webkit-scrollbar { width: 4px; }
-        .sdcon-modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .sdcon-modal-body::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
 
-        /* Meta row */
         .sdcon-modal-meta {
-            display: flex; flex-wrap: wrap; gap: 8px;
-            margin-bottom: 20px;
-        }
-        .sdcon-modal-tag {
-            font-size: 11px; font-weight: 800;
-            padding: 3px 10px; border-radius: 8px;
-        }
-        .sdcon-modal-tag.teal   { background: rgba(79,209,197,0.1);  color: #4fd1c5; }
-        .sdcon-modal-tag.purple { background: rgba(167,139,250,0.1); color: #a78bfa; }
-        .sdcon-modal-tag.green  { background: rgba(34,197,94,0.1);   color: #22c55e; }
-        .sdcon-modal-tag.orange { background: rgba(245,158,11,0.1);  color: #f59e0b; }
-        .sdcon-modal-tag.blue   { background: rgba(78,121,167,0.1);  color: #4e79a7; }
-        .sdcon-modal-tag.red    { background: rgba(248,81,73,0.1);   color: #f85149; }
-        .sdcon-modal-tag.gray   { background: rgba(255,255,255,0.06); color: #8b949e; }
-
-        /* Stats row */
-        .sdcon-modal-stats {
-            display: flex; gap: 10px; flex-wrap: wrap;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .sdcon-modal-stat { text-align: center; flex: 1; min-width: 60px; }
-        .sdcon-modal-stat-val   { font-size: 18px; font-weight: 900; color: #4fd1c5; }
-        .sdcon-modal-stat-label { font-size: 10px; color: #4a5568; font-weight: 700; margin-top: 2px; }
-
-        /* Manual quiz notice */
-        .sdcon-manual-notice {
-            display: flex; align-items: flex-start; gap: 12px;
-            padding: 16px; border-radius: 10px;
-            background: rgba(245,158,11,0.06);
-            border: 1px solid rgba(245,158,11,0.2);
+            display: flex; flex-wrap: wrap; gap: 6px;
             margin-bottom: 16px;
         }
-        .sdcon-manual-notice svg { width: 18px; height: 18px; stroke: #f59e0b; flex-shrink: 0; margin-top: 1px; }
-        .sdcon-manual-notice-text { font-size: 13px; color: #c9d1d9; line-height: 1.6; }
-        .sdcon-manual-notice-text strong { color: #f59e0b; }
+        .sdcon-modal-tag {
+            font-size: 11px; font-weight: 500;
+            padding: 2px 8px; border-radius: 20px;
+            font-family: var(--font-mono);
+        }
+        .sdcon-modal-tag.teal   { background: var(--teal-dim);   color: var(--teal);   }
+        .sdcon-modal-tag.purple { background: var(--purple-dim); color: var(--purple); }
+        .sdcon-modal-tag.green  { background: var(--green-dim);  color: var(--green);  }
+        .sdcon-modal-tag.orange { background: var(--orange-dim); color: var(--orange); }
+        .sdcon-modal-tag.blue   { background: var(--blue-dim);   color: var(--blue);   }
+        .sdcon-modal-tag.red    { background: var(--red-dim);    color: var(--red);    }
+        .sdcon-modal-tag.gray   { background: var(--surface2);   color: var(--text-muted); }
 
-        /* Question cards */
+        .sdcon-modal-stats {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+        }
+        .sdcon-modal-stat      { text-align: center; flex: 1; min-width: 60px; }
+        .sdcon-modal-stat-val  { font-size: 16px; font-weight: 600; color: var(--teal); font-family: var(--font-mono); }
+        .sdcon-modal-stat-label { font-size: 10px; color: var(--text-dim); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+        .sdcon-manual-notice {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 14px; border-radius: var(--radius);
+            background: var(--orange-dim);
+            border: 1px solid rgba(210,153,34,0.25);
+            margin-bottom: 14px;
+        }
+        .sdcon-manual-notice svg { width: 16px; height: 16px; stroke: var(--orange); flex-shrink: 0; margin-top: 1px; }
+        .sdcon-manual-notice-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+        .sdcon-manual-notice-text strong { color: var(--orange); }
+
         .sdcon-question {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-        .sdcon-question-num {
-            font-size: 10px; font-weight: 800;
-            letter-spacing: 1px; text-transform: uppercase;
-            color: #4a5568; margin-bottom: 8px;
-        }
-        .sdcon-question-text {
-            font-size: 14px; font-weight: 700; color: #e2e8f0;
-            margin-bottom: 12px; line-height: 1.5;
-        }
-        .sdcon-question-points {
-            font-size: 11px; font-weight: 800; color: #a78bfa;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
             margin-bottom: 10px;
         }
+        .sdcon-question-num {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            color: var(--text-dim); margin-bottom: 6px;
+        }
+        .sdcon-question-text {
+            font-size: 14px; font-weight: 500; color: var(--text);
+            margin-bottom: 10px; line-height: 1.5;
+        }
+        .sdcon-question-points {
+            font-size: 11px; font-weight: 500; color: var(--purple);
+            margin-bottom: 8px; font-family: var(--font-mono);
+        }
         .sdcon-choice {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 12px; border-radius: 7px;
-            margin-bottom: 6px; font-size: 13px; font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 10px; border-radius: var(--radius);
+            margin-bottom: 4px; font-size: 13px; font-weight: 400;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
         }
         .sdcon-choice.correct {
-            background: rgba(34,197,94,0.08);
-            border-color: rgba(34,197,94,0.25);
-            color: #22c55e;
+            background: var(--green-dim);
+            border-color: rgba(63,185,80,0.25);
+            color: var(--green);
         }
-        .sdcon-choice.wrong { color: #8b949e; }
-        .sdcon-choice-dot {
-            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-        }
-        .sdcon-choice.correct .sdcon-choice-dot { background: #22c55e; }
-        .sdcon-choice.wrong   .sdcon-choice-dot { background: rgba(255,255,255,0.1); }
+        .sdcon-choice-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .sdcon-choice.correct .sdcon-choice-dot { background: var(--green); }
+        .sdcon-choice.wrong   .sdcon-choice-dot { background: var(--border-hover); }
 
-        /* Assignment description */
         .sdcon-desc {
-            font-size: 14px; font-weight: 600; color: #c9d1d9;
-            line-height: 1.7; margin-bottom: 16px;
+            font-size: 13px; font-weight: 400; color: var(--text-muted);
+            line-height: 1.7; margin-bottom: 14px;
             white-space: pre-wrap;
         }
         .sdcon-file-link {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 18px; border-radius: 8px;
-            background: rgba(79,209,197,0.1);
-            border: 1px solid rgba(79,209,197,0.25);
-            color: #4fd1c5; text-decoration: none;
-            font-size: 13px; font-weight: 800;
-            transition: background 0.2s;
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 14px; border-radius: var(--radius);
+            background: var(--teal-dim);
+            border: 1px solid var(--teal-border);
+            color: var(--teal); text-decoration: none;
+            font-size: 13px; font-weight: 500;
+            transition: background 0.15s;
         }
-        .sdcon-file-link:hover { background: rgba(79,209,197,0.18); }
-        .sdcon-file-link svg { width: 15px; height: 15px; stroke: currentColor; }
+        .sdcon-file-link:hover { background: rgba(57,213,193,0.15); }
+        .sdcon-file-link svg   { width: 14px; height: 14px; stroke: currentColor; }
 
-        /* Loading */
         .sdcon-modal-loading {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 60px 20px; gap: 14px; color: #4a5568;
+            padding: 60px 20px; gap: 12px; color: var(--text-dim);
+            font-size: 13px;
         }
         .sdcon-modal-spinner {
-            width: 32px; height: 32px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #4fd1c5;
+            width: 28px; height: 28px;
+            border: 2px solid var(--border-hover);
+            border-top-color: var(--teal);
             border-radius: 50%;
             animation: sd-spin 0.8s linear infinite;
         }
@@ -956,7 +964,6 @@ window.sdevalToggle = function(id) {
 })();
 
 window.sdconViewItem = async function(type, id) {
-    // Create overlay
     const overlay = document.createElement('div');
     overlay.className = 'sdcon-modal-overlay';
     overlay.id = 'sdcon-view-modal';
@@ -966,13 +973,13 @@ window.sdconViewItem = async function(type, id) {
     overlay.innerHTML = `
         <div class="sdcon-modal-box">
             <div class="sdcon-modal-header">
-                <div class="sdcon-modal-title">Loading...</div>
+                <div class="sdcon-modal-title">Loading…</div>
                 <button class="sdcon-modal-close" onclick="sdconCloseModal()">×</button>
             </div>
             <div class="sdcon-modal-body">
                 <div class="sdcon-modal-loading">
                     <div class="sdcon-modal-spinner"></div>
-                    Loading content...
+                    Loading content…
                 </div>
             </div>
         </div>`;
@@ -985,7 +992,7 @@ window.sdconViewItem = async function(type, id) {
         sdconRenderModal(data);
     } catch(e) {
         document.querySelector('#sdcon-view-modal .sdcon-modal-body').innerHTML =
-            `<p style="color:var(--red);text-align:center;padding:40px;">Failed to load: ${e.message}</p>`;
+            `<p style="color:var(--red);text-align:center;padding:40px;font-size:13px;">Failed to load: ${e.message}</p>`;
     }
 };
 
@@ -995,14 +1002,14 @@ window.sdconCloseModal = function() {
 };
 
 function sdconRenderModal(d) {
-    const box   = document.querySelector('#sdcon-view-modal .sdcon-modal-box');
-    const avgC  = v => v === null ? 'gray' : v >= 60 ? 'green' : v >= 40 ? 'orange' : 'red';
+    const box  = document.querySelector('#sdcon-view-modal .sdcon-modal-box');
+    const avgC = v => v === null ? 'gray' : v >= 60 ? 'green' : v >= 40 ? 'orange' : 'red';
 
     if (d.type === 'quiz') {
         const statusColor = d.status === 'Open' ? 'green' : d.status === 'Closed' ? 'gray' : 'orange';
         const summBadge   = d.is_summative
             ? `<span class="sdcon-modal-tag green">Summative${d.weight ? ' · ' + d.weight + '%' : ''}</span>`
-            : `<span class="sdcon-modal-tag gray">Practice Quiz</span>`;
+            : `<span class="sdcon-modal-tag gray">Practice quiz</span>`;
 
         let bodyHTML = `
             <div class="sdcon-modal-meta">
@@ -1013,7 +1020,6 @@ function sdconRenderModal(d) {
                 <span class="sdcon-modal-tag ${statusColor}">${d.status}</span>
                 ${d.duration ? `<span class="sdcon-modal-tag gray">${d.duration} min</span>` : ''}
             </div>
-
             <div class="sdcon-modal-stats">
                 <div class="sdcon-modal-stat">
                     <div class="sdcon-modal-stat-val">${d.question_count}</div>
@@ -1021,17 +1027,17 @@ function sdconRenderModal(d) {
                 </div>
                 <div class="sdcon-modal-stat">
                     <div class="sdcon-modal-stat-val">${d.total_points}</div>
-                    <div class="sdcon-modal-stat-label">Total Points</div>
+                    <div class="sdcon-modal-stat-label">Points</div>
                 </div>
                 <div class="sdcon-modal-stat">
                     <div class="sdcon-modal-stat-val">${d.stats.submitted}</div>
                     <div class="sdcon-modal-stat-label">Submitted</div>
                 </div>
                 <div class="sdcon-modal-stat">
-                    <div class="sdcon-modal-stat-val" style="color:${d.stats.avg_pct >= 60 ? '#22c55e' : d.stats.avg_pct >= 40 ? '#f59e0b' : '#f85149'};">
+                    <div class="sdcon-modal-stat-val" style="color:${d.stats.avg_pct >= 60 ? 'var(--green)' : d.stats.avg_pct >= 40 ? 'var(--orange)' : 'var(--red)'};">
                         ${d.stats.avg_pct !== null ? d.stats.avg_pct + '%' : '—'}
                     </div>
-                    <div class="sdcon-modal-stat-label">Avg Score</div>
+                    <div class="sdcon-modal-stat-label">Avg score</div>
                 </div>
             </div>`;
 
@@ -1043,10 +1049,8 @@ function sdconRenderModal(d) {
                         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
                     <div class="sdcon-manual-notice-text">
-                        <strong>Manual Assessment</strong> — Marks were loaded directly into the system without digital questions.
+                        <strong>Manual assessment</strong> — Marks were loaded directly into the system without digital questions.
                         The content of this assessment is not available on the platform.
-                        <br><br>
-                        In a future update, teachers will be able to upload a PDF of manually written tests.
                     </div>
                 </div>`;
         } else {
@@ -1055,15 +1059,14 @@ function sdconRenderModal(d) {
                     <div class="sdcon-choice ${c.is_correct ? 'correct' : 'wrong'}">
                         <div class="sdcon-choice-dot"></div>
                         ${c.text}
-                        ${c.is_correct ? ' <span style="font-size:10px;margin-left:auto;font-weight:800;">✓ Correct</span>' : ''}
+                        ${c.is_correct ? ' <span style="font-size:10px;margin-left:auto;font-weight:600;font-family:var(--font-mono);">✓ Correct</span>' : ''}
                     </div>`).join('');
-
                 return `
                     <div class="sdcon-question">
                         <div class="sdcon-question-num">Question ${qi + 1}</div>
                         <div class="sdcon-question-text">${q.question_text}</div>
                         <div class="sdcon-question-points">${q.points} point${q.points !== 1 ? 's' : ''}</div>
-                        ${choicesHTML || '<div style="font-size:12px;color:#4a5568;font-style:italic;">No choices recorded</div>'}
+                        ${choicesHTML || '<div style="font-size:12px;color:var(--text-dim);">No choices recorded</div>'}
                     </div>`;
             }).join('');
         }
@@ -1083,9 +1086,9 @@ function sdconRenderModal(d) {
                     <polyline points="7 10 12 15 17 10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Download Assignment File
+                Download assignment file
               </a>`
-            : `<div style="font-size:13px;color:#4a5568;font-style:italic;">No file attached</div>`;
+            : `<div style="font-size:13px;color:var(--text-dim);">No file attached</div>`;
 
         const dueDate = d.due_date
             ? new Date(d.due_date).toLocaleDateString('en-ZA', {weekday:'long', day:'numeric', month:'long', year:'numeric'})
@@ -1116,8 +1119,6 @@ function sdconRenderModal(d) {
 
     } else if (d.type === 'resource') {
         const ext = d.file_type.toUpperCase();
-        const isViewable = ['PDF','JPG','JPEG','PNG','GIF','WEBP'].includes(d.file_type.toUpperCase());
-
         box.innerHTML = `
             <div class="sdcon-modal-header">
                 <div class="sdcon-modal-title">${d.title}</div>
@@ -1136,7 +1137,7 @@ function sdconRenderModal(d) {
                         <polyline points="7 10 12 15 17 10"/>
                         <line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Open Resource File
+                    Open resource file
                 </a>
             </div>`;
     }

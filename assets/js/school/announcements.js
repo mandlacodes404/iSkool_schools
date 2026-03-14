@@ -5,7 +5,7 @@
 window._sdAnnCache    = null;
 window._sdAnnFilters  = { class_id: 0, term: 0, send_to: '', teacher_email: '' };
 window._sdAnnSearch   = '';
-window._sdAnnExpanded = null; // id of expanded announcement
+window._sdAnnExpanded = null;
 
 // ── INJECT STYLES ──
 (function injectAnnStyles() {
@@ -13,190 +13,209 @@ window._sdAnnExpanded = null; // id of expanded announcement
     const s = document.createElement('style');
     s.id = 'sd-ann-styles';
     s.textContent = `
-        .sdan-shell { padding: 28px 28px 80px; max-width: 1100px; }
+        .sdan-shell { padding: 24px 24px 80px; max-width: 1100px; }
 
-        /* Header */
+        /* ── Header ── */
         .sdan-header {
             display: flex; align-items: flex-end;
             justify-content: space-between;
-            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; gap: 10px;
         }
-        .sdan-title { font-size: 22px; font-weight: 900; color: #e2e8f0; margin-bottom: 4px; }
-        .sdan-sub   { font-size: 13px; color: #8b949e; }
+        .sdan-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+        .sdan-sub   { font-size: 12px; color: var(--text-muted); }
 
-        /* Stats row */
+        /* ── Stats row ── */
         .sdan-stats {
             display: flex; gap: 10px; flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .sdan-stat {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-            padding: 12px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 12px 16px;
             display: flex; align-items: center; gap: 10px;
+            transition: border-color 0.15s;
         }
-        .sdan-stat-val  { font-size: 20px; font-weight: 900; }
-        .sdan-stat-label{ font-size: 11px; color: #4a5568; font-weight: 700; letter-spacing: 0.5px; }
-        .sdan-stat.c-teal   .sdan-stat-val { color: #4fd1c5; }
-        .sdan-stat.c-blue   .sdan-stat-val { color: #4e79a7; }
-        .sdan-stat.c-orange .sdan-stat-val { color: #f59e0b; }
+        .sdan-stat:hover { border-color: var(--border-hover); }
+        .sdan-stat-val {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+        }
+        .sdan-stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .sdan-stat.c-teal   .sdan-stat-val { color: var(--teal);   }
+        .sdan-stat.c-blue   .sdan-stat-val { color: var(--blue);   }
+        .sdan-stat.c-orange .sdan-stat-val { color: var(--orange); }
 
-        /* Toolbar */
+        /* ── Toolbar ── */
         .sdan-toolbar {
             display: flex; align-items: center;
-            gap: 10px; margin-bottom: 16px;
+            gap: 8px; margin-bottom: 14px;
             flex-wrap: wrap;
         }
-
         .sdan-search-wrap {
             position: relative; flex: 1;
-            min-width: 180px; max-width: 320px;
+            min-width: 180px; max-width: 300px;
         }
         .sdan-search-wrap svg {
-            position: absolute; left: 11px; top: 50%;
+            position: absolute; left: 10px; top: 50%;
             transform: translateY(-50%);
-            width: 14px; height: 14px; stroke: #4a5568;
+            width: 13px; height: 13px;
+            stroke: var(--text-dim);
             pointer-events: none;
         }
         .sdan-search {
             width: 100%;
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px 12px 8px 32px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 13px; font-weight: 600;
-            color: #e2e8f0; outline: none;
-            transition: border-color 0.2s;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 10px 6px 30px;
+            font-family: var(--font);
+            font-size: 13px; font-weight: 400;
+            color: var(--text); outline: none;
+            transition: border-color 0.15s;
         }
-        .sdan-search::placeholder { color: #4a5568; }
-        .sdan-search:focus { border-color: rgba(79,209,197,0.4); }
+        .sdan-search::placeholder { color: var(--text-dim); }
+        .sdan-search:focus         { border-color: var(--border-hover); }
 
         .sdan-select {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 12px; font-weight: 700;
-            color: #8b949e; outline: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            font-family: var(--font);
+            font-size: 12px; font-weight: 400;
+            color: var(--text-muted); outline: none;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: border-color 0.15s;
         }
-        .sdan-select:focus { border-color: rgba(79,209,197,0.4); }
+        .sdan-select:focus { border-color: var(--border-hover); }
 
         .sdan-count {
-            font-size: 11px; font-weight: 800;
-            padding: 5px 12px; border-radius: 20px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            color: #4a5568; white-space: nowrap;
+            font-size: 11px; font-weight: 500;
+            padding: 3px 10px; border-radius: 20px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-dim); white-space: nowrap;
             margin-left: auto;
+            font-family: var(--font-mono);
         }
 
-        /* Announcement cards */
-        .sdan-list { display: flex; flex-direction: column; gap: 10px; }
+        /* ── Announcement cards ── */
+        .sdan-list { display: flex; flex-direction: column; gap: 8px; }
 
         .sdan-card {
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            transition: border-color 0.2s;
+            transition: border-color 0.15s;
         }
-        .sdan-card:hover { border-color: rgba(255,255,255,0.13); }
-        .sdan-card.expanded { border-color: rgba(79,209,197,0.25); }
+        .sdan-card:hover    { border-color: var(--border-hover); }
+        .sdan-card.expanded { border-color: var(--teal-border); }
 
         .sdan-card-header {
             display: flex; align-items: center;
-            gap: 14px; padding: 16px 20px;
+            gap: 12px; padding: 12px 16px;
             cursor: pointer;
         }
 
         /* Avatar */
         .sdan-avatar {
-            width: 38px; height: 38px;
+            width: 30px; height: 30px;
             border-radius: 50%;
-            background: #1b1b1b;
-            border: 2px solid #2d3340;
+            background: var(--surface2);
+            border: 1px solid var(--border-hover);
             display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 800;
-            color: #8b949e; text-transform: uppercase;
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase;
             flex-shrink: 0; overflow: hidden;
+            font-family: var(--font-mono);
         }
         .sdan-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         .sdan-card-main { flex: 1; min-width: 0; }
         .sdan-card-title {
-            font-size: 14px; font-weight: 800; color: #e2e8f0;
-            margin-bottom: 4px;
+            font-size: 13px; font-weight: 500; color: var(--text);
+            margin-bottom: 3px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .sdan-card-meta {
             display: flex; align-items: center;
-            gap: 8px; flex-wrap: wrap;
+            gap: 6px; flex-wrap: wrap;
         }
-        .sdan-meta-text { font-size: 11px; color: #4a5568; }
-        .sdan-meta-sep  { font-size: 11px; color: #2d3340; }
+        .sdan-meta-text { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+        .sdan-meta-sep  { font-size: 11px; color: var(--text-dim); }
 
         /* Badges */
         .sdan-badge {
-            font-size: 10px; font-weight: 800;
-            padding: 2px 8px; border-radius: 10px;
-            letter-spacing: 0.5px; text-transform: uppercase;
+            font-size: 11px; font-weight: 500;
+            padding: 2px 7px; border-radius: 20px;
             white-space: nowrap;
+            font-family: var(--font-mono);
         }
-        .sdan-badge.class   { background: rgba(79,209,197,0.1);  color: #4fd1c5; border: 1px solid rgba(79,209,197,0.2); }
-        .sdan-badge.term    { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
-        .sdan-badge.learners{ background: rgba(78,121,167,0.1);  color: #4e79a7; border: 1px solid rgba(78,121,167,0.2); }
-        .sdan-badge.parents { background: rgba(245,158,11,0.1);  color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+        .sdan-badge.class    { background: var(--teal-dim);   color: var(--teal);   border: 1px solid var(--teal-border); }
+        .sdan-badge.term     { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(188,140,255,0.2); }
+        .sdan-badge.learners { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(88,166,255,0.2); }
+        .sdan-badge.parents  { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(210,153,34,0.2); }
 
         /* Chevron */
         .sdan-chevron {
-            color: #2d3340; flex-shrink: 0;
+            color: var(--border-hover); flex-shrink: 0;
             transition: transform 0.2s, color 0.2s;
         }
         .sdan-card.expanded .sdan-chevron {
             transform: rotate(180deg);
-            color: #4fd1c5;
+            color: var(--teal);
         }
-        .sdan-chevron svg { width: 16px; height: 16px; stroke: currentColor; }
+        .sdan-chevron svg { width: 14px; height: 14px; stroke: currentColor; }
 
-        /* Expanded message body */
+        /* Expanded body */
         .sdan-card-body {
             display: none;
-            padding: 0 20px 20px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            margin-top: 0;
+            padding: 0 16px 16px;
+            border-top: 1px solid var(--border);
         }
         .sdan-card.expanded .sdan-card-body { display: block; }
 
         .sdan-message {
-            font-size: 14px; font-weight: 600;
-            color: #c9d1d9; line-height: 1.7;
-            padding-top: 16px;
+            font-size: 13px; font-weight: 400;
+            color: var(--text-muted); line-height: 1.7;
+            padding-top: 14px;
             white-space: pre-wrap;
         }
 
         .sdan-teacher-line {
-            display: flex; align-items: center; gap: 8px;
-            margin-top: 14px; padding-top: 14px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            font-size: 12px; color: #4a5568;
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 11px; color: var(--text-dim);
+            font-family: var(--font-mono);
+            flex-wrap: wrap;
         }
-        .sdan-teacher-line strong { color: #8b949e; }
+        .sdan-teacher-line strong { color: var(--text-muted); font-weight: 500; }
 
         /* Empty state */
         .sdan-empty {
             text-align: center; padding: 60px 20px;
-            color: #4a5568; font-size: 13px; font-style: italic;
+            color: var(--text-dim); font-size: 13px;
         }
 
         @media (max-width: 700px) {
-            .sdan-shell { padding: 16px 14px 80px; }
-            .sdan-toolbar { gap: 8px; }
-            .sdan-select { font-size: 11px; padding: 7px 8px; }
+            .sdan-shell   { padding: 14px 12px 80px; }
+            .sdan-toolbar { gap: 6px; }
+            .sdan-select  { font-size: 11px; padding: 6px 8px; }
         }
     `;
     document.head.appendChild(s);
@@ -224,15 +243,14 @@ window.loadSdAnnouncements = async function() {
         return;
     }
 
-    // Skeleton
     content.innerHTML = `
         <div class="sdan-shell">
-            <div class="sd-skeleton" style="height:22px;width:220px;margin-bottom:8px;"></div>
-            <div class="sd-skeleton" style="height:13px;width:300px;margin-bottom:20px;"></div>
-            <div style="display:flex;gap:10px;margin-bottom:20px;">
-                ${[1,2,3].map(()=>`<div class="sd-skeleton" style="height:56px;width:120px;border-radius:10px;"></div>`).join('')}
+            <div class="sd-skeleton" style="height:20px;width:220px;margin-bottom:6px;border-radius:var(--radius);"></div>
+            <div class="sd-skeleton" style="height:12px;width:280px;margin-bottom:16px;border-radius:var(--radius);"></div>
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                ${[1,2,3].map(()=>`<div class="sd-skeleton" style="height:52px;width:110px;border-radius:var(--radius-lg);"></div>`).join('')}
             </div>
-            ${[1,2,3,4,5].map(()=>`<div class="sd-skeleton" style="height:68px;border-radius:14px;margin-bottom:10px;"></div>`).join('')}
+            ${[1,2,3,4,5].map(()=>`<div class="sd-skeleton" style="height:60px;border-radius:var(--radius-lg);margin-bottom:8px;"></div>`).join('')}
         </div>`;
 
     try {
@@ -241,7 +259,7 @@ window.loadSdAnnouncements = async function() {
         window._sdAnnCache = data;
         renderAnnouncements(data);
     } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;">Failed to load announcements.</p>`;
+        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load announcements.</p>`;
     }
 };
 
@@ -253,20 +271,18 @@ function renderAnnouncements(data) {
     const f       = window._sdAnnFilters;
     const search  = window._sdAnnSearch.toLowerCase().trim();
 
-    // ── Filter ──
     let list = data.announcements || [];
-    if (f.class_id)     list = list.filter(a => a.class_id == f.class_id);
-    if (f.term)         list = list.filter(a => a.term == f.term);
-    if (f.send_to)      list = list.filter(a => a.send_to === f.send_to);
-    if (f.teacher_email)list = list.filter(a => a.teacher_email === f.teacher_email);
-    if (search)         list = list.filter(a =>
+    if (f.class_id)      list = list.filter(a => a.class_id == f.class_id);
+    if (f.term)          list = list.filter(a => a.term == f.term);
+    if (f.send_to)       list = list.filter(a => a.send_to === f.send_to);
+    if (f.teacher_email) list = list.filter(a => a.teacher_email === f.teacher_email);
+    if (search)          list = list.filter(a =>
         a.title.toLowerCase().includes(search) ||
         a.message.toLowerCase().includes(search) ||
         a.teacher_name.toLowerCase().includes(search) ||
         (a.class_name||'').toLowerCase().includes(search)
     );
 
-    // ── Filter dropdowns ──
     const classOptions = (data.classes || []).map(c =>
         `<option value="${c.id}" ${f.class_id == c.id ? 'selected' : ''}>${c.name}</option>`
     ).join('');
@@ -275,7 +291,6 @@ function renderAnnouncements(data) {
         `<option value="${t.email}" ${f.teacher_email === t.email ? 'selected' : ''}>${t.name}</option>`
     ).join('');
 
-    // ── Cards ──
     const cards = list.length ? list.map(a => {
         const initials  = a.teacher_name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
         const picHTML   = a.profile_pic && a.profile_pic !== 'default.png'
@@ -312,9 +327,9 @@ function renderAnnouncements(data) {
                     <div class="sdan-message">${a.message}</div>
                     <div class="sdan-teacher-line">
                         <strong>Posted by</strong> ${a.teacher_name}
-                        &nbsp;·&nbsp;
+                        <span class="sdan-meta-sep">·</span>
                         ${new Date(a.created_at).toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
-                        &nbsp;·&nbsp;
+                        <span class="sdan-meta-sep">·</span>
                         Sent to: ${a.send_to === 'parents' ? 'Parents' : 'Learners'}
                     </div>
                 </div>
@@ -324,7 +339,6 @@ function renderAnnouncements(data) {
     content.innerHTML = `
         <div class="sdan-shell">
 
-            <!-- HEADER -->
             <div class="sdan-header">
                 <div>
                     <div class="sdan-title">Announcements</div>
@@ -332,7 +346,6 @@ function renderAnnouncements(data) {
                 </div>
             </div>
 
-            <!-- STATS -->
             <div class="sdan-stats">
                 <div class="sdan-stat c-teal">
                     <div>
@@ -343,18 +356,17 @@ function renderAnnouncements(data) {
                 <div class="sdan-stat c-blue">
                     <div>
                         <div class="sdan-stat-val">${data.for_learners}</div>
-                        <div class="sdan-stat-label">For Learners</div>
+                        <div class="sdan-stat-label">For learners</div>
                     </div>
                 </div>
                 <div class="sdan-stat c-orange">
                     <div>
                         <div class="sdan-stat-val">${data.for_parents}</div>
-                        <div class="sdan-stat-label">For Parents</div>
+                        <div class="sdan-stat-label">For parents</div>
                     </div>
                 </div>
             </div>
 
-            <!-- TOOLBAR -->
             <div class="sdan-toolbar">
                 <div class="sdan-search-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -366,12 +378,12 @@ function renderAnnouncements(data) {
                 </div>
 
                 <select class="sdan-select" onchange="sdanFilter('class_id', this.value)">
-                    <option value="0">All Classes</option>
+                    <option value="0">All classes</option>
                     ${classOptions}
                 </select>
 
                 <select class="sdan-select" onchange="sdanFilter('term', this.value)">
-                    <option value="0">All Terms</option>
+                    <option value="0">All terms</option>
                     <option value="1" ${f.term==1?'selected':''}>Term 1</option>
                     <option value="2" ${f.term==2?'selected':''}>Term 2</option>
                     <option value="3" ${f.term==3?'selected':''}>Term 3</option>
@@ -379,33 +391,30 @@ function renderAnnouncements(data) {
                 </select>
 
                 <select class="sdan-select" onchange="sdanFilter('send_to', this.value)">
-                    <option value="">All Recipients</option>
+                    <option value="">All recipients</option>
                     <option value="learners" ${f.send_to==='learners'?'selected':''}>Learners</option>
                     <option value="parents"  ${f.send_to==='parents' ?'selected':''}>Parents</option>
                 </select>
 
                 <select class="sdan-select" onchange="sdanFilter('teacher_email', this.value)">
-                    <option value="">All Teachers</option>
+                    <option value="">All teachers</option>
                     ${teacherOptions}
                 </select>
 
                 <span class="sdan-count">${list.length} announcement${list.length !== 1 ? 's' : ''}</span>
             </div>
 
-            <!-- LIST -->
             <div class="sdan-list">${cards}</div>
 
         </div>`;
 }
 
-// ── Toggle expand/collapse — direct DOM, no re-render ──
+// ── Toggle expand/collapse ──
 window.sdanToggle = function(id) {
     const card = document.getElementById('sdan-card-' + id);
     if (!card) return;
     const isExpanded = card.classList.contains('expanded');
-    // Collapse all
     document.querySelectorAll('.sdan-card.expanded').forEach(c => c.classList.remove('expanded'));
-    // Expand this one if it wasn't already open
     if (!isExpanded) card.classList.add('expanded');
 };
 
