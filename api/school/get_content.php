@@ -90,7 +90,7 @@ while ($row = $aRes->fetch_assoc()) {
 // ── RESOURCES ──
 $resources = [];
 $rRes = $conn->query("
-    SELECT r.id, r.title, r.file_type, r.file_url,
+    SELECT r.id, r.title, r.filename,
            r.uploaded_at, r.uploaded_by,
            u.name, u.surname,
            c.name class_name, c.id class_id
@@ -100,11 +100,13 @@ $rRes = $conn->query("
     ORDER BY r.uploaded_at DESC
 ");
 while ($row = $rRes->fetch_assoc()) {
+    // Derive file type from filename extension
+    $ext = strtolower(pathinfo($row['filename'], PATHINFO_EXTENSION));
     $resources[] = [
         'id'           => $row['id'],
         'title'        => $row['title'],
-        'file_type'    => $row['file_type'],
-        'file_url'     => $row['file_url'],
+        'file_type'    => $ext ?: 'file',
+        'file_url'     => $row['filename'],
         'created_at'   => $row['uploaded_at'],
         'teacher_name' => trim($row['name'] . ' ' . $row['surname']),
         'teacher_email'=> $row['uploaded_by'],
