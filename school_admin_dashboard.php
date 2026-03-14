@@ -53,820 +53,564 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>School Dashboard — <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ══════════════════════════════════════════════════════════════
-   iSkool — School Dashboard CSS
-   GitHub-inspired redesign — drop this entire block into <style>
-   ══════════════════════════════════════════════════════════════ */
+           iSkool — School Dashboard CSS
+           GitHub-inspired redesign
+        ══════════════════════════════════════════════════════════════ */
 
-/* ──────────────────────────────────────────
-   ROOT & TOKENS
-────────────────────────────────────────── */
-:root {
-    /* Backgrounds — GitHub's actual palette */
-    --bg:           #0d1117;
-    --surface:      #161b22;
-    --surface2:     #21262d;
-    --surface3:     #1c2128;
+        /* ──────────────────────────────────────────
+           ROOT & TOKENS
+        ────────────────────────────────────────── */
+        :root {
+            --bg:           #0d1117;
+            --surface:      #161b22;
+            --surface2:     #21262d;
+            --surface3:     #1c2128;
+            --border:       #21262d;
+            --border-hover: #30363d;
+            --border-muted: #161b22;
+            --text:         #e6edf3;
+            --text-muted:   #8b949e;
+            --text-dim:     #484f58;
+            --text-link:    #58a6ff;
+            --teal:         #39d5c1;
+            --teal-dim:     rgba(57,213,193,0.08);
+            --teal-border:  rgba(57,213,193,0.25);
+            --green:        #3fb950;
+            --green-dim:    rgba(63,185,80,0.1);
+            --orange:       #d29922;
+            --orange-dim:   rgba(210,153,34,0.1);
+            --red:          #f85149;
+            --red-dim:      rgba(248,81,73,0.08);
+            --blue:         #58a6ff;
+            --blue-dim:     rgba(88,166,255,0.1);
+            --purple:       #bc8cff;
+            --purple-dim:   rgba(188,140,255,0.1);
+            --sidebar-w:    240px;
+            --topnav-h:     56px;
+            --radius:       6px;
+            --radius-lg:    8px;
+            --transition:   0.2s ease;
+            --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+                            Helvetica, Arial, sans-serif, "Apple Color Emoji";
+            --font-mono:    ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+                            Liberation Mono, monospace;
+        }
 
-    /* Borders — thin, neutral, not colored */
-    --border:       #21262d;
-    --border-hover: #30363d;
-    --border-muted: #161b22;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Text — GitHub's text stack */
-    --text:         #e6edf3;
-    --text-muted:   #8b949e;
-    --text-dim:     #484f58;
-    --text-link:    #58a6ff;
+        body {
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.5;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-    /* Accent — teal kept for active/brand moments only */
-    --teal:         #39d5c1;
-    --teal-dim:     rgba(57,213,193,0.08);
-    --teal-border:  rgba(57,213,193,0.25);
+        /* ══════════════════════════════════════
+           SIDEBAR
+        ══════════════════════════════════════ */
+        .sd-sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 8px;
+            position: fixed;
+            top: 0; left: -100%;
+            height: 100vh;
+            z-index: 5000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-hover) transparent;
+            transition: left var(--transition);
+        }
+        .sd-sidebar::-webkit-scrollbar       { width: 4px; }
+        .sd-sidebar::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+        .sd-sidebar.open { left: 0; }
 
-    /* Semantic — muted, not vivid */
-    --green:        #3fb950;
-    --green-dim:    rgba(63,185,80,0.1);
-    --orange:       #d29922;
-    --orange-dim:   rgba(210,153,34,0.1);
-    --red:          #f85149;
-    --red-dim:      rgba(248,81,73,0.08);
-    --blue:         #58a6ff;
-    --blue-dim:     rgba(88,166,255,0.1);
-    --purple:       #bc8cff;
-    --purple-dim:   rgba(188,140,255,0.1);
+        .sd-sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            margin-bottom: 16px;
+        }
 
-    /* Layout */
-    --sidebar-w:    240px;
-    --topnav-h:     56px;
-    --radius:       6px;
-    --radius-lg:    8px;
-    --transition:   0.2s ease;
+        .sd-avatar-wrap {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-hover);
+            overflow: hidden;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--surface2);
+            flex-shrink: 0;
+            transition: border-color var(--transition);
+        }
+        .sd-avatar-wrap:hover { border-color: var(--teal); }
+        .sd-avatar-wrap img   { width: 100%; height: 100%; object-fit: cover; }
+        .sd-avatar-initials {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
 
-    /* Typography — GitHub's system font stack */
-    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
-                    Helvetica, Arial, sans-serif, "Apple Color Emoji";
-    --font-mono:    ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-                    Liberation Mono, monospace;
-}
+        .sd-close-btn {
+            width: 28px; height: 28px;
+            border-radius: var(--radius);
+            background: transparent;
+            border: 1px solid var(--border-hover);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition);
+        }
+        .sd-close-btn:hover { background: var(--surface2); color: var(--text); }
 
-/* ──────────────────────────────────────────
-   RESET
-────────────────────────────────────────── */
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        .sd-admin-name {
+            font-size: 14px; font-weight: 600;
+            color: var(--text);
+            padding: 0 8px; margin-bottom: 2px;
+        }
+        .sd-admin-role {
+            font-size: 12px; color: var(--text-muted);
+            padding: 0 8px; margin-bottom: 12px;
+        }
 
-body {
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
+        .sd-role-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 2px 8px; border-radius: 20px;
+            background: var(--teal-dim); border: 1px solid var(--teal-border);
+            font-size: 11px; font-weight: 500; color: var(--teal);
+            letter-spacing: 0.3px; margin: 0 8px 16px;
+        }
+        .sd-role-badge svg { width: 10px; height: 10px; stroke: var(--teal); }
 
-/* ══════════════════════════════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════════════════════════════ */
-.sd-sidebar {
-    width: var(--sidebar-w);
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 16px 8px;
-    position: fixed;
-    top: 0; left: -100%;
-    height: 100vh;
-    z-index: 5000;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-hover) transparent;
-    transition: left var(--transition);
-}
-.sd-sidebar::-webkit-scrollbar       { width: 4px; }
-.sd-sidebar::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
-.sd-sidebar.open { left: 0; }
+        .sd-nav-label {
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.8px; text-transform: uppercase;
+            color: var(--text-dim); padding: 0 16px; margin: 14px 0 4px;
+        }
 
-.sd-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 8px;
-    margin-bottom: 16px;
-}
+        .sd-nav-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px; border-radius: var(--radius);
+            color: var(--text-muted); text-decoration: none;
+            font-size: 14px; font-weight: 400;
+            cursor: pointer; border: 1px solid transparent;
+            transition: all 0.15s ease; margin-bottom: 1px;
+            background: none; width: 100%; text-align: left;
+            font-family: var(--font); line-height: 1.5;
+        }
+        .sd-nav-link:hover { background: var(--surface2); color: var(--text); }
+        .sd-nav-link.active {
+            background: var(--teal-dim); border-color: var(--teal-border);
+            color: var(--teal); font-weight: 500;
+        }
+        .sd-nav-link svg { width: 16px; height: 16px; stroke: currentColor; flex-shrink: 0; opacity: 0.8; }
 
-/* Avatar */
-.sd-avatar-wrap {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border-hover);
-    overflow: hidden;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface2);
-    flex-shrink: 0;
-    transition: border-color var(--transition);
-}
-.sd-avatar-wrap:hover { border-color: var(--teal); }
-.sd-avatar-wrap img   { width: 100%; height: 100%; object-fit: cover; }
-.sd-avatar-initials {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-family: var(--font-mono);
-}
+        .sd-sidebar-footer {
+            margin-top: auto; padding: 12px 16px 4px;
+            border-top: 1px solid var(--border);
+            font-size: 11px; color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
 
-/* Close btn */
-.sd-close-btn {
-    width: 28px; height: 28px;
-    border-radius: var(--radius);
-    background: transparent;
-    border: 1px solid var(--border-hover);
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all var(--transition);
-}
-.sd-close-btn:hover {
-    background: var(--surface2);
-    color: var(--text);
-    border-color: var(--border-hover);
-}
+        /* ══════════════════════════════════════
+           OVERLAY
+        ══════════════════════════════════════ */
+        #sdOverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 4999; opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+        }
+        #sdOverlay.show { opacity: 1; pointer-events: all; }
 
-/* Admin info block */
-.sd-admin-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    padding: 0 8px;
-    margin-bottom: 2px;
-}
-.sd-admin-role {
-    font-size: 12px;
-    color: var(--text-muted);
-    padding: 0 8px;
-    margin-bottom: 12px;
-}
+        /* ══════════════════════════════════════
+           MAIN
+        ══════════════════════════════════════ */
+        .sd-main {
+            flex: 1; display: flex;
+            flex-direction: column;
+            overflow: hidden; margin-left: 0;
+        }
 
-/* Role badge — smaller, GitHub-style */
-.sd-role-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: var(--teal-dim);
-    border: 1px solid var(--teal-border);
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--teal);
-    letter-spacing: 0.3px;
-    margin: 0 8px 16px;
-}
-.sd-role-badge svg { width: 10px; height: 10px; stroke: var(--teal); }
+        /* ══════════════════════════════════════
+           TOP NAV ROW 1
+        ══════════════════════════════════════ */
+        .sd-topnav {
+            height: var(--topnav-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 16px; gap: 10px; flex-shrink: 0;
+        }
 
-/* Nav section labels */
-.sd-nav-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 0 16px;
-    margin: 14px 0 4px;
-}
+        .sd-hamburger {
+            width: 32px; height: 32px;
+            background: transparent;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all var(--transition);
+        }
+        .sd-hamburger:hover { background: var(--surface2); color: var(--text); }
+        .sd-hamburger svg { width: 16px; height: 16px; stroke: currentColor; }
 
-/* Nav links — GitHub's exact hover pattern */
-.sd-nav-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: var(--radius);
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 400;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.15s ease;
-    margin-bottom: 1px;
-    background: none;
-    width: 100%;
-    text-align: left;
-    font-family: var(--font);
-    line-height: 1.5;
-}
-.sd-nav-link:hover {
-    background: var(--surface2);
-    color: var(--text);
-    border-color: transparent;
-    transform: none;
-}
-.sd-nav-link.active {
-    background: var(--teal-dim);
-    border-color: var(--teal-border);
-    color: var(--teal);
-    font-weight: 500;
-}
-.sd-nav-link svg {
-    width: 16px; height: 16px;
-    stroke: currentColor;
-    flex-shrink: 0;
-    opacity: 0.8;
-}
+        .sd-topnav-brand {
+            display: flex; align-items: center;
+            gap: 8px; flex: 1; justify-content: center;
+        }
+        .sd-topnav-brand img {
+            width: 22px; height: 22px; border-radius: 4px;
+            object-fit: cover; border: 1px solid var(--border-hover);
+        }
+        .sd-topnav-school { font-size: 14px; font-weight: 600; color: var(--text); }
 
-/* Sidebar footer */
-.sd-sidebar-footer {
-    margin-top: auto;
-    padding: 12px 16px 4px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-}
+        .sd-topnav-right {
+            display: flex; align-items: center;
+            gap: 10px; flex-shrink: 0;
+        }
 
-/* ══════════════════════════════════════════════════════════════
-   OVERLAY
-══════════════════════════════════════════════════════════════ */
-#sdOverlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(2px);
-    z-index: 4999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition);
-}
-#sdOverlay.show { opacity: 1; pointer-events: all; }
+        .sd-clock {
+            font-size: 12px; font-weight: 400;
+            color: var(--text-muted); font-family: var(--font-mono);
+            letter-spacing: 0.5px; display: none;
+        }
 
-/* ══════════════════════════════════════════════════════════════
-   MAIN CONTENT
-══════════════════════════════════════════════════════════════ */
-.sd-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin-left: 0;
-}
+        .sd-topnav-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid var(--border-hover);
+            overflow: hidden; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--surface2);
+            transition: border-color var(--transition); position: relative;
+        }
+        .sd-topnav-avatar:hover { border-color: var(--teal); }
+        .sd-topnav-avatar img   { width: 100%; height: 100%; object-fit: cover; }
+        .sd-topnav-avatar .sd-av-init {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted); font-family: var(--font-mono);
+        }
 
-/* ══════════════════════════════════════════════════════════════
-   TOP NAV — GitHub header anatomy
-══════════════════════════════════════════════════════════════ */
-.sd-topnav {
-    height: var(--topnav-h);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 10px;
-    flex-shrink: 0;
-}
+        .sd-av-dropdown {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            background: var(--surface); border: 1px solid var(--border-hover);
+            border-radius: var(--radius-lg); min-width: 190px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 6000; overflow: hidden; display: none;
+        }
+        .sd-av-dropdown.open    { display: block; }
+        .sd-av-dropdown-header  { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        .sd-av-dropdown-name    { font-size: 13px; font-weight: 600; color: var(--text); }
+        .sd-av-dropdown-role    { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
-/* Hamburger */
-.sd-hamburger {
-    width: 32px; height: 32px;
-    background: transparent;
-    border: 1px solid var(--border-hover);
-    border-radius: var(--radius);
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all var(--transition);
-}
-.sd-hamburger:hover {
-    background: var(--surface2);
-    color: var(--text);
-}
-.sd-hamburger svg { width: 16px; height: 16px; stroke: currentColor; }
+        .sd-av-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; font-size: 13px; font-weight: 400;
+            color: var(--text-muted); cursor: pointer;
+            transition: all var(--transition);
+            border: none; background: none;
+            width: 100%; text-align: left; font-family: var(--font);
+        }
+        .sd-av-item:hover        { background: var(--surface2); color: var(--text); }
+        .sd-av-item.danger       { color: var(--red); }
+        .sd-av-item.danger:hover { background: var(--red-dim); }
+        .sd-av-item svg          { width: 14px; height: 14px; stroke: currentColor; opacity: 0.7; }
 
-/* Brand / school name */
-.sd-topnav-brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    justify-content: center;
-}
-.sd-topnav-brand img {
-    width: 22px; height: 22px;
-    border-radius: 4px;
-    object-fit: cover;
-    border: 1px solid var(--border-hover);
-}
-.sd-topnav-school {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-}
+        /* ══════════════════════════════════════
+           TOP NAV ROW 2 — GitHub tab bar
+        ══════════════════════════════════════ */
+        .sd-subnav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sd-subnav::-webkit-scrollbar { display: none; }
 
-/* Right side — clock + avatar */
-.sd-topnav-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
+        .sd-subnav-inner {
+            display: flex;
+            align-items: stretch;
+            padding: 0 16px;
+            min-width: max-content;
+            height: 44px;
+        }
 
-.sd-clock {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    letter-spacing: 0.5px;
-    display: none;
-}
+        .sd-subnav-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px;
+            height: 44px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s ease, border-color 0.15s ease;
+            position: relative;
+            top: 1px;
+        }
+        .sd-subnav-tab svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            flex-shrink: 0; opacity: 0.7;
+        }
+        .sd-subnav-tab:hover          { color: var(--text); }
+        .sd-subnav-tab:hover svg      { opacity: 1; }
+        .sd-subnav-tab.active         { color: var(--text); font-weight: 600; border-bottom-color: #f78166; }
+        .sd-subnav-tab.active svg     { opacity: 1; }
 
-/* Topnav avatar */
-.sd-topnav-avatar {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    border: 1px solid var(--border-hover);
-    overflow: hidden;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface2);
-    transition: border-color var(--transition);
-    position: relative;
-}
-.sd-topnav-avatar:hover { border-color: var(--teal); }
-.sd-topnav-avatar img   { width: 100%; height: 100%; object-fit: cover; }
-.sd-topnav-avatar .sd-av-init {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-}
+        /* ══════════════════════════════════════
+           CONTENT AREA
+        ══════════════════════════════════════ */
+        #sd-content {
+            flex: 1; overflow-y: auto; background: var(--bg);
+        }
+        #sd-content::-webkit-scrollbar       { width: 4px; }
+        #sd-content::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
 
-/* Avatar dropdown */
-.sd-av-dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border-hover);
-    border-radius: var(--radius-lg);
-    min-width: 190px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    z-index: 6000;
-    overflow: hidden;
-    display: none;
-}
-.sd-av-dropdown.open                { display: block; }
-.sd-av-dropdown-header              { padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.sd-av-dropdown-name                { font-size: 13px; font-weight: 600; color: var(--text); }
-.sd-av-dropdown-role                { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+        /* ══════════════════════════════════════
+           OVERVIEW
+        ══════════════════════════════════════ */
+        .sd-overview { padding: 24px 24px 60px; max-width: 1400px; }
 
-.sd-av-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 14px;
-    font-size: 13px; font-weight: 400;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all var(--transition);
-    border: none; background: none;
-    width: 100%; text-align: left;
-    font-family: var(--font);
-}
-.sd-av-item:hover        { background: var(--surface2); color: var(--text); }
-.sd-av-item.danger       { color: var(--red); }
-.sd-av-item.danger:hover { background: var(--red-dim); }
-.sd-av-item svg          { width: 14px; height: 14px; stroke: currentColor; opacity: 0.7; }
+        .sd-page-header {
+            display: flex; align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 24px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sd-page-title  { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+        .sd-page-sub    { font-size: 12px; color: var(--text-muted); }
+        .sd-year-badge  {
+            font-size: 11px; font-weight: 500; font-family: var(--font-mono);
+            padding: 3px 10px; border-radius: 20px;
+            background: var(--teal-dim); border: 1px solid var(--teal-border); color: var(--teal);
+        }
 
-/* ══════════════════════════════════════════════════════════════
-   CONTENT AREA
-══════════════════════════════════════════════════════════════ */
-#sd-content {
-    flex: 1;
-    overflow-y: auto;
-    background: var(--bg);
-}
-#sd-content::-webkit-scrollbar       { width: 4px; }
-#sd-content::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+        /* KPI ROW */
+        .sd-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
 
-/* ══════════════════════════════════════════════════════════════
-   OVERVIEW — WAR ROOM
-══════════════════════════════════════════════════════════════ */
-.sd-overview {
-    padding: 24px 24px 60px;
-    max-width: 1400px;
-}
+        .sd-kpi-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 16px;
+            position: relative; overflow: hidden;
+            transition: border-color var(--transition); cursor: default;
+        }
+        .sd-kpi-card:hover { border-color: var(--border-hover); }
+        .sd-kpi-card::before {
+            content: ''; position: absolute;
+            top: 12px; bottom: 12px; left: 0;
+            width: 2px; border-radius: 0 2px 2px 0;
+        }
+        .sd-kpi-card.c-teal::before   { background: var(--teal); }
+        .sd-kpi-card.c-green::before  { background: var(--green); }
+        .sd-kpi-card.c-blue::before   { background: var(--blue); }
+        .sd-kpi-card.c-orange::before { background: var(--orange); }
+        .sd-kpi-card.c-purple::before { background: var(--purple); }
 
-/* Page header */
-.sd-page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-}
-.sd-page-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 3px;
-}
-.sd-page-sub {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-.sd-year-badge {
-    font-size: 11px;
-    font-weight: 500;
-    font-family: var(--font-mono);
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: var(--teal-dim);
-    border: 1px solid var(--teal-border);
-    color: var(--teal);
-}
+        .sd-kpi-icon {
+            width: 28px; height: 28px; border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; background: var(--surface2);
+        }
+        .sd-kpi-icon svg { width: 14px; height: 14px; stroke: var(--text-muted); }
 
-/* ── KPI ROW ── */
-.sd-kpi-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
-}
+        .sd-kpi-label {
+            font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+        }
+        .sd-kpi-value {
+            font-size: 26px; font-weight: 600; line-height: 1;
+            color: var(--text); margin-bottom: 4px; font-variant-numeric: tabular-nums;
+        }
+        .c-teal   .sd-kpi-value { color: var(--teal); }
+        .c-green  .sd-kpi-value { color: var(--green); }
+        .c-blue   .sd-kpi-value { color: var(--blue); }
+        .c-orange .sd-kpi-value { color: var(--orange); }
+        .c-purple .sd-kpi-value { color: var(--purple); }
+        .sd-kpi-sub { font-size: 12px; color: var(--text-muted); }
 
-.sd-kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color var(--transition);
-    cursor: default;
-}
-.sd-kpi-card:hover { border-color: var(--border-hover); }
+        /* PULSE ROW */
+        .sd-pulse-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
 
-/* Removed: colored ::before top bars — using subtle left accent instead */
-.sd-kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 12px; bottom: 12px;
-    left: 0;
-    width: 2px;
-    border-radius: 0 2px 2px 0;
-}
-.sd-kpi-card.c-teal::before   { background: var(--teal); }
-.sd-kpi-card.c-green::before  { background: var(--green); }
-.sd-kpi-card.c-blue::before   { background: var(--blue); }
-.sd-kpi-card.c-orange::before { background: var(--orange); }
-.sd-kpi-card.c-purple::before { background: var(--purple); }
+        .sd-pulse-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            transition: border-color var(--transition);
+        }
+        .sd-pulse-card:hover { border-color: var(--border-hover); }
+        .sd-pulse-icon {
+            width: 32px; height: 32px; border-radius: var(--radius);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; background: var(--surface2);
+        }
+        .sd-pulse-icon svg { width: 14px; height: 14px; stroke: var(--text-muted); }
+        .sd-pulse-num   { font-size: 20px; font-weight: 600; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+        .sd-pulse-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-/* Icon — muted, single color per card */
-.sd-kpi-icon {
-    width: 28px; height: 28px;
-    border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 12px;
-    background: var(--surface2);
-}
-.sd-kpi-icon svg { width: 14px; height: 14px; }
+        /* LAYOUT ROWS */
+        .sd-row { display: grid; gap: 12px; margin-bottom: 12px; }
+        .sd-row.col-2   { grid-template-columns: 1fr 1fr; }
+        .sd-row.col-3-1 { grid-template-columns: 3fr 2fr; }
+        .sd-row.col-1   { grid-template-columns: 1fr; }
 
-/* All icons same color — GitHub-style muted */
-.sd-kpi-icon svg { stroke: var(--text-muted); }
+        /* CARDS */
+        .sd-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 16px;
+            transition: border-color var(--transition);
+        }
+        .sd-card:hover { border-color: var(--border-hover); }
+        .sd-card-title {
+            font-size: 12px; font-weight: 600; color: var(--text-muted);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
+        }
+        .sd-card-title-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+        .sd-chart-wrap      { position: relative; height: 220px; }
+        .sd-chart-wrap.tall { height: 260px; }
+        .sd-no-data { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 12px; }
 
-/* Label — smaller, less aggressive caps */
-.sd-kpi-label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-}
+        /* CLASS PERFORMANCE */
+        .sd-class-perf-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: var(--radius);
+            margin-bottom: 4px; transition: background var(--transition);
+        }
+        .sd-class-perf-item:hover { background: var(--surface2); }
+        .sd-class-dot         { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .sd-class-dot.green   { background: var(--green); }
+        .sd-class-dot.orange  { background: var(--orange); }
+        .sd-class-dot.red     { background: var(--red); }
+        .sd-class-dot.gray    { background: var(--text-dim); }
+        .sd-class-name        { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+        .sd-class-learners    { font-size: 12px; color: var(--text-muted); }
+        .sd-class-avg         { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 20px; font-family: var(--font-mono); }
+        .sd-class-avg.green   { background: var(--green-dim);  color: var(--green);  }
+        .sd-class-avg.orange  { background: var(--orange-dim); color: var(--orange); }
+        .sd-class-avg.red     { background: var(--red-dim);    color: var(--red);    }
+        .sd-class-avg.gray    { background: var(--surface2);   color: var(--text-muted); }
 
-/* Value — white/near-white, not color-coded */
-.sd-kpi-value {
-    font-size: 26px;
-    font-weight: 600;
-    line-height: 1;
-    color: var(--text);
-    margin-bottom: 4px;
-    font-variant-numeric: tabular-nums;
-}
+        /* TEACHER ITEMS */
+        .sd-teacher-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: var(--radius);
+            margin-bottom: 4px; transition: background var(--transition);
+        }
+        .sd-teacher-item:hover { background: var(--surface2); }
+        .sd-teacher-avatar-sm {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--surface2); border: 1px solid var(--border-hover);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; color: var(--text-muted);
+            flex-shrink: 0; text-transform: uppercase; font-family: var(--font-mono);
+        }
+        .sd-teacher-name  { font-size: 13px; font-weight: 500; color: var(--text); }
+        .sd-teacher-meta  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+        .sd-teacher-score {
+            font-size: 12px; font-weight: 600; color: var(--text-muted);
+            flex-shrink: 0; font-family: var(--font-mono);
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2px 8px;
+        }
 
-/* Subtle color only on the value — toned way down */
-.c-teal   .sd-kpi-value { color: var(--teal); }
-.c-green  .sd-kpi-value { color: var(--green); }
-.c-blue   .sd-kpi-value { color: var(--blue); }
-.c-orange .sd-kpi-value { color: var(--orange); }
-.c-purple .sd-kpi-value { color: var(--purple); }
+        /* FEED */
+        .sd-feed-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .sd-feed-item:last-child { border-bottom: none; }
+        .sd-feed-icon     { width: 28px; height: 28px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface2); }
+        .sd-feed-icon svg { width: 12px; height: 12px; }
+        .sd-feed-icon.quiz         svg { stroke: var(--teal);   }
+        .sd-feed-icon.announcement svg { stroke: var(--orange); }
+        .sd-feed-icon.assignment   svg { stroke: var(--blue);   }
+        .sd-feed-text  { flex: 1; font-size: 13px; font-weight: 400; color: var(--text-muted); line-height: 1.5; }
+        .sd-feed-time  { font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 2px; font-family: var(--font-mono); white-space: nowrap; }
+        .sd-feed-class { font-size: 11px; font-weight: 500; color: var(--text-dim); margin-top: 2px; font-family: var(--font-mono); }
 
-.sd-kpi-sub {
-    font-size: 12px;
-    color: var(--text-muted);
-}
+        /* ALERT */
+        .sd-alert { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius); background: var(--red-dim); border: 1px solid rgba(248,81,73,0.18); margin-bottom: 6px; }
+        .sd-alert svg      { width: 14px; height: 14px; stroke: var(--red); flex-shrink: 0; opacity: 0.8; }
+        .sd-alert-text     { font-size: 13px; color: var(--text-muted); }
+        .sd-alert-avg      { font-size: 12px; font-weight: 600; color: var(--red); flex-shrink: 0; font-family: var(--font-mono); background: rgba(248,81,73,0.08); border-radius: 20px; padding: 2px 8px; }
 
-/* ── PULSE / ACTIVITY ROW ── */
-.sd-pulse-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
-}
+        /* SKELETON */
+        .sd-skeleton {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--surface3) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: sd-shimmer 1.6s infinite;
+            border-radius: var(--radius);
+        }
+        @keyframes sd-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-.sd-pulse-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: border-color var(--transition);
-}
-.sd-pulse-card:hover { border-color: var(--border-hover); }
+        /* LOADER */
+        #sdLoader {
+            position: fixed; inset: 0;
+            background: rgba(13,17,23,0.8); backdrop-filter: blur(4px);
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; color: var(--text-muted); font-size: 13px; gap: 12px;
+        }
+        .sd-spinner {
+            width: 32px; height: 32px;
+            border: 2px solid var(--border-hover); border-top-color: var(--teal);
+            border-radius: 50%; animation: sd-spin 0.8s linear infinite;
+        }
+        @keyframes sd-spin { to { transform: rotate(360deg); } }
 
-.sd-pulse-icon {
-    width: 32px; height: 32px;
-    border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    background: var(--surface2);
-}
-.sd-pulse-icon svg { width: 14px; height: 14px; stroke: var(--text-muted); }
+        /* COMING SOON */
+        .sd-coming-soon { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; color: var(--text-dim); gap: 10px; }
+        .sd-coming-soon svg { opacity: 0.25; }
+        .sd-coming-soon h3  { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .sd-coming-soon p   { font-size: 12px; max-width: 280px; color: var(--text-dim); }
 
-.sd-pulse-num {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-}
-.sd-pulse-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-/* ── LAYOUT ROWS ── */
-.sd-row { display: grid; gap: 12px; margin-bottom: 12px; }
-.sd-row.col-2   { grid-template-columns: 1fr 1fr; }
-.sd-row.col-3-1 { grid-template-columns: 3fr 2fr; }
-.sd-row.col-1   { grid-template-columns: 1fr; }
-
-/* ── CARDS ── */
-.sd-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    transition: border-color var(--transition);
-}
-.sd-card:hover { border-color: var(--border-hover); }
-
-/* Card title — GitHub's "● Section" pattern */
-.sd-card-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-transform: none;
-    letter-spacing: 0;
-}
-.sd-card-title-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--teal);
-    flex-shrink: 0;
-}
-
-.sd-chart-wrap         { position: relative; height: 220px; }
-.sd-chart-wrap.tall    { height: 260px; }
-.sd-no-data {
-    display: flex; align-items: center; justify-content: center;
-    height: 100%;
-    color: var(--text-dim);
-    font-size: 12px;
-}
-
-/* ── CLASS PERFORMANCE LIST ── */
-.sd-class-perf-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: var(--radius);
-    margin-bottom: 4px;
-    transition: background var(--transition);
-}
-.sd-class-perf-item:hover { background: var(--surface2); }
-
-.sd-class-dot         { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.sd-class-dot.green   { background: var(--green); }
-.sd-class-dot.orange  { background: var(--orange); }
-.sd-class-dot.red     { background: var(--red); }
-.sd-class-dot.gray    { background: var(--text-dim); }
-
-.sd-class-name     { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
-.sd-class-learners { font-size: 12px; color: var(--text-muted); }
-
-.sd-class-avg {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-family: var(--font-mono);
-}
-.sd-class-avg.green  { background: var(--green-dim);  color: var(--green);  }
-.sd-class-avg.orange { background: var(--orange-dim); color: var(--orange); }
-.sd-class-avg.red    { background: var(--red-dim);    color: var(--red);    }
-.sd-class-avg.gray   { background: var(--surface2);   color: var(--text-muted); }
-
-/* ── TEACHER ACTIVITY ── */
-.sd-teacher-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: var(--radius);
-    margin-bottom: 4px;
-    transition: background var(--transition);
-}
-.sd-teacher-item:hover { background: var(--surface2); }
-
-.sd-teacher-avatar-sm {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--border-hover);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 600;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    text-transform: uppercase;
-    font-family: var(--font-mono);
-}
-.sd-teacher-name  { font-size: 13px; font-weight: 500; color: var(--text); }
-.sd-teacher-meta  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
-.sd-teacher-score {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    font-family: var(--font-mono);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-}
-
-/* ── ACTIVITY FEED ── */
-.sd-feed-item {
-    display: flex;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-}
-.sd-feed-item:last-child { border-bottom: none; }
-
-.sd-feed-icon     { width: 28px; height: 28px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface2); }
-.sd-feed-icon svg { width: 12px; height: 12px; }
-
-/* All feed icons same neutral, diff icon types */
-.sd-feed-icon.quiz         svg { stroke: var(--teal);   }
-.sd-feed-icon.announcement svg { stroke: var(--orange); }
-.sd-feed-icon.assignment   svg { stroke: var(--blue);   }
-
-.sd-feed-text {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text-muted);
-    line-height: 1.5;
-}
-.sd-feed-time {
-    font-size: 11px;
-    color: var(--text-dim);
-    flex-shrink: 0;
-    margin-top: 2px;
-    font-family: var(--font-mono);
-    white-space: nowrap;
-}
-.sd-feed-class {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-dim);
-    margin-top: 2px;
-    font-family: var(--font-mono);
-}
-
-/* ── ATTENTION ALERT ── */
-.sd-alert {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-radius: var(--radius);
-    background: var(--red-dim);
-    border: 1px solid rgba(248,81,73,0.18);
-    margin-bottom: 6px;
-}
-.sd-alert svg      { width: 14px; height: 14px; stroke: var(--red); flex-shrink: 0; opacity: 0.8; }
-.sd-alert-text     { font-size: 13px; color: var(--text-muted); }
-.sd-alert-avg      { font-size: 12px; font-weight: 600; color: var(--red); flex-shrink: 0; font-family: var(--font-mono); background: rgba(248,81,73,0.08); border-radius: 20px; padding: 2px 8px; }
-
-/* ── SKELETON LOADER ── */
-.sd-skeleton {
-    background: linear-gradient(90deg, var(--surface) 25%, var(--surface3) 50%, var(--surface) 75%);
-    background-size: 200% 100%;
-    animation: sd-shimmer 1.6s infinite;
-    border-radius: var(--radius);
-}
-@keyframes sd-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* ── GLOBAL LOADER ── */
-#sdLoader {
-    position: fixed; inset: 0;
-    background: rgba(13,17,23,0.8);
-    backdrop-filter: blur(4px);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    color: var(--text-muted);
-    font-size: 13px;
-    gap: 12px;
-}
-.sd-spinner {
-    width: 32px; height: 32px;
-    border: 2px solid var(--border-hover);
-    border-top-color: var(--teal);
-    border-radius: 50%;
-    animation: sd-spin 0.8s linear infinite;
-}
-@keyframes sd-spin { to { transform: rotate(360deg); } }
-
-/* ── COMING SOON PLACEHOLDER ── */
-.sd-coming-soon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px;
-    text-align: center;
-    color: var(--text-dim);
-    gap: 10px;
-}
-.sd-coming-soon svg { opacity: 0.25; }
-.sd-coming-soon h3  { font-size: 14px; font-weight: 600; color: var(--text-muted); }
-.sd-coming-soon p   { font-size: 12px; max-width: 280px; color: var(--text-dim); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-    .sd-kpi-row   { grid-template-columns: repeat(2, 1fr); }
-    .sd-pulse-row { grid-template-columns: repeat(2, 1fr); }
-    .sd-row.col-2, .sd-row.col-3-1 { grid-template-columns: 1fr; }
-}
-@media (max-width: 600px) {
-    .sd-kpi-row, .sd-pulse-row { grid-template-columns: repeat(2, 1fr); }
-    .sd-overview  { padding: 16px 12px 80px; }
-    .sd-topnav-school { display: none; }
-    .sd-clock     { display: none !important; }
-}
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .sd-kpi-row   { grid-template-columns: repeat(2,1fr); }
+            .sd-pulse-row { grid-template-columns: repeat(2,1fr); }
+            .sd-row.col-2, .sd-row.col-3-1 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .sd-kpi-row, .sd-pulse-row { grid-template-columns: repeat(2,1fr); }
+            .sd-overview  { padding: 16px 12px 80px; }
+            .sd-topnav-school { display: none; }
+            .sd-clock { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════
-     OVERLAY
-═══════════════════════════════════ -->
+<!-- OVERLAY -->
 <div id="sdOverlay" onclick="closeSidebar()"></div>
 
-<!-- ═══════════════════════════════════
-     SIDEBAR
-═══════════════════════════════════ -->
+<!-- SIDEBAR -->
 <aside class="sd-sidebar" id="sdSidebar">
 
     <div class="sd-sidebar-header">
@@ -892,42 +636,6 @@ body {
         </svg>
         School Admin
     </div>
-
-    <div class="sd-nav-label">Main</div>
-
-    <button class="sd-nav-link active" id="nav-overview" onclick="loadSection('overview')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-        </svg>
-        Overview
-    </button>
-
-    <button class="sd-nav-link" id="nav-learners" onclick="loadSection('learners')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-        Learners
-    </button>
-
-    <button class="sd-nav-link" id="nav-teachers" onclick="loadSection('teachers')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-        </svg>
-        Teachers
-    </button>
-
-    <button class="sd-nav-link" id="nav-classes" onclick="loadSection('classes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        Classes
-    </button>
 
     <div class="sd-nav-label">Content</div>
 
@@ -968,12 +676,10 @@ body {
     <div class="sd-sidebar-footer">iSkool v1.0.0</div>
 </aside>
 
-<!-- ═══════════════════════════════════
-     MAIN
-═══════════════════════════════════ -->
+<!-- MAIN -->
 <div class="sd-main">
 
-    <!-- TOP NAV -->
+    <!-- TOP NAV ROW 1 -->
     <header class="sd-topnav">
         <button class="sd-hamburger" onclick="openSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -990,7 +696,6 @@ body {
 
         <div class="sd-topnav-right">
             <span class="sd-clock" id="sdClock"></span>
-
             <div style="position:relative;">
                 <div class="sd-topnav-avatar" onclick="toggleAvatarDrop()" id="sdTopAvatar">
                     <?php if (!empty($adminProfile) && $adminProfile !== 'default.png'): ?>
@@ -1023,6 +728,47 @@ body {
             </div>
         </div>
     </header>
+
+    <!-- TOP NAV ROW 2 — GitHub-style tab bar -->
+    <nav class="sd-subnav">
+        <div class="sd-subnav-inner">
+
+            <button class="sd-subnav-tab active" id="tab-overview" onclick="loadSection('overview')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Overview
+            </button>
+
+            <button class="sd-subnav-tab" id="tab-learners" onclick="loadSection('learners')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Learners
+            </button>
+
+            <button class="sd-subnav-tab" id="tab-teachers" onclick="loadSection('teachers')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Teachers
+            </button>
+
+            <button class="sd-subnav-tab" id="tab-classes" onclick="loadSection('classes')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Classes
+            </button>
+
+        </div>
+    </nav>
 
     <!-- CONTENT -->
     <div id="sd-content"></div>
@@ -1078,12 +824,18 @@ document.addEventListener('click', e => {
 })();
 
 // ═══════════════════════════════════
-// NAV ACTIVE STATE
+// NAV ACTIVE STATE — sidebar + subnav
 // ═══════════════════════════════════
 function setNavActive(section) {
+    // Sidebar links
     document.querySelectorAll('.sd-nav-link').forEach(l => l.classList.remove('active'));
-    const el = document.getElementById('nav-' + section);
-    if (el) el.classList.add('active');
+    const sideEl = document.getElementById('nav-' + section);
+    if (sideEl) sideEl.classList.add('active');
+
+    // Subnav tabs
+    document.querySelectorAll('.sd-subnav-tab').forEach(t => t.classList.remove('active'));
+    const tabEl = document.getElementById('tab-' + section);
+    if (tabEl) tabEl.classList.add('active');
 }
 
 // ═══════════════════════════════════
@@ -1119,18 +871,18 @@ async function loadSection(section) {
 function renderComingSoon(section) {
     document.getElementById('sd-content').innerHTML = `
         <div class="sd-coming-soon">
-            <svg viewBox="0 0 24 24" width="56" height="56" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+            <svg viewBox="0 0 24 24" width="56" height="56" stroke="var(--teal)" stroke-width="1.5" fill="none">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <h3>${section.charAt(0).toUpperCase() + section.slice(1)}</h3>
-            <p>This section is coming soon. The overview war room is live above.</p>
+            <p>This section is coming soon.</p>
         </div>`;
 }
 
 // ═══════════════════════════════════
-// OVERVIEW — WAR ROOM
+// OVERVIEW
 // ═══════════════════════════════════
 async function loadOverview() {
     const content = document.getElementById('sd-content');
@@ -1140,31 +892,30 @@ async function loadOverview() {
         return;
     }
 
-    // Skeleton while loading
     content.innerHTML = `
         <div class="sd-overview">
             <div class="sd-page-header">
                 <div>
-                    <div class="sd-skeleton" style="height:22px;width:180px;margin-bottom:8px;"></div>
-                    <div class="sd-skeleton" style="height:13px;width:240px;"></div>
+                    <div class="sd-skeleton" style="height:20px;width:180px;margin-bottom:8px;"></div>
+                    <div class="sd-skeleton" style="height:12px;width:240px;"></div>
                 </div>
-                <div class="sd-skeleton" style="height:28px;width:80px;border-radius:20px;"></div>
+                <div class="sd-skeleton" style="height:26px;width:80px;border-radius:20px;"></div>
             </div>
             <div class="sd-kpi-row">
                 ${[1,2,3,4].map(() => `
-                    <div class="sd-kpi-card" style="background:var(--surface);">
-                        <div class="sd-skeleton" style="height:34px;width:34px;border-radius:8px;margin-bottom:12px;"></div>
+                    <div class="sd-kpi-card">
+                        <div class="sd-skeleton" style="height:28px;width:28px;border-radius:6px;margin-bottom:12px;"></div>
                         <div class="sd-skeleton" style="height:10px;width:60%;margin-bottom:10px;"></div>
-                        <div class="sd-skeleton" style="height:30px;width:50%;margin-bottom:6px;"></div>
+                        <div class="sd-skeleton" style="height:26px;width:50%;margin-bottom:6px;"></div>
                         <div class="sd-skeleton" style="height:10px;width:80%;"></div>
                     </div>`).join('')}
             </div>
             <div class="sd-pulse-row">
                 ${[1,2,3,4].map(() => `
                     <div class="sd-pulse-card">
-                        <div class="sd-skeleton" style="height:38px;width:38px;border-radius:10px;flex-shrink:0;"></div>
+                        <div class="sd-skeleton" style="height:32px;width:32px;border-radius:6px;flex-shrink:0;"></div>
                         <div style="flex:1;">
-                            <div class="sd-skeleton" style="height:22px;width:40px;margin-bottom:6px;"></div>
+                            <div class="sd-skeleton" style="height:20px;width:40px;margin-bottom:6px;"></div>
                             <div class="sd-skeleton" style="height:11px;width:80%;"></div>
                         </div>
                     </div>`).join('')}
@@ -1177,7 +928,7 @@ async function loadOverview() {
         window._sdCache.overview = data;
         renderOverview(data);
     } catch (e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;">Failed to load overview data.</p>`;
+        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load overview data.</p>`;
     }
 }
 
@@ -1193,23 +944,21 @@ function renderOverview(d) {
 
     function timeAgo(dateStr) {
         const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-        if (diff < 60)   return diff + 's ago';
-        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-        if (diff < 86400)return Math.floor(diff/3600) + 'h ago';
+        if (diff < 60)    return diff + 's ago';
+        if (diff < 3600)  return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
         return Math.floor(diff/86400) + 'd ago';
     }
 
-    // ── Feed icons ──
     const feedIcons = {
-        quiz: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+        quiz:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
         announcement: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
-        assignment: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+        assignment:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
     };
 
     content.innerHTML = `
     <div class="sd-overview">
 
-        <!-- PAGE HEADER -->
         <div class="sd-page-header">
             <div>
                 <div class="sd-page-title">School Overview</div>
@@ -1218,7 +967,6 @@ function renderOverview(d) {
             <div class="sd-year-badge">${d.year_name || 'CURRENT YEAR'}</div>
         </div>
 
-        <!-- KPI CARDS -->
         <div class="sd-kpi-row">
             <div class="sd-kpi-card c-teal">
                 <div class="sd-kpi-icon">
@@ -1254,47 +1002,45 @@ function renderOverview(d) {
             </div>
         </div>
 
-        <!-- THIS WEEK PULSE -->
         <div class="sd-pulse-row">
             <div class="sd-pulse-card">
-                <div class="sd-pulse-icon" style="background:rgba(79,209,197,0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <div class="sd-pulse-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </div>
                 <div>
-                    <div class="sd-pulse-num" style="color:var(--teal);">${d.this_week.quizzes}</div>
+                    <div class="sd-pulse-num">${d.this_week.quizzes}</div>
                     <div class="sd-pulse-label">Quizzes this week</div>
                 </div>
             </div>
             <div class="sd-pulse-card">
-                <div class="sd-pulse-icon" style="background:rgba(78,121,167,0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div class="sd-pulse-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
                 <div>
-                    <div class="sd-pulse-num" style="color:var(--blue);">${d.this_week.assignments}</div>
+                    <div class="sd-pulse-num">${d.this_week.assignments}</div>
                     <div class="sd-pulse-label">Assignments this week</div>
                 </div>
             </div>
             <div class="sd-pulse-card">
-                <div class="sd-pulse-icon" style="background:rgba(245,158,11,0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <div class="sd-pulse-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                 </div>
                 <div>
-                    <div class="sd-pulse-num" style="color:var(--orange);">${d.this_week.announcements}</div>
+                    <div class="sd-pulse-num">${d.this_week.announcements}</div>
                     <div class="sd-pulse-label">Announcements this week</div>
                 </div>
             </div>
             <div class="sd-pulse-card">
-                <div class="sd-pulse-icon" style="background:rgba(167,139,250,0.1);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <div class="sd-pulse-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 </div>
                 <div>
-                    <div class="sd-pulse-num" style="color:var(--purple);">${d.this_week.resources}</div>
+                    <div class="sd-pulse-num">${d.this_week.resources}</div>
                     <div class="sd-pulse-label">Resources this week</div>
                 </div>
             </div>
         </div>
 
-        <!-- ROW: CLASS PERFORMANCE CHART + ACTIVITY FEED -->
         <div class="sd-row col-3-1">
             <div class="sd-card">
                 <div class="sd-card-title">
@@ -1326,7 +1072,6 @@ function renderOverview(d) {
             </div>
         </div>
 
-        <!-- ROW: CLASS LIST + ACTIVE TEACHERS -->
         <div class="sd-row col-2">
             <div class="sd-card">
                 <div class="sd-card-title">
@@ -1344,13 +1089,12 @@ function renderOverview(d) {
                         </div>`;
                 }).join('') || `<div class="sd-no-data" style="height:120px;">No classes yet</div>`}
             </div>
-
             <div class="sd-card">
                 <div class="sd-card-title">
                     <span class="sd-card-title-dot" style="background:var(--blue);"></span>
                     Most Active Teachers
                 </div>
-                ${d.active_teachers.map((t, i) => {
+                ${d.active_teachers.map(t => {
                     const initials = (t.name?.[0] || '') + (t.surname?.[0] || '');
                     return `
                         <div class="sd-teacher-item">
@@ -1365,7 +1109,6 @@ function renderOverview(d) {
             </div>
         </div>
 
-        <!-- ROW: CLASSES NEEDING ATTENTION -->
         ${d.classes_need_attention.length ? `
         <div class="sd-row col-1">
             <div class="sd-card">
@@ -1387,7 +1130,6 @@ function renderOverview(d) {
 
     </div>`;
 
-    // ── Render class performance chart ──
     if (d.class_performance.length) {
         const ctx = document.getElementById('sd-chart-classes')?.getContext('2d');
         if (ctx) {
@@ -1399,17 +1141,17 @@ function renderOverview(d) {
                         label: 'Average %',
                         data: d.class_performance.map(c => c.avg_pct),
                         backgroundColor: d.class_performance.map(c =>
-                            c.avg_pct >= 60 ? 'rgba(34,197,94,0.65)' :
-                            c.avg_pct >= 40 ? 'rgba(245,158,11,0.65)' :
-                            c.avg_pct !== null ? 'rgba(248,81,73,0.65)' : 'rgba(255,255,255,0.1)'
+                            c.avg_pct >= 60 ? 'rgba(63,185,80,0.5)'  :
+                            c.avg_pct >= 40 ? 'rgba(210,153,34,0.5)' :
+                            c.avg_pct !== null ? 'rgba(248,81,73,0.5)' : 'rgba(255,255,255,0.06)'
                         ),
                         borderColor: d.class_performance.map(c =>
-                            c.avg_pct >= 60 ? '#22c55e' :
-                            c.avg_pct >= 40 ? '#f59e0b' :
-                            c.avg_pct !== null ? '#f85149' : 'rgba(255,255,255,0.2)'
+                            c.avg_pct >= 60 ? '#3fb950' :
+                            c.avg_pct >= 40 ? '#d29922' :
+                            c.avg_pct !== null ? '#f85149' : 'rgba(255,255,255,0.15)'
                         ),
-                        borderWidth: 2,
-                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderRadius: 4,
                         borderSkipped: false,
                     }]
                 },
@@ -1419,18 +1161,25 @@ function renderOverview(d) {
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#1c2128',
+                            borderColor: '#30363d',
+                            borderWidth: 1,
+                            titleColor: '#e6edf3',
+                            bodyColor: '#8b949e',
                             callbacks: { label: ctx => ` ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}` }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true, max: 100,
-                            ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20 },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
+                            ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20, font: { size: 11 } },
+                            grid: { color: 'rgba(255,255,255,0.04)' },
+                            border: { color: 'rgba(255,255,255,0.04)' }
                         },
                         x: {
-                            ticks: { color: '#8b949e' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
+                            ticks: { color: '#8b949e', font: { size: 11 } },
+                            grid: { display: false },
+                            border: { color: 'rgba(255,255,255,0.04)' }
                         }
                     }
                 }
@@ -1445,9 +1194,6 @@ function renderOverview(d) {
 document.addEventListener('DOMContentLoaded', () => {
     loadSection('overview');
 });
-</script>
-<script>
-// ── INLINE CLASSES SECTION ──
 </script>
 <script src="assets/js/school/classes.js?v=1.0"></script>
 <script src="assets/js/school/learners.js?v=1.0"></script>
