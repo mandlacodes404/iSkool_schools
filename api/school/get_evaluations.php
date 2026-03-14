@@ -86,23 +86,59 @@ while ($eval = $evalRes->fetch_assoc()) {
         ORDER BY es.order_num ASC
     ");
 
-    $stmtData = []; // id => [statement, scores[]]
+    $stmtData = []; // id => [statement, scores[], answers[]]
     while ($row = $stmtRes->fetch_assoc()) {
         $sid = $row['id'];
         if (!isset($stmtData[$sid])) {
-            $stmtData[$sid] = ['statement' => $row['statement'], 'scores' => []];
+            $stmtData[$sid] = [
+                'statement' => $row['statement'],
+                'scores'    => [],
+                'answers'   => [
+                    'strongly_agree'    => 0,
+                    'agree'             => 0,
+                    'neutral'           => 0,
+                    'disagree'          => 0,
+                    'strongly_disagree' => 0,
+                ],
+            ];
         }
         $stmtData[$sid]['scores'][] = $scoreMap[$row['answer']] ?? 3;
+        if (isset($stmtData[$sid]['answers'][$row['answer']])) {
+            $stmtData[$sid]['answers'][$row['answer']]++;
+        }
     }
+
+    $answerLabels = [
+        'strongly_agree'    => ['label' => 'Strongly Agree',    'color' => '#22c55e'],
+        'agree'             => ['label' => 'Agree',             'color' => '#4fd1c5'],
+        'neutral'           => ['label' => 'Neutral',           'color' => '#f59e0b'],
+        'disagree'          => ['label' => 'Disagree',          'color' => '#f85149'],
+        'strongly_disagree' => ['label' => 'Strongly Disagree', 'color' => '#991b1b'],
+    ];
 
     $statements  = [];
     $allScores   = [];
     foreach ($stmtData as $sid => $sdata) {
-        $avg = count($sdata['scores']) ? round(array_sum($sdata['scores']) / count($sdata['scores']), 1) : null;
+        $total = count($sdata['scores']);
+        $avg   = $total ? round(array_sum($sdata['scores']) / $total, 1) : null;
+
+        // Build breakdown with percentages
+        $breakdown = [];
+        foreach ($sdata['answers'] as $key => $count) {
+            $breakdown[] = [
+                'key'        => $key,
+                'label'      => $answerLabels[$key]['label'],
+                'color'      => $answerLabels[$key]['color'],
+                'count'      => $count,
+                'percentage' => $total > 0 ? round(($count / $total) * 100) : 0,
+            ];
+        }
+
         $statements[] = [
             'statement' => $sdata['statement'],
             'avg_score' => $avg,
-            'count'     => count($sdata['scores']),
+            'count'     => $total,
+            'breakdown' => $breakdown,
         ];
         if ($avg !== null) $allScores[] = $avg;
     }

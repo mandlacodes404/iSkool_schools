@@ -595,19 +595,61 @@ function renderEvaluationsTab() {
             ? `<div class="sdeval-score-num ${col}">${ev.overall_score}</div><div class="sdeval-score-label">/5</div>`
             : `<div class="sdeval-score-num gray">—</div><div class="sdeval-score-label">no data</div>`;
 
-        // Statements
+        // Answer options config — matches teacher side
+        const answerOptions = [
+            { key: 'strongly_agree',    label: 'Strongly Agree',    color: '#22c55e' },
+            { key: 'agree',             label: 'Agree',             color: '#4fd1c5' },
+            { key: 'neutral',           label: 'Neutral',           color: '#f59e0b' },
+            { key: 'disagree',          label: 'Disagree',          color: '#f85149' },
+            { key: 'strongly_disagree', label: 'Strongly Disagree', color: '#991b1b' },
+        ];
+
+        // Statements with percentage breakdown bars
         const stmtRows = ev.statements.length ? ev.statements.map(st => {
-            const sc   = sdevalScoreColor(st.avg_score);
-            const barW = st.avg_score !== null ? (st.avg_score / 5) * 100 : 0;
-            const barColor = sc === 'green' ? '#22c55e' : sc === 'orange' ? '#f59e0b' : '#f85149';
+            // Build breakdown from avg_score + count
+            // API gives us avg_score and count — we approximate breakdown
+            // For actual breakdown we need counts per answer, but avg_score gives us the story
+            const sc = sdevalScoreColor(st.avg_score);
+            const scoreLabel = st.avg_score !== null
+                ? `<span style="font-size:12px;font-weight:900;color:${sc==='green'?'#22c55e':sc==='orange'?'#f59e0b':'#f85149'};">${st.avg_score}/5</span>`
+                : '—';
+
+            // Build percentage bars using breakdown if available, else show avg bar
+            let barsHTML = '';
+            if (st.breakdown && st.breakdown.length) {
+                barsHTML = st.breakdown.map(b => `
+                    <div style="margin-bottom:6px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#4a5568;margin-bottom:3px;">
+                            <span>${b.label}</span>
+                            <span style="color:${b.color};">${b.count} (${b.percentage}%)</span>
+                        </div>
+                        <div style="height:7px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+                            <div style="height:100%;width:${b.percentage}%;background:${b.color};border-radius:4px;transition:width 0.6s ease;"></div>
+                        </div>
+                    </div>`).join('');
+            } else {
+                // Fallback: single bar showing avg as percentage of 5
+                const pct = st.avg_score !== null ? Math.round((st.avg_score / 5) * 100) : 0;
+                const barColor = sc==='green'?'#22c55e':sc==='orange'?'#f59e0b':'#f85149';
+                barsHTML = `
+                    <div style="margin-bottom:6px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#4a5568;margin-bottom:3px;">
+                            <span>Average score</span>
+                            <span style="color:${barColor};">${st.avg_score ?? '—'}/5</span>
+                        </div>
+                        <div style="height:7px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+                            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.6s ease;"></div>
+                        </div>
+                    </div>`;
+            }
+
             return `
-                <div class="sdeval-stmt-row">
-                    <div class="sdeval-stmt-text">${st.statement}</div>
-                    <div class="sdeval-stmt-bar-wrap">
-                        <div class="sdeval-stmt-bar" style="width:${barW}%;background:${barColor};"></div>
+                <div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:12px;">
+                        <div style="font-size:13px;font-weight:700;color:#c9d1d9;flex:1;">${st.statement}</div>
+                        ${scoreLabel}
                     </div>
-                    <div class="sdeval-stmt-score" style="color:${barColor};">${st.avg_score ?? '—'}</div>
-                    ${sdevalScoreTag(st.avg_score)}
+                    ${barsHTML}
                 </div>`;
         }).join('') : `<div class="sdeval-no-responses">No responses yet</div>`;
 
