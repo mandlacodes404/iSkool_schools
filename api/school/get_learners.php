@@ -1,6 +1,7 @@
 <?php
 /**
  * iSkool School Dashboard — Get All Learners API
+ * Updated: added profile_status for incomplete badge
  */
 ob_start();
 error_reporting(E_ALL);
@@ -23,7 +24,7 @@ if ($row = $res->fetch_assoc()) $yearId = $row['id'];
 $sql = "
     SELECT 
         u.id, u.name, u.surname, u.email, u.gender, u.age,
-        u.profile_pic, u.created_at,
+        u.profile_pic, u.created_at, u.profile_status,
         GROUP_CONCAT(DISTINCT c.name ORDER BY c.name SEPARATOR ', ') AS classes,
         GROUP_CONCAT(DISTINCT c.id   ORDER BY c.name SEPARATOR ',')  AS class_ids
     FROM users u
@@ -50,18 +51,19 @@ while ($row = $result->fetch_assoc()) {
     $avg = $avgRes->fetch_assoc()['avg'];
 
     $learners[] = [
-        'id'         => $row['id'],
-        'name'       => trim($row['name'] . ' ' . $row['surname']),
-        'first_name' => $row['name'],
-        'surname'    => $row['surname'],
-        'email'      => $row['email'],
-        'gender'     => $row['gender'],
-        'age'        => $row['age'],
-        'profile_pic'=> $row['profile_pic'],
-        'created_at' => $row['created_at'],
-        'classes'    => $row['classes'] ?? '—',
-        'class_ids'  => $row['class_ids'] ?? '',
-        'avg_pct'    => $avg,
+        'id'             => $row['id'],
+        'name'           => trim($row['name'] . ' ' . $row['surname']),
+        'first_name'     => $row['name'],
+        'surname'        => $row['surname'],
+        'email'          => $row['email'],
+        'gender'         => $row['gender'],
+        'age'            => $row['age'],
+        'profile_pic'    => $row['profile_pic'],
+        'created_at'     => $row['created_at'],
+        'classes'        => $row['classes'] ?? '—',
+        'class_ids'      => $row['class_ids'] ?? '',
+        'avg_pct'        => $avg,
+        'profile_status' => $row['profile_status'] ?? 'incomplete',
     ];
 }
 

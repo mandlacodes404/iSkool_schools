@@ -2,7 +2,7 @@
 /**
  * iSkool School Dashboard — Learner Profile API
  * Returns personal + academic details for a single learner
- * Mirrors get_progress_report.php logic but for admin view
+ * Updated: added guardian, emergency, medical, DOB, ID, address fields
  */
 ob_start();
 error_reporting(E_ALL);
@@ -29,13 +29,18 @@ $yearName = '';
 $res = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($row = $res->fetch_assoc()) { $yearId = $row['id']; $yearName = $row['name']; }
 
-// Current term (simple: based on current month)
+// Current term
 $month = (int)date('n');
 $currentTerm = $month <= 3 ? 1 : ($month <= 6 ? 2 : ($month <= 9 ? 3 : 4));
 
-// Learner personal details
+// ── Learner personal details — including all new profile fields ──
 $uRes = $conn->query("
-    SELECT id, name, surname, email, gender, age, profile_pic, created_at
+    SELECT id, name, surname, email, gender, age,
+           profile_pic, created_at, profile_status,
+           date_of_birth, id_number, address,
+           guardian_name, guardian_relationship, guardian_phone, guardian_email,
+           emergency_contact_name, emergency_contact_phone,
+           medical_notes
     FROM users WHERE email = '$safe' AND role = 'learner' LIMIT 1
 ");
 $u = $uRes->fetch_assoc();
@@ -58,16 +63,13 @@ $schoolName = 'iSkool';
 $snRes = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 if ($snRow = $snRes->fetch_assoc()) $schoolName = $snRow['setting_value'];
 
-// ── ACADEMIC DATA: subjects grouped by teacher_subjects (or teacher name fallback) ──
-// Get all class IDs for this learner
+// ── ACADEMIC DATA: subjects grouped by teacher_subjects ──
 $classIds = array_column($classes, 'id');
-
 $subjects = [];
 
 if (!empty($classIds)) {
     $classIdStr = implode(',', array_map('intval', $classIds));
 
-    // Get all teachers who posted summative quizzes to learner's classes
     $teacherRes = $conn->query("
         SELECT DISTINCT q.created_by, q.class_id
         FROM quizzes q
@@ -138,12 +140,12 @@ if (!empty($classIds)) {
                     $earnedTotal += $earned;
                     $totalWeight += $w;
                     $quizzes[]    = [
-                        'title'   => $qRow['title'],
-                        'score'   => $qRow['score'],
-                        'total'   => $qRow['total'],
-                        'weight'  => $w,
-                        'earned'  => round($earned, 1),
-                        'pct'     => round($qRow['score'] / $qRow['total'] * 100, 1),
+                        'title'  => $qRow['title'],
+                        'score'  => $qRow['score'],
+                        'total'  => $qRow['total'],
+                        'weight' => $w,
+                        'earned' => round($earned, 1),
+                        'pct'    => round($qRow['score'] / $qRow['total'] * 100, 1),
                     ];
                 }
             }
@@ -172,7 +174,6 @@ if (!empty($classIds)) {
             ];
         }
 
-        // Overall avg across all terms
         $termPcts = array_filter(array_map(fn($t) => $t['pct'], $terms), fn($v) => $v !== null);
         $overallSubAvg = count($termPcts) ? round(array_sum($termPcts) / count($termPcts)) : null;
 
@@ -187,12 +188,17 @@ if (!empty($classIds)) {
 
 $subjects = array_values($subjects);
 
-// Overall academic average
-$allAvgs = array_filter(array_column($subjects, 'overall_avg'), fn($v) => $v !== null);
+$allAvgs    = array_filter(array_column($subjects, 'overall_avg'), fn($v) => $v !== null);
 $overallAvg = count($allAvgs) ? round(array_sum($allAvgs) / count($allAvgs)) : null;
 
+// Format DOB for display
+$dobFormatted = null;
+if ($u['date_of_birth']) {
+    $dobFormatted = date('d F Y', strtotime($u['date_of_birth']));
+}
+
 echo json_encode([
-    // Personal
+    // ── Identity ──
     'id'           => $u['id'],
     'name'         => trim($u['name'] . ' ' . $u['surname']),
     'first_name'   => $u['name'],
@@ -200,10 +206,28 @@ echo json_encode([
     'email'        => $u['email'],
     'gender'       => $u['gender'],
     'age'          => $u['age'],
+    'date_of_birth'=> $dobFormatted,
+    'id_number'    => $u['id_number'],
+    'address'      => $u['address'],
     'profile_pic'  => $u['profile_pic'],
+    'profile_status'=> $u['profile_status'] ?? 'incomplete',
     'joined'       => $u['created_at'],
+
+    // ── Guardian ──
+    'guardian_name'         => $u['guardian_name'],
+    'guardian_relationship' => $u['guardian_relationship'],
+    'guardian_phone'        => $u['guardian_phone'],
+    'guardian_email'        => $u['guardian_email'],
+
+    // ── Emergency ──
+    'emergency_contact_name'  => $u['emergency_contact_name'],
+    'emergency_contact_phone' => $u['emergency_contact_phone'],
+
+    // ── Medical ──
+    'medical_notes' => $u['medical_notes'],
+
+    // ── Academic ──
     'classes'      => $classNames ?: '—',
-    // Academic
     'school_name'  => $schoolName,
     'year_name'    => $yearName,
     'current_term' => $currentTerm,
