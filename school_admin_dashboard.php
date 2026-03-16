@@ -1196,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="assets/js/school/classes.js?v=1.1"></script>
-<script src="assets/js/school/learners.js?v=1.3"></script>
+<script src="assets/js/school/learners.js?v=1.4"></script>
 <script src="assets/js/school/teachers.js?v=1.1"></script>
 <script src="assets/js/school/analytics.js?v=1.3"></script>
 <script src="assets/js/school/settings.js?v=1.0"></script>

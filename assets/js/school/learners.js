@@ -705,28 +705,15 @@ function renderLearnersTable(data) {
                 <option value="">All Classes</option>
                 ${classOptions}
             </select>
-            <select class="sdl-filter" id="sdl-gender-filter" onchange="sdlFilterTable()">
-                <option value="">All Genders</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-            </select>
-            <select class="sdl-filter" id="sdl-profile-filter" onchange="sdlFilterTable()">
-                <option value="">All Profiles</option>
-                <option value="incomplete">Incomplete</option>
-                <option value="complete">Complete</option>
-            </select>
+
         </div>
 
         <div class="sdl-table-wrap">
             <table class="sdl-table" id="sdl-table">
                 <thead>
                     <tr>
-                        <th onclick="sdlSort('name')"    id="sdth-name">Learner</th>
+                        <th onclick="sdlSort('name')" id="sdth-name">Learner</th>
                         <th onclick="sdlSort('classes')" id="sdth-classes">Class</th>
-                        <th onclick="sdlSort('gender')"  id="sdth-gender">Gender</th>
-                        <th onclick="sdlSort('age')"     id="sdth-age">Age</th>
-                        <th onclick="sdlSort('avg_pct')" id="sdth-avg">Avg %</th>
-                        <th>Profile</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -761,7 +748,7 @@ function renderLearnersTable(data) {
 
 function buildLearnerRows(learners) {
     if (!learners.length) {
-        return `<tr><td colspan="7" style="text-align:center;padding:40px;color:#4a5568;font-style:italic;">No learners found.</td></tr>`;
+        return `<tr><td colspan="3" style="text-align:center;padding:40px;color:#4a5568;font-style:italic;">No learners found.</td></tr>`;
     }
 
     return learners.map(l => {
@@ -787,8 +774,7 @@ function buildLearnerRows(learners) {
         return `
             <tr data-id="${l.id}" data-name="${sdlEsc(l.name)}" data-email="${sdlEsc(l.email)}"
                 data-classes="${sdlEsc(l.classes)}" data-class-ids="${sdlEsc(l.class_ids)}"
-                data-gender="${l.gender || ''}" data-avg="${l.avg_pct || 0}" data-age="${l.age || 0}"
-                data-profile="${profileStatus}">
+                data-gender="${l.gender || ''}" data-profile="${profileStatus}">
                 <td>
                     <div class="sdl-learner-cell" onclick="loadSdLearnerProfile('${sdlEsc(l.email)}', '${sdlEsc(l.name)}')">
                         ${avatar}
@@ -799,10 +785,6 @@ function buildLearnerRows(learners) {
                     </div>
                 </td>
                 <td>${classDisplay}</td>
-                <td><span class="sdl-gender ${genderCls}">${genderLabel}</span></td>
-                <td>${l.age || '—'}</td>
-                <td>${avg}</td>
-                <td>${profileBadge}</td>
                 <td>
                     <button class="sdl-delete-btn"
                             onclick="sdlPromptDelete(${l.id}, '${sdlEsc(l.name)}')">
@@ -815,27 +797,21 @@ function buildLearnerRows(learners) {
 
 // ── FILTER ──────────────────────────────────────────
 window.sdlFilterTable = function() {
-    const search   = (document.getElementById('sdl-search')?.value || '').toLowerCase();
-    const classF   = document.getElementById('sdl-class-filter')?.value || '';
-    const genderF  = document.getElementById('sdl-gender-filter')?.value || '';
-    const profileF = document.getElementById('sdl-profile-filter')?.value || '';
+    const search  = (document.getElementById('sdl-search')?.value || '').toLowerCase();
+    const classF  = document.getElementById('sdl-class-filter')?.value || '';
 
     const rows = document.querySelectorAll('#sdl-tbody tr[data-id]');
     let visible = 0;
 
     rows.forEach(row => {
-        const name     = (row.dataset.name    || '').toLowerCase();
-        const email    = (row.dataset.email   || '').toLowerCase();
+        const name     = (row.dataset.name  || '').toLowerCase();
+        const email    = (row.dataset.email || '').toLowerCase();
         const classIds = (row.dataset.classIds || '').split(',');
-        const gender   = row.dataset.gender || '';
-        const profile  = row.dataset.profile || '';
 
-        const matchSearch  = !search   || name.includes(search) || email.includes(search);
-        const matchClass   = !classF   || classIds.includes(classF);
-        const matchGender  = !genderF  || gender === genderF;
-        const matchProfile = !profileF || profile === profileF;
+        const matchSearch = !search || name.includes(search) || email.includes(search);
+        const matchClass  = !classF || classIds.includes(classF);
 
-        const show = matchSearch && matchClass && matchGender && matchProfile;
+        const show = matchSearch && matchClass;
         row.style.display = show ? '' : 'none';
         if (show) visible++;
     });
