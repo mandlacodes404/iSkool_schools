@@ -5,6 +5,7 @@
 
 window._sdLearnersCache = null;
 window._sdLearnerProfileCache = {};
+window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
 
 // ── INJECT STYLES ──────────────────────────────────────
 (function injectLearnerStyles() {
@@ -423,6 +424,61 @@ window._sdLearnerProfileCache = {};
         color: #8b949e;
     }
     .sdp-overall-sub { font-size: 11px; color: #8b949e; }
+
+    /* ── PROFILE TABS ── */
+    .sdp-profile-tabs {
+        display: flex; gap: 4px;
+        background: #161b22;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 20px;
+        width: fit-content;
+    }
+    .sdp-profile-tab {
+        font-size: 13px; font-weight: 800;
+        padding: 8px 20px; border-radius: 9px;
+        border: none; background: none;
+        color: #4a5568; cursor: pointer;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.18s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .sdp-profile-tab:hover { color: #8b949e; }
+    .sdp-profile-tab.active {
+        background: rgba(79,209,197,0.12);
+        border: 1px solid rgba(79,209,197,0.3);
+        color: #4fd1c5;
+    }
+    .sdp-profile-tab svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── PROFILE TABS (Profile / Academic) ── */
+    .sdp-profile-tabs {
+        display: flex;
+        gap: 4px;
+        background: #161b22;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+        width: fit-content;
+    }
+    .sdp-profile-tab {
+        font-size: 13px; font-weight: 800;
+        padding: 8px 20px; border-radius: 9px;
+        border: none; background: none;
+        color: #4a5568; cursor: pointer;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.18s;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .sdp-profile-tab:hover { color: #8b949e; }
+    .sdp-profile-tab.active {
+        background: rgba(79,209,197,0.12);
+        border: 1px solid rgba(79,209,197,0.3);
+        color: #4fd1c5;
+    }
+    .sdp-profile-tab svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
     /* ── TERM TABS ── */
     .sdp-term-tabs {
@@ -960,15 +1016,97 @@ function renderLearnerProfile(data) {
     const genderLabel = data.gender === 'male' ? 'Male' : data.gender === 'female' ? 'Female' : data.gender || '—';
     const isIncomplete = data.profile_status !== 'complete';
 
-    // ── Incomplete notice ──
-    const incompleteNotice = isIncomplete ? `
-        <div class="sdp-incomplete-notice">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            Profile incomplete — learner has not filled in all personal details yet
-        </div>` : '';
+    // ── Profile tab HTML ──
+    const profileTabHTML = `
+        <div class="sdp-details-card">
+            ${isIncomplete ? `
+            <div class="sdp-incomplete-notice">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Profile incomplete — learner has not filled in all personal details yet
+            </div>` : ''}
+
+            <div class="sdp-details-section-title">Identity</div>
+            <div class="sdp-details-grid">
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Gender</div>
+                    ${sdlField(genderLabel)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Date of Birth</div>
+                    ${sdlField(data.date_of_birth)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Age</div>
+                    ${sdlField(data.age ? String(data.age) : null)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">ID Number</div>
+                    ${sdlField(data.id_number)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Email</div>
+                    <span class="sdp-detail-value" style="font-size:12px;">${sdlEsc(data.email)}</span>
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Address</div>
+                    ${sdlField(data.address)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Enrolled In</div>
+                    ${sdlField(data.classes)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Joined</div>
+                    <span class="sdp-detail-value" style="font-size:12px;">${joinedDate}</span>
+                </div>
+            </div>
+
+            <div class="sdp-details-section-title">Guardian / Parent</div>
+            <div class="sdp-details-grid">
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Guardian Name</div>
+                    ${sdlField(data.guardian_name)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Relationship</div>
+                    ${sdlField(data.guardian_relationship)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Guardian Phone</div>
+                    ${sdlField(data.guardian_phone)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Guardian Email</div>
+                    ${sdlField(data.guardian_email)}
+                </div>
+            </div>
+
+            <div class="sdp-details-section-title">Emergency & Medical</div>
+            <div class="sdp-details-grid">
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Emergency Contact</div>
+                    ${sdlField(data.emergency_contact_name)}
+                </div>
+                <div class="sdp-detail-item">
+                    <div class="sdp-detail-label">Emergency Phone</div>
+                    ${sdlField(data.emergency_contact_phone)}
+                </div>
+                <div class="sdp-detail-item" style="grid-column:1/-1;">
+                    <div class="sdp-detail-label">Medical Notes</div>
+                    ${sdlField(data.medical_notes)}
+                </div>
+            </div>
+        </div>`;
+
+    // ── Academic tab HTML ──
+    const academicTabHTML = `
+        <div class="sdp-term-tabs">${termTabsHtml}</div>
+        <div class="sdp-subjects-grid" id="sdp-subjects-grid">
+            ${buildSubjectCards(ct)}
+        </div>`;
 
     content.innerHTML = `
         <div class="sdp-shell">
@@ -999,100 +1137,54 @@ function renderLearnerProfile(data) {
                 </div>
             </div>
 
-            ${incompleteNotice}
-
-            <!-- PERSONAL FILE -->
-            <div class="sdp-details-card">
-
-                <!-- Section 1: Identity -->
-                <div class="sdp-details-section-title">Identity</div>
-                <div class="sdp-details-grid">
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Gender</div>
-                        ${sdlField(genderLabel)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Date of Birth</div>
-                        ${sdlField(data.date_of_birth)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Age</div>
-                        ${sdlField(data.age ? String(data.age) : null)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">ID Number</div>
-                        ${sdlField(data.id_number)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Email</div>
-                        <span class="sdp-detail-value" style="font-size:12px;">${sdlEsc(data.email)}</span>
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Address</div>
-                        ${sdlField(data.address)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Enrolled In</div>
-                        ${sdlField(data.classes)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Joined</div>
-                        <span class="sdp-detail-value" style="font-size:12px;">${joinedDate}</span>
-                    </div>
-                </div>
-
-                <!-- Section 2: Guardian -->
-                <div class="sdp-details-section-title">Guardian / Parent</div>
-                <div class="sdp-details-grid">
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Guardian Name</div>
-                        ${sdlField(data.guardian_name)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Relationship</div>
-                        ${sdlField(data.guardian_relationship)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Guardian Phone</div>
-                        ${sdlField(data.guardian_phone)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Guardian Email</div>
-                        ${sdlField(data.guardian_email)}
-                    </div>
-                </div>
-
-                <!-- Section 3: Emergency & Medical -->
-                <div class="sdp-details-section-title">Emergency & Medical</div>
-                <div class="sdp-details-grid">
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Emergency Contact</div>
-                        ${sdlField(data.emergency_contact_name)}
-                    </div>
-                    <div class="sdp-detail-item">
-                        <div class="sdp-detail-label">Emergency Phone</div>
-                        ${sdlField(data.emergency_contact_phone)}
-                    </div>
-                    <div class="sdp-detail-item" style="grid-column: 1 / -1;">
-                        <div class="sdp-detail-label">Medical Notes</div>
-                        ${sdlField(data.medical_notes)}
-                    </div>
-                </div>
-
+            <!-- PROFILE / ACADEMIC TABS -->
+            <div class="sdp-profile-tabs">
+                <button class="sdp-profile-tab active" id="sdp-ptab-profile" onclick="sdpSwitchProfileTab('profile')">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Profile
+                    ${isIncomplete ? '<span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;margin-left:2px;"></span>' : ''}
+                </button>
+                <button class="sdp-profile-tab" id="sdp-ptab-academic" onclick="sdpSwitchProfileTab('academic')">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    Academic
+                </button>
             </div>
 
-            <!-- TERM TABS -->
-            <div class="sdp-term-tabs">${termTabsHtml}</div>
-
-            <!-- SUBJECT CARDS -->
-            <div class="sdp-subjects-grid" id="sdp-subjects-grid">
-                ${buildSubjectCards(ct)}
+            <!-- TAB CONTENT -->
+            <div id="sdp-tab-content">
+                ${profileTabHTML}
             </div>
         </div>`;
 
-    content._sdpBuildCards  = buildSubjectCards;
-    content._sdpCurrentTerm = ct;
+    // Store for tab switching
+    content._sdpBuildCards    = buildSubjectCards;
+    content._sdpCurrentTerm   = ct;
+    content._sdpProfileHTML   = profileTabHTML;
+    content._sdpAcademicHTML  = academicTabHTML;
+    content._sdpActiveTab     = 'profile';
 }
+
+window.sdpSwitchProfileTab = function(tab) {
+    const content = document.getElementById('sd-content');
+    const tabContent = document.getElementById('sdp-tab-content');
+    if (!tabContent) return;
+
+    document.getElementById('sdp-ptab-profile')?.classList.toggle('active', tab === 'profile');
+    document.getElementById('sdp-ptab-academic')?.classList.toggle('active', tab === 'academic');
+
+    if (tab === 'profile') {
+        tabContent.innerHTML = content._sdpProfileHTML;
+    } else {
+        tabContent.innerHTML = content._sdpAcademicHTML;
+    }
+    content._sdpActiveTab = tab;
+};
 
 window.sdpSwitchTerm = function(term) {
     const content = document.getElementById('sd-content');
