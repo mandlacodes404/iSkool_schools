@@ -372,6 +372,60 @@ window._sdtProfileTab = 'profile'; // 'profile' | 'analytics'
             .sdt-hero-tags { justify-content: center; }
             .sdt-details-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        /* ── ANALYTICS TAB — teacher analytics styles ── */
+        .an-kpi-row {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; margin-bottom: 20px;
+        }
+        .an-kpi-card {
+            background: #161b22; border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px; padding: 16px;
+            position: relative; overflow: hidden; transition: border-color 0.2s;
+        }
+        .an-kpi-card:hover { border-color: rgba(255,255,255,0.12); }
+        .an-kpi-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        }
+        .an-kpi-card.teal::before  { background: #4fd1c5; }
+        .an-kpi-card.green::before { background: #22c55e; }
+        .an-kpi-card.blue::before  { background: #4e79a7; }
+        .an-kpi-card.pink::before  { background: #e15759; }
+        .an-kpi-label { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #8b949e; margin-bottom: 10px; }
+        .an-kpi-value { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+        .an-kpi-card.teal  .an-kpi-value { color: #4fd1c5; }
+        .an-kpi-card.green .an-kpi-value { color: #22c55e; }
+        .an-kpi-card.blue  .an-kpi-value { color: #4e79a7; }
+        .an-kpi-card.pink  .an-kpi-value { color: #e15759; }
+        .an-kpi-sub { font-size: 11px; color: #8b949e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .an-chart-row { display: grid; gap: 16px; margin-bottom: 16px; }
+        .an-chart-row.two-col { grid-template-columns: 1fr 1fr; }
+        .an-chart-row.one-col { grid-template-columns: 1fr; }
+        .an-chart-card { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px; }
+        .an-chart-title { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8b949e; margin-bottom: 16px; }
+        .an-chart-wrap { position: relative; height: 220px; }
+        .an-chart-wrap.tall { height: 260px; }
+        .an-no-data { display: flex; align-items: center; justify-content: center; height: 100%; color: #4a5568; font-size: 13px; font-style: italic; }
+
+        .an-performers-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .an-performers-card { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px; }
+        .an-performers-title { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+        .an-performer-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+        .an-performer-rank { font-size: 11px; font-weight: 800; color: #4a5568; width: 16px; flex-shrink: 0; }
+        .an-performer-name { flex: 1; font-size: 13px; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .an-performer-avg  { font-size: 13px; font-weight: 800; }
+
+        .an-pass-bar-wrap { margin-bottom: 10px; }
+        .an-pass-bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .an-pass-bar-track { height: 8px; background: rgba(248,81,73,0.2); border-radius: 100px; overflow: hidden; }
+        .an-pass-bar-fill  { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+
+        @media (max-width: 900px) {
+            .an-kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .an-chart-row.two-col { grid-template-columns: 1fr; }
+            .an-performers-row { grid-template-columns: 1fr; }
+        }
     `;
     document.head.appendChild(s);
 })();
@@ -471,8 +525,8 @@ function renderTeachersTable(data, search) {
     const rows = teachers.length ? teachers.map(t => {
         const col      = sdtAvgColor(t.avg_pct);
         const initials = ((t.first_name||'')[0]||'') + ((t.surname||'')[0]||'');
-        const picHTML  = t.profile_pic && t.profile_pic !== 'default.png'
-            ? `<img src="uploads/teachers/${t.profile_pic}" alt="">`
+        const picHTML  = t.profile_pic && t.profile_pic !== 'default.png' && t.profile_pic !== 'uploads/default_profile.png'
+            ? `<img src="${t.profile_pic}" alt="" style="width:100%;height:100%;object-fit:cover;">`
             : initials.toUpperCase();
 
         return `
@@ -602,8 +656,8 @@ function renderTeacherProfile(d) {
     const content  = document.getElementById('sd-content');
     const avgCol   = sdtAvgColor(d.overall_avg);
     const initials = ((d.first_name||'')[0]||'') + ((d.surname||'')[0]||'');
-    const picHTML  = d.profile_pic && d.profile_pic !== 'default.png'
-        ? `<img src="uploads/teachers/${d.profile_pic}" alt="">`
+    const picHTML  = d.profile_pic && d.profile_pic !== 'default.png' && d.profile_pic !== 'uploads/default_profile.png'
+        ? `<img src="${d.profile_pic}" alt="" style="width:100%;height:100%;object-fit:cover;">`
         : initials.toUpperCase();
 
     const joined   = d.joined ? new Date(d.joined).toLocaleDateString('en-ZA', { day:'numeric', month:'long', year:'numeric' }) : '—';
@@ -703,9 +757,9 @@ function renderTeacherProfile(d) {
     // This is a placeholder — actual analytics loads dynamically when tab is clicked
     const analyticsTabHTML = `
         <div id="sdt-analytics-panel" data-teacher="${d.email}">
-            <div style="display:flex;gap:0;height:calc(100vh - 280px);overflow:hidden;border-radius:14px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;">
+            <div style="display:flex;gap:0;min-height:500px;height:calc(100vh - 320px);border-radius:14px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;">
                 <!-- LEFT: Term tabs + class list -->
-                <div id="sdt-an-left" style="width:240px;min-width:240px;background:#0d1117;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;">
+                <div id="sdt-an-left" style="width:240px;min-width:240px;background:#0d1117;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
                     <div style="padding:16px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">
                         <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4fd1c5;margin-bottom:12px;">Classes</div>
                         <div id="sdt-an-term-tabs" style="display:flex;gap:4px;"></div>
