@@ -1,7 +1,7 @@
 <?php
 /**
  * iSkool School Dashboard — Teacher Profile API
- * Returns personal info + content stats + per-class subject performance
+ * Updated: added phone, subject_specialization, employment_type
  */
 ob_start();
 error_reporting(E_ALL);
@@ -25,8 +25,12 @@ $yearId = 0;
 $res = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($row = $res->fetch_assoc()) $yearId = $row['id'];
 
-// Teacher personal details
-$uRes = $conn->query("SELECT id, name, surname, email, gender, profile_pic, created_at FROM users WHERE email = '$safe' AND role = 'teacher' LIMIT 1");
+// ── Teacher personal details — including new fields ──
+$uRes = $conn->query("
+    SELECT id, name, surname, email, gender, age, profile_pic, created_at,
+           phone, subject_specialization, employment_type
+    FROM users WHERE email = '$safe' AND role = 'teacher' LIMIT 1
+");
 $u = $uRes->fetch_assoc();
 if (!$u) { echo json_encode(['error' => 'Teacher not found']); exit(); }
 
@@ -51,7 +55,6 @@ $lastRes = $conn->query("
 $lastActive = $lastRes->fetch_assoc()['last_active'];
 
 // ── Per-class subject performance ──
-// Get distinct classes teacher posted summative quizzes to
 $classRes = $conn->query("
     SELECT DISTINCT q.class_id, c.name class_name
     FROM quizzes q
@@ -66,26 +69,22 @@ while ($cr = $classRes->fetch_assoc()) {
     $classId   = (int)$cr['class_id'];
     $className = $cr['class_name'];
 
-    // Subject name (teacher_subjects or fallback to teacher name)
     $subjectName = null;
     $tsRes = $conn->query("SELECT subject_name FROM teacher_subjects WHERE teacher_email = '$safe' AND class_id = $classId LIMIT 1");
     if ($tsRow = $tsRes->fetch_assoc()) $subjectName = $tsRow['subject_name'];
     if (!$subjectName) $subjectName = trim($u['name'] . ' ' . $u['surname']);
 
-    // Learners enrolled in this class
     $learnerCount = (int)$conn->query("
         SELECT COUNT(DISTINCT student_email) c FROM class_students
         WHERE class_id = $classId
         " . ($yearId ? "AND academic_year_id = $yearId" : "") . "
     ")->fetch_assoc()['c'];
 
-    // Quiz count (summative)
     $quizCount = (int)$conn->query("
         SELECT COUNT(*) c FROM quizzes
         WHERE created_by = '$safe' AND class_id = $classId AND is_summative = 1
     ")->fetch_assoc()['c'];
 
-    // Average % for this teacher's summative quizzes in this class
     $avgRes = $conn->query("
         SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
         FROM quiz_results qr
@@ -95,7 +94,6 @@ while ($cr = $classRes->fetch_assoc()) {
     ");
     $avg = $avgRes->fetch_assoc()['avg'];
 
-    // Learner count who submitted at least one result
     $submittedCount = (int)$conn->query("
         SELECT COUNT(DISTINCT qr.user_email) c
         FROM quiz_results qr
@@ -104,7 +102,6 @@ while ($cr = $classRes->fetch_assoc()) {
         " . ($yearId ? "AND qr.academic_year_id = $yearId" : "") . "
     ")->fetch_assoc()['c'];
 
-    // Top 3 and bottom 3 learners
     $perfRes = $conn->query("
         SELECT qr.user_email,
                u.name, u.surname,
@@ -123,54 +120,58 @@ while ($cr = $classRes->fetch_assoc()) {
     }
 
     $classSubjects[] = [
-        'class_id'       => $classId,
-        'class_name'     => $className,
-        'subject_name'   => $subjectName,
-        'learner_count'  => $learnerCount,
-        'submitted_count'=> $submittedCount,
-        'quiz_count'     => $quizCount,
-        'avg_pct'        => $avg,
-        'top_learners'   => array_slice($perf, 0, 3),
-        'bottom_learners'=> array_slice(array_reverse($perf), 0, 3),
+        'class_id'        => $classId,
+        'class_name'      => $className,
+        'subject_name'    => $subjectName,
+        'learner_count'   => $learnerCount,
+        'submitted_count' => $submittedCount,
+        'quiz_count'      => $quizCount,
+        'avg_pct'         => $avg,
+        'top_learners'    => array_slice($perf, 0, 3),
+        'bottom_learners' => array_slice(array_reverse($perf), 0, 3),
     ];
 }
 
-// Overall avg across all their summative quizzes
-$overallAvgRes = $conn->query("
+// Overall avg
+$overallAvg = $conn->query("
     SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
     FROM quiz_results qr
     JOIN quizzes q ON qr.quiz_id = q.id
     WHERE q.created_by = '$safe' AND q.is_summative = 1
     " . ($yearId ? "AND qr.academic_year_id = $yearId" : "") . "
-");
-$overallAvg = $overallAvgRes->fetch_assoc()['avg'];
+")->fetch_assoc()['avg'];
 
-// School average for comparison
-$schoolAvgRes = $conn->query("
+// School average
+$schoolAvg = $conn->query("
     SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
     FROM quiz_results qr
     JOIN quizzes q ON qr.quiz_id = q.id
     WHERE q.is_summative = 1
     " . ($yearId ? "AND qr.academic_year_id = $yearId" : "") . "
-");
-$schoolAvg = $schoolAvgRes->fetch_assoc()['avg'];
+")->fetch_assoc()['avg'];
 
 echo json_encode([
-    'id'            => $u['id'],
-    'name'          => trim($u['name'] . ' ' . $u['surname']),
-    'first_name'    => $u['name'],
-    'surname'       => $u['surname'],
-    'email'         => $u['email'],
-    'gender'        => $u['gender'],
-    'profile_pic'   => $u['profile_pic'],
-    'joined'        => $u['created_at'],
-    'last_active'   => $lastActive,
-    'quizzes'       => $quizzes,
-    'assignments'   => $assignments,
-    'resources'     => $resources,
-    'announcements' => $announcements,
-    'total'         => $quizzes + $assignments + $resources + $announcements,
-    'overall_avg'   => $overallAvg,
-    'school_avg'    => $schoolAvg,
-    'class_subjects'=> $classSubjects,
+    'id'                     => $u['id'],
+    'name'                   => trim($u['name'] . ' ' . $u['surname']),
+    'first_name'             => $u['name'],
+    'surname'                => $u['surname'],
+    'email'                  => $u['email'],
+    'gender'                 => $u['gender'],
+    'age'                    => $u['age'],
+    'profile_pic'            => $u['profile_pic'],
+    'joined'                 => $u['created_at'],
+    'last_active'            => $lastActive,
+    // New fields
+    'phone'                  => $u['phone'],
+    'subject_specialization' => $u['subject_specialization'],
+    'employment_type'        => $u['employment_type'],
+    // Content
+    'quizzes'                => $quizzes,
+    'assignments'            => $assignments,
+    'resources'              => $resources,
+    'announcements'          => $announcements,
+    'total'                  => $quizzes + $assignments + $resources + $announcements,
+    'overall_avg'            => $overallAvg,
+    'school_avg'             => $schoolAvg,
+    'class_subjects'         => $classSubjects,
 ]);
