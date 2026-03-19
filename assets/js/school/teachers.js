@@ -700,71 +700,29 @@ function renderTeacherProfile(d) {
         </div>` : ''}`;
 
     // ── ANALYTICS TAB HTML ──
-    const classBlocks = d.class_subjects && d.class_subjects.length
-        ? d.class_subjects.map((cs, ci) => {
-            const cCol = sdtAvgColor(cs.avg_pct);
-
-            const topRows = cs.top_learners.length
-                ? cs.top_learners.map((l, li) => `
-                    <div class="sdt-perf-row">
-                        <div class="sdt-perf-rank">${li + 1}</div>
-                        <div class="sdt-perf-name">${l.name}</div>
-                        <div class="sdt-perf-avg ${sdtAvgColor(l.avg)}">${l.avg !== null ? l.avg + '%' : '—'}</div>
-                    </div>`).join('')
-                : `<div class="sdt-no-perf">No results yet</div>`;
-
-            const botRows = cs.bottom_learners.length > 0
-                ? cs.bottom_learners.map((l, li) => `
-                    <div class="sdt-perf-row">
-                        <div class="sdt-perf-rank">${cs.submitted_count - li}</div>
-                        <div class="sdt-perf-name">${l.name}</div>
-                        <div class="sdt-perf-avg ${sdtAvgColor(l.avg)}">${l.avg !== null ? l.avg + '%' : '—'}</div>
-                    </div>`).join('')
-                : '';
-
-            const showBottom = cs.bottom_learners.length > 0 && cs.submitted_count > 3;
-
-            return `
-                <div class="sdt-class-block">
-                    <div class="sdt-class-block-header" onclick="sdtToggleClassBlock(${ci})">
-                        <div>
-                            <span class="sdt-class-block-title">${cs.subject_name}</span>
-                            <span class="sdt-class-block-sub">${cs.class_name}</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span class="sdt-avg-badge ${cCol}">${cs.avg_pct !== null ? cs.avg_pct + '%' : '—'}</span>
-                            <svg id="sdt-chev-${ci}" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#8b949e" stroke-width="2.5" style="transition:transform 0.2s;">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div id="sdt-block-${ci}" class="sdt-class-block-body">
-                        <div class="sdt-class-stats-row">
-                            <div class="sdt-class-stat-item"><strong>${cs.learner_count}</strong> learners enrolled</div>
-                            <div class="sdt-class-stat-item"><strong>${cs.submitted_count}</strong> submitted results</div>
-                            <div class="sdt-class-stat-item"><strong>${cs.quiz_count}</strong> summative quizzes</div>
-                        </div>
-                        <div style="display:grid;grid-template-columns:${showBottom ? '1fr 1fr' : '1fr'};gap:20px;">
-                            <div>
-                                <div class="sdt-perf-title">Top Learners</div>
-                                ${topRows}
-                            </div>
-                            ${showBottom ? `
-                            <div>
-                                <div class="sdt-perf-title">Needs Support</div>
-                                ${botRows}
-                            </div>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-        }).join('')
-        : `<div class="sdt-no-classes">This teacher hasn't posted any summative assessments yet.</div>`;
-
+    // This is a placeholder — actual analytics loads dynamically when tab is clicked
     const analyticsTabHTML = `
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4a5568;margin-bottom:12px;">
-            Classes & Subject Performance
-        </div>
-        ${classBlocks}`;
+        <div id="sdt-analytics-panel" data-teacher="${d.email}">
+            <div style="display:flex;gap:0;height:calc(100vh - 280px);overflow:hidden;border-radius:14px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;">
+                <!-- LEFT: Term tabs + class list -->
+                <div id="sdt-an-left" style="width:240px;min-width:240px;background:#0d1117;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;">
+                    <div style="padding:16px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4fd1c5;margin-bottom:12px;">Classes</div>
+                        <div id="sdt-an-term-tabs" style="display:flex;gap:4px;"></div>
+                    </div>
+                    <div id="sdt-an-class-list" style="flex:1;overflow-y:auto;padding:10px;"></div>
+                </div>
+                <!-- RIGHT: Dashboard -->
+                <div id="sdt-an-right" style="flex:1;overflow-y:auto;background:#0d1117;padding:20px 24px 40px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#4a5568;text-align:center;gap:12px;">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="opacity:0.3;">
+                            <path d="M18 20V10M12 20V4M6 20v-6"/>
+                        </svg>
+                        <div style="font-size:16px;color:#8b949e;">Select a class to view analytics</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
 
     // ── Render shell ──
     const activeTab = window._sdtProfileTab || 'profile';
@@ -835,10 +793,437 @@ window.sdtSwitchProfileTab = function(tab) {
     document.getElementById('sdt-ptab-profile')?.classList.toggle('active', tab === 'profile');
     document.getElementById('sdt-ptab-analytics')?.classList.toggle('active', tab === 'analytics');
 
+    // Destroy any existing charts before switching
+    if (window._sdtAnalyticsCharts) {
+        window._sdtAnalyticsCharts.forEach(c => { try { c.destroy(); } catch(e){} });
+        window._sdtAnalyticsCharts = [];
+    }
+
     tabContent.innerHTML = tab === 'profile'
         ? content._sdtProfileHTML
         : content._sdtAnalyticsHTML;
+
+    // After switching to analytics, initialise the panel
+    if (tab === 'analytics') {
+        const panel = document.getElementById('sdt-analytics-panel');
+        const teacherEmail = panel?.dataset.teacher;
+        if (teacherEmail) sdtLoadTeacherAnalytics(teacherEmail);
+    }
 };
+
+// ── Teacher analytics (full split-panel) ──
+window._sdtAnalyticsCharts  = [];
+window._sdtAnAllTerms        = [];
+window._sdtAnActiveTerm      = null;
+window._sdtAnCurrentClassId  = null;
+window._sdtAnCurrentTerm     = null;
+window._sdtAnTeacherEmail    = null;
+window._sdtAnCache           = {};
+
+window.sdtLoadTeacherAnalytics = async function(teacherEmail) {
+    window._sdtAnTeacherEmail = teacherEmail;
+
+    const listEl = document.getElementById('sdt-an-class-list');
+    const termEl = document.getElementById('sdt-an-term-tabs');
+    if (!listEl || !termEl) return;
+
+    // Show loading in left panel
+    listEl.innerHTML = `<div style="text-align:center;padding:30px;color:#4a5568;font-size:13px;">Loading...</div>`;
+
+    try {
+        const res  = await fetch('api/school/get_teacher_analytics.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `teacher_email=${encodeURIComponent(teacherEmail)}`
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        window._sdtAnAllTerms   = data.terms || [];
+        window._sdtAnActiveTerm = data.current_term || 1;
+
+        // Build term tabs
+        termEl.innerHTML = [1,2,3,4].map(t => {
+            const hasData  = window._sdtAnAllTerms.find(td => td.term === t);
+            const isCurrent = t === data.current_term;
+            return `<div onclick="sdtAnSwitchTerm(${t})"
+                style="flex:1;padding:6px 0;text-align:center;font-size:11px;font-weight:800;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:${t === window._sdtAnActiveTerm ? '#4fd1c5' : '#8b949e'};${t === window._sdtAnActiveTerm ? 'background:rgba(79,209,197,0.12);border-color:rgba(79,209,197,0.4);' : ''}${!hasData ? 'opacity:0.35;pointer-events:none;' : ''}"
+                id="sdt-an-ttab-${t}">T${t}</div>`;
+        }).join('');
+
+        sdtAnRenderClassList(window._sdtAnActiveTerm);
+
+    } catch(e) {
+        listEl.innerHTML = `<div style="color:#f85149;text-align:center;padding:20px;font-size:13px;">Failed to load</div>`;
+    }
+};
+
+window.sdtAnSwitchTerm = function(term) {
+    window._sdtAnActiveTerm    = term;
+    window._sdtAnCurrentClassId = null;
+
+    // Update tab styles
+    [1,2,3,4].forEach(t => {
+        const el = document.getElementById(`sdt-an-ttab-${t}`);
+        if (!el) return;
+        el.style.color      = t === term ? '#4fd1c5' : '#8b949e';
+        el.style.background = t === term ? 'rgba(79,209,197,0.12)' : 'rgba(255,255,255,0.03)';
+        el.style.borderColor= t === term ? 'rgba(79,209,197,0.4)' : 'rgba(255,255,255,0.08)';
+    });
+
+    sdtAnRenderClassList(term);
+
+    const right = document.getElementById('sdt-an-right');
+    if (right) right.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#4a5568;text-align:center;gap:12px;">
+            <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="opacity:0.3;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <div style="font-size:16px;color:#8b949e;">Select a class to view analytics</div>
+        </div>`;
+};
+
+function sdtAnRenderClassList(term) {
+    const listEl = document.getElementById('sdt-an-class-list');
+    if (!listEl) return;
+
+    const termData = window._sdtAnAllTerms.find(t => t.term === term);
+    const classes  = termData ? termData.classes : [];
+
+    if (!classes.length) {
+        listEl.innerHTML = `<div style="text-align:center;color:#4a5568;font-size:13px;padding:30px 16px;font-style:italic;">No assessments for Term ${term}</div>`;
+        return;
+    }
+
+    listEl.innerHTML = classes.map(cls => {
+        const isActive = cls.id === window._sdtAnCurrentClassId && term === window._sdtAnCurrentTerm;
+        const subject  = cls.subject || null;
+        return `
+            <div onclick="sdtAnSelectClass(${cls.id}, ${term})"
+                id="sdt-an-cls-${cls.id}-${term}"
+                style="padding:12px;border-radius:10px;cursor:pointer;margin-bottom:6px;border:1px solid ${isActive ? 'rgba(79,209,197,0.25)' : 'transparent'};background:${isActive ? 'rgba(79,209,197,0.08)' : 'transparent'};transition:all 0.2s;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <span style="font-size:13px;font-weight:800;color:${subject ? '#e2e8f0' : '#4fd1c5'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;${!subject ? 'font-style:italic;font-size:12px;' : ''}">
+                        ${subject || 'No subject set'}
+                    </span>
+                    <span class="an-class-dot gray" id="sdt-an-dot-${cls.id}-${term}" style="width:8px;height:8px;border-radius:50%;background:#4a5568;flex-shrink:0;"></span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:11px;color:#8b949e;">${cls.name} · ${cls.student_count} students</span>
+                    <span id="sdt-an-badge-${cls.id}-${term}" style="font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(255,255,255,0.06);color:#8b949e;">—</span>
+                </div>
+            </div>`;
+    }).join('');
+
+    // Auto-select first class
+    if (window._sdtAnCurrentTerm !== term) window._sdtAnCurrentClassId = null;
+    if (!window._sdtAnCurrentClassId && classes.length) {
+        sdtAnSelectClass(classes[0].id, term);
+    }
+}
+
+window.sdtAnSelectClass = async function(classId, term) {
+    window._sdtAnCurrentClassId = classId;
+    window._sdtAnCurrentTerm    = term;
+
+    // Highlight active
+    document.querySelectorAll('[id^="sdt-an-cls-"]').forEach(el => {
+        el.style.background   = 'transparent';
+        el.style.borderColor  = 'transparent';
+    });
+    const activeEl = document.getElementById(`sdt-an-cls-${classId}-${term}`);
+    if (activeEl) {
+        activeEl.style.background  = 'rgba(79,209,197,0.08)';
+        activeEl.style.borderColor = 'rgba(79,209,197,0.25)';
+    }
+
+    const termData = window._sdtAnAllTerms.find(t => t.term === term);
+    const cls      = termData?.classes.find(c => c.id === classId);
+    if (!cls) return;
+
+    const right = document.getElementById('sdt-an-right');
+    if (!right) return;
+
+    // Skeleton
+    right.innerHTML = `
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+                <div style="font-size:20px;font-weight:800;color:#e2e8f0;margin-bottom:4px;">${cls.subject || cls.name}</div>
+                <div style="font-size:12px;color:#8b949e;">${cls.name} · ${cls.student_count} students</div>
+            </div>
+            <div style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;">TERM ${term}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+            ${[1,2,3,4].map(() => `<div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;"><div style="height:10px;width:60%;background:rgba(255,255,255,0.06);border-radius:4px;margin-bottom:12px;"></div><div style="height:28px;width:50%;background:rgba(255,255,255,0.06);border-radius:4px;"></div></div>`).join('')}
+        </div>`;
+
+    // Destroy old charts
+    if (window._sdtAnalyticsCharts) {
+        window._sdtAnalyticsCharts.forEach(c => { try { c.destroy(); } catch(e){} });
+        window._sdtAnalyticsCharts = [];
+    }
+
+    try {
+        const res  = await fetch('api/school/get_teacher_analytics_data.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `teacher_email=${encodeURIComponent(window._sdtAnTeacherEmail)}&class_id=${classId}&term=${term}`
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        sdtAnRenderDashboard(cls, term, data);
+    } catch(e) {
+        right.innerHTML = `<p style="color:#f85149;text-align:center;margin-top:60px;">Failed to load analytics.</p>`;
+    }
+};
+
+function sdtAnRenderDashboard(cls, term, data) {
+    const right    = document.getElementById('sdt-an-right');
+    if (!right) return;
+
+    const quizAvgs   = data.quiz_averages             || [];
+    const genderData = data.quiz_gender_averages       || [];
+    const topGirls   = data.top_girls                  || [];
+    const topBoys    = data.top_boys                   || [];
+    const byTerm     = data.boys_vs_girls_by_term      || { boys: [null,null,null,null], girls: [null,null,null,null] };
+    const classTrend = data.class_performance_by_term  || [null,null,null,null];
+    const topAll     = data.top_learners               || [];
+    const needsSupp  = data.needs_support              || [];
+
+    const classAvg = quizAvgs.length
+        ? Math.round(quizAvgs.reduce((s,q) => s + (q.avg || 0), 0) / quizAvgs.length * 10) / 10
+        : null;
+
+    const highestQuiz = quizAvgs.length
+        ? quizAvgs.reduce((max, q) => (q.avg || 0) > (max.avg || 0) ? q : max, quizAvgs[0])
+        : null;
+
+    const topOverall = [...topGirls, ...topBoys].sort((a,b) => b.avg - a.avg)[0] || null;
+
+    const boysAvg  = genderData.filter(d => d.boys  !== null).reduce((s,d) => s + d.boys,  0) / (genderData.filter(d => d.boys  !== null).length || 1) || null;
+    const girlsAvg = genderData.filter(d => d.girls !== null).reduce((s,d) => s + d.girls, 0) / (genderData.filter(d => d.girls !== null).length || 1) || null;
+
+    let gapLabel = '—', gapColor = '#8b949e';
+    if (boysAvg && girlsAvg) {
+        const diff   = Math.abs(boysAvg - girlsAvg).toFixed(1);
+        const leader = boysAvg >= girlsAvg ? 'Boys' : 'Girls';
+        gapLabel = `+${diff}% ${leader}`;
+        gapColor = boysAvg >= girlsAvg ? '#4e79a7' : '#e15759';
+    }
+
+    // Update left panel badge
+    const badge = document.getElementById(`sdt-an-badge-${cls.id}-${term}`);
+    const dot   = document.getElementById(`sdt-an-dot-${cls.id}-${term}`);
+    const col   = classAvg === null ? 'gray' : classAvg >= 60 ? 'green' : classAvg >= 40 ? 'orange' : 'red';
+    const colMap = { green:'#22c55e', orange:'#f59e0b', red:'#f85149', gray:'#4a5568' };
+    if (badge) { badge.textContent = classAvg !== null ? classAvg + '%' : '—'; badge.style.color = colMap[col]; badge.style.background = `${colMap[col]}20`; }
+    if (dot)   { dot.style.background = colMap[col]; }
+
+    const passData = quizAvgs.map(q => ({
+        title:   q.title,
+        passing: (q.avg || 0) >= 50 ? 100 : Math.round(((q.avg || 0) / 50) * 100),
+        avg:     q.avg,
+    }));
+
+    // Admin-only: top + needs support
+    const adminPerf = (topAll.length || needsSupp.length) ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px;">
+                <div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#22c55e;margin-bottom:14px;">Top Learners (All)</div>
+                ${topAll.map((p, i) => `
+                    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <span style="font-size:11px;font-weight:800;color:#2d3340;width:20px;">${i+1}</span>
+                        <span style="flex:1;font-size:13px;font-weight:700;color:#c9d1d9;">${p.name}</span>
+                        <span style="font-size:12px;font-weight:800;color:${p.avg >= 60 ? '#22c55e' : p.avg >= 40 ? '#f59e0b' : '#f85149'};">${p.avg}%</span>
+                    </div>`).join('') || '<div style="color:#4a5568;font-size:12px;padding:4px 0;">No results yet</div>'}
+            </div>
+            <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px;">
+                <div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#f85149;margin-bottom:14px;">Needs Support</div>
+                ${needsSupp.map((p, i) => `
+                    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <span style="font-size:11px;font-weight:800;color:#2d3340;width:20px;">${i+1}</span>
+                        <span style="flex:1;font-size:13px;font-weight:700;color:#c9d1d9;">${p.name}</span>
+                        <span style="font-size:12px;font-weight:800;color:${p.avg >= 60 ? '#22c55e' : p.avg >= 40 ? '#f59e0b' : '#f85149'};">${p.avg}%</span>
+                    </div>`).join('') || '<div style="color:#4a5568;font-size:12px;padding:4px 0;">No data</div>'}
+            </div>
+        </div>` : '';
+
+    right.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;">
+            <div>
+                <div style="font-size:20px;font-weight:800;color:#e2e8f0;margin-bottom:4px;">${cls.subject || cls.name}</div>
+                <div style="font-size:12px;color:#8b949e;">${cls.name} · ${cls.student_count} students · Term ${term} summative assessments</div>
+            </div>
+            <div style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;">TERM ${term}</div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="an-kpi-row" style="margin-bottom:20px;">
+            <div class="an-kpi-card teal">
+                <div class="an-kpi-label">Class Average</div>
+                <div class="an-kpi-value">${classAvg !== null ? classAvg + '%' : '—'}</div>
+                <div class="an-kpi-sub">${quizAvgs.length} assessment${quizAvgs.length !== 1 ? 's' : ''} this term</div>
+            </div>
+            <div class="an-kpi-card green">
+                <div class="an-kpi-label">Highest Quiz</div>
+                <div class="an-kpi-value">${highestQuiz ? highestQuiz.avg + '%' : '—'}</div>
+                <div class="an-kpi-sub">${highestQuiz ? highestQuiz.title : 'No data'}</div>
+            </div>
+            <div class="an-kpi-card blue">
+                <div class="an-kpi-label">Top Performer</div>
+                <div class="an-kpi-value" style="font-size:18px;padding-top:4px;">${topOverall ? topOverall.avg + '%' : '—'}</div>
+                <div class="an-kpi-sub">${topOverall ? topOverall.name : 'No data'}</div>
+            </div>
+            <div class="an-kpi-card pink">
+                <div class="an-kpi-label">Gender Gap</div>
+                <div class="an-kpi-value" style="color:${gapColor};font-size:20px;padding-top:6px;">${gapLabel}</div>
+                <div class="an-kpi-sub">Based on quiz averages</div>
+            </div>
+        </div>
+
+        <!-- ROW 2: Quiz avg + Gender per quiz -->
+        <div class="an-chart-row two-col">
+            <div class="an-chart-card">
+                <div class="an-chart-title">Quiz Average</div>
+                <div class="an-chart-wrap">
+                    ${quizAvgs.length ? `<canvas id="sdt-chart-qa-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
+                </div>
+            </div>
+            <div class="an-chart-card">
+                <div class="an-chart-title">Boys vs Girls per Quiz</div>
+                <div class="an-chart-wrap">
+                    ${genderData.length ? `<canvas id="sdt-chart-qg-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No gender data yet</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: Class trend -->
+        <div class="an-chart-row one-col">
+            <div class="an-chart-card">
+                <div class="an-chart-title">Class Performance by Term</div>
+                <div class="an-chart-wrap tall">
+                    ${classTrend.some(v => v !== null) ? `<canvas id="sdt-chart-ct-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">More terms needed to show trend</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 4: Gender by term + Pass/Fail -->
+        <div class="an-chart-row two-col">
+            <div class="an-chart-card">
+                <div class="an-chart-title">Boys vs Girls by Term</div>
+                <div class="an-chart-wrap">
+                    ${(byTerm.boys.some(v=>v!==null)||byTerm.girls.some(v=>v!==null)) ? `<canvas id="sdt-chart-tg-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">More terms needed</div>'}
+                </div>
+            </div>
+            <div class="an-chart-card">
+                <div class="an-chart-title">Pass Rate per Quiz (50% threshold)</div>
+                <div class="an-chart-wrap" style="overflow-y:auto;">
+                    ${passData.length ? `<div id="sdt-pass-fail-${cls.id}-${term}"></div>` : '<div class="an-no-data">No data yet</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 5: Top Girls / Top Boys -->
+        <div class="an-performers-row">
+            <div class="an-performers-card">
+                <div class="an-performers-title" style="color:#e15759;">Top 5 Girls</div>
+                ${topGirls.length ? topGirls.map((p,i) => `
+                    <div class="an-performer-item">
+                        <span class="an-performer-rank">${i+1}</span>
+                        <span class="an-performer-name">${p.name}</span>
+                        <span class="an-performer-avg" style="color:#e15759;">${p.avg}%</span>
+                    </div>`).join('') : '<p style="color:#4a5568;font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
+            </div>
+            <div class="an-performers-card">
+                <div class="an-performers-title" style="color:#4e79a7;">Top 5 Boys</div>
+                ${topBoys.length ? topBoys.map((p,i) => `
+                    <div class="an-performer-item">
+                        <span class="an-performer-rank">${i+1}</span>
+                        <span class="an-performer-name">${p.name}</span>
+                        <span class="an-performer-avg" style="color:#4e79a7;">${p.avg}%</span>
+                    </div>`).join('') : '<p style="color:#4a5568;font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
+            </div>
+        </div>
+
+        <!-- ROW 6: Admin-only top learners + needs support -->
+        ${adminPerf}`;
+
+    // Render charts
+    if (!window._sdtAnalyticsCharts) window._sdtAnalyticsCharts = [];
+    const chartOpts = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: '#e2e8f0', font: { family: 'Nunito', size: 12 } } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}` } }
+        },
+        scales: {
+            y: { beginAtZero: true, max: 100, ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { ticks: { color: '#8b949e', maxRotation: 30 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+    };
+
+    if (quizAvgs.length) {
+        const ctx = document.getElementById(`sdt-chart-qa-${cls.id}-${term}`)?.getContext('2d');
+        if (ctx) window._sdtAnalyticsCharts.push(new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: quizAvgs.map(q => q.title),
+                datasets: [{ label: 'Class Average %', data: quizAvgs.map(q => q.avg),
+                    backgroundColor: quizAvgs.map(q => q.avg >= 60 ? 'rgba(34,197,94,0.6)' : q.avg >= 40 ? 'rgba(245,158,11,0.6)' : 'rgba(248,81,73,0.6)'),
+                    borderColor:     quizAvgs.map(q => q.avg >= 60 ? '#22c55e' : q.avg >= 40 ? '#f59e0b' : '#f85149'),
+                    borderWidth: 2, borderRadius: 6 }]
+            },
+            options: { ...chartOpts, plugins: { ...chartOpts.plugins, legend: { display: false } } }
+        }));
+    }
+    if (genderData.length) {
+        const ctx = document.getElementById(`sdt-chart-qg-${cls.id}-${term}`)?.getContext('2d');
+        if (ctx) window._sdtAnalyticsCharts.push(new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: genderData.map(d => d.title),
+                datasets: [
+                    { label: 'Boys %',  data: genderData.map(d => d.boys),  backgroundColor: 'rgba(78,121,167,0.7)',  borderColor: '#4e79a7', borderWidth: 2, borderRadius: 6 },
+                    { label: 'Girls %', data: genderData.map(d => d.girls), backgroundColor: 'rgba(225,87,89,0.7)',   borderColor: '#e15759', borderWidth: 2, borderRadius: 6 }
+                ]
+            }, options: chartOpts
+        }));
+    }
+    if (classTrend.some(v => v !== null)) {
+        const ctx = document.getElementById(`sdt-chart-ct-${cls.id}-${term}`)?.getContext('2d');
+        if (ctx) window._sdtAnalyticsCharts.push(new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+                datasets: [{ label: 'Class Average', data: classTrend, borderColor: '#4fd1c5', backgroundColor: 'rgba(79,209,197,0.08)', tension: 0.4, fill: true, pointBackgroundColor: '#4fd1c5', pointRadius: 6, borderWidth: 3, spanGaps: true }]
+            }, options: chartOpts
+        }));
+    }
+    if (byTerm.boys.some(v=>v!==null) || byTerm.girls.some(v=>v!==null)) {
+        const ctx = document.getElementById(`sdt-chart-tg-${cls.id}-${term}`)?.getContext('2d');
+        if (ctx) window._sdtAnalyticsCharts.push(new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+                datasets: [
+                    { label: 'Boys',  data: byTerm.boys,  borderColor: '#4e79a7', backgroundColor: 'rgba(78,121,167,0.08)',  tension: 0.4, fill: true, pointBackgroundColor: '#4e79a7', pointRadius: 6, spanGaps: true },
+                    { label: 'Girls', data: byTerm.girls, borderColor: '#e15759', backgroundColor: 'rgba(225,87,89,0.08)',   tension: 0.4, fill: true, pointBackgroundColor: '#e15759', pointRadius: 6, spanGaps: true }
+                ]
+            }, options: chartOpts
+        }));
+    }
+    if (passData.length) {
+        const wrap = document.getElementById(`sdt-pass-fail-${cls.id}-${term}`);
+        if (wrap) wrap.innerHTML = passData.map(q => `
+            <div class="an-pass-bar-wrap">
+                <div class="an-pass-bar-label">
+                    <span style="color:#e2e8f0;font-size:12px;">${q.title}</span>
+                    <span style="color:${q.passing >= 100 ? '#22c55e' : q.passing >= 60 ? '#f59e0b' : '#f85149'};font-weight:800;font-size:12px;">${q.passing}%</span>
+                </div>
+                <div class="an-pass-bar-track">
+                    <div class="an-pass-bar-fill" style="width:${q.passing}%;background:${q.passing >= 100 ? '#22c55e' : q.passing >= 60 ? '#f59e0b' : '#f85149'};"></div>
+                </div>
+            </div>`).join('');
+    }
+}
 
 // ── Accordion toggle ──
 window.sdtToggleClassBlock = function(idx) {
