@@ -74,14 +74,14 @@ function cPanelAPI(string $module, string $func, array $params = []): array {
 //  STEP 1 — CREATE DATABASE VIA CPANEL API
 // ============================================================
 function createDatabase(string $dbName): array {
-    // Strip the prefix — cPanel adds it automatically
-    $suffix = str_replace(DB_PREFIX, '', $dbName);
+    // Strip the prefix — cPanel adds iskowdbw_ automatically
+    $suffix = str_replace('iskowdbw_', '', $dbName);
 
     $res = cPanelAPI('Mysql', 'create_database', ['name' => $suffix]);
     if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
 
     cPanelAPI('Mysql', 'set_privileges_on_database', [
-        'user'       => DB_USER,
+        'user'       => 'iskowdbw',
         'database'   => $suffix,
         'privileges' => 'ALL PRIVILEGES',
     ]);
