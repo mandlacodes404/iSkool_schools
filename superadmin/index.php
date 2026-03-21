@@ -159,11 +159,19 @@ return ['ok' => true];
 // ============================================================
 function createSubdomain(string $subdomain): array {
     $res = cPanelAPI('SubDomain', 'addsubdomain', [
-        'domain'    => $subdomain,
+        'domain'     => $subdomain,
         'rootdomain' => MAIN_DOMAIN,
-        'dir'       => '/public_html',
+        'dir'        => 'public_html',
     ]);
-    if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
+
+    // If subdomain already exists treat it as success
+    if (!empty($res['errors'])) {
+        $errorMsg = implode(', ', $res['errors']);
+        if (stripos($errorMsg, 'already exists') !== false) {
+            return ['ok' => true]; // Already exists — that's fine
+        }
+        return ['ok' => false, 'msg' => $errorMsg];
+    }
     return ['ok' => true];
 }
 
