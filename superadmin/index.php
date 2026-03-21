@@ -174,7 +174,7 @@ function sendWelcomeEmail(string $toEmail, string $toName, string $schoolName,
                           string $subdomain, string $adminPassword, array $keys): array {
     // PHPMailer — assumes composer autoload or manual include
     // Place PHPMailer in /superadmin/PHPMailer/
-    $mailerPath = __DIR__ . '/PHPMailer/src/';
+    $mailerPath = __DIR__ . '/PHPMailer/PHPMailer/src/';
     if (!file_exists($mailerPath . 'PHPMailer.php')) {
         return ['ok' => false, 'msg' => 'PHPMailer not found. Upload it to /superadmin/PHPMailer/src/'];
     }
