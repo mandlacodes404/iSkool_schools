@@ -134,18 +134,24 @@ function runTemplate(string $dbName, string $schoolName, string $adminEmail,
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, $dbName);
     if ($conn->connect_error) return ['ok' => false, 'msg' => 'Cannot connect to new DB: ' . $conn->connect_error];
     $conn->set_charset('utf8mb4');
+// Execute entire SQL file at once using multi_query
+$conn->multi_query($sql);
 
-    // Split and execute statement by statement
-    $statements = array_filter(array_map('trim', explode(';', $sql)));
-    foreach ($statements as $stmt) {
-        if (empty($stmt) || strpos($stmt, '--') === 0) continue;
-        if (!$conn->query($stmt)) {
-            $conn->close();
-            return ['ok' => false, 'msg' => 'SQL error: ' . $conn->error . ' → ' . substr($stmt, 0, 80)];
-        }
+// Consume all result sets to avoid "commands out of sync" error
+do {
+    if ($result = $conn->store_result()) {
+        $result->free();
     }
+} while ($conn->more_results() && $conn->next_result());
+
+// Check for errors
+if ($conn->errno) {
     $conn->close();
-    return ['ok' => true];
+    return ['ok' => false, 'msg' => 'SQL error: ' . $conn->error];
+}
+
+$conn->close();
+return ['ok' => true];
 }
 
 // ============================================================
