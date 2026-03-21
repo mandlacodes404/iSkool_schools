@@ -239,16 +239,19 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
   <!-- HEADER -->
-  <tr>
-    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:32px;font-weight:700;color:#ffffff;letter-spacing:-1px;">
-        i<span style="color:#39d5c1;">Skool</span>
-      </h1>
-      <p style="margin:8px 0 0;font-size:13px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
-      </p>
-    </td>
-  </tr>
+  <!-- HEADER -->
+<tr>
+  <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+    <img src="https://iskool.online/apple-touch-icon.png"
+         width="80"
+         height="80"
+         alt="iSkool"
+         style="display:block;margin:0 auto 12px;border-radius:16px;border:2px solid rgba(57,213,193,0.3);">
+    <p style="margin:0;font-size:13px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
+      Learning Management System
+    </p>
+  </td>
+</tr>
 
   <!-- HERO -->
   <tr>
