@@ -8,9 +8,9 @@
 # Find your IP at: https://whatismyip.com
 # Uncomment these lines when you know your IP:
 
-Order deny,allow
-Deny from all
-Allow from 165.16.184.54
+# Order deny,allow
+# Deny from all
+# Allow from 165.16.184.54
 
 # ── Option 2: Password Protection (fallback)
 # The panel already has its own password but this adds
