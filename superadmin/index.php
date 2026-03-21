@@ -97,6 +97,14 @@ function createDatabase(string $dbName): array {
 function runTemplate(string $dbName, string $schoolName, string $adminEmail,
                      string $adminPassword, string $adminFirstName,
                      string $adminLastName, array $keys): array {
+
+    ini_set('max_execution_time', 300);
+    ini_set('memory_limit', '256M');
+
+    // DEBUG — remove after testing
+    error_log('TEMPLATE PATH: ' . TEMPLATE_PATH);
+    error_log('FILE EXISTS: ' . (file_exists(TEMPLATE_PATH) ? 'YES' : 'NO'));
+
     if (!file_exists(TEMPLATE_PATH)) {
         return ['ok' => false, 'msg' => 'Template SQL file not found at: ' . TEMPLATE_PATH];
     }
