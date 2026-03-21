@@ -1,0 +1,38 @@
+# ============================================================
+#  iSkool Superadmin — Security Configuration
+#  Place this file in your /superadmin/ folder
+# ============================================================
+
+# ── Option 1: Restrict by IP (RECOMMENDED)
+# Replace with your actual IP address.
+# Find your IP at: https://whatismyip.com
+# Uncomment these lines when you know your IP:
+
+Order deny,allow
+Deny from all
+Allow from 165.16.184.54
+
+# ── Option 2: Password Protection (fallback)
+# The panel already has its own password but this adds
+# a second layer at the server level.
+# Uncomment and configure if you want double protection:
+
+# AuthType Basic
+# AuthName "Restricted Area"
+# AuthUserFile /home/iskowdbw/.htpasswd
+# Require valid-user
+
+# ── Always: Prevent directory listing
+Options -Indexes
+
+# ── Always: Block direct access to SQL files
+<Files "*.sql">
+  Order allow,deny
+  Deny from all
+</Files>
+
+# ── Always: Block direct access to config
+<Files "config.php">
+  Order allow,deny
+  Deny from all
+</Files>
