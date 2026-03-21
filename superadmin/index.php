@@ -182,30 +182,27 @@ function sendWelcomeEmail(string $toEmail, string $toName, string $schoolName,
                           string $subdomain, string $adminPassword, array $keys): array {
     // PHPMailer — assumes composer autoload or manual include
     // Place PHPMailer in /superadmin/PHPMailer/
-    $mailerPath = __DIR__ . '/PHPMailer/PHPMailer/src/';
-    if (!file_exists($mailerPath . 'PHPMailer.php')) {
-       return ['ok' => false, 'msg' => 'PHPMailer not found. Upload it to /superadmin/PHPMailer/PHPMailer/src/'];
-    }
+     $autoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (!file_exists($autoload)) {
+    return ['ok' => false, 'msg' => 'Composer autoload not found at: ' . $autoload];
+}
+require_once $autoload;
 
-    require_once $mailerPath . 'PHPMailer.php';
-    require_once $mailerPath . 'SMTP.php';
-    require_once $mailerPath . 'Exception.php';
-
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-    $schoolUrl = 'https://' . $subdomain . '.' . MAIN_DOMAIN;
+$mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    $schoolUrl = 'https://' . $subdomain . '.' . MAIN_DOMAIN;        
 
     try {
-        $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = SMTP_PORT;
+    $mail->isSMTP();
+    $mail->Host       = SMTP_HOST;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = SMTP_USER;
+    $mail->Password   = SMTP_PASS;
+    $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+    $mail->Port       = SMTP_PORT;
 
-        $mail->setFrom(SMTP_USER, 'iSkool Support');
-        $mail->addAddress($toEmail, $toName);
-        $mail->isHTML(true);
+    $mail->setFrom(SMTP_USER, 'iSkool Support');
+    $mail->addAddress($toEmail, $toName);
+    $mail->isHTML(true);
         $mail->Subject = 'Welcome to iSkool — Your School Platform is Ready';
         $mail->Body    = buildWelcomeEmailHTML(
             $toName, $schoolName, $schoolUrl,
