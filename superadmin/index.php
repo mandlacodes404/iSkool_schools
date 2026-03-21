@@ -74,17 +74,21 @@ function cPanelAPI(string $module, string $func, array $params = []): array {
 //  STEP 1 — CREATE DATABASE VIA CPANEL API
 // ============================================================
 function createDatabase(string $dbName): array {
-    // Strip the prefix — cPanel adds iskowdbw_ automatically
-    $suffix = str_replace('iskowdbw_', '', $dbName);
+    // cPanel UAPI expects the FULL name including prefix
+    // e.g. iskowdbw_testschool NOT just testschool
+    $res = cPanelAPI('Mysql', 'create_database', ['name' => $dbName]);
+    
+    if (!empty($res['errors'])) {
+        return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
+    }
 
-    $res = cPanelAPI('Mysql', 'create_database', ['name' => $suffix]);
-    if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
-
+    // Privileges also needs full name
     cPanelAPI('Mysql', 'set_privileges_on_database', [
         'user'       => 'iskowdbw',
-        'database'   => $suffix,
+        'database'   => $dbName,
         'privileges' => 'ALL PRIVILEGES',
     ]);
+    
     return ['ok' => true];
 }
 // ============================================================
