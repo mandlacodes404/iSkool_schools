@@ -74,13 +74,12 @@ function cPanelAPI(string $module, string $func, array $params = []): array {
 //  STEP 1 — CREATE DATABASE VIA CPANEL API
 // ============================================================
 function createDatabase(string $dbName): array {
-    // cPanel API only needs the suffix — it adds iskowdbw_ prefix automatically
+    // Strip the prefix — cPanel adds it automatically
     $suffix = str_replace(DB_PREFIX, '', $dbName);
-    
+
     $res = cPanelAPI('Mysql', 'create_database', ['name' => $suffix]);
     if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
 
-    // Grant all privileges to the DB user — also uses suffix only
     cPanelAPI('Mysql', 'set_privileges_on_database', [
         'user'       => DB_USER,
         'database'   => $suffix,
