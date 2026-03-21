@@ -14,9 +14,20 @@ date_default_timezone_set('Africa/Johannesburg');
 // ============================================================
 //  ⚙️  CONFIGURATION — Fill these before uploading
 // ============================================================
-
-
-//deleted for now
+define('SA_PASSWORD',      'SomeStrongPassword@2026');       // your private panel password
+define('CPANEL_USER',      'iskowdbw');
+define('CPANEL_API_TOKEN', 'CFMB6QZBHI5MDBQ1I90GW6DGYYEP9G5L');    // from cPanel → API Tokens
+define('CPANEL_HOST',      'https://iskool.online:2083');
+define('DB_HOST',          'localhost');
+define('DB_USER',          'iskowdbw');
+define('DB_PASS',          'ogeQkRitRfdy');            // your cPanel DB password
+define('DB_PREFIX',        'iskowdbw_');
+define('MAIN_DOMAIN',      'iskool.online');
+define('TEMPLATE_PATH',    __DIR__ . '/iskool_new_school_template.sql');
+define('SMTP_HOST',        'iskool.online');
+define('SMTP_USER',        'support@iskool.online');
+define('SMTP_PASS',        'ogeQkRitRfdy');         // support@iskool.online password
+define('SMTP_PORT',        465);
 
 // ============================================================
 //  MASTER DB CONNECTION (tracks all schools)
@@ -77,7 +88,6 @@ function createDatabase(string $dbName): array {
     ]);
     return ['ok' => true];
 }
-
 // ============================================================
 //  STEP 2 — RUN SQL TEMPLATE
 // ============================================================
