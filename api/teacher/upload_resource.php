@@ -30,6 +30,27 @@ $current_term = $termResult ? (int)$termResult->fetch_assoc()['current_global_te
 $title   = trim($_POST['title'] ?? '');
 $classId = (int)($_POST['class_id'] ?? 0);
 $forceEmail = isset($_POST['force_email']);
+// ── Teacher display name ──
+$stmtUser = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
+$stmtUser->bind_param("s", $email);
+$stmtUser->execute();
+$userData = $stmtUser->get_result()->fetch_assoc();
+$stmtUser->close();
+
+$teacherDisplayName = "Teacher";
+if ($userData) {
+    $tTitle       = $userData['title'] ?? '';
+    $tName        = $userData['name'] ?? '';
+    $tSurname     = $userData['surname'] ?? '';
+    $firstInitial = !empty($tName) ? strtoupper(substr(trim($tName), 0, 1)) . "." : "";
+    $teacherDisplayName = trim("$tTitle $firstInitial $tSurname");
+}
+
+// ── School name ──
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 if (empty($title)) {
     echo json_encode(['success' => false, 'error' => 'Please enter a title.']);
@@ -117,7 +138,125 @@ while ($learner = $learners->fetch_assoc()) {
             $mail->addAddress($lEmail);
             $mail->isHTML(true);
             $mail->Subject = "New Resource: $title";
-            $mail->Body    = '<p>Hello ' . htmlspecialchars($lName) . ', a new resource has been uploaded: <strong>' . htmlspecialchars($title) . '</strong></p>';
+            $mail->Body = '
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <img src="https://iskool.online/apple-touch-icon.png"
+           width="72" height="72" alt="iSkool"
+           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
+        Learning Management System
+      </p>
+    </td>
+  </tr>
+
+  <!-- HERO -->
+  <tr>
+    <td style="background:#39d5c1;padding:20px 40px;text-align:center;">
+      <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+        📚 New Resource Available
+      </p>
+    </td>
+  </tr>
+
+  <!-- SCHOOL + TEACHER ROW -->
+  <tr>
+    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
+      <p style="margin:0;font-size:13px;color:#8b949e;">
+        <span style="color:#e6edf3;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span>
+        &nbsp;·&nbsp;
+        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
+      </p>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background:#ffffff;padding:40px;">
+
+      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
+        Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has uploaded a new resource for your class.
+      </p>
+
+      <!-- RESOURCE TITLE BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
+              Resource
+            </p>
+            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+              📎 ' . htmlspecialchars($title) . '
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- INFO BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4fd;border:1px solid #b3d9f7;border-radius:8px;margin-bottom:28px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:13px;color:#1565c0;line-height:1.7;">
+              Log in to your iSkool dashboard to view and download this resource.
+              Resources are available anytime from your <strong>Resources</strong> section.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
+        </tr>
+      </table>
+
+      <!-- FROM -->
+      <p style="margin:0;font-size:13px;color:#888;">
+        Uploaded by
+        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
+        via
+        <strong style="color:#333;">' . htmlspecialchars($schoolName) . '</strong>
+      </p>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
+        iSkool LMS · Johannesburg, South Africa
+      </p>
+      <p style="margin:0;font-size:12px;color:#484f58;">
+        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
+      </p>
+      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
+        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>';
             $mail->send();
         } catch (Exception $e) {
             error_log("Email failed to $lEmail: " . $mail->ErrorInfo);
