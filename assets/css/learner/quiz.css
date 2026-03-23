@@ -1,117 +1,540 @@
-/* assets/css/quiz.css */
+/* ============================================================
+   iSkool — quiz.css  v2.0
+   Redesigned by: Senior FE pass
+   Replaces: assets/css/learner/quiz.css
+   Drop-in compatible — no PHP changes needed for this file
+   ============================================================ */
 
-/* 1. The Container - This replicates the dashboard environment */
-/* 1. The Container - Updated for Scrolling */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Override body font to Sora ── */
+body {
+    font-family: 'Sora', sans-serif !important;
+}
+
+/* ────────────────────────────────────────────────
+   1. CSS VARIABLES — single source of truth
+──────────────────────────────────────────────── */
+:root {
+    --bg:           #0d1117;
+    --bg-deep:      #080b10;
+    --surface:      #13181f;
+    --surface-2:    #161c25;
+    --border:       rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(79, 209, 197, 0.25);
+
+    --teal:         #4fd1c5;
+    --teal-dim:     rgba(79, 209, 197, 0.08);
+    --teal-border:  rgba(79, 209, 197, 0.18);
+
+    --green:        #27ae60;
+    --green-dim:    rgba(39, 174, 96, 0.10);
+    --green-border: rgba(39, 174, 96, 0.22);
+
+    --orange:       #e67e22;
+    --orange-dim:   rgba(230, 126, 34, 0.10);
+    --orange-border:rgba(230, 126, 34, 0.22);
+
+    --yellow:       #fdd663;
+    --yellow-dim:   rgba(253, 214, 99, 0.08);
+    --yellow-border:rgba(253, 214, 99, 0.22);
+
+    --muted:        #8b949e;
+    --muted-dim:    rgba(139, 148, 158, 0.08);
+    --muted-border: rgba(139, 148, 158, 0.18);
+
+    --text-primary: #e2e8f0;
+    --text-muted:   #8b949e;
+
+    --mono: 'JetBrains Mono', monospace;
+    --radius-card: 14px;
+    --radius-pill: 8px;
+}
+
+/* ────────────────────────────────────────────────
+   2. QUIZ LIST WRAPPER
+──────────────────────────────────────────────── */
 #api-content-area {
-    padding: 25px;
-    color: #ffffff;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.5;
-
-    /* --- ADD THESE TO FIX SCROLLING --- */
-    height: calc(100vh - 70px); /* Adjust 70px if your top header is taller */
-    overflow-y: auto;           /* This enables the scrollbar */
-    box-sizing: border-box;     /* Keeps padding from breaking layout */
-    padding-bottom: 120px;      /* Extra space so the last card isn't stuck at the bottom */
+    padding: 20px 20px 100px; /* bottom pad clears mobile nav */
+    max-width: 900px;
+    margin: 0 auto;
+    animation: fadeSlideIn 0.25s ease forwards;
 }
 
-/* 2. Make the scrollbar look professional (Matches Chrome/Edge/Safari) */
-#api-content-area::-webkit-scrollbar {
-    width: 6px;
-}
-#api-content-area::-webkit-scrollbar-thumb {
-    /* Changed from dark black to a semi-transparent light grey */
-    background: rgba(255, 255, 255, 0.2); 
-    border-radius: 10px;
-    transition: background 0.3s;
-}
-#api-content-area::-webkit-scrollbar-thumb:hover {
-    /* Turns teal when they actually grab the scroller */
-    background: rgba(79, 209, 197, 0.5); 
-}
-#api-content-area::-webkit-scrollbar-track {
-    background: transparent;
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 2. Section Headers */
-#api-content-area h2 {
-    color: #4fd1c5;
-    margin-bottom: 25px;
-    font-size: 24px;
+/* ────────────────────────────────────────────────
+   3. STAT SUMMARY ROW  (injected by renderQuizCards)
+──────────────────────────────────────────────── */
+.quiz-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.quiz-stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+}
+.quiz-stat-card:hover { border-color: rgba(255,255,255,0.12); }
+
+.quiz-stat-card.accent {
+    border-color: var(--teal-border);
+    background: var(--teal-dim);
+}
+
+.quiz-stat-label {
+    font-size: 9px;
     font-weight: 700;
-}
-
-#api-content-area h3 {
-    margin-top: 35px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: #aaaaaa;
-    padding-bottom: 8px;
-    font-size: 16px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-bottom: 6px;
 }
 
-/* 3. The Quiz Card - The exact "Pro" look from our test */
+.quiz-stat-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    font-family: var(--mono);
+}
+.quiz-stat-card.accent .quiz-stat-val { color: var(--teal); }
+
+.quiz-stat-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ────────────────────────────────────────────────
+   4. SUBJECT SECTION HEADER
+──────────────────────────────────────────────── */
+.quiz-subject-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 10px;
+}
+
+.quiz-subject-header:first-of-type { margin-top: 0; }
+
+.quiz-subject-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.quiz-subject-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ────────────────────────────────────────────────
+   5. QUIZ CARD  — the main component
+──────────────────────────────────────────────── */
 .quiz-card {
-    background: #1a1919; /* That subtle glass effect */
-    padding: 18px;
-    border-radius: 14px;
-    margin: 12px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 16px 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* LEFT STATUS STRIPE — the key upgrade */
+.quiz-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    background: var(--teal); /* default = startable */
+    transition: background 0.2s;
+}
+
+.quiz-card.status-done::before    { background: var(--green); }
+.quiz-card.status-continue::before{ background: var(--orange); }
+.quiz-card.status-scheduled::before { background: var(--yellow); }
+.quiz-card.status-closed::before  { background: var(--muted); }
+
+.quiz-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-2);
+}
+
+/* Shift content right to clear the stripe */
+.quiz-card-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-left: 10px; /* clears the 4px stripe + breathing room */
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Icon box ── */
+.quiz-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.quiz-card.status-done     .quiz-card-icon { background: var(--green-dim);  border-color: var(--green-border); }
+.quiz-card.status-continue .quiz-card-icon { background: var(--orange-dim); border-color: var(--orange-border); }
+.quiz-card.status-scheduled .quiz-card-icon{ background: var(--yellow-dim); border-color: var(--yellow-border); }
+.quiz-card.status-closed   .quiz-card-icon { background: var(--muted-dim);  border-color: var(--muted-border); }
+
+/* ── Text block ── */
+.quiz-card-body { flex: 1; min-width: 0; }
+
+.quiz-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quiz-card.status-done .quiz-card-title { color: var(--text-muted); }
+.quiz-card.status-closed .quiz-card-title { color: var(--text-muted); }
+
+.quiz-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    flex-wrap: wrap;
+}
+
+.quiz-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Summative badge */
+.quiz-summative-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--teal-dim);
+    color: var(--teal);
+    border: 1px solid var(--teal-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ────────────────────────────────────────────────
+   6. STATUS PILLS  — action buttons
+──────────────────────────────────────────────── */
+.quiz-action-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.15s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: 'Sora', sans-serif;
+}
+
+.quiz-action-pill:hover { opacity: 0.85; transform: scale(0.98); }
+
+.pill-start {
+    background: var(--teal-dim);
+    color: var(--teal);
+    border-color: var(--teal-border);
+}
+.pill-done {
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: var(--green-border);
+    cursor: default;
+}
+.pill-done:hover { transform: none; opacity: 1; }
+
+.pill-continue {
+    background: var(--orange-dim);
+    color: var(--orange);
+    border-color: var(--orange-border);
+}
+.pill-scheduled {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border-color: var(--yellow-border);
+    cursor: default;
+}
+.pill-scheduled:hover { transform: none; opacity: 1; }
+
+.pill-closed {
+    background: var(--muted-dim);
+    color: var(--muted);
+    border-color: var(--muted-border);
+    cursor: default;
+}
+.pill-closed:hover { transform: none; opacity: 1; }
+
+/* Countdown spans (JS-driven) */
+.quiz-countdown {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* ────────────────────────────────────────────────
+   7. INSTRUCTIONS PAGE
+──────────────────────────────────────────────── */
+.inst-container {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--surface);
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+}
+
+.inst-page-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+}
+
+.inst-info-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inst-info-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.2s ease-in-out;
-}
-
-.quiz-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-2px);
-    border-color: rgba(79, 209, 197, 0.3); /* Subtle teal glow on hover */
-}
-
-/* 4. Card Content Styles */
-.quiz-card h4 {
-    margin: 0;
-    font-size: 18px;
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.quiz-info-text {
     font-size: 13px;
-    color: #888888;
-    margin-top: 5px;
 }
+.inst-info-row span:first-child { color: var(--text-muted); }
+.inst-info-row span:last-child  { color: var(--text-primary); font-weight: 600; font-family: var(--mono); }
 
-.quiz-info-text i {
-    margin-right: 5px;
-    color:  #888888; /* Icons match the brand color */
-}
-
-/* 5. The Start Button - High Contrast Pro Style */
-.quiz-start-btn {
-    background: #4fd1c5;
-    color: #1a1919;
-    border: none;
-    /* Reduced padding: 6px top/bottom, 16px left/right */
-    padding: 6px 16px; 
-    border-radius: 6px;
-    /* Lower weight and size for a cleaner look */
-    font-weight: 600;
+.inst-rule-heading {
     font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    /* Added spacing to keep uppercase text readable at small sizes */
-    letter-spacing: 0.5px;
-    /* Ensures buttons don't jump size when text changes (e.g., START vs CLOSED) */
-    min-width: 100px;
-    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 12px;
 }
 
-.quiz-start-btn:hover {
-    background: #38b2ac;
-    box-shadow: 0 4px 12px rgba(79, 209, 197, 0.2);
+.inst-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inst-list li {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.6;
+}
+
+.inst-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--teal);
+    font-weight: 700;
+}
+
+/* Resuming warning item */
+.inst-list li.inst-resume {
+    color: var(--orange);
+    font-weight: 600;
+}
+.inst-list li.inst-resume::before { color: var(--orange); }
+
+/* AI box */
+.inst-ai-box {
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+.inst-ai-box.monitored {
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+}
+.inst-ai-box.session {
+    background: var(--muted-dim);
+    border: 1px solid var(--muted-border);
+}
+.inst-ai-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.inst-ai-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.inst-ai-box.monitored .inst-ai-title { color: var(--teal); }
+.inst-ai-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Start / Continue button */
+.inst-start-btn {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    background: var(--teal-dim);
+    color: var(--text-primary);
+    border: 1px solid var(--teal-border);
+    border-radius: 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.inst-start-btn:hover {
+    background: rgba(79, 209, 197, 0.18);
+    border-color: var(--teal);
+    transform: translateY(-1px);
+}
+.inst-start-btn.resume {
+    background: var(--orange-dim);
+    border-color: var(--orange-border);
+    color: var(--orange);
+}
+.inst-start-btn.resume:hover {
+    background: rgba(230, 126, 34, 0.2);
+    border-color: var(--orange);
+}
+
+/* ────────────────────────────────────────────────
+   8. EMPTY STATE
+──────────────────────────────────────────────── */
+.quiz-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ────────────────────────────────────────────────
+   9. MOBILE OVERRIDES
+──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    #api-content-area {
+        padding: 16px 14px 100px;
+    }
+
+    .quiz-stat-row {
+        gap: 8px;
+    }
+
+    .quiz-stat-val { font-size: 22px; }
+
+    .quiz-card {
+        padding: 14px 14px 14px 18px;
+        border-radius: 12px;
+    }
+
+    /* On mobile the icon is optional — hide to save space */
+    .quiz-card-icon {
+        display: none;
+    }
+
+    .quiz-card-left {
+        padding-left: 8px;
+        gap: 0;
+    }
+
+    .quiz-card-title { font-size: 13px; }
+
+    .quiz-card-meta {
+        gap: 8px;
+        font-size: 10px;
+    }
+
+    .quiz-action-pill {
+        padding: 6px 11px;
+        font-size: 11px;
+    }
+
+    .inst-container {
+        padding: 22px 16px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .quiz-stat-label { font-size: 8px; }
+
+    .quiz-card-meta {
+        flex-direction: column;
+        gap: 2px;
+        align-items: flex-start;
+    }
 }
