@@ -709,6 +709,119 @@ body {
     width: 100%;
   }
 }
+
+.demo-mini-cal { width: 100%; }
+ 
+.demo-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+ 
+.demo-cal-month {
+  font-size: 13px;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+ 
+.demo-cal-nav {
+  background: none;
+  border: none;
+  color: #8b949e;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+.demo-cal-nav:hover { color: #4fd1c5; }
+ 
+.demo-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+ 
+.demo-cal-day-label {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #555e6a;
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+ 
+.demo-cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 34px;
+  padding: 3px 1px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+.demo-cal-cell:hover { background: rgba(255,255,255,0.05); }
+.demo-cal-cell.empty { cursor: default; pointer-events: none; }
+ 
+.demo-cal-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b949e;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+ 
+.demo-cal-cell.is-today .demo-cal-num {
+  background: #4fd1c5;
+  color: #0d1117;
+  font-weight: 900;
+}
+ 
+.demo-cal-cell.has-events .demo-cal-num {
+  color: #e2e8f0;
+}
+ 
+.demo-cal-dots {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+ 
+.demo-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+}
+ 
+.demo-dot-quiz       { background: #4fd1c5; }
+.demo-dot-assignment { background: #a78bfa; }
+.demo-dot-academic   { background: #f472b6; }
+ 
+.demo-cal-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+ 
+.demo-cal-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #8b949e;
+}
 </style>
 </head>
 <body>
@@ -1151,54 +1264,73 @@ function renderHome() {
   }
 }
  
-// ── MINI CALENDAR BUILDER (static May 2025 for demo) ──────────
 function buildDemoMiniCal() {
   const month = 5, year = 2025;
-  const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-  const firstDay = new Date(year, month - 1, 1).getDay();
-  const offset = firstDay === 0 ? 6 : firstDay - 1;
-  const daysInMonth = new Date(year, month, 0).getDate();
+  const dayLabels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const firstDay  = new Date(year, month - 1, 1).getDay();
+  const offset    = firstDay === 0 ? 6 : firstDay - 1; // Monday-first
+  const total     = new Date(year, month, 0).getDate();
  
-  // Demo events
-  const events = {
-    14: [{ type:'quiz',       dot:'dot-quiz' }],
-    18: [{ type:'assignment', dot:'dot-assignment' }],
-    20: [{ type:'quiz',       dot:'dot-quiz' }, { type:'assignment', dot:'dot-assignment' }],
-    22: [{ type:'assignment', dot:'dot-assignment' }],
-    28: [{ type:'quiz',       dot:'dot-quiz' }]
+  // Demo events — keyed by day number
+  const eventMap = {
+    14: [{ dot: 'demo-dot-quiz' }],
+    18: [{ dot: 'demo-dot-assignment' }],
+    20: [{ dot: 'demo-dot-quiz' }, { dot: 'demo-dot-assignment' }],
+    22: [{ dot: 'demo-dot-assignment' }],
+    28: [{ dot: 'demo-dot-quiz' }],
+    3:  [{ dot: 'demo-dot-academic' }],
+    10: [{ dot: 'demo-dot-academic' }],
   };
  
-  let html = `
-    <div class="cal-header">
-      <button class="cal-btn">&#8249;</button>
-      <span class="cal-title" style="font-size:12px;font-weight:800;">May 2025</span>
-      <button class="cal-btn">&#8250;</button>
-    </div>
-    <div class="cal-grid">
-      ${days.map(d => `<div class="cal-lbl">${d}</div>`).join('')}`;
+  const todayDemo = 14; // "today" in demo world
  
+  // ── Header ──
+  let html = `
+    <div class="demo-mini-cal">
+      <div class="demo-cal-header">
+        <button class="demo-cal-nav">&#8249;</button>
+        <span class="demo-cal-month">May 2025</span>
+        <button class="demo-cal-nav">&#8250;</button>
+      </div>
+      <div class="demo-cal-grid">`;
+ 
+  // Day labels row
+  dayLabels.forEach(d => {
+    html += `<div class="demo-cal-day-label">${d}</div>`;
+  });
+ 
+  // Empty offset cells
   for (let i = 0; i < offset; i++) {
-    html += `<div class="cal-cell"></div>`;
+    html += `<div class="demo-cal-cell empty"></div>`;
   }
  
-  for (let d = 1; d <= daysInMonth; d++) {
-    const ev = events[d] || [];
-    const isToday = d === 14; // "today" in demo
+  // Day cells
+  for (let d = 1; d <= total; d++) {
+    const isToday  = d === todayDemo;
+    const evs      = eventMap[d] || [];
+    const hasEvs   = evs.length > 0;
+ 
+    const dots = evs.map(e =>
+      `<span class="demo-dot ${e.dot}"></span>`
+    ).join('');
+ 
     html += `
-      <div class="cal-cell${isToday ? ' today' : ''}">
-        <span class="day-num">${d}</span>
-        ${ev.length ? `<div class="cal-dot-row">${ev.map(e => `<span class="dot ${e.dot}"></span>`).join('')}</div>` : ''}
+      <div class="demo-cal-cell ${isToday ? 'is-today' : ''} ${hasEvs ? 'has-events' : ''}">
+        <span class="demo-cal-num">${d}</span>
+        ${hasEvs ? `<div class="demo-cal-dots">${dots}</div>` : ''}
       </div>`;
   }
  
-  html += `</div>
-    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-      <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);">
-        <span class="dot dot-q" style="width:6px;height:6px;border-radius:50%;background:#4fd1c5;display:inline-block;"></span> Quiz
-      </span>
-      <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);">
-        <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;display:inline-block;"></span> Assignment
-      </span>
+  html += `
+      </div>
+ 
+      <!-- Legend -->
+      <div class="demo-cal-legend">
+        <span><span class="demo-dot demo-dot-quiz"></span> Quiz</span>
+        <span><span class="demo-dot demo-dot-assignment"></span> Assignment</span>
+        <span><span class="demo-dot demo-dot-academic"></span> Academic</span>
+      </div>
+ 
     </div>`;
  
   return html;
