@@ -150,6 +150,8 @@ function renderSnapshotPanel(data) {
         window.fetchTeacherGrades();
     } else if (savedPage === "teacher_syllabus") {
         window.fetchTeacherSyllabus();
+    } else if (savedPage === "teacher_calendar") {
+    window.fetchTeacherCalendar();
     } else {
         window.loadTeacherManual();
     }
