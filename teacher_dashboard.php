@@ -1171,7 +1171,7 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=4.3"></script>
+<script src="assets/js/teacher/dashboard.js?v=4.4"></script>
 <script src="assets/js/teacher/quizzes.js?v=1.5"></script>
 <script src="assets/js/teacher/announcements.js?v=1.6"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.4"></script>
