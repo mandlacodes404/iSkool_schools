@@ -573,6 +573,142 @@ body {
   #mobileBtn { display: none !important; }
   #desktopBtn { display: flex !important; }
 }
+.learner-home-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+ 
+.learner-home-left {
+  width: 30%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+ 
+.learner-home-right {
+  flex: 1;
+  min-width: 0;
+}
+ 
+.learner-home-panel {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+ 
+.learner-home-panel-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+ 
+.learner-home-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: opacity 0.2s;
+}
+.learner-home-activity-item:last-child { border-bottom: none; }
+.learner-home-activity-item:hover { opacity: 0.8; }
+ 
+.learner-home-activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+ 
+.learner-home-activity-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+.learner-home-activity-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+ 
+.learner-home-todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: opacity 0.2s;
+}
+.learner-home-todo-item:last-child { border-bottom: none; }
+.learner-home-todo-item:hover { opacity: 0.8; }
+ 
+.learner-home-todo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+ 
+.learner-home-todo-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+.learner-home-todo-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+ 
+.learner-home-todo-info { flex: 1; min-width: 0; }
+ 
+.learner-home-empty {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+}
+ 
+.learner-cal-mini .cal-header {
+  margin-bottom: 8px;
+}
+ 
+.learner-cal-mini .cal-month-title {
+  font-size: 12px;
+}
+ 
+.dot-quiz-done { background: #22c55e; }
+ 
+@media (max-width: 768px) {
+  .learner-home-wrapper {
+    flex-direction: column;
+  }
+  .learner-home-left {
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body>
@@ -589,7 +725,7 @@ body {
     </button>
   </div>
   <div class="learner-name">Thabo Mahlangu</div>
-  <div class="learner-email">t.mahlangu@landulwazi.edu.za</div>
+  <div class="learner-email">t.mahlangu@iSkool.demo</div>
 
   <div class="sb-links">
     <button class="sb-link active" onclick="showPage('home');setActive(this)">
@@ -634,7 +770,7 @@ body {
     </button>
     <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:var(--accent);">
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Grade 10A – Mathematics
+      Grade 10A
     </div>
   </div>
   <div class="sb-footer"><strong>iSkool v.1.0.0</strong></div>
@@ -823,54 +959,249 @@ function demoBanner() {
   return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS. All data shown is for demonstration purposes.</div>`;
 }
 
-// ── HOME ──
 function renderHome() {
-  document.getElementById('content').innerHTML = `
+  const isMobile = window.innerWidth <= 768;
+ 
+  // ── LEFT PANEL: Recent Activity ──
+  const recentItems = [
+    {
+      type: 'quiz',
+      stroke: '#fdd663',
+      icon: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+      title: 'New quiz available: Algebraic Expressions',
+      meta: 'Today',
+      action: "showPage('quizzes')"
+    },
+    {
+      type: 'assignment',
+      stroke: '#a78bfa',
+      icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+      title: 'Assignment submitted: Algebra Review',
+      meta: 'Yesterday',
+      action: "showPage('assignments')"
+    },
+    {
+      type: 'announcement',
+      stroke: '#4fd1c5',
+      icon: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
+      title: 'Term 2 Test Schedule Released',
+      meta: '2 May',
+      action: "showPage('announcements')"
+    },
+    {
+      type: 'grades',
+      stroke: '#22c55e',
+      icon: `<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,
+      title: 'Marks published: Number Systems — 69%',
+      meta: '6 Mar',
+      action: "showPage('grades')"
+    }
+  ];
+ 
+  const activityHtml = recentItems.map(item => `
+    <div class="learner-home-activity-item" onclick="${item.action}" style="cursor:pointer;">
+      <div class="learner-home-activity-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="${item.stroke}" stroke-width="2" fill="none">
+          ${item.icon}
+        </svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="learner-home-activity-title">${item.title}</div>
+        <div class="learner-home-activity-meta">${item.meta}</div>
+      </div>
+    </div>`).join('');
+ 
+  // ── LEFT PANEL: To-Do ──
+  const todoItems = [
+    { color: '#fdd663', title: 'Algebraic Expressions Quiz', meta: 'Quiz · 14 May 2025', action: "showPage('quizzes')" },
+    { color: '#a78bfa', title: 'Equations Practice Set', meta: 'Assignment · Due 22 May', action: "showPage('assignments')" },
+    { color: '#4fd1c5', title: 'Teacher Evaluation pending', meta: 'Evaluation · Term 2', action: "showPage('evaluations')" }
+  ];
+ 
+  const todoHtml = todoItems.map(item => `
+    <div class="learner-home-todo-item" onclick="${item.action}" style="cursor:pointer;">
+      <div class="learner-home-todo-dot" style="background:${item.color};"></div>
+      <div class="learner-home-todo-info">
+        <div class="learner-home-todo-title">${item.title}</div>
+        <div class="learner-home-todo-meta">${item.meta}</div>
+      </div>
+      <svg viewBox="0 0 24 24" width="13" height="13" stroke="${item.color}" stroke-width="2" fill="none">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </div>`).join('');
+ 
+  // ── LEFT PANEL: Mini Calendar (May 2025) ──
+  const calHtml = buildDemoMiniCal();
+ 
+  // ── RIGHT PANEL: Manual content ──
+  const manualHtml = `
     ${demoBanner()}
-    <div class="manual-container">
-      <div class="manual-greeting">Welcome back, Thabo 👋</div>
-      <div class="manual-sub">Grade 10A – Mathematics · Landulwazi Comprehensive School</div>
-      <div class="quick-stats">
-        <div class="stat-card" onclick="showPage('quizzes')">
-          <div class="stat-num" style="color:#4fd1c5">4</div>
-          <div class="stat-lbl">Quizzes</div>
-        </div>
-        <div class="stat-card" onclick="showPage('assignments')">
-          <div class="stat-num" style="color:#a78bfa">3</div>
-          <div class="stat-lbl">Assignments</div>
-        </div>
-        <div class="stat-card" onclick="showPage('grades')">
-          <div class="stat-num" style="color:#22c55e">69%</div>
-          <div class="stat-lbl">Latest Score</div>
-        </div>
+    <div class="manual-greeting">Welcome back, Thabo 👋</div>
+    <div class="manual-sub">Grade 10A · Landulwazi Comprehensive School</div>
+    <div class="quick-stats">
+      <div class="stat-card" onclick="showPage('quizzes')">
+        <div class="stat-num" style="color:#4fd1c5">4</div>
+        <div class="stat-lbl">Quizzes</div>
       </div>
-      <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Recent Activity</div>
-      <div class="activity-item"><div class="act-dot" style="background:#4fd1c5"></div><div class="act-text">New quiz available: <strong>Algebraic Expressions</strong></div><div class="act-time">Today</div></div>
-      <div class="activity-item"><div class="act-dot" style="background:#a78bfa"></div><div class="act-text">Assignment submitted: <strong>Algebra Review Worksheet</strong></div><div class="act-time">Yesterday</div></div>
-      <div class="activity-item"><div class="act-dot" style="background:#f59e0b"></div><div class="act-text">New announcement: <strong>Term 2 Test Schedule Released</strong></div><div class="act-time">2 May</div></div>
-      <div class="activity-item"><div class="act-dot" style="background:#22c55e"></div><div class="act-text">Marks published for <strong>Number Systems</strong> quiz — 69%</div><div class="act-time">6 Mar</div></div>
-      <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:24px 0 12px;">Quick Access</div>
-      <div class="section-card" onclick="showPage('quizzes')">
-        <div class="sc-head"><div class="sc-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="sc-title">Take a Quiz</span></div>
-        <div class="sc-body">Find and complete quizzes assigned by your teacher.</div>
+      <div class="stat-card" onclick="showPage('assignments')">
+        <div class="stat-num" style="color:#a78bfa">3</div>
+        <div class="stat-lbl">Assignments</div>
       </div>
-      <div class="section-card" onclick="showPage('grades')">
-        <div class="sc-head"><div class="sc-icon" style="background:rgba(34,197,94,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#22c55e" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="sc-title">View Results</span></div>
-        <div class="sc-body">Check your quiz scores and progress reports once marks are published.</div>
-      </div>
-      <div class="section-card" onclick="showPage('resources')">
-        <div class="sc-head"><div class="sc-icon" style="background:rgba(245,158,11,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span class="sc-title">Study Resources</span></div>
-        <div class="sc-body">Access study guides, notes and past papers uploaded by your teacher.</div>
-      </div>
-      <div class="section-card" onclick="showPage('announcements')">
-        <div class="sc-head"><div class="sc-icon" style="background:rgba(167,139,250,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div><span class="sc-title">Announcements</span></div>
-        <div class="sc-body">Stay updated with teacher posts and class notices.</div>
-      </div>
-      <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:var(--muted);line-height:1.6;">
-        <strong style="color:var(--accent)">Need help?</strong> Contact your school admin or email <strong style="color:#c9d1d9">support@iskool.online</strong>
+      <div class="stat-card" onclick="showPage('grades')">
+        <div class="stat-num" style="color:#22c55e">69%</div>
+        <div class="stat-lbl">Latest Score</div>
       </div>
     </div>
-  `;
+    <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Quick Access</div>
+    <div class="section-card" onclick="showPage('quizzes')">
+      <div class="sc-head">
+        <div class="sc-icon" style="background:rgba(79,209,197,0.1)">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <span class="sc-title">Take a Quiz</span>
+      </div>
+      <div class="sc-body">Find and complete quizzes assigned by your teacher.</div>
+    </div>
+    <div class="section-card" onclick="showPage('grades')">
+      <div class="sc-head">
+        <div class="sc-icon" style="background:rgba(34,197,94,0.1)">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#22c55e" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <span class="sc-title">View Results</span>
+      </div>
+      <div class="sc-body">Check your quiz scores and progress reports once marks are published.</div>
+    </div>
+    <div class="section-card" onclick="showPage('resources')">
+      <div class="sc-head">
+        <div class="sc-icon" style="background:rgba(245,158,11,0.1)">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <span class="sc-title">Study Resources</span>
+      </div>
+      <div class="sc-body">Access study guides, notes and past papers uploaded by your teacher.</div>
+    </div>
+    <div class="section-card" onclick="showPage('announcements')">
+      <div class="sc-head">
+        <div class="sc-icon" style="background:rgba(167,139,250,0.1)">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        </div>
+        <span class="sc-title">Announcements</span>
+      </div>
+      <div class="sc-body">Stay updated with teacher posts and class notices.</div>
+    </div>
+    <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:var(--muted);line-height:1.6;">
+      <strong style="color:var(--accent)">Need help?</strong> Contact your school admin or email <strong style="color:#c9d1d9">support@iskool.online</strong>
+    </div>`;
+ 
+  // ── LEFT COLUMN HTML ──
+  const leftCol = `
+    <div class="learner-home-left">
+ 
+      <div class="learner-home-panel">
+        <div class="learner-home-panel-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
+            <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Recent Activity
+        </div>
+        ${activityHtml}
+      </div>
+ 
+      <div class="learner-home-panel">
+        <div class="learner-home-panel-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          To-Do
+        </div>
+        ${todoHtml}
+      </div>
+ 
+      <div class="learner-home-panel learner-cal-mini">
+        <div class="learner-home-panel-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          My Calendar
+        </div>
+        ${calHtml}
+      </div>
+ 
+    </div>`;
+ 
+  // ── ASSEMBLE ──
+  if (isMobile) {
+    // Mobile: just show the manual column (matches real app mobile behaviour)
+    document.getElementById('content').innerHTML = `
+      <div class="manual-container">
+        ${manualHtml}
+      </div>`;
+  } else {
+    document.getElementById('content').innerHTML = `
+      <div class="learner-home-wrapper">
+        ${leftCol}
+        <div class="learner-home-right manual-container">
+          ${manualHtml}
+        </div>
+      </div>`;
+  }
+}
+ 
+// ── MINI CALENDAR BUILDER (static May 2025 for demo) ──────────
+function buildDemoMiniCal() {
+  const month = 5, year = 2025;
+  const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month, 0).getDate();
+ 
+  // Demo events
+  const events = {
+    14: [{ type:'quiz',       dot:'dot-quiz' }],
+    18: [{ type:'assignment', dot:'dot-assignment' }],
+    20: [{ type:'quiz',       dot:'dot-quiz' }, { type:'assignment', dot:'dot-assignment' }],
+    22: [{ type:'assignment', dot:'dot-assignment' }],
+    28: [{ type:'quiz',       dot:'dot-quiz' }]
+  };
+ 
+  let html = `
+    <div class="cal-header">
+      <button class="cal-btn">&#8249;</button>
+      <span class="cal-title" style="font-size:12px;font-weight:800;">May 2025</span>
+      <button class="cal-btn">&#8250;</button>
+    </div>
+    <div class="cal-grid">
+      ${days.map(d => `<div class="cal-lbl">${d}</div>`).join('')}`;
+ 
+  for (let i = 0; i < offset; i++) {
+    html += `<div class="cal-cell"></div>`;
+  }
+ 
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ev = events[d] || [];
+    const isToday = d === 14; // "today" in demo
+    html += `
+      <div class="cal-cell${isToday ? ' today' : ''}">
+        <span class="day-num">${d}</span>
+        ${ev.length ? `<div class="cal-dot-row">${ev.map(e => `<span class="dot ${e.dot}"></span>`).join('')}</div>` : ''}
+      </div>`;
+  }
+ 
+  html += `</div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);">
+        <span class="dot dot-q" style="width:6px;height:6px;border-radius:50%;background:#4fd1c5;display:inline-block;"></span> Quiz
+      </span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);">
+        <span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;display:inline-block;"></span> Assignment
+      </span>
+    </div>`;
+ 
+  return html;
 }
 
 // ── QUIZZES ──
