@@ -756,7 +756,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             </button>
 
             <button class="top-nav-tab" id="tab-calendar"
-                    onclick="FetchTeacherCalendar(); setTopNavTab('tab-calendar')">
+                    onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
                      stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2"/>
