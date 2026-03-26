@@ -1504,6 +1504,8 @@ document.addEventListener("DOMContentLoaded", function () {
             window.fetchSyllabus();
         } else if (savedPage.includes("evaluation_list.php")) {
             window.fetchEvaluaions();
+        } else if (savedPage === 'learner_calendar') {
+            window.fetchLearnerCalendar();
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
@@ -1527,6 +1529,7 @@ document.addEventListener("DOMContentLoaded", function () {
     savedPage !== "evaluation_list.php" &&
     savedPage !== "syllabus" &&
     savedPage !== "grades" &&
+    savedPage !== "learner_calendar" &&
     savedPage !== "announcement_list.php"
 ) {
     iframe.style.display = 'block';   // ← ADD THIS
@@ -2166,6 +2169,13 @@ if (currentTitle === 'Discussion') {
     }
 }
 
+if (currentTitle === 'Calendar') {
+    if (typeof loadManual === 'function') {
+        window.loadManual();
+        return;
+    }
+}
+
 if (currentTitle === 'Review') {
     if (typeof fetchGrades === 'function') {
         window.fetchGrades();
@@ -2388,6 +2398,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/evaluations.js?v=1.1"></script>
 <script src="assets/js/learner/discussions.js?v=2.2"></script>
 <script src="assets/js/learner/syllabus.js?v=1.0"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
