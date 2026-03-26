@@ -64,12 +64,7 @@ body {
 .sidebar::-webkit-scrollbar { display: none; }
 .sidebar.open { left: 0; visibility: visible; opacity: 1; }
 
-.sb-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
-}
+.sb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
 .avatar-wrap {
   width: 44px; height: 44px; border-radius: 50%;
   background: #121212; border: 2px solid #8b8989;
@@ -77,7 +72,6 @@ body {
   font-size: 16px; font-weight: 800; color: #8b8989;
   text-transform: uppercase; cursor: pointer; overflow: hidden; flex-shrink: 0;
 }
-.avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
 .sb-close {
   width: 38px; height: 38px; border-radius: 50%;
   background: #000; border: 2px solid #333; color: var(--text);
@@ -100,26 +94,14 @@ body {
 .sb-link:hover { background: var(--accent-dim); color: #fff; transform: translateX(2px); }
 .sb-link.active { background: rgba(79,209,197,0.15); box-shadow: inset 4px 0 0 0 #8b949e; }
 .sb-link svg { flex-shrink: 0; }
-.sb-footer {
-  margin-top: auto; padding-top: 20px;
-  border-top: 1px solid var(--border);
-  font-size: 13px; color: #555; text-align: center; letter-spacing: 1px;
-}
+.sb-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); font-size: 13px; color: #555; text-align: center; letter-spacing: 1px; }
 
 /* ─── OVERLAY ─── */
-#overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 4999; opacity: 0; pointer-events: none;
-  transition: opacity var(--t);
-}
+#overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4999; opacity: 0; pointer-events: none; transition: opacity var(--t); }
 #overlay.show { opacity: 1; pointer-events: all; }
 
 /* ─── MAIN ─── */
-.main {
-  flex: 1; display: flex; flex-direction: column; overflow: hidden;
-  width: 100%;
-}
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
 /* ─── HEADER ─── */
 .main-header {
@@ -134,9 +116,7 @@ body {
   position: sticky; top: 0; z-index: 1000;
 }
 .header-left { flex: 1; display: flex; align-items: center; gap: 10px; }
-.header-brand {
-  flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;
-}
+.header-brand { flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px; }
 .brand-logo {
   width: 38px; height: 38px; border-radius: 8px;
   border: 2px solid #757272;
@@ -145,15 +125,21 @@ body {
   font-size: 16px; font-weight: 900; color: var(--accent);
 }
 .brand-school { font-size: 16px; font-weight: 700; color: var(--text); }
-.header-right { flex: 1; display: flex; justify-content: flex-end; }
+.header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
 
 .hdr-btn {
   background: none; border: none; color: var(--text);
-  cursor: pointer; padding: 8px; font-size: 20px;
+  cursor: pointer; padding: 8px;
   display: flex; align-items: center; justify-content: center;
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s;
+  border-radius: 8px;
 }
-.hdr-btn:hover { color: var(--secondary); }
+.hdr-btn:hover { color: var(--accent); background: var(--accent-dim); }
+
+/* Calendar icon — desktop only, hidden by default */
+#demoCalIconBtn {
+  display: none; /* shown via JS only on home + desktop */
+}
 
 .menu-btn {
   background: #000; border: 2px solid #333; color: var(--text);
@@ -164,10 +150,7 @@ body {
 .menu-btn:hover { background: #111; }
 
 /* ─── CONTENT ─── */
-#content {
-  flex: 1; overflow-y: auto; padding: 20px;
-  padding-bottom: 90px;
-}
+#content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
 #content::-webkit-scrollbar { width: 6px; }
 #content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 #content::-webkit-scrollbar-thumb:hover { background: rgba(79,209,197,0.5); }
@@ -200,57 +183,117 @@ body {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 20px; font-size: 13px; color: var(--muted);
 }
-.demo-tag {
-  background: var(--accent); color: #0d1117;
-  padding: 2px 8px; border-radius: 6px;
-  font-size: 11px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0;
-}
+.demo-tag { background: var(--accent); color: #0d1117; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; letter-spacing: 1px; flex-shrink: 0; }
 
-/* ─── HOME / MANUAL ─── */
+/* ─── HOME ─── */
 .manual-container { max-width: 800px; margin: 0 auto; }
 .manual-greeting { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
 .manual-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
 .quick-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
-.stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;
-  transition: all 0.2s;
-}
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
 .stat-card:hover { border-color: rgba(79,209,197,0.3); transform: translateY(-2px); }
 .stat-num { font-size: 28px; font-weight: 900; }
 .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.activity-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; margin-bottom: 8px;
-}
-.act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.act-text { flex: 1; font-size: 13px; color: #c9d1d9; }
-.act-time { font-size: 12px; color: var(--muted); }
-
-.section-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 18px; margin-bottom: 12px;
-  cursor: pointer; transition: all 0.2s;
-}
+.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
 .section-card:hover { border-color: rgba(79,209,197,0.3); transform: translateX(4px); }
 .sc-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.sc-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
+.sc-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .sc-title { font-size: 15px; font-weight: 800; color: var(--text); }
 .sc-body { font-size: 13px; color: var(--muted); line-height: 1.5; padding-left: 50px; }
 
-/* ─── QUIZ CARDS ─── */
-.quiz-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px; transition: border-color 0.2s;
+/* ─── HOME LAYOUT ─── */
+.learner-home-wrapper { display: flex; gap: 20px; align-items: flex-start; }
+.learner-home-left { width: 30%; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+.learner-home-right { flex: 1; min-width: 0; }
+.learner-home-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+.learner-home-panel-title { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.learner-home-activity-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); transition: opacity 0.2s; }
+.learner-home-activity-item:last-child { border-bottom: none; }
+.learner-home-activity-item:hover { opacity: 0.8; }
+.learner-home-activity-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.learner-home-activity-title { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.learner-home-activity-meta { font-size: 11px; color: var(--muted); }
+.learner-home-todo-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); transition: opacity 0.2s; }
+.learner-home-todo-item:last-child { border-bottom: none; }
+.learner-home-todo-item:hover { opacity: 0.8; }
+.learner-home-todo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.learner-home-todo-title { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.learner-home-todo-meta { font-size: 11px; color: var(--muted); }
+.learner-home-todo-info { flex: 1; min-width: 0; }
+.learner-home-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 16px 0; font-style: italic; }
+
+/* ─── MINI CALENDAR ─── */
+.demo-mini-cal { width: 100%; }
+.demo-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.demo-cal-month { font-size: 13px; font-weight: 800; color: #e2e8f0; }
+.demo-cal-nav { background: none; border: none; color: #8b949e; font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px; transition: color 0.2s; }
+.demo-cal-nav:hover { color: #4fd1c5; }
+.demo-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.demo-cal-day-label { text-align: center; font-size: 9px; font-weight: 800; color: #555e6a; padding: 4px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+.demo-cal-cell { display: flex; flex-direction: column; align-items: center; min-height: 34px; padding: 3px 1px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+.demo-cal-cell:hover { background: rgba(255,255,255,0.05); }
+.demo-cal-cell.empty { cursor: default; pointer-events: none; }
+.demo-cal-num { font-size: 11px; font-weight: 600; color: #8b949e; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.demo-cal-cell.is-today .demo-cal-num { background: #4fd1c5; color: #0d1117; font-weight: 900; }
+.demo-cal-cell.has-events .demo-cal-num { color: #e2e8f0; }
+.demo-cal-dots { display: flex; gap: 2px; margin-top: 2px; }
+.demo-dot { width: 5px; height: 5px; border-radius: 50%; display: block; flex-shrink: 0; }
+.demo-dot-quiz       { background: #4fd1c5; }
+.demo-dot-assignment { background: #a78bfa; }
+.demo-dot-academic   { background: #f472b6; }
+.demo-cal-legend { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.demo-cal-legend span { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: #8b949e; }
+
+/* ─── FULL CALENDAR PAGE ─── */
+.lcal-topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.lcal-header-left { display: flex; flex-direction: column; gap: 8px; }
+.lcal-page-title { font-size: 22px; font-weight: 900; color: #4fd1c5; margin: 0; }
+.lcal-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.lcal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #8b949e; }
+.lcal-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.lcal-back-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: #e2e8f0; padding: 9px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Nunito', sans-serif; transition: background 0.2s;
 }
+.lcal-back-btn:hover { background: rgba(255,255,255,0.09); }
+.lcal-body { display: flex; gap: 20px; align-items: flex-start; }
+.lcal-main { flex: 1; min-width: 0; background: #1a1919; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
+.lcal-nav-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.lcal-nav-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #8b949e; width: 34px; height: 34px; border-radius: 8px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: all 0.2s; font-family: 'Nunito', sans-serif; }
+.lcal-nav-btn:hover { background: rgba(79,209,197,0.1); border-color: rgba(79,209,197,0.3); color: #4fd1c5; }
+.lcal-month-label { font-size: 17px; font-weight: 900; color: #e2e8f0; }
+.lcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.lcal-day-header { text-align: center; font-size: 11px; font-weight: 800; color: #555e6a; padding: 10px 4px; text-transform: uppercase; letter-spacing: 0.8px; border-right: 1px solid rgba(255,255,255,0.03); }
+.lcal-day-header:last-child { border-right: none; }
+.lcal-cells { display: grid; grid-template-columns: repeat(7, 1fr); }
+.lcal-cell { min-height: 90px; padding: 8px; border-right: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; }
+.lcal-cell:nth-child(7n) { border-right: none; }
+.lcal-cell-empty { background: rgba(0,0,0,0.1); pointer-events: none; }
+.lcal-cell-today { background: rgba(79,209,197,0.05); }
+.lcal-cell-top { display: flex; align-items: center; justify-content: space-between; }
+.lcal-day-num { font-size: 13px; font-weight: 700; color: #8b949e; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+.lcal-cell-today .lcal-day-num { background: #4fd1c5; color: #0d1117; font-weight: 900; }
+.lcal-cell-has-events .lcal-day-num { color: #e2e8f0; }
+.lcal-dots { display: flex; gap: 3px; align-items: center; }
+.lcal-dot { width: 5px; height: 5px; border-radius: 50%; display: block; flex-shrink: 0; }
+.lcal-pills { display: flex; flex-direction: column; gap: 3px; }
+.lcal-pill { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+.lcal-pill-more { background: rgba(255,255,255,0.05) !important; color: #8b949e !important; font-size: 10px; }
+.lcal-upcoming { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+.lcal-upcoming-label { font-size: 11px; font-weight: 800; color: #8b949e; text-transform: uppercase; letter-spacing: 1.5px; }
+.lcal-upcoming-card { background: #1a1919; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px 14px; transition: border-color 0.2s, transform 0.2s; }
+.lcal-upcoming-card:hover { border-color: rgba(79,209,197,0.2); transform: translateY(-2px); }
+.lcal-upcoming-type { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.lcal-upcoming-title { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; line-height: 1.3; }
+.lcal-upcoming-meta { font-size: 11px; color: #555e6a; }
+.lcal-upcoming-date { font-size: 12px; font-weight: 800; margin-top: 6px; }
+.lcal-upcoming-empty { background: #1a1919; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; text-align: center; font-size: 13px; color: #555e6a; }
+
+/* ─── OTHER PAGES ─── */
+.quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; transition: border-color 0.2s; }
 .quiz-card:hover { border-color: rgba(79,209,197,0.25); }
 .quiz-card h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .quiz-info-text { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -259,134 +302,55 @@ body {
 .q-action-done { color: var(--green); font-weight: 700; font-size: 13px; }
 .q-action-closed { color: var(--muted); font-weight: 700; font-size: 13px; }
 .q-action-progress { color: var(--orange); font-weight: 700; font-size: 13px; cursor: pointer; }
-
-/* ─── INSTRUCTIONS ─── */
-.inst-container {
-  max-width: 700px; margin: auto;
-  background: #1b1b1b; padding: 30px;
-  border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
-}
-.quiz-info-box {
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-  padding: 18px; border-radius: 10px; margin-bottom: 25px; color: var(--muted);
-}
+.inst-container { max-width: 700px; margin: auto; background: #1b1b1b; padding: 30px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+.quiz-info-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 18px; border-radius: 10px; margin-bottom: 25px; color: var(--muted); }
 .quiz-info-box p { margin: 6px 0; font-size: 14px; }
 .quiz-info-box strong { color: var(--text); }
 .inst-list { list-style: none; padding: 0; }
 .inst-list li { margin-bottom: 12px; color: var(--muted); position: relative; padding-left: 24px; font-size: 14px; }
 .inst-list li::before { content: "•"; color: var(--accent); position: absolute; left: 0; font-weight: bold; }
 .ai-box { background: rgba(79,209,197,0.05); border: 1px solid rgba(79,209,197,0.3); border-radius: 10px; padding: 15px; margin-top: 25px; }
-.start-btn {
-  background: rgba(79,209,197,0.1); color: var(--text);
-  padding: 14px 30px; border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 10px; font-weight: 700; cursor: pointer;
-  width: 100%; max-width: 320px; display: block; margin: 35px auto 0;
-  transition: 0.3s; font-family: 'Nunito', sans-serif; font-size: 15px;
-}
+.start-btn { background: rgba(79,209,197,0.1); color: var(--text); padding: 14px 30px; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; max-width: 320px; display: block; margin: 35px auto 0; transition: 0.3s; font-family: 'Nunito', sans-serif; font-size: 15px; }
 .start-btn:hover { border-color: var(--accent); background: rgba(79,209,197,0.2); }
-
-/* ─── ASSIGNMENTS ─── */
-.assign-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 16px; margin-bottom: 12px;
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
-  transition: border-color 0.2s;
-}
+.assign-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; transition: border-color 0.2s; }
 .assign-card:hover { border-color: rgba(79,209,197,0.25); }
 .assign-info { flex: 1; }
 .assign-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .assign-meta { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .assign-desc { font-size: 13px; color: #bbb; line-height: 1.5; margin-bottom: 10px; }
 .assign-links { display: flex; gap: 12px; flex-wrap: wrap; }
-.assign-link {
-  color: var(--accent); font-size: 12px; font-weight: 700;
-  display: flex; align-items: center; gap: 4px; cursor: pointer;
-}
+.assign-link { color: var(--accent); font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .assign-action { white-space: nowrap; font-weight: 700; font-size: 13px; padding-top: 4px; }
-
-/* ─── GRADES ─── */
 .grades-wrap { max-width: 780px; margin: 0 auto; }
 .grades-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
 .grades-title { font-size: 20px; font-weight: 800; color: var(--text); }
-.grades-report-btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px; background: var(--accent-dim);
-  color: var(--accent); border: 1px solid rgba(79,209,197,0.3);
-  border-radius: 10px; font-size: 13px; font-weight: 700;
-  cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s;
-}
+.grades-report-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.3); border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s; }
 .grades-report-btn:hover { background: rgba(79,209,197,0.2); }
-.subject-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 14px; margin-bottom: 14px; overflow: hidden; transition: border-color 0.2s;
-}
-.subject-card:hover { border-color: rgba(255,255,255,0.1); }
-.subject-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 18px 20px; cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  transition: background 0.2s;
-}
+.subject-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+.subject-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
 .subject-header:hover { background: rgba(255,255,255,0.02); }
 .subject-name { flex: 1; font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.subject-count {
-  font-size: 12px; color: var(--muted); font-weight: 600;
-  background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px;
-}
+.subject-count { font-size: 12px; color: var(--muted); font-weight: 600; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px; }
 .subject-chev { transition: transform 0.3s; color: #4a5568; }
 .subject-chev.open { transform: rotate(90deg); }
-.view-toggle-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.vt-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: none; border: none; color: var(--muted);
-  font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif;
-  text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer;
-  padding: 6px 10px; border-radius: 8px; transition: all 0.2s;
-}
+.view-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.vt-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.2s; }
 .vt-btn:hover { background: var(--accent-dim); color: var(--accent); }
 .vt-btn.active-view { color: var(--accent); background: var(--accent-dim); }
 .quiz-list { padding: 8px 16px 16px; }
-.quiz-row {
-  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 10px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s;
-}
+.quiz-row { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
 .quiz-row:hover { border-color: rgba(79,209,197,0.2); transform: translateX(3px); }
-.quiz-row-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 13px 16px; cursor: pointer;
-}
-.quiz-row-title {
-  flex: 1; font-size: 14px; font-weight: 700; color: var(--accent);
-  display: flex; align-items: center; gap: 6px;
-}
-.score-pill {
-  font-size: 12px; font-weight: 800;
-  padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
-}
+.quiz-row-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; cursor: pointer; }
+.quiz-row-title { flex: 1; font-size: 14px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+.score-pill { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
 .score-high { background: rgba(34,197,94,0.15); color: var(--green); }
 .score-mid { background: rgba(79,209,197,0.15); color: var(--accent); }
 .score-low { background: rgba(248,81,73,0.15); color: var(--danger); }
 .score-pending { background: rgba(255,255,255,0.05); color: #4a5568; }
-.quiz-row-details {
-  display: none; padding: 12px 16px 14px;
-  border-top: 1px solid rgba(255,255,255,0.04);
-  background: rgba(0,0,0,0.2); font-size: 13px; color: var(--muted); line-height: 1.7;
-}
+.quiz-row-details { display: none; padding: 12px 16px 14px; border-top: 1px solid rgba(255,255,255,0.04); background: rgba(0,0,0,0.2); font-size: 13px; color: var(--muted); line-height: 1.7; }
 .quiz-row-details p { margin: 2px 0; }
 .quiz-row-details strong { color: #c9d1d9; }
-.view-details-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--accent-dim); color: var(--accent);
-  border: 1px solid rgba(79,209,197,0.2); padding: 5px 12px;
-  border-radius: 8px; font-size: 12px; font-weight: 700;
-  font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 6px; transition: background 0.2s;
-}
-.view-details-btn:hover { background: rgba(79,209,197,0.15); }
-
-/* Term table */
+.view-details-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 6px; }
 .term-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
 .term-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .term-table th { padding: 10px 14px; text-align: left; color: var(--accent); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); }
@@ -395,432 +359,81 @@ body {
 .term-table td:not(:first-child) { text-align: center; }
 .term-table tr:last-child td { border-bottom: none; }
 .term-total td { font-weight: 800; color: var(--accent); border-top: 2px solid rgba(79,209,197,0.3) !important; }
-
-/* ─── RESOURCES ─── */
-.resource-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 14px; cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
-}
+.resource-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
 .resource-card:hover { border-color: rgba(79,209,197,0.3); transform: translateY(-2px); }
-.res-icon { flex-shrink: 0; }
 .res-info { flex: 1; }
 .res-name { font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 4px; }
 .res-meta { font-size: 12px; color: var(--muted); }
-
-/* ─── ANNOUNCEMENTS ─── */
-.ann-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--yellow);
-  border-radius: 12px; padding: 16px; margin-bottom: 12px;
-  transition: border-color 0.2s, transform 0.2s;
-}
+.ann-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: border-color 0.2s, transform 0.2s; }
 .ann-card:hover { border-color: rgba(245,158,11,0.4); transform: translateX(4px); }
 .ann-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .ann-preview { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
 .ann-date { font-size: 12px; color: #555e6a; }
-
-/* ─── DISCUSSIONS ─── */
-.disc-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 12px; padding: 16px 18px; margin-bottom: 12px;
-  cursor: pointer; transition: border-color 0.2s, transform 0.2s;
-}
+.disc-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
 .disc-card:hover { border-color: rgba(79,209,197,0.4); transform: translateX(4px); }
 .disc-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .disc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
-.disc-replies {
-  background: var(--accent-dim); color: var(--accent);
-  border: 1px solid rgba(79,209,197,0.2);
-  padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 12px;
-}
-
-/* ─── EVALUATIONS ─── */
-.eval-form {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px; margin-bottom: 16px;
-}
+.disc-replies { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; }
+.eval-form { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
 .eval-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
 .eval-options { display: flex; flex-direction: column; gap: 8px; }
-.eval-option {
-  padding: 10px 14px; border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.07);
-  font-size: 14px; color: #c9d1d9; cursor: pointer;
-  transition: all 0.2s; display: flex; align-items: center; gap: 10px;
-}
+.eval-option { padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
 .eval-option:hover { border-color: rgba(79,209,197,0.3); background: var(--accent-dim); }
 .eval-option.selected { border-color: var(--accent); background: rgba(79,209,197,0.12); color: var(--text); }
-.eval-option-dot {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0;
-  transition: all 0.2s;
-}
+.eval-option-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0; }
 .eval-option.selected .eval-option-dot { background: var(--accent); border-color: var(--accent); }
-.eval-submit {
-  background: var(--accent); color: #0d1117;
-  border: none; padding: 12px 24px; border-radius: 10px;
-  font-size: 14px; font-weight: 800; cursor: pointer;
-  font-family: 'Nunito', sans-serif; margin-top: 20px;
-  display: block; width: 100%; transition: background 0.2s;
-}
+.eval-submit { background: var(--accent); color: #0d1117; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; margin-top: 20px; display: block; width: 100%; }
 .eval-submit:hover { background: #3ab8ae; }
-
-/* ─── SYLLABUS ─── */
-.syl-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; margin-bottom: 14px; overflow: hidden;
-}
-.syl-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 18px; cursor: pointer; border-bottom: 1px solid var(--border);
-  transition: background 0.2s;
-}
+.syl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+.syl-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s; }
 .syl-head:hover { background: rgba(255,255,255,0.02); }
 .syl-class-name { font-size: 15px; font-weight: 700; color: var(--accent); }
 .syl-body { padding: 16px 18px; }
 .syl-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.syl-check {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid #30363d;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
+.syl-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #30363d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .syl-check.done { background: var(--accent); border-color: var(--accent); color: #0d1117; }
 .syl-topic { font-size: 14px; color: #c9d1d9; }
 .syl-topic.done { text-decoration: line-through; opacity: 0.5; }
-.syl-prog-bar { flex: 1; height: 5px; background: #21262d; border-radius: 3px; overflow: hidden; }
-.syl-prog-fill { height: 100%; background: var(--accent); border-radius: 3px; }
-
-/* ─── SETTINGS ─── */
 .settings-wrap { max-width: 460px; margin: 0 auto; }
 .settings-avatar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
-.settings-avatar {
-  width: 96px; height: 96px; border-radius: 50%;
-  background: #1b1b1b; border: 3px solid #30363d;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 32px; font-weight: 900; color: var(--muted);
-  cursor: pointer; transition: border-color 0.2s;
-}
-.settings-avatar:hover { border-color: var(--accent); }
+.settings-avatar { width: 96px; height: 96px; border-radius: 50%; background: #1b1b1b; border: 3px solid #30363d; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: var(--muted); cursor: pointer; }
 .settings-hint { margin-top: 10px; font-size: 13px; color: var(--muted); }
-.settings-card {
-  background: #1b1b1b; border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px; padding: 16px; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 14px; cursor: pointer;
-  transition: background 0.2s;
-}
+.settings-card { background: #1b1b1b; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.2s; }
 .settings-card:hover { background: #21262d; }
-.settings-card-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
+.settings-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .settings-card-info { flex: 1; }
 .settings-card-name { font-size: 14px; font-weight: 700; color: var(--text); }
 .settings-card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-/* ─── TOAST ─── */
-.toast {
-  position: fixed; bottom: 80px; right: 20px;
-  background: var(--surface); border: 1px solid var(--accent);
-  border-radius: 10px; padding: 12px 18px;
-  font-size: 14px; font-weight: 700; color: var(--text);
-  z-index: 9999; display: none; animation: slideUp 0.3s ease;
-}
+/* ─── TOAST / MODAL ─── */
+.toast { position: fixed; bottom: 80px; right: 20px; background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; padding: 12px 18px; font-size: 14px; font-weight: 700; color: var(--text); z-index: 9999; display: none; animation: slideUp 0.3s ease; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* ─── MODAL ─── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-  z-index: 9000; display: none;
-  align-items: center; justify-content: center;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9000; display: none; align-items: center; justify-content: center; }
 .modal-overlay.open { display: flex; }
-.modal-box {
-  background: var(--surface); border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08); width: 90%; max-width: 420px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-.modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px; border-bottom: 1px solid var(--border);
-  font-size: 16px; font-weight: 700; color: var(--accent);
-}
+.modal-box { background: var(--surface); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 700; color: var(--accent); }
 .modal-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
 .modal-body { padding: 20px; font-size: 14px; color: #c9d1d9; line-height: 1.7; }
-.modal-foot {
-  display: flex; justify-content: flex-end; padding: 16px 20px;
-  border-top: 1px solid var(--border);
-}
-.modal-ok {
-  background: var(--accent); border: none; color: #0d1117;
-  padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800;
-  cursor: pointer; font-family: 'Nunito', sans-serif;
-}
+.modal-foot { display: flex; justify-content: flex-end; padding: 16px 20px; border-top: 1px solid var(--border); }
+.modal-ok { background: var(--accent); border: none; color: #0d1117; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
   .mob-nav { display: flex !important; }
   #content { padding-bottom: 88px; }
-  .quick-stats { grid-template-columns: repeat(3,1fr); }
   #desktopBtn { display: none !important; }
   #mobileBtn { display: flex !important; }
   .brand-school { display: none; }
+  .learner-home-wrapper { flex-direction: column; }
+  .learner-home-left { width: 100%; }
+  .lcal-body { flex-direction: column; }
+  .lcal-upcoming { width: 100%; }
+  #demoCalIconBtn { display: none !important; }
 }
 @media (min-width: 769px) {
   #mobileBtn { display: none !important; }
   #desktopBtn { display: flex !important; }
-}
-.learner-home-wrapper {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
- 
-.learner-home-left {
-  width: 30%;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
- 
-.learner-home-right {
-  flex: 1;
-  min-width: 0;
-}
- 
-.learner-home-panel {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-}
- 
-.learner-home-panel-title {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
- 
-.learner-home-activity-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: opacity 0.2s;
-}
-.learner-home-activity-item:last-child { border-bottom: none; }
-.learner-home-activity-item:hover { opacity: 0.8; }
- 
-.learner-home-activity-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
- 
-.learner-home-activity-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin-bottom: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
- 
-.learner-home-activity-meta {
-  font-size: 11px;
-  color: var(--muted);
-}
- 
-.learner-home-todo-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: opacity 0.2s;
-}
-.learner-home-todo-item:last-child { border-bottom: none; }
-.learner-home-todo-item:hover { opacity: 0.8; }
- 
-.learner-home-todo-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
- 
-.learner-home-todo-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #e2e8f0;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
- 
-.learner-home-todo-meta {
-  font-size: 11px;
-  color: var(--muted);
-}
- 
-.learner-home-todo-info { flex: 1; min-width: 0; }
- 
-.learner-home-empty {
-  font-size: 13px;
-  color: var(--muted);
-  text-align: center;
-  padding: 16px 0;
-  font-style: italic;
-}
- 
-.learner-cal-mini .cal-header {
-  margin-bottom: 8px;
-}
- 
-.learner-cal-mini .cal-month-title {
-  font-size: 12px;
-}
- 
-.dot-quiz-done { background: #22c55e; }
- 
-@media (max-width: 768px) {
-  .learner-home-wrapper {
-    flex-direction: column;
-  }
-  .learner-home-left {
-    width: 100%;
-  }
-}
-
-.demo-mini-cal { width: 100%; }
- 
-.demo-cal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
- 
-.demo-cal-month {
-  font-size: 13px;
-  font-weight: 800;
-  color: #e2e8f0;
-}
- 
-.demo-cal-nav {
-  background: none;
-  border: none;
-  color: #8b949e;
-  font-size: 18px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-  transition: color 0.2s;
-}
-.demo-cal-nav:hover { color: #4fd1c5; }
- 
-.demo-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
- 
-.demo-cal-day-label {
-  text-align: center;
-  font-size: 9px;
-  font-weight: 800;
-  color: #555e6a;
-  padding: 4px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
- 
-.demo-cal-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 34px;
-  padding: 3px 1px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-  position: relative;
-}
-.demo-cal-cell:hover { background: rgba(255,255,255,0.05); }
-.demo-cal-cell.empty { cursor: default; pointer-events: none; }
- 
-.demo-cal-num {
-  font-size: 11px;
-  font-weight: 600;
-  color: #8b949e;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
- 
-.demo-cal-cell.is-today .demo-cal-num {
-  background: #4fd1c5;
-  color: #0d1117;
-  font-weight: 900;
-}
- 
-.demo-cal-cell.has-events .demo-cal-num {
-  color: #e2e8f0;
-}
- 
-.demo-cal-dots {
-  display: flex;
-  gap: 2px;
-  margin-top: 2px;
-}
- 
-.demo-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  display: block;
-  flex-shrink: 0;
-}
- 
-.demo-dot-quiz       { background: #4fd1c5; }
-.demo-dot-assignment { background: #a78bfa; }
-.demo-dot-academic   { background: #f472b6; }
- 
-.demo-cal-legend {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
- 
-.demo-cal-legend span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #8b949e;
+  .lcal-cell { min-height: 90px; }
 }
 </style>
 </head>
@@ -831,55 +444,42 @@ body {
   <div class="sb-header">
     <div class="avatar-wrap">TM</div>
     <button class="sb-close" onclick="closeSidebar()">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-        <line x1="7" y1="3" x2="7" y2="21"></line>
-      </svg>
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="7" y1="3" x2="7" y2="21"></line></svg>
     </button>
   </div>
   <div class="learner-name">Thabo Mahlangu</div>
   <div class="learner-email">t.mahlangu@iSkool.demo</div>
-
   <div class="sb-links">
     <button class="sb-link active" onclick="showPage('home');setActive(this)">
       <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       Home
     </button>
     <button class="sb-link desktop-only" onclick="showPage('quizzes');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Quiz
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
     </button>
     <button class="sb-link desktop-only" onclick="showPage('assignments');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      Assignments
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
     </button>
     <button class="sb-link desktop-only" onclick="showPage('resources');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Resources
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
     </button>
     <button class="sb-link" onclick="showPage('grades');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Grades
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Grades
     </button>
     <button class="sb-link" onclick="showPage('announcements');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Announcements
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Announcements
     </button>
     <button class="sb-link" onclick="showPage('evaluations');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg>
-      Teacher Evaluations
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg>Teacher Evaluations
     </button>
     <button class="sb-link" onclick="showPage('syllabus');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>
-      Syllabus
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/></svg>Syllabus
     </button>
     <button class="sb-link" onclick="showPage('discussions');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Discussions
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Discussions
     </button>
     <button class="sb-link" onclick="showPage('settings');setActive(this)">
-      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings
     </button>
     <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:var(--accent);">
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -895,7 +495,7 @@ body {
 <div class="main">
   <div class="main-header">
     <div class="header-left">
-      <button class="hdr-btn" id="mobileBtn" style="font-size:26px;" onclick="toggleSidebar()">
+      <button class="hdr-btn" id="mobileBtn" onclick="toggleSidebar()">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
       <button class="menu-btn" id="desktopBtn" onclick="toggleSidebar()">
@@ -907,56 +507,77 @@ body {
       <span class="brand-school">Demo School</span>
     </div>
     <div class="header-right">
+      <!-- Calendar icon — desktop only, shown only on home page -->
+      <button class="hdr-btn" id="demoCalIconBtn" title="My Calendar" onclick="showPage('calendar')">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </button>
+      <!-- Settings icon -->
       <button class="hdr-btn" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
   </div>
-
   <div id="content"></div>
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mob-nav">
   <button class="mob-tab active" onclick="showPage('home');setMobActive(this)">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-    Home
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Home
   </button>
   <button class="mob-tab" onclick="showPage('quizzes');setMobActive(this)">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-    Quiz
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Quiz
   </button>
   <button class="mob-tab" onclick="showPage('assignments');setMobActive(this)">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-    Assignments
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments
   </button>
   <button class="mob-tab" onclick="showPage('resources');setMobActive(this)">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-    Resources
+    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Resources
   </button>
 </nav>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
-    <div class="modal-head">
-      <span id="modalTitle"></span>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-    </div>
+    <div class="modal-head"><span id="modalTitle"></span><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="modal-body" id="modalBody"></div>
-    <div class="modal-foot">
-      <button class="modal-ok" onclick="closeModal()">Got it</button>
-    </div>
+    <div class="modal-foot"><button class="modal-ok" onclick="closeModal()">Got it</button></div>
   </div>
 </div>
 
 <script>
+// ── DEMO CALENDAR DATA ──
+// Keyed by YYYY-MM: array of { day, type, title, class_name }
+const DEMO_CAL_EVENTS = {
+  '2025-05': [
+    { day: 3,  type: 'academic',   title: 'Term 2 Open Day',            class_name: 'Grade 10A' },
+    { day: 10, type: 'academic',   title: 'Academic Review',             class_name: 'Grade 10A' },
+    { day: 14, type: 'quiz',       subtype: 'quiz_upcoming', title: 'Algebraic Expressions Quiz',   class_name: 'Grade 10A' },
+    { day: 15, type: 'assignment', title: 'Algebra Review Due',          class_name: 'Grade 10A' },
+    { day: 20, type: 'quiz',       subtype: 'quiz_upcoming', title: 'Equations & Inequalities Quiz', class_name: 'Grade 10A' },
+    { day: 22, type: 'assignment', title: 'Equations Practice Set Due',  class_name: 'Grade 10A' },
+    { day: 28, type: 'quiz',       subtype: 'quiz_upcoming', title: 'Geometry Basics Quiz',         class_name: 'Grade 10A' },
+  ],
+  '2025-04': [
+    { day: 5,  type: 'quiz',       subtype: 'quiz_done', title: 'Number Systems Quiz',  class_name: 'Grade 10A' },
+    { day: 18, type: 'assignment', title: 'Number Patterns Due',         class_name: 'Grade 10A' },
+  ],
+  '2025-06': [
+    { day: 3,  type: 'academic',   title: 'Mid-Year Exams Begin',        class_name: 'Grade 10A' },
+    { day: 10, type: 'academic',   title: 'Mid-Year Exams End',          class_name: 'Grade 10A' },
+  ]
+};
+
+// Current calendar state
+let calState = { month: 5, year: 2025 };
+
 // ── DATA ──
 const D = {
-  learner: { name: 'Thabo Mahlangu', initials: 'TM', email: 't.mahlangu@landulwazi.edu.za', class: 'Grade 10A – Mathematics' },
   quizzes: {
     'Mathematics': [
       { id:1, title:'Algebraic Expressions', duration:60, date:'14 May 2025 09:00', status:'Open', attempt:'not_started' },
@@ -966,8 +587,8 @@ const D = {
     ]
   },
   assignments: [
-    { id:1, title:'Algebra Review Worksheet', class:'Grade 10A – Mathematics', teacher:'Ms N. Sithole', due:'15 May 2025', desc:'Complete all problems in Chapter 3. Show all working. Marks will be given for method.', done:true, locked:false },
-    { id:2, title:'Equations Practice Set', class:'Grade 10A – Mathematics', teacher:'Ms N. Sithole', due:'22 May 2025', desc:'Solve the 20 equations on the worksheet. Use substitution where applicable.', done:false, locked:false },
+    { id:1, title:'Algebra Review Worksheet', class:'Grade 10A – Mathematics', teacher:'Ms N. Sithole', due:'15 May 2025', desc:'Complete all problems in Chapter 3. Show all working.', done:true, locked:false },
+    { id:2, title:'Equations Practice Set', class:'Grade 10A – Mathematics', teacher:'Ms N. Sithole', due:'22 May 2025', desc:'Solve the 20 equations on the worksheet.', done:false, locked:false },
     { id:3, title:'Number Patterns Assignment', class:'Grade 10A – Mathematics', teacher:'Ms N. Sithole', due:'1 Apr 2025', desc:'Past due assignment.', done:false, locked:true },
   ],
   resources: [
@@ -977,9 +598,9 @@ const D = {
     { name:'Number Systems – Notes', type:'DOCX', size:'1.1 MB', date:'15 Apr 2025' },
   ],
   announcements: [
-    { title:'Term 2 Test Schedule Released', preview:'Please note that the Term 2 tests start on 14 May 2025. Bring calculators and all necessary stationery. Topics covered: Algebraic expressions and equations.', date:'2 May 2025', teacher:'Ms N. Sithole' },
-    { title:'Extra Maths Class on Saturday', preview:'An extra support class will be held on Saturday 10 May at 09:00 in Room 12. Optional but strongly recommended for learners who struggled with the Chapter 3 test.', date:'6 May 2025', teacher:'Ms N. Sithole' },
-    { title:'Important: Homework Submission Reminder', preview:'All outstanding homework for Chapter 4 must be submitted by Friday, 9 May 2025. Late submissions will not be accepted.', date:'5 May 2025', teacher:'Ms N. Sithole' },
+    { title:'Term 2 Test Schedule Released', preview:'The Term 2 tests start on 14 May 2025. Bring calculators and all necessary stationery.', date:'2 May 2025', teacher:'Ms N. Sithole' },
+    { title:'Extra Maths Class on Saturday', preview:'An extra support class will be held on Saturday 10 May at 09:00 in Room 12.', date:'6 May 2025', teacher:'Ms N. Sithole' },
+    { title:'Homework Submission Reminder', preview:'All outstanding homework for Chapter 4 must be submitted by Friday, 9 May 2025.', date:'5 May 2025', teacher:'Ms N. Sithole' },
   ],
   discussions: [
     { id:1, title:'When is the next test?', replies:8, date:'3 May 2025' },
@@ -994,7 +615,7 @@ const D = {
     ]}
   ],
   syllabus: [
-    { class:'Grade 10A – Mathematics', progress:60, topics:[
+    { class:'Grade 10A – Mathematics', topics:[
       { name:'Number Systems', done:true },
       { name:'Algebraic Expressions', done:true },
       { name:'Equations & Inequalities', done:true },
@@ -1002,338 +623,308 @@ const D = {
       { name:'Data Handling', done:false },
     ]}
   ],
-  evalQuestions:[
-    'The teacher explains concepts clearly',
-    'The learning platform (iSkool) is easy to use',
-    'Assignments are fair and relevant',
-    'I feel supported in my learning',
-  ],
+  evalQuestions:['The teacher explains concepts clearly','The learning platform (iSkool) is easy to use','Assignments are fair and relevant','I feel supported in my learning'],
   evalOptions:['Strongly Agree','Agree','Neutral','Disagree','Strongly Disagree'],
 };
 
 let evalSelections = {};
 let charts = {};
 
-function destroyCharts() {
-  Object.values(charts).forEach(c => { try{ c.destroy(); }catch(e){} });
-  charts = {};
-}
+function destroyCharts() { Object.values(charts).forEach(c => { try{ c.destroy(); }catch(e){} }); charts = {}; }
 
 // ── NAV ──
 function showPage(page) {
   destroyCharts();
   closeSidebar();
+  // Show/hide calendar icon — only on home, desktop only
+  const calIcon = document.getElementById('demoCalIconBtn');
+  if (calIcon) {
+    calIcon.style.display = (page === 'home' && window.innerWidth > 768) ? 'flex' : 'none';
+  }
   switch(page) {
-    case 'home': renderHome(); break;
-    case 'quizzes': renderQuizzes(); break;
+    case 'home':        renderHome(); break;
+    case 'calendar':    renderCalendarPage(); break;
+    case 'quizzes':     renderQuizzes(); break;
     case 'assignments': renderAssignments(); break;
-    case 'resources': renderResources(); break;
-    case 'grades': renderGrades(); break;
+    case 'resources':   renderResources(); break;
+    case 'grades':      renderGrades(); break;
     case 'announcements': renderAnnouncements(); break;
     case 'evaluations': renderEvaluations(); break;
-    case 'syllabus': renderSyllabus(); break;
+    case 'syllabus':    renderSyllabus(); break;
     case 'discussions': renderDiscussions(); break;
-    case 'settings': renderSettings(); break;
+    case 'settings':    renderSettings(); break;
     default: renderHome();
   }
 }
 
-function setActive(el) {
-  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
-  el.classList.add('active');
-}
-function setMobActive(el) {
-  document.querySelectorAll('.mob-tab').forEach(l => l.classList.remove('active'));
-  el.classList.add('active');
-}
-function toggleSidebar() {
-  const s = document.getElementById('sidebar');
-  const o = document.getElementById('overlay');
-  s.classList.toggle('open');
-  o.classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2500);
-}
-function openModal(title, body) {
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalBody').innerHTML = body;
-  document.getElementById('modal').classList.add('open');
-}
+function setActive(el) { document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
+function setMobActive(el) { document.querySelectorAll('.mob-tab').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); }
+function openModal(title, body) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').innerHTML = body; document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function demoBanner() { return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS. All data shown is for demonstration purposes.</div>`; }
 
-function demoBanner() {
-  return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS. All data shown is for demonstration purposes.</div>`;
-}
-
+// ── HOME ──
 function renderHome() {
   const isMobile = window.innerWidth <= 768;
- 
-  // ── LEFT PANEL: Recent Activity ──
   const recentItems = [
-    {
-      type: 'quiz',
-      stroke: '#fdd663',
-      icon: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
-      title: 'New quiz available: Algebraic Expressions',
-      meta: 'Today',
-      action: "showPage('quizzes')"
-    },
-    {
-      type: 'assignment',
-      stroke: '#a78bfa',
-      icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
-      title: 'Assignment submitted: Algebra Review',
-      meta: 'Yesterday',
-      action: "showPage('assignments')"
-    },
-    {
-      type: 'announcement',
-      stroke: '#4fd1c5',
-      icon: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
-      title: 'Term 2 Test Schedule Released',
-      meta: '2 May',
-      action: "showPage('announcements')"
-    },
-    {
-      type: 'grades',
-      stroke: '#22c55e',
-      icon: `<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`,
-      title: 'Marks published: Number Systems — 69%',
-      meta: '6 Mar',
-      action: "showPage('grades')"
-    }
+    { stroke:'#fdd663', icon:`<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`, title:'New quiz available: Algebraic Expressions', meta:'Today', action:"showPage('quizzes')" },
+    { stroke:'#a78bfa', icon:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`, title:'Assignment submitted: Algebra Review', meta:'Yesterday', action:"showPage('assignments')" },
+    { stroke:'#4fd1c5', icon:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`, title:'Term 2 Test Schedule Released', meta:'2 May', action:"showPage('announcements')" },
+    { stroke:'#22c55e', icon:`<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>`, title:'Marks published: Number Systems — 69%', meta:'6 Mar', action:"showPage('grades')" },
   ];
- 
-  const activityHtml = recentItems.map(item => `
-    <div class="learner-home-activity-item" onclick="${item.action}" style="cursor:pointer;">
-      <div class="learner-home-activity-icon">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="${item.stroke}" stroke-width="2" fill="none">
-          ${item.icon}
-        </svg>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <div class="learner-home-activity-title">${item.title}</div>
-        <div class="learner-home-activity-meta">${item.meta}</div>
-      </div>
-    </div>`).join('');
- 
-  // ── LEFT PANEL: To-Do ──
   const todoItems = [
-    { color: '#fdd663', title: 'Algebraic Expressions Quiz', meta: 'Quiz · 14 May 2025', action: "showPage('quizzes')" },
-    { color: '#a78bfa', title: 'Equations Practice Set', meta: 'Assignment · Due 22 May', action: "showPage('assignments')" },
-    { color: '#4fd1c5', title: 'Teacher Evaluation pending', meta: 'Evaluation · Term 2', action: "showPage('evaluations')" }
+    { color:'#fdd663', title:'Algebraic Expressions Quiz', meta:'Quiz · 14 May 2025', action:"showPage('quizzes')" },
+    { color:'#a78bfa', title:'Equations Practice Set', meta:'Assignment · Due 22 May', action:"showPage('assignments')" },
+    { color:'#4fd1c5', title:'Teacher Evaluation pending', meta:'Evaluation · Term 2', action:"showPage('evaluations')" },
   ];
- 
-  const todoHtml = todoItems.map(item => `
-    <div class="learner-home-todo-item" onclick="${item.action}" style="cursor:pointer;">
-      <div class="learner-home-todo-dot" style="background:${item.color};"></div>
-      <div class="learner-home-todo-info">
-        <div class="learner-home-todo-title">${item.title}</div>
-        <div class="learner-home-todo-meta">${item.meta}</div>
-      </div>
-      <svg viewBox="0 0 24 24" width="13" height="13" stroke="${item.color}" stroke-width="2" fill="none">
-        <polyline points="9 18 15 12 9 6"></polyline>
-      </svg>
+
+  const activityHtml = recentItems.map(i => `
+    <div class="learner-home-activity-item" onclick="${i.action}" style="cursor:pointer;">
+      <div class="learner-home-activity-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="${i.stroke}" stroke-width="2" fill="none">${i.icon}</svg></div>
+      <div style="flex:1;min-width:0;"><div class="learner-home-activity-title">${i.title}</div><div class="learner-home-activity-meta">${i.meta}</div></div>
     </div>`).join('');
- 
-  // ── LEFT PANEL: Mini Calendar (May 2025) ──
-  const calHtml = buildDemoMiniCal();
- 
-  // ── RIGHT PANEL: Manual content ──
+
+  const todoHtml = todoItems.map(i => `
+    <div class="learner-home-todo-item" onclick="${i.action}" style="cursor:pointer;">
+      <div class="learner-home-todo-dot" style="background:${i.color}"></div>
+      <div class="learner-home-todo-info"><div class="learner-home-todo-title">${i.title}</div><div class="learner-home-todo-meta">${i.meta}</div></div>
+      <svg viewBox="0 0 24 24" width="13" height="13" stroke="${i.color}" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </div>`).join('');
+
   const manualHtml = `
     ${demoBanner()}
     <div class="manual-greeting">Welcome back, Thabo 👋</div>
     <div class="manual-sub">Grade 10A · Landulwazi Comprehensive School</div>
     <div class="quick-stats">
-      <div class="stat-card" onclick="showPage('quizzes')">
-        <div class="stat-num" style="color:#4fd1c5">4</div>
-        <div class="stat-lbl">Quizzes</div>
-      </div>
-      <div class="stat-card" onclick="showPage('assignments')">
-        <div class="stat-num" style="color:#a78bfa">3</div>
-        <div class="stat-lbl">Assignments</div>
-      </div>
-      <div class="stat-card" onclick="showPage('grades')">
-        <div class="stat-num" style="color:#22c55e">69%</div>
-        <div class="stat-lbl">Latest Score</div>
-      </div>
+      <div class="stat-card" onclick="showPage('quizzes')"><div class="stat-num" style="color:#4fd1c5">4</div><div class="stat-lbl">Quizzes</div></div>
+      <div class="stat-card" onclick="showPage('assignments')"><div class="stat-num" style="color:#a78bfa">3</div><div class="stat-lbl">Assignments</div></div>
+      <div class="stat-card" onclick="showPage('grades')"><div class="stat-num" style="color:#22c55e">69%</div><div class="stat-lbl">Latest Score</div></div>
     </div>
     <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Quick Access</div>
-    <div class="section-card" onclick="showPage('quizzes')">
-      <div class="sc-head">
-        <div class="sc-icon" style="background:rgba(79,209,197,0.1)">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <span class="sc-title">Take a Quiz</span>
-      </div>
-      <div class="sc-body">Find and complete quizzes assigned by your teacher.</div>
-    </div>
-    <div class="section-card" onclick="showPage('grades')">
-      <div class="sc-head">
-        <div class="sc-icon" style="background:rgba(34,197,94,0.1)">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#22c55e" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        </div>
-        <span class="sc-title">View Results</span>
-      </div>
-      <div class="sc-body">Check your quiz scores and progress reports once marks are published.</div>
-    </div>
-    <div class="section-card" onclick="showPage('resources')">
-      <div class="sc-head">
-        <div class="sc-icon" style="background:rgba(245,158,11,0.1)">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        </div>
-        <span class="sc-title">Study Resources</span>
-      </div>
-      <div class="sc-body">Access study guides, notes and past papers uploaded by your teacher.</div>
-    </div>
-    <div class="section-card" onclick="showPage('announcements')">
-      <div class="sc-head">
-        <div class="sc-icon" style="background:rgba(167,139,250,0.1)">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
-        </div>
-        <span class="sc-title">Announcements</span>
-      </div>
-      <div class="sc-body">Stay updated with teacher posts and class notices.</div>
-    </div>
-    <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:var(--muted);line-height:1.6;">
-      <strong style="color:var(--accent)">Need help?</strong> Contact your school admin or email <strong style="color:#c9d1d9">support@iskool.online</strong>
-    </div>`;
- 
-  // ── LEFT COLUMN HTML ──
-  const leftCol = `
-    <div class="learner-home-left">
- 
-      <div class="learner-home-panel">
-        <div class="learner-home-panel-title">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
-            <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          Recent Activity
-        </div>
-        ${activityHtml}
-      </div>
- 
-      <div class="learner-home-panel">
-        <div class="learner-home-panel-title">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
-            <path d="M9 11l3 3L22 4"></path>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-          </svg>
-          To-Do
-        </div>
-        ${todoHtml}
-      </div>
- 
-      <div class="learner-home-panel learner-cal-mini">
-        <div class="learner-home-panel-title">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none">
-            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          My Calendar
-        </div>
-        ${calHtml}
-      </div>
- 
-    </div>`;
- 
-  // ── ASSEMBLE ──
+    <div class="section-card" onclick="showPage('quizzes')"><div class="sc-head"><div class="sc-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="sc-title">Take a Quiz</span></div><div class="sc-body">Find and complete quizzes assigned by your teacher.</div></div>
+    <div class="section-card" onclick="showPage('grades')"><div class="sc-head"><div class="sc-icon" style="background:rgba(34,197,94,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#22c55e" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="sc-title">View Results</span></div><div class="sc-body">Check your quiz scores and progress reports once marks are published.</div></div>
+    <div class="section-card" onclick="showPage('resources')"><div class="sc-head"><div class="sc-icon" style="background:rgba(245,158,11,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span class="sc-title">Study Resources</span></div><div class="sc-body">Access study guides, notes and past papers uploaded by your teacher.</div></div>
+    <div class="section-card" onclick="showPage('announcements')"><div class="sc-head"><div class="sc-icon" style="background:rgba(167,139,250,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div><span class="sc-title">Announcements</span></div><div class="sc-body">Stay updated with teacher posts and class notices.</div></div>
+    <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:var(--muted);line-height:1.6;"><strong style="color:var(--accent)">Need help?</strong> Contact your school admin or email <strong style="color:#c9d1d9">support@iskool.online</strong></div>`;
+
   if (isMobile) {
-    // Mobile: just show the manual column (matches real app mobile behaviour)
-    document.getElementById('content').innerHTML = `
-      <div class="manual-container">
-        ${manualHtml}
-      </div>`;
+    document.getElementById('content').innerHTML = `<div class="manual-container">${manualHtml}</div>`;
   } else {
     document.getElementById('content').innerHTML = `
       <div class="learner-home-wrapper">
-        ${leftCol}
-        <div class="learner-home-right manual-container">
-          ${manualHtml}
+        <div class="learner-home-left">
+          <div class="learner-home-panel">
+            <div class="learner-home-panel-title"><svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Recent Activity</div>
+            ${activityHtml}
+          </div>
+          <div class="learner-home-panel">
+            <div class="learner-home-panel-title"><svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>To-Do</div>
+            ${todoHtml}
+          </div>
+          <div class="learner-home-panel">
+            <div class="learner-home-panel-title"><svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>My Calendar</div>
+            ${buildDemoMiniCal()}
+          </div>
+        </div>
+        <div class="learner-home-right manual-container">${manualHtml}</div>
+      </div>`;
+  }
+  // Show calendar icon when on home (desktop only)
+  const calIcon = document.getElementById('demoCalIconBtn');
+  if (calIcon) calIcon.style.display = window.innerWidth > 768 ? 'flex' : 'none';
+}
+
+// ── MINI CALENDAR ──
+function buildDemoMiniCal() {
+  const { month, year } = calState;
+  const dayLabels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const firstDay  = new Date(year, month - 1, 1).getDay();
+  const offset    = firstDay === 0 ? 6 : firstDay - 1;
+  const total     = new Date(year, month, 0).getDate();
+  const key       = `${year}-${String(month).padStart(2,'0')}`;
+  const evs       = DEMO_CAL_EVENTS[key] || [];
+  const eventMap  = {};
+  evs.forEach(e => { if (!eventMap[e.day]) eventMap[e.day] = []; eventMap[e.day].push(e); });
+  const todayDemo = (month === 5 && year === 2025) ? 14 : 0;
+
+  let html = `<div class="demo-mini-cal"><div class="demo-cal-header"><button class="demo-cal-nav" onclick="miniCalPrev()">&#8249;</button><span class="demo-cal-month">${['January','February','March','April','May','June','July','August','September','October','November','December'][month-1]} ${year}</span><button class="demo-cal-nav" onclick="miniCalNext()">&#8250;</button></div><div class="demo-cal-grid">`;
+  dayLabels.forEach(d => { html += `<div class="demo-cal-day-label">${d}</div>`; });
+  for (let i = 0; i < offset; i++) html += `<div class="demo-cal-cell empty"></div>`;
+  for (let d = 1; d <= total; d++) {
+    const dayEvs = eventMap[d] || [];
+    const isToday = d === todayDemo;
+    const dots = dayEvs.map(e => {
+      const dotClass = e.type === 'quiz' ? 'demo-dot-quiz' : e.type === 'assignment' ? 'demo-dot-assignment' : 'demo-dot-academic';
+      return `<span class="demo-dot ${dotClass}"></span>`;
+    }).join('');
+    html += `<div class="demo-cal-cell ${isToday ? 'is-today' : ''} ${dayEvs.length ? 'has-events' : ''}"><span class="demo-cal-num">${d}</span>${dayEvs.length ? `<div class="demo-cal-dots">${dots}</div>` : ''}</div>`;
+  }
+  html += `</div><div class="demo-cal-legend"><span><span class="demo-dot demo-dot-quiz"></span> Quiz</span><span><span class="demo-dot demo-dot-assignment"></span> Assignment</span><span><span class="demo-dot demo-dot-academic"></span> Academic</span></div></div>`;
+  return html;
+}
+
+function miniCalPrev() {
+  calState.month--;
+  if (calState.month < 1) { calState.month = 12; calState.year--; }
+  // Re-render just the mini cal panel
+  const panel = document.querySelector('.learner-home-panel:last-child');
+  if (panel) {
+    const container = panel.querySelector('.demo-mini-cal')?.parentElement;
+    if (container) container.innerHTML = `<div class="learner-home-panel-title"><svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>My Calendar</div>${buildDemoMiniCal()}`;
+  }
+}
+function miniCalNext() {
+  calState.month++;
+  if (calState.month > 12) { calState.month = 1; calState.year++; }
+  const panel = document.querySelector('.learner-home-panel:last-child');
+  if (panel) {
+    const container = panel.querySelector('.demo-mini-cal')?.parentElement;
+    if (container) container.innerHTML = `<div class="learner-home-panel-title"><svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>My Calendar</div>${buildDemoMiniCal()}`;
+  }
+}
+
+// ── FULL CALENDAR PAGE ──
+function renderCalendarPage() {
+  const calIcon = document.getElementById('demoCalIconBtn');
+  if (calIcon) calIcon.style.display = 'none';
+  document.getElementById('content').innerHTML = buildFullCalPage(calState.month, calState.year);
+}
+
+function buildFullCalPage(month, year) {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const today = new Date();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const key = `${year}-${String(month).padStart(2,'0')}`;
+  const evs = DEMO_CAL_EVENTS[key] || [];
+  const eventMap = {};
+  evs.forEach(e => { if (!eventMap[e.day]) eventMap[e.day] = []; eventMap[e.day].push(e); });
+
+  // Legend
+  const legend = `
+    <div class="lcal-legend">
+      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#fdd663"></span> Quiz</span>
+      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#a78bfa"></span> Assignment</span>
+      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#f472b6"></span> Academic</span>
+      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#22c55e"></span> Completed</span>
+    </div>`;
+
+  // Day headers
+  const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="lcal-day-header">${d}</div>`).join('');
+
+  // Cells
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += `<div class="lcal-cell lcal-cell-empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = (d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
+    const isFakeToday = (d === 14 && month === 5 && year === 2025); // demo "today"
+    const dayEvs = eventMap[d] || [];
+
+    const hasDots = {
+      quiz_up:  dayEvs.some(e => e.type === 'quiz' && e.subtype !== 'quiz_done'),
+      quiz_done:dayEvs.some(e => e.subtype === 'quiz_done'),
+      assign:   dayEvs.some(e => e.type === 'assignment'),
+      academic: dayEvs.some(e => e.type === 'academic'),
+    };
+
+    const visible = dayEvs.slice(0, 3);
+    const overflow = dayEvs.length - 3;
+
+    const pills = visible.map(e => {
+      let bg, color;
+      if (e.type === 'assignment')       { bg='rgba(167,139,250,0.15)'; color='#a78bfa'; }
+      else if (e.subtype === 'quiz_done'){ bg='rgba(34,197,94,0.15)';   color='#22c55e'; }
+      else if (e.type === 'quiz')        { bg='rgba(253,214,99,0.15)';  color='#fdd663'; }
+      else                               { bg='rgba(244,114,182,0.15)'; color='#f472b6'; }
+      const label = e.class_name ? `${e.title} <span style="opacity:0.6;font-weight:600">— ${e.class_name}</span>` : e.title;
+      return `<div class="lcal-pill" style="background:${bg};color:${color}">${label}</div>`;
+    }).join('');
+
+    const dots = `<div class="lcal-dots">
+      ${hasDots.quiz_up   ? '<span class="lcal-dot" style="background:#fdd663"></span>' : ''}
+      ${hasDots.quiz_done ? '<span class="lcal-dot" style="background:#22c55e"></span>'  : ''}
+      ${hasDots.assign    ? '<span class="lcal-dot" style="background:#a78bfa"></span>'  : ''}
+      ${hasDots.academic  ? '<span class="lcal-dot" style="background:#f472b6"></span>'  : ''}
+    </div>`;
+
+    cells += `
+      <div class="lcal-cell ${(isToday || isFakeToday) ? 'lcal-cell-today' : ''} ${dayEvs.length ? 'lcal-cell-has-events' : ''}">
+        <div class="lcal-cell-top">
+          <span class="lcal-day-num">${d}</span>
+          ${dots}
+        </div>
+        <div class="lcal-pills">
+          ${pills}
+          ${overflow > 0 ? `<div class="lcal-pill lcal-pill-more">+${overflow} more</div>` : ''}
         </div>
       </div>`;
   }
-}
- 
-function buildDemoMiniCal() {
-  const month = 5, year = 2025;
-  const dayLabels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-  const firstDay  = new Date(year, month - 1, 1).getDay();
-  const offset    = firstDay === 0 ? 6 : firstDay - 1; // Monday-first
-  const total     = new Date(year, month, 0).getDate();
- 
-  // Demo events — keyed by day number
-  const eventMap = {
-    14: [{ dot: 'demo-dot-quiz' }],
-    18: [{ dot: 'demo-dot-assignment' }],
-    20: [{ dot: 'demo-dot-quiz' }, { dot: 'demo-dot-assignment' }],
-    22: [{ dot: 'demo-dot-assignment' }],
-    28: [{ dot: 'demo-dot-quiz' }],
-    3:  [{ dot: 'demo-dot-academic' }],
-    10: [{ dot: 'demo-dot-academic' }],
-  };
- 
-  const todayDemo = 14; // "today" in demo world
- 
-  // ── Header ──
-  let html = `
-    <div class="demo-mini-cal">
-      <div class="demo-cal-header">
-        <button class="demo-cal-nav">&#8249;</button>
-        <span class="demo-cal-month">May 2025</span>
-        <button class="demo-cal-nav">&#8250;</button>
-      </div>
-      <div class="demo-cal-grid">`;
- 
-  // Day labels row
-  dayLabels.forEach(d => {
-    html += `<div class="demo-cal-day-label">${d}</div>`;
-  });
- 
-  // Empty offset cells
-  for (let i = 0; i < offset; i++) {
-    html += `<div class="demo-cal-cell empty"></div>`;
-  }
- 
-  // Day cells
-  for (let d = 1; d <= total; d++) {
-    const isToday  = d === todayDemo;
-    const evs      = eventMap[d] || [];
-    const hasEvs   = evs.length > 0;
- 
-    const dots = evs.map(e =>
-      `<span class="demo-dot ${e.dot}"></span>`
-    ).join('');
- 
-    html += `
-      <div class="demo-cal-cell ${isToday ? 'is-today' : ''} ${hasEvs ? 'has-events' : ''}">
-        <span class="demo-cal-num">${d}</span>
-        ${hasEvs ? `<div class="demo-cal-dots">${dots}</div>` : ''}
+
+  // Upcoming panel
+  const allUpcoming = evs.filter(e => {
+    const d = new Date(year, month - 1, e.day);
+    const now = new Date(); now.setHours(0,0,0,0);
+    return d >= now || (month === 5 && year === 2025 && e.day >= 14);
+  }).sort((a,b) => a.day - b.day).slice(0, 6);
+
+  const upcomingCards = allUpcoming.length ? allUpcoming.map(e => {
+    let color, label;
+    if (e.type === 'assignment')        { color='#a78bfa'; label='Assignment'; }
+    else if (e.subtype === 'quiz_done') { color='#22c55e'; label='Quiz (Done)'; }
+    else if (e.type === 'quiz')         { color='#fdd663'; label='Quiz'; }
+    else                                { color='#f472b6'; label='Academic'; }
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month-1];
+    return `
+      <div class="lcal-upcoming-card">
+        <div class="lcal-upcoming-type" style="color:${color}">${label}</div>
+        <div class="lcal-upcoming-title">${e.title}</div>
+        ${e.class_name ? `<div class="lcal-upcoming-meta">${e.class_name}</div>` : ''}
+        <div class="lcal-upcoming-date" style="color:${color}">${e.day} ${mn}</div>
       </div>`;
-  }
- 
-  html += `
+  }).join('') : `<div class="lcal-upcoming-empty">Nothing coming up this month</div>`;
+
+  return `
+    <div>
+      <div class="lcal-topbar">
+        <div class="lcal-header-left">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <button class="lcal-back-btn" onclick="showPage('home')">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
+              Back to Home
+            </button>
+            <h2 class="lcal-page-title">My Calendar</h2>
+          </div>
+          ${legend}
+        </div>
       </div>
- 
-      <!-- Legend -->
-      <div class="demo-cal-legend">
-        <span><span class="demo-dot demo-dot-quiz"></span> Quiz</span>
-        <span><span class="demo-dot demo-dot-assignment"></span> Assignment</span>
-        <span><span class="demo-dot demo-dot-academic"></span> Academic</span>
+      <div class="lcal-body">
+        <div class="lcal-main">
+          <div class="lcal-nav-row">
+            <button class="lcal-nav-btn" onclick="fullCalNav(-1)">&#8249;</button>
+            <span class="lcal-month-label">${monthNames[month-1]} ${year}</span>
+            <button class="lcal-nav-btn" onclick="fullCalNav(1)">&#8250;</button>
+          </div>
+          <div class="lcal-grid">${dayHeaders}</div>
+          <div class="lcal-cells">${cells}</div>
+        </div>
+        <div class="lcal-upcoming">
+          <div class="lcal-upcoming-label">Upcoming</div>
+          ${upcomingCards}
+        </div>
       </div>
- 
     </div>`;
- 
-  return html;
+}
+
+function fullCalNav(dir) {
+  calState.month += dir;
+  if (calState.month < 1) { calState.month = 12; calState.year--; }
+  if (calState.month > 12) { calState.month = 1; calState.year++; }
+  document.getElementById('content').innerHTML = buildFullCalPage(calState.month, calState.year);
 }
 
 // ── QUIZZES ──
@@ -1343,30 +934,12 @@ function renderQuizzes() {
     html += `<div class="subj-head">${subj}</div>`;
     quizzes.forEach(q => {
       let action = '';
-      if (q.attempt === 'submitted') {
-        action = `<span class="q-action-done">✓ Completed</span>`;
-      } else if (q.status === 'Closed') {
-        action = `<span class="q-action-closed">Closed</span>`;
-      } else if (q.scheduled) {
-        action = `<span style="color:#fdd663;font-weight:700;font-size:13px;">Starts in 14d</span>`;
-      } else if (q.attempt === 'in_progress') {
-        action = `<span class="q-action-progress" onclick="loadInstructions(${q.id})">Continue</span>`;
-      } else {
-        action = `<span class="q-action-start" onclick="loadInstructions(${q.id})">Start</span>`;
-      }
-      html += `
-        <div class="quiz-card">
-          <div>
-            <h4>${q.title}</h4>
-            <div class="quiz-info-text">
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              ${q.duration} mins &nbsp;|&nbsp;
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              ${q.date}
-            </div>
-          </div>
-          ${action}
-        </div>`;
+      if (q.attempt === 'submitted') action = `<span class="q-action-done">✓ Completed</span>`;
+      else if (q.status === 'Closed') action = `<span class="q-action-closed">Closed</span>`;
+      else if (q.scheduled) action = `<span style="color:#fdd663;font-weight:700;font-size:13px;">Starts in 14d</span>`;
+      else if (q.attempt === 'in_progress') action = `<span class="q-action-progress" onclick="loadInstructions(${q.id})">Continue</span>`;
+      else action = `<span class="q-action-start" onclick="loadInstructions(${q.id})">Start</span>`;
+      html += `<div class="quiz-card"><div><h4>${q.title}</h4><div class="quiz-info-text"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${q.duration} mins &nbsp;|&nbsp;<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${q.date}</div></div>${action}</div>`;
     });
   }
   document.getElementById('content').innerHTML = html;
@@ -1379,74 +952,22 @@ function loadInstructions(id) {
   document.getElementById('content').innerHTML = `
     <div class="inst-container">
       <h2 style="text-align:center;color:var(--text);margin-bottom:25px;">Quiz Instructions</h2>
-      <div class="quiz-info-box">
-        <p><strong>Quiz Title:</strong> ${q.title}</p>
-        <p><strong>Duration:</strong> ${q.duration} minutes</p>
-        <p><strong>Attempts Allowed:</strong> 1</p>
-      </div>
+      <div class="quiz-info-box"><p><strong>Quiz Title:</strong> ${q.title}</p><p><strong>Duration:</strong> ${q.duration} minutes</p><p><strong>Attempts Allowed:</strong> 1</p></div>
       <h3 style="color:#c9d1d9;margin-bottom:12px;">⚠️ Please read carefully:</h3>
-      <ul class="inst-list">
-        ${isContinue ? `<li style="color:#e67e22"><strong>Note:</strong> You have an unfinished attempt. You will resume.</li>` : ''}
-        <li>You can only attempt this quiz <strong>1</strong> time.</li>
-        <li>The timer starts immediately and cannot be paused.</li>
-        <li>Tab switching and quiz exits are monitored and logged per question.</li>
-      </ul>
-      <div class="ai-box">
-        <h4 style="color:var(--accent);margin-top:0;">🤖 AI Invigilator Active</h4>
-        <p style="font-size:13px;color:var(--muted);margin:0;">Tab switching and quiz exits are monitored and logged per question.</p>
-      </div>
-      <button class="start-btn" onclick="showToast('Demo mode: quiz taking not available. In the real app, the quiz would start now!')" style="${isContinue?'background:rgba(230,126,34,0.2);border-color:#e67e22;':''}">${isContinue ? 'Continue Quiz' : 'Start Quiz'}</button>
-    </div>
-  `;
+      <ul class="inst-list">${isContinue?`<li style="color:#e67e22"><strong>Note:</strong> You have an unfinished attempt.</li>`:''}<li>You can only attempt this quiz <strong>1</strong> time.</li><li>The timer starts immediately and cannot be paused.</li><li>Tab switching is monitored per question.</li></ul>
+      <div class="ai-box"><h4 style="color:var(--accent);margin-top:0;">🤖 AI Invigilator Active</h4><p style="font-size:13px;color:var(--muted);margin:0;">Tab switching and quiz exits are monitored and logged per question.</p></div>
+      <button class="start-btn" onclick="showToast('Demo mode: quiz taking not available.')" style="${isContinue?'background:rgba(230,126,34,0.2);border-color:#e67e22;':''}">${isContinue ? 'Continue Quiz' : 'Start Quiz'}</button>
+    </div>`;
 }
 
 // ── ASSIGNMENTS ──
 function renderAssignments() {
   let html = `${demoBanner()}`;
-  const byTeacher = {};
-  D.assignments.forEach(a => {
-    if (!byTeacher[a.teacher]) byTeacher[a.teacher] = [];
-    byTeacher[a.teacher].push(a);
+  D.assignments.forEach(t => {
+    const statusSVG = t.locked ? `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#8b949e" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : t.done ? `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#4fd1c5" stroke-width="2.5" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>` : `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#888" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    const actionEl = t.locked ? `<span style="color:#8b949e;font-weight:700;font-size:13px;">Locked</span>` : `<span style="color:${t.done?'#4fd1c5':'#e67e22'};font-weight:700;font-size:13px;cursor:pointer;" onclick="showToast('${t.done?'Submission updated!':'Assignment submitted!'}')">${t.done?'Update':'Submit'}</span>`;
+    html += `<div class="assign-card" style="${t.locked?'opacity:0.7':''}"><div class="assign-info"><div class="assign-title">${statusSVG} ${t.title}</div><div class="assign-meta">${t.class} &nbsp;|&nbsp; Due: ${t.due}</div><div class="assign-desc">${t.desc}</div></div><div class="assign-action">${actionEl}</div></div>`;
   });
-  for (const [teacher, tasks] of Object.entries(byTeacher)) {
-    html += `<div class="subj-head">${teacher}</div>`;
-    tasks.forEach(t => {
-      const statusSVG = t.locked
-        ? `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#8b949e" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-        : t.done
-          ? `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#4fd1c5" stroke-width="2.5" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
-          : `<svg viewBox="0 0 24 24" width="17" height="17" stroke="#888" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-      const actionEl = t.locked
-        ? `<span style="color:#8b949e;font-weight:700;font-size:13px;">Locked</span>`
-        : `<span style="color:${t.done?'#4fd1c5':'#e67e22'};font-weight:700;font-size:13px;cursor:pointer;" onclick="showToast('${t.done?'Submission updated!':'Assignment submitted!'}')">
-            ${t.done ? 'Update' : 'Submit'}
-           </span>`;
-      html += `
-        <div class="assign-card" style="${t.locked?'opacity:0.7':''}">
-          <div class="assign-info">
-            <div class="assign-title">${statusSVG} ${t.title}</div>
-            <div class="assign-meta">
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M2 3h20v14H2z"/></svg>
-              ${t.class} &nbsp;|&nbsp;
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Due: ${t.due}
-            </div>
-            <div class="assign-desc">${t.desc}</div>
-            <div class="assign-links">
-              <span class="assign-link" onclick="showToast('Opening teacher attachment...')">
-                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                Teacher Attachment
-              </span>
-              ${t.done ? `<span class="assign-link" onclick="showToast('Opening your submission...')">
-                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                View My Work
-              </span>` : ''}
-            </div>
-          </div>
-          <div class="assign-action">${actionEl}</div>
-        </div>`;
-    });
-  }
   document.getElementById('content').innerHTML = html;
 }
 
@@ -1455,17 +976,7 @@ function renderResources() {
   let html = `${demoBanner()}`;
   D.resources.forEach(r => {
     const color = r.type === 'PDF' ? '#f85149' : '#4fd1c5';
-    html += `
-      <div class="resource-card" onclick="showToast('Opening ${r.name}...')">
-        <div class="res-icon">
-          <svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div class="res-info">
-          <div class="res-name">${r.name}</div>
-          <div class="res-meta">${r.type} · ${r.size} · ${r.date}</div>
-        </div>
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>`;
+    html += `<div class="resource-card" onclick="showToast('Opening ${r.name}...')"><div class="res-info"><div class="res-name">${r.name}</div><div class="res-meta">${r.type} · ${r.size} · ${r.date}</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div>`;
   });
   document.getElementById('content').innerHTML = html;
 }
@@ -1474,12 +985,7 @@ function renderResources() {
 function renderAnnouncements() {
   let html = `${demoBanner()}`;
   D.announcements.forEach(a => {
-    html += `
-      <div class="ann-card" onclick="openModal('${a.title}', '<p style=\\"color:#c9d1d9;line-height:1.7;font-size:14px;\\">${a.preview}</p><p style=\\"margin-top:12px;font-size:12px;color:#555e6a;\\">${a.teacher} · ${a.date}</p>')">
-        <div class="ann-title">${a.title}</div>
-        <div class="ann-preview">${a.preview.substring(0,100)}...</div>
-        <div class="ann-date">${a.teacher} · ${a.date}</div>
-      </div>`;
+    html += `<div class="ann-card" onclick="openModal('${a.title}','<p style=\\"color:#c9d1d9;line-height:1.7;font-size:14px;\\">${a.preview}</p><p style=\\"margin-top:12px;font-size:12px;color:#555e6a;\\">${a.teacher} · ${a.date}</p>')"><div class="ann-title">${a.title}</div><div class="ann-preview">${a.preview.substring(0,100)}...</div><div class="ann-date">${a.teacher} · ${a.date}</div></div>`;
   });
   document.getElementById('content').innerHTML = html;
 }
@@ -1488,59 +994,16 @@ function renderAnnouncements() {
 function renderDiscussions() {
   let html = `${demoBanner()}`;
   D.discussions.forEach(d => {
-    html += `
-      <div class="disc-card" onclick="openModal('Discussion', '<p style=\\"color:#c9d1d9;font-size:14px;margin-bottom:10px;\\">${d.title}</p><p style=\\"color:var(--muted);font-size:13px;\\">${d.replies} replies · ${d.date}</p><p style=\\"color:#555;font-size:13px;margin-top:12px;font-style:italic;\\">In demo mode discussions are read-only. In the real app you can post replies.</p>')">
-        <div class="disc-title">${d.title}</div>
-        <div class="disc-meta">
-          Grade 10A · ${d.date}
-          <span class="disc-replies">${d.replies} replies</span>
-        </div>
-      </div>`;
+    html += `<div class="disc-card" onclick="openModal('Discussion','<p style=\\"color:#c9d1d9;font-size:14px;margin-bottom:10px;\\">${d.title}</p><p style=\\"color:var(--muted);font-size:13px;\\">${d.replies} replies · ${d.date}</p>')"><div class="disc-title">${d.title}</div><div class="disc-meta">Grade 10A · ${d.date}<span class="disc-replies">${d.replies} replies</span></div></div>`;
   });
   document.getElementById('content').innerHTML = html;
 }
 
 // ── GRADES ──
 function renderGrades() {
-  let html = `${demoBanner()}<div class="grades-wrap">
-    <div class="grades-header">
-      <div class="grades-title">My Grades</div>
-      <button class="grades-report-btn" onclick="showProgressReport()">
-        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Progress Report
-      </button>
-    </div>`;
-
+  let html = `${demoBanner()}<div class="grades-wrap"><div class="grades-header"><div class="grades-title">My Grades</div><button class="grades-report-btn" onclick="showProgressReport()"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Progress Report</button></div>`;
   D.grades.forEach((g, gi) => {
-    html += `
-      <div class="subject-card">
-        <div class="subject-header" onclick="toggleCard(${gi})">
-          <div class="subject-name">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            ${g.subject}
-            <span class="subject-count">${g.quizzes.length} assessment${g.quizzes.length!==1?'s':''}</span>
-          </div>
-          <svg class="subject-chev open" id="gchev-${gi}" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-        <div id="gcard-${gi}">
-          <div class="view-toggle-bar">
-            <button class="vt-btn active-view" id="vt-list-${gi}" onclick="switchView(${gi},'list')">
-              <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
-              Quiz List
-            </button>
-            <button class="vt-btn" id="vt-term-${gi}" onclick="switchView(${gi},'term')">
-              <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
-              Term Marks
-            </button>
-          </div>
-          <div class="quiz-list" id="glist-${gi}">
-            ${buildGradesList(g.quizzes, gi)}
-          </div>
-          <div class="term-marks-view" id="gterm-${gi}" style="display:none;padding:8px 16px 16px;">
-            ${buildTermTable(g.quizzes)}
-          </div>
-        </div>
-      </div>`;
+    html += `<div class="subject-card"><div class="subject-header" onclick="toggleCard(${gi})"><div class="subject-name"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>${g.subject}<span class="subject-count">${g.quizzes.length} assessments</span></div><svg class="subject-chev open" id="gchev-${gi}" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div id="gcard-${gi}"><div class="view-toggle-bar"><button class="vt-btn active-view" id="vt-list-${gi}" onclick="switchView(${gi},'list')">Quiz List</button><button class="vt-btn" id="vt-term-${gi}" onclick="switchView(${gi},'term')">Term Marks</button></div><div class="quiz-list" id="glist-${gi}">${buildGradesList(g.quizzes,gi)}</div><div id="gterm-${gi}" style="display:none;padding:8px 16px 16px;">${buildTermTable(g.quizzes)}</div></div></div>`;
   });
   html += `</div>`;
   document.getElementById('content').innerHTML = html;
@@ -1548,249 +1011,55 @@ function renderGrades() {
 
 function buildGradesList(quizzes, gi) {
   return quizzes.map((q, qi) => {
-    const pub = q.published;
-    const pct = pub ? Math.round((q.score/q.total)*100) : 0;
+    const pub = q.published; const pct = pub ? Math.round((q.score/q.total)*100) : 0;
     const pillCls = !pub ? 'score-pending' : pct>=75 ? 'score-high' : pct>=50 ? 'score-mid' : 'score-low';
     const pillTxt = pub ? `${pct}%` : 'Pending';
-    const icon = pub
-      ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
-      : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f85149" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
-    return `
-      <div class="quiz-row">
-        <div class="quiz-row-header" onclick="toggleRow('gdetail-${gi}-${qi}','gexp-${gi}-${qi}')">
-          ${icon}
-          <div class="quiz-row-title">${q.title}${q.summative?'<span style="font-size:10px;border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:1px 6px;border-radius:10px;font-weight:700;">Term</span>':''}</div>
-          <span class="score-pill ${pillCls}">${pillTxt}</span>
-          <button id="gexp-${gi}-${qi}" style="background:none;border:none;color:#4a5568;cursor:pointer;padding:4px;display:flex;align-items:center;" onclick="event.stopPropagation();toggleRow('gdetail-${gi}-${qi}','gexp-${gi}-${qi}')">
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </div>
-        <div class="quiz-row-details" id="gdetail-${gi}-${qi}">
-          ${pub ? `<p><strong>Score:</strong> ${q.score} / ${q.total} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
-          <button class="view-details-btn" onclick="showToast('Class stats: Avg 67% | Highest 85% | Lowest 42%')">Class Performance</button>` 
-          : `<p style="color:#4a5568;font-style:italic;">Marks not published yet.</p>`}
-          <p style="margin-top:8px"><strong>Duration:</strong> ${q.duration} min</p>
-          <p><strong>Taken on:</strong> ${q.taken}</p>
-        </div>
-      </div>`;
+    const icon = pub ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>` : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f85149" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+    return `<div class="quiz-row"><div class="quiz-row-header" onclick="toggleRow('gdetail-${gi}-${qi}','gexp-${gi}-${qi}')">${icon}<div class="quiz-row-title">${q.title}${q.summative?'<span style="font-size:10px;border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:1px 6px;border-radius:10px;font-weight:700;">Term</span>':''}</div><span class="score-pill ${pillCls}">${pillTxt}</span><button id="gexp-${gi}-${qi}" style="background:none;border:none;color:#4a5568;cursor:pointer;padding:4px;display:flex;align-items:center;" onclick="event.stopPropagation();toggleRow('gdetail-${gi}-${qi}','gexp-${gi}-${qi}')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"/></svg></button></div><div class="quiz-row-details" id="gdetail-${gi}-${qi}">${pub?`<p><strong>Score:</strong> ${q.score}/${q.total} · <strong>${pct}%</strong></p><button class="view-details-btn" onclick="showToast('Class avg: 67% | Highest: 85%')">Class Performance</button>`:`<p style="color:#4a5568;font-style:italic;">Marks not published yet.</p>`}<p style="margin-top:8px"><strong>Duration:</strong> ${q.duration} min</p><p><strong>Taken:</strong> ${q.taken}</p></div></div>`;
   }).join('');
 }
 
 function buildTermTable(quizzes) {
   const summative = quizzes.filter(q => q.summative && q.published);
-  if (!summative.length) return `<p style="text-align:center;color:#4a5568;font-style:italic;padding:20px;">No summative assessments in Term 1 yet.</p>`;
-  let rows = '';
-  let earnedTotal = 0, weightTotal = 0;
-  summative.forEach(q => {
-    const earned = q.total > 0 ? (q.score/q.total)*q.weight : 0;
-    earnedTotal += earned; weightTotal += q.weight;
-    rows += `<tr><td>${q.title}</td><td>${q.weight}%</td><td>${q.score}/${q.total}</td><td style="color:#4fd1c5;font-weight:800">${earned.toFixed(1)}/${q.weight}%</td></tr>`;
-  });
-  const finalPct = weightTotal > 0 ? Math.round((earnedTotal/weightTotal)*100) : 0;
-  return `
-    <div class="term-table-wrap">
-      <table class="term-table">
-        <thead><tr><th>Quiz</th><th>Weight</th><th>Score</th><th>Earned</th></tr></thead>
-        <tbody>
-          ${rows}
-          <tr class="term-total"><td>TOTAL</td><td>${weightTotal}%</td><td>—</td><td style="color:#22c55e">${earnedTotal.toFixed(1)}/${weightTotal}% → ${finalPct}%</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p style="text-align:center;font-size:12px;color:#4a5568;margin-top:8px;">70% of term still to be assessed</p>`;
+  if (!summative.length) return `<p style="text-align:center;color:#4a5568;font-style:italic;padding:20px;">No summative assessments yet.</p>`;
+  let rows='', earnedTotal=0, weightTotal=0;
+  summative.forEach(q => { const earned=(q.score/q.total)*q.weight; earnedTotal+=earned; weightTotal+=q.weight; rows+=`<tr><td>${q.title}</td><td>${q.weight}%</td><td>${q.score}/${q.total}</td><td style="color:#4fd1c5;font-weight:800">${earned.toFixed(1)}/${q.weight}%</td></tr>`; });
+  const finalPct = Math.round((earnedTotal/weightTotal)*100);
+  return `<div class="term-table-wrap"><table class="term-table"><thead><tr><th>Quiz</th><th>Weight</th><th>Score</th><th>Earned</th></tr></thead><tbody>${rows}<tr class="term-total"><td>TOTAL</td><td>${weightTotal}%</td><td>—</td><td style="color:#22c55e">${earnedTotal.toFixed(1)}/${weightTotal}% → ${finalPct}%</td></tr></tbody></table></div>`;
 }
 
-function toggleCard(i) {
-  const body = document.getElementById('gcard-'+i);
-  const chev = document.getElementById('gchev-'+i);
-  const isOpen = chev.classList.contains('open');
-  body.style.display = isOpen ? 'none' : 'block';
-  chev.classList.toggle('open', !isOpen);
-}
-function toggleRow(detailId, btnId) {
-  const d = document.getElementById(detailId);
-  if (!d) return;
-  const open = d.style.display === 'block';
-  d.style.display = open ? 'none' : 'block';
-  const btn = document.getElementById(btnId);
-  if (btn) btn.querySelector('svg').style.transform = open ? '' : 'rotate(180deg)';
-}
-function switchView(gi, view) {
-  const listEl = document.getElementById('glist-'+gi);
-  const termEl = document.getElementById('gterm-'+gi);
-  const btnL = document.getElementById('vt-list-'+gi);
-  const btnT = document.getElementById('vt-term-'+gi);
-  if (view === 'list') {
-    listEl.style.display = 'block'; termEl.style.display = 'none';
-    btnL.classList.add('active-view'); btnT.classList.remove('active-view');
-  } else {
-    listEl.style.display = 'none'; termEl.style.display = 'block';
-    btnL.classList.remove('active-view'); btnT.classList.add('active-view');
-  }
-}
+function toggleCard(i) { const body=document.getElementById('gcard-'+i); const chev=document.getElementById('gchev-'+i); const isOpen=chev.classList.contains('open'); body.style.display=isOpen?'none':'block'; chev.classList.toggle('open',!isOpen); }
+function toggleRow(detailId,btnId) { const d=document.getElementById(detailId); if(!d)return; const open=d.style.display==='block'; d.style.display=open?'none':'block'; const btn=document.getElementById(btnId); if(btn)btn.querySelector('svg').style.transform=open?'':'rotate(180deg)'; }
+function switchView(gi,view) { const listEl=document.getElementById('glist-'+gi); const termEl=document.getElementById('gterm-'+gi); const btnL=document.getElementById('vt-list-'+gi); const btnT=document.getElementById('vt-term-'+gi); if(view==='list'){listEl.style.display='block';termEl.style.display='none';btnL.classList.add('active-view');btnT.classList.remove('active-view');}else{listEl.style.display='none';termEl.style.display='block';btnL.classList.remove('active-view');btnT.classList.add('active-view');} }
 
 function showProgressReport() {
-  const c = document.getElementById('content');
-  const colors = v => v>=80?{t:'#22c55e',b:'rgba(34,197,94,0.15)'}:v>=60?{t:'#4fd1c5',b:'rgba(79,209,197,0.15)'}:{t:'#f59e0b',b:'rgba(245,158,11,0.15)'};
-  const oc = colors(69);
-  c.innerHTML = `
-    <div style="max-width:860px;margin:0 auto;padding-bottom:60px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
-        <button onclick="renderGrades()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">
-          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
-          Back to Grades
-        </button>
-        <button onclick="showToast('Print dialog opening...')" style="display:inline-flex;align-items:center;gap:7px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">
-          Print Report
-        </button>
-      </div>
-      <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:24px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4fd1c5,#22c55e,#4e79a7)"></div>
-        <div style="width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,#1a3a3a,#0d2424);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#4fd1c5;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;">L</div>
-        <div style="flex:1">
-          <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4fd1c5;margin-bottom:4px;">Demo School</div>
-          <div style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;">Thabo Mahlangu</div>
-          <div style="font-size:13px;color:var(--muted);">Grade 10A – Mathematics · Term 1 Progress Report · 7 May 2025</div>
-        </div>
-        <div style="text-align:center;flex-shrink:0;">
-          <div style="width:78px;height:78px;border-radius:50%;border:3px solid ${oc.t};background:${oc.b};display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px;">
-            <div style="font-size:22px;font-weight:900;color:${oc.t};line-height:1;">69%</div>
-            <div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Overall</div>
-          </div>
-          <div style="font-size:11px;color:var(--muted);">Term 1 Average</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:20px;">
-        ${[1,2,3,4].map(t=>`
-          <div style="flex:1;padding:10px;text-align:center;background:#161b22;border:1px solid ${t===1?'rgba(79,209,197,0.35)':'rgba(255,255,255,0.07)'};border-radius:10px;${t>1?'opacity:0.35;':''}">
-            <div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${t===1?'#4fd1c5':'#8b949e'};">Term ${t}</div>
-            <div style="font-size:18px;font-weight:900;color:${t===1?'#4fd1c5':'#8b949e'};margin:4px 0;">${t===1?'69%':'—'}</div>
-            <div style="font-size:10px;color:#4a5568;">${t===1?'Current':'Upcoming'}</div>
-          </div>`).join('')}
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
-        <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:18px;position:relative;overflow:hidden;border-left:3px solid #4fd1c5;">
-          <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px;">Grade 10A – Mathematics</div>
-          <div style="font-size:24px;font-weight:900;color:#4fd1c5;position:absolute;top:16px;right:16px;">69%</div>
-          <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;margin-bottom:8px;overflow:hidden;"><div style="width:69%;height:100%;background:#4fd1c5;border-radius:100px;"></div></div>
-          <div style="font-size:11px;color:#4a5568;">1 of 5 assessments counted · 70% still to come</div>
-        </div>
-      </div>
-    </div>`;
+  const c=document.getElementById('content'); const oc={t:'#4fd1c5',b:'rgba(79,209,197,0.15)'};
+  c.innerHTML=`<div style="max-width:860px;margin:0 auto;padding-bottom:60px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;"><button onclick="renderGrades()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>Back to Grades</button><button onclick="showToast('Print dialog opening...')" style="display:inline-flex;align-items:center;gap:7px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Print Report</button></div><div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:24px;position:relative;overflow:hidden;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4fd1c5,#22c55e,#4e79a7)"></div><div style="width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,#1a3a3a,#0d2424);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#4fd1c5;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;">L</div><div style="flex:1"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4fd1c5;margin-bottom:4px;">Demo School</div><div style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;">Thabo Mahlangu</div><div style="font-size:13px;color:var(--muted);">Grade 10A – Mathematics · Term 1 Progress Report</div></div><div style="text-align:center;flex-shrink:0;"><div style="width:78px;height:78px;border-radius:50%;border:3px solid ${oc.t};background:${oc.b};display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px;"><div style="font-size:22px;font-weight:900;color:${oc.t};line-height:1;">69%</div><div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Overall</div></div><div style="font-size:11px;color:var(--muted);">Term 1 Average</div></div></div><div style="display:flex;gap:8px;margin-bottom:20px;">${[1,2,3,4].map(t=>`<div style="flex:1;padding:10px;text-align:center;background:#161b22;border:1px solid ${t===1?'rgba(79,209,197,0.35)':'rgba(255,255,255,0.07)'};border-radius:10px;${t>1?'opacity:0.35;':''}"><div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${t===1?'#4fd1c5':'#8b949e'};">Term ${t}</div><div style="font-size:18px;font-weight:900;color:${t===1?'#4fd1c5':'#8b949e'};margin:4px 0;">${t===1?'69%':'—'}</div><div style="font-size:10px;color:#4a5568;">${t===1?'Current':'Upcoming'}</div></div>`).join('')}</div></div>`;
 }
 
 // ── EVALUATIONS ──
 function renderEvaluations() {
-  const submitted = Object.keys(evalSelections).length === D.evalQuestions.length &&
-    Object.values(evalSelections).every(v => v !== undefined);
-  let html = `${demoBanner()}
-    <div style="max-width:600px;margin:0 auto;">
-      <div style="background:rgba(79,209,197,0.06);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.6;">
-        <strong style="color:var(--accent)">Help improve your learning experience.</strong> Your responses are anonymous and help your teacher understand how to support you better.
-      </div>`;
-  D.evalQuestions.forEach((q, i) => {
-    html += `
-      <div class="eval-form">
-        <div class="eval-q">${q}</div>
-        <div class="eval-options">
-          ${D.evalOptions.map((opt,oi) => `
-            <div class="eval-option ${evalSelections[i]===oi?'selected':''}" onclick="selectEval(${i},${oi})">
-              <div class="eval-option-dot"></div>
-              ${opt}
-            </div>`).join('')}
-        </div>
-      </div>`;
+  let html=`${demoBanner()}<div style="max-width:600px;margin:0 auto;"><div style="background:rgba(79,209,197,0.06);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.6;"><strong style="color:var(--accent)">Help improve your learning experience.</strong> Responses are anonymous.</div>`;
+  D.evalQuestions.forEach((q,i) => {
+    html+=`<div class="eval-form"><div class="eval-q">${q}</div><div class="eval-options">${D.evalOptions.map((opt,oi)=>`<div class="eval-option ${evalSelections[i]===oi?'selected':''}" onclick="selectEval(${i},${oi})"><div class="eval-option-dot"></div>${opt}</div>`).join('')}</div></div>`;
   });
-  html += `<button class="eval-submit" onclick="submitEvaluations()">Submit Evaluation</button></div>`;
-  document.getElementById('content').innerHTML = html;
+  html+=`<button class="eval-submit" onclick="submitEvaluations()">Submit Evaluation</button></div>`;
+  document.getElementById('content').innerHTML=html;
 }
-
-function selectEval(q, o) {
-  evalSelections[q] = o;
-  renderEvaluations();
-}
-function submitEvaluations() {
-  const all = D.evalQuestions.every((_, i) => evalSelections[i] !== undefined);
-  if (!all) { showToast('Please answer all questions before submitting.'); return; }
-  evalSelections = {};
-  openModal('Evaluation Submitted ✓', '<p style="color:#c9d1d9;line-height:1.7;font-size:14px;">Thank you for your feedback! Your responses have been recorded anonymously.</p>');
-}
+function selectEval(q,o){evalSelections[q]=o;renderEvaluations();}
+function submitEvaluations(){const all=D.evalQuestions.every((_,i)=>evalSelections[i]!==undefined);if(!all){showToast('Please answer all questions before submitting.');return;}evalSelections={};openModal('Evaluation Submitted ✓','<p style="color:#c9d1d9;line-height:1.7;font-size:14px;">Thank you! Your responses have been recorded anonymously.</p>');}
 
 // ── SYLLABUS ──
 function renderSyllabus() {
-  let html = `${demoBanner()}`;
-  D.syllabus.forEach((s, si) => {
-    const done = s.topics.filter(t => t.done).length;
-    const pct = Math.round(done/s.topics.length*100);
-    html += `
-      <div class="syl-card">
-        <div class="syl-head" onclick="toggleSyl(${si})">
-          <div>
-            <div class="syl-class-name">${s.class}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:3px;">${done}/${s.topics.length} topics complete</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:70px;height:5px;background:#21262d;border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--accent);border-radius:3px;"></div></div>
-            <span style="font-size:13px;font-weight:800;color:var(--accent);">${pct}%</span>
-          </div>
-        </div>
-        <div class="syl-body" id="syl-${si}">
-          ${s.topics.map((t,ti) => `
-            <div class="syl-row">
-              <div class="syl-check${t.done?' done':''}">
-                ${t.done?'<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>':''}
-              </div>
-              <div class="syl-topic${t.done?' done':''}">${t.name}</div>
-              ${t.done?'<span style="font-size:11px;background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 8px;border-radius:10px;font-weight:700;">Done</span>':'<span style="font-size:11px;color:#4a5568;">Upcoming</span>'}
-            </div>`).join('')}
-        </div>
-      </div>`;
-  });
-  document.getElementById('content').innerHTML = html;
+  let html=`${demoBanner()}`;
+  D.syllabus.forEach((s,si)=>{const done=s.topics.filter(t=>t.done).length;const pct=Math.round(done/s.topics.length*100);html+=`<div class="syl-card"><div class="syl-head" onclick="toggleSyl(${si})"><div><div class="syl-class-name">${s.class}</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">${done}/${s.topics.length} topics complete</div></div><div style="display:flex;align-items:center;gap:12px;"><div style="width:70px;height:5px;background:#21262d;border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--accent);border-radius:3px;"></div></div><span style="font-size:13px;font-weight:800;color:var(--accent);">${pct}%</span></div></div><div class="syl-body" id="syl-${si}">${s.topics.map(t=>`<div class="syl-row"><div class="syl-check${t.done?' done':''}"> ${t.done?'<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div class="syl-topic${t.done?' done':''}">${t.name}</div>${t.done?'<span style="font-size:11px;background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 8px;border-radius:10px;font-weight:700;">Done</span>':'<span style="font-size:11px;color:#4a5568;">Upcoming</span>'}</div>`).join('')}</div></div>`;});
+  document.getElementById('content').innerHTML=html;
 }
-function toggleSyl(i) {
-  const el = document.getElementById('syl-'+i);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
+function toggleSyl(i){const el=document.getElementById('syl-'+i);el.style.display=el.style.display==='none'?'block':'none';}
 
 // ── SETTINGS ──
 function renderSettings() {
-  document.getElementById('content').innerHTML = `
-    ${demoBanner()}
-    <div class="settings-wrap">
-      <div class="settings-avatar-wrap">
-        <div class="settings-avatar" onclick="showToast('Photo upload not available in demo')">TM</div>
-        <div class="settings-hint">Click to update photo</div>
-      </div>
-      <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);border-left:4px solid #4fd1c5;border-radius:12px;padding:14px;margin-bottom:16px;">
-        <div style="color:var(--accent);font-weight:800;font-size:14px;margin-bottom:8px;">💡 Notification Help</div>
-        <ol style="margin:0;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.7;">
-          <li><strong style="color:#c9d1d9;">iPhone Users:</strong> You must "Add to Home Screen" first.</li>
-          <li>Tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below if you aren't getting alerts.</li>
-          <li>If prompted, select <strong style="color:#c9d1d9;">"Allow"</strong> on the system popup.</li>
-        </ol>
-      </div>
-      <div class="settings-card" onclick="showToast('Photo upload not available in demo')">
-        <div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
-        <div class="settings-card-info"><div class="settings-card-name">Update Profile Picture</div><div class="settings-card-sub">Upload a new photo</div></div>
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="settings-card" onclick="showToast('Profile picture removed — showing initials')">
-        <div class="settings-card-icon" style="background:rgba(248,81,73,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></div>
-        <div class="settings-card-info"><div class="settings-card-name" style="color:#f85149;">Remove Profile Picture</div><div class="settings-card-sub">Revert to initials avatar</div></div>
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="settings-card" onclick="showToast('Notification sync requested!')">
-        <div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
-        <div class="settings-card-info"><div class="settings-card-name">Sync Notifications</div><div class="settings-card-sub">Not receiving alerts? Tap to sync</div></div>
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="settings-card" onclick="showToast('Signed out – this is a demo!')" style="margin-top:8px;">
-        <div class="settings-card-icon" style="background:rgba(248,81,73,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
-        <div class="settings-card-info"><div class="settings-card-name" style="color:#f85149;">Sign Out</div><div class="settings-card-sub">Log out of your account</div></div>
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-    </div>`;
+  document.getElementById('content').innerHTML=`${demoBanner()}<div class="settings-wrap"><div class="settings-avatar-wrap"><div class="settings-avatar" onclick="showToast('Photo upload not available in demo')">TM</div><div class="settings-hint">Click to update photo</div></div><div class="settings-card" onclick="showToast('Photo upload not available in demo')"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div><div class="settings-card-info"><div class="settings-card-name">Update Profile Picture</div><div class="settings-card-sub">Upload a new photo</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Notification sync requested!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div><div class="settings-card-info"><div class="settings-card-name">Sync Notifications</div><div class="settings-card-sub">Not receiving alerts? Tap to sync</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Signed out – this is a demo!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(248,81,73,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div><div class="settings-card-info"><div class="settings-card-name" style="color:#f85149;">Sign Out</div><div class="settings-card-sub">Log out of your account</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
 }
 
 // ── INIT ──
