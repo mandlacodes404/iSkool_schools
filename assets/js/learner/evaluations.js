@@ -22,7 +22,7 @@ window.fetchEvaluations = async function() {
     // Inject CSS
     if (!document.getElementById('eval-style')) {
         const link = document.createElement('link');
-        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = 'assets/css/learner/evaluations.css?v=1.1';
+        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = 'assets/css/learner/evaluations.css';
         document.head.appendChild(link);
     }
 
