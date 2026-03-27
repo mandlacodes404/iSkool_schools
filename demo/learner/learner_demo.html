@@ -42,6 +42,77 @@ body {
   font-weight: 600;
 }
 
+/* ─── SPLASH SCREEN ─── */
+#splash {
+  position: fixed; inset: 0;
+  background: #1a1919;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.8s ease;
+}
+#splash.fade-out { opacity: 0; pointer-events: none; }
+#splash-logo {
+  animation: splashReveal 0.8s ease-out forwards;
+}
+@keyframes splashReveal {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+#splash-logo svg { width: 140px; height: 140px; }
+
+/* ─── PERSONALISE SCREEN ─── */
+#personalise {
+  position: fixed; inset: 0;
+  background: #1a1919;
+  display: none;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 99998;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  padding: 24px;
+}
+#personalise.show { display: flex; opacity: 1; }
+.pers-logo { margin-bottom: 28px; }
+.pers-logo svg { width: 72px; height: 72px; }
+.pers-title {
+  font-size: 22px; font-weight: 900; color: #fff;
+  margin-bottom: 6px; text-align: center;
+}
+.pers-sub {
+  font-size: 14px; color: #8b949e;
+  margin-bottom: 32px; text-align: center; line-height: 1.6;
+}
+.pers-form { width: 100%; max-width: 400px; }
+.pers-input {
+  width: 100%; background: #1E1F20;
+  border: 1px solid #30363d; border-radius: 30px;
+  color: #fff; padding: 14px 22px;
+  font-size: 15px; font-family: 'Nunito', sans-serif;
+  font-weight: 600; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  display: block; margin-bottom: 14px;
+}
+.pers-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+}
+.pers-input::placeholder { color: #555e6a; }
+.pers-btn {
+  width: 100%; background: #fff; color: #131314;
+  border: none; border-radius: 24px; padding: 15px;
+  font-size: 16px; font-weight: 800; font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+  margin-top: 4px;
+}
+.pers-btn:hover { background: #f1f1f1; transform: translateY(-1px); }
+.pers-btn:active { transform: translateY(0); }
+.pers-note {
+  text-align: center; font-size: 12px; color: #555e6a;
+  margin-top: 16px; line-height: 1.5;
+}
+
 /* ─── SIDEBAR ─── */
 .sidebar {
   width: var(--sidebar-w);
@@ -136,9 +207,8 @@ body {
 }
 .hdr-btn:hover { color: var(--accent); background: var(--accent-dim); }
 
-/* Calendar icon — desktop only, hidden by default */
 #demoCalIconBtn {
-  display: none; /* shown via JS only on home + desktop */
+  display: none;
 }
 
 .menu-btn {
@@ -439,16 +509,48 @@ body {
 </head>
 <body>
 
+<!-- ─── SPLASH SCREEN ─── -->
+<div id="splash">
+  <div id="splash-logo">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#a09d9dff" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- ─── PERSONALISE SCREEN ─── -->
+<div id="personalise">
+  <div class="pers-logo">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
+      </g>
+    </svg>
+  </div>
+  <div class="pers-title">Welcome to iSkool LMS</div>
+  <div class="pers-sub">Enter your details to personalise your demo experience.</div>
+  <div class="pers-form">
+    <input class="pers-input" id="persName" type="text" placeholder="Your full name (e.g. Thabo Mahlangu)" autocomplete="off">
+    <input class="pers-input" id="persSchool" type="text" placeholder="Your school name" autocomplete="off">
+    <button class="pers-btn" onclick="launchDemo()">
+      Launch Demo &nbsp;→
+    </button>
+    <p class="pers-note">No account needed · Demo data only · Nothing is saved</p>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <div class="sb-header">
-    <div class="avatar-wrap">TM</div>
+    <div class="avatar-wrap" id="sbAvatar">TM</div>
     <button class="sb-close" onclick="closeSidebar()">
       <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="7" y1="3" x2="7" y2="21"></line></svg>
     </button>
   </div>
-  <div class="learner-name">Thabo Mahlangu</div>
-  <div class="learner-email">t.mahlangu@iSkool.demo</div>
+  <div class="learner-name" id="sbName">Thabo Mahlangu</div>
+  <div class="learner-email" id="sbEmail">t.mahlangu@iSkool.demo</div>
   <div class="sb-links">
     <button class="sb-link active" onclick="showPage('home');setActive(this)">
       <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -503,11 +605,10 @@ body {
       </button>
     </div>
     <div class="header-brand">
-      <div class="brand-logo">L</div>
-      <span class="brand-school">Demo School</span>
+      <div class="brand-logo" id="brandInitials">L</div>
+      <span class="brand-school" id="brandSchool">Demo School</span>
     </div>
     <div class="header-right">
-      <!-- Calendar icon — desktop only, shown only on home page -->
       <button class="hdr-btn" id="demoCalIconBtn" title="My Calendar" onclick="showPage('calendar')">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -516,7 +617,6 @@ body {
           <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
       </button>
-      <!-- Settings icon -->
       <button class="hdr-btn" onclick="showPage('settings')">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -551,8 +651,72 @@ body {
 </div>
 
 <script>
+// ── LEARNER STATE ──
+let LEARNER = { name: '', firstName: '', initials: '', email: '', school: '' };
+
+// ── PERSONALISATION HELPERS ──
+function getInitials(fullName) {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+function getFirstName(fullName) {
+  return fullName.trim().split(/\s+/)[0];
+}
+function getSchoolInitials(school) {
+  return school.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 3).toUpperCase();
+}
+
+function launchDemo() {
+  const nameVal   = document.getElementById('persName').value.trim();
+  const schoolVal = document.getElementById('persSchool').value.trim();
+  if (!nameVal)   { document.getElementById('persName').focus();   showToast('Please enter your name');        return; }
+  if (!schoolVal) { document.getElementById('persSchool').focus(); showToast('Please enter your school name'); return; }
+
+  LEARNER.name      = nameVal;
+  LEARNER.firstName = getFirstName(nameVal);
+  LEARNER.initials  = getInitials(nameVal);
+  LEARNER.email     = nameVal.toLowerCase().replace(/\s+/g, '.') + '@iskool.demo';
+  LEARNER.school    = schoolVal;
+
+  // Patch sidebar
+  document.getElementById('sbAvatar').textContent  = LEARNER.initials;
+  document.getElementById('sbName').textContent     = LEARNER.name;
+  document.getElementById('sbEmail').textContent    = LEARNER.email;
+  // Patch header
+  document.getElementById('brandInitials').textContent = getSchoolInitials(schoolVal);
+  document.getElementById('brandSchool').textContent   = schoolVal;
+  // Patch settings avatar later via renderSettings()
+
+  // Fade out personalise screen
+  const p = document.getElementById('personalise');
+  p.style.opacity    = '0';
+  p.style.transition = 'opacity 0.5s ease';
+  setTimeout(() => { p.style.display = 'none'; showPage('home'); }, 500);
+}
+
+// Allow Enter key on personalise form
+document.addEventListener('keydown', e => {
+  const p = document.getElementById('personalise');
+  if (e.key === 'Enter' && p && p.style.display !== 'none') launchDemo();
+});
+
+// ── SPLASH → PERSONALISE ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.classList.add('fade-out');
+    setTimeout(() => {
+      splash.style.display = 'none';
+      const p = document.getElementById('personalise');
+      p.style.display = 'flex';
+      requestAnimationFrame(() => { requestAnimationFrame(() => { p.classList.add('show'); }); });
+      document.getElementById('persName').focus();
+    }, 800);
+  }, 2200);
+});
+
 // ── DEMO CALENDAR DATA ──
-// Keyed by YYYY-MM: array of { day, type, title, class_name }
 const DEMO_CAL_EVENTS = {
   '2025-05': [
     { day: 3,  type: 'academic',   title: 'Term 2 Open Day',            class_name: 'Grade 10A' },
@@ -573,7 +737,6 @@ const DEMO_CAL_EVENTS = {
   ]
 };
 
-// Current calendar state
 let calState = { month: 5, year: 2025 };
 
 // ── DATA ──
@@ -636,7 +799,6 @@ function destroyCharts() { Object.values(charts).forEach(c => { try{ c.destroy()
 function showPage(page) {
   destroyCharts();
   closeSidebar();
-  // Show/hide calendar icon — only on home, desktop only
   const calIcon = document.getElementById('demoCalIconBtn');
   if (calIcon) {
     calIcon.style.display = (page === 'home' && window.innerWidth > 768) ? 'flex' : 'none';
@@ -664,11 +826,15 @@ function closeSidebar() { document.getElementById('sidebar').classList.remove('o
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); }
 function openModal(title, body) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').innerHTML = body; document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
-function demoBanner() { return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS. All data shown is for demonstration purposes.</div>`; }
+function demoBanner() {
+  const school = LEARNER.school || 'Demo School';
+  return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS for <strong style="color:var(--accent)">${school}</strong>. All data is for demonstration purposes.</div>`;
+}
 
 // ── HOME ──
 function renderHome() {
   const isMobile = window.innerWidth <= 768;
+  const firstName = LEARNER.firstName || 'Thabo';
   const recentItems = [
     { stroke:'#fdd663', icon:`<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`, title:'New quiz available: Algebraic Expressions', meta:'Today', action:"showPage('quizzes')" },
     { stroke:'#a78bfa', icon:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`, title:'Assignment submitted: Algebra Review', meta:'Yesterday', action:"showPage('assignments')" },
@@ -696,8 +862,8 @@ function renderHome() {
 
   const manualHtml = `
     ${demoBanner()}
-    <div class="manual-greeting">Welcome back, Thabo 👋</div>
-    <div class="manual-sub">Grade 10A </div>
+    <div class="manual-greeting">Welcome back, ${firstName} 👋</div>
+    <div class="manual-sub">Grade 10A</div>
     <div class="quick-stats">
       <div class="stat-card" onclick="showPage('quizzes')"><div class="stat-num" style="color:#4fd1c5">4</div><div class="stat-lbl">Quizzes</div></div>
       <div class="stat-card" onclick="showPage('assignments')"><div class="stat-num" style="color:#a78bfa">3</div><div class="stat-lbl">Assignments</div></div>
@@ -732,7 +898,6 @@ function renderHome() {
         <div class="learner-home-right manual-container">${manualHtml}</div>
       </div>`;
   }
-  // Show calendar icon when on home (desktop only)
   const calIcon = document.getElementById('demoCalIconBtn');
   if (calIcon) calIcon.style.display = window.innerWidth > 768 ? 'flex' : 'none';
 }
@@ -769,7 +934,6 @@ function buildDemoMiniCal() {
 function miniCalPrev() {
   calState.month--;
   if (calState.month < 1) { calState.month = 12; calState.year--; }
-  // Re-render just the mini cal panel
   const panel = document.querySelector('.learner-home-panel:last-child');
   if (panel) {
     const container = panel.querySelector('.demo-mini-cal')?.parentElement;
@@ -804,7 +968,6 @@ function buildFullCalPage(month, year) {
   const eventMap = {};
   evs.forEach(e => { if (!eventMap[e.day]) eventMap[e.day] = []; eventMap[e.day].push(e); });
 
-  // Legend
   const legend = `
     <div class="lcal-legend">
       <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#fdd663"></span> Quiz</span>
@@ -813,16 +976,14 @@ function buildFullCalPage(month, year) {
       <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#22c55e"></span> Completed</span>
     </div>`;
 
-  // Day headers
   const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="lcal-day-header">${d}</div>`).join('');
 
-  // Cells
   let cells = '';
   for (let i = 0; i < offset; i++) cells += `<div class="lcal-cell lcal-cell-empty"></div>`;
 
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = (d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
-    const isFakeToday = (d === 14 && month === 5 && year === 2025); // demo "today"
+    const isFakeToday = (d === 14 && month === 5 && year === 2025);
     const dayEvs = eventMap[d] || [];
 
     const hasDots = {
@@ -865,7 +1026,6 @@ function buildFullCalPage(month, year) {
       </div>`;
   }
 
-  // Upcoming panel
   const allUpcoming = evs.filter(e => {
     const d = new Date(year, month - 1, e.day);
     const now = new Date(); now.setHours(0,0,0,0);
@@ -975,7 +1135,6 @@ function renderAssignments() {
 function renderResources() {
   let html = `${demoBanner()}`;
   D.resources.forEach(r => {
-    const color = r.type === 'PDF' ? '#f85149' : '#4fd1c5';
     html += `<div class="resource-card" onclick="showToast('Opening ${r.name}...')"><div class="res-info"><div class="res-name">${r.name}</div><div class="res-meta">${r.type} · ${r.size} · ${r.date}</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div>`;
   });
   document.getElementById('content').innerHTML = html;
@@ -1033,8 +1192,12 @@ function toggleRow(detailId,btnId) { const d=document.getElementById(detailId); 
 function switchView(gi,view) { const listEl=document.getElementById('glist-'+gi); const termEl=document.getElementById('gterm-'+gi); const btnL=document.getElementById('vt-list-'+gi); const btnT=document.getElementById('vt-term-'+gi); if(view==='list'){listEl.style.display='block';termEl.style.display='none';btnL.classList.add('active-view');btnT.classList.remove('active-view');}else{listEl.style.display='none';termEl.style.display='block';btnL.classList.remove('active-view');btnT.classList.add('active-view');} }
 
 function showProgressReport() {
-  const c=document.getElementById('content'); const oc={t:'#4fd1c5',b:'rgba(79,209,197,0.15)'};
-  c.innerHTML=`<div style="max-width:860px;margin:0 auto;padding-bottom:60px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;"><button onclick="renderGrades()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>Back to Grades</button><button onclick="showToast('Print dialog opening...')" style="display:inline-flex;align-items:center;gap:7px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Print Report</button></div><div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:24px;position:relative;overflow:hidden;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4fd1c5,#22c55e,#4e79a7)"></div><div style="width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,#1a3a3a,#0d2424);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#4fd1c5;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;">L</div><div style="flex:1"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4fd1c5;margin-bottom:4px;">Demo School</div><div style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;">Thabo Mahlangu</div><div style="font-size:13px;color:var(--muted);">Grade 10A – Mathematics · Term 1 Progress Report</div></div><div style="text-align:center;flex-shrink:0;"><div style="width:78px;height:78px;border-radius:50%;border:3px solid ${oc.t};background:${oc.b};display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px;"><div style="font-size:22px;font-weight:900;color:${oc.t};line-height:1;">69%</div><div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Overall</div></div><div style="font-size:11px;color:var(--muted);">Term 1 Average</div></div></div><div style="display:flex;gap:8px;margin-bottom:20px;">${[1,2,3,4].map(t=>`<div style="flex:1;padding:10px;text-align:center;background:#161b22;border:1px solid ${t===1?'rgba(79,209,197,0.35)':'rgba(255,255,255,0.07)'};border-radius:10px;${t>1?'opacity:0.35;':''}"><div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${t===1?'#4fd1c5':'#8b949e'};">Term ${t}</div><div style="font-size:18px;font-weight:900;color:${t===1?'#4fd1c5':'#8b949e'};margin:4px 0;">${t===1?'69%':'—'}</div><div style="font-size:10px;color:#4a5568;">${t===1?'Current':'Upcoming'}</div></div>`).join('')}</div></div>`;
+  const firstName = LEARNER.firstName || 'Thabo';
+  const fullName  = LEARNER.name      || 'Thabo Mahlangu';
+  const school    = LEARNER.school    || 'Demo School';
+  const initials  = LEARNER.initials  || 'TM';
+  const c={t:'#4fd1c5',b:'rgba(79,209,197,0.15)'};
+  document.getElementById('content').innerHTML=`<div style="max-width:860px;margin:0 auto;padding-bottom:60px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;"><button onclick="renderGrades()" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>Back to Grades</button><button onclick="showToast('Print dialog opening...')" style="display:inline-flex;align-items:center;gap:7px;background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Print Report</button></div><div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:24px;position:relative;overflow:hidden;"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4fd1c5,#22c55e,#4e79a7)"></div><div style="width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,#1a3a3a,#0d2424);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#4fd1c5;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;">${initials}</div><div style="flex:1"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#4fd1c5;margin-bottom:4px;">${school}</div><div style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;">${fullName}</div><div style="font-size:13px;color:var(--muted);">Grade 10A – Mathematics · Term 1 Progress Report</div></div><div style="text-align:center;flex-shrink:0;"><div style="width:78px;height:78px;border-radius:50%;border:3px solid ${c.t};background:${c.b};display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px;"><div style="font-size:22px;font-weight:900;color:${c.t};line-height:1;">69%</div><div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Overall</div></div><div style="font-size:11px;color:var(--muted);">Term 1 Average</div></div></div><div style="display:flex;gap:8px;margin-bottom:20px;">${[1,2,3,4].map(t=>`<div style="flex:1;padding:10px;text-align:center;background:#161b22;border:1px solid ${t===1?'rgba(79,209,197,0.35)':'rgba(255,255,255,0.07)'};border-radius:10px;${t>1?'opacity:0.35;':''}"><div style="font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${t===1?'#4fd1c5':'#8b949e'};">Term ${t}</div><div style="font-size:18px;font-weight:900;color:${t===1?'#4fd1c5':'#8b949e'};margin:4px 0;">${t===1?'69%':'—'}</div><div style="font-size:10px;color:#4a5568;">${t===1?'Current':'Upcoming'}</div></div>`).join('')}</div></div>`;
 }
 
 // ── EVALUATIONS ──
@@ -1059,11 +1222,11 @@ function toggleSyl(i){const el=document.getElementById('syl-'+i);el.style.displa
 
 // ── SETTINGS ──
 function renderSettings() {
-  document.getElementById('content').innerHTML=`${demoBanner()}<div class="settings-wrap"><div class="settings-avatar-wrap"><div class="settings-avatar" onclick="showToast('Photo upload not available in demo')">TM</div><div class="settings-hint">Click to update photo</div></div><div class="settings-card" onclick="showToast('Photo upload not available in demo')"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div><div class="settings-card-info"><div class="settings-card-name">Update Profile Picture</div><div class="settings-card-sub">Upload a new photo</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Notification sync requested!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div><div class="settings-card-info"><div class="settings-card-name">Sync Notifications</div><div class="settings-card-sub">Not receiving alerts? Tap to sync</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Signed out – this is a demo!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(248,81,73,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div><div class="settings-card-info"><div class="settings-card-name" style="color:#f85149;">Sign Out</div><div class="settings-card-sub">Log out of your account</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
+  const initials = LEARNER.initials || 'TM';
+  const name     = LEARNER.name     || 'Thabo Mahlangu';
+  const school   = LEARNER.school   || 'Demo School';
+  document.getElementById('content').innerHTML=`${demoBanner()}<div class="settings-wrap"><div class="settings-avatar-wrap"><div class="settings-avatar" onclick="showToast('Photo upload not available in demo')">${initials}</div><div class="settings-hint">Click to update photo</div></div><div style="text-align:center;margin-bottom:24px;font-size:14px;color:#8b949e;">Signed in as <strong style="color:#4fd1c5">${name}</strong> · ${school}</div><div class="settings-card" onclick="showToast('Photo upload not available in demo')"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div><div class="settings-card-info"><div class="settings-card-name">Update Profile Picture</div><div class="settings-card-sub">Upload a new photo</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Notification sync requested!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div><div class="settings-card-info"><div class="settings-card-name">Sync Notifications</div><div class="settings-card-sub">Not receiving alerts? Tap to sync</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div><div class="settings-card" onclick="showToast('Signed out – this is a demo!')" style="margin-top:4px;"><div class="settings-card-icon" style="background:rgba(248,81,73,0.1)"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div><div class="settings-card-info"><div class="settings-card-name" style="color:#f85149;">Sign Out</div><div class="settings-card-sub">Log out of your account</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--muted)" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"/></svg></div></div>`;
 }
-
-// ── INIT ──
-showPage('home');
 </script>
 </body>
 </html>
