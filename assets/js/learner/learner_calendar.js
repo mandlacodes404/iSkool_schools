@@ -638,25 +638,6 @@ window.hideLearnerCalIcon = function () {
     if (btn) btn.style.display = 'none';
 };
 
-// ── PATCH loadManual to show/hide the icon ──
-// We wrap the existing loadManual so the icon appears on home and hides elsewhere
-(function patchLoadManual() {
-    // Wait until manual.js has defined window.loadManual
-    const interval = setInterval(() => {
-        if (typeof window.loadManual === 'function') {
-            clearInterval(interval);
-
-            const original = window.loadManual;
-            window.loadManual = async function (...args) {
-                await original.apply(this, args);
-                // Show icon after home renders (desktop only)
-                if (window.innerWidth > 768) {
-                    window.showLearnerCalIcon();
-                }
-            };
-        }
-    }, 50);
-})();
 
 // ── Hide icon when ANY other nav item is clicked ──
 document.addEventListener('DOMContentLoaded', function () {

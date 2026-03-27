@@ -2389,7 +2389,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=1.5"></script>
+<script src="assets/js/learner/manual.js?v=1.6"></script>
 <script src="assets/js/learner/quiz.js?v=3.0"></script>
 <script src="assets/js/learner/assignments.js?v=2.2"></script>
 <script src="assets/js/learner/resources.js?v=2.0"></script>
@@ -2398,7 +2398,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/evaluations.js?v=1.1"></script>
 <script src="assets/js/learner/discussions.js?v=2.2"></script>
 <script src="assets/js/learner/syllabus.js?v=1.0"></script>
-<script src="assets/js/learner/learner_calendar.js?v=1.0"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
