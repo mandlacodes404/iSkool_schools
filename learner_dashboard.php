@@ -1503,7 +1503,7 @@ document.addEventListener("DOMContentLoaded", function () {
          } else if (savedPage === 'syllabus') {
             window.fetchSyllabus();
         } else if (savedPage.includes("evaluation_list.php")) {
-            window.fetchEvaluaions();
+            window.fetchEvaluations();
         } else if (savedPage === 'learner_calendar') {
             window.fetchLearnerCalendar();
         } else if (savedPage.includes("discussion_list.php")) {
