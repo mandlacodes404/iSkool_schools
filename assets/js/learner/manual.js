@@ -79,6 +79,8 @@ function afterHomeRender() {
 // ─────────────────────────────────────────────
 // BUILD LAYOUT
 // ─────────────────────────────────────────────
+// CHANGED: panel titles moved outside .learner-home-panel cards (sit above like teacher snap-panel-title)
+// CHANGED: calendar stripped of .learner-home-panel wrapper — floats with no background/border
 function buildHomeLayout(data, manualHtml) {
     const todo   = data.todo   || [];
     const recent = data.recent || [];
@@ -93,40 +95,40 @@ function buildHomeLayout(data, manualHtml) {
             <div class="learner-home-left">
 
                 <!-- RECENT ACTIVITY -->
+                <div class="learner-home-panel-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Recent Activity
+                </div>
                 <div class="learner-home-panel">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Recent Activity
-                    </div>
                     ${buildRecentActivity(recent)}
                 </div>
 
                 <!-- TO-DO (capped at 3) -->
-                <div class="learner-home-panel" style="margin-top:16px;">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M9 11l3 3L22 4"></path>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        To-Do
-                    </div>
+                <div class="learner-home-panel-title" style="margin-top:20px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    To-Do
+                </div>
+                <div class="learner-home-panel">
                     ${buildTodoList(todoSlice)}
                 </div>
 
                 <!-- CALENDAR (desktop only — populated by loadLearnerCalendar) -->
-                <div class="learner-home-panel learner-cal-panel" style="margin-top:16px; display:none;">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        My Calendar
-                    </div>
+                <div class="learner-home-panel-title" style="margin-top:20px; display:none;" id="learner-cal-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    My Calendar
+                </div>
+                <div class="learner-cal-panel" style="display:none;">
                     <div id="learner-cal-container">
                         <div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>
                     </div>
@@ -145,14 +147,18 @@ function buildHomeLayout(data, manualHtml) {
 // ─────────────────────────────────────────────
 // LEARNER CALENDAR
 // ─────────────────────────────────────────────
+// CHANGED: added titleEl lookup + titleEl.style.display = 'flex' so the
+//          floating label above the calendar shows when the calendar loads
 window.loadLearnerCalendar = async function(month, year) {
     // Only show on desktop
     if (window.innerWidth <= 768) return;
 
+    const titleEl   = document.getElementById('learner-cal-title');
     const panel     = document.querySelector('.learner-cal-panel');
     const container = document.getElementById('learner-cal-container');
     if (!panel || !container) return;
 
+    if (titleEl) titleEl.style.display = 'flex';
     panel.style.display = 'block';
     container.innerHTML = `<div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>`;
 
