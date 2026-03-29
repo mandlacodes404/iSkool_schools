@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>iSkool LMS – Teacher Demo</title>
 <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous">
@@ -35,8 +35,13 @@ body {
   color: var(--text);
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   font-weight: 600;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 /* ─── SPLASH SCREEN ─── */
@@ -47,6 +52,8 @@ body {
   align-items: center; justify-content: center;
   z-index: 99999;
   transition: opacity 0.8s ease;
+  height: 100vh;
+  height: 100dvh;
 }
 #splash.fade-out { opacity: 0; pointer-events: none; }
 #splash-logo {
@@ -115,7 +122,9 @@ body {
   width: var(--sidebar-w); background: var(--surface2);
   display: flex; flex-direction: column; padding: 20px;
   position: fixed; top: 0; left: -100%;
-  height: 100vh; z-index: 5000; overflow-y: auto;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 5000; overflow-y: auto;
   box-shadow: 2px 0 12px rgba(0,0,0,0.3);
   transition: left var(--transition);
   visibility: hidden; opacity: 0;
@@ -168,7 +177,7 @@ body {
 #overlay.show { opacity: 1; pointer-events: all; }
 
 /* ─── MAIN ─── */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; min-height: 0; }
 
 /* ─── TOP NAV ─── */
 .top-nav { background: var(--surface); border-bottom: 1px solid var(--border2); flex-shrink: 0; }
@@ -257,7 +266,7 @@ body {
 .tab.active { color: var(--text); border-bottom-color: var(--orange); }
 
 /* ─── CONTENT ─── */
-#content { flex: 1; overflow-y: auto; padding: 24px; padding-bottom: 100px; }
+#content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 #content::-webkit-scrollbar { width: 6px; }
 #content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 #content::-webkit-scrollbar-thumb:hover { background: rgba(79,209,197,0.5); }
@@ -265,9 +274,11 @@ body {
 /* ─── MOBILE BOTTOM NAV ─── */
 .mobile-nav {
   display: none; position: fixed; bottom: 0; left: 0; width: 100%;
-  height: 68px; background: rgba(26,25,25,0.9);
+  background: rgba(26,25,25,0.97);
   backdrop-filter: blur(20px); border-top: 1px solid var(--border);
   z-index: 4000; justify-content: space-around; align-items: flex-start; padding-top: 6px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(68px + env(safe-area-inset-bottom, 0px));
 }
 .mob-tab {
   flex: 1; display: flex; flex-direction: column;
@@ -539,7 +550,7 @@ body {
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
   .mobile-nav { display: flex !important; }
-  #content { padding-bottom: 90px; }
+  #content { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
   .kpi-grid { grid-template-columns: repeat(2,1fr); }
   .chart-row { grid-template-columns: 1fr; }
   .top-grid { grid-template-columns: 1fr; }
@@ -713,7 +724,6 @@ body {
     <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     Evaluations
   </button>
-  
   <button class="mob-tab" onclick="showPage('announcements');setMobActive(this)">
     <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
     Announcement
@@ -740,32 +750,23 @@ body {
 // ── TEACHER STATE ──
 let TEACHER = { name: '', firstName: '', initials: '', email: '', school: '' };
 
-// ── PERSONALISATION ──
 function getInitials(fullName) {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].substring(0,2).toUpperCase();
   return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
 }
-function getFirstName(fullName) {
-  return fullName.trim().split(/\s+/)[0];
-}
-function getSchoolInitials(school) {
-  return school.trim().split(/\s+/).map(w=>w[0]).join('').substring(0,3).toUpperCase();
-}
+function getFirstName(fullName) { return fullName.trim().split(/\s+/)[0]; }
+function getSchoolInitials(school) { return school.trim().split(/\s+/).map(w=>w[0]).join('').substring(0,3).toUpperCase(); }
 
 function launchDemo() {
   const nameVal = document.getElementById('persName').value.trim();
   const schoolVal = document.getElementById('persSchool').value.trim();
   if (!nameVal) { document.getElementById('persName').focus(); showToast('Please enter your name'); return; }
   if (!schoolVal) { document.getElementById('persSchool').focus(); showToast('Please enter your school name'); return; }
-
-  TEACHER.name = nameVal;
-  TEACHER.firstName = getFirstName(nameVal);
+  TEACHER.name = nameVal; TEACHER.firstName = getFirstName(nameVal);
   TEACHER.initials = getInitials(nameVal);
   TEACHER.email = nameVal.toLowerCase().replace(/\s+/g,'.') + '@iskool.demo';
   TEACHER.school = schoolVal;
-
-  // Patch all UI elements
   document.getElementById('sidebarInitials').textContent = TEACHER.initials;
   document.getElementById('sidebarName').textContent = TEACHER.name;
   document.getElementById('sidebarEmail').textContent = TEACHER.email;
@@ -775,32 +776,19 @@ function launchDemo() {
   document.getElementById('dropName').textContent = TEACHER.name;
   document.getElementById('dropEmail').textContent = TEACHER.email;
   document.getElementById('sidebarFooter').textContent = 'iSkool v.1.0.0 · ' + schoolVal;
-
-  // Update data with school name
-  DATA.school = schoolVal;
-  DATA.teacher.name = TEACHER.name;
-  DATA.teacher.initials = TEACHER.initials;
-  DATA.teacher.email = TEACHER.email;
-  // Update class names to reflect school
+  DATA.school = schoolVal; DATA.teacher.name = TEACHER.name;
+  DATA.teacher.initials = TEACHER.initials; DATA.teacher.email = TEACHER.email;
   DATA.classes = ['Grade 10A – Mathematics','Grade 11B – Mathematics','Grade 12A – Mathematics'];
-  // Update announcement classes
   DATA.announcements.forEach(a => { a.school = schoolVal; });
-
-  // Hide personalise screen
   const p = document.getElementById('personalise');
-  p.style.opacity = '0';
-  p.style.transition = 'opacity 0.5s ease';
+  p.style.opacity = '0'; p.style.transition = 'opacity 0.5s ease';
   setTimeout(() => { p.style.display = 'none'; showPage('home'); }, 500);
 }
 
-// Allow Enter key on personalise form
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('personalise').style.display !== 'none') {
-    launchDemo();
-  }
+  if (e.key === 'Enter' && document.getElementById('personalise').style.display !== 'none') launchDemo();
 });
 
-// ── SPLASH → PERSONALISE ──
 window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splash');
@@ -815,10 +803,8 @@ window.addEventListener('load', () => {
   }, 2200);
 });
 
-// ── DATA ──
 const DATA = {
-  teacher: { name: '', initials: '', email: '' },
-  school: '',
+  teacher: { name: '', initials: '', email: '' }, school: '',
   classes: ['Grade 10A – Mathematics','Grade 11B – Mathematics','Grade 12A – Mathematics'],
   quizzes: [
     { id:1, name:'Quadratic Equations', class:'Grade 12A – Mathematics', term:'Term 2', date:'2025-05-14', time:'09:00–10:00', status:'Open', questions:15, published:true },
@@ -835,17 +821,17 @@ const DATA = {
   ],
   grades: {
     'Grade 12A – Mathematics': [
-      { name:'Amahle Dube', score:92, outOf:100 }, { name:'Sipho Nkosi', score:78, outOf:100 },
-      { name:'Thandi Mokoena', score:85, outOf:100 }, { name:'Bongani Zulu', score:54, outOf:100 },
-      { name:'Lerato Molefe', score:71, outOf:100 }, { name:'Zanele Khumalo', score:88, outOf:100 },
+      { name:'Amahle Dube', score:92, outOf:100 },{ name:'Sipho Nkosi', score:78, outOf:100 },
+      { name:'Thandi Mokoena', score:85, outOf:100 },{ name:'Bongani Zulu', score:54, outOf:100 },
+      { name:'Lerato Molefe', score:71, outOf:100 },{ name:'Zanele Khumalo', score:88, outOf:100 },
     ],
     'Grade 11B – Mathematics': [
-      { name:'Siyanda Ndlovu', score:65, outOf:100 }, { name:'Palesa Dlamini', score:82, outOf:100 },
-      { name:'Mpho Sithole', score:74, outOf:100 }, { name:'Kagiso Tshwane', score:91, outOf:100 },
+      { name:'Siyanda Ndlovu', score:65, outOf:100 },{ name:'Palesa Dlamini', score:82, outOf:100 },
+      { name:'Mpho Sithole', score:74, outOf:100 },{ name:'Kagiso Tshwane', score:91, outOf:100 },
     ],
     'Grade 10A – Mathematics': [
-      { name:'Luyanda Mthembu', score:58, outOf:100 }, { name:'Nomsa Cele', score:77, outOf:100 },
-      { name:'Thabo Mahlangu', score:69, outOf:100 }, { name:'Ayanda Nxumalo', score:83, outOf:100 },
+      { name:'Luyanda Mthembu', score:58, outOf:100 },{ name:'Nomsa Cele', score:77, outOf:100 },
+      { name:'Thabo Mahlangu', score:69, outOf:100 },{ name:'Ayanda Nxumalo', score:83, outOf:100 },
     ],
   },
   resources: [
@@ -857,7 +843,7 @@ const DATA = {
   ],
   discussions: [
     { id:1, title:'When is the next test?', class:'Grade 12A – Mathematics', replies:8, date:'3 May 2025' },
-    { id:2, title:'I don\'t understand question 5 in the homework', class:'Grade 11B – Mathematics', replies:12, date:'4 May 2025' },
+    { id:2, title:"I don't understand question 5 in the homework", class:'Grade 11B – Mathematics', replies:12, date:'4 May 2025' },
     { id:3, title:'Can we get extra study materials for trigonometry?', class:'Grade 10A – Mathematics', replies:5, date:'5 May 2025' },
     { id:4, title:'Group study session – who is interested?', class:'Grade 12A – Mathematics', replies:19, date:'6 May 2025' },
   ],
@@ -868,17 +854,17 @@ const DATA = {
   ],
   syllabus: [
     { class:'Grade 12A – Mathematics', topics:[
-      { name:'Quadratic Equations', done:true }, { name:'Functions & Graphs', done:true },
-      { name:'Calculus (Differentiation)', done:true }, { name:'Integration', done:false },
-      { name:'Trigonometry', done:false }, { name:'Statistics & Probability', done:false },
+      { name:'Quadratic Equations', done:true },{ name:'Functions & Graphs', done:true },
+      { name:'Calculus (Differentiation)', done:true },{ name:'Integration', done:false },
+      { name:'Trigonometry', done:false },{ name:'Statistics & Probability', done:false },
     ]},
     { class:'Grade 11B – Mathematics', topics:[
-      { name:'Algebra – Polynomials', done:true }, { name:'Functions (Exponential)', done:true },
-      { name:'Trigonometry Basics', done:false }, { name:'Analytical Geometry', done:false },
+      { name:'Algebra – Polynomials', done:true },{ name:'Functions (Exponential)', done:true },
+      { name:'Trigonometry Basics', done:false },{ name:'Analytical Geometry', done:false },
     ]},
     { class:'Grade 10A – Mathematics', topics:[
-      { name:'Number Systems', done:true }, { name:'Algebraic Expressions', done:true },
-      { name:'Equations & Inequalities', done:true }, { name:'Geometry Basics', done:false },
+      { name:'Number Systems', done:true },{ name:'Algebraic Expressions', done:true },
+      { name:'Equations & Inequalities', done:true },{ name:'Geometry Basics', done:false },
       { name:'Data Handling', done:false },
     ]},
   ],
@@ -888,55 +874,48 @@ const DATA = {
     byClass: { labels:['Gr 12A Maths','Gr 11B Maths','Gr 10A Maths'], data:[81, 78, 68] },
     gender: { female:{ pct:79, avg:76 }, male:{ pct:67, avg:71 } },
     topPerformers: [
-      { name:'Amahle Dube', avg:92 }, { name:'Kagiso Tshwane', avg:91 },
-      { name:'Zanele Khumalo', avg:88 }, { name:'Thandi Mokoena', avg:85 },
+      { name:'Amahle Dube', avg:92 },{ name:'Kagiso Tshwane', avg:91 },
+      { name:'Zanele Khumalo', avg:88 },{ name:'Thandi Mokoena', avg:85 },
     ],
     needsSupport: [
-      { name:'Bongani Zulu', avg:54 }, { name:'Luyanda Mthembu', avg:58 },
-      { name:'Nomsa Cele (Gr10)', avg:61 }, { name:'Sipho Nkosi', avg:64 },
+      { name:'Bongani Zulu', avg:54 },{ name:'Luyanda Mthembu', avg:58 },
+      { name:'Nomsa Cele (Gr10)', avg:61 },{ name:'Sipho Nkosi', avg:64 },
     ],
   },
   evaluations: [
     { question:'The teacher explains concepts clearly', results:[
-      { label:'Strongly Agree', count:18 }, { label:'Agree', count:9 },
-      { label:'Neutral', count:3 }, { label:'Disagree', count:1 }, { label:'Strongly Disagree', count:0 },
+      { label:'Strongly Agree', count:18 },{ label:'Agree', count:9 },
+      { label:'Neutral', count:3 },{ label:'Disagree', count:1 },{ label:'Strongly Disagree', count:0 },
     ], comments:['Best teacher I have had!','Very clear explanations, thank you.','Sometimes goes too fast but overall great.']},
     { question:'The learning platform is easy to use', results:[
-      { label:'Strongly Agree', count:14 }, { label:'Agree', count:11 },
-      { label:'Neutral', count:4 }, { label:'Disagree', count:2 }, { label:'Strongly Disagree', count:0 },
+      { label:'Strongly Agree', count:14 },{ label:'Agree', count:11 },
+      { label:'Neutral', count:4 },{ label:'Disagree', count:2 },{ label:'Strongly Disagree', count:0 },
     ], comments:['iSkool makes studying easier.','I love the quiz feature.']},
     { question:'Assignments are fair and relevant', results:[
-      { label:'Strongly Agree', count:16 }, { label:'Agree', count:10 },
-      { label:'Neutral', count:4 }, { label:'Disagree', count:1 }, { label:'Strongly Disagree', count:0 },
+      { label:'Strongly Agree', count:16 },{ label:'Agree', count:10 },
+      { label:'Neutral', count:4 },{ label:'Disagree', count:1 },{ label:'Strongly Disagree', count:0 },
     ], comments:['The assignments help me prepare for tests.','Fair workload.']},
   ],
   calEvents: {
     14:[ {type:'q',label:'Quadratic Equations Quiz – Gr12A'} ],
     18:[ {type:'a',label:'Functions Practice – Gr11B due'} ],
-    20:[ {type:'q',label:'Functions & Graphs Quiz – Gr11B'}, {type:'a',label:'Calculus Exercises – Gr12A due'} ],
+    20:[ {type:'q',label:'Functions & Graphs Quiz – Gr11B'},{type:'a',label:'Calculus Exercises – Gr12A due'} ],
     24:[ {type:'r',label:'Mark assignments'} ],
     28:[ {type:'q',label:'Trigonometry Quiz – Gr10A'} ],
   }
 };
 
-// ── NAVIGATION ──
 let charts = {};
 function destroyCharts() { Object.values(charts).forEach(c => { try{ c.destroy(); }catch(e){} }); charts = {}; }
 function showPage(page) {
   destroyCharts(); closeSidebar();
   switch(page) {
-    case 'home': renderHome(); break;
-    case 'quizzes': renderQuizzes(); break;
-    case 'assignments': renderAssignments(); break;
-    case 'announcements': renderAnnouncements(); break;
-    case 'grades': renderGrades(); break;
-    case 'resources': renderResources(); break;
-    case 'discussions': renderDiscussions(); break;
-    case 'analytics': renderAnalytics(); break;
-    case 'evaluations': renderEvaluations(); break;
-    case 'syllabus': renderSyllabus(); break;
-    case 'calendar': renderCalendar(); break;
-    case 'settings': renderSettings(); break;
+    case 'home': renderHome(); break; case 'quizzes': renderQuizzes(); break;
+    case 'assignments': renderAssignments(); break; case 'announcements': renderAnnouncements(); break;
+    case 'grades': renderGrades(); break; case 'resources': renderResources(); break;
+    case 'discussions': renderDiscussions(); break; case 'analytics': renderAnalytics(); break;
+    case 'evaluations': renderEvaluations(); break; case 'syllabus': renderSyllabus(); break;
+    case 'calendar': renderCalendar(); break; case 'settings': renderSettings(); break;
     default: renderHome();
   }
 }
@@ -953,14 +932,13 @@ function openModal(title, bodyHtml, submitFn) { document.getElementById('modalTi
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function submitModal() { if(window._modalSubmit) window._modalSubmit(); closeModal(); }
 
-// ── SEARCH ──
 const PAGES = [
-  { label:'Home', page:'home' }, { label:'Quizzes', page:'quizzes' },
-  { label:'Assignments', page:'assignments' }, { label:'Announcements', page:'announcements' },
-  { label:'Grades', page:'grades' }, { label:'Resources', page:'resources' },
-  { label:'Discussions', page:'discussions' }, { label:'Analytics', page:'analytics' },
-  { label:'Evaluations', page:'evaluations' }, { label:'Syllabus', page:'syllabus' },
-  { label:'Calendar', page:'calendar' }, { label:'Settings', page:'settings' },
+  { label:'Home', page:'home' },{ label:'Quizzes', page:'quizzes' },
+  { label:'Assignments', page:'assignments' },{ label:'Announcements', page:'announcements' },
+  { label:'Grades', page:'grades' },{ label:'Resources', page:'resources' },
+  { label:'Discussions', page:'discussions' },{ label:'Analytics', page:'analytics' },
+  { label:'Evaluations', page:'evaluations' },{ label:'Syllabus', page:'syllabus' },
+  { label:'Calendar', page:'calendar' },{ label:'Settings', page:'settings' },
 ];
 function handleSearch(q) {
   const box=document.getElementById('searchSuggs');
@@ -971,12 +949,10 @@ function handleSearch(q) {
   box.style.display='block';
 }
 
-// ── DEMO BANNER ──
 function demoBanner() {
   return `<div class="demo-banner"><span class="demo-tag">DEMO</span> This is an interactive preview of iSkool LMS for <strong style="color:var(--accent)">${DATA.school}</strong>. All data is for demonstration purposes.</div>`;
 }
 
-// ── HOME ──
 function renderHome() {
   const isMobile = window.innerWidth <= 768;
   const snap = `
@@ -1002,8 +978,7 @@ function renderHome() {
       <div class="snap-meta">Grade 12A · <span class="badge" style="background:rgba(52,211,153,0.15);color:#34d399">19 replies</span></div>
     </div>
     <div class="section-label" style="margin-top:20px;">Calendar – May 2025</div>
-    ${miniCal()}
-  `;
+    ${miniCal()}`;
   const manual = `
     ${demoBanner()}
     <div class="manual-greeting">Good day, ${TEACHER.firstName}! 👋</div>
@@ -1020,8 +995,7 @@ function renderHome() {
       <div class="activity-item"><div class="activity-dot" style="background:#f59e0b"></div><div class="activity-text">Amahle Dube scored 92% on <strong>Quadratic Equations Quiz</strong></div><div class="activity-time">Yesterday</div></div>
       <div class="activity-item"><div class="activity-dot" style="background:#22c55e"></div><div class="activity-text">Kagiso Tshwane scored 91% on <strong>Quadratic Equations Quiz</strong></div><div class="activity-time">Yesterday</div></div>
       <div class="activity-item"><div class="activity-dot" style="background:#f85149"></div><div class="activity-text">Bongani Zulu scored 54% — consider support session</div><div class="activity-time">Yesterday</div></div>
-    </div>
-  `;
+    </div>`;
   if (isMobile) {
     document.getElementById('content').innerHTML = manual;
   } else {
@@ -1039,25 +1013,15 @@ function miniCal() {
   html+=`<div class="cal-grid">${days.map(d=>`<div class="cal-lbl">${d}</div>`).join('')}`;
   for(let i=0;i<offset;i++) html+=`<div class="cal-cell"></div>`;
   for(let d=1;d<=daysInMonth;d++){
-    const ev=DATA.calEvents[d]||[];
-    const isToday=d===14;
+    const ev=DATA.calEvents[d]||[];const isToday=d===14;
     html+=`<div class="cal-cell${isToday?' today':''}"><span class="day-num">${d}</span>${ev.length?`<div class="cal-dot-row">${ev.map(e=>`<span class="dot dot-${e.type}"></span>`).join('')}</div>`:''}</div>`;
   }
-  html+=`</div>`;
-  return html;
+  html+=`</div>`;return html;
 }
 
-// ── QUIZZES ──
 function renderQuizzes() {
-  const t1=DATA.quizzes.filter(q=>q.term==='Term 1');
-  const t2=DATA.quizzes.filter(q=>q.term==='Term 2');
-  document.getElementById('content').innerHTML=`
-    ${demoBanner()}
-    <div class="page-header"><div class="page-title">Quizzes</div><button class="add-btn" onclick="openCreateQuiz()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create Quiz</button></div>
-    <div class="year-badge">2025 Academic Year</div>
-    <div class="term-card active-term"><div class="term-head"><span class="term-name">Term 2</span><span class="term-badge">CURRENT</span></div>${t2.map(quizCard).join('')}</div>
-    <div class="term-card"><div class="term-head"><span class="term-name">Term 1</span></div>${t1.map(quizCard).join('')}</div>
-  `;
+  const t1=DATA.quizzes.filter(q=>q.term==='Term 1');const t2=DATA.quizzes.filter(q=>q.term==='Term 2');
+  document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Quizzes</div><button class="add-btn" onclick="openCreateQuiz()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Create Quiz</button></div><div class="year-badge">2025 Academic Year</div><div class="term-card active-term"><div class="term-head"><span class="term-name">Term 2</span><span class="term-badge">CURRENT</span></div>${t2.map(quizCard).join('')}</div><div class="term-card"><div class="term-head"><span class="term-name">Term 1</span></div>${t1.map(quizCard).join('')}</div>`;
 }
 function quizCard(q) {
   const colors={Open:'#f28c38',Closed:'#6b7280',Draft:'#4fd1c5'};
@@ -1065,11 +1029,8 @@ function quizCard(q) {
   return `<div class="quiz-card"><div class="quiz-main" onclick="toggleQuizDetails(${q.id})"><div class="quiz-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div><div class="quiz-info"><div class="quiz-name">${q.name}</div><div class="quiz-meta">${q.class} · ${q.date}</div></div><span class="status-badge" style="background:${bg[q.status]};color:${colors[q.status]}">${q.status}</span><svg class="quiz-chevron" id="chev-${q.id}" viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="quiz-details" id="qd-${q.id}"><div class="quiz-detail-row"><strong>${q.date}</strong> · ${q.time}</div><div class="quiz-detail-row"><strong>${q.questions} questions</strong></div><div class="quiz-detail-row">Published: <span style="color:${q.published?'#27ae60':'#f85149'};font-weight:800">${q.published?'Visible to learners':'Hidden'}</span></div><div class="quiz-actions"><button class="q-btn results" onclick="showToast('Loading quiz results...')"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> View Results</button>${q.status==='Open'?`<button class="q-btn close-q" onclick="showToast('Quiz closed successfully')">Close Quiz</button>`:''}${q.status==='Closed'?`<button class="q-btn reopen" onclick="showToast('Quiz reopened!')">Reopen</button>`:''}${q.status==='Draft'?`<button class="q-btn reopen" onclick="showToast('Quiz published to learners!')">Publish</button>`:''}<button class="q-btn integrity" onclick="showToast('Integrity report generated')"><svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Integrity</button></div></div></div>`;
 }
 function toggleQuizDetails(id) { const d=document.getElementById('qd-'+id); const c=document.getElementById('chev-'+id); const open=d.classList.toggle('open'); c.classList.toggle('rotated',open); }
-function openCreateQuiz() {
-  openModal('Create New Quiz',`<label class="modal-label">Quiz Title</label><input class="modal-input" placeholder="e.g. Term 2 – Chapter 6 Test"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Date</label><input type="date" class="modal-input" value="2025-05-30"><label class="modal-label">Duration (minutes)</label><input class="modal-input" type="number" value="60">`,()=>showToast('Quiz created successfully!'));
-}
+function openCreateQuiz() { openModal('Create New Quiz',`<label class="modal-label">Quiz Title</label><input class="modal-input" placeholder="e.g. Term 2 – Chapter 6 Test"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Date</label><input type="date" class="modal-input" value="2025-05-30"><label class="modal-label">Duration (minutes)</label><input class="modal-input" type="number" value="60">`,()=>showToast('Quiz created successfully!')); }
 
-// ── ASSIGNMENTS ──
 function renderAssignments() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Assignments</div><button class="add-btn" onclick="openCreateAssign()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> New Assignment</button></div>${DATA.assignments.map(assignCard).join('')}`;
 }
@@ -1079,59 +1040,43 @@ function assignCard(a) {
   return `<div class="assign-card"><div class="assign-main" onclick="toggleAssign(${a.id})"><div class="assign-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div><div class="assign-info"><div class="assign-name">${a.name}</div><div class="assign-sub">${a.class} · Due ${a.due}</div><div class="assign-prog"><div class="assign-bar-bg"><div class="assign-bar-fill" style="width:${pct}%"></div></div><span class="assign-prog-label">${a.submitted}/${a.total} submitted</span></div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="assign-details" id="ad-${a.id}"><div style="font-size:13px;font-weight:800;color:#8b949e;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Submissions</div>${subs.slice(0,a.submitted).map(n=>`<div class="submission-row"><span style="font-size:13px;color:#c9d1d9">${n}</span><span class="sub-badge sub-yes">Submitted</span></div>`).join('')}${['Mpho Sithole','Thabo Mahlangu'].map(n=>`<div class="submission-row"><span style="font-size:13px;color:#c9d1d9">${n}</span><span class="sub-badge sub-no">Not Submitted</span></div>`).join('')}</div></div>`;
 }
 function toggleAssign(id) { document.getElementById('ad-'+id).classList.toggle('open'); }
-function openCreateAssign() {
-  openModal('New Assignment',`<label class="modal-label">Assignment Title</label><input class="modal-input" placeholder="e.g. Chapter 7 Practice Problems"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Due Date</label><input type="date" class="modal-input" value="2025-06-01"><label class="modal-label">Instructions</label><textarea class="modal-input" rows="3" placeholder="Enter assignment instructions..."></textarea>`,()=>showToast('Assignment created!'));
-}
+function openCreateAssign() { openModal('New Assignment',`<label class="modal-label">Assignment Title</label><input class="modal-input" placeholder="e.g. Chapter 7 Practice Problems"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Due Date</label><input type="date" class="modal-input" value="2025-06-01"><label class="modal-label">Instructions</label><textarea class="modal-input" rows="3" placeholder="Enter assignment instructions..."></textarea>`,()=>showToast('Assignment created!')); }
 
-// ── ANNOUNCEMENTS ──
 function renderAnnouncements() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Announcements</div><button class="add-btn" onclick="openCreateAnn()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> New Announcement</button></div>${DATA.announcements.map(a=>`<div class="ann-flat-card"><div class="ann-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div><div class="ann-info"><div class="ann-title">${a.title}</div><div class="ann-preview">${a.message.substring(0,100)}...</div><div class="ann-date">${a.class} · ${DATA.school} · ${a.date}</div></div></div>`).join('')}`;
 }
-function openCreateAnn() {
-  openModal('New Announcement',`<label class="modal-label">Title</label><input class="modal-input" placeholder="Announcement title"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Message</label><textarea class="modal-input" rows="4" placeholder="Write your announcement here..."></textarea>`,()=>showToast('Announcement sent to learners!'));
-}
+function openCreateAnn() { openModal('New Announcement',`<label class="modal-label">Title</label><input class="modal-input" placeholder="Announcement title"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Message</label><textarea class="modal-input" rows="4" placeholder="Write your announcement here..."></textarea>`,()=>showToast('Announcement sent to learners!')); }
 
-// ── GRADES ──
 function renderGrades() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Grades</div></div><div style="display:flex;align-items:flex-start;gap:10px;background:rgba(79,209,197,0.06);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#8b949e;margin-bottom:20px;line-height:1.5;"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>Showing latest quiz results per class at <strong style="color:#4fd1c5">${DATA.school}</strong>. Click <strong style="color:#4fd1c5">Edit Marks</strong> to update individual scores.</div>${Object.entries(DATA.grades).map(([cls,students])=>`<div class="class-group"><div class="class-label">${cls}</div><div class="grades-table-wrap"><table class="grades-table"><thead><tr><th>Learner</th><th>Score</th><th>%</th><th>Symbol</th><th>Action</th></tr></thead><tbody>${students.map(s=>{const pct=Math.round(s.score/s.outOf*100);const cls2=pct>=75?'grade-high':pct>=50?'grade-mid':'grade-low';const sym=pct>=80?'A':pct>=70?'B':pct>=60?'C':pct>=50?'D':'F';return`<tr><td>${s.name}</td><td>${s.score}/${s.outOf}</td><td><span class="grade-badge ${cls2}">${pct}%</span></td><td><strong style="color:${pct>=75?'#1ed760':pct>=50?'#4fd1c5':'#e74c3c'}">${sym}</strong></td><td><button style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;padding:5px 12px;border-radius:6px;font-size:13px;cursor:pointer;font-family:'Nunito',sans-serif;" onclick="showToast('Edit mode – marks updated for ${s.name}')">Edit Marks</button></td></tr>`;}).join('')}</tbody></table></div></div>`).join('')}`;
 }
 
-// ── RESOURCES ──
 function renderResources() {
   const icons={PDF:`<svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,DOCX:`<svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`};
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Resources</div><button class="add-btn" onclick="openUploadResource()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload File</button></div>${DATA.resources.map(r=>`<div class="resource-card"><div class="res-icon">${icons[r.type]||icons.PDF}</div><div class="res-info"><div class="res-name">${r.name}</div><div class="res-meta">${r.class} · ${r.type} · ${r.size} · ${r.date}</div></div><button class="res-del" onclick="showToast('Resource deleted')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></button></div>`).join('')}`;
 }
-function openUploadResource() {
-  openModal('Upload Resource',`<label class="modal-label">Resource Title</label><input class="modal-input" placeholder="e.g. Term 2 Study Guide"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">File</label><div style="border:2px dashed rgba(255,255,255,0.15);border-radius:10px;padding:24px;text-align:center;color:#8b949e;font-size:14px;cursor:pointer;" onclick="showToast('File picker opened')"><svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="2" fill="none" style="display:block;margin:0 auto 10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p>Click to upload or drag & drop</p><p style="font-size:12px">PDF, DOCX, PPTX up to 20MB</p></div>`,()=>showToast('Resource uploaded successfully!'));
-}
+function openUploadResource() { openModal('Upload Resource',`<label class="modal-label">Resource Title</label><input class="modal-input" placeholder="e.g. Term 2 Study Guide"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">File</label><div style="border:2px dashed rgba(255,255,255,0.15);border-radius:10px;padding:24px;text-align:center;color:#8b949e;font-size:14px;cursor:pointer;" onclick="showToast('File picker opened')"><svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="2" fill="none" style="display:block;margin:0 auto 10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><p>Click to upload or drag & drop</p><p style="font-size:12px">PDF, DOCX, PPTX up to 20MB</p></div>`,()=>showToast('Resource uploaded successfully!')); }
 
-// ── DISCUSSIONS ──
 function renderDiscussions() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Discussions</div><button class="add-btn" onclick="openCreateDisc()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> New Topic</button></div>${DATA.discussions.map(d=>`<div class="disc-card" onclick="showToast('Opening discussion: ${d.title.substring(0,30)}...')"><div class="disc-title">${d.title}</div><div class="disc-meta">${d.class} · ${d.date}<span class="disc-reply-badge">${d.replies} replies</span></div></div>`).join('')}`;
 }
-function openCreateDisc() {
-  openModal('New Discussion Topic',`<label class="modal-label">Topic Title</label><input class="modal-input" placeholder="e.g. Questions on Chapter 6"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Opening Message (optional)</label><textarea class="modal-input" rows="3" placeholder="Write something to start the discussion..."></textarea>`,()=>showToast('Discussion topic created!'));
-}
+function openCreateDisc() { openModal('New Discussion Topic',`<label class="modal-label">Topic Title</label><input class="modal-input" placeholder="e.g. Questions on Chapter 6"><label class="modal-label">Class</label><select class="modal-input">${DATA.classes.map(c=>`<option>${c}</option>`).join('')}</select><label class="modal-label">Opening Message (optional)</label><textarea class="modal-input" rows="3" placeholder="Write something to start the discussion..."></textarea>`,()=>showToast('Discussion topic created!')); }
 
-// ── ANALYTICS ──
 function renderAnalytics() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Analytics</div></div><div class="kpi-grid"><div class="kpi-card"><div class="kpi-val" style="color:#4fd1c5">${DATA.analytics.passRate}%</div><div class="kpi-lbl">Pass Rate</div><div class="kpi-sub">↑ 10% from Term 1</div></div><div class="kpi-card"><div class="kpi-val" style="color:#a78bfa">${DATA.analytics.avgScore}</div><div class="kpi-lbl">Avg Score</div><div class="kpi-sub">Out of 100</div></div><div class="kpi-card"><div class="kpi-val" style="color:#22c55e">${DATA.analytics.totalLearners}</div><div class="kpi-lbl">Learners</div><div class="kpi-sub">Across 3 classes</div></div><div class="kpi-card"><div class="kpi-val" style="color:#f59e0b">${DATA.analytics.quizzesGiven}</div><div class="kpi-lbl">Quizzes Given</div><div class="kpi-sub">This year</div></div></div><div class="chart-row"><div class="chart-card"><div class="chart-title">Pass Rate by Term</div><div class="chart-box"><canvas id="termChart"></canvas></div></div><div class="chart-card"><div class="chart-title">Average Score by Class</div><div class="chart-box"><canvas id="classChart"></canvas></div></div></div><div class="gender-gap"><div class="chart-title">Gender Performance Gap</div><div class="gender-row"><div class="gender-label" style="color:#f472b6">Female</div><div class="gender-bar-bg"><div class="gender-bar-fill" style="width:${DATA.analytics.gender.female.pct}%;background:#f472b6">${DATA.analytics.gender.female.avg}%</div></div><div class="gender-pct" style="color:#f472b6">${DATA.analytics.gender.female.pct}%</div></div><div class="gender-row"><div class="gender-label" style="color:#60a5fa">Male</div><div class="gender-bar-bg"><div class="gender-bar-fill" style="width:${DATA.analytics.gender.male.pct}%;background:#60a5fa">${DATA.analytics.gender.male.avg}%</div></div><div class="gender-pct" style="color:#60a5fa">${DATA.analytics.gender.male.pct}%</div></div></div><div class="top-grid"><div class="top-list-card"><div class="top-list-title" style="color:#22c55e">🏆 Top Performers</div>${DATA.analytics.topPerformers.map((p,i)=>`<div class="performer"><span class="perf-name">${i+1}. ${p.name}</span><span style="font-weight:800;color:#22c55e">${p.avg}%</span></div>`).join('')}</div><div class="top-list-card"><div class="top-list-title" style="color:#f85149">⚠️ Needs Support</div>${DATA.analytics.needsSupport.map((p,i)=>`<div class="performer"><span class="perf-name">${i+1}. ${p.name}</span><span style="font-weight:800;color:#f85149">${p.avg}%</span></div>`).join('')}</div></div>`;
   setTimeout(()=>{
-    const tCtx=document.getElementById('termChart');
-    const cCtx=document.getElementById('classChart');
+    const tCtx=document.getElementById('termChart'); const cCtx=document.getElementById('classChart');
     if(tCtx) charts.term=new Chart(tCtx,{type:'bar',data:{labels:DATA.analytics.byTerm.labels,datasets:[{data:DATA.analytics.byTerm.data,backgroundColor:['rgba(79,209,197,0.5)','rgba(79,209,197,0.85)'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8b949e'}},x:{grid:{display:false},ticks:{color:'#8b949e'}}}}});
     if(cCtx) charts.cls=new Chart(cCtx,{type:'bar',data:{labels:DATA.analytics.byClass.labels,datasets:[{data:DATA.analytics.byClass.data,backgroundColor:['rgba(167,139,250,0.7)','rgba(167,139,250,0.9)','rgba(167,139,250,0.6)'],borderRadius:8,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#8b949e'}},y:{grid:{display:false},ticks:{color:'#8b949e'}}}}});
   },50);
 }
 
-// ── EVALUATIONS ──
 function renderEvaluations() {
   const colors=['rgba(79,209,197,0.8)','rgba(34,197,94,0.8)','rgba(245,158,11,0.7)','rgba(248,81,73,0.7)','rgba(100,100,100,0.7)'];
   const total=31;
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Evaluations</div></div><div class="card" style="margin-bottom:20px;"><div style="font-size:14px;color:#8b949e;margin-bottom:4px;">Total Responses</div><div style="font-size:28px;font-weight:900;color:#4fd1c5">${total}</div><div style="font-size:13px;color:#8b949e;margin-top:4px;">Grade 12A · Term 2 2025 · ${DATA.school}</div></div>${DATA.evaluations.map((ev)=>`<div class="card" style="margin-bottom:16px;"><div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:14px;border-left:4px solid #4fd1c5;padding-left:12px;">${ev.question}</div>${ev.results.map((r,i)=>{const pct=Math.round(r.count/total*100);return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;"><div style="width:150px;color:#c9d1d9;font-weight:600;flex-shrink:0">${r.label}</div><div style="flex:1;height:26px;background:#21262d;border-radius:13px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${colors[i]};border-radius:13px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:800;color:#000;">${pct}%</div></div><div style="width:30px;text-align:right;color:#8b949e;font-size:13px">${r.count}</div></div>`;}).join('')}<div style="margin-top:14px;font-size:13px;font-weight:800;color:#4fd1c5;margin-bottom:10px;">Learner Comments</div>${ev.comments.map(c=>`<div style="background:rgba(0,0,0,0.3);padding:10px 14px;border-radius:8px;margin-bottom:8px;font-style:italic;color:#c9d1d9;font-size:14px;border-left:3px solid #30363d;line-height:1.5">${c}</div>`).join('')}</div>`).join('')}`;
 }
 
-// ── SYLLABUS ──
 function renderSyllabus() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Syllabus</div></div>${DATA.syllabus.map((s,si)=>{const done=s.topics.filter(t=>t.done).length;const pct=Math.round(done/s.topics.length*100);return`<div class="syl-class-card"><div class="syl-class-head" onclick="toggleSyl(${si})"><div><div class="syl-class-name">${s.class}</div><div style="font-size:12px;color:#8b949e;margin-top:4px">${done}/${s.topics.length} topics complete · ${pct}%</div></div><div style="display:flex;align-items:center;gap:12px"><div style="width:80px;height:6px;background:#21262d;border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:#4fd1c5;border-radius:3px"></div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"></polyline></svg></div></div><div class="syl-progress-wrap" id="syl-${si}" style="display:none">${s.topics.map((t,ti)=>`<div class="syl-topic-row"><div class="syl-check${t.done?' done':''}" onclick="toggleTopic(${si},${ti})" id="chk-${si}-${ti}">${t.done?'<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>':''}</div><div class="syl-topic-name" id="tn-${si}-${ti}" style="${t.done?'text-decoration:line-through;opacity:0.5':''}">${t.name}</div></div>`).join('')}</div></div>`;}).join('')}`;
 }
@@ -1139,31 +1084,24 @@ function toggleSyl(i) { const el=document.getElementById('syl-'+i); el.style.dis
 function toggleTopic(si,ti) {
   DATA.syllabus[si].topics[ti].done=!DATA.syllabus[si].topics[ti].done;
   const done=DATA.syllabus[si].topics[ti].done;
-  const chk=document.getElementById('chk-'+si+'-'+ti);
-  const tn=document.getElementById('tn-'+si+'-'+ti);
+  const chk=document.getElementById('chk-'+si+'-'+ti); const tn=document.getElementById('tn-'+si+'-'+ti);
   chk.className='syl-check'+(done?' done':'');
   chk.innerHTML=done?'<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>':'';
-  tn.style.textDecoration=done?'line-through':'';
-  tn.style.opacity=done?'0.5':'1';
+  tn.style.textDecoration=done?'line-through':''; tn.style.opacity=done?'0.5':'1';
   showToast(done?'Topic marked complete ✓':'Topic marked incomplete');
 }
 
-// ── CALENDAR ──
 function renderCalendar() {
   const month=5,year=2025;
   const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
-  const firstDay=new Date(year,month-1,1).getDay();
-  const offset=firstDay===0?6:firstDay-1;
+  const firstDay=new Date(year,month-1,1).getDay(); const offset=firstDay===0?6:firstDay-1;
   const total=new Date(year,month,0).getDate();
   const colors={q:'rgba(79,209,197,0.2)',a:'rgba(167,139,250,0.2)',r:'rgba(245,158,11,0.2)'};
   const textC={q:'#4fd1c5',a:'#a78bfa',r:'#f59e0b'};
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Calendar – May 2025</div></div><div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;font-size:13px;font-weight:700"><span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#4fd1c5;display:inline-block"></span> Quiz</span><span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#a78bfa;display:inline-block"></span> Assignment</span><span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span> Reminder</span></div><div class="cal-full-grid">${days.map(d=>`<div style="text-align:center;font-size:11px;font-weight:800;color:#555e6a;padding:8px 0;text-transform:uppercase">${d}</div>`).join('')}${Array(offset).fill(`<div class="cal-full-cell empty"></div>`).join('')}${Array.from({length:total},(_,i)=>{const d=i+1;const evs=DATA.calEvents[d]||[];const isToday=d===14;return`<div class="cal-full-cell${isToday?' today':''}" onclick="${evs.length?`showToast('${evs[0].label}')`:'openNewEvent()'}"><div class="cal-day-num2">${d}</div>${evs.map(e=>`<div class="cal-event-pill" style="background:${colors[e.type]};color:${textC[e.type]}">${e.label}</div>`).join('')}</div>`;}).join('')}</div>`;
 }
-function openNewEvent() {
-  openModal('Add to Calendar',`<label class="modal-label">Title</label><input class="modal-input" placeholder="e.g. Mark assignments"><label class="modal-label">Date</label><input type="date" class="modal-input" value="2025-05-16"><label class="modal-label">Type</label><select class="modal-input"><option>Personal Reminder</option><option>Academic Event</option></select>`,()=>showToast('Event added to calendar!'));
-}
+function openNewEvent() { openModal('Add to Calendar',`<label class="modal-label">Title</label><input class="modal-input" placeholder="e.g. Mark assignments"><label class="modal-label">Date</label><input type="date" class="modal-input" value="2025-05-16"><label class="modal-label">Type</label><select class="modal-input"><option>Personal Reminder</option><option>Academic Event</option></select>`,()=>showToast('Event added to calendar!')); }
 
-// ── SETTINGS ──
 function renderSettings() {
   document.getElementById('content').innerHTML=`${demoBanner()}<div class="page-header"><div class="page-title">Settings</div></div><div class="settings-avatar-wrap"><div class="settings-avatar" onclick="showToast('Photo upload not available in demo')">${TEACHER.initials}</div><div class="settings-hint">Click to update photo</div></div><div style="text-align:center;margin-bottom:24px;font-size:14px;color:#8b949e;">Signed in as <strong style="color:#4fd1c5">${TEACHER.name}</strong> · ${DATA.school}</div><div class="settings-card" onclick="showToast('Photo upload not available in demo')"><div class="settings-card-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div><div class="settings-card-info"><div class="settings-card-name">Update Profile Picture</div><div class="settings-card-sub">Upload a new photo</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div class="settings-card" onclick="showToast('Profile picture removed — showing initials')"><div class="settings-card-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></div><div class="settings-card-info"><div class="settings-card-name" style="color:#f85149">Remove Profile Picture</div><div class="settings-card-sub">Revert to initials avatar</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div class="settings-card" onclick="showToast('Signed out – this is a demo!')"><div class="settings-card-icon"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div><div class="settings-card-info"><div class="settings-card-name" style="color:#f85149">Sign Out</div><div class="settings-card-sub">Log out of your account</div></div><svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div>`;
 }
