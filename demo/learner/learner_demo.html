@@ -215,9 +215,7 @@ body {
 }
 .hdr-btn:hover { color: var(--accent); background: var(--accent-dim); }
 
-#demoCalIconBtn {
-  display: none;
-}
+#demoCalIconBtn { display: none; }
 
 .menu-btn {
   background: #000; border: 2px solid #333; color: var(--text);
@@ -232,6 +230,12 @@ body {
 #content::-webkit-scrollbar { width: 6px; }
 #content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 #content::-webkit-scrollbar-thumb:hover { background: rgba(79,209,197,0.5); }
+
+/* ─── DISCUSSION FULL-HEIGHT WRAPPER ─── */
+#content.disc-mode {
+  padding: 0;
+  overflow: hidden;
+}
 
 /* ─── MOBILE BOTTOM NAV ─── */
 .mob-nav {
@@ -443,7 +447,6 @@ body {
 .res-info { flex: 1; }
 .res-name { font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 4px; }
 .res-meta { font-size: 12px; color: var(--muted); }
-/* ─── ANNOUNCEMENT FLAT CARDS (teacher-style) ─── */
 .ann-flat-card {
   display: flex; align-items: flex-start; gap: 14px;
   background: var(--surface2); border: 1px solid var(--border);
@@ -456,20 +459,6 @@ body {
 .ann-flat-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .ann-flat-preview { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
 .ann-flat-date { font-size: 12px; color: #555e6a; }
-
-/* ─── DISCUSSION FLAT CARDS (teacher-style) ─── */
-.disc-flat-card {
-  display: flex; align-items: flex-start; gap: 14px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px; margin-bottom: 10px;
-  cursor: pointer; transition: border-color 0.2s, transform 0.2s;
-}
-.disc-flat-card:hover { border-color: rgba(79,209,197,0.3); transform: translateY(-2px); }
-.disc-flat-icon { flex-shrink: 0; margin-top: 2px; }
-.disc-flat-info { flex: 1; }
-.disc-flat-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.disc-flat-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #555e6a; }
-.disc-replies { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,209,197,0.2); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; }
 .eval-form { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
 .eval-q { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
 .eval-options { display: flex; flex-direction: column; gap: 8px; }
@@ -512,6 +501,229 @@ body {
 .modal-body { padding: 20px; font-size: 14px; color: #c9d1d9; line-height: 1.7; }
 .modal-foot { display: flex; justify-content: flex-end; padding: 16px 20px; border-top: 1px solid var(--border); }
 .modal-ok { background: var(--accent); border: none; color: #0d1117; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; }
+
+/* ─── DISCUSSION STYLES ─── */
+/* Desktop split layout */
+.disc-split-wrap {
+  display: flex;
+  height: calc(100vh - var(--header-h));
+  overflow: hidden;
+}
+.disc-sidebar-panel {
+  width: 300px;
+  min-width: 260px;
+  max-width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #111;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.disc-sidebar-head {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.disc-sidebar-head span {
+  font-size: 13px; font-weight: 700; color: #e2e8f0;
+  font-family: 'Nunito', sans-serif;
+}
+.disc-new-btn {
+  background: rgba(79,209,197,0.1); color: #4fd1c5;
+  border: 1px solid rgba(79,209,197,0.3);
+  padding: 5px 12px; border-radius: 7px; cursor: pointer;
+  font-weight: 700; font-family: 'Nunito', sans-serif;
+  font-size: 12px; transition: background 0.15s; white-space: nowrap;
+}
+.disc-new-btn:hover { background: rgba(79,209,197,0.2); }
+.disc-sidebar-list {
+  flex: 1; overflow-y: auto; padding: 6px;
+  scrollbar-width: thin; scrollbar-color: #1b1b1b transparent;
+}
+.dsk-item {
+  padding: 11px 12px; border-radius: 8px; cursor: pointer;
+  margin-bottom: 2px; border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dsk-item:hover { background: rgba(255,255,255,0.04); }
+.dsk-item.active {
+  background: rgba(79,209,197,0.07);
+  border-color: rgba(79,209,197,0.2);
+}
+.dsk-item-title {
+  font-size: 12px; font-weight: 700; color: #e2e8f0;
+  font-family: 'Nunito', sans-serif;
+  line-height: 1.35; margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dsk-item.active .dsk-item-title { color: #4fd1c5; }
+.dsk-item-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: #8b949e; font-family: 'Nunito', sans-serif;
+}
+.dsk-item-pill {
+  background: rgba(79,209,197,0.1); color: #4fd1c5;
+  padding: 1px 6px; border-radius: 10px;
+  font-size: 9px; font-weight: 700;
+}
+.dsk-item-preview {
+  font-size: 10px; color: #8b949e;
+  font-family: 'Nunito', sans-serif;
+  margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.disc-thread-panel {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; background: #0f0f0f;
+}
+.disc-empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: #8b949e;
+  font-family: 'Nunito', sans-serif; height: 100%;
+}
+.disc-empty-state i { font-size: 36px; color: rgba(79,209,197,0.2); }
+.disc-empty-state p { font-size: 13px; font-weight: 600; }
+.disc-empty-state small { font-size: 11px; color: #555; }
+
+/* Thread */
+.disc-thread-wrap { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.disc-thread-head {
+  padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0; background: #111;
+}
+.disc-thread-head-title { font-size: 14px; font-weight: 700; color: #e2e8f0; font-family: 'Nunito', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.disc-thread-head-meta { font-size: 11px; color: #8b949e; font-family: 'Nunito', sans-serif; margin-top: 2px; }
+.disc-posts-scroll {
+  flex: 1; overflow-y: auto; padding: 16px 16px 8px;
+  display: flex; flex-direction: column; gap: 0;
+  scrollbar-width: thin; scrollbar-color: #1b1b1b transparent;
+}
+.disc-date-sep { display: flex; align-items: center; justify-content: center; margin: 16px 0 10px; }
+.disc-date-sep span {
+  font-size: 10px; font-weight: 700; color: #8b949e;
+  background: #141414; border: 1px solid rgba(255,255,255,0.07);
+  padding: 3px 12px; border-radius: 20px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.disc-post-card {
+  display: flex; gap: 12px; padding-bottom: 16px;
+  position: relative;
+  animation: discFadeUp 0.25s ease both;
+}
+@keyframes discFadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.disc-spine {
+  display: flex; flex-direction: column;
+  align-items: center; width: 28px; flex-shrink: 0; padding-top: 2px;
+}
+.disc-spine-dot { width: 9px; height: 9px; border-radius: 50%; background: #4fd1c5; flex-shrink: 0; }
+.disc-spine-dot.muted { background: #2a2a2a; border: 1px solid rgba(255,255,255,0.1); }
+.disc-spine-dot.is-op-dot { background: #4fd1c5; box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
+.disc-spine-line { width: 1px; flex: 1; background: rgba(255,255,255,0.07); margin-top: 4px; min-height: 24px; }
+.disc-post-card:last-child .disc-spine-line { display: none; }
+.disc-post-content { flex: 1; min-width: 0; }
+.disc-post-header { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; flex-wrap: wrap; }
+.disc-avatar { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.1); flex-shrink: 0; background: #333; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #8b949e; text-transform: uppercase; }
+.disc-author { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+.disc-time { font-size: 10px; color: #8b949e; margin-left: auto; white-space: nowrap; }
+.disc-tag { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+.disc-tag.op { background: rgba(79,209,197,0.12); color: #4fd1c5; border: 1px solid rgba(79,209,197,0.25); }
+.disc-tag.me { background: rgba(79,209,197,0.12); color: #4fd1c5; border: 1px solid rgba(79,209,197,0.25); }
+.disc-tag.anon { background: rgba(255,255,255,0.05); color: #8b949e; border: 1px solid rgba(255,255,255,0.1); }
+.disc-body-wrap {
+  background: #1a1919; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 0 10px 10px 10px; padding: 10px 13px;
+}
+.disc-body-wrap.is-op { background: rgba(79,209,197,0.04); border-color: rgba(79,209,197,0.15); }
+.disc-body-wrap.is-me { border-color: rgba(79,209,197,0.2); }
+.disc-quote {
+  background: rgba(255,255,255,0.03); border-left: 2px solid #4fd1c5;
+  border-radius: 0 6px 6px 0; padding: 6px 10px; margin-bottom: 8px;
+  font-size: 11px; color: #8b949e;
+}
+.disc-quote-author { color: #4fd1c5; font-weight: 700; margin-bottom: 1px; font-size: 10px; }
+.disc-body { font-size: 13px; line-height: 1.65; color: #e2e8f0; word-wrap: break-word; white-space: pre-wrap; }
+.disc-footer { display: flex; align-items: center; gap: 2px; margin-top: 6px; }
+.disc-action-btn {
+  background: none; border: none; color: #8b949e; font-size: 11px; font-weight: 700;
+  cursor: pointer; padding: 3px 8px; border-radius: 5px;
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'Nunito', sans-serif; transition: 0.15s;
+}
+.disc-action-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+.disc-action-btn.reply:hover { color: #4fd1c5; }
+.disc-compose {
+  flex-shrink: 0; padding: 10px 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.07); background: #111;
+}
+.disc-reply-preview {
+  display: none; background: rgba(79,209,197,0.06);
+  border: 1px solid rgba(79,209,197,0.2); border-radius: 8px;
+  padding: 7px 11px; margin-bottom: 7px; font-size: 11px; color: #8b949e;
+  align-items: center; gap: 8px;
+}
+.disc-reply-preview.show { display: flex; }
+.disc-compose-box {
+  background: #1b1b1b; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; overflow: hidden; transition: border-color 0.2s;
+}
+.disc-compose-box:focus-within { border-color: rgba(79,209,197,0.4); }
+.disc-compose-box textarea {
+  width: 100%; background: transparent; border: none; color: #e2e8f0;
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 11px 13px 8px; resize: none; outline: none;
+  min-height: 42px; max-height: 120px; line-height: 1.5; box-sizing: border-box;
+}
+.disc-compose-box textarea::placeholder { color: #8b949e; }
+.disc-toolbar {
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 9px; border-top: 1px solid rgba(255,255,255,0.07);
+}
+.disc-anon-label {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: none; color: #4fd1c5; cursor: pointer;
+  padding: 5px 7px; border-radius: 6px; transition: 0.15s;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+}
+.disc-anon-label:hover { background: rgba(255,255,255,0.06); }
+.disc-post-btn {
+  background: #4fd1c5; color: #0d1117; border: none;
+  padding: 6px 14px; border-radius: 8px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  margin-left: auto; transition: 0.2s;
+}
+.disc-post-btn:hover { background: #38b2ac; }
+
+/* Mobile discussion list */
+.mob-disc-list { padding: 0; }
+.mob-disc-item {
+  background: #1b1b1b; border: 1px solid rgba(255,255,255,0.06);
+  padding: 18px 16px; border-radius: 12px; cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  margin-bottom: 10px;
+}
+.mob-disc-item:hover { border-color: rgba(79,209,197,0.3); transform: translateY(-2px); }
+.mob-disc-title { font-size: 15px; font-weight: 800; color: #e2e8f0; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.02em; }
+.mob-disc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #8b949e; margin-bottom: 8px; }
+.mob-disc-replies { background: rgba(79,209,197,0.1); color: #4fd1c5; padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; }
+.mob-disc-preview { font-size: 13px; color: #abb2bf; line-height: 1.5; }
+
+/* Mobile thread back button */
+.disc-mob-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: #111; flex-shrink: 0;
+}
+.disc-mob-back-btn {
+  background: none; border: none; color: #4fd1c5; cursor: pointer;
+  font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
+  display: flex; align-items: center; gap: 6px; padding: 4px 0;
+}
+.disc-mob-back-title { font-size: 13px; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
@@ -560,9 +772,7 @@ body {
   <div class="pers-form">
     <input class="pers-input" id="persName" type="text" placeholder="Your full name (e.g. Thabo Mahlangu)" autocomplete="off">
     <input class="pers-input" id="persSchool" type="text" placeholder="Your school name" autocomplete="off">
-    <button class="pers-btn" onclick="launchDemo()">
-      Launch Demo &nbsp;→
-    </button>
+    <button class="pers-btn" onclick="launchDemo()">Launch Demo &nbsp;→</button>
     <p class="pers-note">No account needed · Demo data only · Nothing is saved</p>
   </div>
 </div>
@@ -576,7 +786,7 @@ body {
     </button>
   </div>
   <div class="learner-name" id="sbName">Thabo Mahlangu</div>
-  <div class="learner-email" id="sbEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bdc993d0dcd5d1dcd3dac8fdd4eed6d2d2d193d9d8d0d2">[email&#160;protected]</a></div>
+  <div class="learner-email" id="sbEmail">thabo.mahlangu@iskool.demo</div>
   <div class="sb-links">
     <button class="sb-link active" onclick="showPage('home');setActive(this)">
       <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -676,58 +886,41 @@ body {
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ── LEARNER STATE ──
 let LEARNER = { name: '', firstName: '', initials: '', email: '', school: '' };
 
-// ── PERSONALISATION HELPERS ──
 function getInitials(fullName) {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
-function getFirstName(fullName) {
-  return fullName.trim().split(/\s+/)[0];
-}
-function getSchoolInitials(school) {
-  return school.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 3).toUpperCase();
-}
+function getFirstName(fullName) { return fullName.trim().split(/\s+/)[0]; }
+function getSchoolInitials(school) { return school.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 3).toUpperCase(); }
 
 function launchDemo() {
   const nameVal   = document.getElementById('persName').value.trim();
   const schoolVal = document.getElementById('persSchool').value.trim();
   if (!nameVal)   { document.getElementById('persName').focus();   showToast('Please enter your name');        return; }
   if (!schoolVal) { document.getElementById('persSchool').focus(); showToast('Please enter your school name'); return; }
-
   LEARNER.name      = nameVal;
   LEARNER.firstName = getFirstName(nameVal);
   LEARNER.initials  = getInitials(nameVal);
   LEARNER.email     = nameVal.toLowerCase().replace(/\s+/g, '.') + '@iskool.demo';
   LEARNER.school    = schoolVal;
-
-  // Patch sidebar
   document.getElementById('sbAvatar').textContent  = LEARNER.initials;
-  document.getElementById('sbName').textContent     = LEARNER.name;
-  document.getElementById('sbEmail').textContent    = LEARNER.email;
-  // Patch header
+  document.getElementById('sbName').textContent    = LEARNER.name;
+  document.getElementById('sbEmail').textContent   = LEARNER.email;
   document.getElementById('brandInitials').textContent = getSchoolInitials(schoolVal);
   document.getElementById('brandSchool').textContent   = schoolVal;
-  // Patch settings avatar later via renderSettings()
-
-  // Fade out personalise screen
   const p = document.getElementById('personalise');
-  p.style.opacity    = '0';
-  p.style.transition = 'opacity 0.5s ease';
+  p.style.opacity = '0'; p.style.transition = 'opacity 0.5s ease';
   setTimeout(() => { p.style.display = 'none'; showPage('home'); }, 500);
 }
-
-// Allow Enter key on personalise form
 document.addEventListener('keydown', e => {
   const p = document.getElementById('personalise');
   if (e.key === 'Enter' && p && p.style.display !== 'none') launchDemo();
 });
-
-// ── SPLASH → PERSONALISE ──
 window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splash');
@@ -765,6 +958,97 @@ const DEMO_CAL_EVENTS = {
 
 let calState = { month: 5, year: 2025 };
 
+// ── DISCUSSION DATA ──
+const DISC_DATA = [
+  {
+    id: 1,
+    title: 'When is the next test?',
+    creator: 'Amahle Dube',
+    creator_initials: 'AD',
+    is_op_me: false,
+    date: '3 May 2025',
+    reply_count: 8,
+    preview: 'Can someone confirm the date for the next Maths test?',
+    posts: [
+      { id: 1, author: 'Amahle Dube', initials: 'AD', is_me: false, is_op: true,  is_anon: false, time: '8:04 am',  msg: 'Can someone confirm the date for the next Maths test? I heard it was moved.',  quote: null },
+      { id: 2, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '8:17 am', is_teacher: true, msg: 'The test is confirmed for 14 May 2025 at 09:00 in your classroom. Please bring your calculator and geometry set.', quote: null },
+      { id: 3, author: 'Anonymous', initials: '?', is_me: false, is_op: false, is_anon: true, time: '8:22 am', msg: 'Thank you Miss!', quote: null },
+      { id: 4, author: 'Sipho Nkosi', initials: 'SN', is_me: false, is_op: false, is_anon: false, time: '8:30 am', msg: 'Will Section 4 (Geometry) be included or just Algebra?', quote: null },
+      { id: 5, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '8:45 am', is_teacher: true, msg: 'It covers Chapters 1–3 only. Geometry will be in the June paper.', quote: null },
+      { id: 6, author: 'Anonymous', initials: '?', is_me: true, is_op: false, is_anon: true, time: '9:01 am', msg: 'Okay got it, thank you Miss!', quote: null },
+      { id: 7, author: 'Zinhle Mkhathini', initials: 'ZM', is_me: false, is_op: false, is_anon: false, time: '10:15 am', msg: 'Will there be a study guide uploaded before the test?', quote: null },
+      { id: 8, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '11:00 am', is_teacher: true, msg: 'Yes — check the Resources section. I uploaded the formula sheet and a revision worksheet this morning.', quote: null },
+    ]
+  },
+  {
+    id: 2,
+    title: "I don't understand Question 5 in the homework",
+    creator: 'Anonymous',
+    creator_initials: '?',
+    is_op_me: true,
+    date: '4 May 2025',
+    reply_count: 5,
+    preview: 'The question asks to factorise 2x² + 5x + 3. I keep getting the wrong answer.',
+    posts: [
+      { id: 1, author: 'Anonymous', initials: '?', is_me: true, is_op: true, is_anon: true, time: '7:30 am', msg: 'The question asks to factorise 2x² + 5x + 3. I keep getting the wrong answer — can someone walk me through it?', quote: null },
+      { id: 2, author: 'Sipho Nkosi', initials: 'SN', is_me: false, is_op: false, is_anon: false, time: '7:48 am', msg: 'Try the product-and-sum method. You need two numbers that multiply to (2×3=6) and add to 5. That gives you 2 and 3.\n\nSo: 2x² + 2x + 3x + 3, then factorise in pairs.', quote: null },
+      { id: 3, author: 'Anonymous', initials: '?', is_me: true, is_op: false, is_anon: true, time: '7:55 am', msg: 'Ohhh okay that makes more sense! So the answer is (2x + 3)(x + 1)?', quote: { author: 'Sipho Nkosi', text: 'Try the product-and-sum method...' } },
+      { id: 4, author: 'Sipho Nkosi', initials: 'SN', is_me: false, is_op: false, is_anon: false, time: '8:02 am', msg: 'Exactly! ✓', quote: null },
+      { id: 5, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '8:20 am', is_teacher: true, msg: 'Well done Sipho for helping your classmate. Remember this method for the test — it will save you time.', quote: null },
+    ]
+  },
+  {
+    id: 3,
+    title: 'Can we get extra study materials for Algebra?',
+    creator: 'Lungelo Zulu',
+    creator_initials: 'LZ',
+    is_op_me: false,
+    date: '5 May 2025',
+    reply_count: 3,
+    preview: 'I feel like the textbook examples are not enough for exam prep.',
+    posts: [
+      { id: 1, author: 'Lungelo Zulu', initials: 'LZ', is_me: false, is_op: true, is_anon: false, time: '6:15 pm', msg: 'I feel like the textbook examples are not enough for exam prep. Can we get extra practice problems for Algebraic Expressions?', quote: null },
+      { id: 2, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '6:44 pm', is_teacher: true, msg: 'I have just uploaded an extra worksheet and a past paper to the Resources section. Have a look and let me know if you need more.', quote: null },
+      { id: 3, author: 'Anonymous', initials: '?', is_me: false, is_op: false, is_anon: true, time: '7:01 pm', msg: 'Thanks Miss, downloading now 👍', quote: null },
+    ]
+  },
+  {
+    id: 4,
+    title: 'Group study session — who is interested?',
+    creator: 'Amahle Dube',
+    creator_initials: 'AD',
+    is_op_me: false,
+    date: '6 May 2025',
+    reply_count: 7,
+    preview: 'Thinking of organising a study group before the test. Anyone keen?',
+    posts: [
+      { id: 1, author: 'Amahle Dube', initials: 'AD', is_me: false, is_op: true, is_anon: false, time: '2:00 pm', msg: 'Thinking of organising a study group the Saturday before the test. Anyone keen? We can meet at the school library at 10:00.', quote: null },
+      { id: 2, author: 'Sipho Nkosi', initials: 'SN', is_me: false, is_op: false, is_anon: false, time: '2:14 pm', msg: 'I\'m in! Will bring my notes from class.', quote: null },
+      { id: 3, author: 'Zinhle Mkhathini', initials: 'ZM', is_me: false, is_op: false, is_anon: false, time: '2:18 pm', msg: 'Count me in too.', quote: null },
+      { id: 4, author: 'Anonymous', initials: '?', is_me: true, is_op: false, is_anon: true, time: '2:25 pm', msg: 'I\'ll try to make it. What chapters are we focusing on?', quote: null },
+      { id: 5, author: 'Amahle Dube', initials: 'AD', is_me: false, is_op: false, is_anon: false, time: '2:31 pm', msg: 'Mainly Algebraic Expressions and Equations. We can each bring one topic and teach the others.', quote: null },
+      { id: 6, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '3:05 pm', is_teacher: true, msg: 'Love the initiative! I\'ve asked the librarian to keep the study room open for you. See me if you need printed materials.', quote: null },
+      { id: 7, author: 'Lungelo Zulu', initials: 'LZ', is_me: false, is_op: false, is_anon: false, time: '3:22 pm', msg: 'I can come too. Thanks Miss!', quote: null },
+    ]
+  },
+  {
+    id: 5,
+    title: 'Equations assignment — question about showing working',
+    creator: 'Anonymous',
+    creator_initials: '?',
+    is_op_me: false,
+    date: '7 May 2025',
+    reply_count: 4,
+    preview: 'For the Equations Practice Set, does full working need to be shown for every question?',
+    posts: [
+      { id: 1, author: 'Anonymous', initials: '?', is_me: false, is_op: true, is_anon: true, time: '11:20 am', msg: 'For the Equations Practice Set — does full working need to be shown for every question, or just the ones that ask for it?', quote: null },
+      { id: 2, author: 'Ms N. Sithole', initials: 'NS', is_me: false, is_op: false, is_anon: false, time: '11:38 am', is_teacher: true, msg: 'Full working must be shown for ALL questions. A correct answer without working will receive 0 marks.', quote: null },
+      { id: 3, author: 'Zinhle Mkhathini', initials: 'ZM', is_me: false, is_op: false, is_anon: false, time: '11:45 am', msg: 'Good to know, I almost skipped the working on Q8!', quote: null },
+      { id: 4, author: 'Anonymous', initials: '?', is_me: true, is_op: false, is_anon: true, time: '12:02 pm', msg: 'Thank you Miss, will make sure to show everything.', quote: null },
+    ]
+  },
+];
+
 // ── DATA ──
 const D = {
   quizzes: {
@@ -790,12 +1074,6 @@ const D = {
     { title:'Term 2 Test Schedule Released', preview:'The Term 2 tests start on 14 May 2025. Bring calculators and all necessary stationery.', date:'2 May 2025', teacher:'Ms N. Sithole' },
     { title:'Extra Maths Class on Saturday', preview:'An extra support class will be held on Saturday 10 May at 09:00 in Room 12.', date:'6 May 2025', teacher:'Ms N. Sithole' },
     { title:'Homework Submission Reminder', preview:'All outstanding homework for Chapter 4 must be submitted by Friday, 9 May 2025.', date:'5 May 2025', teacher:'Ms N. Sithole' },
-  ],
-  discussions: [
-    { id:1, title:'When is the next test?', replies:8, date:'3 May 2025' },
-    { id:2, title:"I don't understand Question 5 in the homework", replies:12, date:'4 May 2025' },
-    { id:3, title:'Can we get extra study materials for Algebra?', replies:5, date:'5 May 2025' },
-    { id:4, title:'Group study session – who is interested?', replies:19, date:'6 May 2025' },
   ],
   grades: [
     { subject:'Mathematics', quizzes:[
@@ -825,22 +1103,28 @@ function destroyCharts() { Object.values(charts).forEach(c => { try{ c.destroy()
 function showPage(page) {
   destroyCharts();
   closeSidebar();
+  const content = document.getElementById('content');
+  // Reset disc-mode
+  content.classList.remove('disc-mode');
+  content.style.padding = '';
+  content.style.paddingBottom = '';
+  content.style.overflow = '';
+
   const calIcon = document.getElementById('demoCalIconBtn');
-  if (calIcon) {
-    calIcon.style.display = (page === 'home' && window.innerWidth > 768) ? 'flex' : 'none';
-  }
+  if (calIcon) calIcon.style.display = (page === 'home' && window.innerWidth > 768) ? 'flex' : 'none';
+
   switch(page) {
-    case 'home':        renderHome(); break;
-    case 'calendar':    renderCalendarPage(); break;
-    case 'quizzes':     renderQuizzes(); break;
-    case 'assignments': renderAssignments(); break;
-    case 'resources':   renderResources(); break;
-    case 'grades':      renderGrades(); break;
+    case 'home':          renderHome(); break;
+    case 'calendar':      renderCalendarPage(); break;
+    case 'quizzes':       renderQuizzes(); break;
+    case 'assignments':   renderAssignments(); break;
+    case 'resources':     renderResources(); break;
+    case 'grades':        renderGrades(); break;
     case 'announcements': renderAnnouncements(); break;
-    case 'evaluations': renderEvaluations(); break;
-    case 'syllabus':    renderSyllabus(); break;
-    case 'discussions': renderDiscussions(); break;
-    case 'settings':    renderSettings(); break;
+    case 'evaluations':   renderEvaluations(); break;
+    case 'syllabus':      renderSyllabus(); break;
+    case 'discussions':   renderDiscussions(); break;
+    case 'settings':      renderSettings(); break;
     default: renderHome();
   }
 }
@@ -899,7 +1183,7 @@ function renderHome() {
     <div class="section-card" onclick="showPage('quizzes')"><div class="sc-head"><div class="sc-icon" style="background:rgba(79,209,197,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span class="sc-title">Take a Quiz</span></div><div class="sc-body">Find and complete quizzes assigned by your teacher.</div></div>
     <div class="section-card" onclick="showPage('grades')"><div class="sc-head"><div class="sc-icon" style="background:rgba(34,197,94,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#22c55e" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="sc-title">View Results</span></div><div class="sc-body">Check your quiz scores and progress reports once marks are published.</div></div>
     <div class="section-card" onclick="showPage('resources')"><div class="sc-head"><div class="sc-icon" style="background:rgba(245,158,11,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span class="sc-title">Study Resources</span></div><div class="sc-body">Access study guides, notes and past papers uploaded by your teacher.</div></div>
-    <div class="section-card" onclick="showPage('announcements')"><div class="sc-head"><div class="sc-icon" style="background:rgba(167,139,250,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div><span class="sc-title">Announcements</span></div><div class="sc-body">Stay updated with teacher posts and class notices.</div></div>
+    <div class="section-card" onclick="showPage('discussions')"><div class="sc-head"><div class="sc-icon" style="background:rgba(167,139,250,0.1)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><span class="sc-title">Discussions</span></div><div class="sc-body">Ask questions, get help from classmates and your teacher.</div></div>
     <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:12px;padding:14px;margin-top:20px;font-size:13px;color:var(--muted);line-height:1.6;"><strong style="color:var(--accent)">Need help?</strong> Contact your school admin or email <strong style="color:#c9d1d9">support@iskool.online</strong></div>`;
 
   if (isMobile) {
@@ -994,116 +1278,40 @@ function buildFullCalPage(month, year) {
   const eventMap = {};
   evs.forEach(e => { if (!eventMap[e.day]) eventMap[e.day] = []; eventMap[e.day].push(e); });
 
-  const legend = `
-    <div class="lcal-legend">
-      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#fdd663"></span> Quiz</span>
-      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#a78bfa"></span> Assignment</span>
-      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#f472b6"></span> Academic</span>
-      <span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#22c55e"></span> Completed</span>
-    </div>`;
-
+  const legend = `<div class="lcal-legend"><span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#fdd663"></span> Quiz</span><span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#a78bfa"></span> Assignment</span><span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#f472b6"></span> Academic</span><span class="lcal-legend-item"><span class="lcal-legend-dot" style="background:#22c55e"></span> Completed</span></div>`;
   const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="lcal-day-header">${d}</div>`).join('');
 
   let cells = '';
   for (let i = 0; i < offset; i++) cells += `<div class="lcal-cell lcal-cell-empty"></div>`;
-
   for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = (d === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
     const isFakeToday = (d === 14 && month === 5 && year === 2025);
     const dayEvs = eventMap[d] || [];
-
-    const hasDots = {
-      quiz_up:  dayEvs.some(e => e.type === 'quiz' && e.subtype !== 'quiz_done'),
-      quiz_done:dayEvs.some(e => e.subtype === 'quiz_done'),
-      assign:   dayEvs.some(e => e.type === 'assignment'),
-      academic: dayEvs.some(e => e.type === 'academic'),
-    };
-
-    const visible = dayEvs.slice(0, 3);
-    const overflow = dayEvs.length - 3;
-
+    const hasDots = { quiz_up: dayEvs.some(e => e.type==='quiz'&&e.subtype!=='quiz_done'), quiz_done: dayEvs.some(e=>e.subtype==='quiz_done'), assign: dayEvs.some(e=>e.type==='assignment'), academic: dayEvs.some(e=>e.type==='academic') };
+    const visible = dayEvs.slice(0,3); const overflow = dayEvs.length - 3;
     const pills = visible.map(e => {
       let bg, color;
-      if (e.type === 'assignment')       { bg='rgba(167,139,250,0.15)'; color='#a78bfa'; }
-      else if (e.subtype === 'quiz_done'){ bg='rgba(34,197,94,0.15)';   color='#22c55e'; }
-      else if (e.type === 'quiz')        { bg='rgba(253,214,99,0.15)';  color='#fdd663'; }
-      else                               { bg='rgba(244,114,182,0.15)'; color='#f472b6'; }
-      const label = e.class_name ? `${e.title} <span style="opacity:0.6;font-weight:600">— ${e.class_name}</span>` : e.title;
-      return `<div class="lcal-pill" style="background:${bg};color:${color}">${label}</div>`;
+      if (e.type==='assignment'){bg='rgba(167,139,250,0.15)';color='#a78bfa';}
+      else if(e.subtype==='quiz_done'){bg='rgba(34,197,94,0.15)';color='#22c55e';}
+      else if(e.type==='quiz'){bg='rgba(253,214,99,0.15)';color='#fdd663';}
+      else{bg='rgba(244,114,182,0.15)';color='#f472b6';}
+      return `<div class="lcal-pill" style="background:${bg};color:${color}">${e.title}</div>`;
     }).join('');
-
-    const dots = `<div class="lcal-dots">
-      ${hasDots.quiz_up   ? '<span class="lcal-dot" style="background:#fdd663"></span>' : ''}
-      ${hasDots.quiz_done ? '<span class="lcal-dot" style="background:#22c55e"></span>'  : ''}
-      ${hasDots.assign    ? '<span class="lcal-dot" style="background:#a78bfa"></span>'  : ''}
-      ${hasDots.academic  ? '<span class="lcal-dot" style="background:#f472b6"></span>'  : ''}
-    </div>`;
-
-    cells += `
-      <div class="lcal-cell ${(isToday || isFakeToday) ? 'lcal-cell-today' : ''} ${dayEvs.length ? 'lcal-cell-has-events' : ''}">
-        <div class="lcal-cell-top">
-          <span class="lcal-day-num">${d}</span>
-          ${dots}
-        </div>
-        <div class="lcal-pills">
-          ${pills}
-          ${overflow > 0 ? `<div class="lcal-pill lcal-pill-more">+${overflow} more</div>` : ''}
-        </div>
-      </div>`;
+    const dots = `<div class="lcal-dots">${hasDots.quiz_up?'<span class="lcal-dot" style="background:#fdd663"></span>':''}${hasDots.quiz_done?'<span class="lcal-dot" style="background:#22c55e"></span>':''}${hasDots.assign?'<span class="lcal-dot" style="background:#a78bfa"></span>':''}${hasDots.academic?'<span class="lcal-dot" style="background:#f472b6"></span>':''}</div>`;
+    cells += `<div class="lcal-cell ${isFakeToday?'lcal-cell-today':''} ${dayEvs.length?'lcal-cell-has-events':''}"><div class="lcal-cell-top"><span class="lcal-day-num">${d}</span>${dots}</div><div class="lcal-pills">${pills}${overflow>0?`<div class="lcal-pill lcal-pill-more">+${overflow} more</div>`:''}</div></div>`;
   }
 
-  const allUpcoming = evs.filter(e => {
-    const d = new Date(year, month - 1, e.day);
-    const now = new Date(); now.setHours(0,0,0,0);
-    return d >= now || (month === 5 && year === 2025 && e.day >= 14);
-  }).sort((a,b) => a.day - b.day).slice(0, 6);
-
+  const allUpcoming = evs.filter(e => e.day >= 14 || month !== 5).sort((a,b)=>a.day-b.day).slice(0,6);
   const upcomingCards = allUpcoming.length ? allUpcoming.map(e => {
     let color, label;
-    if (e.type === 'assignment')        { color='#a78bfa'; label='Assignment'; }
-    else if (e.subtype === 'quiz_done') { color='#22c55e'; label='Quiz (Done)'; }
-    else if (e.type === 'quiz')         { color='#fdd663'; label='Quiz'; }
-    else                                { color='#f472b6'; label='Academic'; }
-    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month-1];
-    return `
-      <div class="lcal-upcoming-card">
-        <div class="lcal-upcoming-type" style="color:${color}">${label}</div>
-        <div class="lcal-upcoming-title">${e.title}</div>
-        ${e.class_name ? `<div class="lcal-upcoming-meta">${e.class_name}</div>` : ''}
-        <div class="lcal-upcoming-date" style="color:${color}">${e.day} ${mn}</div>
-      </div>`;
+    if(e.type==='assignment'){color='#a78bfa';label='Assignment';}
+    else if(e.subtype==='quiz_done'){color='#22c55e';label='Quiz (Done)';}
+    else if(e.type==='quiz'){color='#fdd663';label='Quiz';}
+    else{color='#f472b6';label='Academic';}
+    const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month-1];
+    return `<div class="lcal-upcoming-card"><div class="lcal-upcoming-type" style="color:${color}">${label}</div><div class="lcal-upcoming-title">${e.title}</div>${e.class_name?`<div class="lcal-upcoming-meta">${e.class_name}</div>`:''}<div class="lcal-upcoming-date" style="color:${color}">${e.day} ${mn}</div></div>`;
   }).join('') : `<div class="lcal-upcoming-empty">Nothing coming up this month</div>`;
 
-  return `
-    <div>
-      <div class="lcal-topbar">
-        <div class="lcal-header-left">
-          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-            <button class="lcal-back-btn" onclick="showPage('home')">
-              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
-              Back to Home
-            </button>
-            <h2 class="lcal-page-title">My Calendar</h2>
-          </div>
-          ${legend}
-        </div>
-      </div>
-      <div class="lcal-body">
-        <div class="lcal-main">
-          <div class="lcal-nav-row">
-            <button class="lcal-nav-btn" onclick="fullCalNav(-1)">&#8249;</button>
-            <span class="lcal-month-label">${monthNames[month-1]} ${year}</span>
-            <button class="lcal-nav-btn" onclick="fullCalNav(1)">&#8250;</button>
-          </div>
-          <div class="lcal-grid">${dayHeaders}</div>
-          <div class="lcal-cells">${cells}</div>
-        </div>
-        <div class="lcal-upcoming">
-          <div class="lcal-upcoming-label">Upcoming</div>
-          ${upcomingCards}
-        </div>
-      </div>
-    </div>`;
+  return `<div><div class="lcal-topbar"><div class="lcal-header-left"><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;"><button class="lcal-back-btn" onclick="showPage('home')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>Back to Home</button><h2 class="lcal-page-title">My Calendar</h2></div>${legend}</div></div><div class="lcal-body"><div class="lcal-main"><div class="lcal-nav-row"><button class="lcal-nav-btn" onclick="fullCalNav(-1)">&#8249;</button><span class="lcal-month-label">${monthNames[month-1]} ${year}</span><button class="lcal-nav-btn" onclick="fullCalNav(1)">&#8250;</button></div><div class="lcal-grid">${dayHeaders}</div><div class="lcal-cells">${cells}</div></div><div class="lcal-upcoming"><div class="lcal-upcoming-label">Upcoming</div>${upcomingCards}</div></div></div>`;
 }
 
 function fullCalNav(dir) {
@@ -1111,6 +1319,300 @@ function fullCalNav(dir) {
   if (calState.month < 1) { calState.month = 12; calState.year--; }
   if (calState.month > 12) { calState.month = 1; calState.year++; }
   document.getElementById('content').innerHTML = buildFullCalPage(calState.month, calState.year);
+}
+
+// ── DISCUSSIONS ──
+function renderDiscussions() {
+  const isMobile = window.innerWidth <= 768;
+  const content = document.getElementById('content');
+
+  if (isMobile) {
+    // Mobile: show list with padding
+    content.classList.remove('disc-mode');
+    content.style.padding = '16px';
+    content.style.paddingBottom = 'calc(88px + env(safe-area-inset-bottom, 0px))';
+    content.style.overflowY = 'auto';
+    renderMobileDiscList();
+  } else {
+    // Desktop: full-height split layout, no padding
+    content.classList.add('disc-mode');
+    content.style.padding = '0';
+    content.style.paddingBottom = '0';
+    content.style.overflow = 'hidden';
+    renderDesktopDiscSplit();
+  }
+}
+
+function renderMobileDiscList() {
+  const content = document.getElementById('content');
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:18px;font-weight:900;color:var(--text);">Discussions</div>
+      <button onclick="showToast('New discussion: demo mode only')" style="background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid rgba(79,209,197,0.3);padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;font-size:13px;">
+        <i class="fas fa-plus"></i> New
+      </button>
+    </div>
+    <div class="mob-disc-list">`;
+  DISC_DATA.forEach(d => {
+    html += `
+      <div class="mob-disc-item" onclick="renderMobileDiscThread(${d.id})">
+        <div class="mob-disc-title">${d.title}</div>
+        <div class="mob-disc-meta">
+          <span>By ${d.is_op_me ? 'You (Anon)' : d.creator}</span>
+          <span>•</span>
+          <span>${d.date}</span>
+          <span class="mob-disc-replies">${d.reply_count} replies</span>
+        </div>
+        <div class="mob-disc-preview">${d.preview}</div>
+      </div>`;
+  });
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+function renderMobileDiscThread(discId) {
+  const disc = DISC_DATA.find(d => d.id === discId);
+  if (!disc) return;
+  const content = document.getElementById('content');
+  content.style.padding = '0';
+
+  let postsHtml = '';
+  disc.posts.forEach((p, idx) => {
+    postsHtml += buildDiscPostHtml(p, idx === disc.posts.length - 1);
+  });
+
+  content.innerHTML = `
+    <div class="disc-thread-wrap" style="height:calc(100vh - var(--header-h) - calc(68px + env(safe-area-inset-bottom, 0px)));">
+      <div class="disc-mob-back">
+        <button class="disc-mob-back-btn" onclick="renderDiscussions()">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"/></svg>
+          Discussions
+        </button>
+        <span style="color:rgba(255,255,255,0.2);margin:0 8px;">|</span>
+        <span class="disc-mob-back-title">${disc.title}</span>
+      </div>
+      <div class="disc-posts-scroll" id="discPostsScroll">
+        <div class="disc-date-sep"><span>${disc.date}</span></div>
+        ${postsHtml}
+        <div style="height:8px;"></div>
+      </div>
+      ${buildDiscCompose()}
+    </div>`;
+
+  const scroll = document.getElementById('discPostsScroll');
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+  wireDiscCompose();
+}
+
+function renderDesktopDiscSplit() {
+  const content = document.getElementById('content');
+
+  let listItems = DISC_DATA.map(d => `
+    <div class="dsk-item" data-disc-id="${d.id}" onclick="loadDesktopThread(${d.id})">
+      <div class="dsk-item-title">${d.title}</div>
+      <div class="dsk-item-meta">
+        <span>${d.date}</span>
+        <span class="dsk-item-pill">${d.reply_count} replies</span>
+      </div>
+      <div class="dsk-item-preview">${d.preview}</div>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div class="disc-split-wrap">
+      <div class="disc-sidebar-panel">
+        <div class="disc-sidebar-head">
+          <span>Discussions</span>
+          <button class="disc-new-btn" onclick="showToast('New discussion: demo mode only')">
+            <i class="fas fa-plus"></i> New
+          </button>
+        </div>
+        <div class="disc-sidebar-list" id="discSidebarList">
+          ${listItems}
+        </div>
+      </div>
+      <div class="disc-thread-panel" id="discThreadPanel">
+        <div class="disc-empty-state">
+          <i class="fas fa-comments"></i>
+          <p>Select a discussion</p>
+          <small>Choose one from the list to join the conversation</small>
+        </div>
+      </div>
+    </div>`;
+
+  // Auto-open first discussion
+  loadDesktopThread(DISC_DATA[0].id);
+}
+
+function loadDesktopThread(discId) {
+  const disc = DISC_DATA.find(d => d.id === discId);
+  if (!disc) return;
+
+  // Highlight active item
+  document.querySelectorAll('.dsk-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.discId) === discId);
+  });
+
+  const panel = document.getElementById('discThreadPanel');
+  if (!panel) return;
+
+  let postsHtml = '';
+  disc.posts.forEach((p, idx) => {
+    postsHtml += buildDiscPostHtml(p, idx === disc.posts.length - 1);
+  });
+
+  panel.innerHTML = `
+    <div class="disc-thread-wrap">
+      <div class="disc-thread-head">
+        <div class="disc-thread-head-title">${disc.title}</div>
+        <div class="disc-thread-head-meta">Grade 10A · ${disc.posts.length} posts</div>
+      </div>
+      <div class="disc-posts-scroll" id="discPostsScroll">
+        <div class="disc-date-sep"><span>${disc.date}</span></div>
+        ${postsHtml}
+        <div style="height:8px;"></div>
+      </div>
+      ${buildDiscCompose()}
+    </div>`;
+
+  const scroll = document.getElementById('discPostsScroll');
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+  wireDiscCompose();
+}
+
+function buildDiscPostHtml(p, isLast) {
+  const isOp     = p.is_op;
+  const isMe     = p.is_me;
+  const isTeacher = p.is_teacher || false;
+  const dotClass = isOp ? 'is-op-dot' : (isMe ? '' : 'muted');
+  const bodyWrapClass = `disc-body-wrap${isOp ? ' is-op' : ''}${isMe ? ' is-me' : ''}`;
+
+  const opTag      = isOp     ? `<span class="disc-tag op">OP</span>`      : '';
+  const meTag      = isMe     ? `<span class="disc-tag me">You</span>`     : '';
+  const anonTag    = p.is_anon ? `<span class="disc-tag anon">Anon</span>` : '';
+  const teacherTag = isTeacher ? `<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em;background:rgba(56,178,172,0.12);color:#38b2ac;border:1px solid rgba(56,178,172,0.25);">Teacher</span>` : '';
+
+  const quoteHtml = p.quote ? `<div class="disc-quote"><div class="disc-quote-author">${p.quote.author}</div><div>${p.quote.text}</div></div>` : '';
+
+  const avatarColor = isTeacher ? '#38b2ac' : (isMe || p.is_anon) ? '#555' : '#8b949e';
+
+  return `
+    <div class="disc-post-card">
+      <div class="disc-spine">
+        <div class="disc-spine-dot ${dotClass}"></div>
+        ${!isLast ? '<div class="disc-spine-line"></div>' : ''}
+      </div>
+      <div class="disc-post-content">
+        <div class="disc-post-header">
+          <div class="disc-avatar" style="background:${isTeacher?'rgba(56,178,172,0.15)':'rgba(255,255,255,0.06)'};color:${avatarColor};border-color:${isTeacher?'rgba(56,178,172,0.3)':'rgba(255,255,255,0.1)'};">${p.initials}</div>
+          <span class="disc-author">${p.author}</span>
+          ${opTag}${meTag}${anonTag}${teacherTag}
+          <span class="disc-time">${p.time}</span>
+        </div>
+        <div class="${bodyWrapClass}">
+          ${quoteHtml}
+          <div class="disc-body">${p.msg}</div>
+        </div>
+        <div class="disc-footer">
+          <button class="disc-action-btn reply" onclick="discSetReply('${p.author}','${p.msg.substring(0,60).replace(/'/g,"\\'")}')">
+            <i class="fas fa-reply"></i> Reply
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildDiscCompose() {
+  return `
+    <div class="disc-compose">
+      <div class="disc-reply-preview" id="discReplyPreview">
+        <span style="color:#4fd1c5;font-weight:700;flex-shrink:0;">Replying to:</span>
+        <span id="discPreviewText" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button onclick="discCancelReply()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
+      </div>
+      <div class="disc-compose-box">
+        <textarea id="discTextarea" placeholder="Add to the discussion…" rows="1"></textarea>
+        <div class="disc-toolbar">
+          <label class="disc-anon-label" title="Post anonymously">
+            <input type="checkbox" id="discAnon" checked style="display:none;">
+            <i class="fas fa-user-secret"></i> Anonymous
+          </label>
+          <button class="disc-post-btn" onclick="discDemoPost()">
+            <i class="fas fa-paper-plane"></i> Post
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function wireDiscCompose() {
+  const ta = document.getElementById('discTextarea');
+  if (ta) {
+    ta.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+    ta.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); discDemoPost(); }
+    });
+  }
+}
+
+function discDemoPost() {
+  const ta = document.getElementById('discTextarea');
+  if (!ta || !ta.value.trim()) { showToast('Type a message first'); return; }
+
+  const msg     = ta.value.trim();
+  const scroll  = document.getElementById('discPostsScroll');
+  if (!scroll) return;
+
+  // Build the new post card and inject
+  const isAnon = document.getElementById('discAnon')?.checked ?? true;
+  const name   = isAnon ? 'Anonymous' : (LEARNER.name || 'You');
+  const initials = isAnon ? '?' : (LEARNER.initials || 'ME');
+
+  const postHtml = buildDiscPostHtml({
+    author: name, initials, is_me: true, is_op: false, is_anon: isAnon,
+    time: new Date().toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true }),
+    msg, quote: null
+  }, true);
+
+  // Remove "last" class from the current last spine line
+  const existing = scroll.querySelectorAll('.disc-post-card');
+  if (existing.length) {
+    const lastSpine = existing[existing.length - 1].querySelector('.disc-spine');
+    if (lastSpine && !lastSpine.querySelector('.disc-spine-line')) {
+      const line = document.createElement('div');
+      line.className = 'disc-spine-line';
+      lastSpine.appendChild(line);
+    }
+  }
+
+  const dummy = document.createElement('div');
+  dummy.innerHTML = postHtml.trim();
+  const bottomEl = scroll.querySelector('div[style="height:8px;"]');
+  if (bottomEl) {
+    scroll.insertBefore(dummy.firstChild, bottomEl);
+  } else {
+    scroll.appendChild(dummy.firstChild);
+  }
+
+  ta.value = '';
+  ta.style.height = 'auto';
+  discCancelReply();
+  scroll.scrollTop = scroll.scrollHeight;
+  showToast('Posted! (Demo — not saved)');
+}
+
+function discSetReply(author, preview) {
+  window._discReplyTo = { author, preview };
+  const p = document.getElementById('discPreviewText');
+  if (p) p.textContent = author + ': ' + preview;
+  document.getElementById('discReplyPreview')?.classList.add('show');
+  document.getElementById('discTextarea')?.focus();
+}
+function discCancelReply() {
+  window._discReplyTo = null;
+  document.getElementById('discReplyPreview')?.classList.remove('show');
 }
 
 // ── QUIZZES ──
@@ -1172,15 +1674,10 @@ function renderAnnouncements() {
   D.announcements.forEach((a, i) => {
     html += `
       <div class="ann-flat-card" onclick="openAnnModal(${i})">
-        <div class="ann-flat-icon">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-        </div>
+        <div class="ann-flat-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
         <div class="ann-flat-info">
           <div class="ann-flat-title">${a.title}</div>
-          <div class="ann-flat-preview">${a.preview.substring(0, 110)}...</div>
+          <div class="ann-flat-preview">${a.preview.substring(0,110)}...</div>
           <div class="ann-flat-date">${a.teacher} · ${a.date}</div>
         </div>
       </div>`;
@@ -1190,33 +1687,6 @@ function renderAnnouncements() {
 window.openAnnModal = function(i) {
   const a = D.announcements[i];
   openModal(a.title, `<p style="color:#c9d1d9;line-height:1.7;font-size:14px;">${a.preview}</p><p style="margin-top:12px;font-size:12px;color:#555e6a;">${a.teacher} · ${a.date}</p>`);
-};
-
-// ── DISCUSSIONS ──
-function renderDiscussions() {
-  let html = `${demoBanner()}`;
-  D.discussions.forEach((d, i) => {
-    html += `
-      <div class="disc-flat-card" onclick="openDiscModal(${i})">
-        <div class="disc-flat-icon">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-        </div>
-        <div class="disc-flat-info">
-          <div class="disc-flat-title">${d.title}</div>
-          <div class="disc-flat-meta">
-            Grade 10A &nbsp;·&nbsp; ${d.date}
-            <span class="disc-replies">${d.replies} replies</span>
-          </div>
-        </div>
-      </div>`;
-  });
-  document.getElementById('content').innerHTML = html;
-}
-window.openDiscModal = function(i) {
-  const d = D.discussions[i];
-  openModal('Discussion', `<p style="color:#c9d1d9;font-size:14px;margin-bottom:10px;">${d.title}</p><p style="color:var(--muted);font-size:13px;">${d.replies} replies · ${d.date}</p>`);
 };
 
 // ── GRADES ──
