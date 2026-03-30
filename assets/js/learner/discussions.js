@@ -421,7 +421,7 @@ function renderThread(data) {
         : getDateKey(disc.created_at);
 
     const composeHtml = is_in_class ? buildCompose(disc.id) : '';
-    const threadHeight = isDesktop() ? '100%' : 'calc(100vh - 120px)';
+    const threadHeight = '100%'; // Parent container owns the height on both mobile and desktop
 
     target.innerHTML = `
         <style>
