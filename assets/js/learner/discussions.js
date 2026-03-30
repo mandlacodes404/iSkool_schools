@@ -81,8 +81,7 @@ window.fetchDiscussions = async function() {
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading discussions.</p>`;
     } finally {
         if (loader) loader.style.display = 'none';
-         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
-        
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
 
@@ -144,7 +143,6 @@ window.loadDiscussionThread = async function(discId) {
     const apiArea = document.getElementById('api-content-area');
     const loader  = document.getElementById('loaderOverlay');
 
-    // Use cache if available
     if (window.discussionThreadCache[discId]) {
         renderThread(window.discussionThreadCache[discId]);
         currentDiscId = discId;
@@ -161,10 +159,9 @@ window.loadDiscussionThread = async function(discId) {
         if (data.error) throw new Error(data.error);
 
         renderThread(data);
-        window.discussionThreadCache[discId] = data; // cache it
+        window.discussionThreadCache[discId] = data;
         currentDiscId = discId;
 
-        // Start polling for new replies + typing
         discPollInterval       = setInterval(() => pollNewReplies(discId), 4000);
         discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
 
@@ -179,8 +176,6 @@ function renderThread(data) {
     const { discussion: disc, replies, user_role, is_in_class } = data;
     const apiArea = document.getElementById('api-content-area');
 
-
-    // Track date separators
     let lastDate = null;
 
     function maybeDate(dateStr) {
@@ -192,7 +187,6 @@ function renderThread(data) {
     }
 
     // Build OP card
-    const opInitial = disc.creator_display.charAt(0).toUpperCase();
     let postsHtml = maybeDate(disc.created_at);
     postsHtml += buildPostCard({
         id: 0,
@@ -209,12 +203,11 @@ function renderThread(data) {
     }, user_role, is_in_class, disc.id);
 
     // Build reply cards
-    replies.forEach((r, i) => {
+    replies.forEach((r) => {
         postsHtml += maybeDate(r.created_at);
         postsHtml += buildPostCard(r, user_role, is_in_class, disc.id);
     });
 
-    // Track last reply id for polling
     lastReplyId    = replies.length > 0 ? replies[replies.length - 1].id : 0;
     lastSeenDateKey = replies.length > 0
         ? getDateKey(replies[replies.length - 1].created_at)
@@ -224,115 +217,161 @@ function renderThread(data) {
 
     apiArea.innerHTML = `
         <style>
+            /* ── LAYOUT ── */
             .disc-thread-wrap { display:flex; flex-direction:column; height:calc(100vh - 120px); }
-            .disc-thread-header { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
-            .disc-thread-header .class-badge { display:inline-flex;align-items:center;gap:6px;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);color:#4fd1c5;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px; }
-            .disc-thread-header h2 { font-size:17px;font-weight:800;color:#e2e8f0;margin:0;line-height:1.3; }
-            .disc-thread-header .meta { font-size:12px;color:#8b949e;margin-top:4px; }
-            .disc-posts-scroll { flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:#1b1b1b transparent; }
-            .disc-date-sep { display:flex;align-items:center;gap:12px;margin:14px 0 8px;color:#8b949e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px; }
-            .disc-date-sep::before,.disc-date-sep::after { content:'';flex:1;height:1px;background:rgba(255,255,255,0.07); }
-            .disc-post-card { background:#1a1919;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;border-left:3px solid transparent;animation:discFadeUp 0.3s ease both; }
-            .disc-post-card.is-op { background:rgba(79,209,197,0.03);border-color:rgba(79,209,197,0.15);border-left-color:#4fd1c5; }
-            .disc-post-card.is-me { border-left-color:#4fd1c5; }
-            @keyframes discFadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-            .disc-post-header { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
-            .disc-avatar { width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.1);flex-shrink:0; }
-            .disc-avatar-ph { width:30px;height:30px;border-radius:50%;background:#222;border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#8b949e;flex-shrink:0;text-transform:uppercase; }
-            .disc-author { font-size:13px;font-weight:700;color:#e2e8f0;display:flex;align-items:center;gap:6px; }
-            .disc-time { font-size:11px;color:#8b949e;margin-top:1px; }
-            .disc-tag { font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase; }
-            .disc-tag.op { background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid rgba(79,209,197,0.2); }
-            .disc-tag.me { background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid rgba(79,209,197,0.2); }
-            .disc-quote { background:rgba(255,255,255,0.03);border-left:3px solid #4fd1c5;border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#8b949e; }
-            .disc-quote-author { color:#4fd1c5;font-weight:700;margin-bottom:2px;font-size:11px; }
-            .disc-body { font-size:14px;line-height:1.65;color:#e2e8f0;word-wrap:break-word;white-space:pre-wrap; }
-            .disc-attachment { margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);display:inline-block;max-width:260px; }
-            .disc-attachment img { width:100%;display:block;cursor:zoom-in; }
-            .disc-pdf-link { display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(79,209,197,0.06);color:#4fd1c5;cursor:pointer;font-size:13px;font-weight:600; }
-            .disc-footer { display:flex;align-items:center;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06); }
-            .disc-action-btn { background:none;border:none;color:#8b949e;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;transition:0.15s; }
-            .disc-action-btn:hover { background:rgba(255,255,255,0.05);color:#e2e8f0; }
+            .disc-posts-scroll { flex:1; overflow-y:auto; padding:16px 16px 8px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; }
+
+            /* ── DATE SEPARATOR ── */
+            .disc-date-sep { display:flex; align-items:center; justify-content:center; margin:16px 0 10px; }
+            .disc-date-sep span { font-size:10px; font-weight:700; color:#8b949e; background:#141414; border:1px solid rgba(255,255,255,0.07); padding:3px 12px; border-radius:20px; letter-spacing:0.06em; text-transform:uppercase; }
+
+            /* ── ACTIVITY FEED ITEM ── */
+            .disc-post-card { display:flex; gap:12px; padding-bottom:16px; position:relative; animation:discFadeUp 0.25s ease both; }
+            .disc-post-card:last-of-type { padding-bottom:0; }
+            @keyframes discFadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+
+            /* ── SPINE ── */
+            .disc-spine { display:flex; flex-direction:column; align-items:center; width:28px; flex-shrink:0; padding-top:2px; }
+            .disc-spine-dot { width:9px; height:9px; border-radius:50%; background:#4fd1c5; flex-shrink:0; }
+            .disc-spine-dot.muted { background:#2a2a2a; border:1px solid rgba(255,255,255,0.1); }
+            .disc-spine-dot.is-op-dot { background:#4fd1c5; box-shadow:0 0 0 3px rgba(79,209,197,0.15); }
+            .disc-spine-line { width:1px; flex:1; background:rgba(255,255,255,0.07); margin-top:4px; min-height:24px; }
+            .disc-post-card:last-of-type .disc-spine-line { display:none; }
+
+            /* ── CONTENT SIDE ── */
+            .disc-post-content { flex:1; min-width:0; }
+
+            /* ── POST HEADER ── */
+            .disc-post-header { display:flex; align-items:center; gap:7px; margin-bottom:6px; flex-wrap:wrap; }
+            .disc-avatar { width:24px; height:24px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(255,255,255,0.1); flex-shrink:0; }
+            .disc-avatar-ph { width:24px; height:24px; border-radius:50%; background:#222; border:1.5px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#8b949e; flex-shrink:0; text-transform:uppercase; }
+            .disc-author { font-size:13px; font-weight:700; color:#e2e8f0; }
+            .disc-time { font-size:10px; color:#8b949e; margin-left:auto; white-space:nowrap; }
+            .disc-tag { font-size:9px; font-weight:700; padding:1px 6px; border-radius:3px; text-transform:uppercase; letter-spacing:0.04em; }
+            .disc-tag.op { background:rgba(79,209,197,0.12); color:#4fd1c5; border:1px solid rgba(79,209,197,0.25); }
+            .disc-tag.me { background:rgba(79,209,197,0.12); color:#4fd1c5; border:1px solid rgba(79,209,197,0.25); }
+            .disc-tag.teacher { background:rgba(56,178,172,0.12); color:#38b2ac; border:1px solid rgba(56,178,172,0.25); }
+            .disc-tag.anon { background:rgba(255,255,255,0.05); color:#8b949e; border:1px solid rgba(255,255,255,0.1); }
+
+            /* ── POST BODY BUBBLE ── */
+            .disc-body-wrap { background:#1a1919; border:1px solid rgba(255,255,255,0.07); border-radius:0 10px 10px 10px; padding:10px 13px; }
+            .disc-body-wrap.is-op { background:rgba(79,209,197,0.04); border-color:rgba(79,209,197,0.15); }
+            .disc-body-wrap.is-me { border-color:rgba(79,209,197,0.2); }
+
+            /* ── QUOTE ── */
+            .disc-quote { background:rgba(255,255,255,0.03); border-left:2px solid #4fd1c5; border-radius:0 6px 6px 0; padding:6px 10px; margin-bottom:8px; font-size:11px; color:#8b949e; }
+            .disc-quote-author { color:#4fd1c5; font-weight:700; margin-bottom:1px; font-size:10px; }
+
+            /* ── BODY TEXT ── */
+            .disc-body { font-size:13px; line-height:1.65; color:#e2e8f0; word-wrap:break-word; white-space:pre-wrap; }
+
+            /* ── ATTACHMENT ── */
+            .disc-attachment { margin-top:8px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); display:inline-block; max-width:220px; }
+            .disc-attachment img { width:100%; display:block; cursor:zoom-in; }
+            .disc-pdf-link { display:flex; align-items:center; gap:8px; padding:10px 12px; background:rgba(79,209,197,0.06); color:#4fd1c5; cursor:pointer; font-size:12px; font-weight:600; }
+
+            /* ── FOOTER ACTIONS ── */
+            .disc-footer { display:flex; align-items:center; gap:2px; margin-top:6px; }
+            .disc-action-btn { background:none; border:none; color:#8b949e; font-size:11px; font-weight:700; cursor:pointer; padding:3px 8px; border-radius:5px; display:flex; align-items:center; gap:4px; font-family:'Nunito',sans-serif; transition:0.15s; }
+            .disc-action-btn:hover { background:rgba(255,255,255,0.05); color:#e2e8f0; }
             .disc-action-btn.reply:hover { color:#4fd1c5; }
             .disc-action-btn.report:hover { color:#f85149; }
-            /* Compose */
-            .disc-compose { flex-shrink:0;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.07); }
-            .disc-reply-preview { display:none;background:rgba(79,209,197,0.06);border:1px solid rgba(79,209,197,0.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#8b949e;align-items:center;gap:8px; }
+
+            /* ── NESTED REPLY (inline under parent) ── */
+            .disc-nested-reply { display:flex; gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.05); }
+            .disc-nested-avatar { width:20px; height:20px; border-radius:50%; background:#222; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:800; color:#8b949e; flex-shrink:0; text-transform:uppercase; overflow:hidden; }
+            .disc-nested-avatar img { width:100%; height:100%; object-fit:cover; }
+            .disc-nested-content { flex:1; min-width:0; }
+            .disc-nested-header { display:flex; align-items:center; gap:5px; margin-bottom:3px; }
+            .disc-nested-name { font-size:11px; font-weight:700; color:#c9d1d9; }
+            .disc-nested-time { font-size:9px; color:#8b949e; margin-left:auto; }
+            .disc-nested-body { font-size:12px; color:#c9d1d9; line-height:1.55; word-wrap:break-word; white-space:pre-wrap; }
+
+            /* ── COMPOSE ── */
+            .disc-compose { flex-shrink:0; padding:10px 16px 12px; border-top:1px solid rgba(255,255,255,0.07); }
+            .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:7px 11px; margin-bottom:7px; font-size:11px; color:#8b949e; align-items:center; gap:8px; }
             .disc-reply-preview.show { display:flex; }
-            .disc-file-preview { display:none;align-items:center;gap:8px;background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#8b949e; }
+            .disc-file-preview { display:none; align-items:center; gap:8px; background:#1b1b1b; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:7px 11px; margin-bottom:7px; font-size:11px; color:#8b949e; }
             .disc-file-preview.show { display:flex; }
-            .disc-file-preview img { width:32px;height:32px;object-fit:cover;border-radius:4px; }
-            .disc-compose-box { background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;transition:border-color 0.2s; }
+            .disc-file-preview img { width:28px; height:28px; object-fit:cover; border-radius:4px; }
+            .disc-compose-box { background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow:hidden; transition:border-color 0.2s; }
             .disc-compose-box:focus-within { border-color:rgba(79,209,197,0.4); }
-            .disc-compose-box textarea { width:100%;background:transparent;border:none;color:#e2e8f0;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;padding:12px 14px 8px;resize:none;outline:none;min-height:44px;max-height:120px;line-height:1.5;box-sizing:border-box; }
+            .disc-compose-box textarea { width:100%; background:transparent; border:none; color:#e2e8f0; font-family:'Nunito',sans-serif; font-size:13px; font-weight:600; padding:11px 13px 8px; resize:none; outline:none; min-height:42px; max-height:120px; line-height:1.5; box-sizing:border-box; }
             .disc-compose-box textarea::placeholder { color:#8b949e; }
-            .disc-toolbar { display:flex;align-items:center;gap:4px;padding:6px 10px;border-top:1px solid rgba(255,255,255,0.07); }
-            .disc-tool-btn { background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;transition:0.15s;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700; }
-            .disc-tool-btn:hover { background:rgba(255,255,255,0.06);color:#e2e8f0; }
+            .disc-toolbar { display:flex; align-items:center; gap:4px; padding:5px 9px; border-top:1px solid rgba(255,255,255,0.07); }
+            .disc-tool-btn { background:none; border:none; color:#8b949e; cursor:pointer; padding:5px 7px; border-radius:6px; transition:0.15s; display:flex; align-items:center; gap:5px; font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; }
+            .disc-tool-btn:hover { background:rgba(255,255,255,0.06); color:#e2e8f0; }
             .disc-tool-btn.anon-on { color:#4fd1c5; }
-            .disc-post-btn { background:#4fd1c5;color:#0d1117;border:none;padding:7px 16px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:auto;transition:0.2s; }
+            .disc-post-btn { background:#4fd1c5; color:#0d1117; border:none; padding:6px 14px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; margin-left:auto; transition:0.2s; }
             .disc-post-btn:hover { background:#38b2ac; }
-            /* Typing */
-            .disc-typing { display:none;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:#8b949e;font-weight:700;min-height:28px; }
+
+            /* ── TYPING ── */
+            .disc-typing { display:none; align-items:center; gap:8px; padding:3px 0 6px; font-size:12px; color:#8b949e; font-weight:700; min-height:26px; }
             .disc-typing.show { display:flex; }
-            .disc-typing-dots { display:flex;align-items:center;gap:4px; }
-            .disc-typing-dots span { width:8px;height:8px;border-radius:50%;background:#4fd1c5;animation:discTypeBounce 1.2s infinite ease-in-out;display:inline-block; }
+            .disc-typing-dots { display:flex; align-items:center; gap:3px; }
+            .disc-typing-dots span { width:6px; height:6px; border-radius:50%; background:#4fd1c5; animation:discTypeBounce 1.2s infinite ease-in-out; display:inline-block; }
             .disc-typing-dots span:nth-child(2){animation-delay:0.2s}
             .disc-typing-dots span:nth-child(3){animation-delay:0.4s}
             @keyframes discTypeBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
         </style>
 
         <div class="disc-thread-wrap">
-
             <div class="disc-posts-scroll" id="discPostsScroll">
                 ${postsHtml}
                 <div id="discBottom"></div>
             </div>
-
             ${composeHtml}
         </div>`;
 
-    // Scroll to bottom
     const scroll = document.getElementById('discPostsScroll');
     if (scroll) scroll.scrollTop = scroll.scrollHeight;
 
-    // Wire up compose
     wireCompose(disc.id);
 }
 
 function buildPostCard(r, user_role, is_in_class, discId) {
-    const isOp      = r.is_op || false;
-    const isMe      = r.is_me == 1;
-    const showAvatar = !(r.replier_anonymous && user_role === 'learner');
+    const isOp       = r.is_op || false;
+    const isMe       = r.is_me == 1;
+    const isAnon     = r.replier_anonymous && user_role === 'learner';
     const initial    = (r.replier_display || '?').charAt(0).toUpperCase();
     const picFolder  = 'uploads/learners/';
 
-    const avatarHtml = showAvatar
-        ? `<img src="${picFolder}${escHtml(r.profile_picture || 'default.png')}" class="disc-avatar"
+    // ── Spine dot style
+    const dotClass = isOp ? 'is-op-dot' : (isMe ? '' : 'muted');
+
+    // ── Avatar (small, 24px)
+    const avatarHtml = isAnon
+        ? `<div class="disc-avatar-ph">?</div>`
+        : `<img src="${picFolder}${escHtml(r.profile_picture || 'default.png')}" class="disc-avatar"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-           <div class="disc-avatar-ph" style="display:none;">${initial}</div>`
-        : `<div class="disc-avatar-ph">?</div>`;
+           <div class="disc-avatar-ph" style="display:none;">${initial}</div>`;
 
-    const tags = (isOp ? `<span class="disc-tag op">OP</span>` : '') +
-                 (isMe ? `<span class="disc-tag me">You</span>` : '');
+    // ── Tags
+    const opTag      = isOp  ? `<span class="disc-tag op">OP</span>` : '';
+    const meTag      = isMe  ? `<span class="disc-tag me">You</span>` : '';
+    const anonTag    = isAnon? `<span class="disc-tag anon">Anon</span>` : '';
+    const displayName = isAnon ? 'Anonymous' : escHtml(r.replier_display);
 
+    // ── Quote block (if replying to someone)
     const quoteHtml = r.quote_author
         ? `<div class="disc-quote">
                <div class="disc-quote-author">${escHtml(r.quote_author)}</div>
                <div>${escHtml(r.quote_text || '')}${(r.quote_text||'').length >= 100 ? '…' : ''}</div>
            </div>` : '';
 
+    // ── Attachment
     let attachHtml = '';
     if (r.attachment) {
-        const ext    = r.attachment.split('.').pop().toLowerCase();
-        const path   = 'uploads/discussions/' + r.attachment;
-        const isImg  = ['jpg','jpeg','png','gif','webp'].includes(ext);
-        attachHtml   = `<div class="disc-attachment">` + (isImg
+        const ext   = r.attachment.split('.').pop().toLowerCase();
+        const path  = 'uploads/discussions/' + r.attachment;
+        const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
+        attachHtml  = `<div class="disc-attachment">` + (isImg
             ? `<img src="${path}" onclick="discOpenMedia('${path}','image')">`
             : `<div class="disc-pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf"></i> Open PDF</div>`)
             + `</div>`;
     }
 
+    // ── Action buttons
     const replyBtn  = is_in_class && r.id !== undefined
         ? `<button class="disc-action-btn reply" onclick="discSetReply(${r.id || 0},'${escHtml(r.replier_display)}','${escHtml((r.message||'').substring(0,80))}')"><i class="fas fa-reply"></i> Reply</button>`
         : '';
@@ -340,19 +379,28 @@ function buildPostCard(r, user_role, is_in_class, discId) {
         ? `<button class="disc-action-btn report" onclick="discShowReport(${r.id},${discId})"><i class="fas fa-flag"></i> Report</button>`
         : '';
 
+    const bodyWrapClass = `disc-body-wrap${isOp ? ' is-op' : ''}${isMe ? ' is-me' : ''}`;
+
     return `
-        <div class="disc-post-card ${isOp?'is-op':''} ${isMe?'is-me':''}" data-id="${r.id || 0}">
-            <div class="disc-post-header">
-                ${avatarHtml}
-                <div>
-                    <div class="disc-author">${escHtml(r.replier_display)} ${tags}</div>
-                    <div class="disc-time">${formatTime(r.created_at)}</div>
-                </div>
+        <div class="disc-post-card" data-id="${r.id || 0}">
+            <div class="disc-spine">
+                <div class="disc-spine-dot ${dotClass}"></div>
+                <div class="disc-spine-line"></div>
             </div>
-            ${quoteHtml}
-            <div class="disc-body">${escHtml(r.message || '')}</div>
-            ${attachHtml}
-            <div class="disc-footer">${replyBtn}${reportBtn}</div>
+            <div class="disc-post-content">
+                <div class="disc-post-header">
+                    ${avatarHtml}
+                    <span class="disc-author">${displayName}</span>
+                    ${opTag}${meTag}${anonTag}
+                    <span class="disc-time">${formatTime(r.created_at)}</span>
+                </div>
+                <div class="${bodyWrapClass}">
+                    ${quoteHtml}
+                    <div class="disc-body">${escHtml(r.message || '')}</div>
+                    ${attachHtml}
+                </div>
+                <div class="disc-footer">${replyBtn}${reportBtn}</div>
+            </div>
         </div>`;
 }
 
@@ -393,20 +441,17 @@ function buildCompose(discId) {
 }
 
 function wireCompose(discId) {
-    // Auto-grow textarea
     const ta = document.getElementById('discTextarea');
     if (ta) {
         ta.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            // Send typing signal
             sendTypingSignal(discId);
             clearTimeout(discTypingTimeout);
             discTypingTimeout = setTimeout(() => {}, 5000);
         });
     }
 
-    // File preview
     const fi = document.getElementById('discFileInput');
     if (fi) {
         fi.addEventListener('change', function() {
@@ -428,7 +473,7 @@ function wireCompose(discId) {
     }
 }
 
-// Typing
+// ── Typing signal
 function sendTypingSignal(discId) {
     fetch('api/set_typing.php', {
         method: 'POST',
@@ -453,7 +498,7 @@ async function pollTyping(discId) {
     } catch (e) {}
 }
 
-// Poll new replies
+// ── Poll new replies
 async function pollNewReplies(discId) {
     try {
         const res  = await fetch(`api/learner/get_new_replies.php?discussion_id=${discId}&after_id=${lastReplyId}`);
@@ -461,9 +506,9 @@ async function pollNewReplies(discId) {
         const rows = await res.json();
         if (!Array.isArray(rows) || rows.length === 0) return;
 
-        const scroll    = document.getElementById('discPostsScroll');
-        const bottom    = document.getElementById('discBottom');
-        const atBottom  = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80;
+        const scroll   = document.getElementById('discPostsScroll');
+        const bottom   = document.getElementById('discBottom');
+        const atBottom = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80;
 
         rows.forEach(r => {
             const dk = getDateKey(r.created_at);
@@ -481,7 +526,6 @@ async function pollNewReplies(discId) {
         });
 
         if (atBottom) scroll.scrollTop = scroll.scrollHeight;
-        // Update reply count in cache directly (no reload needed)
         if (window.discussionCache) {
             const disc = window.discussionCache.find(d => d.id == discId);
             if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + rows.length;
@@ -489,13 +533,13 @@ async function pollNewReplies(discId) {
     } catch (e) {}
 }
 
-// Submit reply
+// ── Submit reply
 window.discSubmitReply = async function(discId) {
-    const ta       = document.getElementById('discTextarea');
-    const fi       = document.getElementById('discFileInput');
-    const anon     = document.getElementById('discAnon');
-    const replyTo  = window._discReplyTo ?? 0;
-    const message  = ta ? ta.value.trim() : '';
+    const ta      = document.getElementById('discTextarea');
+    const fi      = document.getElementById('discFileInput');
+    const anon    = document.getElementById('discAnon');
+    const replyTo = window._discReplyTo ?? 0;
+    const message = ta ? ta.value.trim() : '';
 
     if (!message && (!fi || !fi.files[0])) return;
 
@@ -506,7 +550,6 @@ window.discSubmitReply = async function(discId) {
     fd.append('reply_to', replyTo);
     if (fi?.files[0]) fd.append('attachment', fi.files[0]);
 
-    // Optimistic UI — disable button
     const btn = document.querySelector('.disc-post-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
 
@@ -515,14 +558,12 @@ window.discSubmitReply = async function(discId) {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        // Clear compose
         if (ta) { ta.value = ''; ta.style.height = 'auto'; }
         if (fi) fi.value = '';
         discCancelReply();
         discClearFile();
 
-        // Render new reply instantly
-        const scroll = document.getElementById('discPostsScroll');
+        const scroll   = document.getElementById('discPostsScroll');
         const bottomEl = document.getElementById('discBottom');
         if (scroll && data.reply) {
             const dk = getDateKey(data.reply.created_at);
@@ -540,12 +581,10 @@ window.discSubmitReply = async function(discId) {
             scroll.scrollTop = scroll.scrollHeight;
         }
 
-        // Bust cache so list shows updated reply count
-       // Update reply count in cache directly (no reload needed)
-if (window.discussionCache) {
-    const disc = window.discussionCache.find(d => d.id == discId);
-    if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
-}
+        if (window.discussionCache) {
+            const disc = window.discussionCache.find(d => d.id == discId);
+            if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
+        }
 
     } catch (e) {
         alert(e.message || 'Failed to post reply');
@@ -554,7 +593,7 @@ if (window.discussionCache) {
     }
 };
 
-// Reply helpers
+// ── Reply helpers
 window.discSetReply = function(id, author, preview) {
     window._discReplyTo = id;
     const p = document.getElementById('discPreviewText');
@@ -574,7 +613,7 @@ window.discClearFile = function() {
     if (img) img.style.display = 'none';
 };
 
-// Report modal (inline — no separate page needed)
+// ── Report modal
 window.discShowReport = function(replyId, discId) {
     const existing = document.getElementById('discReportModal');
     if (existing) existing.remove();
@@ -618,7 +657,7 @@ window.discSubmitReport = async function(replyId, discId) {
     } catch (e) {}
 };
 
-// Media overlay
+// ── Media overlay
 window.discOpenMedia = function(path, type) {
     const existing = document.getElementById('discMediaOverlay');
     if (existing) existing.remove();
@@ -649,13 +688,11 @@ window.loadCreateDiscussion = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        // Fetch teacher list (cached)
         if (!window.teacherListCache) {
             const res  = await fetch('api/learner/get_teachers.php');
             const data = await res.json();
             window.teacherListCache = data;
         }
-
         renderCreateForm(window.teacherListCache);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading form.</p>`;
@@ -745,12 +782,12 @@ window.discToggleTeacher = function(el) {
 };
 
 window.discSubmitCreate = async function() {
-    const title    = document.getElementById('discTitle')?.value.trim();
-    const message  = document.getElementById('discMessage')?.value.trim();
-    const anon     = document.getElementById('discCreateAnon')?.checked;
-    const fileInput= document.getElementById('discCreateFile');
-    const errorEl  = document.getElementById('discFormError');
-    const btn      = document.getElementById('discSubmitBtn');
+    const title     = document.getElementById('discTitle')?.value.trim();
+    const message   = document.getElementById('discMessage')?.value.trim();
+    const anon      = document.getElementById('discCreateAnon')?.checked;
+    const fileInput = document.getElementById('discCreateFile');
+    const errorEl   = document.getElementById('discFormError');
+    const btn       = document.getElementById('discSubmitBtn');
 
     const selectedTeachers = [...document.querySelectorAll('.disc-teacher-option.selected')]
         .map(el => el.dataset.email);
@@ -777,7 +814,6 @@ window.discSubmitCreate = async function() {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        // Bust cache and go back to list
         window.discussionCache = null;
         window.fetchDiscussions();
 
