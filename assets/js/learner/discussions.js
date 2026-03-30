@@ -444,7 +444,7 @@ function renderThread(data) {
             .disc-post-content { flex:1; min-width:0; }
             .disc-post-header { display:flex; align-items:center; gap:7px; margin-bottom:6px; flex-wrap:wrap; }
             .disc-avatar { width:24px; height:24px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(255,255,255,0.1); flex-shrink:0; }
-            .disc-avatar-ph { width:24px; height:24px; border-radius:50%; background:#222; border:1.5px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#8b949e; flex-shrink:0; text-transform:uppercase; }
+            .disc-avatar-ph { width:24px; height:24px; border-radius:50%; background:#222; border:1.5px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#8b949e; flex-shrink:0; text-transform:uppercase; letter-spacing:0.03em; }
             .disc-author { font-size:13px; font-weight:700; color:#e2e8f0; }
             .disc-time { font-size:10px; color:#8b949e; margin-left:auto; white-space:nowrap; }
             .disc-tag { font-size:9px; font-weight:700; padding:1px 6px; border-radius:3px; text-transform:uppercase; letter-spacing:0.04em; }
@@ -527,11 +527,30 @@ function buildPostCard(r, user_role, is_in_class, discId) {
 
     const dotClass = isOp ? 'is-op-dot' : (isMe ? '' : 'muted');
 
+    // Pick a consistent color per initial so the same person always gets the same colour
+    const avatarColors = [
+        { bg:'rgba(79,209,197,0.15)',  color:'#4fd1c5' },  // teal
+        { bg:'rgba(99,153,250,0.15)',  color:'#63a0fa' },  // blue
+        { bg:'rgba(246,173,85,0.15)', color:'#f6ad55' },  // amber
+        { bg:'rgba(154,117,242,0.15)',color:'#9a75f2' },  // purple
+        { bg:'rgba(72,199,142,0.15)', color:'#48c78e' },  // green
+        { bg:'rgba(241,101,101,0.15)',color:'#f16565' },  // coral
+    ];
+    const colorIdx   = initial.charCodeAt(0) % avatarColors.length;
+    const avatarColor = avatarColors[colorIdx];
+
+    // Always render the initials circle. If a real (non-default) profile pic exists,
+    // swap it in on successful load — this avoids the grey default.png problem.
+    const hasPic = r.profile_picture && r.profile_picture !== 'default.png' && r.profile_picture !== '';
     const avatarHtml = isAnon
-        ? `<div class="disc-avatar-ph">?</div>`
-        : `<img src="${picFolder}${escHtml(r.profile_picture || 'default.png')}" class="disc-avatar"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-           <div class="disc-avatar-ph" style="display:none;">${initial}</div>`;
+        ? `<div class="disc-avatar-ph" style="background:rgba(255,255,255,0.06);color:#8b949e;">?</div>`
+        : (hasPic
+            ? `<img src="${picFolder}${escHtml(r.profile_picture)}" class="disc-avatar"
+                   onload="this.style.display='block';this.nextElementSibling.style.display='none';"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                   style="display:none;">
+               <div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`
+            : `<div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`);
 
     const opTag      = isOp   ? `<span class="disc-tag op">OP</span>`    : '';
     const meTag      = isMe   ? `<span class="disc-tag me">You</span>`   : '';
