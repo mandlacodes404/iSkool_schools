@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iSkool — The LMS Built for South African High Schools</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --bg:        #0f0f12;
+  --bg2:       #1a1919;
+  --bg3:       #1c1c24;
+  --surface:   #1e1e28;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #f0eff5;
+  --muted:     #7a7a8c;
+  --teal:      #4fd1c5;
+  --teal2:     #00e5a0;
+  --orange:    #f97316;
+  --blue:      #4f7cff;
+  --red:       #f85149;
+  --gold:      #f5c842;
+  --radius:    14px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:.4;
+}
+
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 1000;
+  background: rgba(15,15,18,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none;
+}
+.nav-logo svg { width: 38px; height: 38px; }
+.nav-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800;
+  color: var(--text); letter-spacing: -0.5px;
+}
+.nav-logo-text span { color: var(--teal); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 14px; font-weight: 500;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  display: flex; align-items: center; gap: 12px;
+}
+.btn-ghost {
+  padding: 9px 20px; border-radius: 50px;
+  border: 1px solid var(--border2);
+  color: var(--text); font-size: 14px; font-weight: 500;
+  text-decoration: none; transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+.btn-primary {
+  padding: 9px 22px; border-radius: 50px;
+  background: var(--teal); color: #0f0f12;
+  font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--teal2); transform: translateY(-1px); }
+
+.nav-mobile-toggle {
+  display: none; background: none; border: none;
+  color: var(--text); cursor: pointer; padding: 6px;
+}
+
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 140px 24px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hero glow orbs */
+.hero::before {
+  content:'';
+  position:absolute;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,209,197,0.06) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-55%);
+  pointer-events: none;
+}
+.hero::after {
+  content:'';
+  position:absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,124,255,0.05) 0%, transparent 70%);
+  bottom: 10%; right: 10%;
+  pointer-events: none;
+}
+
+/* Grid lines */
+.hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-inner {
+  position: relative; z-index: 2;
+  max-width: 820px;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 50px;
+  background: rgba(79,209,197,0.08);
+  border: 1px solid rgba(79,209,197,0.2);
+  font-size: 13px; font-weight: 500; color: var(--teal);
+  margin-bottom: 32px;
+  animation: fadeUp .6s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:.5; transform:scale(.7); }
+}
+
+.hero-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: var(--text);
+  margin-bottom: 24px;
+  animation: fadeUp .7s .1s ease both;
+}
+.hero-headline .hl-teal  { color: var(--teal); }
+.hero-headline .hl-line  { display: block; }
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--muted); line-height: 1.7;
+  max-width: 560px; margin: 0 auto 40px;
+  font-weight: 400;
+  animation: fadeUp .7s .2s ease both;
+}
+
+.hero-actions {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; flex-wrap: wrap;
+  animation: fadeUp .7s .3s ease both;
+}
+
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 32px; border-radius: 50px;
+  background: var(--teal); color: #0f0f12;
+  font-size: 16px; font-weight: 700;
+  text-decoration: none; transition: all .25s;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 0 40px rgba(79,209,197,0.2);
+}
+.btn-hero-primary:hover {
+  background: var(--teal2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(79,209,197,0.35);
+}
+.btn-hero-primary svg { width:18px; height:18px; }
+
+.btn-hero-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 32px; border-radius: 50px;
+  border: 1px solid var(--border2);
+  color: var(--text); font-size: 16px; font-weight: 500;
+  text-decoration: none; transition: all .25s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-hero-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+.hero-trust {
+  display: flex; align-items: center; justify-content: center;
+  gap: 24px; margin-top: 60px; flex-wrap: wrap;
+  animation: fadeUp .7s .4s ease both;
+}
+.hero-trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+}
+.hero-trust-item svg { width:14px; height:14px; stroke: var(--teal); }
+.hero-trust-divider {
+  width: 1px; height: 16px;
+  background: var(--border2);
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════════════ */
+.marquee-section {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  padding: 18px 0;
+  overflow: hidden;
+  position: relative; z-index: 2;
+}
+.marquee-label {
+  text-align: center;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+.marquee-track-wrap { overflow: hidden; }
+.marquee-track {
+  display: inline-flex; gap: 0;
+  animation: marquee 28s linear infinite;
+  white-space: nowrap;
+}
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 28px; font-size: 13px; color: var(--muted);
+  font-weight: 500;
+}
+.marquee-dot { width:4px; height:4px; border-radius:50%; background:var(--teal); flex-shrink:0; }
+@keyframes marquee {
+  from { transform:translateX(0); }
+  to   { transform:translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════════
+   DEMO SECTION
+═══════════════════════════════════════════════ */
+.demo-section {
+  padding: 120px 40px;
+  position: relative; overflow: hidden;
+  background: var(--bg);
+}
+.demo-section .glow {
+  position:absolute; width:500px; height:500px; border-radius:50%;
+  background: radial-gradient(circle, rgba(79,209,197,0.06) 0%, transparent 70%);
+  top:50%; left:35%; transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.demo-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+  position: relative; z-index: 2;
+}
+
+/* ── CARDS STAGE ── */
+.cards-stage {
+  position: relative; height: 400px;
+}
+
+.demo-card {
+  position: absolute;
+  width: 100%; max-width: 500px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px 30px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.3);
+  transition: all .65s cubic-bezier(.34,1.56,.64,1);
+  will-change: transform,opacity;
+  color: #111;
+  overflow: hidden;
+}
+.demo-card.pos-back2 { top:0;  left:28px; transform:scale(.88); opacity:.4; z-index:1; filter:blur(1.5px); }
+.demo-card.pos-back1 { top:18px; left:14px; transform:scale(.94); opacity:.65; z-index:2; }
+.demo-card.pos-front { top:38px; left:0;   transform:scale(1);  opacity:1;  z-index:3; }
+.demo-card.pos-exit  { top:120px; left:0; transform:scale(.8) translateY(80px); opacity:0; z-index:0; pointer-events:none; }
+
+/* Card internals */
+.card-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:4px 10px; border-radius:50px; margin-bottom:14px;
+}
+.badge-quiz     { background:rgba(79,124,255,.1); color:#4f7cff; }
+.badge-roster   { background:rgba(0,229,160,.1);  color:#00c47a; }
+.badge-setup    { background:rgba(249,115,22,.1); color:#f97316; }
+.badge-analytics{ background:rgba(245,200,66,.1); color:#d4a800; }
+
+.card-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; color:#0a0a0f; margin-bottom:5px; }
+.card-sub   { font-size:12px; color:#888; margin-bottom:18px; }
+
+/* Mini bar chart */
+.mini-bars { display:flex; align-items:flex-end; gap:5px; height:56px; margin-bottom:16px; }
+.mini-bar  { flex:1; border-radius:4px 4px 0 0; }
+
+/* Stat row */
+.stat-row  { display:flex; gap:10px; }
+.stat-pill { flex:1; background:#f5f5f8; border-radius:12px; padding:10px 12px; text-align:center; }
+.stat-val  { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; line-height:1; margin-bottom:3px; }
+.stat-lbl  { font-size:10px; color:#999; font-weight:500; }
+
+/* Learner list */
+.learner-list { display:flex; flex-direction:column; gap:8px; }
+.learner-row  { display:flex; align-items:center; gap:10px; padding:8px 10px; background:#f8f8fb; border-radius:10px; }
+.l-avatar     { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+.l-name       { font-size:13px; font-weight:600; color:#111; flex:1; }
+.l-grade      { font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; }
+
+/* Progress bars */
+.prog-list { display:flex; flex-direction:column; gap:10px; }
+.prog-item {}
+.prog-hdr  { display:flex; justify-content:space-between; margin-bottom:5px; }
+.prog-lbl  { font-size:12px; color:#555; font-weight:500; }
+.prog-pct  { font-size:12px; font-weight:700; }
+.prog-track{ height:6px; background:#eee; border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:3px; }
+
+/* Input field in card */
+.card-input-label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#aaa; margin-bottom:7px; }
+.card-input {
+  width:100%; border:2px solid #e5e5ef; border-radius:10px;
+  padding:11px 14px; font-family:'DM Sans',sans-serif;
+  font-size:14px; color:#111; outline:none;
+  background:#fafafd; transition:border-color .3s; margin-bottom:16px;
+}
+.card-input.active { border-color:#4f7cff; }
+
+/* Fake cursor */
+#fake-cursor {
+  position:absolute; width:22px; height:22px;
+  pointer-events:none; z-index:100;
+  transition: top .55s cubic-bezier(.25,1,.5,1), left .55s cubic-bezier(.25,1,.5,1);
+  opacity:0; transform:translate(-3px,-3px);
+}
+#fake-cursor svg { width:22px; height:22px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+
+/* ── RIGHT COPY ── */
+.demo-copy { display:flex; flex-direction:column; gap:28px; }
+
+.demo-tabs {
+  display:flex; gap:4px;
+  background:rgba(255,255,255,.05);
+  border-radius:50px; padding:5px; width:fit-content;
+}
+.demo-tab {
+  padding:8px 18px; border-radius:50px; border:none;
+  background:transparent; color:var(--muted);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+  cursor:pointer; transition:all .3s; white-space:nowrap;
+}
+.demo-tab.active {
+  background:var(--teal); color:#0f0f12; font-weight:700;
+}
+
+.demo-eyebrow {
+  font-size:11px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--teal);
+}
+.demo-headline {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(28px,3.5vw,44px);
+  font-weight:800; line-height:1.1; color:var(--text);
+}
+.demo-headline span { color:var(--teal); }
+.demo-underline { width:44px; height:3px; background:var(--teal); border-radius:2px; margin-top:10px; }
+.demo-body { font-size:15px; line-height:1.75; color:var(--muted); max-width:420px; }
+
+.demo-dots { display:flex; gap:8px; }
+.demo-dot  { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.15); cursor:pointer; transition:all .4s; }
+.demo-dot.active { background:var(--teal); width:24px; border-radius:4px; }
+
+/* ═══════════════════════════════════════════════
+   HOW IT WORKS
+═══════════════════════════════════════════════ */
+.how-section {
+  padding: 120px 40px;
+  background: var(--bg2);
+  position: relative; z-index: 2;
+}
+.section-header { text-align:center; margin-bottom:64px; }
+.section-eyebrow {
+  font-size:11px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--teal); margin-bottom:14px;
+}
+.section-title {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(32px,5vw,52px);
+  font-weight:800; line-height:1.1;
+  letter-spacing:-1px; color:var(--text);
+}
+.section-title span { color:var(--teal); }
+.section-sub {
+  font-size:17px; color:var(--muted); margin-top:16px;
+  line-height:1.7; max-width:540px; margin-left:auto; margin-right:auto;
+}
+
+.how-grid {
+  max-width:1100px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:24px;
+}
+.how-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  padding:32px 28px 28px;
+  position:relative; overflow:hidden;
+  transition:border-color .3s, transform .3s;
+}
+.how-card:hover { border-color:var(--border2); transform:translateY(-4px); }
+.how-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--teal),transparent);
+}
+
+.how-step-num {
+  width:44px; height:44px; border-radius:50%;
+  background:var(--teal); color:#0f0f12;
+  font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:20px;
+}
+.how-card-title {
+  font-family:'Syne',sans-serif; font-size:20px; font-weight:700;
+  color:var(--text); margin-bottom:10px;
+}
+.how-card-body { font-size:14px; color:var(--muted); line-height:1.7; }
+
+/* Mini mock inside cards */
+.how-mock {
+  margin-top:24px; background:rgba(255,255,255,.03);
+  border:1px solid var(--border); border-radius:10px;
+  padding:14px; display:flex; flex-direction:column; gap:8px;
+}
+.how-mock-row {
+  display:flex; align-items:center; gap:10px;
+}
+.how-mock-avatar {
+  width:24px; height:24px; border-radius:50%;
+  flex-shrink:0;
+}
+.how-mock-line {
+  height:8px; border-radius:4px; background:rgba(255,255,255,.08);
+}
+.how-mock-bar {
+  height:6px; border-radius:3px; background:var(--teal);
+  opacity:.7;
+}
+
+/* ═══════════════════════════════════════════════
+   BUILT FOR (ROLE CARDS)
+═══════════════════════════════════════════════ */
+.roles-section {
+  padding:120px 40px;
+  background:var(--bg);
+  position:relative; z-index:2;
+}
+.roles-grid {
+  max-width:1100px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+}
+.role-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:36px 28px;
+  transition:all .3s; cursor:default;
+  position:relative; overflow:hidden;
+}
+.role-card:hover { border-color:var(--border2); transform:translateY(-6px); }
+.role-card::after {
+  content:'';
+  position:absolute; bottom:0; left:0; right:0; height:80px;
+  background:linear-gradient(transparent,rgba(79,209,197,.03));
+  pointer-events:none;
+}
+
+.role-icon {
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:22px;
+}
+.role-icon svg { width:26px; height:26px; }
+
+.role-title {
+  font-family:'Syne',sans-serif; font-size:22px; font-weight:800;
+  color:var(--text); margin-bottom:10px;
+}
+.role-sub { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:24px; }
+.role-features { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.role-features li {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:13px; color:var(--muted); line-height:1.5;
+}
+.role-features li::before {
+  content:'';
+  width:16px; height:16px; border-radius:50%;
+  flex-shrink:0; margin-top:2px;
+  display:flex; align-items:center; justify-content:center;
+}
+.role-check {
+  width:16px; height:16px; border-radius:50%;
+  flex-shrink:0; margin-top:2px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.role-check svg { width:10px; height:10px; stroke:#fff; stroke-width:3; }
+
+/* ═══════════════════════════════════════════════
+   COMPARISON
+═══════════════════════════════════════════════ */
+.compare-section {
+  padding:120px 40px;
+  background:var(--bg2);
+  position:relative; z-index:2;
+}
+.compare-wrap { max-width:900px; margin:0 auto; }
+
+.compare-table {
+  width:100%; border-collapse:collapse;
+  border-radius:var(--radius); overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--surface);
+}
+.compare-table th, .compare-table td {
+  padding:16px 20px; text-align:center;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.compare-table th {
+  background:var(--bg3); font-family:'Syne',sans-serif;
+  font-weight:700; font-size:13px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.compare-table th:first-child,
+.compare-table td:first-child { text-align:left; padding-left:28px; }
+.compare-table tr:last-child td { border-bottom:none; }
+.compare-table tr:hover td { background:rgba(255,255,255,.02); }
+
+.compare-table th.highlight { background:rgba(79,209,197,.08); color:var(--teal); }
+.compare-table td.highlight { background:rgba(79,209,197,.04); }
+
+.feature-label { font-size:14px; color:var(--text); font-weight:500; }
+.check-yes { color:var(--teal); font-size:18px; font-weight:700; }
+.check-no  { color:var(--muted); font-size:18px; font-weight:400; opacity:.4; }
+
+.iskool-col-header {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.iskool-best-badge {
+  background:var(--teal); color:#0f0f12;
+  font-size:10px; font-weight:700; letter-spacing:.08em;
+  padding:2px 8px; border-radius:50px;
+  font-family:'DM Sans',sans-serif;
+}
+
+/* ═══════════════════════════════════════════════
+   PILOT CTA
+═══════════════════════════════════════════════ */
+.pilot-section {
+  padding:120px 40px;
+  background:var(--bg);
+  position:relative; z-index:2; overflow:hidden;
+}
+.pilot-section::before {
+  content:'';
+  position:absolute; width:600px; height:600px; border-radius:50%;
+  background:radial-gradient(circle, rgba(79,209,197,0.07) 0%, transparent 70%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+.pilot-inner {
+  max-width:680px; margin:0 auto; text-align:center;
+  position:relative; z-index:2;
+}
+.pilot-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px; border-radius:50px;
+  background:rgba(249,115,22,.1); border:1px solid rgba(249,115,22,.25);
+  font-size:12px; font-weight:700; color:var(--orange);
+  letter-spacing:.08em; text-transform:uppercase; margin-bottom:28px;
+}
+.pilot-headline {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(36px,6vw,58px); font-weight:800;
+  line-height:1.08; letter-spacing:-1.5px; color:var(--text);
+  margin-bottom:20px;
+}
+.pilot-headline span { color:var(--teal); }
+.pilot-sub { font-size:17px; color:var(--muted); line-height:1.7; margin-bottom:48px; }
+
+.pilot-form {
+  display:flex; gap:12px; max-width:480px; margin:0 auto 32px;
+  flex-wrap:wrap;
+}
+.pilot-input {
+  flex:1; min-width:240px; padding:16px 20px;
+  border-radius:50px; border:1px solid var(--border2);
+  background:rgba(255,255,255,.05);
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px;
+  outline:none; transition:border-color .2s;
+}
+.pilot-input::placeholder { color:var(--muted); }
+.pilot-input:focus { border-color:var(--teal); }
+.pilot-submit {
+  padding:16px 28px; border-radius:50px;
+  background:var(--teal); color:#0f0f12;
+  font-size:15px; font-weight:700; border:none; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all .25s;
+  white-space:nowrap;
+}
+.pilot-submit:hover { background:var(--teal2); transform:translateY(-2px); }
+
+.pilot-note { font-size:13px; color:var(--muted); }
+.pilot-note strong { color:var(--teal); }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+footer {
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:48px 40px 32px;
+  position:relative; z-index:2;
+}
+.footer-inner {
+  max-width:1100px; margin:0 auto;
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px;
+}
+.footer-brand .nav-logo { margin-bottom:14px; }
+.footer-brand p { font-size:13px; color:var(--muted); line-height:1.7; max-width:280px; }
+
+.footer-col-title {
+  font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--muted);
+  margin-bottom:16px;
+}
+.footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.footer-links a {
+  font-size:13px; color:var(--muted); text-decoration:none; transition:color .2s;
+}
+.footer-links a:hover { color:var(--text); }
+
+.footer-bottom {
+  max-width:1100px; margin:40px auto 0;
+  padding-top:24px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:12px;
+}
+.footer-copy { font-size:12px; color:var(--muted); }
+.footer-legal { display:flex; gap:20px; }
+.footer-legal a { font-size:12px; color:var(--muted); text-decoration:none; }
+.footer-legal a:hover { color:var(--text); }
+
+/* ═══════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════ */
+.reveal {
+  opacity:0; transform:translateY(32px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ═══════════════════════════════════════════════
+   MOBILE MENU
+═══════════════════════════════════════════════ */
+.mobile-menu {
+  display:none; position:fixed; inset:0;
+  background:var(--bg2); z-index:2000;
+  flex-direction:column; padding:24px;
+}
+.mobile-menu.open { display:flex; }
+.mobile-menu-header {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;
+}
+.mobile-close {
+  background:none; border:none; color:var(--text); cursor:pointer; padding:8px;
+}
+.mobile-nav-links { list-style:none; display:flex; flex-direction:column; gap:4px; margin-bottom:32px; }
+.mobile-nav-links a {
+  display:block; padding:14px 0; font-size:22px; font-weight:600;
+  color:var(--text); text-decoration:none; border-bottom:1px solid var(--border);
+  font-family:'Syne',sans-serif;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media (max-width:1024px) {
+  .demo-inner { grid-template-columns:1fr; gap:48px; }
+  .cards-stage { height:360px; }
+  .demo-copy { order:-1; }
+  .how-grid { grid-template-columns:1fr; gap:16px; }
+  .roles-grid { grid-template-columns:1fr; gap:16px; }
+  .footer-inner { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:768px) {
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+  .nav-mobile-toggle { display:block; }
+  .demo-section, .how-section, .roles-section, .compare-section, .pilot-section { padding:80px 20px; }
+  .section-title { font-size:32px; }
+  .compare-table th, .compare-table td { padding:12px 10px; font-size:12px; }
+  .footer-inner { grid-template-columns:1fr; gap:28px; }
+  .footer-bottom { flex-direction:column; text-align:center; }
+  .cards-stage { height:340px; }
+}
+@media (max-width:480px) {
+  .hero { padding:120px 20px 60px; }
+  .hero-headline { letter-spacing:-1px; }
+  .demo-tabs { flex-wrap:wrap; }
+  .pilot-form { flex-direction:column; }
+  .pilot-input { min-width:unset; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
+      </g>
+    </svg>
+    <span class="nav-logo-text">i<span>Skool</span></span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#demo">Platform</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#roles">For Schools</a></li>
+    <li><a href="#pilot">Pilot Programme</a></li>
+  </ul>
+
+  <div class="nav-cta">
+    <a href="#" class="btn-ghost">Log In</a>
+    <a href="#pilot" class="btn-primary">
+      Apply for Free Pilot
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+    <button class="nav-mobile-toggle" onclick="document.getElementById('mobileMenu').classList.add('open')">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round">
+        <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-header">
+    <a class="nav-logo" href="#">
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 805" style="width:36px;height:36px;">
+        <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+          <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
+        </g>
+      </svg>
+      <span class="nav-logo-text">i<span>Skool</span></span>
+    </a>
+    <button class="mobile-close" onclick="document.getElementById('mobileMenu').classList.remove('open')">
+      <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <ul class="mobile-nav-links">
+    <li><a href="#demo" onclick="document.getElementById('mobileMenu').classList.remove('open')">Platform</a></li>
+    <li><a href="#how" onclick="document.getElementById('mobileMenu').classList.remove('open')">How It Works</a></li>
+    <li><a href="#roles" onclick="document.getElementById('mobileMenu').classList.remove('open')">For Schools</a></li>
+    <li><a href="#pilot" onclick="document.getElementById('mobileMenu').classList.remove('open')">Pilot Programme</a></li>
+  </ul>
+  <a href="#pilot" class="btn-hero-primary" style="justify-content:center;" onclick="document.getElementById('mobileMenu').classList.remove('open')">
+    Apply for Free Pilot
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now live at Landulwazi Comprehensive School
+    </div>
+
+    <h1 class="hero-headline">
+      <span class="hl-line">The LMS Built</span>
+      <span class="hl-line">for <span class="hl-teal">South African</span></span>
+      <span class="hl-line">High Schools.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Quizzes, assignments, grades, analytics, and parent communication — 
+      purpose-built for the SA curriculum and the teachers who deliver it.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#pilot" class="btn-hero-primary">
+        Apply for Free Pilot
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#demo" class="btn-hero-ghost">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        See the Platform
+      </a>
+    </div>
+
+    <div class="hero-trust">
+      <div class="hero-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        No IT team needed
+      </div>
+      <div class="hero-trust-divider"></div>
+      <div class="hero-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Live in under 10 minutes
+      </div>
+      <div class="hero-trust-divider"></div>
+      <div class="hero-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        6-month free pilot
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<div class="marquee-section">
+  <div class="marquee-label">Gauteng schools currently in our pilot network</div>
+  <div class="marquee-track-wrap">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+</div>
+
+<!-- ═══ DEMO SECTION ═══ -->
+<section class="demo-section" id="demo">
+  <div class="glow"></div>
+  <div class="demo-inner">
+
+    <!-- LEFT: Stacked Cards -->
+    <div class="cards-stage" id="cardsStage">
+      <div id="fake-cursor">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 2L20 11.5L12.5 13.5L9 20L4 2Z" fill="white" stroke="#222" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- Card 1: Quiz Analytics -->
+      <div class="demo-card pos-back2" id="dcard0">
+        <div class="card-badge badge-quiz">📊 Quiz Results</div>
+        <div class="card-title">Grade 11B — Life Sciences</div>
+        <div class="card-sub">Chapter 4: Genetics · 28 learners · Term 2</div>
+        <div class="mini-bars">
+          <div class="mini-bar" style="height:70%;background:#4f7cff;opacity:.3"></div>
+          <div class="mini-bar" style="height:88%;background:#4f7cff;opacity:.5"></div>
+          <div class="mini-bar" style="height:52%;background:#4f7cff;opacity:.4"></div>
+          <div class="mini-bar" style="height:94%;background:#4f7cff"></div>
+          <div class="mini-bar" style="height:60%;background:#4f7cff;opacity:.5"></div>
+          <div class="mini-bar" style="height:78%;background:#4f7cff;opacity:.7"></div>
+          <div class="mini-bar" style="height:85%;background:#4f7cff;opacity:.8"></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-pill"><div class="stat-val" style="color:#4f7cff">76%</div><div class="stat-lbl">Class Avg</div></div>
+          <div class="stat-pill"><div class="stat-val" style="color:#00c47a">89%</div><div class="stat-lbl">Pass Rate</div></div>
+          <div class="stat-pill"><div class="stat-val" style="color:#f85149">3</div><div class="stat-lbl">At Risk</div></div>
+        </div>
+      </div>
+
+      <!-- Card 2: Class Roster -->
+      <div class="demo-card pos-back1" id="dcard1">
+        <div class="card-badge badge-roster">👩‍🎓 Class Roster</div>
+        <div class="card-title">Grade 10A — English FAL</div>
+        <div class="card-sub">Mrs T. Dlamini · 32 learners enrolled</div>
+        <div class="learner-list">
+          <div class="learner-row">
+            <div class="l-avatar" style="background:#4f7cff">NK</div>
+            <div class="l-name">Nomvula Khumalo</div>
+            <div class="l-grade" style="background:rgba(0,196,122,.12);color:#00c47a">84%</div>
+          </div>
+          <div class="learner-row">
+            <div class="l-avatar" style="background:#f97316">LM</div>
+            <div class="l-name">Lethabo Molefe</div>
+            <div class="l-grade" style="background:rgba(248,81,73,.1);color:#f85149">51%</div>
+          </div>
+          <div class="learner-row">
+            <div class="l-avatar" style="background:#00c47a">SA</div>
+            <div class="l-name">Sipho Andile</div>
+            <div class="l-grade" style="background:rgba(0,196,122,.12);color:#00c47a">91%</div>
+          </div>
+          <div class="learner-row">
+            <div class="l-avatar" style="background:#9b59b6">TM</div>
+            <div class="l-name">Thandeka Mokoena</div>
+            <div class="l-grade" style="background:rgba(0,196,122,.12);color:#00c47a">78%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Setup (front — has typewriter) -->
+      <div class="demo-card pos-front" id="dcard2">
+        <div class="card-badge badge-setup">🎓 Teacher Setup</div>
+        <div class="card-title">Create a New Quiz</div>
+        <div class="card-sub">iSkool LMS · Landulwazi Comprehensive</div>
+        <div class="card-input-label">Subject & Grade</div>
+        <input class="card-input" id="typeInput" type="text" value="" placeholder="e.g. Physical Sciences Gr 12" readonly>
+        <div class="prog-list">
+          <div class="prog-item">
+            <div class="prog-hdr"><span class="prog-lbl">Assignments submitted</span><span class="prog-pct" style="color:#4f7cff">78%</span></div>
+            <div class="prog-track"><div class="prog-fill" style="width:78%;background:#4f7cff"></div></div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-hdr"><span class="prog-lbl">Quiz completion rate</span><span class="prog-pct" style="color:#00c47a">91%</span></div>
+            <div class="prog-track"><div class="prog-fill" style="width:91%;background:#00c47a"></div></div>
+          </div>
+          <div class="prog-item">
+            <div class="prog-hdr"><span class="prog-lbl">Learner logins this week</span><span class="prog-pct" style="color:#f97316">64%</span></div>
+            <div class="prog-track"><div class="prog-fill" style="width:64%;background:#f97316"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Copy -->
+    <div class="demo-copy">
+      <div class="demo-tabs" id="demoTabs">
+        <button class="demo-tab active" data-idx="0">Analytics</button>
+        <button class="demo-tab" data-idx="1">Learners</button>
+        <button class="demo-tab" data-idx="2">Setup</button>
+      </div>
+      <div>
+        <div class="demo-eyebrow" id="demoEyebrow">CLASS ANALYTICS</div>
+        <h2 class="demo-headline" id="demoHeadline">Real-time data<br>for <span>every class.</span></h2>
+        <div class="demo-underline"></div>
+      </div>
+      <p class="demo-body" id="demoBody">iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports. Built for the SA curriculum from the ground up.</p>
+      <div class="demo-dots" id="demoDots">
+        <div class="demo-dot active" data-idx="0"></div>
+        <div class="demo-dot" data-idx="1"></div>
+        <div class="demo-dot" data-idx="2"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="how-section" id="how">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">Live in <span>Three Steps.</span></h2>
+    <p class="section-sub">No IT department. No complicated setup. Just a browser and an internet connection.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card reveal">
+      <div class="how-step-num">1</div>
+      <div class="how-card-title">School Signs Up</div>
+      <div class="how-card-body">We onboard your school in under 10 minutes — your school name, classes, and teacher accounts are configured and ready to go.</div>
+      <div class="how-mock">
+        <div class="how-mock-row">
+          <div class="how-mock-avatar" style="background:#4f7cff;border-radius:50%;width:24px;height:24px;flex-shrink:0"></div>
+          <div class="how-mock-line" style="width:60%"></div>
+        </div>
+        <div class="how-mock-row" style="gap:8px;padding-left:4px">
+          <div class="how-mock-bar" style="width:45%;background:#4fd1c5"></div>
+          <div style="font-size:10px;color:#4fd1c5;font-weight:700">Active</div>
+        </div>
+      </div>
+    </div>
+    <div class="how-card reveal" style="transition-delay:.1s">
+      <div class="how-step-num">2</div>
+      <div class="how-card-title">Teachers Set Up Classes</div>
+      <div class="how-card-body">Teachers create quizzes, upload resources, set assignments, and post announcements. Learners join their class with a single tap.</div>
+      <div class="how-mock">
+        <div class="how-mock-row" style="gap:8px">
+          <div class="how-mock-avatar" style="background:#00c47a;border-radius:6px"></div>
+          <div style="flex:1"><div class="how-mock-line" style="width:80%;margin-bottom:5px"></div><div class="how-mock-line" style="width:55%"></div></div>
+        </div>
+        <div class="how-mock-row" style="gap:8px;margin-top:4px">
+          <div class="how-mock-avatar" style="background:#f97316;border-radius:6px"></div>
+          <div style="flex:1"><div class="how-mock-line" style="width:70%;margin-bottom:5px"></div><div class="how-mock-line" style="width:40%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="how-card reveal" style="transition-delay:.2s">
+      <div class="how-step-num">3</div>
+      <div class="how-card-title">Everyone Stays Informed</div>
+      <div class="how-card-body">Learners access work, submit assignments, and check grades. Parents receive push notifications. The principal sees the full school dashboard.</div>
+      <div class="how-mock">
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <div class="how-mock-bar" style="width:70%;background:#4fd1c5"></div>
+          <div style="font-size:10px;color:#4fd1c5;font-weight:700">78%</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <div class="how-mock-bar" style="width:91%;background:#00c47a"></div>
+          <div style="font-size:10px;color:#00c47a;font-weight:700">91%</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <div class="how-mock-bar" style="width:55%;background:#f97316"></div>
+          <div style="font-size:10px;color:#f97316;font-weight:700">55%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BUILT FOR ═══ -->
+<section class="roles-section" id="roles">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Built For Everyone</div>
+    <h2 class="section-title">One Platform.<br><span>Three Experiences.</span></h2>
+    <p class="section-sub">iSkool is purpose-built for every person in the school — not a generic tool retrofitted for education.</p>
+  </div>
+  <div class="roles-grid">
+
+    <!-- Learner -->
+    <div class="role-card reveal">
+      <div class="role-icon" style="background:rgba(79,124,255,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4f7cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <div class="role-title">Learners</div>
+      <div class="role-sub">A clean, mobile-first dashboard so learners can focus on learning — not figuring out the software.</div>
+      <ul class="role-features">
+        <li>
+          <div class="role-check" style="background:#4f7cff"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Take quizzes with instant marking and feedback
+        </li>
+        <li>
+          <div class="role-check" style="background:#4f7cff"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Submit assignments and track submission status
+        </li>
+        <li>
+          <div class="role-check" style="background:#4f7cff"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Download resources uploaded by teachers
+        </li>
+        <li>
+          <div class="role-check" style="background:#4f7cff"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Push notifications for new quizzes and deadlines
+        </li>
+      </ul>
+    </div>
+
+    <!-- Teacher -->
+    <div class="role-card reveal" style="transition-delay:.1s;border-color:rgba(79,209,197,.2)">
+      <div style="position:absolute;top:20px;right:20px;background:var(--teal);color:#0f0f12;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;letter-spacing:.08em;">MOST LOVED</div>
+      <div class="role-icon" style="background:rgba(79,209,197,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="role-title">Teachers</div>
+      <div class="role-sub">Analytics-first dashboard built to save time and surface the insights that actually matter in the classroom.</div>
+      <ul class="role-features">
+        <li>
+          <div class="role-check" style="background:#4fd1c5"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Create quizzes with auto-marking and class averages
+        </li>
+        <li>
+          <div class="role-check" style="background:#4fd1c5"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          See at-risk learners flagged automatically
+        </li>
+        <li>
+          <div class="role-check" style="background:#4fd1c5"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Upload resources, manage the syllabus
+        </li>
+        <li>
+          <div class="role-check" style="background:#4fd1c5"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Full analytics dashboard with gender breakdowns and pass rates
+        </li>
+      </ul>
+    </div>
+
+    <!-- Principal -->
+    <div class="role-card reveal" style="transition-delay:.2s">
+      <div class="role-icon" style="background:rgba(249,115,22,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="role-title">Principals</div>
+      <div class="role-sub">The war room. A real-time school overview with class-by-class performance, teacher activity, and alerts — no spreadsheets needed.</div>
+      <ul class="role-features">
+        <li>
+          <div class="role-check" style="background:#f97316"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Live KPI dashboard — learners, teachers, classes, school average
+        </li>
+        <li>
+          <div class="role-check" style="background:#f97316"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Classes flagged automatically when below 50%
+        </li>
+        <li>
+          <div class="role-check" style="background:#f97316"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          Most active teacher leaderboard
+        </li>
+        <li>
+          <div class="role-check" style="background:#f97316"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          School-wide announcements with read receipts
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ COMPARISON ═══ -->
+<section class="compare-section" id="compare">
+  <div class="section-header reveal">
+    <div class="section-eyebrow">Comparison</div>
+    <h2 class="section-title">Built for SA.<br><span>Not Adapted for SA.</span></h2>
+    <p class="section-sub">Generic tools require months of configuration. iSkool is ready for the SA curriculum on day one.</p>
+  </div>
+  <div class="compare-wrap reveal">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="highlight">
+            <div class="iskool-col-header">
+              <span class="iskool-best-badge">BEST FOR SA SCHOOLS</span>
+              <span style="color:var(--teal);font-family:'Syne',sans-serif">iSkool</span>
+            </div>
+          </th>
+          <th>Google Classroom</th>
+          <th>WhatsApp Groups</th>
+          <th>Paper Registers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="feature-label">Auto-marked quizzes</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">Real-time class analytics</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">At-risk learner alerts</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">Principal school dashboard</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">Parent linking & notifications</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td style="color:var(--muted);font-size:13px">Partial</td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">Works on any device</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-yes">✓</span></td>
+          <td><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+        <tr>
+          <td><span class="feature-label">SA curriculum focus</span></td>
+          <td class="highlight"><span class="check-yes">✓</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+          <td><span class="check-no">✕</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ PILOT CTA ═══ -->
+<section class="pilot-section" id="pilot">
+  <div class="pilot-inner reveal">
+    <div class="pilot-tag">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      6-Month Free Pilot — No Credit Card
+    </div>
+    <h2 class="pilot-headline">
+      Ready to bring<br><span>iSkool</span> to your school?
+    </h2>
+    <p class="pilot-sub">
+      We're currently onboarding Gauteng high schools for our free 6-month pilot programme. 
+      Your school gets full platform access — quizzes, assignments, analytics, parent notifications — completely free.
+    </p>
+    <div class="pilot-form">
+      <input type="email" class="pilot-input" placeholder="Principal's email address">
+      <button class="pilot-submit" onclick="handlePilotSubmit()">Apply Now</button>
+    </div>
+    <p class="pilot-note">
+      Or send a WhatsApp to <strong>+27 XX XXX XXXX</strong> with your school name and we'll call you back within 24 hours.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="nav-logo" href="#" style="margin-bottom:14px;display:inline-flex">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 805" style="width:32px;height:32px;">
+          <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+            <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
+          </g>
+        </svg>
+        <span class="nav-logo-text" style="font-size:16px">i<span>Skool</span></span>
+      </a>
+      <p>A cloud-based Learning Management System purpose-built for South African high schools. Quizzes, analytics, resources, and parent communication — all in one place.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Platform</div>
+      <ul class="footer-links">
+        <li><a href="#demo">Learner Dashboard</a></li>
+        <li><a href="#demo">Teacher Dashboard</a></li>
+        <li><a href="#demo">Principal Dashboard</a></li>
+        <li><a href="#demo">Analytics</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About iSkool</a></li>
+        <li><a href="#pilot">Pilot Programme</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Support</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Data & POPIA</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 iSkool EdTech. All rights reserved. Built in South Africa 🇿🇦</div>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════
+   JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+// ── MARQUEE ──
+const schools = [
+  'Landulwazi Comprehensive','Soweto High School','Johannesburg Commercial',
+  'Tembisa Secondary','Krugersdorp High','Roodepoort Secondary',
+  'Germiston High School','Benoni High School','Boksburg High School',
+  'Kempton Park Secondary','Midrand Secondary','Centurion High School',
+  'Edenvale High','Alberton High','Springs High School'
+];
+const track = document.getElementById('marqueeTrack');
+let mHTML = '';
+[...schools,...schools].forEach(s => {
+  mHTML += `<span class="marquee-item"><span class="marquee-dot"></span>${s}</span>`;
+});
+track.innerHTML = mHTML;
+
+// ── DEMO CARDS ──
+const cards = [
+  document.getElementById('dcard0'),
+  document.getElementById('dcard1'),
+  document.getElementById('dcard2'),
+];
+const positions = ['pos-back2','pos-back1','pos-front','pos-exit'];
+let cardOrder = [0,1,2];
+
+function setCardPositions() {
+  cardOrder.forEach((ci,i) => {
+    cards[ci].className = 'demo-card ' + positions[i];
+  });
+}
+function rotateCards() {
+  cardOrder.push(cardOrder.shift());
+  setCardPositions();
+}
+
+// ── SLIDE DATA ──
+const slides = [
+  {
+    tab:'Analytics', eyebrow:'CLASS ANALYTICS',
+    headline:'Real-time data<br>for <span>every class.</span>',
+    body:'iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports. Built for the SA curriculum from the ground up.',
+    type:null
+  },
+  {
+    tab:'Learners', eyebrow:'LEARNER MANAGEMENT',
+    headline:'Every learner.<br><span>Every result.</span>',
+    body:'Drill into any class to see individual learner performance. Identify who needs support before term-end. Filter by grade, subject, or risk level — and link learners to their parents.',
+    type:null
+  },
+  {
+    tab:'Setup', eyebrow:'QUICK ONBOARDING',
+    headline:'Live in<br><span>minutes.</span>',
+    body:'Add your school, set up classes, and invite teachers in under 10 minutes. No IT department needed. iSkool is designed for how South African schools actually work.',
+    type:'typewriter'
+  }
+];
+
+let currentSlide = 0;
+let autoTimer = null;
+
+const eyebrow  = document.getElementById('demoEyebrow');
+const headline = document.getElementById('demoHeadline');
+const body     = document.getElementById('demoBody');
+const dots     = document.querySelectorAll('.demo-dot');
+const tabs     = document.querySelectorAll('.demo-tab');
+
+function goToSlide(idx, manual=false) {
+  currentSlide = idx;
+  const s = slides[idx];
+  eyebrow.textContent  = s.eyebrow;
+  headline.innerHTML   = s.headline;
+  body.textContent     = s.body;
+  dots.forEach((d,i) => d.classList.toggle('active', i===idx));
+  tabs.forEach((t,i) => t.classList.toggle('active', i===idx));
+  rotateCards();
+  if (s.type === 'typewriter') startTypewriter();
+  if (manual) { clearInterval(autoTimer); autoTimer = setInterval(advance, 5000); }
+}
+
+function advance() { goToSlide((currentSlide+1)%slides.length); }
+
+// ── TYPEWRITER ──
+let typeTimer = null;
+const typeStrings = [
+  'Physical Sciences Gr 12',
+  'Life Sciences Gr 11',
+  'Mathematics Gr 10',
+  'English FAL Gr 12',
+  'History Gr 11',
+];
+let typeIdx = 0;
+const typeInput = document.getElementById('typeInput');
+
+function startTypewriter() {
+  clearTimeout(typeTimer);
+  const text = typeStrings[typeIdx % typeStrings.length]; typeIdx++;
+  typeInput.value = ''; typeInput.classList.add('active');
+  let i = 0;
+  function next() {
+    if (i <= text.length) {
+      typeInput.value = text.slice(0,i); i++;
+      typeTimer = setTimeout(next, 65);
+    } else {
+      typeTimer = setTimeout(() => typeInput.classList.remove('active'), 1500);
+    }
+  }
+  next();
+}
+
+// ── FAKE CURSOR ──
+const cursor = document.getElementById('fake-cursor');
+const stage  = document.getElementById('cardsStage');
+
+async function moveCursor(xPct, yPct, delay=0) {
+  return new Promise(r => {
+    setTimeout(() => {
+      cursor.style.left = (xPct/100*480)+'px';
+      cursor.style.top  = (yPct/100*400)+'px';
+      setTimeout(r, 600);
+    }, delay);
+  });
+}
+
+async function runCursor() {
+  cursor.style.opacity = '1';
+  await moveCursor(28,52,800);
+  startTypewriter();
+  await new Promise(r => setTimeout(r,2400));
+  await moveCursor(52,72,200);
+  await new Promise(r => setTimeout(r,400));
+  await moveCursor(88,88,600);
+  cursor.style.opacity = '0';
+}
+
+// ── TABS & DOTS ──
+tabs.forEach((t,i) => t.addEventListener('click', () => goToSlide(i,true)));
+dots.forEach((d,i) => d.addEventListener('click', () => goToSlide(i,true)));
+
+// ── INIT ──
+setCardPositions();
+setTimeout(() => {
+  autoTimer = setInterval(advance, 5000);
+  runCursor();
+  setInterval(runCursor, 11000);
+}, 1500);
+
+// ── SCROLL REVEAL ──
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// ── PILOT SUBMIT ──
+function handlePilotSubmit() {
+  const inp = document.querySelector('.pilot-input');
+  if (!inp.value || !inp.value.includes('@')) {
+    inp.style.borderColor = '#f85149';
+    inp.placeholder = 'Please enter a valid email';
+    setTimeout(() => { inp.style.borderColor = ''; inp.placeholder = "Principal's email address"; }, 2500);
+    return;
+  }
+  const btn = document.querySelector('.pilot-submit');
+  btn.textContent = '✓ Request Sent!';
+  btn.style.background = '#00c47a';
+  inp.value = '';
+  setTimeout(() => { btn.textContent = 'Apply Now'; btn.style.background = ''; }, 3000);
+}
+</script>
+</body>
+</html>
