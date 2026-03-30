@@ -309,12 +309,14 @@ nav {
 
 /* ── CARDS STAGE ── */
 .cards-stage {
-  position: relative; height: 400px;
+  position: relative; 
+  height: 460px;        /* Increased height to fit more stacked cards */
 }
 
 .demo-card {
   position: absolute;
-  width: 100%; max-width: 500px;
+  width: 100%; 
+  max-width: 500px;
   background: #fff;
   border-radius: 20px;
   padding: 26px 30px;
@@ -324,10 +326,14 @@ nav {
   color: #111;
   overflow: hidden;
 }
-.demo-card.pos-back2 { top:0;  left:28px; transform:scale(.88); opacity:.4; z-index:1; filter:blur(1.5px); }
-.demo-card.pos-back1 { top:18px; left:14px; transform:scale(.94); opacity:.65; z-index:2; }
-.demo-card.pos-front { top:38px; left:0;   transform:scale(1);  opacity:1;  z-index:3; }
-.demo-card.pos-exit  { top:120px; left:0; transform:scale(.8) translateY(80px); opacity:0; z-index:0; pointer-events:none; }
+
+/* Adjust positions for better stacking with 7 cards */
+.demo-card.pos-back4 { top:0;   left:42px; transform:scale(.78); opacity:.25; z-index:1; filter:blur(2px); }
+.demo-card.pos-back3 { top:12px; left:28px; transform:scale(.84); opacity:.38; z-index:2; filter:blur(1.2px); }
+.demo-card.pos-back2 { top:24px; left:18px; transform:scale(.90); opacity:.55; z-index:3; }
+.demo-card.pos-back1 { top:34px; left:8px;  transform:scale(.96); opacity:.75; z-index:4; }
+.demo-card.pos-front { top:48px; left:0;    transform:scale(1);   opacity:1;   z-index:5; }
+.demo-card.pos-exit  { top:140px; left:0;   transform:scale(.75) translateY(90px); opacity:0; z-index:0; pointer-events:none; }
 
 /* Card internals */
 .card-badge {
@@ -901,6 +907,7 @@ footer {
         </svg>
       </div>
 
+      <!-- === ORIGINAL 3 CARDS === -->
       <!-- Card 1: Quiz Analytics -->
       <div class="demo-card pos-back2" id="dcard0">
         <div class="card-badge badge-quiz">📊 Quiz Results</div>
@@ -951,7 +958,7 @@ footer {
         </div>
       </div>
 
-      <!-- Card 3: Setup (front — has typewriter) -->
+      <!-- Card 3: Setup (front) -->
       <div class="demo-card pos-front" id="dcard2">
         <div class="card-badge badge-setup">🎓 Teacher Setup</div>
         <div class="card-title">Create a New Quiz</div>
@@ -973,6 +980,89 @@ footer {
           </div>
         </div>
       </div>
+
+      <!-- === YOUR 4 NEW CARDS === -->
+      <!-- New Card 4: Syllabus Engine -->
+      <div class="demo-card" id="dcard3">
+        <div class="card-badge badge-setup">Syllabus Engine</div>
+        <div class="card-title">Grade 11 Mathematics</div>
+        <div class="card-sub">Term 2: Euclidean Geometry & Trigonometry</div>
+        <div class="prog-list">
+          <div class="prog-item">
+            <div class="prog-hdr">
+              <span class="prog-lbl">Syllabus Coverage</span>
+              <span class="prog-pct" style="color:var(--orange)">68%</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" style="width:68%; background:var(--orange);"></div></div>
+          </div>
+        </div>
+        <div class="stat-row" style="margin-top:18px;">
+          <div class="stat-pill">
+            <div class="stat-val" style="color:var(--orange)">25%</div>
+            <div class="stat-lbl">SBA Weight</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val">12</div>
+            <div class="stat-lbl">Topics Left</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Card 5: Assessment AI -->
+      <div class="demo-card" id="dcard4">
+        <div class="card-badge badge-quiz">Assessment AI</div>
+        <div class="card-title">Quick Quiz: Organic Chemistry</div>
+        <div class="card-sub">Generating 15 Multiple Choice Questions...</div>
+        <div class="card-input-label">Focus Area</div>
+        <div class="card-input active">Alkanes and Macromolecules</div>
+        <div class="mini-bars">
+          <div class="mini-bar" style="height:40%;background:#4f7cff;opacity:0.4"></div>
+          <div class="mini-bar" style="height:70%;background:#4f7cff;opacity:0.7"></div>
+          <div class="mini-bar" style="height:100%;background:#4f7cff"></div>
+          <div class="mini-bar" style="height:60%;background:#4f7cff;opacity:0.6"></div>
+        </div>
+      </div>
+
+      <!-- New Card 6: Class Roster -->
+      <div class="demo-card" id="dcard5">
+        <div class="card-badge badge-roster">Class Roster</div>
+        <div class="card-title">10-C Life Sciences</div>
+        <div class="card-sub">Daily Attendance & Participation</div>
+        <div class="learner-list">
+          <div class="learner-row">
+            <div class="l-avatar" style="background:var(--teal2);">LM</div>
+            <div class="l-name">Lerato Mokwena</div>
+            <div class="l-grade" style="background:rgba(0,229,160,.1);color:#00c47a;">92%</div>
+          </div>
+          <div class="learner-row">
+            <div class="l-avatar" style="background:var(--blue);">TN</div>
+            <div class="l-name">Thabo Ndlovu</div>
+            <div class="l-grade" style="background:rgba(79,124,255,.1);color:#4f7cff;">88%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Card 7: Insights -->
+      <div class="demo-card" id="dcard6">
+        <div class="card-badge badge-analytics">Insights</div>
+        <div class="card-title">National Senior Certificate</div>
+        <div class="card-sub">Projected Pass Rate vs. Previous Year</div>
+        <div class="stat-row">
+          <div class="stat-pill">
+            <div class="stat-val" style="color:var(--gold)">+4.2%</div>
+            <div class="stat-lbl">Trend</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val">B+</div>
+            <div class="stat-lbl">Avg. Grade</div>
+          </div>
+        </div>
+        <div class="prog-track" style="margin-top:15px;height:12px;background:#eee;">
+          <div class="prog-fill" style="width:82%;background:var(--gold);"></div>
+        </div>
+        <p style="font-size:10px;color:#999;margin-top:8px;text-align:center;">82% of learners are currently NSC compliant</p>
+      </div>
+
     </div>
 
     <!-- RIGHT: Copy -->
@@ -981,6 +1071,7 @@ footer {
         <button class="demo-tab active" data-idx="0">Analytics</button>
         <button class="demo-tab" data-idx="1">Learners</button>
         <button class="demo-tab" data-idx="2">Setup</button>
+        <button class="demo-tab" data-idx="3">New Features</button>
       </div>
       <div>
         <div class="demo-eyebrow" id="demoEyebrow">CLASS ANALYTICS</div>
@@ -992,6 +1083,7 @@ footer {
         <div class="demo-dot active" data-idx="0"></div>
         <div class="demo-dot" data-idx="1"></div>
         <div class="demo-dot" data-idx="2"></div>
+        <div class="demo-dot" data-idx="3"></div>
       </div>
     </div>
 
@@ -1331,44 +1423,61 @@ let mHTML = '';
 });
 track.innerHTML = mHTML;
 
-// ── DEMO CARDS ──
+// Updated JavaScript for 7 cards + 4 tabs
+
 const cards = [
   document.getElementById('dcard0'),
   document.getElementById('dcard1'),
   document.getElementById('dcard2'),
+  document.getElementById('dcard3'),
+  document.getElementById('dcard4'),
+  document.getElementById('dcard5'),
+  document.getElementById('dcard6')
 ];
-const positions = ['pos-back2','pos-back1','pos-front','pos-exit'];
-let cardOrder = [0,1,2];
+
+const positions = ['pos-back4','pos-back3','pos-back2','pos-back1','pos-front','pos-exit'];
+let cardOrder = [0,1,2,3,4,5,6];   // 7 cards
 
 function setCardPositions() {
-  cardOrder.forEach((ci,i) => {
-    cards[ci].className = 'demo-card ' + positions[i];
+  cardOrder.forEach((ci, i) => {
+    if (i < positions.length) {
+      cards[ci].className = `demo-card ${positions[i]}`;
+    } else {
+      cards[ci].className = 'demo-card pos-exit';
+    }
   });
 }
+
 function rotateCards() {
-  cardOrder.push(cardOrder.shift());
+  cardOrder.push(cardOrder.shift());   // Rotate left
   setCardPositions();
 }
 
-// ── SLIDE DATA ──
+// Updated slides (4 tabs now)
 const slides = [
   {
-    tab:'Analytics', eyebrow:'CLASS ANALYTICS',
-    headline:'Real-time data<br>for <span>every class.</span>',
-    body:'iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports. Built for the SA curriculum from the ground up.',
-    type:null
+    tab: 'Analytics',
+    eyebrow: 'CLASS ANALYTICS',
+    headline: 'Real-time data<br>for <span>every class.</span>',
+    body: 'iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports.'
   },
   {
-    tab:'Learners', eyebrow:'LEARNER MANAGEMENT',
-    headline:'Every learner.<br><span>Every result.</span>',
-    body:'Drill into any class to see individual learner performance. Identify who needs support before term-end. Filter by grade, subject, or risk level — and link learners to their parents.',
-    type:null
+    tab: 'Learners',
+    eyebrow: 'LEARNER MANAGEMENT',
+    headline: 'Every learner.<br><span>Every result.</span>',
+    body: 'Drill into any class to see individual learner performance. Identify who needs support before term-end.'
   },
   {
-    tab:'Setup', eyebrow:'QUICK ONBOARDING',
-    headline:'Live in<br><span>minutes.</span>',
-    body:'Add your school, set up classes, and invite teachers in under 10 minutes. No IT department needed. iSkool is designed for how South African schools actually work.',
-    type:'typewriter'
+    tab: 'Setup',
+    eyebrow: 'QUICK ONBOARDING',
+    headline: 'Live in<br><span>minutes.</span>',
+    body: 'Add your school, set up classes, and invite teachers in under 10 minutes. No IT department needed.'
+  },
+  {
+    tab: 'New Features',
+    eyebrow: 'POWERFUL NEW TOOLS',
+    headline: 'Syllabus Engine &<br><span>Assessment AI</span>',
+    body: 'Automatically track syllabus coverage, generate smart quizzes, and get deep insights into NSC readiness.'
   }
 ];
 
@@ -1381,41 +1490,44 @@ const body     = document.getElementById('demoBody');
 const dots     = document.querySelectorAll('.demo-dot');
 const tabs     = document.querySelectorAll('.demo-tab');
 
-function goToSlide(idx, manual=false) {
+function goToSlide(idx, manual = false) {
   currentSlide = idx;
   const s = slides[idx];
-  eyebrow.textContent  = s.eyebrow;
-  headline.innerHTML   = s.headline;
-  body.textContent     = s.body;
+  eyebrow.textContent = s.eyebrow;
+  headline.innerHTML = s.headline;
+  body.textContent = s.body;
+
   dots.forEach((d,i) => d.classList.toggle('active', i===idx));
   tabs.forEach((t,i) => t.classList.toggle('active', i===idx));
+
   rotateCards();
-  if (s.type === 'typewriter') startTypewriter();
-  if (manual) { clearInterval(autoTimer); autoTimer = setInterval(advance, 5000); }
+  if (manual) {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(advance, 5000);
+  }
 }
 
-function advance() { goToSlide((currentSlide+1)%slides.length); }
+function advance() {
+  goToSlide((currentSlide + 1) % slides.length);
+}
 
-// ── TYPEWRITER ──
+// Typewriter remains the same
 let typeTimer = null;
-const typeStrings = [
-  'Physical Sciences Gr 12',
-  'Life Sciences Gr 11',
-  'Mathematics Gr 10',
-  'English FAL Gr 12',
-  'History Gr 11',
-];
+const typeStrings = ['Physical Sciences Gr 12','Life Sciences Gr 11','Mathematics Gr 10','English FAL Gr 12','History Gr 11'];
 let typeIdx = 0;
 const typeInput = document.getElementById('typeInput');
 
 function startTypewriter() {
   clearTimeout(typeTimer);
-  const text = typeStrings[typeIdx % typeStrings.length]; typeIdx++;
-  typeInput.value = ''; typeInput.classList.add('active');
+  const text = typeStrings[typeIdx % typeStrings.length]; 
+  typeIdx++;
+  typeInput.value = '';
+  typeInput.classList.add('active');
   let i = 0;
   function next() {
     if (i <= text.length) {
-      typeInput.value = text.slice(0,i); i++;
+      typeInput.value = text.slice(0,i); 
+      i++;
       typeTimer = setTimeout(next, 65);
     } else {
       typeTimer = setTimeout(() => typeInput.classList.remove('active'), 1500);
@@ -1424,15 +1536,15 @@ function startTypewriter() {
   next();
 }
 
-// ── FAKE CURSOR ──
+// Fake cursor remains mostly the same
 const cursor = document.getElementById('fake-cursor');
 const stage  = document.getElementById('cardsStage');
 
 async function moveCursor(xPct, yPct, delay=0) {
   return new Promise(r => {
     setTimeout(() => {
-      cursor.style.left = (xPct/100*480)+'px';
-      cursor.style.top  = (yPct/100*400)+'px';
+      cursor.style.left = (xPct/100 * 480) + 'px';
+      cursor.style.top  = (yPct/100 * 460) + 'px';   // updated height
       setTimeout(r, 600);
     }, delay);
   });
@@ -1449,26 +1561,25 @@ async function runCursor() {
   cursor.style.opacity = '0';
 }
 
-// ── TABS & DOTS ──
+// Event listeners
 tabs.forEach((t,i) => t.addEventListener('click', () => goToSlide(i,true)));
 dots.forEach((d,i) => d.addEventListener('click', () => goToSlide(i,true)));
 
-// ── INIT ──
+// Init
 setCardPositions();
 setTimeout(() => {
   autoTimer = setInterval(advance, 5000);
   runCursor();
-  setInterval(runCursor, 11000);
+  setInterval(runCursor, 12000);
 }, 1500);
 
-// ── SCROLL REVEAL ──
+// Keep your existing scroll reveal and pilot submit functions
 const revealEls = document.querySelectorAll('.reveal');
 const revealObs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.15 });
 revealEls.forEach(el => revealObs.observe(el));
 
-// ── PILOT SUBMIT ──
 function handlePilotSubmit() {
   const inp = document.querySelector('.pilot-input');
   if (!inp.value || !inp.value.includes('@')) {
