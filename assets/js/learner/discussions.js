@@ -347,9 +347,9 @@ function buildPostCard(r, user_role, is_in_class, discId) {
            <div class="disc-avatar-ph" style="display:none;">${initial}</div>`;
 
     // ── Tags
-    const opTag      = isOp  ? `<span class="disc-tag op">OP</span>` : '';
+    const opTag      = isOp  ? `<span class="disc-tag op"></span>` : '';
     const meTag      = isMe  ? `<span class="disc-tag me">You</span>` : '';
-    const anonTag    = isAnon? `<span class="disc-tag anon">Anon</span>` : '';
+    const anonTag    = isAnon? `<span class="disc-tag anon"></span>` : '';
     const displayName = isAnon ? 'Anonymous' : escHtml(r.replier_display);
 
     // ── Quote block (if replying to someone)
@@ -409,7 +409,7 @@ function buildCompose(discId) {
         <div class="disc-compose">
             <div class="disc-typing" id="discTypingIndicator">
                 <div class="disc-typing-dots"><span></span><span></span><span></span></div>
-                <span id="discTypingText">Someone is typing...</span>
+                <span id="discTypingText">Classmate is typing...</span>
             </div>
             <div class="disc-reply-preview" id="discReplyPreview">
                 <span style="color:#4fd1c5;font-weight:700;flex-shrink:0;">Replying to:</span>
@@ -430,7 +430,7 @@ function buildCompose(discId) {
                     </label>
                     <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
                         <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
-                        <i class="fas fa-user-secret"></i> Anon
+                        <i class="fas fa-user-secret"></i> Anononymous
                     </label>
                     <button class="disc-post-btn" onclick="discSubmitReply(${discId})">
                         <i class="fas fa-paper-plane"></i> Post
