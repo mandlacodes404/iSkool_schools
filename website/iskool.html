@@ -1557,80 +1557,51 @@ track.innerHTML = mHTML;
 // Updated JavaScript for 7 cards + 4 tabs
 
 const cards = [
-  document.getElementById('dcard0'),
-  document.getElementById('dcard1'),
-  document.getElementById('dcard2'),
-  document.getElementById('dcard3'),
-  document.getElementById('dcard4'),
-  document.getElementById('dcard5'),
-  document.getElementById('dcard6')
+  document.getElementById('dcard0'), document.getElementById('dcard1'),
+  document.getElementById('dcard2'), document.getElementById('dcard3'),
+  document.getElementById('dcard4'), document.getElementById('dcard5'),
+  document.getElementById('dcard6'), document.getElementById('dcard7')
 ];
 
-const positions = ['pos-back4','pos-back3','pos-back2','pos-back1','pos-front','pos-exit'];
+const positions = ['pos-back5','pos-back4','pos-back3','pos-back2','pos-back1','pos-front','pos-exit'];
 let cardOrder = [0,1,2,3,4,5,6,7];
 
 function setCardPositions() {
   cardOrder.forEach((ci, i) => {
-    if (i < positions.length) {
-      cards[ci].className = `demo-card ${positions[i]}`;
-    } else {
-      cards[ci].className = 'demo-card pos-exit';
-    }
+    cards[ci].className = `demo-card ${positions[i] || 'pos-exit'}`;
   });
 }
 
 function rotateCards() {
-  cardOrder.push(cardOrder.shift());   // Rotate left
+  cardOrder.push(cardOrder.shift());
   setCardPositions();
 }
 
-// Updated slides (4 tabs now)
+// ── SLIDES ──
 const slides = [
-  {
-    tab: 'Analytics',
-    eyebrow: 'CLASS ANALYTICS',
-    headline: 'Real-time data<br>for <span>every class.</span>',
-    body: 'iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports.'
-  },
-  {
-    tab: 'Learners',
-    eyebrow: 'LEARNER MANAGEMENT',
-    headline: 'Every learner.<br><span>Every result.</span>',
-    body: 'Drill into any class to see individual learner performance. Identify who needs support before term-end.'
-  },
-  {
-    tab: 'Setup',
-    eyebrow: 'QUICK ONBOARDING',
-    headline: 'Live in<br><span>minutes.</span>',
-    body: 'Add your school, set up classes, and invite teachers in under 10 minutes. No IT department needed.'
-  },
-  {
-    tab: 'New Features',
-    eyebrow: 'POWERFUL NEW TOOLS',
-    headline: 'Syllabus Engine &<br><span>Assessment AI</span>',
-    body: 'Automatically track syllabus coverage, generate smart quizzes, and get deep insights into NSC readiness.'
-  }
+  { eyebrow: 'CLASS ANALYTICS', headline: 'Real-time data<br>for <span>every class.</span>', body: 'iSkool gives teachers instant visibility into quiz scores, assignment completion, and at-risk learners — without waiting for end-of-term reports. Built for the SA curriculum from the ground up.' },
+  { eyebrow: 'LEARNER MANAGEMENT', headline: 'Every learner.<br><span>Every result.</span>', body: 'Drill into any class to see individual learner performance. Identify who needs support before term-end.' },
+  { eyebrow: 'QUICK ONBOARDING', headline: 'Live in<br><span>minutes.</span>', body: 'Add your school, set up classes, and invite teachers in under 10 minutes. No IT department needed.' },
+  { eyebrow: 'POWERFUL NEW TOOLS', headline: 'Syllabus Engine &<br><span>Assessment AI</span>', body: 'Automatically track syllabus coverage, generate smart quizzes, and get deep insights into NSC readiness.' }
 ];
 
 let currentSlide = 0;
 let autoTimer = null;
 
-const eyebrow  = document.getElementById('demoEyebrow');
+const eyebrow = document.getElementById('demoEyebrow');
 const headline = document.getElementById('demoHeadline');
-const body     = document.getElementById('demoBody');
-const dots     = document.querySelectorAll('.demo-dot');
-const tabs     = document.querySelectorAll('.demo-tab');
+const body = document.getElementById('demoBody');
+const dots = document.querySelectorAll('.demo-dot');
+const tabs = document.querySelectorAll('.demo-tab');
 
 function goToSlide(idx, manual = false) {
-  currentSlide = idx;
-  const s = slides[idx];
+  currentSlide = idx % slides.length;
+  const s = slides[currentSlide];
   eyebrow.textContent = s.eyebrow;
   headline.innerHTML = s.headline;
   body.textContent = s.body;
-
-  dots.forEach((d,i) => d.classList.toggle('active', i===idx));
-  tabs.forEach((t,i) => t.classList.toggle('active', i===idx));
-
+  dots.forEach((d,i) => d.classList.toggle('active', i===currentSlide));
+  tabs.forEach((t,i) => t.classList.toggle('active', i===currentSlide));
   rotateCards();
   if (manual) {
     clearInterval(autoTimer);
@@ -1638,27 +1609,21 @@ function goToSlide(idx, manual = false) {
   }
 }
 
-function advance() {
-  goToSlide((currentSlide + 1) % slides.length);
-}
+function advance() { goToSlide(currentSlide + 1); }
 
-// Typewriter remains the same
-let typeTimer = null;
+// Typewriter
 const typeStrings = ['Physical Sciences Gr 12','Life Sciences Gr 11','Mathematics Gr 10','English FAL Gr 12','History Gr 11'];
 let typeIdx = 0;
 const typeInput = document.getElementById('typeInput');
 
 function startTypewriter() {
   clearTimeout(typeTimer);
-  const text = typeStrings[typeIdx % typeStrings.length]; 
-  typeIdx++;
-  typeInput.value = '';
-  typeInput.classList.add('active');
+  const text = typeStrings[typeIdx % typeStrings.length]; typeIdx++;
+  typeInput.value = ''; typeInput.classList.add('active');
   let i = 0;
   function next() {
     if (i <= text.length) {
-      typeInput.value = text.slice(0,i); 
-      i++;
+      typeInput.value = text.slice(0,i); i++;
       typeTimer = setTimeout(next, 65);
     } else {
       typeTimer = setTimeout(() => typeInput.classList.remove('active'), 1500);
@@ -1667,18 +1632,15 @@ function startTypewriter() {
   next();
 }
 
-// Fake cursor remains mostly the same
+// Fake Cursor
 const cursor = document.getElementById('fake-cursor');
-const stage  = document.getElementById('cardsStage');
 
 async function moveCursor(xPct, yPct, delay=0) {
-  return new Promise(r => {
-    setTimeout(() => {
-      cursor.style.left = (xPct/100 * 480) + 'px';
-      cursor.style.top  = (yPct/100 * 460) + 'px';   // updated height
-      setTimeout(r, 600);
-    }, delay);
-  });
+  return new Promise(r => setTimeout(() => {
+    cursor.style.left = (xPct/100 * 480) + 'px';
+    cursor.style.top  = (yPct/100 * 480) + 'px';
+    setTimeout(r, 600);
+  }, delay));
 }
 
 async function runCursor() {
@@ -1692,11 +1654,10 @@ async function runCursor() {
   cursor.style.opacity = '0';
 }
 
-// Event listeners
+// Init
 tabs.forEach((t,i) => t.addEventListener('click', () => goToSlide(i,true)));
 dots.forEach((d,i) => d.addEventListener('click', () => goToSlide(i,true)));
 
-// Init
 setCardPositions();
 setTimeout(() => {
   autoTimer = setInterval(advance, 5000);
@@ -1704,7 +1665,7 @@ setTimeout(() => {
   setInterval(runCursor, 12000);
 }, 1500);
 
-// Keep your existing scroll reveal and pilot submit functions
+// Scroll Reveal + Pilot Submit (keep your original functions)
 const revealEls = document.querySelectorAll('.reveal');
 const revealObs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
