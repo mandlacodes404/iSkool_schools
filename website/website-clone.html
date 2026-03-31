@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iSkool — The LMS for South African High Schools</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+
+/* ===========================
+   ROOT & RESET
+=========================== */
+:root {
+  --teal: #4fd1c5;
+  --teal2: #00e5a0;
+  --orange: #f97316;
+  --gold: #f5c842;
+  --blue: #4f7cff;
+  --red: #f85149;
+  --dark: #0f0f12;
+  --dark2: #0d1117;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #ffffff;
+  color: #111;
+  line-height: 1.6;
+}
+
+/* ===========================
+   NAV
+=========================== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #eee;
+  padding: 16px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-decoration: none;
+  color: #111;
+}
+
+.nav-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--teal); }
+
+.nav-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nav-login {
+  background: none;
+  border: none;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+.nav-pilot {
+  padding: 10px 22px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.nav-pilot:hover { background: #333; }
+
+/* ===========================
+   HERO
+=========================== */
+.hero {
+  padding: 172px 20px 120px;
+  text-align: center;
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* subtle dot grid background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef9e6;
+  border: 1px solid #f5c84250;
+  color: #d97706;
+  padding: 8px 22px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.trust-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d97706;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2.5px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.hero h1 span {
+  color: var(--gold);
+}
+
+.hero p {
+  font-size: 20px;
+  color: #555;
+  max-width: 660px;
+  margin: 0 auto 40px;
+  line-height: 1.65;
+  position: relative;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.btn {
+  padding: 15px 32px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn-outline {
+  background: white;
+  color: #111;
+  border: 2px solid #ddd;
+}
+.btn-outline:hover { border-color: #bbb; }
+
+.btn-primary {
+  background: #111;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+/* play icon */
+.play-icon {
+  width: 20px;
+  height: 20px;
+  background: #eee;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+}
+
+/* ===========================
+   PILL BRIDGE (straddles hero ↔ dark)
+=========================== */
+.pill-bridge {
+  background: #ffffff;
+  padding-bottom: 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.pill-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: #ebebeb;
+  border-radius: 999px;
+  padding: 5px;
+  gap: 2px;
+  position: relative;
+  bottom: -24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.pill-btn {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.pill-btn.active {
+  background: #111;
+  color: #fff;
+}
+
+/* ===========================
+   DARK FEATURE SECTION
+=========================== */
+.feature-section {
+  background: var(--dark);
+  padding: 80px 5% 100px;
+}
+
+.feature-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  padding-top: 48px;
+}
+
+/* ===========================
+   STACKED CARDS
+=========================== */
+.stack-wrapper {
+  position: relative;
+  height: 380px;
+}
+
+.stack-layer {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+
+/* Default resting positions */
+.stack-layer[data-pos="0"] {
+  z-index: 3;
+  transform: translateY(0px) scale(1);
+  opacity: 1;
+}
+.stack-layer[data-pos="1"] {
+  z-index: 2;
+  transform: translateY(56px) scale(0.95);
+  opacity: 0.72;
+}
+.stack-layer[data-pos="2"] {
+  z-index: 1;
+  transform: translateY(104px) scale(0.905);
+  opacity: 0.42;
+}
+
+/* ===========================
+   DEMO CARDS (white cards)
+=========================== */
+.demo-card {
+  background: white;
+  color: #111;
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+  position: relative;
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.6;
+}
+
+.demo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+}
+
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+}
+
+.badge-quiz      { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.badge-analytics { background: rgba(245,200,66,0.12); color: #d4a800; }
+.badge-integrity { background: rgba(0,229,160,0.12); color: #00c47a; }
+.badge-discussion{ background: rgba(249,115,22,0.12); color: #f97316; }
+.badge-calendar  { background: rgba(79,209,197,0.12); color: #4fd1c5; }
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.15;
+}
+
+.card-sub {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 18px;
+}
+
+.table-mini {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 10px 0;
+}
+.table-mini th {
+  text-align: left;
+  padding: 9px 8px;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #eee;
+}
+.table-mini td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.percent-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: white;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #eee;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  border-radius: 999px;
+}
+
+.topic-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f4f4f4;
+  font-size: 14px;
+  color: #111;
+}
+.topic-item:last-child { border-bottom: none; }
+
+.announcement {
+  background: #f8f9fc;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--teal);
+}
+
+/* Tab panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ===========================
+   RIGHT COPY
+=========================== */
+.feature-copy {
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.copy-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 16px;
+}
+
+.feature-copy h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  margin-bottom: 16px;
+}
+
+.feature-copy h3 span { color: var(--gold); }
+
+.feature-copy p {
+  color: #888;
+  font-size: 15.5px;
+  line-height: 1.75;
+  margin-bottom: 26px;
+}
+
+.copy-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.copy-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: #ccc;
+}
+
+.bullet-check {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: rgba(79,209,197,0.15);
+  border: 1px solid rgba(79,209,197,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--teal);
+  margin-top: 2px;
+}
+
+.copy-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold);
+  color: #111;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.copy-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(245,200,66,0.35);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ==================== NAV ==================== -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🎓</div>
+    iSkool
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#">Platform</a></li>
+    <li><a href="#">How it Works</a></li>
+    <li><a href="#">For Schools</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button class="nav-login">Log In</button>
+    <button class="nav-pilot">Apply for Free Pilot</button>
+  </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <div class="trust-badge">
+    <div class="trust-dot"></div>
+    Trusted by South African High Schools
+  </div>
+
+  <h1>The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
+
+  <p>Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
+
+  <div class="hero-buttons">
+    <a href="#" class="btn btn-outline">
+      <span class="play-icon">▶</span>
+      See Demo
+    </a>
+    <a href="#" class="btn btn-primary">Apply for Free Pilot →</a>
+  </div>
+</section>
+
+<!-- ==================== PILL (straddles hero ↔ dark) ==================== -->
+<div class="pill-bridge">
+  <div class="pill-switcher">
+    <button class="pill-btn active" onclick="switchTab(0, this)">Run Quizzes</button>
+    <button class="pill-btn" onclick="switchTab(1, this)">Grades & Reports</button>
+    <button class="pill-btn" onclick="switchTab(2, this)">Communication</button>
+    <button class="pill-btn" onclick="switchTab(3, this)">Syllabus</button>
+  </div>
+</div>
+
+<!-- ==================== DARK FEATURE SECTION ==================== -->
+<section class="feature-section">
+  <div class="feature-inner">
+
+    <!-- LEFT: Animated Stacked Cards -->
+    <div>
+
+      <!-- TAB 0: Run Quizzes -->
+      <div class="tab-panel active" id="panel-0">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📝 Quizzes</div>
+              <div class="card-title">Term 2 — Live Quizzes</div>
+              <div class="card-sub">2025 Academic Year</div>
+              <div style="background:#f8f9fc;padding:16px;border-radius:12px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:start;">
+                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A • Maths • 15 questions</small></div>
+                  <span class="percent-badge" style="background:#00c47a">Open</span>
+                </div>
+                <div style="margin-top:8px;font-size:13px;color:#555;">14 May 2025 • 09:00–10:00</div>
+              </div>
+              <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+                <div style="display:flex;justify-content:space-between;">
+                  <div><strong>Functions & Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
+                  <span class="percent-badge" style="background:#00c47a">Open</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">🛡️ AI Invigilator</div>
+              <div class="card-title">Integrity Monitor</div>
+              <div class="card-sub">Real-time quiz protection</div>
+              <p style="font-size:14px;line-height:1.55;margin-bottom:16px;">Records every quiz session. Detects tab switching, browser minimization, or navigating away — question by question.</p>
+              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">✓ Verified & Tested • Powered by AI</div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📋 Assignments</div>
+              <div class="card-title">Chapter 5 – Calculus</div>
+              <div class="card-sub">Grade 12A • Due 20 May 2025</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:56%;"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:13.5px;">
+                <span><strong>18</strong> of 32 submitted</span>
+                <span style="color:#4fd1c5">56% completion</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: Grades & Reports -->
+      <div class="tab-panel" id="panel-1">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📊 Evaluations</div>
+              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-sub">Term 2 Quiz Results</div>
+              <table class="table-mini">
+                <thead><tr><th>Learner</th><th>Score</th><th>%</th><th>Symbol</th></tr></thead>
+                <tbody>
+                  <tr><td>Amahle Dube</td><td>92/100</td><td><span class="percent-badge" style="background:#00c47a">92%</span></td><td>A</td></tr>
+                  <tr><td>Sipho Nkosi</td><td>78/100</td><td><span class="percent-badge" style="background:#f97316">78%</span></td><td>B</td></tr>
+                  <tr><td>Thandi Mokoena</td><td>85/100</td><td><span class="percent-badge" style="background:#00c47a">85%</span></td><td>A</td></tr>
+                  <tr><td>Bongani Zulu</td><td>54/100</td><td><span class="percent-badge" style="background:#f85149">54%</span></td><td>D</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-analytics">📈 Analytics</div>
+              <div class="card-title">Term 2 Performance</div>
+              <div class="card-sub">Across 3 Classes</div>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;">
+                <div style="text-align:center;">
+                  <div style="font-size:38px;font-weight:800;color:#4fd1c5;">78%</div>
+                  <div style="font-size:12px;color:#666;margin-top:4px;">Pass Rate <span style="color:#00c47a">↑10%</span></div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:38px;font-weight:800;color:#f5c842;">74.2</div>
+                  <div style="font-size:12px;color:#666;margin-top:4px;">Average Score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">🏠 Dashboard</div>
+              <div class="card-title">Welcome back, Linda 👋</div>
+              <div class="card-sub">Grade 10A</div>
+              <div style="display:flex;gap:14px;margin-top:20px;">
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div>
+                  <div style="font-size:12px;color:#666;">Quizzes</div>
+                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#f97316;">3</div>
+                  <div style="font-size:12px;color:#666;">Assignments</div>
+                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div>
+                  <div style="font-size:12px;color:#666;">Score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Communication -->
+      <div class="tab-panel" id="panel-2">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">🛎️ Announcements</div>
+              <div class="card-title">Important Updates</div>
+              <div class="announcement">
+                <strong>Term 2 Test Schedule Released</strong><br>
+                <small style="color:#555;">Tests begin 14 May 2025. Bring calculators and stationery.</small>
+              </div>
+              <div class="announcement">
+                <strong>Extra Maths Support Class</strong><br>
+                <small style="color:#555;">Saturday 10 May • 09:00 • Room 12</small>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">💬 Discussions</div>
+              <div class="card-title">When is the next test?</div>
+              <div class="card-sub">Grade 10A • 8 posts</div>
+              <div style="background:#f8f9fc;padding:14px;border-radius:12px;font-size:13.5px;margin-top:10px;">
+                <strong>Amahle Dube:</strong> Can someone confirm the date for the next Maths test?<br><br>
+                <strong style="color:#4fd1c5;">Ms N. Sithole • Teacher</strong><br>
+                The test is confirmed for 14 May at 09:00. Please bring calculator and geometry set.
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-title">May 2025</div>
+              <div class="card-sub">Academic + Personal Reminders</div>
+              <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
+                <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
+                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations & Inequalities Quiz</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Syllabus -->
+      <div class="tab-panel" id="panel-3">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📚 Syllabus Engine</div>
+              <div class="card-title">Grade 10A — Mathematics</div>
+              <div class="card-sub">3 of 5 topics complete • 60%</div>
+              <div class="topic-item">✅ Number Systems <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">✅ Algebraic Expressions <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">✅ Equations & Inequalities <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">○ Geometry Basics <span style="margin-left:auto;color:#999;">Upcoming</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-title">May 2025</div>
+              <div class="card-sub">Upcoming Topics & Deadlines</div>
+              <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
+                <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
+                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations & Inequalities Quiz</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">🏠 Dashboard</div>
+              <div class="card-title">Welcome back, Linda 👋</div>
+              <div class="card-sub">Grade 10A</div>
+              <div style="display:flex;gap:14px;margin-top:20px;">
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div>
+                  <div style="font-size:12px;color:#666;">Quizzes</div>
+                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#f97316;">3</div>
+                  <div style="font-size:12px;color:#666;">Assignments</div>
+                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
+                  <div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div>
+                  <div style="font-size:12px;color:#666;">Score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end left -->
+
+    <!-- RIGHT: Copy -->
+    <div class="feature-copy">
+      <span class="copy-eyebrow" id="copy-eyebrow">Quizzes</span>
+      <h3 id="copy-heading">Run powerful quizzes with <span>AI watching over</span> every learner</h3>
+      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.</p>
+      <ul class="copy-bullets" id="copy-bullets">
+        <li><div class="bullet-check">✓</div>Live learner progress tracked question by question</li>
+        <li><div class="bullet-check">✓</div>Tab-switch & browser exit detection built in</li>
+        <li><div class="bullet-check">✓</div>Auto-marked with instant results & reports</li>
+      </ul>
+      <a href="#" class="copy-cta">See it in action →</a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+/* ---- Tab copy data ---- */
+const tabData = [
+  {
+    eyebrow: "Quizzes",
+    heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
+    desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
+    bullets: ["Live learner progress tracked question by question","Tab-switch & browser exit detection built in","Auto-marked with instant results & reports"]
+  },
+  {
+    eyebrow: "Grades & Reports",
+    heading: 'Capture marks and <span>generate reports</span> in seconds',
+    desc: "No more spreadsheets. Enter marks once — iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.",
+    bullets: ["Mark entries auto-calculate class averages","Symbol assignment (A–F) based on CAPS thresholds","One-click PDF report cards per learner"]
+  },
+  {
+    eyebrow: "Communication",
+    heading: 'Keep learners and parents <span>always in the loop</span>',
+    desc: "Post announcements, run class discussions, and sync academic events to learner calendars — all from one place. No more WhatsApp groups.",
+    bullets: ["Targeted announcements per class or grade","Threaded discussions with teacher replies","Calendar events auto-synced to learner dashboards"]
+  },
+  {
+    eyebrow: "Syllabus",
+    heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
+    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Track coverage progress across all your classes and never fall behind the curriculum again.",
+    bullets: ["Full CAPS topic mapping for Grade 10–12","Coverage progress tracked per class","Upload notes, videos & worksheets per topic"]
+  }
+];
+
+/* ---- Card cycling ---- */
+let cycleTimers = {};
+
+function startCardCycle(panelId) {
+  stopCardCycle(panelId);
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const layers = panel.querySelectorAll('.stack-layer');
+  if (layers.length < 2) return;
+
+  cycleTimers[panelId] = setInterval(() => {
+    // Read current positions
+    const positions = Array.from(layers).map(l => parseInt(l.dataset.pos));
+    // Rotate: 0→2, 1→0, 2→1 (bring back card to back, promote others forward)
+    const newPositions = positions.map(p => (p + layers.length - 1) % layers.length);
+    layers.forEach((l, i) => {
+      l.dataset.pos = newPositions[i];
+    });
+    applyPositions(layers);
+  }, 2200);
+}
+
+function stopCardCycle(panelId) {
+  if (cycleTimers[panelId]) {
+    clearInterval(cycleTimers[panelId]);
+    delete cycleTimers[panelId];
+  }
+}
+
+function applyPositions(layers) {
+  const posStyles = [
+    { zIndex: 3, transform: 'translateY(0px) scale(1)', opacity: '1' },
+    { zIndex: 2, transform: 'translateY(56px) scale(0.95)', opacity: '0.72' },
+    { zIndex: 1, transform: 'translateY(104px) scale(0.905)', opacity: '0.42' },
+  ];
+  layers.forEach(l => {
+    const pos = parseInt(l.dataset.pos);
+    const s = posStyles[pos];
+    l.style.zIndex = s.zIndex;
+    l.style.transform = s.transform;
+    l.style.opacity = s.opacity;
+  });
+}
+
+/* ---- Tab switching ---- */
+function switchTab(index, btn) {
+  // Pills
+  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Stop all cycles
+  for (let i = 0; i < 4; i++) stopCardCycle('panel-' + i);
+
+  // Panels
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const activePanel = document.getElementById('panel-' + index);
+  activePanel.classList.add('active');
+
+  // Reset card positions for new panel
+  const layers = activePanel.querySelectorAll('.stack-layer');
+  layers.forEach((l, i) => { l.dataset.pos = i; });
+  applyPositions(layers);
+
+  // Copy
+  const d = tabData[index];
+  document.getElementById('copy-eyebrow').textContent = d.eyebrow;
+  document.getElementById('copy-heading').innerHTML = d.heading;
+  document.getElementById('copy-desc').textContent = d.desc;
+  document.getElementById('copy-bullets').innerHTML = d.bullets
+    .map(b => `<li><div class="bullet-check">✓</div>${b}</li>`).join('');
+
+  // Start cycle for new panel
+  startCardCycle('panel-' + index);
+}
+
+/* ---- Boot ---- */
+// Apply initial positions for all panels
+document.querySelectorAll('.tab-panel').forEach(panel => {
+  const layers = panel.querySelectorAll('.stack-layer');
+  applyPositions(layers);
+});
+
+// Start cycling the default (panel-0)
+startCardCycle('panel-0');
+</script>
+
+</body>
+</html>
