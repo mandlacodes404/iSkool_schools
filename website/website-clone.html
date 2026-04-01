@@ -1054,6 +1054,138 @@ function setFilter(cat, btn) {
   .hiw-section { padding: 72px 5% 80px; }
   .hiw-heading { letter-spacing: -1px; }
 }
+/* ===================== FAQ SECTION ===================== */
+.faq-section {
+  background: #f8f5f0; /* warm off-white like your screenshot */
+  padding: 100px 5% 120px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.faq-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.faq-small {
+  color: #f5c842; /* your gold */
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.faq-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  color: #111;
+}
+
+.faq-accordion {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+
+.faq-item {
+  border-bottom: 1px solid #eee;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-question {
+  width: 100%;
+  padding: 28px 32px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.faq-question:hover {
+  background: #fdfaf5;
+}
+
+.faq-answer {
+  padding: 0 32px 28px;
+  color: #555;
+  line-height: 1.7;
+  font-size: 15.5px;
+  display: none;
+}
+
+.faq-answer.open {
+  display: block;
+}
+
+.faq-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.faq-item.open .faq-icon {
+  background: #f5c842;
+  color: #111;
+  transform: rotate(45deg);
+}
+
+.faq-cta {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.faq-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #f5c842;
+  color: #111;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 18px 42px;
+  border-radius: 9999px;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(245, 200, 66, 0.3);
+  transition: all 0.3s ease;
+}
+
+.faq-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(245, 200, 66, 0.4);
+}
+
+.faq-button span {
+  font-size: 22px;
+}
+
 </style>
 
 <section class="hiw-section">
@@ -1189,6 +1321,92 @@ function setFilter(cat, btn) {
         </div>
       </div>
 
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ SECTION ===================== -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <div class="faq-small">FAQ</div>
+      <h2 class="faq-title">Frequently Asked Questions</h2>
+    </div>
+
+    <div class="faq-accordion" id="faqAccordion">
+
+      <!-- Question 1 -->
+      <div class="faq-item">
+        <button class="faq-question">
+          Is iSkool compatible with the South African CAPS curriculum?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="faq-item">
+        <button class="faq-question">
+          Do teachers need training to use iSkool?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.
+        </div>
+      </div>
+
+      <!-- Question 3 (pre-opened like your example) -->
+      <div class="faq-item open">
+        <button class="faq-question">
+          Do I need to buy any other tools or software?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer open">
+          Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.
+        </div>
+      </div>
+
+      <!-- Question 4 -->
+      <div class="faq-item">
+        <button class="faq-question">
+          Can parents access learner progress?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.
+        </div>
+      </div>
+
+      <!-- Question 5 -->
+      <div class="faq-item">
+        <button class="faq-question">
+          What about data security and backups?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.
+        </div>
+      </div>
+
+      <!-- Question 6 -->
+      <div class="faq-item">
+        <button class="faq-question">
+          How fast can we get started?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="faq-cta">
+      <a href="#" class="faq-button">
+        Apply for Free Pilot →
+      </a>
     </div>
   </div>
 </section>
@@ -1393,5 +1611,29 @@ setTimeout(runCard2, 900);
 setTimeout(runCard3, 1400);
 </script>
 
+<script>
+// FAQ Accordion
+document.querySelectorAll('.faq-question').forEach(button => {
+  button.addEventListener('click', () => {
+    const item = button.parentElement;
+    const answer = item.querySelector('.faq-answer');
+    const icon = button.querySelector('.faq-icon');
+
+    // Close all other items
+    document.querySelectorAll('.faq-item').forEach(otherItem => {
+      if (otherItem !== item) {
+        otherItem.classList.remove('open');
+        otherItem.querySelector('.faq-answer').classList.remove('open');
+        otherItem.querySelector('.faq-icon').textContent = '+';
+      }
+    });
+
+    // Toggle current item
+    const isOpen = item.classList.toggle('open');
+    answer.classList.toggle('open', isOpen);
+    icon.textContent = isOpen ? '×' : '+';
+  });
+});
+</script>
 </body>
 </html>
