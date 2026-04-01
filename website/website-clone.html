@@ -64,23 +64,62 @@ nav {
 .play-icon { width: 20px; height: 20px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; }
 
 /* PILL NOTCH */
-.pill-bridge { position: relative; background: #fff; z-index: 10; overflow: visible; }
-.pill-notch { position: relative; background: #fff; display: flex; justify-content: center; align-items: center; padding: 24px 20px 0; z-index: 10; }
-.notch-shape { position: relative; width: 100%; line-height: 0; background: #fff; }
-.notch-shape svg { display: block; width: 100%; height: auto; }
+.pill-bridge {
+/* PILL NOTCH WRAPPER */
+  position: relative;
+  background: #fff;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* The notch: white background with the dark arch cutout at bottom */
+.pill-notch {
+  position: relative;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 20px 0;
+  z-index: 10;
+}
+
+/* SVG notch shape sitting below the pill */
+.notch-shape {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  background: #fff;
+}
+
+.notch-shape svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .pill-switcher {
-  position: relative; z-index: 20; display: inline-flex; align-items: center;
-  background: #ffffff; border-radius: 999px; padding: 5px; gap: 2px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18); white-space: nowrap;
-  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  position: relative;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 5px;
+  gap: 2px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 .pill-switcher::-webkit-scrollbar { display: none; }
 .pill-btn { padding: 11px 20px; border-radius: 999px; border: none; background: transparent; color: #555; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; }
 .pill-btn.active { background: #111; color: #fff; }
 
 /* DARK SECTION */
-.feature-section { background: var(--dark); padding: 0 5% 100px; }
-.feature-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 60px; }
+.feature-section { background: var(--dark); padding: 40px 5% 100px; }
+.feature-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 20px; }
 
 /* STACK */
 .stack-wrapper { position: relative; height: 420px; }
@@ -124,255 +163,6 @@ nav {
 .copy-cta { display: inline-flex; align-items: center; gap: 10px; background: var(--gold); color: #111; padding: 14px 28px; border-radius: 999px; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; border: none; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
 .copy-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.35); }
 
-/* ===================== COMPARISON SECTION ===================== */
-.comparison-section {
-  background: #ffffff;
-  padding: 100px 5%;
-}
-.comparison-inner {
-  max-width: 860px;
-  margin: 0 auto;
-}
-.comparison-header {
-  text-align: center;
-  margin-bottom: 56px;
-}
-.comp-eyebrow {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 14px;
-}
-.comp-heading {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 5vw, 58px);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -2px;
-  color: #111;
-  margin-bottom: 16px;
-}
-.comp-sub {
-  font-size: 17px;
-  color: #666;
-  max-width: 520px;
-  margin: 0 auto;
-  line-height: 1.65;
-}
-
-/* === DESKTOP TABLE === */
-.comp-table-wrap { overflow: visible; }
-.comp-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-.col-feat   { width: 46%; }
-.col-iskool { width: 27%; }
-.col-other  { width: 27%; }
-
-/* header row */
-.comp-table thead th {
-  padding-bottom: 0;
-  vertical-align: bottom;
-  border: none;
-  background: transparent;
-}
-/* iSkool header — dark pill card */
-.th-iskool-inner {
-  background: #111;
-  border-radius: 16px 16px 0 0;
-  padding: 16px 12px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.iskool-badge {
-  background: var(--gold);
-  color: #111;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 14px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.th-iskool-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-/* Other LMS header */
-.th-other-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 16px;
-  gap: 6px;
-}
-.th-other-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #999;
-}
-
-/* body rows */
-.comp-table tbody tr { border-bottom: 1px solid #f0f0f0; }
-.comp-table tbody tr:first-child .feat-cell { padding-top: 20px; }
-
-.feat-cell {
-  padding: 18px 0 18px 4px;
-  font-size: 15px;
-  color: #333;
-  font-weight: 400;
-}
-/* iSkool value cell — dark card continues */
-.td-iskool {
-  background: #111;
-  text-align: center;
-  padding: 16px 8px;
-  border-bottom: 1px solid #1e1e22 !important;
-}
-.comp-table tbody tr:last-child .td-iskool {
-  border-radius: 0 0 16px 16px;
-  border-bottom: none !important;
-}
-/* Other LMS value cell */
-.td-other {
-  text-align: center;
-  padding: 16px 8px;
-}
-
-/* check / cross icons */
-.ico-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: rgba(0,196,122,0.15);
-  border: 2px solid #00c47a;
-  color: #00c47a;
-  font-size: 13px;
-  font-weight: 700;
-}
-.ico-cross {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px; height: 28px;
-  color: #ccc;
-  font-size: 18px;
-  font-weight: 300;
-}
-
-/* CTA */
-.comp-cta-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 52px;
-}
-.comp-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--gold);
-  color: #111;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  padding: 18px 28px 18px 36px;
-  border-radius: 999px;
-  text-decoration: none;
-  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.comp-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245,200,66,0.45); }
-.comp-cta-arrow {
-  width: 36px; height: 36px;
-  background: rgba(0,0,0,0.12);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-/* === MOBILE COMPARISON (shown below 640px) === */
-.comp-mobile { display: none; }
-.comp-mobile-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 1px solid #e8e8e8;
-  border-radius: 16px;
-  overflow: hidden;
-}
-/* mobile header */
-.comp-mobile-table thead th {
-  padding: 18px 12px;
-  background: #fff;
-  border: none;
-}
-.comp-mobile-table thead tr { border-bottom: 1px solid #e8e8e8; }
-.mob-th-feat { width: 0; padding: 0 !important; }
-.mob-th-other {
-  width: 50%;
-  text-align: center;
-  border-right: 1px solid #e8e8e8;
-}
-.mob-th-other-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.mob-other-icons { display: flex; gap: 6px; align-items: center; justify-content: center; font-size: 18px; }
-.mob-other-label { font-size: 13px; font-weight: 600; color: #888; }
-.mob-th-iskool { width: 50%; text-align: center; }
-.mob-th-iskool-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.mob-iskool-logo { font-size: 22px; }
-.mob-iskool-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #111; }
-
-/* mobile body rows */
-.comp-mobile-table tbody tr { border-bottom: 1px solid #e8e8e8; }
-.comp-mobile-table tbody tr:last-child { border-bottom: none; }
-
-.mob-feat-label {
-  text-align: center;
-  font-size: 13px;
-  color: #555;
-  padding: 10px 8px 6px;
-  border-bottom: 1px solid #f5f5f5;
-}
-.mob-feat-label td { width: 100%; text-align: center; }
-
-/* each feature is two rows: label row + values row */
-.mob-vals-row td { padding: 14px 12px; }
-.mob-val-other {
-  text-align: center;
-  background: #f5f5f5;
-  border-right: 1px solid #e8e8e8;
-  border-radius: 12px 0 0 12px;
-}
-.mob-val-iskool {
-  text-align: center;
-  background: rgba(0,196,122,0.08);
-  border: 2px solid #00c47a;
-  border-radius: 0 12px 12px 0;
-}
-
 /* TABLET */
 @media (max-width: 900px) {
   .nav-links, .nav-actions { display: none; }
@@ -384,7 +174,7 @@ nav {
 }
 
 /* MOBILE */
-@media (max-width: 640px) {
+@media (max-width: 600px) {
   .hero { padding: 130px 20px 80px; }
   .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
   .hero-buttons { flex-direction: column; align-items: center; }
@@ -403,13 +193,6 @@ nav {
   .feature-copy p { font-size: 15px; }
   .copy-cta { width: 100%; justify-content: center; }
   .table-mini th:nth-child(2), .table-mini td:nth-child(2) { display: none; }
-
-  /* hide desktop table, show mobile version */
-  .comp-table-wrap { display: none; }
-  .comp-mobile { display: block; }
-  .comparison-section { padding: 72px 4%; }
-  .comp-heading { letter-spacing: -1px; }
-  .comp-cta { width: 100%; justify-content: center; font-size: 16px; }
 }
 </style>
 </head>
@@ -462,13 +245,18 @@ nav {
   </div>
 </section>
 
-<!-- NOTCH TRANSITION -->
-<div style="position:relative; background:#fff; line-height:0; z-index:5; height:80px; overflow:visible;">
-  <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:80px;">
-    <rect x="0" y="0" width="1440" height="80" fill="#0f0f12"/>
-    <path d="M330,0 C430,0 470,55 560,55 L880,55 C970,55 1010,0 1110,0 L330,0 Z" fill="#ffffff"/>
-  </svg>
-  <div style="position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; z-index:20;">
+<!-- NOTCH SECTION — matches image 1 exactly -->
+<!--
+  Structure:
+  - White strip at bottom of hero (pill lives here, centered)
+  - Dark section has a white pill-shaped cutout at top center
+  - Achieved with: dark bg full width, two dark rounded blocks on left+right
+    with the center left as white, pill floats on top
+-->
+<div style="position:relative; background:#ffffff; padding: 28px 0 0; z-index:5;">
+
+  <!-- The pill centered on white -->
+  <div style="display:flex; justify-content:center; position:relative; z-index:20;">
     <div class="pill-switcher">
       <button class="pill-btn active" onclick="switchTab(0, this)">Run Quizzes</button>
       <button class="pill-btn" onclick="switchTab(1, this)">Grades &amp; Reports</button>
@@ -476,6 +264,23 @@ nav {
       <button class="pill-btn" onclick="switchTab(3, this)">Syllabus</button>
     </div>
   </div>
+
+  <!-- Dark layer below the pill with notch carved out -->
+  <!-- Full-width dark bar, but the center has a white rounded-top cutout -->
+  <div style="position:relative; height:44px; margin-top:8px;">
+    <!-- Dark full width base -->
+    <div style="position:absolute; inset:0; background:#0f0f12;"></div>
+    <!-- White notch cutout: centered, rounded top corners only -->
+    <div style="
+      position:absolute;
+      top:0; left:50%; transform:translateX(-50%);
+      width:680px;
+      height:44px;
+      background:#ffffff;
+      border-radius:0 0 28px 28px;
+    "></div>
+  </div>
+
 </div>
 
 <!-- DARK FEATURE SECTION -->
@@ -664,139 +469,6 @@ nav {
   </div>
 </section>
 
-<!-- ===================== COMPARISON SECTION ===================== -->
-<section class="comparison-section">
-  <div class="comparison-inner">
-
-    <div class="comparison-header">
-      <div class="comp-eyebrow">COMPARISON</div>
-      <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
-      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
-    </div>
-
-    <!-- DESKTOP TABLE (hidden on mobile) -->
-    <div class="comp-table-wrap">
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th class="col-feat"></th>
-            <!-- iSkool — dark highlighted column -->
-            <th class="col-iskool">
-              <div class="th-iskool-inner">
-                <span class="iskool-badge">Best for SA Schools</span>
-                <div class="th-iskool-name">
-                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
-                  iSkool
-                </div>
-              </div>
-            </th>
-            <!-- Other LMS column -->
-            <th class="col-other">
-              <div class="th-other-inner">
-                <div class="th-other-label">Other LMS</div>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="feat-cell">Built for SA CAPS curriculum</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-          <tr>
-            <td class="feat-cell">AI invigilation for quizzes</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-          <tr>
-            <td class="feat-cell">Real-time learner analytics</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-          <tr>
-            <td class="feat-cell">Automated report cards</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-          <tr>
-            <td class="feat-cell">Syllabus coverage tracking</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-          <tr>
-            <td class="feat-cell">Free pilot for SA schools</td>
-            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
-            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- MOBILE TABLE (shown on mobile only) -->
-    <div class="comp-mobile">
-      <table class="comp-mobile-table">
-        <thead>
-          <tr>
-            <th class="mob-th-other">
-              <div class="mob-th-other-inner">
-                <div class="mob-other-label">Other LMS</div>
-              </div>
-            </th>
-            <th class="mob-th-iskool">
-              <div class="mob-th-iskool-inner">
-                <svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
-                <span class="mob-iskool-label">iSkool</span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for SA CAPS curriculum</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Automated report cards</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus coverage tracking</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot for SA schools</td></tr>
-          <tr>
-            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
-            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- CTA -->
-    <div class="comp-cta-row">
-      <a href="#" class="comp-cta">
-        Apply for Free Pilot
-        <span class="comp-cta-arrow">&#8599;</span>
-      </a>
-    </div>
-
-  </div>
-</section>
-
 <script>
 const tabData = [
   { eyebrow:"Quizzes", heading:'Run powerful quizzes with <span>AI watching over</span> every learner', desc:"Build quizzes from your question bank, launch them live to your class, and let iSkool\u2019s AI invigilator handle integrity \u2014 so you can focus on what matters: teaching.", bullets:["Live learner progress tracked question by question","Tab-switch & browser exit detection built in","Auto-marked with instant results & reports"] },
@@ -859,259 +531,157 @@ document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelec
 startCardCycle('panel-0');
 </script>
 
+<!-- ===================== COMPARISON SECTION ===================== -->
+<style>
+.comparison-section { background: #ffffff; padding: 100px 5%; }
+.comparison-inner { max-width: 860px; margin: 0 auto; }
+.comparison-header { text-align: center; margin-bottom: 56px; }
+.comp-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.comp-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 16px; }
+.comp-sub { font-size: 17px; color: #666; max-width: 520px; margin: 0 auto; line-height: 1.65; }
+.comp-table-wrap { overflow: visible; }
+.comp-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.col-feat { width: 46%; } .col-iskool { width: 27%; } .col-other { width: 27%; }
+.comp-table thead th { padding-bottom: 0; vertical-align: bottom; border: none; background: transparent; }
+.th-iskool-inner { background: #111; border-radius: 16px 16px 0 0; padding: 16px 12px 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.iskool-badge { background: var(--gold); color: #111; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; white-space: nowrap; }
+.th-iskool-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+.th-other-inner { display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; gap: 6px; }
+.th-other-label { font-size: 14px; font-weight: 600; color: #999; }
+.comp-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.feat-cell { padding: 18px 0 18px 4px; font-size: 15px; color: #333; font-weight: 400; }
+.td-iskool { background: #111; text-align: center; padding: 16px 8px; border-bottom: 1px solid #1e1e22 !important; }
+.comp-table tbody tr:last-child .td-iskool { border-radius: 0 0 16px 16px; border-bottom: none !important; }
+.td-other { text-align: center; padding: 16px 8px; }
+.ico-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,196,122,0.15); border: 2px solid #00c47a; color: #00c47a; font-size: 13px; font-weight: 700; }
+.ico-cross { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: #ccc; font-size: 18px; font-weight: 300; }
+.comp-cta-row { display: flex; justify-content: center; margin-top: 52px; }
+.comp-cta { display: inline-flex; align-items: center; gap: 14px; background: var(--gold); color: #111; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; padding: 18px 28px 18px 36px; border-radius: 999px; text-decoration: none; box-shadow: 0 4px 24px rgba(245,200,66,0.3); transition: transform 0.2s, box-shadow 0.2s; }
+.comp-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245,200,66,0.45); }
+.comp-cta-arrow { width: 36px; height: 36px; background: rgba(0,0,0,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.comp-mobile { display: none; }
+.comp-mobile-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e8e8e8; border-radius: 16px; overflow: hidden; }
+.comp-mobile-table thead th { padding: 18px 12px; background: #fff; border: none; }
+.comp-mobile-table thead tr { border-bottom: 1px solid #e8e8e8; }
+.mob-th-other { width: 50%; text-align: center; border-right: 1px solid #e8e8e8; }
+.mob-th-other-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mob-other-label { font-size: 13px; font-weight: 600; color: #888; }
+.mob-th-iskool { width: 50%; text-align: center; }
+.mob-th-iskool-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mob-iskool-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #111; }
+.comp-mobile-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.comp-mobile-table tbody tr:last-child { border-bottom: none; }
+.mob-vals-row td { padding: 14px 12px; }
+.mob-val-other { text-align: center; background: #f5f5f5; border-right: 1px solid #e8e8e8; border-radius: 12px 0 0 12px; }
+.mob-val-iskool { text-align: center; background: rgba(0,196,122,0.08); border: 2px solid #00c47a; border-radius: 0 12px 12px 0; }
+@media (max-width: 640px) {
+  .comp-table-wrap { display: none; }
+  .comp-mobile { display: block; }
+  .comparison-section { padding: 72px 4%; }
+  .comp-heading { letter-spacing: -1px; }
+  .comp-cta { width: 100%; justify-content: center; font-size: 16px; }
+}
+</style>
+
+<section class="comparison-section">
+  <div class="comparison-inner">
+    <div class="comparison-header">
+      <div class="comp-eyebrow">COMPARISON</div>
+      <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
+      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
+    </div>
+    <div class="comp-table-wrap">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th class="col-feat"></th>
+            <th class="col-iskool">
+              <div class="th-iskool-inner">
+                <span class="iskool-badge">Best for SA Schools</span>
+                <div class="th-iskool-name">
+                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                  iSkool
+                </div>
+              </div>
+            </th>
+            <th class="col-other"><div class="th-other-inner"><div class="th-other-label">Other LMS</div></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feat-cell">Built for SA CAPS curriculum</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">AI invigilation for quizzes</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Real-time learner analytics</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Automated report cards</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Syllabus coverage tracking</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Free pilot for SA schools</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- MOBILE TABLE -->
+    <div class="comp-mobile">
+      <table class="comp-mobile-table">
+        <thead>
+          <tr>
+            <th class="mob-th-other"><div class="mob-th-other-inner"><div class="mob-other-label">Other LMS</div></div></th>
+            <th class="mob-th-iskool"><div class="mob-th-iskool-inner"><svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg><span class="mob-iskool-label">iSkool</span></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for SA CAPS curriculum</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Automated report cards</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus coverage tracking</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot for SA schools</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="comp-cta-row">
+      <a href="#" class="comp-cta">Apply for Free Pilot<span class="comp-cta-arrow">&#8599;</span></a>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== SOCIAL PROOF SECTION ===================== -->
 <style>
-.proof-section {
-  background: #ece8e0;
-  padding: 100px 0 110px;
-  overflow: hidden;
-}
-.proof-inner {
-  text-align: center;
-  padding: 0 5%;
-  margin-bottom: 48px;
-}
-.proof-eyebrow {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 14px;
-}
-.proof-heading {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 5vw, 58px);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -2px;
-  color: #111;
-  margin-bottom: 12px;
-}
-.proof-sub {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 32px;
-}
-
-/* Filter pills */
-.proof-filters {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.proof-filter {
-  padding: 11px 26px;
-  border-radius: 999px;
-  border: 2px solid #ccc;
-  background: white;
-  color: #111;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-.proof-filter.active {
-  background: #111;
-  color: #fff;
-  border-color: #111;
-}
-
-/* ---- SCROLLING TRACK (desktop auto-scroll) ---- */
-.proof-track-outer {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  margin-top: 48px;
-  /* fade edges */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-}
-
-.proof-track {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  animation: scrollLeft 32s linear infinite;
-  cursor: grab;
-  user-select: none;
-}
+.proof-section { background: #ece8e0; padding: 100px 0 110px; overflow: hidden; }
+.proof-inner { text-align: center; padding: 0 5%; margin-bottom: 48px; }
+.proof-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.proof-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 12px; }
+.proof-sub { font-size: 16px; color: #666; margin-bottom: 32px; }
+.proof-filters { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.proof-filter { padding: 11px 26px; border-radius: 999px; border: 2px solid #ccc; background: white; color: #111; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.proof-filter.active { background: #111; color: #fff; border-color: #111; }
+.proof-track-outer { position: relative; width: 100%; overflow: hidden; margin-top: 48px; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
+.proof-track { display: flex; gap: 24px; width: max-content; animation: scrollLeft 32s linear infinite; cursor: grab; user-select: none; }
 .proof-track:hover { animation-play-state: paused; }
 .proof-track.dragging { animation-play-state: paused; cursor: grabbing; }
-
-@keyframes scrollLeft {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* ---- Phone mockup card ---- */
-.phone-card {
-  flex-shrink: 0;
-  width: 220px;
-  height: 380px;
-  border-radius: 36px;
-  background: #1a1a1a;
-  border: 3px solid #2a2a2a;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  transition: transform 0.3s ease;
-}
+@keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.phone-card { flex-shrink: 0; width: 220px; height: 380px; border-radius: 36px; background: #1a1a1a; border: 3px solid #2a2a2a; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
 .phone-card:hover { transform: scale(1.04); }
-
-/* notch */
-.phone-card::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 8px;
-  background: #000;
-  border-radius: 999px;
-  z-index: 10;
-}
-
-/* inner content area */
-.phone-screen {
-  position: absolute;
-  inset: 0;
-  border-radius: 34px;
-  overflow: hidden;
-  background: #2a2a2a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* gradient overlay at bottom */
-.phone-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 55%;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
-  z-index: 2;
-  border-radius: 0 0 34px 34px;
-}
-
-/* play button */
-.phone-play {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 54px; height: 54px;
-  background: var(--gold);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 5;
-  font-size: 18px;
-  color: #111;
-  box-shadow: 0 4px 20px rgba(245,200,66,0.5);
-}
-
-/* niche badge */
-.phone-niche {
-  position: absolute;
-  bottom: 56px; left: 16px;
-  background: var(--gold);
-  color: #111;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: 999px;
-  z-index: 6;
-}
-
-/* view count */
-.phone-views {
-  position: absolute;
-  bottom: 20px; left: 16px;
-  z-index: 6;
-  color: white;
-}
-.phone-views-count {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1;
-}
-.phone-views-label {
-  font-size: 12px;
-  color: rgba(255,255,255,0.75);
-  display: inline;
-  margin-left: 4px;
-}
-.phone-views-handle {
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
-  margin-top: 2px;
-}
-
-/* placeholder graphic inside empty phone */
-.phone-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(160deg, #2a2a2a 0%, #1a1a1a 100%);
-}
-.phone-placeholder-icon {
-  font-size: 40px;
-  opacity: 0.15;
-}
-
-/* ---- MOBILE: touch-scrollable, static (no auto-scroll) ---- */
-.proof-track-mobile {
-  display: none;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 0 5% 12px;
-  margin-top: 40px;
-}
+.phone-card::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 60px; height: 8px; background: #000; border-radius: 999px; z-index: 10; }
+.phone-screen { position: absolute; inset: 0; border-radius: 34px; overflow: hidden; background: #2a2a2a; display: flex; align-items: center; justify-content: center; }
+.phone-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); z-index: 2; border-radius: 0 0 34px 34px; }
+.phone-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5; font-size: 18px; color: #111; box-shadow: 0 4px 20px rgba(245,200,66,0.5); }
+.phone-niche { position: absolute; bottom: 56px; left: 16px; background: var(--gold); color: #111; font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; z-index: 6; }
+.phone-views { position: absolute; bottom: 20px; left: 16px; z-index: 6; color: white; }
+.phone-views-count { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+.phone-views-label { font-size: 12px; color: rgba(255,255,255,0.75); display: inline; margin-left: 4px; }
+.phone-views-handle { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.phone-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #2a2a2a 0%, #1a1a1a 100%); }
+.phone-placeholder-icon { font-size: 40px; opacity: 0.15; }
+.proof-track-mobile { display: none; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 5% 12px; margin-top: 40px; }
 .proof-track-mobile::-webkit-scrollbar { display: none; }
-.proof-track-mobile-inner {
-  display: flex;
-  gap: 16px;
-  width: max-content;
-  padding: 8px 0;
-}
-/* center phone on mobile is taller */
-.phone-card-mob {
-  flex-shrink: 0;
-  width: 200px;
-  height: 350px;
-  border-radius: 32px;
-  background: #1a1a1a;
-  border: 3px solid #2a2a2a;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
-}
-.phone-card-mob::before {
-  content: '';
-  position: absolute;
-  top: 10px; left: 50%;
-  transform: translateX(-50%);
-  width: 55px; height: 7px;
-  background: #000;
-  border-radius: 999px;
-  z-index: 10;
-}
-/* make one card bigger on mobile like the reference */
-.phone-card-mob.featured {
-  width: 240px;
-  height: 420px;
-  border-radius: 36px;
-}
-
+.proof-track-mobile-inner { display: flex; gap: 16px; width: max-content; padding: 8px 0; }
+.phone-card-mob { flex-shrink: 0; width: 200px; height: 350px; border-radius: 32px; background: #1a1a1a; border: 3px solid #2a2a2a; position: relative; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+.phone-card-mob::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 55px; height: 7px; background: #000; border-radius: 999px; z-index: 10; }
+.phone-card-mob.featured { width: 240px; height: 420px; border-radius: 36px; }
 @media (max-width: 768px) {
   .proof-track-outer { display: none; }
   .proof-track-mobile { display: block; }
@@ -1131,230 +701,697 @@ startCardCycle('panel-0');
       <button class="proof-filter" onclick="setFilter('learners', this)">Learners</button>
     </div>
   </div>
-
-  <!-- DESKTOP: auto-scroll (no interaction needed) -->
   <div class="proof-track-outer" id="proofTrackOuter">
     <div class="proof-track" id="proofTrack">
-      <!-- Cards duplicated for seamless loop (8 cards × 2 = 16 total) -->
-
-      <!-- Card 1 -->
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Maths</div>
-        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
-      </div>
-      <!-- Card 2 -->
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">English</div>
-        <div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div>
-      </div>
-      <!-- Card 3 -->
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Analytics</div>
-        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
-      </div>
-      <!-- Card 4 -->
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Science</div>
-        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
-      </div>
-      <!-- Card 5 -->
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Integrity</div>
-        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
-      </div>
-      <!-- Card 6 -->
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Top Learner</div>
-        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
-      </div>
-      <!-- Card 7 -->
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Syllabus</div>
-        <div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div>
-      </div>
-      <!-- Card 8 -->
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Discussion</div>
-        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
-      </div>
-
-      <!-- DUPLICATE SET for seamless loop -->
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Maths</div>
-        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
-      </div>
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">English</div>
-        <div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div>
-      </div>
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Analytics</div>
-        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
-      </div>
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Science</div>
-        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
-      </div>
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Integrity</div>
-        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
-      </div>
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Top Learner</div>
-        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
-      </div>
-      <div class="phone-card" data-cat="teachers">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Syllabus</div>
-        <div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div>
-      </div>
-      <div class="phone-card" data-cat="learners">
-        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Discussion</div>
-        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
-      </div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">English</div><div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Syllabus</div><div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
+      <!-- Duplicate for seamless loop -->
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">English</div><div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
+      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Syllabus</div><div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div></div>
+      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
     </div>
   </div>
-
-  <!-- MOBILE: touch scroll only -->
   <div class="proof-track-mobile" id="proofTrackMobile">
     <div class="proof-track-mobile-inner">
-      <div class="phone-card-mob" data-cat="teachers">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🧑‍🏫</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
-        <div class="phone-niche">Maths</div>
-        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
-      </div>
-      <div class="phone-card-mob featured" data-cat="learners">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:34px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:48px;opacity:0.15;">🏆</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play">&#9654;</div>
-        <div class="phone-niche">Top Learner</div>
-        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
-      </div>
-      <div class="phone-card-mob" data-cat="teachers">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">📊</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
-        <div class="phone-niche">Analytics</div>
-        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
-      </div>
-      <div class="phone-card-mob" data-cat="learners">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">✏️</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
-        <div class="phone-niche">Science</div>
-        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
-      </div>
-      <div class="phone-card-mob" data-cat="teachers">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🛡️</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
-        <div class="phone-niche">Integrity</div>
-        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
-      </div>
-      <div class="phone-card-mob" data-cat="learners">
-        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">💬</div></div>
-        <div class="phone-overlay"></div>
-        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
-        <div class="phone-niche">Discussion</div>
-        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
-      </div>
+      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🧑‍🏫</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
+      <div class="phone-card-mob featured" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:34px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:48px;opacity:0.15;">🏆</div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
+      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">📊</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
+      <div class="phone-card-mob" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">✏️</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
+      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🛡️</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
+      <div class="phone-card-mob" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">💬</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
     </div>
   </div>
 </section>
 
 <script>
-/* ---- Filter logic: show/hide cards by category ---- */
 function setFilter(cat, btn) {
   document.querySelectorAll('.proof-filter').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
-  // Desktop cards
   document.querySelectorAll('#proofTrack .phone-card').forEach(card => {
-    if (cat === 'all' || card.dataset.cat === cat) {
-      card.style.opacity = '1';
-      card.style.pointerEvents = 'auto';
-    } else {
-      card.style.opacity = '0.25';
-      card.style.pointerEvents = 'none';
-    }
+    card.style.opacity = (cat === 'all' || card.dataset.cat === cat) ? '1' : '0.25';
+    card.style.pointerEvents = (cat === 'all' || card.dataset.cat === cat) ? 'auto' : 'none';
   });
-  // Mobile cards
   document.querySelectorAll('#proofTrackMobile .phone-card-mob').forEach(card => {
-    if (cat === 'all' || card.dataset.cat === cat) {
-      card.style.opacity = '1';
-    } else {
-      card.style.opacity = '0.25';
-    }
+    card.style.opacity = (cat === 'all' || card.dataset.cat === cat) ? '1' : '0.25';
   });
 }
-
-/* ---- Desktop: pause on hover already handled by CSS :hover ---- */
-/* ---- Desktop: drag to scrub (optional feel) ---- */
-(function() {
-  const track = document.getElementById('proofTrack');
-  if (!track) return;
-  let isDown = false, startX, scrollLeft;
-
-  track.addEventListener('mousedown', e => {
-    isDown = true;
-    track.classList.add('dragging');
-    startX = e.pageX - track.getBoundingClientRect().left;
-  });
-  document.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
-  track.addEventListener('mousemove', e => {
-    if (!isDown) return;
-    e.preventDefault();
-  });
-})();
 </script>
+
+<!-- ===================== HOW IT WORKS SECTION ===================== -->
+<style>
+/* ---- Section shell ---- */
+.hiw-section {
+  background: #ffffff;
+  padding: 110px 5% 120px;
+}
+.hiw-inner { max-width: 1160px; margin: 0 auto; }
+.hiw-header { text-align: center; margin-bottom: 64px; }
+.hiw-eyebrow {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.hiw-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -2px; color: #111;
+}
+
+/* ---- 3-col grid ---- */
+.hiw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ---- Each step card ---- */
+.hiw-card {
+  background: #f0ede8;
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* mockup area (top half) */
+.hiw-mockup {
+  flex: 1;
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+/* step info (bottom half) */
+.hiw-step-body {
+  padding: 24px 28px 32px;
+}
+.hiw-step-num {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #111;
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.hiw-step-text {
+  font-size: 15px; color: #444; line-height: 1.65;
+}
+.hiw-step-text strong { color: #111; }
+
+/* ---- FAKE CURSOR ---- */
+.fake-cursor {
+  position: absolute;
+  width: 18px; height: 18px;
+  pointer-events: none;
+  z-index: 100;
+  transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+.fake-cursor svg { width: 18px; height: 18px; }
+
+/* ---- CARD 1 mockup: School Setup ---- */
+.setup-ui {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  position: relative;
+}
+.setup-ui-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #111; margin-bottom: 14px;
+}
+.setup-field-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: #888; margin-bottom: 5px;
+}
+.setup-field {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px; color: #111;
+  background: white; margin-bottom: 12px;
+  min-height: 38px;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+}
+.setup-field.active-field {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+}
+.setup-typed { display: inline; }
+.setup-cursor-blink {
+  display: inline-block;
+  width: 2px; height: 14px;
+  background: var(--teal);
+  margin-left: 1px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.setup-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.setup-tag {
+  padding: 4px 12px;
+  background: rgba(79,209,197,0.12);
+  color: #0d9488;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.setup-tag.visible { opacity: 1; transform: scale(1); }
+.setup-progress-row {
+  display: flex; align-items: center; gap: 10px; margin-top: 4px;
+}
+.setup-progress-bar {
+  flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden;
+}
+.setup-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.setup-done-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #d1fae5; color: #065f46;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  opacity: 0; transition: opacity 0.4s;
+  margin-top: 10px;
+}
+.setup-done-badge.visible { opacity: 1; }
+
+/* ---- CARD 2 mockup: Quiz Builder ---- */
+.quiz-ui {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  font-family: 'DM Sans', sans-serif;
+}
+.quiz-ui-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.quiz-ui-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700; color: #111;
+}
+.quiz-live-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #d1fae5; color: #065f46;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  opacity: 0; transition: opacity 0.4s;
+}
+.quiz-live-badge.visible { opacity: 1; }
+.quiz-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #10b981;
+  animation: pulse-green 1.5s ease-in-out infinite;
+}
+@keyframes pulse-green { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+.quiz-name-field {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px; padding: 9px 12px;
+  font-size: 12.5px; color: #111;
+  margin-bottom: 10px;
+  min-height: 34px; display: flex; align-items: center;
+}
+.quiz-name-field.active-field { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
+.quiz-questions { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.quiz-q-row {
+  display: flex; align-items: center; gap: 8px;
+  background: #f8f9fc; border-radius: 8px; padding: 8px 10px;
+  font-size: 12px; color: #333;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.quiz-q-row.visible { opacity: 1; transform: translateY(0); }
+.quiz-q-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--teal); color: white;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.quiz-meta-row {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+}
+.quiz-meta-chip {
+  background: #f0f0f0; border-radius: 8px;
+  padding: 6px 10px; font-size: 11px; color: #555;
+  display: flex; align-items: center; gap: 4px;
+}
+.quiz-meta-chip.active-field { background: rgba(79,209,197,0.1); color: #0d9488; border: 1px solid rgba(79,209,197,0.3); }
+.quiz-launch-btn {
+  width: 100%; padding: 10px;
+  background: #111; color: white;
+  border-radius: 10px; font-size: 13px; font-weight: 700;
+  text-align: center; font-family: 'DM Sans', sans-serif;
+  opacity: 0.3; transition: opacity 0.4s, background 0.4s;
+}
+.quiz-launch-btn.ready { opacity: 1; background: #10b981; }
+.learner-count {
+  font-size: 12px; color: #10b981; font-weight: 700;
+  text-align: center; margin-top: 6px;
+  opacity: 0; transition: opacity 0.3s;
+}
+.learner-count.visible { opacity: 1; }
+
+/* ---- CARD 3 mockup: Analytics ---- */
+.analytics-ui {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  font-family: 'DM Sans', sans-serif;
+}
+.analytics-ui-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;
+}
+.analytics-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+.analytics-stat {
+  background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center;
+}
+.analytics-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  transition: all 0.5s ease;
+}
+.analytics-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+.analytics-bar-row { margin-bottom: 6px; }
+.analytics-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: #555; margin-bottom: 3px;
+}
+.analytics-bar-track { height: 7px; background: #eee; border-radius: 999px; overflow: hidden; }
+.analytics-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  border-radius: 999px;
+  width: 0%; transition: width 0.8s ease;
+}
+.analytics-alert-row {
+  margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
+}
+.analytics-alert {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff5f5; border-radius: 8px; padding: 7px 10px;
+  font-size: 11.5px; color: #333;
+  opacity: 0; transform: translateX(-8px);
+  transition: opacity 0.4s, transform 0.4s;
+  border-left: 3px solid #f85149;
+}
+.analytics-alert.visible { opacity: 1; transform: translateX(0); }
+.analytics-improve {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #d1fae5; color: #065f46;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 700;
+  margin-top: 8px; opacity: 0; transition: opacity 0.4s;
+}
+.analytics-improve.visible { opacity: 1; }
+
+/* ---- MOBILE ---- */
+@media (max-width: 900px) {
+  .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  .hiw-mockup { min-height: 240px; }
+}
+@media (max-width: 600px) {
+  .hiw-section { padding: 72px 5% 80px; }
+  .hiw-heading { letter-spacing: -1px; }
+}
+</style>
+
+<section class="hiw-section">
+  <div class="hiw-inner">
+    <div class="hiw-header">
+      <div class="hiw-eyebrow">HOW IT WORKS</div>
+      <h2 class="hiw-heading">Get Your School Running in Three Steps</h2>
+    </div>
+
+    <div class="hiw-grid">
+
+      <!-- CARD 1: Set Up Your School -->
+      <div class="hiw-card">
+        <div class="hiw-mockup" id="hiw-mockup-1">
+          <!-- Fake cursor -->
+          <div class="fake-cursor" id="cursor-1" style="left:50%;top:50%;">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <!-- UI Mockup -->
+          <div class="setup-ui" id="setup-ui">
+            <div class="setup-ui-title">&#127979; School Setup</div>
+            <div class="setup-field-label">School Name</div>
+            <div class="setup-field active-field" id="setup-field-school">
+              <span class="setup-typed" id="setup-school-text"></span>
+              <span class="setup-cursor-blink" id="setup-blink-1"></span>
+            </div>
+            <div class="setup-field-label">Grades</div>
+            <div class="setup-tags" id="setup-tags">
+              <span class="setup-tag" id="tag-gr10">Grade 10</span>
+              <span class="setup-tag" id="tag-gr11">Grade 11</span>
+              <span class="setup-tag" id="tag-gr12">Grade 12</span>
+            </div>
+            <div class="setup-field-label">Subjects Added</div>
+            <div class="setup-tags" id="setup-subjects">
+              <span class="setup-tag" id="tag-math">Mathematics</span>
+              <span class="setup-tag" id="tag-sci">Phys. Science</span>
+              <span class="setup-tag" id="tag-eng">English</span>
+            </div>
+            <div class="setup-progress-row">
+              <div class="setup-progress-bar"><div class="setup-progress-fill" id="setup-prog"></div></div>
+              <span style="font-size:11px;color:#888;" id="setup-pct">0%</span>
+            </div>
+            <div class="setup-done-badge" id="setup-done">&#10003; Setup Complete</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">1</div>
+          <p class="hiw-step-text">Enter your school details and iSkool will <strong>set up your classes, subjects and learner accounts</strong> automatically.</p>
+        </div>
+      </div>
+
+      <!-- CARD 2: Teach & Assess -->
+      <div class="hiw-card">
+        <div class="hiw-mockup" id="hiw-mockup-2">
+          <div class="fake-cursor" id="cursor-2" style="left:50%;top:50%;">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div class="quiz-ui" id="quiz-ui">
+            <div class="quiz-ui-header">
+              <div class="quiz-ui-title">&#128221; Quiz Builder</div>
+              <div class="quiz-live-badge" id="quiz-live"><div class="quiz-live-dot"></div>Live</div>
+            </div>
+            <div class="quiz-name-field active-field" id="quiz-name-field">
+              <span class="setup-typed" id="quiz-name-text"></span>
+              <span class="setup-cursor-blink" id="setup-blink-2"></span>
+            </div>
+            <div class="quiz-questions" id="quiz-questions">
+              <div class="quiz-q-row" id="qq1"><div class="quiz-q-num">1</div>Solve: x² + 5x + 6 = 0</div>
+              <div class="quiz-q-row" id="qq2"><div class="quiz-q-num">2</div>Find the roots of 2x² - 8 = 0</div>
+              <div class="quiz-q-row" id="qq3"><div class="quiz-q-num">3</div>Factorise: x² - 9</div>
+            </div>
+            <div class="quiz-meta-row">
+              <div class="quiz-meta-chip active-field" id="quiz-time">&#9201; 45 min</div>
+              <div class="quiz-meta-chip" id="quiz-grade">Grade 12A</div>
+              <div class="quiz-meta-chip" id="quiz-qcount">15 Qs</div>
+            </div>
+            <div class="quiz-launch-btn" id="quiz-launch">&#128640; Launch to Class</div>
+            <div class="learner-count" id="learner-count">&#128100; 32 learners joined</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">2</div>
+          <p class="hiw-step-text">Create quizzes, set assignments and <strong>track syllabus coverage</strong> from one dashboard — built for SA teachers.</p>
+        </div>
+      </div>
+
+      <!-- CARD 3: Track & Improve -->
+      <div class="hiw-card">
+        <div class="hiw-mockup" id="hiw-mockup-3">
+          <div class="fake-cursor" id="cursor-3" style="left:50%;top:50%;">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div class="analytics-ui" id="analytics-ui">
+            <div class="analytics-ui-title">&#128200; Term 2 Analytics</div>
+            <div class="analytics-stats">
+              <div class="analytics-stat">
+                <div class="analytics-stat-val" id="astat-pass" style="color:#4fd1c5;">54%</div>
+                <div class="analytics-stat-label">Pass Rate</div>
+              </div>
+              <div class="analytics-stat">
+                <div class="analytics-stat-val" id="astat-avg" style="color:#f5c842;">61.4</div>
+                <div class="analytics-stat-label">Avg Score</div>
+              </div>
+            </div>
+            <div class="analytics-bar-row">
+              <div class="analytics-bar-label"><span>Grade 12A</span><span id="bar1-pct">0%</span></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar1"></div></div>
+            </div>
+            <div class="analytics-bar-row">
+              <div class="analytics-bar-label"><span>Grade 11B</span><span id="bar2-pct">0%</span></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar2"></div></div>
+            </div>
+            <div class="analytics-bar-row">
+              <div class="analytics-bar-label"><span>Grade 10A</span><span id="bar3-pct">0%</span></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar3"></div></div>
+            </div>
+            <div class="analytics-alert-row">
+              <div class="analytics-alert" id="alert1">&#9888; Kamo Sithole — below 50%</div>
+              <div class="analytics-alert" id="alert2">&#9888; Lebo Dlamini — borderline</div>
+            </div>
+            <div class="analytics-improve" id="analytics-improve">&#127775; 3 learners improved this week</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">3</div>
+          <p class="hiw-step-text">Real-time data shows you <strong>exactly which learners need attention</strong> before it's too late — with improvement suggestions built in.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+/* ==========================================
+   HOW IT WORKS — ANIMATION ENGINE
+   Each card runs its own looping sequence.
+   Fake cursor moves between UI elements.
+========================================== */
+
+/* --- Utility: move cursor to element --- */
+function moveCursorTo(cursorEl, targetEl, offsetX, offsetY) {
+  const mockup = cursorEl.parentElement;
+  const mRect = mockup.getBoundingClientRect();
+  const tRect = targetEl.getBoundingClientRect();
+  const x = tRect.left - mRect.left + (offsetX || tRect.width / 2);
+  const y = tRect.top - mRect.top + (offsetY || tRect.height / 2);
+  cursorEl.style.left = x + 'px';
+  cursorEl.style.top = y + 'px';
+}
+
+/* --- Utility: type text into element --- */
+function typeText(el, text, speed, cb) {
+  el.textContent = '';
+  let i = 0;
+  const t = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 300); }
+  }, speed);
+  return t;
+}
+
+/* ============ CARD 1 ANIMATION ============ */
+function runCard1() {
+  const cursor = document.getElementById('cursor-1');
+  const schoolField = document.getElementById('setup-field-school');
+  const schoolText = document.getElementById('setup-school-text');
+  const blink1 = document.getElementById('setup-blink-1');
+  const tags = ['tag-gr10','tag-gr11','tag-gr12','tag-math','tag-sci','tag-eng'];
+  const prog = document.getElementById('setup-prog');
+  const pct = document.getElementById('setup-pct');
+  const done = document.getElementById('setup-done');
+
+  // Reset
+  schoolText.textContent = '';
+  schoolField.classList.add('active-field');
+  blink1.style.display = 'inline-block';
+  tags.forEach(id => document.getElementById(id).classList.remove('visible'));
+  prog.style.width = '0%';
+  pct.textContent = '0%';
+  done.classList.remove('visible');
+
+  // Step 1: cursor moves to school name field & types
+  setTimeout(() => moveCursorTo(cursor, schoolField, 10, 15), 200);
+  setTimeout(() => typeText(schoolText, 'Greenwood High School', 60, () => {
+    blink1.style.display = 'none';
+    schoolField.classList.remove('active-field');
+
+    // Step 2: grades appear one by one
+    setTimeout(() => { document.getElementById('tag-gr10').classList.add('visible'); prog.style.width='20%'; pct.textContent='20%'; }, 200);
+    setTimeout(() => { document.getElementById('tag-gr11').classList.add('visible'); prog.style.width='35%'; pct.textContent='35%'; }, 500);
+    setTimeout(() => { document.getElementById('tag-gr12').classList.add('visible'); prog.style.width='50%'; pct.textContent='50%'; }, 800);
+
+    // Step 3: subjects appear
+    setTimeout(() => { document.getElementById('tag-math').classList.add('visible'); prog.style.width='65%'; pct.textContent='65%'; }, 1300);
+    setTimeout(() => { document.getElementById('tag-sci').classList.add('visible'); prog.style.width='80%'; pct.textContent='80%'; }, 1700);
+    setTimeout(() => { document.getElementById('tag-eng').classList.add('visible'); prog.style.width='100%'; pct.textContent='100%'; }, 2100);
+
+    // Step 4: done badge
+    setTimeout(() => {
+      done.classList.add('visible');
+      // Loop after pause
+      setTimeout(runCard1, 3500);
+    }, 2700);
+  }), 600);
+}
+
+/* ============ CARD 2 ANIMATION ============ */
+function runCard2() {
+  const cursor = document.getElementById('cursor-2');
+  const nameField = document.getElementById('quiz-name-field');
+  const nameText = document.getElementById('quiz-name-text');
+  const blink2 = document.getElementById('setup-blink-2');
+  const qs = ['qq1','qq2','qq3'];
+  const launch = document.getElementById('quiz-launch');
+  const liveB = document.getElementById('quiz-live');
+  const lCount = document.getElementById('learner-count');
+  const timechip = document.getElementById('quiz-time');
+
+  // Reset
+  nameText.textContent = '';
+  nameField.classList.add('active-field');
+  blink2.style.display = 'inline-block';
+  qs.forEach(id => document.getElementById(id).classList.remove('visible'));
+  launch.classList.remove('ready');
+  liveB.classList.remove('visible');
+  lCount.classList.remove('visible');
+  timechip.classList.remove('active-field');
+
+  // Step 1: type quiz name
+  setTimeout(() => moveCursorTo(cursor, nameField, 10, 15), 200);
+  setTimeout(() => typeText(nameText, 'Term 2 — Quadratic Equations', 55, () => {
+    blink2.style.display = 'none';
+    nameField.classList.remove('active-field');
+
+    // Step 2: questions appear
+    setTimeout(() => { document.getElementById('qq1').classList.add('visible'); }, 300);
+    setTimeout(() => { document.getElementById('qq2').classList.add('visible'); }, 650);
+    setTimeout(() => { document.getElementById('qq3').classList.add('visible'); }, 1000);
+
+    // Step 3: time chip highlight
+    setTimeout(() => {
+      timechip.classList.add('active-field');
+      moveCursorTo(cursor, timechip, 10, 10);
+    }, 1400);
+
+    // Step 4: launch becomes ready
+    setTimeout(() => {
+      timechip.classList.remove('active-field');
+      launch.classList.add('ready');
+      moveCursorTo(cursor, launch, 20, 12);
+    }, 2000);
+
+    // Step 5: live badge + learner count
+    setTimeout(() => {
+      liveB.classList.add('visible');
+      lCount.classList.add('visible');
+      lCount.textContent = '👤 0 learners joined';
+      let count = 0;
+      const counter = setInterval(() => {
+        count += 3;
+        if (count > 32) { count = 32; clearInterval(counter); }
+        lCount.textContent = '👤 ' + count + ' learners joined';
+      }, 80);
+      setTimeout(runCard2, 3800);
+    }, 2600);
+  }), 500);
+}
+
+/* ============ CARD 3 ANIMATION ============ */
+function runCard3() {
+  const cursor = document.getElementById('cursor-3');
+  const passEl = document.getElementById('astat-pass');
+  const avgEl = document.getElementById('astat-avg');
+  const bar1 = document.getElementById('bar1');
+  const bar2 = document.getElementById('bar2');
+  const bar3 = document.getElementById('bar3');
+  const bp1 = document.getElementById('bar1-pct');
+  const bp2 = document.getElementById('bar2-pct');
+  const bp3 = document.getElementById('bar3-pct');
+  const alert1 = document.getElementById('alert1');
+  const alert2 = document.getElementById('alert2');
+  const improve = document.getElementById('analytics-improve');
+
+  // Reset
+  passEl.textContent = '54%';
+  avgEl.textContent = '61.4';
+  bar1.style.width = '0%'; bar2.style.width = '0%'; bar3.style.width = '0%';
+  bp1.textContent = '0%'; bp2.textContent = '0%'; bp3.textContent = '0%';
+  alert1.classList.remove('visible');
+  alert2.classList.remove('visible');
+  improve.classList.remove('visible');
+
+  // Step 1: bars animate in
+  setTimeout(() => {
+    bar1.style.width = '78%'; bp1.textContent = '78%';
+    bar2.style.width = '65%'; bp2.textContent = '65%';
+    bar3.style.width = '71%'; bp3.textContent = '71%';
+  }, 400);
+
+  // Step 2: pass rate ticks up
+  setTimeout(() => {
+    moveCursorTo(cursor, passEl, 5, 5);
+    let p = 54;
+    const t = setInterval(() => {
+      p += 2;
+      if (p >= 78) { p = 78; clearInterval(t); }
+      passEl.textContent = p + '%';
+    }, 60);
+  }, 1200);
+
+  // Step 3: avg score updates
+  setTimeout(() => {
+    avgEl.textContent = '74.2';
+  }, 2400);
+
+  // Step 4: at-risk alerts
+  setTimeout(() => { alert1.classList.add('visible'); moveCursorTo(cursor, alert1, 20, 8); }, 3000);
+  setTimeout(() => { alert2.classList.add('visible'); }, 3500);
+
+  // Step 5: improvement badge
+  setTimeout(() => {
+    improve.classList.add('visible');
+    setTimeout(runCard3, 3800);
+  }, 4200);
+}
+
+/* ---- Start all 3 on load, staggered ---- */
+setTimeout(runCard1, 400);
+setTimeout(runCard2, 900);
+setTimeout(runCard3, 1400);
+</script>
+
 </body>
 </html>
