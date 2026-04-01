@@ -6,10 +6,6 @@
 <title>iSkool — The LMS for South African High Schools</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <style>
-
-/* ===========================
-   ROOT & RESET
-=========================== */
 :root {
   --teal: #4fd1c5;
   --teal2: #00e5a0;
@@ -18,605 +14,492 @@
   --blue: #4f7cff;
   --red: #f85149;
   --dark: #0f0f12;
-  --dark2: #0d1117;
 }
-
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #111; line-height: 1.6; }
 
-body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: #ffffff;
-  color: #111;
-  line-height: 1.6;
-}
-
-/* ===========================
-   NAV
-=========================== */
+/* NAV */
 nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1000;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #eee;
-  padding: 16px 5%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid #eee; padding: 14px 5%;
+  display: flex; align-items: center; justify-content: space-between;
 }
-
 .nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Syne', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  text-decoration: none;
-  color: #111;
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+  text-decoration: none; color: #111;
 }
-
-.nav-logo-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--teal), var(--teal2));
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-  list-style: none;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 15px;
-  transition: color 0.2s;
-}
+.nav-logo svg { width: 36px; height: 36px; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { text-decoration: none; color: #333; font-weight: 500; font-size: 15px; transition: color 0.2s; }
 .nav-links a:hover { color: var(--teal); }
-
-.nav-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.nav-login {
-  background: none;
-  border: none;
-  color: #555;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 8px 14px;
-}
-
-.nav-pilot {
-  padding: 10px 22px;
-  background: #111;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.nav-login { background: none; border: none; color: #555; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; padding: 8px 14px; }
+.nav-pilot { padding: 10px 22px; background: #111; color: white; border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
 .nav-pilot:hover { background: #333; }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: #111; border-radius: 2px; }
+.mobile-menu { display: none; position: fixed; top: 65px; left: 0; right: 0; background: white; border-bottom: 1px solid #eee; padding: 20px 5%; z-index: 999; flex-direction: column; gap: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+.mobile-menu.open { display: flex; }
+.mobile-menu a, .mobile-menu button { text-decoration: none; color: #333; font-weight: 500; font-size: 16px; padding: 14px 0; border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: left; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: block; width: 100%; }
+.mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
-/* ===========================
-   HERO
-=========================== */
-.hero {
-  padding: 172px 20px 120px;
-  text-align: center;
-  position: relative;
-  background: #ffffff;
-  overflow: hidden;
-}
-
-/* subtle dot grid background */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.trust-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #fef9e6;
-  border: 1px solid #f5c84250;
-  color: #d97706;
-  padding: 8px 22px;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 28px;
-  position: relative;
-}
-
-.trust-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #d97706;
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-.hero h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(48px, 7vw, 80px);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -2.5px;
-  margin-bottom: 24px;
-  position: relative;
-}
-
-.hero h1 span {
-  color: var(--gold);
-}
-
-.hero p {
-  font-size: 20px;
-  color: #555;
-  max-width: 660px;
-  margin: 0 auto 40px;
-  line-height: 1.65;
-  position: relative;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  position: relative;
-}
-
-.btn {
-  padding: 15px 32px;
-  border-radius: 50px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  border: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+/* HERO */
+.hero { padding: 172px 20px 80px; text-align: center; position: relative; background: #fff; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 28px 28px; opacity: 0.45; pointer-events: none; }
+.trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
+.trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px, 7vw, 80px); font-weight: 800; line-height: 1.05; letter-spacing: -2.5px; margin-bottom: 24px; position: relative; }
+.hero h1 span { color: var(--gold); }
+.hero p { font-size: clamp(16px, 2vw, 20px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
+.hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+.btn { padding: 15px 32px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
 .btn:hover { transform: translateY(-2px); }
-
-.btn-outline {
-  background: white;
-  color: #111;
-  border: 2px solid #ddd;
-}
+.btn-outline { background: white; color: #111; border: 2px solid #ddd; }
 .btn-outline:hover { border-color: #bbb; }
-
-.btn-primary {
-  background: #111;
-  color: white;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
+.btn-primary { background: #111; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
 .btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.play-icon { width: 20px; height: 20px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; }
 
-/* play icon */
-.play-icon {
-  width: 20px;
-  height: 20px;
-  background: #eee;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-}
-
-/* ===========================
-   PILL BRIDGE (straddles hero ↔ dark)
-=========================== */
-.pill-bridge {
-  background: #ffffff;
-  padding-bottom: 0;
-  display: flex;
-  justify-content: center;
-  position: relative;
-  z-index: 10;
-}
-
+/* PILL NOTCH */
+.pill-bridge { position: relative; background: #fff; z-index: 10; overflow: visible; }
+.pill-notch { position: relative; background: #fff; display: flex; justify-content: center; align-items: center; padding: 24px 20px 0; z-index: 10; }
+.notch-shape { position: relative; width: 100%; line-height: 0; background: #fff; }
+.notch-shape svg { display: block; width: 100%; height: auto; }
 .pill-switcher {
-  display: inline-flex;
-  align-items: center;
-  background: #ebebeb;
-  border-radius: 999px;
-  padding: 5px;
-  gap: 2px;
-  position: relative;
-  bottom: -24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  position: relative; z-index: 20; display: inline-flex; align-items: center;
+  background: #ffffff; border-radius: 999px; padding: 5px; gap: 2px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); white-space: nowrap;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
+.pill-switcher::-webkit-scrollbar { display: none; }
+.pill-btn { padding: 11px 20px; border-radius: 999px; border: none; background: transparent; color: #555; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; }
+.pill-btn.active { background: #111; color: #fff; }
 
-.pill-btn {
-  padding: 12px 24px;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  color: #555;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s, color 0.2s;
-}
+/* DARK SECTION */
+.feature-section { background: var(--dark); padding: 0 5% 100px; }
+.feature-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 60px; }
 
-.pill-btn.active {
-  background: #111;
-  color: #fff;
-}
+/* STACK */
+.stack-wrapper { position: relative; height: 420px; }
+.stack-layer { position: absolute; top: 0; left: 0; right: 0; transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease; transform-origin: top center; will-change: transform, opacity; }
+.stack-layer[data-pos="0"] { z-index: 3; transform: translateY(0px) scale(1); opacity: 1; }
+.stack-layer[data-pos="1"] { z-index: 2; transform: translateY(56px) scale(0.95); opacity: 0.72; }
+.stack-layer[data-pos="2"] { z-index: 1; transform: translateY(104px) scale(0.905); opacity: 0.42; }
 
-/* ===========================
-   DARK FEATURE SECTION
-=========================== */
-.feature-section {
-  background: var(--dark);
-  padding: 80px 5% 100px;
-}
-
-.feature-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
-  padding-top: 48px;
-}
-
-/* ===========================
-   STACKED CARDS
-=========================== */
-.stack-wrapper {
-  position: relative;
-  height: 380px;
-}
-
-.stack-layer {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
-  transform-origin: top center;
-  will-change: transform, opacity;
-}
-
-/* Default resting positions */
-.stack-layer[data-pos="0"] {
-  z-index: 3;
-  transform: translateY(0px) scale(1);
-  opacity: 1;
-}
-.stack-layer[data-pos="1"] {
-  z-index: 2;
-  transform: translateY(56px) scale(0.95);
-  opacity: 0.72;
-}
-.stack-layer[data-pos="2"] {
-  z-index: 1;
-  transform: translateY(104px) scale(0.905);
-  opacity: 0.42;
-}
-
-/* ===========================
-   DEMO CARDS (white cards)
-=========================== */
-.demo-card {
-  background: white;
-  color: #111;
-  border-radius: 20px;
-  padding: 26px;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.45);
-  position: relative;
-  overflow: hidden;
-  font-family: 'DM Sans', sans-serif;
-  line-height: 1.6;
-}
-
-.demo-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--teal), var(--teal2));
-}
-
-.card-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 50px;
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 16px;
-}
-
-.badge-quiz      { background: rgba(79,124,255,0.12); color: #4f7cff; }
+/* DEMO CARDS */
+.demo-card { background: white; color: #111; border-radius: 20px; padding: 26px; box-shadow: 0 25px 70px rgba(0,0,0,0.45); position: relative; overflow: hidden; font-family: 'DM Sans', sans-serif; line-height: 1.6; }
+.demo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.card-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 16px; }
+.badge-quiz { background: rgba(79,124,255,0.12); color: #4f7cff; }
 .badge-analytics { background: rgba(245,200,66,0.12); color: #d4a800; }
 .badge-integrity { background: rgba(0,229,160,0.12); color: #00c47a; }
-.badge-discussion{ background: rgba(249,115,22,0.12); color: #f97316; }
-.badge-calendar  { background: rgba(79,209,197,0.12); color: #4fd1c5; }
-
-.card-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 19px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  line-height: 1.15;
-}
-
-.card-sub {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 18px;
-}
-
-.table-mini {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  margin: 10px 0;
-}
-.table-mini th {
-  text-align: left;
-  padding: 9px 8px;
-  font-weight: 600;
-  color: #555;
-  border-bottom: 2px solid #eee;
-}
-.table-mini td {
-  padding: 10px 8px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.percent-badge {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: white;
-}
-
-.progress-bar {
-  height: 8px;
-  background: #eee;
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 12px 0;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--teal2));
-  border-radius: 999px;
-}
-
-.topic-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f4f4f4;
-  font-size: 14px;
-  color: #111;
-}
+.badge-discussion { background: rgba(249,115,22,0.12); color: #f97316; }
+.badge-calendar { background: rgba(79,209,197,0.12); color: #4fd1c5; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; line-height: 1.15; }
+.card-sub { font-size: 13px; color: #666; margin-bottom: 18px; }
+.table-mini { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.table-mini th { text-align: left; padding: 9px 8px; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
+.table-mini td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
+.percent-badge { padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; color: white; }
+.progress-bar { height: 8px; background: #eee; border-radius: 999px; overflow: hidden; margin: 12px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; }
+.topic-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f4f4f4; font-size: 14px; color: #111; }
 .topic-item:last-child { border-bottom: none; }
-
-.announcement {
-  background: #f8f9fc;
-  padding: 14px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border-left: 4px solid var(--teal);
-}
-
-/* Tab panels */
+.announcement { background: #f8f9fc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--teal); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* ===========================
-   RIGHT COPY
-=========================== */
-.feature-copy {
-  color: #fff;
-  font-family: 'DM Sans', sans-serif;
-}
+/* RIGHT COPY */
+.feature-copy { color: #fff; font-family: 'DM Sans', sans-serif; }
+.copy-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+.feature-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(24px, 3vw, 36px); font-weight: 800; line-height: 1.15; letter-spacing: -0.8px; margin-bottom: 16px; }
+.feature-copy h3 span { color: var(--gold); }
+.feature-copy p { color: #888; font-size: 15.5px; line-height: 1.75; margin-bottom: 26px; }
+.copy-bullets { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 13px; }
+.copy-bullets li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: #ccc; }
+.bullet-check { width: 21px; height: 21px; border-radius: 50%; background: rgba(79,209,197,0.15); border: 1px solid rgba(79,209,197,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; color: var(--teal); margin-top: 2px; }
+.copy-cta { display: inline-flex; align-items: center; gap: 10px; background: var(--gold); color: #111; padding: 14px 28px; border-radius: 999px; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; border: none; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+.copy-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.35); }
 
-.copy-eyebrow {
+/* ===================== COMPARISON SECTION ===================== */
+.comparison-section {
+  background: #ffffff;
+  padding: 100px 5%;
+}
+.comparison-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.comparison-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.comp-eyebrow {
   display: inline-block;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--teal);
-  margin-bottom: 16px;
+  color: var(--gold);
+  margin-bottom: 14px;
 }
-
-.feature-copy h3 {
+.comp-heading {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(26px, 3vw, 36px);
+  font-size: clamp(32px, 5vw, 58px);
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.8px;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: #111;
   margin-bottom: 16px;
 }
-
-.feature-copy h3 span { color: var(--gold); }
-
-.feature-copy p {
-  color: #888;
-  font-size: 15.5px;
-  line-height: 1.75;
-  margin-bottom: 26px;
+.comp-sub {
+  font-size: 17px;
+  color: #666;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.65;
 }
 
-.copy-bullets {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 32px;
+/* === DESKTOP TABLE === */
+.comp-table-wrap { overflow: visible; }
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.col-feat   { width: 46%; }
+.col-iskool { width: 27%; }
+.col-other  { width: 27%; }
+
+/* header row */
+.comp-table thead th {
+  padding-bottom: 0;
+  vertical-align: bottom;
+  border: none;
+  background: transparent;
+}
+/* iSkool header — dark pill card */
+.th-iskool-inner {
+  background: #111;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 12px 18px;
   display: flex;
   flex-direction: column;
-  gap: 13px;
-}
-
-.copy-bullets li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  font-size: 15px;
-  color: #ccc;
-}
-
-.bullet-check {
-  width: 21px;
-  height: 21px;
-  border-radius: 50%;
-  background: rgba(79,209,197,0.15);
-  border: 1px solid rgba(79,209,197,0.3);
-  display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 10px;
-  color: var(--teal);
-  margin-top: 2px;
+  gap: 8px;
 }
-
-.copy-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+.iskool-badge {
   background: var(--gold);
   color: #111;
-  padding: 14px 28px;
-  border-radius: 999px;
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 4px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
-.copy-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(245,200,66,0.35);
+.th-iskool-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Other LMS header */
+.th-other-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+  gap: 6px;
+}
+.th-other-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
 }
 
+/* body rows */
+.comp-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.comp-table tbody tr:first-child .feat-cell { padding-top: 20px; }
+
+.feat-cell {
+  padding: 18px 0 18px 4px;
+  font-size: 15px;
+  color: #333;
+  font-weight: 400;
+}
+/* iSkool value cell — dark card continues */
+.td-iskool {
+  background: #111;
+  text-align: center;
+  padding: 16px 8px;
+  border-bottom: 1px solid #1e1e22 !important;
+}
+.comp-table tbody tr:last-child .td-iskool {
+  border-radius: 0 0 16px 16px;
+  border-bottom: none !important;
+}
+/* Other LMS value cell */
+.td-other {
+  text-align: center;
+  padding: 16px 8px;
+}
+
+/* check / cross icons */
+.ico-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(0,196,122,0.15);
+  border: 2px solid #00c47a;
+  color: #00c47a;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ico-cross {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  color: #ccc;
+  font-size: 18px;
+  font-weight: 300;
+}
+
+/* CTA */
+.comp-cta-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 52px;
+}
+.comp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--gold);
+  color: #111;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 18px 28px 18px 36px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.comp-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245,200,66,0.45); }
+.comp-cta-arrow {
+  width: 36px; height: 36px;
+  background: rgba(0,0,0,0.12);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* === MOBILE COMPARISON (shown below 640px) === */
+.comp-mobile { display: none; }
+.comp-mobile-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  overflow: hidden;
+}
+/* mobile header */
+.comp-mobile-table thead th {
+  padding: 18px 12px;
+  background: #fff;
+  border: none;
+}
+.comp-mobile-table thead tr { border-bottom: 1px solid #e8e8e8; }
+.mob-th-feat { width: 0; padding: 0 !important; }
+.mob-th-other {
+  width: 50%;
+  text-align: center;
+  border-right: 1px solid #e8e8e8;
+}
+.mob-th-other-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.mob-other-icons { display: flex; gap: 6px; align-items: center; justify-content: center; font-size: 18px; }
+.mob-other-label { font-size: 13px; font-weight: 600; color: #888; }
+.mob-th-iskool { width: 50%; text-align: center; }
+.mob-th-iskool-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.mob-iskool-logo { font-size: 22px; }
+.mob-iskool-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #111; }
+
+/* mobile body rows */
+.comp-mobile-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.comp-mobile-table tbody tr:last-child { border-bottom: none; }
+
+.mob-feat-label {
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+  padding: 10px 8px 6px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.mob-feat-label td { width: 100%; text-align: center; }
+
+/* each feature is two rows: label row + values row */
+.mob-vals-row td { padding: 14px 12px; }
+.mob-val-other {
+  text-align: center;
+  background: #f5f5f5;
+  border-right: 1px solid #e8e8e8;
+  border-radius: 12px 0 0 12px;
+}
+.mob-val-iskool {
+  text-align: center;
+  background: rgba(0,196,122,0.08);
+  border: 2px solid #00c47a;
+  border-radius: 0 12px 12px 0;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+  .nav-links, .nav-actions { display: none; }
+  .nav-hamburger { display: flex; }
+  .feature-inner { grid-template-columns: 1fr; gap: 48px; padding-top: 48px; }
+  .feature-inner > div:first-child { order: 2; }
+  .feature-copy { order: 1; }
+  .stack-wrapper { height: 340px; }
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+  .hero { padding: 130px 20px 80px; }
+  .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
+  .pill-bridge { justify-content: flex-start; padding-left: 5%; padding-right: 5%; }
+  .pill-switcher { bottom: -20px; }
+  .pill-btn { padding: 10px 14px; font-size: 12px; }
+  .feature-section { padding: 60px 5% 80px; }
+  .feature-inner { gap: 36px; padding-top: 32px; }
+  .stack-wrapper { height: 290px; }
+  .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
+  .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
+  .demo-card { padding: 18px; }
+  .card-title { font-size: 16px; }
+  .feature-copy h3 { font-size: 26px; }
+  .feature-copy p { font-size: 15px; }
+  .copy-cta { width: 100%; justify-content: center; }
+  .table-mini th:nth-child(2), .table-mini td:nth-child(2) { display: none; }
+
+  /* hide desktop table, show mobile version */
+  .comp-table-wrap { display: none; }
+  .comp-mobile { display: block; }
+  .comparison-section { padding: 72px 4%; }
+  .comp-heading { letter-spacing: -1px; }
+  .comp-cta { width: 100%; justify-content: center; font-size: 16px; }
+}
 </style>
 </head>
 <body>
 
-<!-- ==================== NAV ==================== -->
+<!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">🎓</div>
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
+      </g>
+    </svg>
     iSkool
   </a>
-
   <ul class="nav-links">
     <li><a href="#">Platform</a></li>
     <li><a href="#">How it Works</a></li>
     <li><a href="#">For Schools</a></li>
   </ul>
-
   <div class="nav-actions">
     <button class="nav-login">Log In</button>
     <button class="nav-pilot">Apply for Free Pilot</button>
   </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<!-- ==================== HERO ==================== -->
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#">Platform</a>
+  <a href="#">How it Works</a>
+  <a href="#">For Schools</a>
+  <button class="nav-login" style="border-bottom:1px solid #f0f0f0;">Log In</button>
+  <button class="mobile-pilot">Apply for Free Pilot</button>
+</div>
+
+<!-- HERO -->
 <section class="hero">
   <div class="trust-badge">
     <div class="trust-dot"></div>
     Trusted by South African High Schools
   </div>
-
   <h1>The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
-
   <p>Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
-
   <div class="hero-buttons">
-    <a href="#" class="btn btn-outline">
-      <span class="play-icon">▶</span>
-      See Demo
-    </a>
-    <a href="#" class="btn btn-primary">Apply for Free Pilot →</a>
+    <a href="#" class="btn btn-outline"><span class="play-icon">&#9654;</span>See Demo</a>
+    <a href="#" class="btn btn-primary">Apply for Free Pilot &#8594;</a>
   </div>
 </section>
 
-<!-- ==================== PILL (straddles hero ↔ dark) ==================== -->
-<div class="pill-bridge">
-  <div class="pill-switcher">
-    <button class="pill-btn active" onclick="switchTab(0, this)">Run Quizzes</button>
-    <button class="pill-btn" onclick="switchTab(1, this)">Grades & Reports</button>
-    <button class="pill-btn" onclick="switchTab(2, this)">Communication</button>
-    <button class="pill-btn" onclick="switchTab(3, this)">Syllabus</button>
+<!-- NOTCH TRANSITION -->
+<div style="position:relative; background:#fff; line-height:0; z-index:5; height:80px; overflow:visible;">
+  <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:80px;">
+    <rect x="0" y="0" width="1440" height="80" fill="#0f0f12"/>
+    <path d="M330,0 C430,0 470,55 560,55 L880,55 C970,55 1010,0 1110,0 L330,0 Z" fill="#ffffff"/>
+  </svg>
+  <div style="position:absolute; top:10px; left:0; right:0; display:flex; justify-content:center; z-index:20;">
+    <div class="pill-switcher">
+      <button class="pill-btn active" onclick="switchTab(0, this)">Run Quizzes</button>
+      <button class="pill-btn" onclick="switchTab(1, this)">Grades &amp; Reports</button>
+      <button class="pill-btn" onclick="switchTab(2, this)">Communication</button>
+      <button class="pill-btn" onclick="switchTab(3, this)">Syllabus</button>
+    </div>
   </div>
 </div>
 
-<!-- ==================== DARK FEATURE SECTION ==================== -->
+<!-- DARK FEATURE SECTION -->
 <section class="feature-section">
   <div class="feature-inner">
-
-    <!-- LEFT: Animated Stacked Cards -->
     <div>
-
-      <!-- TAB 0: Run Quizzes -->
+      <!-- TAB 0 -->
       <div class="tab-panel active" id="panel-0">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">📝 Quizzes</div>
-              <div class="card-title">Term 2 — Live Quizzes</div>
+              <div class="card-badge badge-quiz">&#128221; Quizzes</div>
+              <div class="card-title">Term 2 &mdash; Live Quizzes</div>
               <div class="card-sub">2025 Academic Year</div>
               <div style="background:#f8f9fc;padding:16px;border-radius:12px;margin-bottom:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:start;">
-                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A • Maths • 15 questions</small></div>
+                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A &bull; Maths &bull; 15 questions</small></div>
                   <span class="percent-badge" style="background:#00c47a">Open</span>
                 </div>
-                <div style="margin-top:8px;font-size:13px;color:#555;">14 May 2025 • 09:00–10:00</div>
+                <div style="margin-top:8px;font-size:13px;color:#555;">14 May 2025 &bull; 09:00&ndash;10:00</div>
               </div>
               <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
                 <div style="display:flex;justify-content:space-between;">
-                  <div><strong>Functions & Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
+                  <div><strong>Functions &amp; Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
                   <span class="percent-badge" style="background:#00c47a">Open</span>
                 </div>
               </div>
@@ -624,18 +507,18 @@ nav {
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-integrity">🛡️ AI Invigilator</div>
+              <div class="card-badge badge-integrity">&#128737; AI Invigilator</div>
               <div class="card-title">Integrity Monitor</div>
               <div class="card-sub">Real-time quiz protection</div>
-              <p style="font-size:14px;line-height:1.55;margin-bottom:16px;">Records every quiz session. Detects tab switching, browser minimization, or navigating away — question by question.</p>
-              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">✓ Verified & Tested • Powered by AI</div>
+              <p style="font-size:14px;line-height:1.55;margin-bottom:16px;">Records every quiz session. Detects tab switching, browser minimization, or navigating away &mdash; question by question.</p>
+              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">&#10003; Verified &amp; Tested &bull; Powered by AI</div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">📋 Assignments</div>
-              <div class="card-title">Chapter 5 – Calculus</div>
-              <div class="card-sub">Grade 12A • Due 20 May 2025</div>
+              <div class="card-badge badge-quiz">&#128203; Assignments</div>
+              <div class="card-title">Chapter 5 &ndash; Calculus</div>
+              <div class="card-sub">Grade 12A &bull; Due 20 May 2025</div>
               <div class="progress-bar"><div class="progress-fill" style="width:56%;"></div></div>
               <div style="display:flex;justify-content:space-between;font-size:13.5px;">
                 <span><strong>18</strong> of 32 submitted</span>
@@ -645,14 +528,13 @@ nav {
           </div>
         </div>
       </div>
-
-      <!-- TAB 1: Grades & Reports -->
+      <!-- TAB 1 -->
       <div class="tab-panel" id="panel-1">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">📊 Evaluations</div>
-              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-badge badge-quiz">&#128202; Evaluations</div>
+              <div class="card-title">Grade 12A &mdash; Mathematics</div>
               <div class="card-sub">Term 2 Quiz Results</div>
               <table class="table-mini">
                 <thead><tr><th>Learner</th><th>Score</th><th>%</th><th>Symbol</th></tr></thead>
@@ -667,374 +549,329 @@ nav {
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-analytics">📈 Analytics</div>
+              <div class="card-badge badge-analytics">&#128200; Analytics</div>
               <div class="card-title">Term 2 Performance</div>
               <div class="card-sub">Across 3 Classes</div>
               <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;">
-                <div style="text-align:center;">
-                  <div style="font-size:38px;font-weight:800;color:#4fd1c5;">78%</div>
-                  <div style="font-size:12px;color:#666;margin-top:4px;">Pass Rate <span style="color:#00c47a">↑10%</span></div>
-                </div>
-                <div style="text-align:center;">
-                  <div style="font-size:38px;font-weight:800;color:#f5c842;">74.2</div>
-                  <div style="font-size:12px;color:#666;margin-top:4px;">Average Score</div>
-                </div>
+                <div style="text-align:center;"><div style="font-size:38px;font-weight:800;color:#4fd1c5;">78%</div><div style="font-size:12px;color:#666;margin-top:4px;">Pass Rate <span style="color:#00c47a">&#8593;10%</span></div></div>
+                <div style="text-align:center;"><div style="font-size:38px;font-weight:800;color:#f5c842;">74.2</div><div style="font-size:12px;color:#666;margin-top:4px;">Average Score</div></div>
               </div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">🏠 Dashboard</div>
-              <div class="card-title">Welcome back, Linda 👋</div>
+              <div class="card-badge badge-quiz">&#127968; Dashboard</div>
+              <div class="card-title">Welcome back, Linda &#128075;</div>
               <div class="card-sub">Grade 10A</div>
               <div style="display:flex;gap:14px;margin-top:20px;">
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div>
-                  <div style="font-size:12px;color:#666;">Quizzes</div>
-                </div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#f97316;">3</div>
-                  <div style="font-size:12px;color:#666;">Assignments</div>
-                </div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div>
-                  <div style="font-size:12px;color:#666;">Score</div>
-                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div><div style="font-size:12px;color:#666;">Quizzes</div></div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#f97316;">3</div><div style="font-size:12px;color:#666;">Assignments</div></div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div><div style="font-size:12px;color:#666;">Score</div></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- TAB 2: Communication -->
+      <!-- TAB 2 -->
       <div class="tab-panel" id="panel-2">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">🛎️ Announcements</div>
+              <div class="card-badge badge-quiz">&#128276; Announcements</div>
               <div class="card-title">Important Updates</div>
-              <div class="announcement">
-                <strong>Term 2 Test Schedule Released</strong><br>
-                <small style="color:#555;">Tests begin 14 May 2025. Bring calculators and stationery.</small>
-              </div>
-              <div class="announcement">
-                <strong>Extra Maths Support Class</strong><br>
-                <small style="color:#555;">Saturday 10 May • 09:00 • Room 12</small>
-              </div>
+              <div class="announcement"><strong>Term 2 Test Schedule Released</strong><br><small style="color:#555;">Tests begin 14 May 2025. Bring calculators and stationery.</small></div>
+              <div class="announcement"><strong>Extra Maths Support Class</strong><br><small style="color:#555;">Saturday 10 May &bull; 09:00 &bull; Room 12</small></div>
             </div>
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-discussion">💬 Discussions</div>
+              <div class="card-badge badge-discussion">&#128172; Discussions</div>
               <div class="card-title">When is the next test?</div>
-              <div class="card-sub">Grade 10A • 8 posts</div>
+              <div class="card-sub">Grade 10A &bull; 8 posts</div>
               <div style="background:#f8f9fc;padding:14px;border-radius:12px;font-size:13.5px;margin-top:10px;">
                 <strong>Amahle Dube:</strong> Can someone confirm the date for the next Maths test?<br><br>
-                <strong style="color:#4fd1c5;">Ms N. Sithole • Teacher</strong><br>
+                <strong style="color:#4fd1c5;">Ms N. Sithole &bull; Teacher</strong><br>
                 The test is confirmed for 14 May at 09:00. Please bring calculator and geometry set.
               </div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-badge badge-calendar">&#128197; Calendar</div>
               <div class="card-title">May 2025</div>
               <div class="card-sub">Academic + Personal Reminders</div>
               <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
                 <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
-                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations & Inequalities Quiz</div>
+                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations &amp; Inequalities Quiz</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- TAB 3: Syllabus -->
+      <!-- TAB 3 -->
       <div class="tab-panel" id="panel-3">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">📚 Syllabus Engine</div>
-              <div class="card-title">Grade 10A — Mathematics</div>
-              <div class="card-sub">3 of 5 topics complete • 60%</div>
-              <div class="topic-item">✅ Number Systems <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">✅ Algebraic Expressions <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">✅ Equations & Inequalities <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">○ Geometry Basics <span style="margin-left:auto;color:#999;">Upcoming</span></div>
+              <div class="card-badge badge-quiz">&#128218; Syllabus Engine</div>
+              <div class="card-title">Grade 10A &mdash; Mathematics</div>
+              <div class="card-sub">3 of 5 topics complete &bull; 60%</div>
+              <div class="topic-item">&#9989; Number Systems <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">&#9989; Algebraic Expressions <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">&#9989; Equations &amp; Inequalities <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
+              <div class="topic-item">&#9898; Geometry Basics <span style="margin-left:auto;color:#999;">Upcoming</span></div>
             </div>
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-badge badge-calendar">&#128197; Calendar</div>
               <div class="card-title">May 2025</div>
-              <div class="card-sub">Upcoming Topics & Deadlines</div>
+              <div class="card-sub">Upcoming Topics &amp; Deadlines</div>
               <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
                 <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
-                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations & Inequalities Quiz</div>
+                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations &amp; Inequalities Quiz</div>
               </div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">🏠 Dashboard</div>
-              <div class="card-title">Welcome back, Linda 👋</div>
+              <div class="card-badge badge-quiz">&#127968; Dashboard</div>
+              <div class="card-title">Welcome back, Linda &#128075;</div>
               <div class="card-sub">Grade 10A</div>
               <div style="display:flex;gap:14px;margin-top:20px;">
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div>
-                  <div style="font-size:12px;color:#666;">Quizzes</div>
-                </div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#f97316;">3</div>
-                  <div style="font-size:12px;color:#666;">Assignments</div>
-                </div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;">
-                  <div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div>
-                  <div style="font-size:12px;color:#666;">Score</div>
-                </div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div><div style="font-size:12px;color:#666;">Quizzes</div></div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#f97316;">3</div><div style="font-size:12px;color:#666;">Assignments</div></div>
+                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div><div style="font-size:12px;color:#666;">Score</div></div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-    </div><!-- end left -->
-
-    <!-- RIGHT: Copy -->
+    <!-- RIGHT COPY -->
     <div class="feature-copy">
       <span class="copy-eyebrow" id="copy-eyebrow">Quizzes</span>
       <h3 id="copy-heading">Run powerful quizzes with <span>AI watching over</span> every learner</h3>
-      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.</p>
+      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity &mdash; so you can focus on what matters: teaching.</p>
       <ul class="copy-bullets" id="copy-bullets">
-        <li><div class="bullet-check">✓</div>Live learner progress tracked question by question</li>
-        <li><div class="bullet-check">✓</div>Tab-switch & browser exit detection built in</li>
-        <li><div class="bullet-check">✓</div>Auto-marked with instant results & reports</li>
+        <li><div class="bullet-check">&#10003;</div>Live learner progress tracked question by question</li>
+        <li><div class="bullet-check">&#10003;</div>Tab-switch &amp; browser exit detection built in</li>
+        <li><div class="bullet-check">&#10003;</div>Auto-marked with instant results &amp; reports</li>
       </ul>
-      <a href="#" class="copy-cta">See it in action →</a>
+      <a href="#" class="copy-cta">See it in action &#8594;</a>
     </div>
-
   </div>
 </section>
 
-<script>
-/* ---- Tab copy data ---- */
-const tabData = [
-  {
-    eyebrow: "Quizzes",
-    heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
-    desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
-    bullets: ["Live learner progress tracked question by question","Tab-switch & browser exit detection built in","Auto-marked with instant results & reports"]
-  },
-  {
-    eyebrow: "Grades & Reports",
-    heading: 'Capture marks and <span>generate reports</span> in seconds',
-    desc: "No more spreadsheets. Enter marks once — iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.",
-    bullets: ["Mark entries auto-calculate class averages","Symbol assignment (A–F) based on CAPS thresholds","One-click PDF report cards per learner"]
-  },
-  {
-    eyebrow: "Communication",
-    heading: 'Keep learners and parents <span>always in the loop</span>',
-    desc: "Post announcements, run class discussions, and sync academic events to learner calendars — all from one place. No more WhatsApp groups.",
-    bullets: ["Targeted announcements per class or grade","Threaded discussions with teacher replies","Calendar events auto-synced to learner dashboards"]
-  },
-  {
-    eyebrow: "Syllabus",
-    heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
-    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Track coverage progress across all your classes and never fall behind the curriculum again.",
-    bullets: ["Full CAPS topic mapping for Grade 10–12","Coverage progress tracked per class","Upload notes, videos & worksheets per topic"]
-  }
-];
-
-/* ---- Card cycling ---- */
-let cycleTimers = {};
-
-function startCardCycle(panelId) {
-  stopCardCycle(panelId);
-  const panel = document.getElementById(panelId);
-  if (!panel) return;
-  const layers = panel.querySelectorAll('.stack-layer');
-  if (layers.length < 2) return;
-
-  cycleTimers[panelId] = setInterval(() => {
-    // Read current positions
-    const positions = Array.from(layers).map(l => parseInt(l.dataset.pos));
-    // Rotate: 0→2, 1→0, 2→1 (bring back card to back, promote others forward)
-    const newPositions = positions.map(p => (p + layers.length - 1) % layers.length);
-    layers.forEach((l, i) => {
-      l.dataset.pos = newPositions[i];
-    });
-    applyPositions(layers);
-  }, 2200);
-}
-
-function stopCardCycle(panelId) {
-  if (cycleTimers[panelId]) {
-    clearInterval(cycleTimers[panelId]);
-    delete cycleTimers[panelId];
-  }
-}
-
-function applyPositions(layers) {
-  const posStyles = [
-    { zIndex: 3, transform: 'translateY(0px) scale(1)', opacity: '1' },
-    { zIndex: 2, transform: 'translateY(56px) scale(0.95)', opacity: '0.72' },
-    { zIndex: 1, transform: 'translateY(104px) scale(0.905)', opacity: '0.42' },
-  ];
-  layers.forEach(l => {
-    const pos = parseInt(l.dataset.pos);
-    const s = posStyles[pos];
-    l.style.zIndex = s.zIndex;
-    l.style.transform = s.transform;
-    l.style.opacity = s.opacity;
-  });
-}
-
-/* ---- Tab switching ---- */
-function switchTab(index, btn) {
-  // Pills
-  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  // Stop all cycles
-  for (let i = 0; i < 4; i++) stopCardCycle('panel-' + i);
-
-  // Panels
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  const activePanel = document.getElementById('panel-' + index);
-  activePanel.classList.add('active');
-
-  // Reset card positions for new panel
-  const layers = activePanel.querySelectorAll('.stack-layer');
-  layers.forEach((l, i) => { l.dataset.pos = i; });
-  applyPositions(layers);
-
-  // Copy
-  const d = tabData[index];
-  document.getElementById('copy-eyebrow').textContent = d.eyebrow;
-  document.getElementById('copy-heading').innerHTML = d.heading;
-  document.getElementById('copy-desc').textContent = d.desc;
-  document.getElementById('copy-bullets').innerHTML = d.bullets
-    .map(b => `<li><div class="bullet-check">✓</div>${b}</li>`).join('');
-
-  // Start cycle for new panel
-  startCardCycle('panel-' + index);
-}
-
-/* ---- Boot ---- */
-// Apply initial positions for all panels
-document.querySelectorAll('.tab-panel').forEach(panel => {
-  const layers = panel.querySelectorAll('.stack-layer');
-  applyPositions(layers);
-});
-
-// Start cycling the default (panel-0)
-startCardCycle('panel-0');
-</script>
-
-
-<!-- ==================== COMPARISON SECTION ==================== -->
+<!-- ===================== COMPARISON SECTION ===================== -->
 <section class="comparison-section">
   <div class="comparison-inner">
 
     <div class="comparison-header">
-      <span class="comp-eyebrow">COMPARISON</span>
+      <div class="comp-eyebrow">COMPARISON</div>
       <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
       <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
     </div>
 
-    <!-- TABLE -->
+    <!-- DESKTOP TABLE (hidden on mobile) -->
     <div class="comp-table-wrap">
       <table class="comp-table">
         <thead>
           <tr>
-            <!-- Feature label column -->
-            <th class="col-feature"></th>
-            <!-- Other LMS column -->
-            <th class="col-other">
-              <div class="col-other-inner">
-                <div class="other-label">Other LMS</div>
+            <th class="col-feat"></th>
+            <!-- iSkool — dark highlighted column -->
+            <th class="col-iskool">
+              <div class="th-iskool-inner">
+                <span class="iskool-badge">Best for SA Schools</span>
+                <div class="th-iskool-name">
+                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                  iSkool
+                </div>
               </div>
             </th>
-            <!-- iSkool column — highlighted -->
-            <th class="col-iskool">
-              <div class="col-iskool-inner">
-                <span class="iskool-best-badge">Best for SA Schools</span>
-                <div class="iskool-logo-row">
-                  <svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg">
-                    <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
-                      <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
-                    </g>
-                  </svg>
-                  <span class="iskool-name">iSkool</span>
-                </div>
+            <!-- Other LMS column -->
+            <th class="col-other">
+              <div class="th-other-inner">
+                <div class="th-other-label">Other LMS</div>
               </div>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="feat-label">Built for SA CAPS curriculum</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">Built for SA CAPS curriculum</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
           </tr>
           <tr>
-            <td class="feat-label">AI invigilation for quizzes</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">AI invigilation for quizzes</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
           </tr>
           <tr>
-            <td class="feat-label">Real-time learner analytics</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">Real-time learner analytics</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
           </tr>
           <tr>
-            <td class="feat-label">Automated report cards</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">Automated report cards</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
           </tr>
           <tr>
-            <td class="feat-label">Syllabus coverage tracking</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">Syllabus coverage tracking</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
           </tr>
           <tr>
-            <td class="feat-label">Free pilot for SA schools</td>
-            <td class="val-other"><span class="cross-icon">✕</span></td>
-            <td class="val-iskool"><span class="check-icon">✓</span></td>
+            <td class="feat-cell">Free pilot for SA schools</td>
+            <td class="td-iskool"><span class="ico-check">&#10003;</span></td>
+            <td class="td-other"><span class="ico-cross">&#10005;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE TABLE (shown on mobile only) -->
+    <div class="comp-mobile">
+      <table class="comp-mobile-table">
+        <thead>
+          <tr>
+            <th class="mob-th-other">
+              <div class="mob-th-other-inner">
+                <div class="mob-other-label">Other LMS</div>
+              </div>
+            </th>
+            <th class="mob-th-iskool">
+              <div class="mob-th-iskool-inner">
+                <svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                <span class="mob-iskool-label">iSkool</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for SA CAPS curriculum</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
+          </tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
+          </tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
+          </tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Automated report cards</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
+          </tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus coverage tracking</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
+          </tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot for SA schools</td></tr>
+          <tr>
+            <td class="mob-val-other"><span class="ico-cross">&#10005;</span></td>
+            <td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- CTA -->
-    <div class="comp-cta-wrap">
-      <a href="#" class="comp-cta-btn">
+    <div class="comp-cta-row">
+      <a href="#" class="comp-cta">
         Apply for Free Pilot
-        <span class="comp-cta-arrow">↗</span>
+        <span class="comp-cta-arrow">&#8599;</span>
       </a>
     </div>
 
   </div>
 </section>
 
+<script>
+const tabData = [
+  { eyebrow:"Quizzes", heading:'Run powerful quizzes with <span>AI watching over</span> every learner', desc:"Build quizzes from your question bank, launch them live to your class, and let iSkool\u2019s AI invigilator handle integrity \u2014 so you can focus on what matters: teaching.", bullets:["Live learner progress tracked question by question","Tab-switch & browser exit detection built in","Auto-marked with instant results & reports"] },
+  { eyebrow:"Grades & Reports", heading:'Capture marks and <span>generate reports</span> in seconds', desc:"No more spreadsheets. Enter marks once \u2014 iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.", bullets:["Mark entries auto-calculate class averages","Symbol assignment (A\u2013F) based on CAPS thresholds","One-click PDF report cards per learner"] },
+  { eyebrow:"Communication", heading:'Keep learners and parents <span>always in the loop</span>', desc:"Post announcements, run class discussions, and sync academic events to learner calendars \u2014 all from one place. No more WhatsApp groups.", bullets:["Targeted announcements per class or grade","Threaded discussions with teacher replies","Calendar events auto-synced to learner dashboards"] },
+  { eyebrow:"Syllabus", heading:'Stay on track with the <span>CAPS curriculum</span> all year', desc:"Map every lesson, quiz, and assignment to the CAPS syllabus. Track coverage progress across all your classes and never fall behind the curriculum again.", bullets:["Full CAPS topic mapping for Grade 10\u201312","Coverage progress tracked per class","Upload notes, videos & worksheets per topic"] }
+];
+
+let cycleTimers = {};
+
+function applyPositions(layers) {
+  const s = [
+    {zIndex:3, transform:'translateY(0px) scale(1)', opacity:'1'},
+    {zIndex:2, transform:'translateY(56px) scale(0.95)', opacity:'0.72'},
+    {zIndex:1, transform:'translateY(104px) scale(0.905)', opacity:'0.42'}
+  ];
+  layers.forEach(l => { const p = parseInt(l.dataset.pos); l.style.zIndex=s[p].zIndex; l.style.transform=s[p].transform; l.style.opacity=s[p].opacity; });
+}
+
+function startCardCycle(id) {
+  stopCardCycle(id);
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  const layers = panel.querySelectorAll('.stack-layer');
+  if (layers.length < 2) return;
+  cycleTimers[id] = setInterval(() => {
+    const np = Array.from(layers).map(l => (parseInt(l.dataset.pos) + layers.length - 1) % layers.length);
+    layers.forEach((l,i) => { l.dataset.pos = np[i]; });
+    applyPositions(layers);
+  }, 2200);
+}
+
+function stopCardCycle(id) {
+  if (cycleTimers[id]) { clearInterval(cycleTimers[id]); delete cycleTimers[id]; }
+}
+
+function switchTab(index, btn) {
+  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  for (let i=0;i<4;i++) stopCardCycle('panel-'+i);
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const ap = document.getElementById('panel-'+index);
+  ap.classList.add('active');
+  const layers = ap.querySelectorAll('.stack-layer');
+  layers.forEach((l,i) => { l.dataset.pos=i; });
+  applyPositions(layers);
+  const d = tabData[index];
+  document.getElementById('copy-eyebrow').textContent = d.eyebrow;
+  document.getElementById('copy-heading').innerHTML = d.heading;
+  document.getElementById('copy-desc').textContent = d.desc;
+  document.getElementById('copy-bullets').innerHTML = d.bullets.map(b => '<li><div class="bullet-check">&#10003;</div>'+b+'</li>').join('');
+  startCardCycle('panel-'+index);
+}
+
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelectorAll('.stack-layer')));
+startCardCycle('panel-0');
+</script>
+
+<!-- ===================== SOCIAL PROOF SECTION ===================== -->
 <style>
-/* ==================== COMPARISON SECTION ==================== */
-.comparison-section {
-  background: #ffffff;
-  padding: 100px 5%;
+.proof-section {
+  background: #ece8e0;
+  padding: 100px 0 110px;
+  overflow: hidden;
 }
-
-.comparison-inner {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.comparison-header {
+.proof-inner {
   text-align: center;
-  margin-bottom: 56px;
+  padding: 0 5%;
+  margin-bottom: 48px;
 }
-
-.comp-eyebrow {
+.proof-eyebrow {
   display: inline-block;
   font-size: 11px;
   font-weight: 700;
@@ -1043,206 +880,481 @@ startCardCycle('panel-0');
   color: var(--gold);
   margin-bottom: 14px;
 }
-
-.comp-heading {
+.proof-heading {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: clamp(32px, 5vw, 58px);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -2px;
   color: #111;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
-
-.comp-sub {
-  font-size: 17px;
+.proof-sub {
+  font-size: 16px;
   color: #666;
-  max-width: 520px;
-  margin: 0 auto;
-  line-height: 1.65;
+  margin-bottom: 32px;
 }
 
-/* Table wrapper */
-.comp-table-wrap {
-  overflow: visible;
-}
-
-.comp-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-/* Column widths */
-.col-feature  { width: 50%; }
-.col-other    { width: 22%; }
-.col-iskool   { width: 28%; }
-
-/* Header cells */
-.comp-table thead th {
-  padding-bottom: 0;
-  vertical-align: bottom;
-  border: none;
-}
-
-/* Other LMS header */
-.col-other-inner {
+/* Filter pills */
+.proof-filters {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 16px;
-}
-
-.other-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #888;
-  margin-top: 8px;
-}
-
-/* iSkool header — dark card */
-.col-iskool-inner {
-  background: #111;
-  border-radius: 16px 16px 0 0;
-  padding: 18px 16px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
-
-.iskool-best-badge {
-  background: var(--gold);
-  color: #111;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 12px;
+.proof-filter {
+  padding: 11px 26px;
   border-radius: 999px;
-  white-space: nowrap;
-}
-
-.iskool-logo-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.iskool-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 800;
-  color: #fff;
-}
-
-/* Body rows */
-.comp-table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.comp-table tbody tr:first-child td {
-  padding-top: 20px;
-}
-
-.feat-label {
-  padding: 16px 0;
-  font-size: 15px;
-  color: #333;
-  font-weight: 400;
-}
-
-/* Other column value cell */
-.val-other {
-  text-align: center;
-  padding: 16px 8px;
-}
-
-/* iSkool column value cell — continues dark card */
-.val-iskool {
-  background: #111;
-  text-align: center;
-  padding: 14px 8px;
-}
-
-/* Last row rounds the bottom of the dark card */
-.comp-table tbody tr:last-child .val-iskool {
-  border-radius: 0 0 16px 16px;
-}
-
-/* Icons */
-.check-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: rgba(0,196,122,0.15);
-  border: 2px solid #00c47a;
-  border-radius: 50%;
-  color: #00c47a;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.cross-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  color: #bbb;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-/* CTA */
-.comp-cta-wrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 48px;
-}
-
-.comp-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--gold);
+  border: 2px solid #ccc;
+  background: white;
   color: #111;
   font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  padding: 18px 36px;
-  border-radius: 999px;
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.comp-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 36px rgba(245,200,66,0.45);
+.proof-filter.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
 }
 
-.comp-cta-arrow {
-  width: 34px;
-  height: 34px;
-  background: rgba(0,0,0,0.12);
-  border-radius: 50%;
+/* ---- SCROLLING TRACK (desktop auto-scroll) ---- */
+.proof-track-outer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 48px;
+  /* fade edges */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.proof-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: scrollLeft 32s linear infinite;
+  cursor: grab;
+  user-select: none;
+}
+.proof-track:hover { animation-play-state: paused; }
+.proof-track.dragging { animation-play-state: paused; cursor: grabbing; }
+
+@keyframes scrollLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ---- Phone mockup card ---- */
+.phone-card {
+  flex-shrink: 0;
+  width: 220px;
+  height: 380px;
+  border-radius: 36px;
+  background: #1a1a1a;
+  border: 3px solid #2a2a2a;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+.phone-card:hover { transform: scale(1.04); }
+
+/* notch */
+.phone-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 8px;
+  background: #000;
+  border-radius: 999px;
+  z-index: 10;
+}
+
+/* inner content area */
+.phone-screen {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  overflow: hidden;
+  background: #2a2a2a;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
 }
 
-/* Mobile comparison */
-@media (max-width: 600px) {
-  .comparison-section { padding: 72px 5%; }
-  .comp-heading { letter-spacing: -1px; }
-  .col-feature { width: 44%; }
-  .col-other   { width: 24%; }
-  .col-iskool  { width: 32%; }
-  .feat-label  { font-size: 13px; }
-  .comp-cta-btn { width: 100%; justify-content: center; font-size: 16px; padding: 16px 24px; }
+/* gradient overlay at bottom */
+.phone-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+  z-index: 2;
+  border-radius: 0 0 34px 34px;
+}
+
+/* play button */
+.phone-play {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px; height: 54px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5;
+  font-size: 18px;
+  color: #111;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.5);
+}
+
+/* niche badge */
+.phone-niche {
+  position: absolute;
+  bottom: 56px; left: 16px;
+  background: var(--gold);
+  color: #111;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+  z-index: 6;
+}
+
+/* view count */
+.phone-views {
+  position: absolute;
+  bottom: 20px; left: 16px;
+  z-index: 6;
+  color: white;
+}
+.phone-views-count {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.phone-views-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  display: inline;
+  margin-left: 4px;
+}
+.phone-views-handle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+
+/* placeholder graphic inside empty phone */
+.phone-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #2a2a2a 0%, #1a1a1a 100%);
+}
+.phone-placeholder-icon {
+  font-size: 40px;
+  opacity: 0.15;
+}
+
+/* ---- MOBILE: touch-scrollable, static (no auto-scroll) ---- */
+.proof-track-mobile {
+  display: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 5% 12px;
+  margin-top: 40px;
+}
+.proof-track-mobile::-webkit-scrollbar { display: none; }
+.proof-track-mobile-inner {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  padding: 8px 0;
+}
+/* center phone on mobile is taller */
+.phone-card-mob {
+  flex-shrink: 0;
+  width: 200px;
+  height: 350px;
+  border-radius: 32px;
+  background: #1a1a1a;
+  border: 3px solid #2a2a2a;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+.phone-card-mob::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 50%;
+  transform: translateX(-50%);
+  width: 55px; height: 7px;
+  background: #000;
+  border-radius: 999px;
+  z-index: 10;
+}
+/* make one card bigger on mobile like the reference */
+.phone-card-mob.featured {
+  width: 240px;
+  height: 420px;
+  border-radius: 36px;
+}
+
+@media (max-width: 768px) {
+  .proof-track-outer { display: none; }
+  .proof-track-mobile { display: block; }
+  .proof-section { padding: 72px 0 80px; }
+  .proof-heading { letter-spacing: -1px; }
 }
 </style>
 
+<section class="proof-section">
+  <div class="proof-inner">
+    <div class="proof-eyebrow">REAL RESULTS</div>
+    <h2 class="proof-heading">Wins Across Every School</h2>
+    <p class="proof-sub">Real results from real schools. See iSkool in action.</p>
+    <div class="proof-filters">
+      <button class="proof-filter active" onclick="setFilter('all', this)">All</button>
+      <button class="proof-filter" onclick="setFilter('teachers', this)">Teachers</button>
+      <button class="proof-filter" onclick="setFilter('learners', this)">Learners</button>
+    </div>
+  </div>
+
+  <!-- DESKTOP: auto-scroll (no interaction needed) -->
+  <div class="proof-track-outer" id="proofTrackOuter">
+    <div class="proof-track" id="proofTrack">
+      <!-- Cards duplicated for seamless loop (8 cards × 2 = 16 total) -->
+
+      <!-- Card 1 -->
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Maths</div>
+        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
+      </div>
+      <!-- Card 2 -->
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">English</div>
+        <div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div>
+      </div>
+      <!-- Card 3 -->
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Analytics</div>
+        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
+      </div>
+      <!-- Card 4 -->
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Science</div>
+        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
+      </div>
+      <!-- Card 5 -->
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Integrity</div>
+        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
+      </div>
+      <!-- Card 6 -->
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Top Learner</div>
+        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
+      </div>
+      <!-- Card 7 -->
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Syllabus</div>
+        <div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div>
+      </div>
+      <!-- Card 8 -->
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Discussion</div>
+        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
+      </div>
+
+      <!-- DUPLICATE SET for seamless loop -->
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Maths</div>
+        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
+      </div>
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">English</div>
+        <div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div>
+      </div>
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Analytics</div>
+        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
+      </div>
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Science</div>
+        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
+      </div>
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Integrity</div>
+        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
+      </div>
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Top Learner</div>
+        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
+      </div>
+      <div class="phone-card" data-cat="teachers">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Syllabus</div>
+        <div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div>
+      </div>
+      <div class="phone-card" data-cat="learners">
+        <div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Discussion</div>
+        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE: touch scroll only -->
+  <div class="proof-track-mobile" id="proofTrackMobile">
+    <div class="proof-track-mobile-inner">
+      <div class="phone-card-mob" data-cat="teachers">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🧑‍🏫</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
+        <div class="phone-niche">Maths</div>
+        <div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div>
+      </div>
+      <div class="phone-card-mob featured" data-cat="learners">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:34px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:48px;opacity:0.15;">🏆</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play">&#9654;</div>
+        <div class="phone-niche">Top Learner</div>
+        <div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div>
+      </div>
+      <div class="phone-card-mob" data-cat="teachers">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">📊</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
+        <div class="phone-niche">Analytics</div>
+        <div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div>
+      </div>
+      <div class="phone-card-mob" data-cat="learners">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">✏️</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
+        <div class="phone-niche">Science</div>
+        <div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div>
+      </div>
+      <div class="phone-card-mob" data-cat="teachers">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🛡️</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
+        <div class="phone-niche">Integrity</div>
+        <div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div>
+      </div>
+      <div class="phone-card-mob" data-cat="learners">
+        <div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">💬</div></div>
+        <div class="phone-overlay"></div>
+        <div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div>
+        <div class="phone-niche">Discussion</div>
+        <div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ---- Filter logic: show/hide cards by category ---- */
+function setFilter(cat, btn) {
+  document.querySelectorAll('.proof-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Desktop cards
+  document.querySelectorAll('#proofTrack .phone-card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+    } else {
+      card.style.opacity = '0.25';
+      card.style.pointerEvents = 'none';
+    }
+  });
+  // Mobile cards
+  document.querySelectorAll('#proofTrackMobile .phone-card-mob').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.style.opacity = '1';
+    } else {
+      card.style.opacity = '0.25';
+    }
+  });
+}
+
+/* ---- Desktop: pause on hover already handled by CSS :hover ---- */
+/* ---- Desktop: drag to scrub (optional feel) ---- */
+(function() {
+  const track = document.getElementById('proofTrack');
+  if (!track) return;
+  let isDown = false, startX, scrollLeft;
+
+  track.addEventListener('mousedown', e => {
+    isDown = true;
+    track.classList.add('dragging');
+    startX = e.pageX - track.getBoundingClientRect().left;
+  });
+  document.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
+  track.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+  });
+})();
+</script>
 </body>
 </html>
