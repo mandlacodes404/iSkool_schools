@@ -19,17 +19,14 @@
 body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #111; line-height: 1.6; }
 
 /* NAV */
-
 nav {
-  position: relative;        /* Changed from fixed */
-  background: rgba(255,255,255,0.95); 
+  position: relative;
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #eee; 
+  border-bottom: 1px solid #eee;
   padding: 14px 5%;
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between;
-  z-index: 100;              /* Lowered a bit since it's no longer fixed */
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 100;
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -46,19 +43,14 @@ nav {
 .nav-pilot:hover { background: #333; }
 .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
 .nav-hamburger span { display: block; width: 24px; height: 2px; background: #111; border-radius: 2px; }
-.mobile-menu { 
-  display: none; 
-  position: absolute;   /* Changed from fixed */
-  top: 100%;            /* Position right below the nav */
-  left: 0; 
-  right: 0; 
-  background: white; 
-  border-bottom: 1px solid #eee; 
-  padding: 20px 5%; 
-  z-index: 999; 
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08); 
+.mobile-menu {
+  display: none;
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: white; border-bottom: 1px solid #eee;
+  padding: 20px 5%; z-index: 999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
-.mobile-menu.open { display: flex; }
+.mobile-menu.open { display: flex; flex-direction: column; }
 .mobile-menu a, .mobile-menu button { text-decoration: none; color: #333; font-weight: 500; font-size: 16px; padding: 14px 0; border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: left; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: block; width: 100%; }
 .mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
@@ -80,16 +72,16 @@ nav {
 .btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
 .play-icon { width: 20px; height: 20px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; }
 
-/* PILL NOTCH */
+/* ═══════════════════════════
+   ARROW PILL SWITCHER
+═══════════════════════════ */
 .pill-bridge {
-/* PILL NOTCH WRAPPER */
   position: relative;
   background: #fff;
   z-index: 10;
   overflow: visible;
 }
 
-/* The notch: white background with the dark arch cutout at bottom */
 .pill-notch {
   position: relative;
   background: #fff;
@@ -100,20 +92,15 @@ nav {
   z-index: 10;
 }
 
-/* SVG notch shape sitting below the pill */
 .notch-shape {
   position: relative;
   width: 100%;
   line-height: 0;
   background: #fff;
 }
+.notch-shape svg { display: block; width: 100%; height: auto; }
 
-.notch-shape svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
+/* The arrow pill switcher */
 .pill-switcher {
   position: relative;
   z-index: 20;
@@ -123,16 +110,78 @@ nav {
   border: 1px solid #e0e0e0;
   border-radius: 999px;
   padding: 5px;
-  gap: 2px;
+  gap: 4px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  white-space: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  user-select: none;
 }
-.pill-switcher::-webkit-scrollbar { display: none; }
-.pill-btn { padding: 11px 20px; border-radius: 999px; border: none; background: transparent; color: #555; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; }
-.pill-btn.active { background: #111; color: #fff; }
+
+.pill-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+  line-height: 1;
+}
+.pill-arrow:hover {
+  background: #111;
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.pill-arrow:active { transform: scale(0.96); }
+
+.pill-label-wrap {
+  min-width: 160px;
+  text-align: center;
+  position: relative;
+  height: 36px;
+  overflow: hidden;
+}
+
+.pill-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  background: white;
+  border-radius: 999px;
+  padding: 0 18px;
+  white-space: nowrap;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.pill-label.exit-left  { opacity: 0; transform: translateX(-24px); pointer-events: none; }
+.pill-label.exit-right { opacity: 0; transform: translateX(24px);  pointer-events: none; }
+.pill-label.enter-left  { opacity: 0; transform: translateX(24px);  pointer-events: none; }
+.pill-label.enter-right { opacity: 0; transform: translateX(-24px); pointer-events: none; }
+
+/* dots indicator */
+.pill-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 20;
+}
+.pill-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  transition: background 0.25s, transform 0.25s;
+}
+.pill-dot.active { background: #111; transform: scale(1.3); }
 
 /* DARK SECTION */
 .feature-section { background: var(--dark); padding: 40px 5% 100px; }
@@ -145,26 +194,84 @@ nav {
 .stack-layer[data-pos="1"] { z-index: 2; transform: translateY(56px) scale(0.95); opacity: 0.72; }
 .stack-layer[data-pos="2"] { z-index: 1; transform: translateY(104px) scale(0.905); opacity: 0.42; }
 
-/* DEMO CARDS */
-.demo-card { background: white; color: #111; border-radius: 20px; padding: 26px; box-shadow: 0 25px 70px rgba(0,0,0,0.45); position: relative; overflow: hidden; font-family: 'DM Sans', sans-serif; line-height: 1.6; }
+/* DEMO CARDS — fixed min-height so all panels are same height */
+.demo-card {
+  background: white; color: #111; border-radius: 20px; padding: 26px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+  position: relative; overflow: hidden;
+  font-family: 'DM Sans', sans-serif; line-height: 1.6;
+  min-height: 260px;
+}
 .demo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+
 .card-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 16px; }
-.badge-quiz { background: rgba(79,124,255,0.12); color: #4f7cff; }
-.badge-analytics { background: rgba(245,200,66,0.12); color: #d4a800; }
+.badge-quiz      { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.badge-assign    { background: rgba(249,115,22,0.12); color: #f97316; }
 .badge-integrity { background: rgba(0,229,160,0.12); color: #00c47a; }
-.badge-discussion { background: rgba(249,115,22,0.12); color: #f97316; }
-.badge-calendar { background: rgba(79,209,197,0.12); color: #4fd1c5; }
+.badge-grade     { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.badge-analytics { background: rgba(245,200,66,0.12); color: #d4a800; }
+.badge-resources { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.badge-discussion{ background: rgba(249,115,22,0.12); color: #f97316; }
+.badge-announce  { background: rgba(248,81,73,0.12); color: #f85149; }
+.badge-calendar  { background: rgba(79,209,197,0.12); color: #4fd1c5; }
+
 .card-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; line-height: 1.15; }
-.card-sub { font-size: 13px; color: #666; margin-bottom: 18px; }
+.card-sub   { font-size: 13px; color: #666; margin-bottom: 18px; }
+
 .table-mini { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
 .table-mini th { text-align: left; padding: 9px 8px; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
 .table-mini td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
 .percent-badge { padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; color: white; }
-.progress-bar { height: 8px; background: #eee; border-radius: 999px; overflow: hidden; margin: 12px 0; }
+.progress-bar  { height: 8px; background: #eee; border-radius: 999px; overflow: hidden; margin: 12px 0; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; }
-.topic-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f4f4f4; font-size: 14px; color: #111; }
+.topic-item    { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f4f4f4; font-size: 14px; color: #111; }
 .topic-item:last-child { border-bottom: none; }
-.announcement { background: #f8f9fc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--teal); }
+.announcement  { background: #f8f9fc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--teal); }
+
+.row-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f4f4f4; font-size: 13.5px; }
+.row-item:last-child { border-bottom: none; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.chip-green  { background: rgba(0,196,122,0.1); color: #00c47a; }
+.chip-orange { background: rgba(249,115,22,0.1); color: var(--orange); }
+.chip-red    { background: rgba(248,81,73,0.1); color: var(--red); }
+.chip-blue   { background: rgba(79,124,255,0.1); color: var(--blue); }
+.chip-teal   { background: rgba(79,209,197,0.1); color: var(--teal); }
+.chip-gold   { background: rgba(245,200,66,0.1); color: #c89a00; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.dot-green  { background: #00c47a; box-shadow: 0 0 6px #00c47a88; animation: dotBlink 1.6s infinite; }
+.dot-orange { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.6); }
+.dot-red    { background: var(--red); box-shadow: 0 0 5px rgba(248,81,73,0.6); }
+@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.mini-bar-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.mini-bar-label{ font-size: 11.5px; color: #777; width: 56px; flex-shrink: 0; }
+.mini-bar-track{ flex: 1; height: 7px; background: #eee; border-radius: 999px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 999px; }
+.fill-teal  { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.fill-gold  { background: var(--gold); }
+.fill-orange{ background: var(--orange); }
+.fill-soft  { background: rgba(79,209,197,0.45); }
+.mini-bar-val { font-size: 11px; color: #888; width: 28px; text-align: right; }
+
+.stat-pill { display: flex; align-items: center; justify-content: center; flex-direction: column; background: #f8f9fc; border-radius: 14px; padding: 14px; text-align: center; }
+.stat-val   { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-label { font-size: 11.5px; color: #888; margin-top: 3px; }
+
+.inv-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; margin-bottom: 7px; background: rgba(0,0,0,0.02); border: 1px solid #f0f0f0; font-size: 13.5px; }
+.inv-row.flagged { background: rgba(249,115,22,0.07); border-color: rgba(249,115,22,0.2); animation: pulseOrange 2s infinite; }
+.inv-row.exited  { background: rgba(248,81,73,0.07); border-color: rgba(248,81,73,0.2); animation: pulseRed 2.4s infinite; }
+@keyframes pulseOrange { 0%,100%{background:rgba(249,115,22,0.07)} 50%{background:rgba(249,115,22,0.14)} }
+@keyframes pulseRed    { 0%,100%{background:rgba(248,81,73,0.07)}  50%{background:rgba(248,81,73,0.14)} }
+.inv-name   { flex: 1; color: #111; }
+.inv-status { font-size: 11.5px; font-weight: 600; }
+.inv-status.ok   { color: #aaa; }
+.inv-status.warn { color: var(--orange); }
+.inv-status.bad  { color: var(--red); }
+.live-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #888; margin-bottom: 12px; }
+.live-dot   { width: 7px; height: 7px; border-radius: 50%; background: #00c47a; animation: livePulse 1.4s infinite; }
+@keyframes livePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.4} }
+
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
@@ -196,15 +303,14 @@ nav {
   .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
   .hero-buttons { flex-direction: column; align-items: center; }
   .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
-  .pill-bridge { justify-content: flex-start; padding-left: 5%; padding-right: 5%; }
-  .pill-switcher { bottom: -20px; }
-  .pill-btn { padding: 10px 14px; font-size: 12px; }
+  .pill-label-wrap { min-width: 120px; }
+  .pill-arrow { width: 32px; height: 32px; font-size: 14px; }
   .feature-section { padding: 60px 5% 130px; }
   .feature-inner { gap: 36px; padding-top: 32px; }
   .stack-wrapper { height: 290px; }
   .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
   .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
-  .demo-card { padding: 18px; }
+  .demo-card { padding: 18px; min-height: 220px; }
   .card-title { font-size: 16px; }
   .feature-copy h3 { font-size: 26px; }
   .feature-copy p { font-size: 15px; }
@@ -215,293 +321,92 @@ nav {
 /* ═══════════════════════════
    FEATURES SECTION (AI Invigilator + Analytics)
 ═══════════════════════════ */
-.features-section {
-  background: #08080c;
-  padding: 100px 0 120px;
-}
-
-.features-header {
-  text-align: center;
-  padding: 0 5% 72px;
-  max-width: 700px;
-  margin: 0 auto;
-}
-.feat-eyebrow {
-  display: inline-block;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--teal); margin-bottom: 16px;
-}
-.features-header h2 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 4.5vw, 56px);
-  font-weight: 800; line-height: 1.08;
-  letter-spacing: -2px; margin-bottom: 14px;
-}
+.features-section { background: #08080c; padding: 100px 0 120px; }
+.features-header { text-align: center; padding: 0 5% 72px; max-width: 700px; margin: 0 auto; }
+.feat-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+.features-header h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 14px; }
 .features-header h2 span { color: var(--gold); }
-.features-header p {
-  color: rgba(255,255,255,0.4);
-  font-size: 17px; line-height: 1.7;
-}
-
-.feat-row {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 0 5% 100px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 72px;
-  align-items: center;
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 0.85s ease, transform 0.85s ease;
-}
+.features-header p { color: rgba(255,255,255,0.4); font-size: 17px; line-height: 1.7; }
+.feat-row { max-width: 1160px; margin: 0 auto; padding: 0 5% 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; opacity: 0; transform: translateY(50px); transition: opacity 0.85s ease, transform 0.85s ease; }
 .feat-row.visible { opacity:1; transform:translateY(0); }
 .feat-row.reverse { direction: rtl; }
 .feat-row.reverse > * { direction: ltr; }
-
-.feat-copy-eyebrow {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  margin-bottom: 18px;
-}
+.feat-copy-eyebrow { display: flex; align-items: center; gap: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px; }
 .feat-copy-eyebrow.teal { color: var(--teal); }
 .feat-copy-eyebrow.gold { color: var(--gold); }
-.eyebrow-line {
-  display: inline-block;
-  width: 28px; height: 2px; border-radius: 999px; flex-shrink: 0;
-}
+.eyebrow-line { display: inline-block; width: 28px; height: 2px; border-radius: 999px; flex-shrink: 0; }
 .teal .eyebrow-line { background: var(--teal); }
 .gold .eyebrow-line { background: var(--gold); }
-
-.feat-copy h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(26px, 3vw, 40px);
-  font-weight: 800; line-height: 1.1;
-  letter-spacing: -1.2px; margin-bottom: 18px;
-}
+.feat-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 3vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 18px; }
 .feat-copy h3 em { font-style: normal; }
 .feat-copy h3 em.teal { color: var(--teal); }
 .feat-copy h3 em.gold { color: var(--gold); }
-
-.feat-copy p {
-  font-size: 15.5px; color: rgba(255,255,255,0.45);
-  line-height: 1.78; margin-bottom: 28px;
-  max-width: 440px;
-}
-
-.feat-bullets {
-  display: flex; flex-direction: column;
-  gap: 13px; margin-bottom: 36px;
-}
-.feat-bullet {
-  display: flex; align-items: flex-start;
-  gap: 12px; font-size: 14.5px;
-  color: rgba(255,255,255,0.72);
-}
-.bullet-dot {
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; flex-shrink: 0; margin-top: 1px;
-}
-.bullet-dot.teal {
-  background: rgba(79,209,197,0.15);
-  border: 1px solid rgba(79,209,197,0.35);
-  color: var(--teal);
-}
-.bullet-dot.gold {
-  background: rgba(245,200,66,0.15);
-  border: 1px solid rgba(245,200,66,0.35);
-  color: var(--gold);
-}
-
-.feat-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 28px; border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px; font-weight: 700;
-  text-decoration: none; border: none; cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+.feat-copy p { font-size: 15.5px; color: rgba(255,255,255,0.45); line-height: 1.78; margin-bottom: 28px; max-width: 440px; }
+.feat-bullets { display: flex; flex-direction: column; gap: 13px; margin-bottom: 36px; }
+.feat-bullet { display: flex; align-items: flex-start; gap: 12px; font-size: 14.5px; color: rgba(255,255,255,0.72); }
+.bullet-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+.bullet-dot.teal { background: rgba(79,209,197,0.15); border: 1px solid rgba(79,209,197,0.35); color: var(--teal); }
+.bullet-dot.gold { background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.35); color: var(--gold); }
+.feat-cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
 .feat-cta:hover { transform: translateY(-2px); }
-.feat-cta.teal {
-  background: var(--teal); color: #061a18;
-  box-shadow: 0 4px 24px rgba(79,209,197,0.3);
-}
+.feat-cta.teal { background: var(--teal); color: #061a18; box-shadow: 0 4px 24px rgba(79,209,197,0.3); }
 .feat-cta.teal:hover { box-shadow: 0 8px 36px rgba(79,209,197,0.45); }
-.feat-cta.gold {
-  background: var(--gold); color: #1a1100;
-  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
-}
+.feat-cta.gold { background: var(--gold); color: #1a1100; box-shadow: 0 4px 24px rgba(245,200,66,0.3); }
 .feat-cta.gold:hover { box-shadow: 0 8px 36px rgba(245,200,66,0.45); }
-
 .feat-mockup-wrap { position: relative; }
-
-.feat-float {
-  position: absolute;
-  bottom: -22px; right: -18px;
-  background: #1c1c26;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 14px 20px;
-  box-shadow: 0 20px 56px rgba(0,0,0,0.55);
-  min-width: 150px;
-  animation: floatBob 4s ease-in-out infinite;
-  z-index: 10;
-}
-@keyframes floatBob {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
-}
-.float-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 24px; font-weight: 800;
-}
+.feat-float { position: absolute; bottom: -22px; right: -18px; background: #1c1c26; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 20px; box-shadow: 0 20px 56px rgba(0,0,0,0.55); min-width: 150px; animation: floatBob 4s ease-in-out infinite; z-index: 10; }
+@keyframes floatBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
 .float-val.teal { color: var(--teal); }
 .float-val.gold { color: var(--gold); }
-.float-label {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  margin-top: 3px;
-}
-
-.mock-panel {
-  background: #13131a;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-}
-.mock-topbar {
-  background: #0d0d14;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding: 12px 16px;
-  display: flex; align-items: center; gap: 10px;
-}
+.float-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.mock-panel { background: #13131a; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
+.mock-topbar { background: #0d0d14; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
 .mock-dots { display: flex; gap: 6px; }
-.mock-dot  { width: 10px; height: 10px; border-radius: 50%; }
-.mock-topbar-title {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  margin-left: 8px;
-}
+.mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mock-topbar-title { font-size: 11px; color: rgba(255,255,255,0.3); margin-left: 8px; }
 .mock-body { padding: 20px; }
-
-.inv-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border-radius: 10px;
-  margin-bottom: 8px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.inv-row.flagged {
-  background: rgba(249,115,22,0.08);
-  border-color: rgba(249,115,22,0.25);
-  animation: pulseRow 2s ease-in-out infinite;
-}
-.inv-row.exited {
-  background: rgba(248,81,73,0.07);
-  border-color: rgba(248,81,73,0.2);
-  animation: pulseRowRed 2.4s ease-in-out infinite;
-}
+.inv-row2 { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+.inv-row2.flagged { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.25); animation: pulseRow 2s ease-in-out infinite; }
+.inv-row2.exited { background: rgba(248,81,73,0.07); border-color: rgba(248,81,73,0.2); animation: pulseRowRed 2.4s ease-in-out infinite; }
 @keyframes pulseRow    { 0%,100%{background:rgba(249,115,22,0.08);} 50%{background:rgba(249,115,22,0.16);} }
 @keyframes pulseRowRed { 0%,100%{background:rgba(248,81,73,0.07);} 50%{background:rgba(248,81,73,0.14);} }
-
 .inv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .inv-dot.green  { background: #00c47a; box-shadow: 0 0 6px #00c47a88; animation: dotBlink 1.6s ease-in-out infinite; }
 .inv-dot.orange { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.6); }
 .inv-dot.red    { background: #f85149; box-shadow: 0 0 5px rgba(248,81,73,0.6); }
-@keyframes dotBlink { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
-
-.inv-name   { font-size: 13.5px; color: rgba(255,255,255,0.85); flex: 1; }
-.inv-status { font-size: 11.5px; font-weight: 600; }
-.inv-status.ok   { color: rgba(255,255,255,0.3); }
-.inv-status.warn { color: var(--orange); }
-.inv-status.bad  { color: #f85149; }
-
-.inv-summary {
-  margin-top: 16px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-}
-.inv-stat {
-  background: rgba(255,255,255,0.04);
-  border-radius: 10px; padding: 12px;
-  text-align: center;
-}
-.inv-stat-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 800;
-}
+.inv-name2  { font-size: 13.5px; color: rgba(255,255,255,0.85); flex: 1; }
+.inv-status2{ font-size: 11.5px; font-weight: 600; }
+.inv-status2.ok   { color: rgba(255,255,255,0.3); }
+.inv-status2.warn { color: var(--orange); }
+.inv-status2.bad  { color: #f85149; }
+.inv-summary { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.inv-stat { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; text-align: center; }
+.inv-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
 .inv-stat-val.teal   { color: var(--teal); }
 .inv-stat-val.orange { color: var(--orange); }
 .inv-stat-val.red    { color: #f85149; }
-.inv-stat-label {
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
-  margin-top: 3px;
-}
-
-.live-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 10.5px; color: rgba(255,255,255,0.35);
-  margin-bottom: 14px;
-}
-.live-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #00c47a;
-  animation: livePulse 1.4s ease-in-out infinite;
-}
-@keyframes livePulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.5;} }
-
-.analytics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-.anal-stat {
-  background: rgba(255,255,255,0.04);
-  border-radius: 10px; padding: 14px;
-  text-align: center;
-}
-.anal-stat-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 30px; font-weight: 800;
-}
+.inv-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+.live-badge2 { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+.live-dot2 { width: 7px; height: 7px; border-radius: 50%; background: #00c47a; animation: livePulse 1.4s ease-in-out infinite; }
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.anal-stat { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 14px; text-align: center; }
+.anal-stat-val { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; }
 .anal-stat-val.teal { color: var(--teal); }
 .anal-stat-val.gold { color: var(--gold); }
-.anal-stat-sub  { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+.anal-stat-sub   { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
 .anal-stat-trend { font-size: 10px; font-weight: 700; margin-top: 3px; color: #00c47a; }
-
 .bar-chart { display: flex; flex-direction: column; gap: 9px; }
 .bar-row   { display: flex; align-items: center; gap: 10px; }
 .bar-label { font-size: 11.5px; color: rgba(255,255,255,0.4); width: 62px; flex-shrink: 0; }
-.bar-track {
-  flex: 1; height: 7px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 999px; overflow: hidden;
-}
-.bar-fill  {
-  height: 100%; border-radius: 999px;
-  width: 0;
-  transition: width 1.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
+.bar-track { flex: 1; height: 7px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 999px; width: 0; transition: width 1.4s cubic-bezier(0.25, 1, 0.5, 1); }
 .bar-fill.teal   { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
 .bar-fill.gold   { background: var(--gold); }
 .bar-fill.orange { background: var(--orange); }
 .bar-fill.soft   { background: rgba(79,209,197,0.45); }
 .bar-val { font-size: 11.5px; color: rgba(255,255,255,0.45); width: 32px; text-align: right; }
-
-.feat-divider {
-  width: 100%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-  max-width: 1160px; margin: 0 auto 80px;
-  padding: 0 5%;
-}
-
+.feat-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent); max-width: 1160px; margin: 0 auto 80px; padding: 0 5%; }
 @media (max-width: 900px) {
   .feat-row { grid-template-columns: 1fr; gap: 48px; }
   .feat-row.reverse { direction: ltr; }
@@ -564,32 +469,25 @@ nav {
   </div>
 </section>
 
-<!-- NOTCH SECTION — matches image 1 exactly -->
-<!--
-  Structure:
-  - White strip at bottom of hero (pill lives here, centered)
-  - Dark section has a white pill-shaped cutout at top center
-  - Achieved with: dark bg full width, two dark rounded blocks on left+right
-    with the center left as white, pill floats on top
--->
+<!-- PILL BRIDGE -->
 <div style="position:relative; background:#ffffff; padding: 28px 0 0; z-index:5;">
 
-  <!-- The pill centered on white -->
-  <div style="display:flex; justify-content:center; position:relative; z-index:20;">
+  <!-- Arrow Pill Switcher -->
+  <div style="display:flex; flex-direction:column; align-items:center; position:relative; z-index:20; gap:10px;">
     <div class="pill-switcher">
-      <button class="pill-btn active" onclick="switchTab(0, this)">Run Quizzes</button>
-      <button class="pill-btn" onclick="switchTab(1, this)">Grades &amp; Reports</button>
-      <button class="pill-btn" onclick="switchTab(2, this)">Communication</button>
-      <button class="pill-btn" onclick="switchTab(3, this)">Syllabus</button>
+      <button class="pill-arrow" id="pill-prev" onclick="switchFeature(-1)" aria-label="Previous feature">&#8592;</button>
+      <div class="pill-label-wrap">
+        <div class="pill-label" id="pill-label">Quizzes</div>
+      </div>
+      <button class="pill-arrow" id="pill-next" onclick="switchFeature(1)" aria-label="Next feature">&#8594;</button>
     </div>
+    <!-- Dot indicators -->
+    <div class="pill-dots" id="pill-dots"></div>
   </div>
 
-  <!-- Dark layer below the pill with notch carved out -->
-  <!-- Full-width dark bar, but the center has a white rounded-top cutout -->
+  <!-- Dark notch below pill -->
   <div style="position:relative; height:44px; margin-top:8px;">
-    <!-- Dark full width base -->
     <div style="position:absolute; inset:0; background:#0f0f12;"></div>
-    <!-- White notch cutout: centered, rounded top corners only -->
     <div style="
       position:absolute;
       top:0; left:50%; transform:translateX(-50%);
@@ -606,22 +504,23 @@ nav {
 <section class="feature-section">
   <div class="feature-inner">
     <div>
-      <!-- TAB 0 -->
+
+      <!-- ── QUIZZES ── -->
       <div class="tab-panel active" id="panel-0">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">&#128221; Quizzes</div>
-              <div class="card-title">Term 2 &mdash; Live Quizzes</div>
-              <div class="card-sub">2025 Academic Year</div>
-              <div style="background:#f8f9fc;padding:16px;border-radius:12px;margin-bottom:12px;">
+              <div class="card-badge badge-quiz">📋 Quizzes</div>
+              <div class="card-title">Term 2 — Live Quizzes</div>
+              <div class="card-sub">2 open · 1 upcoming</div>
+              <div style="background:#f8f9fc;padding:14px;border-radius:12px;margin-bottom:10px;">
                 <div style="display:flex;justify-content:space-between;align-items:start;">
-                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A &bull; Maths &bull; 15 questions</small></div>
+                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A · Maths · 15 Qs</small></div>
                   <span class="percent-badge" style="background:#00c47a">Open</span>
                 </div>
-                <div style="margin-top:8px;font-size:13px;color:#555;">14 May 2025 &bull; 09:00&ndash;10:00</div>
+                <div style="margin-top:6px;font-size:12px;color:#00c47a;font-weight:600;">⏱ 42 min remaining</div>
               </div>
-              <div style="background:#f8f9fc;padding:16px;border-radius:12px;">
+              <div style="background:#f8f9fc;padding:14px;border-radius:12px;">
                 <div style="display:flex;justify-content:space-between;">
                   <div><strong>Functions &amp; Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
                   <span class="percent-badge" style="background:#00c47a">Open</span>
@@ -631,157 +530,390 @@ nav {
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-integrity">&#128737; AI Invigilator</div>
+              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
               <div class="card-title">Integrity Monitor</div>
               <div class="card-sub">Real-time quiz protection</div>
-              <p style="font-size:14px;line-height:1.55;margin-bottom:16px;">Records every quiz session. Detects tab switching, browser minimization, or navigating away &mdash; question by question.</p>
-              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">&#10003; Verified &amp; Tested &bull; Powered by AI</div>
+              <p style="font-size:13.5px;line-height:1.6;margin-bottom:14px;color:#555;">Records every session. Detects tab switching, browser exit, or focus loss — question by question.</p>
+              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">✓ Verified &amp; Tested · Powered by AI</div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">&#128203; Assignments</div>
-              <div class="card-title">Chapter 5 &ndash; Calculus</div>
-              <div class="card-sub">Grade 12A &bull; Due 20 May 2025</div>
-              <div class="progress-bar"><div class="progress-fill" style="width:56%;"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:13.5px;">
+              <div class="card-badge badge-quiz">📁 Assignment</div>
+              <div class="card-title">Chapter 5 – Calculus</div>
+              <div class="card-sub">Grade 12A · Due 20 May 2025</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
                 <span><strong>18</strong> of 32 submitted</span>
-                <span style="color:#4fd1c5">56% completion</span>
+                <span style="color:var(--teal)">56% completion</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- TAB 1 -->
+
+      <!-- ── ASSIGNMENTS ── -->
       <div class="tab-panel" id="panel-1">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">&#128202; Evaluations</div>
-              <div class="card-title">Grade 12A &mdash; Mathematics</div>
-              <div class="card-sub">Term 2 Quiz Results</div>
+              <div class="card-badge badge-assign">📁 Assignments</div>
+              <div class="card-title">Grade 12A — Term 2</div>
+              <div class="card-sub">4 assignments this term</div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Chapter 5 — Calculus</div><div style="font-size:12px;color:#888;">Due 20 May · 18/32 submitted</div></div><span class="chip chip-orange">56%</span></div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Trigonometry Worksheet</div><div style="font-size:12px;color:#888;">Due 28 May · 30/32 submitted</div></div><span class="chip chip-green">94%</span></div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#fef9e6;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Statistics Investigation</div><div style="font-size:12px;color:#888;">Due 5 Jun · Not open yet</div></div><span class="chip chip-gold">Soon</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-assign">📊 Submissions</div>
+              <div class="card-title">Calculus — Submissions</div>
+              <div class="card-sub">Deadline: 20 May 2025</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;"><span><strong>18</strong> submitted</span><span><strong>14</strong> pending</span></div>
+              <div class="row-item"><span class="status-dot dot-green"></span>Amahle Dube<span style="margin-left:auto;font-size:12px;color:#00c47a;font-weight:600">Submitted</span></div>
+              <div class="row-item"><span class="status-dot dot-orange"></span>Sipho Nkosi<span style="margin-left:auto;font-size:12px;color:var(--orange);font-weight:600">Late</span></div>
+              <div class="row-item"><span class="status-dot" style="background:#ddd;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></span>Thandi Mokoena<span style="margin-left:auto;font-size:12px;color:#aaa;font-weight:600">Pending</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-assign">✅ Results</div>
+              <div class="card-title">Calculus — Marked</div>
+              <div class="card-sub">Auto-marked · 18 submitted</div>
               <table class="table-mini">
-                <thead><tr><th>Learner</th><th>Score</th><th>%</th><th>Symbol</th></tr></thead>
+                <thead><tr><th>Learner</th><th>Score</th><th>Symbol</th></tr></thead>
                 <tbody>
-                  <tr><td>Amahle Dube</td><td>92/100</td><td><span class="percent-badge" style="background:#00c47a">92%</span></td><td>A</td></tr>
-                  <tr><td>Sipho Nkosi</td><td>78/100</td><td><span class="percent-badge" style="background:#f97316">78%</span></td><td>B</td></tr>
-                  <tr><td>Thandi Mokoena</td><td>85/100</td><td><span class="percent-badge" style="background:#00c47a">85%</span></td><td>A</td></tr>
-                  <tr><td>Bongani Zulu</td><td>54/100</td><td><span class="percent-badge" style="background:#f85149">54%</span></td><td>D</td></tr>
+                  <tr><td>Amahle Dube</td><td>38/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Sipho Nkosi</td><td>29/40</td><td><span class="percent-badge" style="background:var(--orange)">C</span></td></tr>
+                  <tr><td>Thandi Mokoena</td><td>35/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI INVIGILATOR ── -->
+      <div class="tab-panel" id="panel-2">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="live-badge"><div class="live-dot"></div>Live · 28 learners · updating every 3s</div>
+              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
+              <div class="card-title">Grade 12A — Live Monitor</div>
+              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Amahle Dube</span><span class="inv-status ok">Q 9/15</span></div>
+              <div class="inv-row flagged"><span class="status-dot dot-orange"></span><span class="inv-name">Sipho Nkosi</span><span class="inv-status warn">⚠ Tab switch</span></div>
+              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Thandi Mokoena</span><span class="inv-status ok">Q 7/15</span></div>
+              <div class="inv-row exited"><span class="status-dot dot-red"></span><span class="inv-name">Lerato Khumalo</span><span class="inv-status bad">⛔ Exit detected</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">📋 Audit Trail</div>
+              <div class="card-title">Session Log — Sipho Nkosi</div>
+              <div class="card-sub">14 May 2025 · Quadratic Quiz</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:02</span><span class="chip chip-green">Started quiz</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-orange">Tab switch · Q5</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-green">Returned · Q5</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:28</span><span class="chip chip-orange">Tab switch · Q11</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:47</span><span class="chip chip-blue">Submitted</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">📊 Report</div>
+              <div class="card-title">Integrity Summary</div>
+              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal);font-size:22px;">25</div><div class="stat-label">Clean</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--orange);font-size:22px;">2</div><div class="stat-label">Flagged</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--red);font-size:22px;">1</div><div class="stat-label">Exited</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GRADEBOOK ── -->
+      <div class="tab-panel" id="panel-3">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-grade">📒 Gradebook</div>
+              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-sub">Term 2 · 4 assessments</div>
+              <table class="table-mini">
+                <thead><tr><th>Learner</th><th>T1</th><th>T2</th><th>Avg</th><th>Sym</th></tr></thead>
+                <tbody>
+                  <tr><td>Amahle Dube</td><td>88%</td><td>92%</td><td><strong>90%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Sipho Nkosi</td><td>72%</td><td>78%</td><td><strong>75%</strong></td><td><span class="percent-badge" style="background:var(--orange)">B</span></td></tr>
+                  <tr><td>Thandi Mokoena</td><td>80%</td><td>85%</td><td><strong>82%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Bongani Zulu</td><td>48%</td><td>54%</td><td><strong>51%</strong></td><td><span class="percent-badge" style="background:var(--red)">D</span></td></tr>
                 </tbody>
               </table>
             </div>
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-analytics">&#128200; Analytics</div>
+              <div class="card-badge badge-grade">📑 Report Card</div>
+              <div class="card-title">Amahle Dube</div>
+              <div class="card-sub">Grade 12A · Term 2 · 2025</div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Mathematics</span><span class="percent-badge" style="background:#00c47a">90% · A</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Physical Science</span><span class="percent-badge" style="background:#00c47a">85% · A</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">English FAL</span><span class="percent-badge" style="background:var(--orange)">74% · B</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Life Sciences</span><span class="percent-badge" style="background:#00c47a">88% · A</span></div>
+              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#555;">Overall Average: <strong style="color:#00c47a;font-size:16px;">84.3%</strong> · Symbol: <strong>A</strong></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-grade">📊 Class Stats</div>
+              <div class="card-title">Term 2 Class Overview</div>
+              <div class="card-sub">Grade 12A · Mathematics</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Class Avg</div></div>
+              </div>
+              <div style="font-size:12.5px;color:#888;text-align:center;">↑ 10% improvement vs Term 1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYTICS ── -->
+      <div class="tab-panel" id="panel-4">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-analytics">📈 Analytics</div>
               <div class="card-title">Term 2 Performance</div>
-              <div class="card-sub">Across 3 Classes</div>
-              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;">
-                <div style="text-align:center;"><div style="font-size:38px;font-weight:800;color:#4fd1c5;">78%</div><div style="font-size:12px;color:#666;margin-top:4px;">Pass Rate <span style="color:#00c47a">&#8593;10%</span></div></div>
-                <div style="text-align:center;"><div style="font-size:38px;font-weight:800;color:#f5c842;">74.2</div><div style="font-size:12px;color:#666;margin-top:4px;">Average Score</div></div>
+              <div class="card-sub">Across 4 classes · 3 subjects</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate <span style="color:#00c47a;font-size:10px;">↑10%</span></div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Avg Score</div></div>
               </div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-quiz">&#127968; Dashboard</div>
-              <div class="card-title">Welcome back, Linda &#128075;</div>
-              <div class="card-sub">Grade 10A</div>
-              <div style="display:flex;gap:14px;margin-top:20px;">
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div><div style="font-size:12px;color:#666;">Quizzes</div></div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#f97316;">3</div><div style="font-size:12px;color:#666;">Assignments</div></div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div><div style="font-size:12px;color:#666;">Score</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- TAB 2 -->
-      <div class="tab-panel" id="panel-2">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-quiz">&#128276; Announcements</div>
-              <div class="card-title">Important Updates</div>
-              <div class="announcement"><strong>Term 2 Test Schedule Released</strong><br><small style="color:#555;">Tests begin 14 May 2025. Bring calculators and stationery.</small></div>
-              <div class="announcement"><strong>Extra Maths Support Class</strong><br><small style="color:#555;">Saturday 10 May &bull; 09:00 &bull; Room 12</small></div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 12A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:94%"></div></div><span class="mini-bar-val">94%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 11B</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 10A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-soft" style="width:62%"></div></div><span class="mini-bar-val">62%</span></div>
             </div>
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-discussion">&#128172; Discussions</div>
-              <div class="card-title">When is the next test?</div>
-              <div class="card-sub">Grade 10A &bull; 8 posts</div>
-              <div style="background:#f8f9fc;padding:14px;border-radius:12px;font-size:13.5px;margin-top:10px;">
-                <strong>Amahle Dube:</strong> Can someone confirm the date for the next Maths test?<br><br>
-                <strong style="color:#4fd1c5;">Ms N. Sithole &bull; Teacher</strong><br>
-                The test is confirmed for 14 May at 09:00. Please bring calculator and geometry set.
-              </div>
+              <div class="card-badge badge-analytics">⚠️ At-Risk</div>
+              <div class="card-title">Learners Needing Help</div>
+              <div class="card-sub">Below 50% this term</div>
+              <div class="row-item"><span style="font-size:16px;">🔴</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Bongani Zulu · Gr 12A</div><div style="font-size:12px;color:#888;">48% avg · 3 missed assignments</div></div><span class="chip chip-red" style="font-size:11px;">At risk</span></div>
+              <div class="row-item"><span style="font-size:16px;">🟠</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Lerato Khumalo · Gr 11B</div><div style="font-size:12px;color:#888;">52% avg · flagged</div></div><span class="chip chip-orange" style="font-size:11px;">Watch</span></div>
+              <div class="row-item"><span style="font-size:16px;">🟡</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Kamo Sithole · Gr 10A</div><div style="font-size:12px;color:#888;">55% avg · borderline</div></div><span class="chip chip-gold" style="font-size:11px;">Monitor</span></div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-calendar">&#128197; Calendar</div>
-              <div class="card-title">May 2025</div>
-              <div class="card-sub">Academic + Personal Reminders</div>
-              <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
-                <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
-                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations &amp; Inequalities Quiz</div>
-              </div>
+              <div class="card-badge badge-analytics">❓ Questions</div>
+              <div class="card-title">Question Difficulty</div>
+              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
+              <div class="mini-bar-row" style="margin-top:10px;"><span class="mini-bar-label" style="width:40px;">Q1</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:96%"></div></div><span class="mini-bar-val">96%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q5</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q8</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:54%"></div></div><span class="mini-bar-val">54%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q13</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:38%"></div></div><span class="mini-bar-val">38%</span></div>
+              <div style="font-size:12px;color:#888;margin-top:8px;padding:8px;background:#fff5ed;border-radius:8px;">⚠ Q8 &amp; Q13 need re-teaching</div>
             </div>
           </div>
         </div>
       </div>
-      <!-- TAB 3 -->
-      <div class="tab-panel" id="panel-3">
+
+      <!-- ── RESOURCES ── -->
+      <div class="tab-panel" id="panel-5">
         <div class="stack-wrapper">
           <div class="stack-layer" data-pos="0">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">&#128218; Syllabus Engine</div>
-              <div class="card-title">Grade 10A &mdash; Mathematics</div>
-              <div class="card-sub">3 of 5 topics complete &bull; 60%</div>
-              <div class="topic-item">&#9989; Number Systems <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">&#9989; Algebraic Expressions <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">&#9989; Equations &amp; Inequalities <span style="margin-left:auto;color:#00c47a;font-weight:600;">Done</span></div>
-              <div class="topic-item">&#9898; Geometry Basics <span style="margin-left:auto;color:#999;">Upcoming</span></div>
+              <div class="card-badge badge-resources">📚 Resources</div>
+              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-sub">8 resources uploaded this term</div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Calculus Summary Notes</div><div style="font-size:12px;color:#888;">PDF · 2.1 MB · Added 2 May</div></div><span style="font-size:10px;font-weight:700;color:var(--orange);">PDF</span></div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#eef2ff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🎬</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Quadratics Explained</div><div style="font-size:12px;color:#888;">Video · 14 min · Added 5 May</div></div><span style="font-size:10px;font-weight:700;color:var(--blue);">VIDEO</span></div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📊</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Worksheet 3 — Equations</div><div style="font-size:12px;color:#888;">DOCX · 340 KB · Added 8 May</div></div><span style="font-size:10px;font-weight:700;color:#00c47a;">DOC</span></div>
             </div>
           </div>
           <div class="stack-layer" data-pos="1">
             <div class="demo-card">
-              <div class="card-badge badge-calendar">&#128197; Calendar</div>
-              <div class="card-title">May 2025</div>
-              <div class="card-sub">Upcoming Topics &amp; Deadlines</div>
-              <div style="margin:16px 0;font-size:14.5px;display:flex;flex-direction:column;gap:12px;">
-                <div><span style="background:#4fd1c5;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">14 May</span> &nbsp;Algebraic Expressions Quiz</div>
-                <div><span style="background:#f97316;color:white;padding:4px 12px;border-radius:999px;font-size:13px;">20 May</span> &nbsp;Equations &amp; Inequalities Quiz</div>
+              <div class="card-badge badge-resources">🎬 Preview</div>
+              <div class="card-title">Quadratics Explained</div>
+              <div class="card-sub">14:22 · Grade 12A · Ms N. Sithole</div>
+              <div style="background:#f0f0f5;border-radius:12px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                <div style="width:44px;height:44px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">▶</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="chip chip-blue">Grade 12A</span><span class="chip chip-teal">Mathematics</span><span class="chip chip-gold">Term 2</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-resources">📎 Linked to Topic</div>
+              <div class="card-title">Quadratic Equations</div>
+              <div class="card-sub">CAPS Grade 12 · 3 resources linked</div>
+              <div class="row-item">📄 <span style="flex:1;font-size:13.5px;">Calculus Summary Notes</span><span class="chip chip-orange" style="font-size:10px;">PDF</span></div>
+              <div class="row-item">🎬 <span style="flex:1;font-size:13.5px;">Quadratics Explained</span><span class="chip chip-blue" style="font-size:10px;">VIDEO</span></div>
+              <div class="row-item">📊 <span style="flex:1;font-size:13.5px;">Worksheet 3</span><span class="chip chip-green" style="font-size:10px;">DOC</span></div>
+              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px;font-size:12.5px;color:#555;text-align:center;">3 learners haven't viewed any resources yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DISCUSSIONS ── -->
+      <div class="tab-panel" id="panel-6">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">💬 Discussions</div>
+              <div class="card-title">Grade 12A — Open Threads</div>
+              <div class="card-sub">3 active · 12 total posts</div>
+              <div style="background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Amahle Dube</span><span style="font-size:11px;color:#aaa;">2h ago</span></div>
+                <div style="font-size:13px;color:#555;margin-bottom:8px;">Can someone explain how to factorise when a ≠ 1?</div>
+                <div style="display:flex;gap:6px;"><span class="chip chip-teal" style="font-size:11px;">4 replies</span><span class="chip chip-blue" style="font-size:11px;">Maths</span></div>
+              </div>
+              <div style="background:#f8f9fc;border-radius:12px;padding:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Sipho Nkosi</span><span style="font-size:11px;color:#aaa;">5h ago</span></div>
+                <div style="font-size:13px;color:#555;">When is the next test?</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">💬 Thread</div>
+              <div class="card-title">Factorising when a ≠ 1</div>
+              <div class="card-sub">Grade 12A · 4 replies</div>
+              <div style="background:#f8f9fc;padding:12px;border-radius:10px;font-size:13px;margin-bottom:10px;color:#333;"><strong>Amahle Dube:</strong> Can someone explain how to factorise when a ≠ 1?</div>
+              <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;background:white;border-radius:8px;border-left:3px solid var(--teal);">
+                <div><div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:2px;">Ms N. Sithole · Teacher</div><div style="font-size:12px;color:#555;">Use the product-sum method: multiply a×c, then find factors that add to b.</div></div>
               </div>
             </div>
           </div>
           <div class="stack-layer" data-pos="2">
             <div class="demo-card">
-              <div class="card-badge badge-quiz">&#127968; Dashboard</div>
-              <div class="card-title">Welcome back, Linda &#128075;</div>
-              <div class="card-sub">Grade 10A</div>
-              <div style="display:flex;gap:14px;margin-top:20px;">
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#4fd1c5;">4</div><div style="font-size:12px;color:#666;">Quizzes</div></div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#f97316;">3</div><div style="font-size:12px;color:#666;">Assignments</div></div>
-                <div style="flex:1;text-align:center;background:#f8f9fc;padding:14px;border-radius:12px;"><div style="font-size:28px;font-weight:800;color:#00c47a;">69%</div><div style="font-size:12px;color:#666;">Score</div></div>
+              <div class="card-badge badge-discussion">🏆 Most Active</div>
+              <div class="card-title">Top Contributors</div>
+              <div class="card-sub">This week · Grade 12A</div>
+              <div class="row-item"><span style="font-size:18px;">🥇</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Amahle Dube</div><div style="font-size:12px;color:#888;">8 posts · 3 helpful answers</div></div></div>
+              <div class="row-item"><span style="font-size:18px;">🥈</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Thandi Mokoena</div><div style="font-size:12px;color:#888;">5 posts · 2 helpful answers</div></div></div>
+              <div class="row-item"><span style="font-size:18px;">🥉</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Nomsa Dlamini</div><div style="font-size:12px;color:#888;">3 posts</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="tab-panel" id="panel-7">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">🔔 Announcements</div>
+              <div class="card-title">School-Wide Updates</div>
+              <div class="card-sub">3 new since yesterday</div>
+              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
+                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📋</span>
+                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Term 2 Test Schedule Released</div><div style="font-size:12.5px;color:#666;">Tests begin 14 May. Bring calculators and stationery.</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 2h ago · All Grade 12</div></div>
+              </div>
+              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;">
+                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📐</span>
+                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Extra Maths Support Class</div><div style="font-size:12.5px;color:#666;">Saturday 10 May · 09:00 · Room 12</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 1 day ago · Grade 11 &amp; 12</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">📌 Pinned</div>
+              <div class="card-title">Term 2 Test Schedule</div>
+              <div class="card-sub">Posted by Ms N. Sithole · 2h ago</div>
+              <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:12px;">All Grade 12 learners must note the following test dates. Arrive 10 minutes early and bring your geometry set.</p>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Mathematics</div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Physical Science</div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--blue);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">27 May</span>English FAL</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">📬 Reach</div>
+              <div class="card-title">Announcement Stats</div>
+              <div class="card-sub">Term 2 Test Schedule · May 2025</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">142</div><div class="stat-label">Learners reached</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:#00c47a">94%</div><div class="stat-label">Read rate</div></div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
+              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">9 learners haven't seen this yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CALENDAR ── -->
+      <div class="tab-panel" id="panel-8">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-title">May 2025</div>
+              <div class="card-sub">12 academic events this month</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f0fdfb;border-radius:10px;border-left:3px solid var(--teal);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:var(--teal);text-transform:uppercase;">14 MAY</div><div style="font-size:13px;font-weight:600;">Quadratic Equations Quiz</div><div style="font-size:11.5px;color:#888;">Grade 12A · 09:00</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff5ed;border-radius:10px;border-left:3px solid var(--orange);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:var(--orange);text-transform:uppercase;">17 MAY</div><div style="font-size:13px;font-weight:600;">Parent Consultation Day</div><div style="font-size:11.5px;color:#888;">All grades · 08:00–14:00</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fef9e6;border-radius:10px;border-left:3px solid var(--gold);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:#c89a00;text-transform:uppercase;">20 MAY</div><div style="font-size:13px;font-weight:600;">Calculus Assignment Due</div><div style="font-size:11.5px;color:#888;">Grade 12A · 23:59</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">🎯 Syllabus Plan</div>
+              <div class="card-title">May Coverage Plan</div>
+              <div class="card-sub">Grade 12A · Mathematics</div>
+              <div class="topic-item">✅ <span style="flex:1;">Quadratic Equations</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
+              <div class="topic-item">✅ <span style="flex:1;">Functions &amp; Graphs</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
+              <div class="topic-item">⏳ <span style="flex:1;">Calculus — Derivatives</span><span style="color:var(--orange);font-size:12px;font-weight:600;">In progress</span></div>
+              <div class="topic-item">⭕ <span style="flex:1;">Integration</span><span style="color:#bbb;font-size:12px;font-weight:600;">Upcoming</span></div>
+              <div class="progress-bar" style="margin-top:12px;"><div class="progress-fill" style="width:55%"></div></div>
+              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">55% of May plan complete</div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📌 Upcoming</div>
+              <div class="card-title">Next 7 Days</div>
+              <div class="card-sub">All classes · Academic events</div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Maths Quiz · Gr 12A</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">17 May</span>Parent Consultation Day</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--gold);color:#111;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Calculus Due · Gr 12A</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- end left col -->
 
     <!-- RIGHT COPY -->
     <div class="feature-copy">
       <span class="copy-eyebrow" id="copy-eyebrow">Quizzes</span>
       <h3 id="copy-heading">Run powerful quizzes with <span>AI watching over</span> every learner</h3>
-      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity &mdash; so you can focus on what matters: teaching.</p>
+      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.</p>
       <ul class="copy-bullets" id="copy-bullets">
-        <li><div class="bullet-check">&#10003;</div>Live learner progress tracked question by question</li>
-        <li><div class="bullet-check">&#10003;</div>Tab-switch &amp; browser exit detection built in</li>
-        <li><div class="bullet-check">&#10003;</div>Auto-marked with instant results &amp; reports</li>
+        <li><div class="bullet-check">✓</div>Live learner progress tracked question by question</li>
+        <li><div class="bullet-check">✓</div>Tab-switch &amp; browser exit detection built in</li>
+        <li><div class="bullet-check">✓</div>Auto-marked with instant results &amp; reports</li>
       </ul>
       <a href="#" class="copy-cta">See it in action &#8594;</a>
     </div>
@@ -789,65 +921,200 @@ nav {
 </section>
 
 <script>
-const tabData = [
-  { eyebrow:"Quizzes", heading:'Run powerful quizzes with <span>AI watching over</span> every learner', desc:"Build quizzes from your question bank, launch them live to your class, and let iSkool\u2019s AI invigilator handle integrity \u2014 so you can focus on what matters: teaching.", bullets:["Live learner progress tracked question by question","Tab-switch & browser exit detection built in","Auto-marked with instant results & reports"] },
-  { eyebrow:"Grades & Reports", heading:'Capture marks and <span>generate reports</span> in seconds', desc:"No more spreadsheets. Enter marks once \u2014 iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.", bullets:["Mark entries auto-calculate class averages","Symbol assignment (A\u2013F) based on CAPS thresholds","One-click PDF report cards per learner"] },
-  { eyebrow:"Communication", heading:'Keep learners and parents <span>always in the loop</span>', desc:"Post announcements, run class discussions, and sync academic events to learner calendars \u2014 all from one place. No more WhatsApp groups.", bullets:["Targeted announcements per class or grade","Threaded discussions with teacher replies","Calendar events auto-synced to learner dashboards"] },
-  { eyebrow:"Syllabus", heading:'Stay on track with the <span>CAPS curriculum</span> all year', desc:"Map every lesson, quiz, and assignment to the CAPS syllabus. Track coverage progress across all your classes and never fall behind the curriculum again.", bullets:["Full CAPS topic mapping for Grade 10\u201312","Coverage progress tracked per class","Upload notes, videos & worksheets per topic"] }
+/* ═══════════════════════════════════════════
+   ARROW PILL SWITCHER — 9 features, infinite wrap
+═══════════════════════════════════════════ */
+const features = [
+  {
+    label: 'Quizzes',
+    eyebrow: 'Quizzes',
+    heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
+    desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
+    bullets: ['Live learner progress tracked question by question', 'Tab-switch & browser exit detection built in', 'Auto-marked with instant results & reports']
+  },
+  {
+    label: 'Assignments',
+    eyebrow: 'Assignments',
+    heading: 'Set, track and mark <span>assignments with ease</span>',
+    desc: "Create assignments, set deadlines, and track submission progress across all your classes in one place. Auto-marking saves you hours every week.",
+    bullets: ['Per-learner submission status at a glance', 'Late submission flagging built in', 'Auto-marked with instant feedback to learners']
+  },
+  {
+    label: 'AI Invigilator',
+    eyebrow: 'AI Invigilator',
+    heading: 'Every quiz watched in <span>real time</span>',
+    desc: "iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.",
+    bullets: ['Detects tab-switching & browser minimization', 'Flags anomalies per learner, per question', 'Full session audit log after each quiz closes']
+  },
+  {
+    label: 'Gradebook',
+    eyebrow: 'Gradebook',
+    heading: 'Capture marks and <span>generate reports</span> in seconds',
+    desc: "No more spreadsheets. Enter marks once — iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.",
+    bullets: ['Mark entries auto-calculate class averages', 'Symbol assignment (A–F) based on CAPS thresholds', 'One-click PDF report cards per learner']
+  },
+  {
+    label: 'Analytics',
+    eyebrow: 'Deep Analytics',
+    heading: "See every learner's story <span>at a glance</span>",
+    desc: "Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.",
+    bullets: ['Per-class pass rates with term-on-term trends', 'Question-by-question difficulty breakdown', 'Admin dashboard for principals & HODs']
+  },
+  {
+    label: 'Resources',
+    eyebrow: 'Resources',
+    heading: 'Upload notes, videos and worksheets <span>per topic</span>',
+    desc: "Link learning materials directly to CAPS topics. Learners find exactly what they need, when they need it — all organised by subject and grade.",
+    bullets: ['Upload PDFs, videos and documents', 'Linked directly to CAPS syllabus topics', 'Track which learners have viewed each resource']
+  },
+  {
+    label: 'Discussions',
+    eyebrow: 'Discussions',
+    heading: 'Foster class conversations <span>in a safe space</span>',
+    desc: "Run moderated class discussions where learners ask questions and teachers respond. No WhatsApp groups, no noise — just focused academic conversation.",
+    bullets: ['Threaded discussions per class or subject', 'Teacher moderation and pinned replies', 'Participation tracked per learner']
+  },
+  {
+    label: 'Announcements',
+    eyebrow: 'Announcements',
+    heading: 'Keep learners and parents <span>always in the loop</span>',
+    desc: "Post announcements to specific classes, grades, or the whole school. Track who has read them and follow up with those who haven't.",
+    bullets: ['Target by class, grade or school-wide', 'Read receipts so nothing gets missed', 'Pinned notices stay top-of-feed']
+  },
+  {
+    label: 'Calendar',
+    eyebrow: 'Calendar',
+    heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
+    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Sync academic events to learner calendars and never fall behind the curriculum again.",
+    bullets: ['CAPS topic mapping for Grade 10–12', 'Events auto-synced to learner dashboards', 'Coverage progress tracked per class']
+  }
 ];
 
+let currentIndex = 0;
 let cycleTimers = {};
 
+/* ── Build dot indicators ── */
+const dotsWrap = document.getElementById('pill-dots');
+features.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'pill-dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goToFeature(i, i > currentIndex ? 'right' : 'left');
+  dotsWrap.appendChild(d);
+});
+
+/* ── Stack helpers ── */
 function applyPositions(layers) {
   const s = [
-    {zIndex:3, transform:'translateY(0px) scale(1)', opacity:'1'},
-    {zIndex:2, transform:'translateY(56px) scale(0.95)', opacity:'0.72'},
-    {zIndex:1, transform:'translateY(104px) scale(0.905)', opacity:'0.42'}
+    { zIndex: 3, transform: 'translateY(0px) scale(1)', opacity: '1' },
+    { zIndex: 2, transform: 'translateY(56px) scale(0.95)', opacity: '0.72' },
+    { zIndex: 1, transform: 'translateY(104px) scale(0.905)', opacity: '0.42' }
   ];
-  layers.forEach(l => { const p = parseInt(l.dataset.pos); l.style.zIndex=s[p].zIndex; l.style.transform=s[p].transform; l.style.opacity=s[p].opacity; });
+  layers.forEach(l => {
+    const p = parseInt(l.dataset.pos);
+    l.style.zIndex = s[p].zIndex;
+    l.style.transform = s[p].transform;
+    l.style.opacity = s[p].opacity;
+  });
 }
 
-function startCardCycle(id) {
-  stopCardCycle(id);
-  const panel = document.getElementById(id);
+function startCardCycle(panelId) {
+  stopCardCycle(panelId);
+  const panel = document.getElementById(panelId);
   if (!panel) return;
   const layers = panel.querySelectorAll('.stack-layer');
   if (layers.length < 2) return;
-  cycleTimers[id] = setInterval(() => {
+  cycleTimers[panelId] = setInterval(() => {
     const np = Array.from(layers).map(l => (parseInt(l.dataset.pos) + layers.length - 1) % layers.length);
-    layers.forEach((l,i) => { l.dataset.pos = np[i]; });
+    layers.forEach((l, i) => { l.dataset.pos = np[i]; });
     applyPositions(layers);
-  }, 2200);
+  }, 2400);
 }
 
-function stopCardCycle(id) {
-  if (cycleTimers[id]) { clearInterval(cycleTimers[id]); delete cycleTimers[id]; }
+function stopCardCycle(panelId) {
+  if (cycleTimers[panelId]) { clearInterval(cycleTimers[panelId]); delete cycleTimers[panelId]; }
 }
 
-function switchTab(index, btn) {
-  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  for (let i=0;i<4;i++) stopCardCycle('panel-'+i);
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  const ap = document.getElementById('panel-'+index);
-  ap.classList.add('active');
-  const layers = ap.querySelectorAll('.stack-layer');
-  layers.forEach((l,i) => { l.dataset.pos=i; });
+/* ── Pill label animation ── */
+function animatePillLabel(direction, newLabel) {
+  const labelEl = document.getElementById('pill-label');
+  const exitClass  = direction === 'right' ? 'exit-left'  : 'exit-right';
+  const enterClass = direction === 'right' ? 'enter-left' : 'enter-right';
+
+  labelEl.classList.add(exitClass);
+  setTimeout(() => {
+    labelEl.textContent = newLabel;
+    labelEl.classList.remove(exitClass);
+    labelEl.classList.add(enterClass);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        labelEl.classList.remove(enterClass);
+      });
+    });
+  }, 180);
+}
+
+/* ── Update dot indicators ── */
+function updateDots(index) {
+  document.querySelectorAll('.pill-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === index);
+  });
+}
+
+/* ── Update right-side copy ── */
+function updateCopy(f) {
+  document.getElementById('copy-eyebrow').textContent = f.eyebrow;
+  document.getElementById('copy-heading').innerHTML = f.heading;
+  document.getElementById('copy-desc').textContent = f.desc;
+  document.getElementById('copy-bullets').innerHTML = f.bullets
+    .map(b => `<li><div class="bullet-check">✓</div>${b}</li>`)
+    .join('');
+}
+
+/* ── Main switch function ── */
+function goToFeature(newIndex, direction) {
+  if (newIndex === currentIndex) return;
+
+  const oldPanelId = 'panel-' + currentIndex;
+  const newPanelId = 'panel-' + newIndex;
+
+  stopCardCycle(oldPanelId);
+
+  // Hide old panel
+  document.getElementById(oldPanelId).classList.remove('active');
+
+  // Show new panel
+  const newPanel = document.getElementById(newPanelId);
+  newPanel.classList.add('active');
+  const layers = newPanel.querySelectorAll('.stack-layer');
+  layers.forEach((l, i) => { l.dataset.pos = i; });
   applyPositions(layers);
-  const d = tabData[index];
-  document.getElementById('copy-eyebrow').textContent = d.eyebrow;
-  document.getElementById('copy-heading').innerHTML = d.heading;
-  document.getElementById('copy-desc').textContent = d.desc;
-  document.getElementById('copy-bullets').innerHTML = d.bullets.map(b => '<li><div class="bullet-check">&#10003;</div>'+b+'</li>').join('');
-  startCardCycle('panel-'+index);
+
+  // Animate pill label
+  animatePillLabel(direction, features[newIndex].label);
+
+  // Update dots & copy
+  currentIndex = newIndex;
+  updateDots(currentIndex);
+  updateCopy(features[currentIndex]);
+
+  // Start cycling cards
+  startCardCycle(newPanelId);
 }
+
+/* ── Arrow click handler (infinite wrap) ── */
+function switchFeature(dir) {
+  const newIndex = (currentIndex + dir + features.length) % features.length;
+  const direction = dir > 0 ? 'right' : 'left';
+  goToFeature(newIndex, direction);
+}
+
+/* ── Init ── */
+document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelectorAll('.stack-layer')));
+startCardCycle('panel-0');
 
 function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
 }
-
-document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelectorAll('.stack-layer')));
-startCardCycle('panel-0');
 </script>
 
 <!-- ===================== COMPARISON SECTION ===================== -->
@@ -968,763 +1235,188 @@ startCardCycle('panel-0');
 </section>
 
 <style>
-.footer {
-  background: #0a0a0a;
-  color: #ddd;
-  padding: 80px 5% 40px;
-  font-family: 'DM Sans', system-ui, sans-serif;
-}
-
-.footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.footer-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  font-family: 'Syne', sans-serif;
-  font-size: 32px;
-  font-weight: 800;
-  color: white;
-  text-decoration: none;
-}
-
-.footer-logo svg {
-  width: 48px;
-  height: 48px;
-}
-
-.footer-tagline {
-  font-size: 17px;
-  color: #aaa;
-  max-width: 420px;
-  margin: 0 auto 48px;
-  line-height: 1.5;
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 32px;
-  margin-bottom: 60px;
-  font-size: 15px;
-}
-
-.footer-links a {
-  color: #ccc;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: var(--teal);
-}
-
-.footer-copyright {
-  color: #666;
-  font-size: 13px;
-  margin-bottom: 40px;
-}
-
-.footer-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: #f5c842;
-  color: #111;
-  font-weight: 700;
-  font-size: 17px;
-  padding: 18px 48px;
-  border-radius: 9999px;
-  text-decoration: none;
-  box-shadow: 0 10px 30px rgba(245, 200, 66, 0.35);
-  transition: all 0.3s ease;
-}
-
-.footer-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(245, 200, 66, 0.45);
-}
-
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .footer {
-    padding: 60px 5% 50px;
-  }
-  .footer-links {
-    gap: 20px;
-    font-size: 14px;
-  }
-  .footer-logo {
-    font-size: 28px;
-  }
-  .footer-tagline {
-    font-size: 15.5px;
-  }
-}
+.footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; }
+.footer-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+.footer-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: white; text-decoration: none; }
+.footer-logo svg { width: 48px; height: 48px; }
+.footer-tagline { font-size: 17px; color: #aaa; max-width: 420px; margin: 0 auto 48px; line-height: 1.5; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; margin-bottom: 60px; font-size: 15px; }
+.footer-links a { color: #ccc; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--teal); }
+.footer-copyright { color: #666; font-size: 13px; margin-bottom: 40px; }
+.footer-cta { display: inline-flex; align-items: center; gap: 12px; background: #f5c842; color: #111; font-weight: 700; font-size: 17px; padding: 18px 48px; border-radius: 9999px; text-decoration: none; box-shadow: 0 10px 30px rgba(245,200,66,0.35); transition: all 0.3s ease; }
+.footer-cta:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.45); }
+@media (max-width: 600px) { .footer { padding: 60px 5% 50px; } .footer-links { gap: 20px; font-size: 14px; } .footer-logo { font-size: 28px; } .footer-tagline { font-size: 15.5px; } }
 </style>
 
-
-
-<script>
-function setFilter(cat, btn) {
-  document.querySelectorAll('.proof-filter').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('#proofTrack .phone-card').forEach(card => {
-    card.style.opacity = (cat === 'all' || card.dataset.cat === cat) ? '1' : '0.25';
-    card.style.pointerEvents = (cat === 'all' || card.dataset.cat === cat) ? 'auto' : 'none';
-  });
-  document.querySelectorAll('#proofTrackMobile .phone-card-mob').forEach(card => {
-    card.style.opacity = (cat === 'all' || card.dataset.cat === cat) ? '1' : '0.25';
-  });
-}
-</script>
-
-<!-- ===================== FEATURES SECTION (AI Invigilator + Analytics) ===================== -->
+<!-- ===================== FEATURES SECTION ===================== -->
 <section class="features-section">
-
-  <!-- Header -->
   <div class="features-header">
     <span class="feat-eyebrow">World-class features</span>
     <h2>Built for the <span>classroom</span></h2>
     <p>The tools that separate iSkool from every other platform — purpose-built for South African high schools.</p>
   </div>
-
-  <!-- ROW 1: AI Invigilator -->
   <div class="feat-row" id="feat-inv">
     <div class="feat-copy">
-      <div class="feat-copy-eyebrow teal">
-        <span class="eyebrow-line"></span>
-        AI Invigilator
-      </div>
+      <div class="feat-copy-eyebrow teal"><span class="eyebrow-line"></span>AI Invigilator</div>
       <h3>Every quiz watched<br>in <em class="teal">real time</em></h3>
       <p>iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.</p>
       <div class="feat-bullets">
-        <div class="feat-bullet">
-          <div class="bullet-dot teal">✓</div>
-          Detects tab-switching &amp; browser minimization
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot teal">✓</div>
-          Flags anomalies per learner, per question
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot teal">✓</div>
-          Full session audit log after each quiz closes
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot teal">✓</div>
-          AI-verified &amp; tested on live learners
-        </div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Detects tab-switching &amp; browser minimization</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Flags anomalies per learner, per question</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Full session audit log after each quiz closes</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>AI-verified &amp; tested on live learners</div>
       </div>
       <a href="#" class="feat-cta teal">See it live →</a>
     </div>
-
     <div class="feat-mockup-wrap">
       <div class="mock-panel">
         <div class="mock-topbar">
-          <div class="mock-dots">
-            <div class="mock-dot" style="background:#f85149;"></div>
-            <div class="mock-dot" style="background:#f5c842;"></div>
-            <div class="mock-dot" style="background:#00c47a;"></div>
-          </div>
+          <div class="mock-dots"><div class="mock-dot" style="background:#f85149;"></div><div class="mock-dot" style="background:#f5c842;"></div><div class="mock-dot" style="background:#00c47a;"></div></div>
           <span class="mock-topbar-title">AI Invigilator — Grade 12A — Live</span>
         </div>
         <div class="mock-body">
-          <div class="live-badge">
-            <div class="live-dot"></div>
-            Live session · 28 learners · updating every 3s
-          </div>
-
-          <div class="inv-row">
-            <div class="inv-dot green"></div>
-            <span class="inv-name">Amahle Dube</span>
-            <span class="inv-status ok">Q 9 / 15</span>
-          </div>
-          <div class="inv-row flagged">
-            <div class="inv-dot orange"></div>
-            <span class="inv-name">Sipho Nkosi</span>
-            <span class="inv-status warn">⚠ Tab switch</span>
-          </div>
-          <div class="inv-row">
-            <div class="inv-dot green"></div>
-            <span class="inv-name">Thandi Mokoena</span>
-            <span class="inv-status ok">Q 7 / 15</span>
-          </div>
-          <div class="inv-row exited">
-            <div class="inv-dot red"></div>
-            <span class="inv-name">Lerato Khumalo</span>
-            <span class="inv-status bad">⛔ Exit detected</span>
-          </div>
-          <div class="inv-row">
-            <div class="inv-dot green"></div>
-            <span class="inv-name">Bongani Zulu</span>
-            <span class="inv-status ok">Q 11 / 15</span>
-          </div>
-          <div class="inv-row">
-            <div class="inv-dot green"></div>
-            <span class="inv-name">Nomsa Dlamini</span>
-            <span class="inv-status ok">Q 8 / 15</span>
-          </div>
-
+          <div class="live-badge2"><div class="live-dot2"></div>Live session · 28 learners · updating every 3s</div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Amahle Dube</span><span class="inv-status2 ok">Q 9 / 15</span></div>
+          <div class="inv-row2 flagged"><div class="inv-dot orange"></div><span class="inv-name2">Sipho Nkosi</span><span class="inv-status2 warn">⚠ Tab switch</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Thandi Mokoena</span><span class="inv-status2 ok">Q 7 / 15</span></div>
+          <div class="inv-row2 exited"><div class="inv-dot red"></div><span class="inv-name2">Lerato Khumalo</span><span class="inv-status2 bad">⛔ Exit detected</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Bongani Zulu</span><span class="inv-status2 ok">Q 11 / 15</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Nomsa Dlamini</span><span class="inv-status2 ok">Q 8 / 15</span></div>
           <div class="inv-summary">
-            <div class="inv-stat">
-              <div class="inv-stat-val teal">25</div>
-              <div class="inv-stat-label">Active</div>
-            </div>
-            <div class="inv-stat">
-              <div class="inv-stat-val orange">2</div>
-              <div class="inv-stat-label">Flagged</div>
-            </div>
-            <div class="inv-stat">
-              <div class="inv-stat-val red">1</div>
-              <div class="inv-stat-label">Exited</div>
-            </div>
+            <div class="inv-stat"><div class="inv-stat-val teal">25</div><div class="inv-stat-label">Active</div></div>
+            <div class="inv-stat"><div class="inv-stat-val orange">2</div><div class="inv-stat-label">Flagged</div></div>
+            <div class="inv-stat"><div class="inv-stat-val red">1</div><div class="inv-stat-label">Exited</div></div>
           </div>
         </div>
       </div>
-
-      <div class="feat-float">
-        <div class="float-val teal">2</div>
-        <div class="float-label">Anomalies flagged</div>
-      </div>
+      <div class="feat-float"><div class="float-val teal">2</div><div class="float-label">Anomalies flagged</div></div>
     </div>
   </div>
-
   <div class="feat-divider"></div>
-
-  <!-- ROW 2: Analytics -->
   <div class="feat-row reverse" id="feat-anal">
     <div class="feat-copy">
-      <div class="feat-copy-eyebrow gold">
-        <span class="eyebrow-line"></span>
-        Deep Analytics
-      </div>
+      <div class="feat-copy-eyebrow gold"><span class="eyebrow-line"></span>Deep Analytics</div>
       <h3>See every learner's<br>story <em class="gold">at a glance</em></h3>
       <p>Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.</p>
       <div class="feat-bullets">
-        <div class="feat-bullet">
-          <div class="bullet-dot gold">✓</div>
-          Per-class pass rates with term-on-term trends
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot gold">✓</div>
-          Question-by-question difficulty breakdown
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot gold">✓</div>
-          One-click PDF report cards per learner
-        </div>
-        <div class="feat-bullet">
-          <div class="bullet-dot gold">✓</div>
-          Admin dashboard for principals &amp; HODs
-        </div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Per-class pass rates with term-on-term trends</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Question-by-question difficulty breakdown</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>One-click PDF report cards per learner</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Admin dashboard for principals &amp; HODs</div>
       </div>
       <a href="#" class="feat-cta gold">Explore analytics →</a>
     </div>
-
     <div class="feat-mockup-wrap">
       <div class="mock-panel">
         <div class="mock-topbar">
-          <div class="mock-dots">
-            <div class="mock-dot" style="background:#f85149;"></div>
-            <div class="mock-dot" style="background:#f5c842;"></div>
-            <div class="mock-dot" style="background:#00c47a;"></div>
-          </div>
+          <div class="mock-dots"><div class="mock-dot" style="background:#f85149;"></div><div class="mock-dot" style="background:#f5c842;"></div><div class="mock-dot" style="background:#00c47a;"></div></div>
           <span class="mock-topbar-title">Analytics — Term 2 Overview</span>
         </div>
         <div class="mock-body">
           <div class="analytics-grid">
-            <div class="anal-stat">
-              <div class="anal-stat-val teal" id="analPct">0%</div>
-              <div class="anal-stat-sub">Pass Rate</div>
-              <div class="anal-stat-trend">↑ 10% vs Term 1</div>
-            </div>
-            <div class="anal-stat">
-              <div class="anal-stat-val gold" id="analAvg">0</div>
-              <div class="anal-stat-sub">Class Average</div>
-              <div class="anal-stat-trend">↑ 6.1 pts</div>
-            </div>
+            <div class="anal-stat"><div class="anal-stat-val teal" id="analPct">0%</div><div class="anal-stat-sub">Pass Rate</div><div class="anal-stat-trend">↑ 10% vs Term 1</div></div>
+            <div class="anal-stat"><div class="anal-stat-val gold" id="analAvg">0</div><div class="anal-stat-sub">Class Average</div><div class="anal-stat-trend">↑ 6.1 pts</div></div>
           </div>
-
           <div class="bar-chart">
-            <div class="bar-row">
-              <span class="bar-label">Grade 12A</span>
-              <div class="bar-track"><div class="bar-fill teal" id="bar1"></div></div>
-              <span class="bar-val">94%</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">Grade 11B</span>
-              <div class="bar-track"><div class="bar-fill gold" id="bar2"></div></div>
-              <span class="bar-val">78%</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">Grade 10A</span>
-              <div class="bar-track"><div class="bar-fill soft" id="bar3"></div></div>
-              <span class="bar-val">62%</span>
-            </div>
-            <div class="bar-row">
-              <span class="bar-label">Grade 12B</span>
-              <div class="bar-track"><div class="bar-fill orange" id="bar4"></div></div>
-              <span class="bar-val">71%</span>
-            </div>
+            <div class="bar-row"><span class="bar-label">Grade 12A</span><div class="bar-track"><div class="bar-fill teal" id="bar1"></div></div><span class="bar-val">94%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 11B</span><div class="bar-track"><div class="bar-fill gold" id="bar2"></div></div><span class="bar-val">78%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 10A</span><div class="bar-track"><div class="bar-fill soft" id="bar3"></div></div><span class="bar-val">62%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 12B</span><div class="bar-track"><div class="bar-fill orange" id="bar4"></div></div><span class="bar-val">71%</span></div>
           </div>
         </div>
       </div>
-
-      <div class="feat-float" style="bottom:-22px; right:-18px;">
-        <div class="float-val gold">94%</div>
-        <div class="float-label">Top class this term</div>
-      </div>
+      <div class="feat-float" style="bottom:-22px;right:-18px;"><div class="float-val gold">94%</div><div class="float-label">Top class this term</div></div>
     </div>
   </div>
-
 </section>
 
-<!-- ===================== HOW IT WORKS SECTION ===================== -->
+<!-- ===================== HOW IT WORKS ===================== -->
 <style>
-/* ---- Section shell ---- */
-.hiw-section {
-  background: #ffffff;
-  padding: 110px 5% 120px;
-}
+.hiw-section { background: #ffffff; padding: 110px 5% 120px; }
 .hiw-inner { max-width: 1160px; margin: 0 auto; }
 .hiw-header { text-align: center; margin-bottom: 64px; }
-.hiw-eyebrow {
-  display: inline-block;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 14px;
-}
-.hiw-heading {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(30px, 5vw, 52px);
-  font-weight: 800; line-height: 1.05;
-  letter-spacing: -2px; color: #111;
-}
-
-/* ---- 3-col grid ---- */
-.hiw-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-
-/* ---- Each step card ---- */
-.hiw-card {
-  background: #f0ede8;
-  border-radius: 28px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* mockup area (top half) */
-.hiw-mockup {
-  flex: 1;
-  min-height: 280px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 24px 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-/* step info (bottom half) */
-.hiw-step-body {
-  padding: 24px 28px 32px;
-}
-.hiw-step-num {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: var(--gold);
-  color: #111;
-  font-family: 'Syne', sans-serif;
-  font-size: 20px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px;
-}
-.hiw-step-text {
-  font-size: 15px; color: #444; line-height: 1.65;
-}
+.hiw-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.hiw-heading { font-family: 'Syne', sans-serif; font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; }
+.hiw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.hiw-card { background: #f0ede8; border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; }
+.hiw-mockup { flex: 1; min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 28px 24px 20px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.hiw-step-body { padding: 24px 28px 32px; }
+.hiw-step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--gold); color: #111; font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.hiw-step-text { font-size: 15px; color: #444; line-height: 1.65; }
 .hiw-step-text strong { color: #111; }
-
-/* ---- FAKE CURSOR ---- */
-.fake-cursor {
-  position: absolute;
-  width: 18px; height: 18px;
-  pointer-events: none;
-  z-index: 100;
-  transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1);
-}
+.fake-cursor { position: absolute; width: 18px; height: 18px; pointer-events: none; z-index: 100; transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1); }
 .fake-cursor svg { width: 18px; height: 18px; }
-
-/* ---- CARD 1 mockup: School Setup ---- */
-.setup-ui {
-  width: 100%;
-  background: white;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  position: relative;
-}
-.setup-ui-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px; font-weight: 700;
-  color: #111; margin-bottom: 14px;
-}
-.setup-field-label {
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: #888; margin-bottom: 5px;
-}
-.setup-field {
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 13px; color: #111;
-  background: white; margin-bottom: 12px;
-  min-height: 38px;
-  display: flex; align-items: center;
-  position: relative; overflow: hidden;
-}
-.setup-field.active-field {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
-}
+.setup-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; position: relative; }
+.setup-ui-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #111; margin-bottom: 14px; }
+.setup-field-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+.setup-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #111; background: white; margin-bottom: 12px; min-height: 38px; display: flex; align-items: center; position: relative; overflow: hidden; }
+.setup-field.active-field { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
 .setup-typed { display: inline; }
-.setup-cursor-blink {
-  display: inline-block;
-  width: 2px; height: 14px;
-  background: var(--teal);
-  margin-left: 1px;
-  animation: blink 1s step-end infinite;
-  vertical-align: middle;
-}
+.setup-cursor-blink { display: inline-block; width: 2px; height: 14px; background: var(--teal); margin-left: 1px; animation: blink 1s step-end infinite; vertical-align: middle; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 .setup-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.setup-tag {
-  padding: 4px 12px;
-  background: rgba(79,209,197,0.12);
-  color: #0d9488;
-  border-radius: 999px;
-  font-size: 11px; font-weight: 600;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: opacity 0.3s, transform 0.3s;
-}
+.setup-tag { padding: 4px 12px; background: rgba(79,209,197,0.12); color: #0d9488; border-radius: 999px; font-size: 11px; font-weight: 600; opacity: 0; transform: scale(0.8); transition: opacity 0.3s, transform 0.3s; }
 .setup-tag.visible { opacity: 1; transform: scale(1); }
-.setup-progress-row {
-  display: flex; align-items: center; gap: 10px; margin-top: 4px;
-}
-.setup-progress-bar {
-  flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden;
-}
-.setup-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--teal2));
-  border-radius: 999px;
-  width: 0%;
-  transition: width 0.4s ease;
-}
-.setup-done-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: #d1fae5; color: #065f46;
-  padding: 6px 14px; border-radius: 999px;
-  font-size: 12px; font-weight: 700;
-  opacity: 0; transition: opacity 0.4s;
-  margin-top: 10px;
-}
+.setup-progress-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.setup-progress-bar { flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden; }
+.setup-progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.4s ease; }
+.setup-done-badge { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; }
 .setup-done-badge.visible { opacity: 1; }
-
-/* ---- CARD 2 mockup: Quiz Builder ---- */
-.quiz-ui {
-  width: 100%;
-  background: white;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  font-family: 'DM Sans', sans-serif;
-}
-.quiz-ui-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 14px;
-}
-.quiz-ui-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 700; color: #111;
-}
-.quiz-live-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: #d1fae5; color: #065f46;
-  padding: 4px 10px; border-radius: 999px;
-  font-size: 11px; font-weight: 700;
-  opacity: 0; transition: opacity 0.4s;
-}
+.quiz-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; }
+.quiz-ui-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.quiz-ui-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #111; }
+.quiz-live-badge { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 0.4s; }
 .quiz-live-badge.visible { opacity: 1; }
-.quiz-live-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #10b981;
-  animation: pulse-green 1.5s ease-in-out infinite;
-}
+.quiz-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse-green 1.5s ease-in-out infinite; }
 @keyframes pulse-green { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-.quiz-name-field {
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px; padding: 9px 12px;
-  font-size: 12.5px; color: #111;
-  margin-bottom: 10px;
-  min-height: 34px; display: flex; align-items: center;
-}
+.quiz-name-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; color: #111; margin-bottom: 10px; min-height: 34px; display: flex; align-items: center; }
 .quiz-name-field.active-field { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
 .quiz-questions { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-.quiz-q-row {
-  display: flex; align-items: center; gap: 8px;
-  background: #f8f9fc; border-radius: 8px; padding: 8px 10px;
-  font-size: 12px; color: #333;
-  opacity: 0; transform: translateY(6px);
-  transition: opacity 0.3s, transform 0.3s;
-}
+.quiz-q-row { display: flex; align-items: center; gap: 8px; background: #f8f9fc; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #333; opacity: 0; transform: translateY(6px); transition: opacity 0.3s, transform 0.3s; }
 .quiz-q-row.visible { opacity: 1; transform: translateY(0); }
-.quiz-q-num {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--teal); color: white;
-  font-size: 10px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.quiz-meta-row {
-  display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
-}
-.quiz-meta-chip {
-  background: #f0f0f0; border-radius: 8px;
-  padding: 6px 10px; font-size: 11px; color: #555;
-  display: flex; align-items: center; gap: 4px;
-}
+.quiz-q-num { width: 20px; height: 20px; border-radius: 50%; background: var(--teal); color: white; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.quiz-meta-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.quiz-meta-chip { background: #f0f0f0; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #555; display: flex; align-items: center; gap: 4px; }
 .quiz-meta-chip.active-field { background: rgba(79,209,197,0.1); color: #0d9488; border: 1px solid rgba(79,209,197,0.3); }
-.quiz-launch-btn {
-  width: 100%; padding: 10px;
-  background: #111; color: white;
-  border-radius: 10px; font-size: 13px; font-weight: 700;
-  text-align: center; font-family: 'DM Sans', sans-serif;
-  opacity: 0.3; transition: opacity 0.4s, background 0.4s;
-}
+.quiz-launch-btn { width: 100%; padding: 10px; background: #111; color: white; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: center; font-family: 'DM Sans', sans-serif; opacity: 0.3; transition: opacity 0.4s, background 0.4s; }
 .quiz-launch-btn.ready { opacity: 1; background: #10b981; }
-.learner-count {
-  font-size: 12px; color: #10b981; font-weight: 700;
-  text-align: center; margin-top: 6px;
-  opacity: 0; transition: opacity 0.3s;
-}
+.learner-count { font-size: 12px; color: #10b981; font-weight: 700; text-align: center; margin-top: 6px; opacity: 0; transition: opacity 0.3s; }
 .learner-count.visible { opacity: 1; }
-
-/* ---- CARD 3 mockup: Analytics ---- */
-.analytics-ui {
-  width: 100%;
-  background: white;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  font-family: 'DM Sans', sans-serif;
-}
-.analytics-ui-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;
-}
-.analytics-stats {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
-}
-.analytics-stat {
-  background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center;
-}
-.analytics-stat-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 800;
-  transition: all 0.5s ease;
-}
+.analytics-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; }
+.analytics-ui-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px; }
+.analytics-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.analytics-stat { background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center; }
+.analytics-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; transition: all 0.5s ease; }
 .analytics-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
 .analytics-bar-row { margin-bottom: 6px; }
-.analytics-bar-label {
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: #555; margin-bottom: 3px;
-}
+.analytics-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-bottom: 3px; }
 .analytics-bar-track { height: 7px; background: #eee; border-radius: 999px; overflow: hidden; }
-.analytics-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal), var(--teal2));
-  border-radius: 999px;
-  width: 0%; transition: width 0.8s ease;
-}
-.analytics-alert-row {
-  margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
-}
-.analytics-alert {
-  display: flex; align-items: center; gap: 8px;
-  background: #fff5f5; border-radius: 8px; padding: 7px 10px;
-  font-size: 11.5px; color: #333;
-  opacity: 0; transform: translateX(-8px);
-  transition: opacity 0.4s, transform 0.4s;
-  border-left: 3px solid #f85149;
-}
+.analytics-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.8s ease; }
+.analytics-alert-row { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.analytics-alert { display: flex; align-items: center; gap: 8px; background: #fff5f5; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; color: #333; opacity: 0; transform: translateX(-8px); transition: opacity 0.4s, transform 0.4s; border-left: 3px solid #f85149; }
 .analytics-alert.visible { opacity: 1; transform: translateX(0); }
-.analytics-improve {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: #d1fae5; color: #065f46;
-  padding: 6px 14px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 700;
-  margin-top: 8px; opacity: 0; transition: opacity 0.4s;
-}
+.analytics-improve { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-top: 8px; opacity: 0; transition: opacity 0.4s; }
 .analytics-improve.visible { opacity: 1; }
-
-/* ---- MOBILE ---- */
-@media (max-width: 900px) {
-  .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
-  .hiw-mockup { min-height: 240px; }
-}
-@media (max-width: 600px) {
-  .hiw-section { padding: 72px 5% 80px; }
-  .hiw-heading { letter-spacing: -1px; }
-}
-/* ===================== FAQ SECTION ===================== */
-.faq-section {
-  background: #f8f5f0; /* warm off-white like your screenshot */
-  padding: 100px 5% 120px;
-  font-family: 'DM Sans', system-ui, sans-serif;
-}
-
-.faq-inner {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.faq-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.faq-small {
-  color: #f5c842; /* your gold */
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.faq-title {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 6vw, 52px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -1.5px;
-  color: #111;
-}
-
-.faq-accordion {
-  background: white;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-}
-
-.faq-item {
-  border-bottom: 1px solid #eee;
-}
-
-.faq-item:last-child {
-  border-bottom: none;
-}
-
-.faq-question {
-  width: 100%;
-  padding: 28px 32px;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 17px;
-  font-weight: 600;
-  color: #111;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.faq-question:hover {
-  background: #fdfaf5;
-}
-
-.faq-answer {
-  padding: 0 32px 28px;
-  color: #555;
-  line-height: 1.7;
-  font-size: 15.5px;
-  display: none;
-}
-
-.faq-answer.open {
-  display: block;
-}
-
-.faq-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: #666;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.faq-item.open .faq-icon {
-  background: #f5c842;
-  color: #111;
-  transform: rotate(45deg);
-}
-
-.faq-cta {
-  margin-top: 60px;
-  text-align: center;
-}
-
-.faq-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: #f5c842;
-  color: #111;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  padding: 18px 42px;
-  border-radius: 9999px;
-  text-decoration: none;
-  box-shadow: 0 10px 30px rgba(245, 200, 66, 0.3);
-  transition: all 0.3s ease;
-}
-
-.faq-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(245, 200, 66, 0.4);
-}
-
-.faq-button span {
-  font-size: 22px;
-}
-
+@media (max-width: 900px) { .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } .hiw-mockup { min-height: 240px; } }
+@media (max-width: 600px) { .hiw-section { padding: 72px 5% 80px; } .hiw-heading { letter-spacing: -1px; } }
+.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; }
+.faq-inner { max-width: 720px; margin: 0 auto; }
+.faq-header { text-align: center; margin-bottom: 60px; }
+.faq-small { color: #f5c842; font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+.faq-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; color: #111; }
+.faq-accordion { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+.faq-item { border-bottom: 1px solid #eee; }
+.faq-item:last-child { border-bottom: none; }
+.faq-question { width: 100%; padding: 28px 32px; background: none; border: none; text-align: left; font-size: 17px; font-weight: 600; color: #111; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s ease; }
+.faq-question:hover { background: #fdfaf5; }
+.faq-answer { padding: 0 32px 28px; color: #555; line-height: 1.7; font-size: 15.5px; display: none; }
+.faq-answer.open { display: block; }
+.faq-icon { width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #666; flex-shrink: 0; transition: all 0.3s ease; }
+.faq-item.open .faq-icon { background: #f5c842; color: #111; transform: rotate(45deg); }
+.faq-cta { margin-top: 60px; text-align: center; }
+.faq-button { display: inline-flex; align-items: center; gap: 12px; background: #f5c842; color: #111; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; padding: 18px 42px; border-radius: 9999px; text-decoration: none; box-shadow: 0 10px 30px rgba(245,200,66,0.3); transition: all 0.3s ease; }
+.faq-button:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.4); }
 </style>
 
 <section class="hiw-section">
@@ -1733,231 +1425,81 @@ function setFilter(cat, btn) {
       <div class="hiw-eyebrow">HOW IT WORKS</div>
       <h2 class="hiw-heading">Get Your School Running in Three Steps</h2>
     </div>
-
     <div class="hiw-grid">
-
-      <!-- CARD 1: Set Up Your School -->
       <div class="hiw-card">
         <div class="hiw-mockup" id="hiw-mockup-1">
-          <!-- Fake cursor -->
-          <div class="fake-cursor" id="cursor-1" style="left:50%;top:50%;">
-            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
-            </svg>
-          </div>
-          <!-- UI Mockup -->
+          <div class="fake-cursor" id="cursor-1" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="setup-ui" id="setup-ui">
-            <div class="setup-ui-title">&#127979; School Setup</div>
+            <div class="setup-ui-title">🏫 School Setup</div>
             <div class="setup-field-label">School Name</div>
-            <div class="setup-field active-field" id="setup-field-school">
-              <span class="setup-typed" id="setup-school-text"></span>
-              <span class="setup-cursor-blink" id="setup-blink-1"></span>
-            </div>
+            <div class="setup-field active-field" id="setup-field-school"><span class="setup-typed" id="setup-school-text"></span><span class="setup-cursor-blink" id="setup-blink-1"></span></div>
             <div class="setup-field-label">Grades</div>
-            <div class="setup-tags" id="setup-tags">
-              <span class="setup-tag" id="tag-gr10">Grade 10</span>
-              <span class="setup-tag" id="tag-gr11">Grade 11</span>
-              <span class="setup-tag" id="tag-gr12">Grade 12</span>
-            </div>
+            <div class="setup-tags" id="setup-tags"><span class="setup-tag" id="tag-gr10">Grade 10</span><span class="setup-tag" id="tag-gr11">Grade 11</span><span class="setup-tag" id="tag-gr12">Grade 12</span></div>
             <div class="setup-field-label">Subjects Added</div>
-            <div class="setup-tags" id="setup-subjects">
-              <span class="setup-tag" id="tag-math">Mathematics</span>
-              <span class="setup-tag" id="tag-sci">Phys. Science</span>
-              <span class="setup-tag" id="tag-eng">English</span>
-            </div>
-            <div class="setup-progress-row">
-              <div class="setup-progress-bar"><div class="setup-progress-fill" id="setup-prog"></div></div>
-              <span style="font-size:11px;color:#888;" id="setup-pct">0%</span>
-            </div>
-            <div class="setup-done-badge" id="setup-done">&#10003; Setup Complete</div>
+            <div class="setup-tags" id="setup-subjects"><span class="setup-tag" id="tag-math">Mathematics</span><span class="setup-tag" id="tag-sci">Phys. Science</span><span class="setup-tag" id="tag-eng">English</span></div>
+            <div class="setup-progress-row"><div class="setup-progress-bar"><div class="setup-progress-fill" id="setup-prog"></div></div><span style="font-size:11px;color:#888;" id="setup-pct">0%</span></div>
+            <div class="setup-done-badge" id="setup-done">✓ Setup Complete</div>
           </div>
         </div>
-        <div class="hiw-step-body">
-          <div class="hiw-step-num">1</div>
-          <p class="hiw-step-text">Enter your school details and iSkool will <strong>set up your classes, subjects and learner accounts</strong> automatically.</p>
-        </div>
+        <div class="hiw-step-body"><div class="hiw-step-num">1</div><p class="hiw-step-text">Enter your school details and iSkool will <strong>set up your classes, subjects and learner accounts</strong> automatically.</p></div>
       </div>
-
-      <!-- CARD 2: Teach & Assess -->
       <div class="hiw-card">
         <div class="hiw-mockup" id="hiw-mockup-2">
-          <div class="fake-cursor" id="cursor-2" style="left:50%;top:50%;">
-            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
-            </svg>
-          </div>
+          <div class="fake-cursor" id="cursor-2" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="quiz-ui" id="quiz-ui">
-            <div class="quiz-ui-header">
-              <div class="quiz-ui-title">&#128221; Quiz Builder</div>
-              <div class="quiz-live-badge" id="quiz-live"><div class="quiz-live-dot"></div>Live</div>
-            </div>
-            <div class="quiz-name-field active-field" id="quiz-name-field">
-              <span class="setup-typed" id="quiz-name-text"></span>
-              <span class="setup-cursor-blink" id="setup-blink-2"></span>
-            </div>
+            <div class="quiz-ui-header"><div class="quiz-ui-title">📋 Quiz Builder</div><div class="quiz-live-badge" id="quiz-live"><div class="quiz-live-dot"></div>Live</div></div>
+            <div class="quiz-name-field active-field" id="quiz-name-field"><span class="setup-typed" id="quiz-name-text"></span><span class="setup-cursor-blink" id="setup-blink-2"></span></div>
             <div class="quiz-questions" id="quiz-questions">
               <div class="quiz-q-row" id="qq1"><div class="quiz-q-num">1</div>Solve: x² + 5x + 6 = 0</div>
               <div class="quiz-q-row" id="qq2"><div class="quiz-q-num">2</div>Find the roots of 2x² - 8 = 0</div>
               <div class="quiz-q-row" id="qq3"><div class="quiz-q-num">3</div>Factorise: x² - 9</div>
             </div>
-            <div class="quiz-meta-row">
-              <div class="quiz-meta-chip active-field" id="quiz-time">&#9201; 45 min</div>
-              <div class="quiz-meta-chip" id="quiz-grade">Grade 12A</div>
-              <div class="quiz-meta-chip" id="quiz-qcount">15 Qs</div>
-            </div>
-            <div class="quiz-launch-btn" id="quiz-launch">&#128640; Launch to Class</div>
-            <div class="learner-count" id="learner-count">&#128100; 32 learners joined</div>
+            <div class="quiz-meta-row"><div class="quiz-meta-chip active-field" id="quiz-time">⏱ 45 min</div><div class="quiz-meta-chip" id="quiz-grade">Grade 12A</div><div class="quiz-meta-chip" id="quiz-qcount">15 Qs</div></div>
+            <div class="quiz-launch-btn" id="quiz-launch">🚀 Launch to Class</div>
+            <div class="learner-count" id="learner-count">👤 0 learners joined</div>
           </div>
         </div>
-        <div class="hiw-step-body">
-          <div class="hiw-step-num">2</div>
-          <p class="hiw-step-text">Create quizzes, set assignments and <strong>track syllabus coverage</strong> from one dashboard — built for SA teachers.</p>
-        </div>
+        <div class="hiw-step-body"><div class="hiw-step-num">2</div><p class="hiw-step-text">Create quizzes, set assignments and <strong>track syllabus coverage</strong> from one dashboard — built for SA teachers.</p></div>
       </div>
-
-      <!-- CARD 3: Track & Improve -->
       <div class="hiw-card">
         <div class="hiw-mockup" id="hiw-mockup-3">
-          <div class="fake-cursor" id="cursor-3" style="left:50%;top:50%;">
-            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/>
-            </svg>
-          </div>
+          <div class="fake-cursor" id="cursor-3" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="analytics-ui" id="analytics-ui">
-            <div class="analytics-ui-title">&#128200; Term 2 Analytics</div>
+            <div class="analytics-ui-title">📊 Term 2 Analytics</div>
             <div class="analytics-stats">
-              <div class="analytics-stat">
-                <div class="analytics-stat-val" id="astat-pass" style="color:#4fd1c5;">54%</div>
-                <div class="analytics-stat-label">Pass Rate</div>
-              </div>
-              <div class="analytics-stat">
-                <div class="analytics-stat-val" id="astat-avg" style="color:#f5c842;">61.4</div>
-                <div class="analytics-stat-label">Avg Score</div>
-              </div>
+              <div class="analytics-stat"><div class="analytics-stat-val" id="astat-pass" style="color:#4fd1c5;">54%</div><div class="analytics-stat-label">Pass Rate</div></div>
+              <div class="analytics-stat"><div class="analytics-stat-val" id="astat-avg" style="color:#f5c842;">61.4</div><div class="analytics-stat-label">Avg Score</div></div>
             </div>
-            <div class="analytics-bar-row">
-              <div class="analytics-bar-label"><span>Grade 12A</span><span id="bar1-pct">0%</span></div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar1"></div></div>
-            </div>
-            <div class="analytics-bar-row">
-              <div class="analytics-bar-label"><span>Grade 11B</span><span id="bar2-pct">0%</span></div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar2"></div></div>
-            </div>
-            <div class="analytics-bar-row">
-              <div class="analytics-bar-label"><span>Grade 10A</span><span id="bar3-pct">0%</span></div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" id="bar3"></div></div>
-            </div>
-            <div class="analytics-alert-row">
-              <div class="analytics-alert" id="alert1">&#9888; Kamo Sithole — below 50%</div>
-              <div class="analytics-alert" id="alert2">&#9888; Lebo Dlamini — borderline</div>
-            </div>
-            <div class="analytics-improve" id="analytics-improve">&#127775; 3 learners improved this week</div>
+            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 12A</span><span id="bar1-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar1"></div></div></div>
+            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 11B</span><span id="bar2-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar2"></div></div></div>
+            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 10A</span><span id="bar3-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar3"></div></div></div>
+            <div class="analytics-alert-row"><div class="analytics-alert" id="alert1">⚠ Kamo Sithole — below 50%</div><div class="analytics-alert" id="alert2">⚠ Lebo Dlamini — borderline</div></div>
+            <div class="analytics-improve" id="analytics-improve">🌟 3 learners improved this week</div>
           </div>
         </div>
-        <div class="hiw-step-body">
-          <div class="hiw-step-num">3</div>
-          <p class="hiw-step-text">Real-time data shows you <strong>exactly which learners need attention</strong> before it's too late — with improvement suggestions built in.</p>
-        </div>
+        <div class="hiw-step-body"><div class="hiw-step-num">3</div><p class="hiw-step-text">Real-time data shows you <strong>exactly which learners need attention</strong> before it's too late — with improvement suggestions built in.</p></div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ===================== FAQ SECTION ===================== -->
 <section class="faq-section">
   <div class="faq-inner">
-    <div class="faq-header">
-      <div class="faq-small">FAQ</div>
-      <h2 class="faq-title">Frequently Asked Questions</h2>
-    </div>
-
+    <div class="faq-header"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
     <div class="faq-accordion" id="faqAccordion">
-
-      <!-- Question 1 -->
-      <div class="faq-item">
-        <button class="faq-question">
-          Is iSkool compatible with the South African CAPS curriculum?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.
-        </div>
-      </div>
-
-      <!-- Question 2 -->
-      <div class="faq-item">
-        <button class="faq-question">
-          Do teachers need training to use iSkool?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.
-        </div>
-      </div>
-
-      <!-- Question 3 (pre-opened like your example) -->
-      <div class="faq-item open">
-        <button class="faq-question">
-          Do I need to buy any other tools or software?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer open">
-          Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.
-        </div>
-      </div>
-
-      <!-- Question 4 -->
-      <div class="faq-item">
-        <button class="faq-question">
-          Can parents access learner progress?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.
-        </div>
-      </div>
-
-      <!-- Question 5 -->
-      <div class="faq-item">
-        <button class="faq-question">
-          What about data security and backups?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.
-        </div>
-      </div>
-
-      <!-- Question 6 -->
-      <div class="faq-item">
-        <button class="faq-question">
-          How fast can we get started?
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.
-        </div>
-      </div>
-
+      <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.</div></div>
+      <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.</div></div>
+      <div class="faq-item open"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer open">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
+      <div class="faq-item"><button class="faq-question">Can parents access learner progress?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.</div></div>
+      <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.</div></div>
+      <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.</div></div>
     </div>
-
-    <div class="faq-cta">
-      <a href="#" class="faq-button">
-        Apply for Free Pilot →
-      </a>
-    </div>
+    <div class="faq-cta"><a href="#" class="faq-button">Apply for Free Pilot →</a></div>
   </div>
 </section>
 
 <script>
-/* ==========================================
-   HOW IT WORKS — ANIMATION ENGINE
-   Each card runs its own looping sequence.
-   Fake cursor moves between UI elements.
-========================================== */
-
-/* --- Utility: move cursor to element --- */
+/* ── How It Works animations ── */
 function moveCursorTo(cursorEl, targetEl, offsetX, offsetY) {
   const mockup = cursorEl.parentElement;
   const mRect = mockup.getBoundingClientRect();
@@ -1967,19 +1509,12 @@ function moveCursorTo(cursorEl, targetEl, offsetX, offsetY) {
   cursorEl.style.left = x + 'px';
   cursorEl.style.top = y + 'px';
 }
-
-/* --- Utility: type text into element --- */
 function typeText(el, text, speed, cb) {
   el.textContent = '';
   let i = 0;
-  const t = setInterval(() => {
-    el.textContent += text[i++];
-    if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 300); }
-  }, speed);
+  const t = setInterval(() => { el.textContent += text[i++]; if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 300); } }, speed);
   return t;
 }
-
-/* ============ CARD 1 ANIMATION ============ */
 function runCard1() {
   const cursor = document.getElementById('cursor-1');
   const schoolField = document.getElementById('setup-field-school');
@@ -1989,42 +1524,24 @@ function runCard1() {
   const prog = document.getElementById('setup-prog');
   const pct = document.getElementById('setup-pct');
   const done = document.getElementById('setup-done');
-
-  // Reset
   schoolText.textContent = '';
   schoolField.classList.add('active-field');
   blink1.style.display = 'inline-block';
   tags.forEach(id => document.getElementById(id).classList.remove('visible'));
-  prog.style.width = '0%';
-  pct.textContent = '0%';
+  prog.style.width = '0%'; pct.textContent = '0%';
   done.classList.remove('visible');
-
-  // Step 1: cursor moves to school name field & types
   setTimeout(() => moveCursorTo(cursor, schoolField, 10, 15), 200);
   setTimeout(() => typeText(schoolText, 'Greenwood High School', 60, () => {
-    blink1.style.display = 'none';
-    schoolField.classList.remove('active-field');
-
-    // Step 2: grades appear one by one
+    blink1.style.display = 'none'; schoolField.classList.remove('active-field');
     setTimeout(() => { document.getElementById('tag-gr10').classList.add('visible'); prog.style.width='20%'; pct.textContent='20%'; }, 200);
     setTimeout(() => { document.getElementById('tag-gr11').classList.add('visible'); prog.style.width='35%'; pct.textContent='35%'; }, 500);
     setTimeout(() => { document.getElementById('tag-gr12').classList.add('visible'); prog.style.width='50%'; pct.textContent='50%'; }, 800);
-
-    // Step 3: subjects appear
     setTimeout(() => { document.getElementById('tag-math').classList.add('visible'); prog.style.width='65%'; pct.textContent='65%'; }, 1300);
     setTimeout(() => { document.getElementById('tag-sci').classList.add('visible'); prog.style.width='80%'; pct.textContent='80%'; }, 1700);
     setTimeout(() => { document.getElementById('tag-eng').classList.add('visible'); prog.style.width='100%'; pct.textContent='100%'; }, 2100);
-
-    // Step 4: done badge
-    setTimeout(() => {
-      done.classList.add('visible');
-      // Loop after pause
-      setTimeout(runCard1, 3500);
-    }, 2700);
+    setTimeout(() => { done.classList.add('visible'); setTimeout(runCard1, 3500); }, 2700);
   }), 600);
 }
-
-/* ============ CARD 2 ANIMATION ============ */
 function runCard2() {
   const cursor = document.getElementById('cursor-2');
   const nameField = document.getElementById('quiz-name-field');
@@ -2035,190 +1552,67 @@ function runCard2() {
   const liveB = document.getElementById('quiz-live');
   const lCount = document.getElementById('learner-count');
   const timechip = document.getElementById('quiz-time');
-
-  // Reset
-  nameText.textContent = '';
-  nameField.classList.add('active-field');
-  blink2.style.display = 'inline-block';
+  nameText.textContent = ''; nameField.classList.add('active-field'); blink2.style.display = 'inline-block';
   qs.forEach(id => document.getElementById(id).classList.remove('visible'));
-  launch.classList.remove('ready');
-  liveB.classList.remove('visible');
-  lCount.classList.remove('visible');
-  timechip.classList.remove('active-field');
-
-  // Step 1: type quiz name
+  launch.classList.remove('ready'); liveB.classList.remove('visible'); lCount.classList.remove('visible'); timechip.classList.remove('active-field');
   setTimeout(() => moveCursorTo(cursor, nameField, 10, 15), 200);
   setTimeout(() => typeText(nameText, 'Term 2 — Quadratic Equations', 55, () => {
-    blink2.style.display = 'none';
-    nameField.classList.remove('active-field');
-
-    // Step 2: questions appear
+    blink2.style.display = 'none'; nameField.classList.remove('active-field');
     setTimeout(() => { document.getElementById('qq1').classList.add('visible'); }, 300);
     setTimeout(() => { document.getElementById('qq2').classList.add('visible'); }, 650);
     setTimeout(() => { document.getElementById('qq3').classList.add('visible'); }, 1000);
-
-    // Step 3: time chip highlight
+    setTimeout(() => { timechip.classList.add('active-field'); moveCursorTo(cursor, timechip, 10, 10); }, 1400);
+    setTimeout(() => { timechip.classList.remove('active-field'); launch.classList.add('ready'); moveCursorTo(cursor, launch, 20, 12); }, 2000);
     setTimeout(() => {
-      timechip.classList.add('active-field');
-      moveCursorTo(cursor, timechip, 10, 10);
-    }, 1400);
-
-    // Step 4: launch becomes ready
-    setTimeout(() => {
-      timechip.classList.remove('active-field');
-      launch.classList.add('ready');
-      moveCursorTo(cursor, launch, 20, 12);
-    }, 2000);
-
-    // Step 5: live badge + learner count
-    setTimeout(() => {
-      liveB.classList.add('visible');
-      lCount.classList.add('visible');
-      lCount.textContent = '👤 0 learners joined';
+      liveB.classList.add('visible'); lCount.classList.add('visible'); lCount.textContent = '👤 0 learners joined';
       let count = 0;
-      const counter = setInterval(() => {
-        count += 3;
-        if (count > 32) { count = 32; clearInterval(counter); }
-        lCount.textContent = '👤 ' + count + ' learners joined';
-      }, 80);
+      const counter = setInterval(() => { count += 3; if (count > 32) { count = 32; clearInterval(counter); } lCount.textContent = '👤 ' + count + ' learners joined'; }, 80);
       setTimeout(runCard2, 3800);
     }, 2600);
   }), 500);
 }
-
-/* ============ CARD 3 ANIMATION ============ */
 function runCard3() {
-  const cursor = document.getElementById('cursor-3');
   const passEl = document.getElementById('astat-pass');
   const avgEl = document.getElementById('astat-avg');
-  const bar1 = document.getElementById('bar1');
-  const bar2 = document.getElementById('bar2');
-  const bar3 = document.getElementById('bar3');
-  const bp1 = document.getElementById('bar1-pct');
-  const bp2 = document.getElementById('bar2-pct');
-  const bp3 = document.getElementById('bar3-pct');
-  const alert1 = document.getElementById('alert1');
-  const alert2 = document.getElementById('alert2');
+  const bar1 = document.getElementById('hbar1'); const bar2 = document.getElementById('hbar2'); const bar3 = document.getElementById('hbar3');
+  const bp1 = document.getElementById('bar1-pct'); const bp2 = document.getElementById('bar2-pct'); const bp3 = document.getElementById('bar3-pct');
+  const alert1 = document.getElementById('alert1'); const alert2 = document.getElementById('alert2');
   const improve = document.getElementById('analytics-improve');
-
-  // Reset
-  passEl.textContent = '54%';
-  avgEl.textContent = '61.4';
-  bar1.style.width = '0%'; bar2.style.width = '0%'; bar3.style.width = '0%';
-  bp1.textContent = '0%'; bp2.textContent = '0%'; bp3.textContent = '0%';
-  alert1.classList.remove('visible');
-  alert2.classList.remove('visible');
-  improve.classList.remove('visible');
-
-  // Step 1: bars animate in
-  setTimeout(() => {
-    bar1.style.width = '78%'; bp1.textContent = '78%';
-    bar2.style.width = '65%'; bp2.textContent = '65%';
-    bar3.style.width = '71%'; bp3.textContent = '71%';
-  }, 400);
-
-  // Step 2: pass rate ticks up
-  setTimeout(() => {
-    moveCursorTo(cursor, passEl, 5, 5);
-    let p = 54;
-    const t = setInterval(() => {
-      p += 2;
-      if (p >= 78) { p = 78; clearInterval(t); }
-      passEl.textContent = p + '%';
-    }, 60);
-  }, 1200);
-
-  // Step 3: avg score updates
-  setTimeout(() => {
-    avgEl.textContent = '74.2';
-  }, 2400);
-
-  // Step 4: at-risk alerts
-  setTimeout(() => { alert1.classList.add('visible'); moveCursorTo(cursor, alert1, 20, 8); }, 3000);
+  passEl.textContent = '54%'; avgEl.textContent = '61.4';
+  bar1.style.width='0%'; bar2.style.width='0%'; bar3.style.width='0%';
+  bp1.textContent='0%'; bp2.textContent='0%'; bp3.textContent='0%';
+  alert1.classList.remove('visible'); alert2.classList.remove('visible'); improve.classList.remove('visible');
+  setTimeout(() => { bar1.style.width='78%'; bp1.textContent='78%'; bar2.style.width='65%'; bp2.textContent='65%'; bar3.style.width='71%'; bp3.textContent='71%'; }, 400);
+  setTimeout(() => { let p=54; const t=setInterval(()=>{p+=2; if(p>=78){p=78;clearInterval(t);} passEl.textContent=p+'%';},60); }, 1200);
+  setTimeout(() => { avgEl.textContent='74.2'; }, 2400);
+  setTimeout(() => { alert1.classList.add('visible'); }, 3000);
   setTimeout(() => { alert2.classList.add('visible'); }, 3500);
-
-  // Step 5: improvement badge
-  setTimeout(() => {
-    improve.classList.add('visible');
-    setTimeout(runCard3, 3800);
-  }, 4200);
+  setTimeout(() => { improve.classList.add('visible'); setTimeout(runCard3, 3800); }, 4200);
 }
-
-/* ---- Start all 3 on load, staggered ---- */
 setTimeout(runCard1, 400);
 setTimeout(runCard2, 900);
 setTimeout(runCard3, 1400);
-</script>
 
-<script>
-// FAQ Accordion
+/* ── FAQ ── */
 document.querySelectorAll('.faq-question').forEach(button => {
   button.addEventListener('click', () => {
     const item = button.parentElement;
     const answer = item.querySelector('.faq-answer');
     const icon = button.querySelector('.faq-icon');
-
-    // Close all other items
-    document.querySelectorAll('.faq-item').forEach(otherItem => {
-      if (otherItem !== item) {
-        otherItem.classList.remove('open');
-        otherItem.querySelector('.faq-answer').classList.remove('open');
-        otherItem.querySelector('.faq-icon').textContent = '+';
-      }
+    document.querySelectorAll('.faq-item').forEach(other => {
+      if (other !== item) { other.classList.remove('open'); other.querySelector('.faq-answer').classList.remove('open'); other.querySelector('.faq-icon').textContent = '+'; }
     });
-
-    // Toggle current item
     const isOpen = item.classList.toggle('open');
     answer.classList.toggle('open', isOpen);
     icon.textContent = isOpen ? '×' : '+';
   });
 });
 
-</script>
-
-<!-- ===================== FOOTER ===================== -->
-<footer class="footer">
-  <div class="footer-inner">
-
-    <!-- iSkool Logo -->
-    <a href="#" class="footer-logo">
-      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
-        <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
-          <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
-        </g>
-      </svg>
-      iSkool
-    </a>
-
-    <p class="footer-tagline">
-      The only LMS that actually works for South African high schools.
-    </p>
-
-    <div class="footer-links">
-      <a href="#">Privacy Policy</a>
-      <a href="#">Terms of Service</a>
-      <a href="#">Contact</a>
-      <a href="#">Support</a>
-    </div>
-
-    <div class="footer-copyright">
-      © 2026 iSkool. All rights reserved.
-    </div>
-
-    <a href="#" class="footer-cta">
-      Apply for Free Pilot →
-    </a>
-
-  </div>
-</footer>
-
-<script>
-/* ── Scroll reveal ── */
+/* ── Scroll reveal for features section ── */
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
     entry.target.classList.add('visible');
-
     if (entry.target.id === 'feat-anal') {
       setTimeout(() => {
         document.getElementById('bar1').style.width = '94%';
@@ -2231,12 +1625,9 @@ const observer = new IntersectionObserver(entries => {
     }
   });
 }, { threshold: 0.18 });
-
 document.querySelectorAll('.feat-row').forEach(el => observer.observe(el));
-
 function countUp(id, from, to, dur, suffix, decimals) {
-  decimals = decimals || 0;
-  suffix = suffix || '';
+  decimals = decimals || 0; suffix = suffix || '';
   const el = document.getElementById(id);
   if (!el) return;
   const start = performance.now();
@@ -2248,5 +1639,19 @@ function countUp(id, from, to, dur, suffix, decimals) {
   })(performance.now());
 }
 </script>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/></g></svg>
+      iSkool
+    </a>
+    <p class="footer-tagline">The only LMS that actually works for South African high schools.</p>
+    <div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Contact</a><a href="#">Support</a></div>
+    <div class="footer-copyright">© 2026 iSkool. All rights reserved.</div>
+    <a href="#" class="footer-cta">Apply for Free Pilot →</a>
+  </div>
+</footer>
+
 </body>
 </html>
