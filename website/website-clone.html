@@ -16,6 +16,12 @@
   --dark: #0f0f12;
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Global scroll-reveal ── */
+.sr { opacity: 0; transform: translateY(44px); transition: opacity 0.75s ease, transform 0.75s ease; }
+.sr.sr-visible { opacity: 1; transform: translateY(0); }
+.sr.sr-d1 { transition-delay: 0.12s; }
+.sr.sr-d2 { transition-delay: 0.24s; }
+.sr.sr-d3 { transition-delay: 0.36s; }
 body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #111; line-height: 1.6; }
 
 /* NAV */
@@ -457,13 +463,13 @@ nav {
 
 <!-- HERO -->
 <section class="hero">
-  <div class="trust-badge">
+  <div class="trust-badge sr">
     <div class="trust-dot"></div>
     Trusted by South African High Schools
   </div>
-  <h1>The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
-  <p>Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
-  <div class="hero-buttons">
+  <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
+  <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
+  <div class="hero-buttons sr sr-d3">
     <a href="#" class="btn btn-outline"><span class="play-icon">&#9654;</span>See Demo</a>
     <a href="#" class="btn btn-primary">Apply for Free Pilot &#8594;</a>
   </div>
@@ -1171,12 +1177,12 @@ function toggleMenu() {
 
 <section class="comparison-section">
   <div class="comparison-inner">
-    <div class="comparison-header">
+    <div class="comparison-header sr">
       <div class="comp-eyebrow">COMPARISON</div>
       <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
       <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
     </div>
-    <div class="comp-table-wrap">
+    <div class="comp-table-wrap sr sr-d1">
       <table class="comp-table">
         <thead>
           <tr>
@@ -1228,7 +1234,7 @@ function toggleMenu() {
         </tbody>
       </table>
     </div>
-    <div class="comp-cta-row">
+    <div class="comp-cta-row sr sr-d2">
       <a href="#" class="comp-cta">Apply for Free Pilot<span class="comp-cta-arrow">&#8599;</span></a>
     </div>
   </div>
@@ -1251,7 +1257,7 @@ function toggleMenu() {
 
 <!-- ===================== FEATURES SECTION ===================== -->
 <section class="features-section">
-  <div class="features-header">
+  <div class="features-header sr">
     <span class="feat-eyebrow">World-class features</span>
     <h2>Built for the <span>classroom</span></h2>
     <p>The tools that separate iSkool from every other platform — purpose-built for South African high schools.</p>
@@ -1421,12 +1427,12 @@ function toggleMenu() {
 
 <section class="hiw-section">
   <div class="hiw-inner">
-    <div class="hiw-header">
+    <div class="hiw-header sr">
       <div class="hiw-eyebrow">HOW IT WORKS</div>
       <h2 class="hiw-heading">Get Your School Running in Three Steps</h2>
     </div>
     <div class="hiw-grid">
-      <div class="hiw-card">
+      <div class="hiw-card sr">
         <div class="hiw-mockup" id="hiw-mockup-1">
           <div class="fake-cursor" id="cursor-1" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="setup-ui" id="setup-ui">
@@ -1443,7 +1449,7 @@ function toggleMenu() {
         </div>
         <div class="hiw-step-body"><div class="hiw-step-num">1</div><p class="hiw-step-text">Enter your school details and iSkool will <strong>set up your classes, subjects and learner accounts</strong> automatically.</p></div>
       </div>
-      <div class="hiw-card">
+      <div class="hiw-card sr sr-d1">
         <div class="hiw-mockup" id="hiw-mockup-2">
           <div class="fake-cursor" id="cursor-2" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="quiz-ui" id="quiz-ui">
@@ -1461,7 +1467,7 @@ function toggleMenu() {
         </div>
         <div class="hiw-step-body"><div class="hiw-step-num">2</div><p class="hiw-step-text">Create quizzes, set assignments and <strong>track syllabus coverage</strong> from one dashboard — built for SA teachers.</p></div>
       </div>
-      <div class="hiw-card">
+      <div class="hiw-card sr sr-d2">
         <div class="hiw-mockup" id="hiw-mockup-3">
           <div class="fake-cursor" id="cursor-3" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
           <div class="analytics-ui" id="analytics-ui">
@@ -1485,8 +1491,8 @@ function toggleMenu() {
 
 <section class="faq-section">
   <div class="faq-inner">
-    <div class="faq-header"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
-    <div class="faq-accordion" id="faqAccordion">
+    <div class="faq-header sr"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
+    <div class="faq-accordion sr sr-d1" id="faqAccordion">
       <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.</div></div>
       <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.</div></div>
       <div class="faq-item open"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer open">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
@@ -1494,7 +1500,7 @@ function toggleMenu() {
       <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.</div></div>
       <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.</div></div>
     </div>
-    <div class="faq-cta"><a href="#" class="faq-button">Apply for Free Pilot →</a></div>
+    <div class="faq-cta sr sr-d2"><a href="#" class="faq-button">Apply for Free Pilot →</a></div>
   </div>
 </section>
 
@@ -1638,6 +1644,17 @@ function countUp(id, from, to, dur, suffix, decimals) {
     if (p < 1) requestAnimationFrame(step);
   })(performance.now());
 }
+
+/* ── Global scroll-reveal observer ── */
+const srObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('sr-visible');
+      srObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
 </script>
 
 <footer class="footer">
