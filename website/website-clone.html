@@ -194,6 +194,308 @@ nav {
   .copy-cta { width: 100%; justify-content: center; }
   .table-mini th:nth-child(2), .table-mini td:nth-child(2) { display: none; }
 }
+
+/* ═══════════════════════════
+   FEATURES SECTION (AI Invigilator + Analytics)
+═══════════════════════════ */
+.features-section {
+  background: #08080c;
+  padding: 100px 0 120px;
+}
+
+.features-header {
+  text-align: center;
+  padding: 0 5% 72px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.feat-eyebrow {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 16px;
+}
+.features-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 800; line-height: 1.08;
+  letter-spacing: -2px; margin-bottom: 14px;
+}
+.features-header h2 span { color: var(--gold); }
+.features-header p {
+  color: rgba(255,255,255,0.4);
+  font-size: 17px; line-height: 1.7;
+}
+
+.feat-row {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 5% 100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.85s ease, transform 0.85s ease;
+}
+.feat-row.visible { opacity:1; transform:translateY(0); }
+.feat-row.reverse { direction: rtl; }
+.feat-row.reverse > * { direction: ltr; }
+
+.feat-copy-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.feat-copy-eyebrow.teal { color: var(--teal); }
+.feat-copy-eyebrow.gold { color: var(--gold); }
+.eyebrow-line {
+  display: inline-block;
+  width: 28px; height: 2px; border-radius: 999px; flex-shrink: 0;
+}
+.teal .eyebrow-line { background: var(--teal); }
+.gold .eyebrow-line { background: var(--gold); }
+
+.feat-copy h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -1.2px; margin-bottom: 18px;
+}
+.feat-copy h3 em { font-style: normal; }
+.feat-copy h3 em.teal { color: var(--teal); }
+.feat-copy h3 em.gold { color: var(--gold); }
+
+.feat-copy p {
+  font-size: 15.5px; color: rgba(255,255,255,0.45);
+  line-height: 1.78; margin-bottom: 28px;
+  max-width: 440px;
+}
+
+.feat-bullets {
+  display: flex; flex-direction: column;
+  gap: 13px; margin-bottom: 36px;
+}
+.feat-bullet {
+  display: flex; align-items: flex-start;
+  gap: 12px; font-size: 14.5px;
+  color: rgba(255,255,255,0.72);
+}
+.bullet-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; margin-top: 1px;
+}
+.bullet-dot.teal {
+  background: rgba(79,209,197,0.15);
+  border: 1px solid rgba(79,209,197,0.35);
+  color: var(--teal);
+}
+.bullet-dot.gold {
+  background: rgba(245,200,66,0.15);
+  border: 1px solid rgba(245,200,66,0.35);
+  color: var(--gold);
+}
+
+.feat-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px; border-radius: 999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feat-cta:hover { transform: translateY(-2px); }
+.feat-cta.teal {
+  background: var(--teal); color: #061a18;
+  box-shadow: 0 4px 24px rgba(79,209,197,0.3);
+}
+.feat-cta.teal:hover { box-shadow: 0 8px 36px rgba(79,209,197,0.45); }
+.feat-cta.gold {
+  background: var(--gold); color: #1a1100;
+  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
+}
+.feat-cta.gold:hover { box-shadow: 0 8px 36px rgba(245,200,66,0.45); }
+
+.feat-mockup-wrap { position: relative; }
+
+.feat-float {
+  position: absolute;
+  bottom: -22px; right: -18px;
+  background: #1c1c26;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 14px 20px;
+  box-shadow: 0 20px 56px rgba(0,0,0,0.55);
+  min-width: 150px;
+  animation: floatBob 4s ease-in-out infinite;
+  z-index: 10;
+}
+@keyframes floatBob {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.float-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px; font-weight: 800;
+}
+.float-val.teal { color: var(--teal); }
+.float-val.gold { color: var(--gold); }
+.float-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 3px;
+}
+
+.mock-panel {
+  background: #13131a;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+}
+.mock-topbar {
+  background: #0d0d14;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mock-dots { display: flex; gap: 6px; }
+.mock-dot  { width: 10px; height: 10px; border-radius: 50%; }
+.mock-topbar-title {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin-left: 8px;
+}
+.mock-body { padding: 20px; }
+
+.inv-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 10px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.inv-row.flagged {
+  background: rgba(249,115,22,0.08);
+  border-color: rgba(249,115,22,0.25);
+  animation: pulseRow 2s ease-in-out infinite;
+}
+.inv-row.exited {
+  background: rgba(248,81,73,0.07);
+  border-color: rgba(248,81,73,0.2);
+  animation: pulseRowRed 2.4s ease-in-out infinite;
+}
+@keyframes pulseRow    { 0%,100%{background:rgba(249,115,22,0.08);} 50%{background:rgba(249,115,22,0.16);} }
+@keyframes pulseRowRed { 0%,100%{background:rgba(248,81,73,0.07);} 50%{background:rgba(248,81,73,0.14);} }
+
+.inv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.inv-dot.green  { background: #00c47a; box-shadow: 0 0 6px #00c47a88; animation: dotBlink 1.6s ease-in-out infinite; }
+.inv-dot.orange { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.6); }
+.inv-dot.red    { background: #f85149; box-shadow: 0 0 5px rgba(248,81,73,0.6); }
+@keyframes dotBlink { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+
+.inv-name   { font-size: 13.5px; color: rgba(255,255,255,0.85); flex: 1; }
+.inv-status { font-size: 11.5px; font-weight: 600; }
+.inv-status.ok   { color: rgba(255,255,255,0.3); }
+.inv-status.warn { color: var(--orange); }
+.inv-status.bad  { color: #f85149; }
+
+.inv-summary {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.inv-stat {
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px; padding: 12px;
+  text-align: center;
+}
+.inv-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+}
+.inv-stat-val.teal   { color: var(--teal); }
+.inv-stat-val.orange { color: var(--orange); }
+.inv-stat-val.red    { color: #f85149; }
+.inv-stat-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 3px;
+}
+
+.live-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 10.5px; color: rgba(255,255,255,0.35);
+  margin-bottom: 14px;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #00c47a;
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.5;} }
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.anal-stat {
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px; padding: 14px;
+  text-align: center;
+}
+.anal-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 30px; font-weight: 800;
+}
+.anal-stat-val.teal { color: var(--teal); }
+.anal-stat-val.gold { color: var(--gold); }
+.anal-stat-sub  { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+.anal-stat-trend { font-size: 10px; font-weight: 700; margin-top: 3px; color: #00c47a; }
+
+.bar-chart { display: flex; flex-direction: column; gap: 9px; }
+.bar-row   { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 11.5px; color: rgba(255,255,255,0.4); width: 62px; flex-shrink: 0; }
+.bar-track {
+  flex: 1; height: 7px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px; overflow: hidden;
+}
+.bar-fill  {
+  height: 100%; border-radius: 999px;
+  width: 0;
+  transition: width 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.bar-fill.teal   { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.bar-fill.gold   { background: var(--gold); }
+.bar-fill.orange { background: var(--orange); }
+.bar-fill.soft   { background: rgba(79,209,197,0.45); }
+.bar-val { font-size: 11.5px; color: rgba(255,255,255,0.45); width: 32px; text-align: right; }
+
+.feat-divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  max-width: 1160px; margin: 0 auto 80px;
+  padding: 0 5%;
+}
+
+@media (max-width: 900px) {
+  .feat-row { grid-template-columns: 1fr; gap: 48px; }
+  .feat-row.reverse { direction: ltr; }
+  .feat-float { display: none; }
+}
+@media (max-width: 600px) {
+  .features-section { padding: 72px 0 80px; }
+  .feat-row { padding-bottom: 64px; }
+  .feat-copy h3 { font-size: 26px; }
+  .feat-cta { width: 100%; justify-content: center; }
+}
 </style>
 </head>
 <body>
@@ -648,48 +950,7 @@ startCardCycle('panel-0');
   </div>
 </section>
 
-<!-- ===================== SOCIAL PROOF SECTION ===================== -->
 <style>
-.proof-section { background: #ece8e0; padding: 100px 0 110px; overflow: hidden; }
-.proof-inner { text-align: center; padding: 0 5%; margin-bottom: 48px; }
-.proof-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
-.proof-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 12px; }
-.proof-sub { font-size: 16px; color: #666; margin-bottom: 32px; }
-.proof-filters { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.proof-filter { padding: 11px 26px; border-radius: 999px; border: 2px solid #ccc; background: white; color: #111; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
-.proof-filter.active { background: #111; color: #fff; border-color: #111; }
-.proof-track-outer { position: relative; width: 100%; overflow: hidden; margin-top: 48px; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%); }
-.proof-track { display: flex; gap: 24px; width: max-content; animation: scrollLeft 32s linear infinite; cursor: grab; user-select: none; }
-.proof-track:hover { animation-play-state: paused; }
-.proof-track.dragging { animation-play-state: paused; cursor: grabbing; }
-@keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-.phone-card { flex-shrink: 0; width: 220px; height: 380px; border-radius: 36px; background: #1a1a1a; border: 3px solid #2a2a2a; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
-.phone-card:hover { transform: scale(1.04); }
-.phone-card::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 60px; height: 8px; background: #000; border-radius: 999px; z-index: 10; }
-.phone-screen { position: absolute; inset: 0; border-radius: 34px; overflow: hidden; background: #2a2a2a; display: flex; align-items: center; justify-content: center; }
-.phone-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); z-index: 2; border-radius: 0 0 34px 34px; }
-.phone-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 54px; height: 54px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5; font-size: 18px; color: #111; box-shadow: 0 4px 20px rgba(245,200,66,0.5); }
-.phone-niche { position: absolute; bottom: 56px; left: 16px; background: var(--gold); color: #111; font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; z-index: 6; }
-.phone-views { position: absolute; bottom: 20px; left: 16px; z-index: 6; color: white; }
-.phone-views-count { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
-.phone-views-label { font-size: 12px; color: rgba(255,255,255,0.75); display: inline; margin-left: 4px; }
-.phone-views-handle { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-.phone-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #2a2a2a 0%, #1a1a1a 100%); }
-.phone-placeholder-icon { font-size: 40px; opacity: 0.15; }
-.proof-track-mobile { display: none; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 5% 12px; margin-top: 40px; }
-.proof-track-mobile::-webkit-scrollbar { display: none; }
-.proof-track-mobile-inner { display: flex; gap: 16px; width: max-content; padding: 8px 0; }
-.phone-card-mob { flex-shrink: 0; width: 200px; height: 350px; border-radius: 32px; background: #1a1a1a; border: 3px solid #2a2a2a; position: relative; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
-.phone-card-mob::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 55px; height: 7px; background: #000; border-radius: 999px; z-index: 10; }
-.phone-card-mob.featured { width: 240px; height: 420px; border-radius: 36px; }
-@media (max-width: 768px) {
-  .proof-track-outer { display: none; }
-  .proof-track-mobile { display: block; }
-  .proof-section { padding: 72px 0 80px; }
-  .proof-heading { letter-spacing: -1px; }
-}
-
-/* ===================== FOOTER ===================== */
 .footer {
   background: #0a0a0a;
   color: #ddd;
@@ -792,49 +1053,7 @@ startCardCycle('panel-0');
 }
 </style>
 
-<section class="proof-section">
-  <div class="proof-inner">
-    <div class="proof-eyebrow">REAL RESULTS</div>
-    <h2 class="proof-heading">Wins Across Every School</h2>
-    <p class="proof-sub">Real results from real schools. See iSkool in action.</p>
-    <div class="proof-filters">
-      <button class="proof-filter active" onclick="setFilter('all', this)">All</button>
-      <button class="proof-filter" onclick="setFilter('teachers', this)">Teachers</button>
-      <button class="proof-filter" onclick="setFilter('learners', this)">Learners</button>
-    </div>
-  </div>
-  <div class="proof-track-outer" id="proofTrackOuter">
-    <div class="proof-track" id="proofTrack">
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">English</div><div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Syllabus</div><div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
-      <!-- Duplicate for seamless loop -->
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🧑‍🏫</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📚</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">English</div><div class="phone-views"><span class="phone-views-count">32</span><span class="phone-views-label">submitted</span><div class="phone-views-handle">@grade10b</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📊</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">✏️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🛡️</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">🏆</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
-      <div class="phone-card" data-cat="teachers"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">📅</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Syllabus</div><div class="phone-views"><span class="phone-views-count">60%</span><span class="phone-views-label">complete</span><div class="phone-views-handle">@mrndlovu</div></div></div>
-      <div class="phone-card" data-cat="learners"><div class="phone-screen"><div class="phone-placeholder"><div class="phone-placeholder-icon">💬</div></div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
-    </div>
-  </div>
-  <div class="proof-track-mobile" id="proofTrackMobile">
-    <div class="proof-track-mobile-inner">
-      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🧑‍🏫</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Maths</div><div class="phone-views"><span class="phone-views-count">94%</span><span class="phone-views-label">pass rate</span><div class="phone-views-handle">@grade12a</div></div></div>
-      <div class="phone-card-mob featured" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:34px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:48px;opacity:0.15;">🏆</div></div><div class="phone-overlay"></div><div class="phone-play">&#9654;</div><div class="phone-niche">Top Learner</div><div class="phone-views"><span class="phone-views-count">A+</span><span class="phone-views-label">symbol</span><div class="phone-views-handle">@amahle_d</div></div></div>
-      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">📊</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Analytics</div><div class="phone-views"><span class="phone-views-count">78%</span><span class="phone-views-label">avg score</span><div class="phone-views-handle">@msmokoena</div></div></div>
-      <div class="phone-card-mob" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">✏️</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Science</div><div class="phone-views"><span class="phone-views-count">18</span><span class="phone-views-label">days streak</span><div class="phone-views-handle">@sipho_nkosi</div></div></div>
-      <div class="phone-card-mob" data-cat="teachers"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">🛡️</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Integrity</div><div class="phone-views"><span class="phone-views-count">0</span><span class="phone-views-label">incidents</span><div class="phone-views-handle">@mrsithole</div></div></div>
-      <div class="phone-card-mob" data-cat="learners"><div class="phone-screen" style="position:absolute;inset:0;border-radius:30px;background:#222;display:flex;align-items:center;justify-content:center;"><div style="font-size:36px;opacity:0.15;">💬</div></div><div class="phone-overlay"></div><div class="phone-play" style="width:48px;height:48px;font-size:16px;">&#9654;</div><div class="phone-niche">Discussion</div><div class="phone-views"><span class="phone-views-count">24</span><span class="phone-views-label">replies</span><div class="phone-views-handle">@grade11c</div></div></div>
-    </div>
-  </div>
-</section>
+
 
 <script>
 function setFilter(cat, btn) {
@@ -849,6 +1068,207 @@ function setFilter(cat, btn) {
   });
 }
 </script>
+
+<!-- ===================== FEATURES SECTION (AI Invigilator + Analytics) ===================== -->
+<section class="features-section">
+
+  <!-- Header -->
+  <div class="features-header">
+    <span class="feat-eyebrow">World-class features</span>
+    <h2>Built for the <span>classroom</span></h2>
+    <p>The tools that separate iSkool from every other platform — purpose-built for South African high schools.</p>
+  </div>
+
+  <!-- ROW 1: AI Invigilator -->
+  <div class="feat-row" id="feat-inv">
+    <div class="feat-copy">
+      <div class="feat-copy-eyebrow teal">
+        <span class="eyebrow-line"></span>
+        AI Invigilator
+      </div>
+      <h3>Every quiz watched<br>in <em class="teal">real time</em></h3>
+      <p>iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.</p>
+      <div class="feat-bullets">
+        <div class="feat-bullet">
+          <div class="bullet-dot teal">✓</div>
+          Detects tab-switching &amp; browser minimization
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot teal">✓</div>
+          Flags anomalies per learner, per question
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot teal">✓</div>
+          Full session audit log after each quiz closes
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot teal">✓</div>
+          AI-verified &amp; tested on live learners
+        </div>
+      </div>
+      <a href="#" class="feat-cta teal">See it live →</a>
+    </div>
+
+    <div class="feat-mockup-wrap">
+      <div class="mock-panel">
+        <div class="mock-topbar">
+          <div class="mock-dots">
+            <div class="mock-dot" style="background:#f85149;"></div>
+            <div class="mock-dot" style="background:#f5c842;"></div>
+            <div class="mock-dot" style="background:#00c47a;"></div>
+          </div>
+          <span class="mock-topbar-title">AI Invigilator — Grade 12A — Live</span>
+        </div>
+        <div class="mock-body">
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            Live session · 28 learners · updating every 3s
+          </div>
+
+          <div class="inv-row">
+            <div class="inv-dot green"></div>
+            <span class="inv-name">Amahle Dube</span>
+            <span class="inv-status ok">Q 9 / 15</span>
+          </div>
+          <div class="inv-row flagged">
+            <div class="inv-dot orange"></div>
+            <span class="inv-name">Sipho Nkosi</span>
+            <span class="inv-status warn">⚠ Tab switch</span>
+          </div>
+          <div class="inv-row">
+            <div class="inv-dot green"></div>
+            <span class="inv-name">Thandi Mokoena</span>
+            <span class="inv-status ok">Q 7 / 15</span>
+          </div>
+          <div class="inv-row exited">
+            <div class="inv-dot red"></div>
+            <span class="inv-name">Lerato Khumalo</span>
+            <span class="inv-status bad">⛔ Exit detected</span>
+          </div>
+          <div class="inv-row">
+            <div class="inv-dot green"></div>
+            <span class="inv-name">Bongani Zulu</span>
+            <span class="inv-status ok">Q 11 / 15</span>
+          </div>
+          <div class="inv-row">
+            <div class="inv-dot green"></div>
+            <span class="inv-name">Nomsa Dlamini</span>
+            <span class="inv-status ok">Q 8 / 15</span>
+          </div>
+
+          <div class="inv-summary">
+            <div class="inv-stat">
+              <div class="inv-stat-val teal">25</div>
+              <div class="inv-stat-label">Active</div>
+            </div>
+            <div class="inv-stat">
+              <div class="inv-stat-val orange">2</div>
+              <div class="inv-stat-label">Flagged</div>
+            </div>
+            <div class="inv-stat">
+              <div class="inv-stat-val red">1</div>
+              <div class="inv-stat-label">Exited</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feat-float">
+        <div class="float-val teal">2</div>
+        <div class="float-label">Anomalies flagged</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feat-divider"></div>
+
+  <!-- ROW 2: Analytics -->
+  <div class="feat-row reverse" id="feat-anal">
+    <div class="feat-copy">
+      <div class="feat-copy-eyebrow gold">
+        <span class="eyebrow-line"></span>
+        Deep Analytics
+      </div>
+      <h3>See every learner's<br>story <em class="gold">at a glance</em></h3>
+      <p>Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.</p>
+      <div class="feat-bullets">
+        <div class="feat-bullet">
+          <div class="bullet-dot gold">✓</div>
+          Per-class pass rates with term-on-term trends
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot gold">✓</div>
+          Question-by-question difficulty breakdown
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot gold">✓</div>
+          One-click PDF report cards per learner
+        </div>
+        <div class="feat-bullet">
+          <div class="bullet-dot gold">✓</div>
+          Admin dashboard for principals &amp; HODs
+        </div>
+      </div>
+      <a href="#" class="feat-cta gold">Explore analytics →</a>
+    </div>
+
+    <div class="feat-mockup-wrap">
+      <div class="mock-panel">
+        <div class="mock-topbar">
+          <div class="mock-dots">
+            <div class="mock-dot" style="background:#f85149;"></div>
+            <div class="mock-dot" style="background:#f5c842;"></div>
+            <div class="mock-dot" style="background:#00c47a;"></div>
+          </div>
+          <span class="mock-topbar-title">Analytics — Term 2 Overview</span>
+        </div>
+        <div class="mock-body">
+          <div class="analytics-grid">
+            <div class="anal-stat">
+              <div class="anal-stat-val teal" id="analPct">0%</div>
+              <div class="anal-stat-sub">Pass Rate</div>
+              <div class="anal-stat-trend">↑ 10% vs Term 1</div>
+            </div>
+            <div class="anal-stat">
+              <div class="anal-stat-val gold" id="analAvg">0</div>
+              <div class="anal-stat-sub">Class Average</div>
+              <div class="anal-stat-trend">↑ 6.1 pts</div>
+            </div>
+          </div>
+
+          <div class="bar-chart">
+            <div class="bar-row">
+              <span class="bar-label">Grade 12A</span>
+              <div class="bar-track"><div class="bar-fill teal" id="bar1"></div></div>
+              <span class="bar-val">94%</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Grade 11B</span>
+              <div class="bar-track"><div class="bar-fill gold" id="bar2"></div></div>
+              <span class="bar-val">78%</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Grade 10A</span>
+              <div class="bar-track"><div class="bar-fill soft" id="bar3"></div></div>
+              <span class="bar-val">62%</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Grade 12B</span>
+              <div class="bar-track"><div class="bar-fill orange" id="bar4"></div></div>
+              <span class="bar-val">71%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feat-float" style="bottom:-22px; right:-18px;">
+        <div class="float-val gold">94%</div>
+        <div class="float-label">Top class this term</div>
+      </div>
+    </div>
+  </div>
+
+</section>
 
 <!-- ===================== HOW IT WORKS SECTION ===================== -->
 <style>
@@ -1774,5 +2194,42 @@ document.querySelectorAll('.faq-question').forEach(button => {
 
   </div>
 </footer>
+
+<script>
+/* ── Scroll reveal ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('visible');
+
+    if (entry.target.id === 'feat-anal') {
+      setTimeout(() => {
+        document.getElementById('bar1').style.width = '94%';
+        document.getElementById('bar2').style.width = '78%';
+        document.getElementById('bar3').style.width = '62%';
+        document.getElementById('bar4').style.width = '71%';
+        countUp('analPct', 0, 78, 1300, '%');
+        countUp('analAvg', 0, 74.2, 1300, '', 1);
+      }, 250);
+    }
+  });
+}, { threshold: 0.18 });
+
+document.querySelectorAll('.feat-row').forEach(el => observer.observe(el));
+
+function countUp(id, from, to, dur, suffix, decimals) {
+  decimals = decimals || 0;
+  suffix = suffix || '';
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now();
+  (function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * ease).toFixed(decimals) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  })(performance.now());
+}
+</script>
 </body>
 </html>
