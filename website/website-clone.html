@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>iSkool — The LMS for South African High Schools</title>
+<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -61,7 +62,7 @@ nav {
 .mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
 /* HERO */
-.hero { padding: 172px 20px 80px; text-align: center; position: relative; background: #fff; overflow: hidden; }
+.hero { padding: 96px 20px 80px; text-align: center; position: relative; background: #fff; overflow: hidden; }
 .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 28px 28px; opacity: 0.45; pointer-events: none; }
 .trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
 .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
@@ -298,14 +299,14 @@ nav {
   .nav-links, .nav-actions { display: none; }
   .nav-hamburger { display: flex; }
   .feature-inner { grid-template-columns: 1fr; gap: 48px; padding-top: 48px; }
-  .feature-inner > div:first-child { order: 2; }
-  .feature-copy { order: 1; }
+  .feature-inner > div:first-child { order: 1; }
+  .feature-copy { order: 2; }
   .stack-wrapper { height: 340px; }
 }
 
 /* MOBILE */
 @media (max-width: 600px) {
-  .hero { padding: 130px 20px 80px; }
+  .hero { padding: 88px 20px 80px; }
   .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
   .hero-buttons { flex-direction: column; align-items: center; }
   .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
@@ -470,7 +471,7 @@ nav {
   <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
   <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
   <div class="hero-buttons sr sr-d3">
-    <a href="teacher_demo.html" class="btn btn-outline"><span class="play-icon">&#9654;</span>See Demo</a>
+    <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
     <a href="#" class="btn btn-primary">Apply for Free Pilot &#8594;</a>
   </div>
 </section>
@@ -1669,6 +1670,236 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
     <a href="learner_demo.html" class="footer-cta">Apply for Free Pilot →</a>
   </div>
 </footer>
+
+
+<!-- ===================== DEMO MODAL ===================== -->
+<style>
+.demo-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.demo-modal-overlay.open {
+  display: flex;
+  animation: dmFadeIn 0.22s ease;
+}
+@keyframes dmFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.demo-modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 32px 32px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  position: relative;
+  animation: dmSlideUp 0.28s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes dmSlideUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.demo-modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+  line-height: 1;
+}
+.demo-modal-close:hover { background: #e0e0e0; }
+.demo-modal-eyebrow {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #4fd1c5; margin-bottom: 10px;
+}
+.demo-modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800; line-height: 1.15;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 6px;
+}
+.demo-modal-sub {
+  font-size: 14.5px; color: #777;
+  margin-bottom: 28px; line-height: 1.55;
+}
+.demo-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.demo-card {
+  border: 2px solid #eee;
+  border-radius: 16px;
+  padding: 20px 18px;
+  text-decoration: none;
+  color: #111;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  cursor: pointer;
+  background: #fff;
+}
+.demo-card:hover:not(.demo-card-locked) {
+  border-color: #4fd1c5;
+  box-shadow: 0 8px 28px rgba(79,209,197,0.18);
+  transform: translateY(-3px);
+}
+.demo-card-locked {
+  opacity: 0.62;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+.demo-card-locked:hover { transform: none; box-shadow: none; border-color: #eee; }
+.demo-card-icon {
+  font-size: 26px; line-height: 1;
+}
+.demo-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  color: #111; line-height: 1.2;
+}
+.demo-card-desc {
+  font-size: 12.5px; color: #888; line-height: 1.5;
+}
+.demo-card-action {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 700;
+  color: #4fd1c5; margin-top: 4px;
+}
+.demo-card-locked .demo-card-action {
+  color: #bbb;
+}
+.demo-lock-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10.5px; font-weight: 700;
+  color: #999;
+  letter-spacing: 0.3px;
+}
+.demo-lock-icon {
+  font-size: 13px;
+}
+.demo-card-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+.demo-card-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #111;
+}
+.demo-card-locked:hover .demo-card-tooltip { display: block; }
+
+@media (max-width: 480px) {
+  .demo-modal { padding: 28px 20px 24px; border-radius: 20px; }
+  .demo-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .demo-card { padding: 16px 14px; }
+  .demo-card-icon { font-size: 22px; }
+  .demo-card-name { font-size: 14px; }
+}
+</style>
+
+<!-- Modal HTML -->
+<div class="demo-modal-overlay" id="demoModalOverlay" onclick="closeDemoModalOutside(event)">
+  <div class="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demoModalTitle">
+    <button class="demo-modal-close" onclick="closeDemoModal()" aria-label="Close">&times;</button>
+    <div class="demo-modal-eyebrow">Live Demo</div>
+    <div class="demo-modal-title" id="demoModalTitle">Which dashboard would you like to explore?</div>
+    <p class="demo-modal-sub">Each role has its own experience. Pick yours and see iSkool in action.</p>
+    <div class="demo-cards">
+
+      <!-- Learner — LIVE -->
+      <a href="learner_demo.html" class="demo-card">
+        <div class="demo-card-icon">🎓</div>
+        <div class="demo-card-name">Learner</div>
+        <div class="demo-card-desc">Quizzes, assignments, results &amp; resources</div>
+        <div class="demo-card-action">Explore &rarr;</div>
+      </a>
+
+      <!-- Teacher — LIVE -->
+      <a href="teacher_demo.html" class="demo-card">
+        <div class="demo-card-icon">🧑‍🏫</div>
+        <div class="demo-card-name">Teacher</div>
+        <div class="demo-card-desc">Set assessments, track class performance</div>
+        <div class="demo-card-action">Explore &rarr;</div>
+      </a>
+
+      <!-- Admin — LOCKED -->
+      <div class="demo-card demo-card-locked">
+        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
+        <div class="demo-card-icon">🏫</div>
+        <div class="demo-card-name">Admin</div>
+        <div class="demo-card-desc">School-wide oversight &amp; management</div>
+        <div class="demo-card-action">Coming Soon</div>
+        <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
+      </div>
+
+      <!-- Principal — LOCKED -->
+      <div class="demo-card demo-card-locked">
+        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
+        <div class="demo-card-icon">👔</div>
+        <div class="demo-card-name">Principal</div>
+        <div class="demo-card-desc">Analytics, reports &amp; school performance</div>
+        <div class="demo-card-action">Coming Soon</div>
+        <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function openDemoModal() {
+  const overlay = document.getElementById('demoModalOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDemoModal() {
+  const overlay = document.getElementById('demoModalOverlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeDemoModalOutside(e) {
+  if (e.target === document.getElementById('demoModalOverlay')) closeDemoModal();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDemoModal();
+});
+</script>
 
 </body>
 </html>
