@@ -329,7 +329,7 @@ nav {
 /* ═══════════════════════════
    FEATURES SECTION (AI Invigilator + Analytics)
 ═══════════════════════════ */
-.features-section { background: #08080c; padding: 100px 0 120px; }
+.features-section { background: #08080c; padding: 100px 0 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 3; }
 .features-header { text-align: center; padding: 0 5% 72px; max-width: 700px; margin: 0 auto; }
 .feat-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
 .features-header h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 14px; }
@@ -452,16 +452,16 @@ nav {
   <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
-</nav>
 
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#">Platform</a>
-  <a href="#">How it Works</a>
-  <a href="#">For Schools</a>
-  <button class="nav-login" style="border-bottom:1px solid #f0f0f0;">Log In</button>
-  <button class="mobile-pilot">Apply for Free Pilot</button>
-</div>
+  <!-- MOBILE MENU — inside nav so position:absolute top:100% works -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#">Platform</a>
+    <a href="#">How it Works</a>
+    <a href="#">For Schools</a>
+    <button class="nav-login" style="border-bottom:1px solid #f0f0f0;">Log In</button>
+    <button class="mobile-pilot">Apply for Free Pilot</button>
+  </div>
+</nav>
 
 <!-- HERO -->
 <section class="hero">
@@ -1127,7 +1127,7 @@ function toggleMenu() {
 
 <!-- ===================== COMPARISON SECTION ===================== -->
 <style>
-.comparison-section { background: #ffffff; padding: 100px 5%; }
+.comparison-section { background: #ffffff; padding: 100px 5%; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
 .comparison-inner { max-width: 860px; margin: 0 auto; }
 .comparison-header { text-align: center; margin-bottom: 56px; }
 .comp-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
@@ -1243,7 +1243,7 @@ function toggleMenu() {
 </section>
 
 <style>
-.footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; }
+.footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 6; }
 .footer-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
 .footer-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: white; text-decoration: none; }
 .footer-logo svg { width: 48px; height: 48px; }
@@ -1341,7 +1341,7 @@ function toggleMenu() {
 
 <!-- ===================== HOW IT WORKS ===================== -->
 <style>
-.hiw-section { background: #ffffff; padding: 110px 5% 120px; }
+.hiw-section { background: #ffffff; padding: 110px 5% 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 4; }
 .hiw-inner { max-width: 1160px; margin: 0 auto; }
 .hiw-header { text-align: center; margin-bottom: 64px; }
 .hiw-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
@@ -1408,7 +1408,7 @@ function toggleMenu() {
 .analytics-improve.visible { opacity: 1; }
 @media (max-width: 900px) { .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } .hiw-mockup { min-height: 240px; } }
 @media (max-width: 600px) { .hiw-section { padding: 72px 5% 80px; } .hiw-heading { letter-spacing: -1px; } }
-.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; }
+.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 5; }
 .faq-inner { max-width: 720px; margin: 0 auto; }
 .faq-header { text-align: center; margin-bottom: 60px; }
 .faq-small { color: #f5c842; font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
