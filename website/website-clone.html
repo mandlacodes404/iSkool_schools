@@ -202,13 +202,12 @@ nav {
 .stack-layer[data-pos="1"] { z-index: 2; transform: translateY(56px) scale(0.95); opacity: 0.72; }
 .stack-layer[data-pos="2"] { z-index: 1; transform: translateY(104px) scale(0.905); opacity: 0.42; }
 
-/* DEMO CARDS — fixed min-height so all panels are same height */
+/* DEMO CARDS — fixed height so all cards are same size */
 .demo-card {
   background: white; color: #111; border-radius: 20px; padding: 26px;
   box-shadow: 0 25px 70px rgba(0,0,0,0.45);
   position: relative; overflow: hidden;
   font-family: 'DM Sans', sans-serif; line-height: 1.6;
-  min-height: 260px;
 }
 .demo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
 
@@ -318,7 +317,7 @@ nav {
   .stack-wrapper { height: 340px; margin-bottom: 60px; }
   .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
   .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
-  .demo-card { padding: 18px; min-height: 220px; }
+  .demo-card { padding: 18px; }
   .card-title { font-size: 16px; }
   .feature-copy h3 { font-size: 26px; }
   .feature-copy p { font-size: 15px; }
@@ -1339,76 +1338,284 @@ function toggleMenu() {
   </div>
 </section>
 
-<!-- ===================== HOW IT WORKS ===================== -->
+<!-- ===================== GET STARTED ===================== -->
 <style>
 .hiw-section { background: #ffffff; padding: 110px 5% 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 4; }
 .hiw-inner { max-width: 1160px; margin: 0 auto; }
 .hiw-header { text-align: center; margin-bottom: 64px; }
 .hiw-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .hiw-heading { font-family: 'Syne', sans-serif; font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; }
+.hiw-sub { font-size: 17px; color: #777; max-width: 520px; margin: 12px auto 0; line-height: 1.65; }
 .hiw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .hiw-card { background: #f0ede8; border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; }
-.hiw-mockup { flex: 1; min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 28px 24px 20px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.hiw-mockup { flex: 1; min-height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 28px 24px 20px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .hiw-step-body { padding: 24px 28px 32px; }
 .hiw-step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--gold); color: #111; font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.hiw-step-text { font-size: 15px; color: #444; line-height: 1.65; }
+.hiw-step-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: #111; margin-bottom: 8px; line-height: 1.2; }
+.hiw-step-text { font-size: 14.5px; color: #555; line-height: 1.65; }
 .hiw-step-text strong { color: #111; }
 .fake-cursor { position: absolute; width: 18px; height: 18px; pointer-events: none; z-index: 100; transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1); }
 .fake-cursor svg { width: 18px; height: 18px; }
-.setup-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; position: relative; }
-.setup-ui-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #111; margin-bottom: 14px; }
-.setup-field-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
-.setup-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #111; background: white; margin-bottom: 12px; min-height: 38px; display: flex; align-items: center; position: relative; overflow: hidden; }
-.setup-field.active-field { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
-.setup-typed { display: inline; }
-.setup-cursor-blink { display: inline-block; width: 2px; height: 14px; background: var(--teal); margin-left: 1px; animation: blink 1s step-end infinite; vertical-align: middle; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.setup-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.setup-tag { padding: 4px 12px; background: rgba(79,209,197,0.12); color: #0d9488; border-radius: 999px; font-size: 11px; font-weight: 600; opacity: 0; transform: scale(0.8); transition: opacity 0.3s, transform 0.3s; }
-.setup-tag.visible { opacity: 1; transform: scale(1); }
-.setup-progress-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-.setup-progress-bar { flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden; }
-.setup-progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.4s ease; }
-.setup-done-badge { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; }
-.setup-done-badge.visible { opacity: 1; }
-.quiz-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; }
-.quiz-ui-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.quiz-ui-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #111; }
-.quiz-live-badge { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 0.4s; }
-.quiz-live-badge.visible { opacity: 1; }
-.quiz-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse-green 1.5s ease-in-out infinite; }
-@keyframes pulse-green { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-.quiz-name-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; color: #111; margin-bottom: 10px; min-height: 34px; display: flex; align-items: center; }
-.quiz-name-field.active-field { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
-.quiz-questions { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-.quiz-q-row { display: flex; align-items: center; gap: 8px; background: #f8f9fc; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #333; opacity: 0; transform: translateY(6px); transition: opacity 0.3s, transform 0.3s; }
-.quiz-q-row.visible { opacity: 1; transform: translateY(0); }
-.quiz-q-num { width: 20px; height: 20px; border-radius: 50%; background: var(--teal); color: white; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.quiz-meta-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-.quiz-meta-chip { background: #f0f0f0; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #555; display: flex; align-items: center; gap: 4px; }
-.quiz-meta-chip.active-field { background: rgba(79,209,197,0.1); color: #0d9488; border: 1px solid rgba(79,209,197,0.3); }
-.quiz-launch-btn { width: 100%; padding: 10px; background: #111; color: white; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: center; font-family: 'DM Sans', sans-serif; opacity: 0.3; transition: opacity 0.4s, background 0.4s; }
-.quiz-launch-btn.ready { opacity: 1; background: #10b981; }
-.learner-count { font-size: 12px; color: #10b981; font-weight: 700; text-align: center; margin-top: 6px; opacity: 0; transition: opacity 0.3s; }
-.learner-count.visible { opacity: 1; }
-.analytics-ui { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; }
-.analytics-ui-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px; }
-.analytics-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.analytics-stat { background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center; }
-.analytics-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; transition: all 0.5s ease; }
-.analytics-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
-.analytics-bar-row { margin-bottom: 6px; }
-.analytics-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-bottom: 3px; }
-.analytics-bar-track { height: 7px; background: #eee; border-radius: 999px; overflow: hidden; }
-.analytics-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.8s ease; }
-.analytics-alert-row { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-.analytics-alert { display: flex; align-items: center; gap: 8px; background: #fff5f5; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; color: #333; opacity: 0; transform: translateX(-8px); transition: opacity 0.4s, transform 0.4s; border-left: 3px solid #f85149; }
-.analytics-alert.visible { opacity: 1; transform: translateX(0); }
-.analytics-improve { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-top: 8px; opacity: 0; transition: opacity 0.4s; }
-.analytics-improve.visible { opacity: 1; }
-@media (max-width: 900px) { .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } .hiw-mockup { min-height: 240px; } }
-@media (max-width: 600px) { .hiw-section { padding: 72px 5% 80px; } .hiw-heading { letter-spacing: -1px; } }
-.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 5; }
+.ui-panel { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; position: relative; }
+.ui-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #111; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.ui-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+.ui-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #111; background: white; margin-bottom: 12px; min-height: 38px; display: flex; align-items: center; overflow: hidden; }
+.ui-field.active { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
+.typed-text { display: inline; }
+.cursor-blink { display: inline-block; width: 2px; height: 14px; background: var(--teal); margin-left: 1px; animation: cur-blink 1s step-end infinite; vertical-align: middle; }
+@keyframes cur-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.gs-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.gs-tag { padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; opacity: 0; transform: scale(0.8); transition: opacity 0.3s, transform 0.3s; }
+.gs-tag.teal { background: rgba(79,209,197,0.12); color: #0d9488; }
+.gs-tag.gold { background: rgba(245,200,66,0.15); color: #92650a; }
+.gs-tag.blue { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.gs-tag.visible { opacity: 1; transform: scale(1); }
+.gs-prog-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.gs-prog-track { flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden; }
+.gs-prog-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.4s ease; }
+.gs-prog-pct { font-size: 11px; color: #888; }
+.gs-done { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; background: #d1fae5; color: #065f46; }
+.gs-done.visible { opacity: 1; }
+.gs-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.gs-stat-box { background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center; }
+.gs-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.gs-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+.gs-action-btn { width: 100%; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: center; font-family: 'DM Sans', sans-serif; opacity: 0.3; transition: opacity 0.4s, background 0.4s; color: #111; background: var(--gold); margin-top: 10px; }
+.gs-action-btn.ready { opacity: 1; }
+.gs-live-pulse { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: gs-pg 1.5s ease-in-out infinite; }
+.gs-live-pill { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; }
+.gs-live-pill.visible { opacity: 1; }
+@keyframes gs-pg { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+.gs-alert-row { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.gs-alert-item { display: flex; align-items: center; gap: 8px; background: #f0fdf8; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; color: #333; opacity: 0; transform: translateX(-8px); transition: opacity 0.35s, transform 0.35s; border-left: 3px solid var(--teal); }
+.gs-alert-item.visible { opacity: 1; transform: translateX(0); }
+.gs-code-block { background: #1a1a1a; border-radius: 10px; padding: 12px 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #e0e0e0; margin-bottom: 10px; line-height: 1.6; }
+.gs-code-line { opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; }
+.gs-code-line.visible { opacity: 1; transform: translateY(0); }
+.gs-code-kw { color: #4fd1c5; }
+.gs-code-str { color: #f5c842; }
+.gs-copy-btn { display: flex; align-items: center; justify-content: space-between; background: #f0f0f0; border-radius: 8px; padding: 7px 12px; font-size: 11.5px; color: #555; margin-bottom: 8px; opacity: 0; transition: opacity 0.3s; }
+.gs-copy-btn.visible { opacity: 1; }
+.gs-copy-action { font-size: 10px; font-weight: 700; color: var(--teal); }
+.gs-domain-row { display: flex; align-items: center; gap: 8px; background: #f8f9fc; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 12.5px; transition: opacity 0.4s; }
+.gs-domain-status { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.gs-status-active { background: #d1fae5; color: #065f46; }
+.gs-status-pending { background: #fef9e6; color: #92650a; }
+@media (max-width: 900px) { .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } .hiw-mockup { min-height: 260px; } }
+@media (max-width: 600px) { .hiw-section { padding: 72px 5% 80px; } .hiw-heading { letter-spacing: -1px; } .hiw-step-body { padding: 20px 22px 28px; } }
+</style>
+
+<section class="hiw-section">
+  <div class="hiw-inner">
+    <div class="hiw-header sr">
+      <div class="hiw-eyebrow">GET STARTED</div>
+      <h2 class="hiw-heading">Up and Running in Three Steps</h2>
+      <p class="hiw-sub">From application to your first live class — iSkool gets your school set up fast, with zero technical headaches.</p>
+    </div>
+    <div class="hiw-grid">
+
+      <!-- CARD 1: Apply for Pilot -->
+      <div class="hiw-card sr">
+        <div class="hiw-mockup" id="hiw-mockup-1">
+          <div class="fake-cursor" id="cur-1" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="apply-ui">
+            <div class="ui-title">📋 Pilot Application</div>
+            <div class="ui-label">School Name</div>
+            <div class="ui-field active" id="apply-school"><span class="typed-text" id="apply-school-text"></span><span class="cursor-blink" id="apply-blink"></span></div>
+            <div class="ui-label">Province</div>
+            <div class="ui-field" id="apply-province-field"><span class="typed-text" id="apply-province-text"></span></div>
+            <div class="ui-label">No. of Learners</div>
+            <div class="ui-field" id="apply-learners-field"><span class="typed-text" id="apply-learners-text"></span></div>
+            <div class="ui-label">Interested In</div>
+            <div class="gs-tag-row" id="apply-tags">
+              <span class="gs-tag teal" id="atag-q">Quizzes</span>
+              <span class="gs-tag teal" id="atag-a">Analytics</span>
+              <span class="gs-tag gold" id="atag-r">Reports</span>
+              <span class="gs-tag blue" id="atag-s">Syllabus</span>
+            </div>
+            <div class="gs-prog-row"><div class="gs-prog-track"><div class="gs-prog-fill" id="apply-prog"></div></div><span class="gs-prog-pct" id="apply-pct">0%</span></div>
+            <div class="gs-action-btn" id="apply-btn" style="margin-top:10px;">Submit Application</div>
+            <div class="gs-done" id="apply-done">🎉 Application Submitted!</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">1</div>
+          <div class="hiw-step-title">Apply for the Free Pilot</div>
+          <p class="hiw-step-text">Fill in a quick application — school name, province, and learner count. <strong>We review every application within 48 hours</strong> and reach out to confirm your pilot slot.</p>
+        </div>
+      </div>
+
+      <!-- CARD 2: Domain & School Setup -->
+      <div class="hiw-card sr sr-d1">
+        <div class="hiw-mockup" id="hiw-mockup-2">
+          <div class="fake-cursor" id="cur-2" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="setup-ui-gs">
+            <div class="ui-title">🌐 School Setup</div>
+            <div class="ui-label">Your iSkool Domain</div>
+            <div class="gs-domain-row" id="gs-domain-row" style="opacity:0;">
+              <span style="font-size:16px;">🔗</span>
+              <span style="font-weight:700;color:#111;flex:1;">landulwazi.iskool.co.za</span>
+              <span class="gs-domain-status gs-status-active" id="gs-domain-status">● Live</span>
+            </div>
+            <div class="ui-label">Grades Configured</div>
+            <div class="gs-tag-row"><span class="gs-tag teal" id="sg-10">Grade 10</span><span class="gs-tag teal" id="sg-11">Grade 11</span><span class="gs-tag teal" id="sg-12">Grade 12</span></div>
+            <div class="ui-label">Subjects Loaded</div>
+            <div class="gs-tag-row"><span class="gs-tag gold" id="ss-m">Maths</span><span class="gs-tag gold" id="ss-s">Science</span><span class="gs-tag gold" id="ss-e">English</span><span class="gs-tag blue" id="ss-l">Life Sciences</span></div>
+            <div class="gs-stat-row" id="gs-stats" style="opacity:0;transition:opacity 0.5s;">
+              <div class="gs-stat-box"><div class="gs-stat-val" style="color:var(--teal);" id="st-teachers">0</div><div class="gs-stat-label">Teachers Added</div></div>
+              <div class="gs-stat-box"><div class="gs-stat-val" style="color:var(--gold);" id="st-classes">0</div><div class="gs-stat-label">Classes Created</div></div>
+            </div>
+            <div class="gs-done" id="setup-done-gs">✓ School is Ready</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">2</div>
+          <div class="hiw-step-title">Get Your Domain &amp; School Set Up</div>
+          <p class="hiw-step-text">We configure your custom iSkool domain, load your grades and subjects, and <strong>set up every class automatically</strong>. No IT department needed — we handle everything.</p>
+        </div>
+      </div>
+
+      <!-- CARD 3: Share Codes & Go Live -->
+      <div class="hiw-card sr sr-d2">
+        <div class="hiw-mockup" id="hiw-mockup-3">
+          <div class="fake-cursor" id="cur-3" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="golive-ui">
+            <div class="ui-title">🚀 Go Live</div>
+            <div class="ui-label">Access Codes Generated</div>
+            <div class="gs-code-block" id="gs-code-block">
+              <div class="gs-code-line" id="cl1"><span class="gs-code-kw">Grade 12A</span> — <span class="gs-code-str">GR12A-LAND-2025</span></div>
+              <div class="gs-code-line" id="cl2"><span class="gs-code-kw">Grade 11B</span> — <span class="gs-code-str">GR11B-LAND-2025</span></div>
+              <div class="gs-code-line" id="cl3"><span class="gs-code-kw">Grade 10A</span> — <span class="gs-code-str">GR10A-LAND-2025</span></div>
+            </div>
+            <div class="gs-copy-btn" id="gs-copy-btn"><span>📋 Copy all codes to share</span><span class="gs-copy-action">COPY</span></div>
+            <div class="ui-label" style="margin-top:2px;">Learners Joining</div>
+            <div class="gs-alert-row">
+              <div class="gs-alert-item" id="jf1">🎓 Amahle Dube joined <strong>Grade 12A</strong></div>
+              <div class="gs-alert-item" id="jf2">🎓 Sipho Nkosi joined <strong>Grade 12A</strong></div>
+              <div class="gs-alert-item" id="jf3">🎓 Thandi Mokoena joined <strong>Grade 11B</strong></div>
+            </div>
+            <div class="gs-live-pill" id="gs-live-count"><div class="gs-live-pulse"></div><span id="gs-live-num">0</span> learners online now</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">3</div>
+          <div class="hiw-step-title">Share Access Codes &amp; Go Live</div>
+          <p class="hiw-step-text">Share unique class access codes with your learners. They sign in instantly — <strong>no email required, no app download</strong>. Your school is live and learning from day one.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+/* ── Cursor helper ── */
+function gsCursor(curEl, targetEl, offX, offY) {
+  const mock = curEl.parentElement;
+  const mR = mock.getBoundingClientRect();
+  const tR = targetEl.getBoundingClientRect();
+  curEl.style.left = (tR.left - mR.left + (offX !== undefined ? offX : tR.width / 2)) + 'px';
+  curEl.style.top  = (tR.top  - mR.top  + (offY !== undefined ? offY : tR.height / 2)) + 'px';
+}
+function gsType(el, text, speed, cb) {
+  el.textContent = '';
+  let i = 0;
+  const t = setInterval(() => { el.textContent += text[i++]; if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 280); } }, speed);
+}
+
+/* ── Card 1: Apply ── */
+function gsRunApply() {
+  const cur = document.getElementById('cur-1');
+  const sF = document.getElementById('apply-school'); const sT = document.getElementById('apply-school-text'); const bl = document.getElementById('apply-blink');
+  const pF = document.getElementById('apply-province-field'); const pT = document.getElementById('apply-province-text');
+  const lF = document.getElementById('apply-learners-field'); const lT = document.getElementById('apply-learners-text');
+  const tags = ['atag-q','atag-a','atag-r','atag-s'];
+  const prog = document.getElementById('apply-prog'); const pct = document.getElementById('apply-pct');
+  const btn = document.getElementById('apply-btn'); const done = document.getElementById('apply-done');
+  sT.textContent=''; pT.textContent=''; lT.textContent='';
+  bl.style.display='inline-block'; sF.classList.add('active');
+  tags.forEach(id => document.getElementById(id).classList.remove('visible'));
+  prog.style.width='0%'; pct.textContent='0%';
+  btn.classList.remove('ready'); btn.style.opacity='0.3'; done.classList.remove('visible');
+  setTimeout(() => gsCursor(cur, sF, 10, 18), 200);
+  setTimeout(() => gsType(sT, 'Landulwazi Comprehensive School', 52, () => {
+    bl.style.display='none'; sF.classList.remove('active');
+    prog.style.width='25%'; pct.textContent='25%';
+    setTimeout(() => { pF.classList.add('active'); gsCursor(cur, pF, 10, 18);
+      setTimeout(() => gsType(pT, 'Gauteng', 70, () => {
+        pF.classList.remove('active'); prog.style.width='50%'; pct.textContent='50%';
+        setTimeout(() => { lF.classList.add('active'); gsCursor(cur, lF, 10, 18);
+          setTimeout(() => gsType(lT, '420', 90, () => {
+            lF.classList.remove('active'); prog.style.width='70%'; pct.textContent='70%';
+            setTimeout(() => { document.getElementById('atag-q').classList.add('visible'); prog.style.width='78%'; pct.textContent='78%'; }, 300);
+            setTimeout(() => { document.getElementById('atag-a').classList.add('visible'); prog.style.width='85%'; pct.textContent='85%'; }, 600);
+            setTimeout(() => { document.getElementById('atag-r').classList.add('visible'); prog.style.width='92%'; pct.textContent='92%'; }, 900);
+            setTimeout(() => { document.getElementById('atag-s').classList.add('visible'); prog.style.width='100%'; pct.textContent='100%'; }, 1200);
+            setTimeout(() => { btn.classList.add('ready'); btn.style.opacity='1'; gsCursor(cur, btn, btn.offsetWidth/2, 18); }, 1700);
+            setTimeout(() => { btn.style.opacity='0'; done.classList.add('visible'); setTimeout(gsRunApply, 3200); }, 2500);
+          }), 300);
+        }, 400);
+      }), 300);
+    }, 400);
+  }), 500);
+}
+
+/* ── Card 2: Setup ── */
+function gsRunSetup() {
+  const cur = document.getElementById('cur-2');
+  const domRow = document.getElementById('gs-domain-row'); const domStatus = document.getElementById('gs-domain-status');
+  const grades = ['sg-10','sg-11','sg-12']; const subjects = ['ss-m','ss-s','ss-e','ss-l'];
+  const stats = document.getElementById('gs-stats');
+  const tEl = document.getElementById('st-teachers'); const cEl = document.getElementById('st-classes');
+  const done = document.getElementById('setup-done-gs');
+  domRow.style.opacity='0'; domStatus.className='gs-domain-status gs-status-pending'; domStatus.textContent='⏳ Setting up';
+  grades.forEach(id => document.getElementById(id).classList.remove('visible'));
+  subjects.forEach(id => document.getElementById(id).classList.remove('visible'));
+  stats.style.opacity='0'; tEl.textContent='0'; cEl.textContent='0'; done.classList.remove('visible');
+  setTimeout(() => { gsCursor(cur, domRow, 80, 14); domRow.style.opacity='1'; }, 500);
+  setTimeout(() => { domStatus.className='gs-domain-status gs-status-active'; domStatus.textContent='● Live'; }, 1400);
+  setTimeout(() => { document.getElementById('sg-10').classList.add('visible'); gsCursor(cur, document.getElementById('sg-10'), 20, 10); }, 1900);
+  setTimeout(() => document.getElementById('sg-11').classList.add('visible'), 2200);
+  setTimeout(() => document.getElementById('sg-12').classList.add('visible'), 2500);
+  setTimeout(() => document.getElementById('ss-m').classList.add('visible'), 3000);
+  setTimeout(() => document.getElementById('ss-s').classList.add('visible'), 3300);
+  setTimeout(() => document.getElementById('ss-e').classList.add('visible'), 3600);
+  setTimeout(() => document.getElementById('ss-l').classList.add('visible'), 3900);
+  setTimeout(() => {
+    stats.style.opacity='1'; gsCursor(cur, stats, 60, 20);
+    let t=0,c=0;
+    const ti=setInterval(()=>{t++;tEl.textContent=t;if(t>=12)clearInterval(ti);},80);
+    const ci=setInterval(()=>{c++;cEl.textContent=c;if(c>=9)clearInterval(ci);},110);
+  }, 4400);
+  setTimeout(() => { done.classList.add('visible'); setTimeout(gsRunSetup, 3500); }, 5800);
+}
+
+/* ── Card 3: Go Live ── */
+function gsRunGoLive() {
+  const cur = document.getElementById('cur-3');
+  const cb = document.getElementById('gs-code-block');
+  const lines = ['cl1','cl2','cl3']; const cpBtn = document.getElementById('gs-copy-btn');
+  const joins = ['jf1','jf2','jf3']; const liveC = document.getElementById('gs-live-count'); const liveN = document.getElementById('gs-live-num');
+  lines.forEach(id => document.getElementById(id).classList.remove('visible'));
+  cpBtn.classList.remove('visible'); joins.forEach(id => document.getElementById(id).classList.remove('visible'));
+  liveC.classList.remove('visible'); liveN.textContent='0';
+  setTimeout(() => { gsCursor(cur, cb, 60, 12); document.getElementById('cl1').classList.add('visible'); }, 500);
+  setTimeout(() => document.getElementById('cl2').classList.add('visible'), 900);
+  setTimeout(() => document.getElementById('cl3').classList.add('visible'), 1300);
+  setTimeout(() => { cpBtn.classList.add('visible'); gsCursor(cur, cpBtn, cpBtn.offsetWidth-40, 12); }, 1900);
+  setTimeout(() => { document.getElementById('jf1').classList.add('visible'); liveC.classList.add('visible'); }, 2700);
+  setTimeout(() => { document.getElementById('jf2').classList.add('visible'); let n=1; const ni=setInterval(()=>{n++;liveN.textContent=n;if(n>=32)clearInterval(ni);},90); }, 3200);
+  setTimeout(() => { document.getElementById('jf3').classList.add('visible'); gsCursor(cur, liveC, 60, 12); }, 3700);
+  setTimeout(gsRunGoLive, 4800);
+}
+
+setTimeout(gsRunApply,  400);
+setTimeout(gsRunSetup,  900);
+setTimeout(gsRunGoLive, 1400);
+</script>
+
+<style>
+.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
 .faq-inner { max-width: 720px; margin: 0 auto; }
 .faq-header { text-align: center; margin-bottom: 60px; }
 .faq-small { color: #f5c842; font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
@@ -1427,70 +1634,6 @@ function toggleMenu() {
 .faq-button:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.4); }
 </style>
 
-<section class="hiw-section">
-  <div class="hiw-inner">
-    <div class="hiw-header sr">
-      <div class="hiw-eyebrow">HOW IT WORKS</div>
-      <h2 class="hiw-heading">Get Your School Running in Three Steps</h2>
-    </div>
-    <div class="hiw-grid">
-      <div class="hiw-card sr">
-        <div class="hiw-mockup" id="hiw-mockup-1">
-          <div class="fake-cursor" id="cursor-1" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
-          <div class="setup-ui" id="setup-ui">
-            <div class="setup-ui-title">🏫 School Setup</div>
-            <div class="setup-field-label">School Name</div>
-            <div class="setup-field active-field" id="setup-field-school"><span class="setup-typed" id="setup-school-text"></span><span class="setup-cursor-blink" id="setup-blink-1"></span></div>
-            <div class="setup-field-label">Grades</div>
-            <div class="setup-tags" id="setup-tags"><span class="setup-tag" id="tag-gr10">Grade 10</span><span class="setup-tag" id="tag-gr11">Grade 11</span><span class="setup-tag" id="tag-gr12">Grade 12</span></div>
-            <div class="setup-field-label">Subjects Added</div>
-            <div class="setup-tags" id="setup-subjects"><span class="setup-tag" id="tag-math">Mathematics</span><span class="setup-tag" id="tag-sci">Phys. Science</span><span class="setup-tag" id="tag-eng">English</span></div>
-            <div class="setup-progress-row"><div class="setup-progress-bar"><div class="setup-progress-fill" id="setup-prog"></div></div><span style="font-size:11px;color:#888;" id="setup-pct">0%</span></div>
-            <div class="setup-done-badge" id="setup-done">✓ Setup Complete</div>
-          </div>
-        </div>
-        <div class="hiw-step-body"><div class="hiw-step-num">1</div><p class="hiw-step-text">Enter your school details and iSkool will <strong>set up your classes, subjects and learner accounts</strong> automatically.</p></div>
-      </div>
-      <div class="hiw-card sr sr-d1">
-        <div class="hiw-mockup" id="hiw-mockup-2">
-          <div class="fake-cursor" id="cursor-2" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
-          <div class="quiz-ui" id="quiz-ui">
-            <div class="quiz-ui-header"><div class="quiz-ui-title">📋 Quiz Builder</div><div class="quiz-live-badge" id="quiz-live"><div class="quiz-live-dot"></div>Live</div></div>
-            <div class="quiz-name-field active-field" id="quiz-name-field"><span class="setup-typed" id="quiz-name-text"></span><span class="setup-cursor-blink" id="setup-blink-2"></span></div>
-            <div class="quiz-questions" id="quiz-questions">
-              <div class="quiz-q-row" id="qq1"><div class="quiz-q-num">1</div>Solve: x² + 5x + 6 = 0</div>
-              <div class="quiz-q-row" id="qq2"><div class="quiz-q-num">2</div>Find the roots of 2x² - 8 = 0</div>
-              <div class="quiz-q-row" id="qq3"><div class="quiz-q-num">3</div>Factorise: x² - 9</div>
-            </div>
-            <div class="quiz-meta-row"><div class="quiz-meta-chip active-field" id="quiz-time">⏱ 45 min</div><div class="quiz-meta-chip" id="quiz-grade">Grade 12A</div><div class="quiz-meta-chip" id="quiz-qcount">15 Qs</div></div>
-            <div class="quiz-launch-btn" id="quiz-launch">🚀 Launch to Class</div>
-            <div class="learner-count" id="learner-count">👤 0 learners joined</div>
-          </div>
-        </div>
-        <div class="hiw-step-body"><div class="hiw-step-num">2</div><p class="hiw-step-text">Create quizzes, set assignments and <strong>track syllabus coverage</strong> from one dashboard — built for SA teachers.</p></div>
-      </div>
-      <div class="hiw-card sr sr-d2">
-        <div class="hiw-mockup" id="hiw-mockup-3">
-          <div class="fake-cursor" id="cursor-3" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
-          <div class="analytics-ui" id="analytics-ui">
-            <div class="analytics-ui-title">📊 Term 2 Analytics</div>
-            <div class="analytics-stats">
-              <div class="analytics-stat"><div class="analytics-stat-val" id="astat-pass" style="color:#4fd1c5;">54%</div><div class="analytics-stat-label">Pass Rate</div></div>
-              <div class="analytics-stat"><div class="analytics-stat-val" id="astat-avg" style="color:#f5c842;">61.4</div><div class="analytics-stat-label">Avg Score</div></div>
-            </div>
-            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 12A</span><span id="bar1-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar1"></div></div></div>
-            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 11B</span><span id="bar2-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar2"></div></div></div>
-            <div class="analytics-bar-row"><div class="analytics-bar-label"><span>Grade 10A</span><span id="bar3-pct">0%</span></div><div class="analytics-bar-track"><div class="analytics-bar-fill" id="hbar3"></div></div></div>
-            <div class="analytics-alert-row"><div class="analytics-alert" id="alert1">⚠ Kamo Sithole — below 50%</div><div class="analytics-alert" id="alert2">⚠ Lebo Dlamini — borderline</div></div>
-            <div class="analytics-improve" id="analytics-improve">🌟 3 learners improved this week</div>
-          </div>
-        </div>
-        <div class="hiw-step-body"><div class="hiw-step-num">3</div><p class="hiw-step-text">Real-time data shows you <strong>exactly which learners need attention</strong> before it's too late — with improvement suggestions built in.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="faq-section">
   <div class="faq-inner">
     <div class="faq-header sr"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
@@ -1507,99 +1650,6 @@ function toggleMenu() {
 </section>
 
 <script>
-/* ── How It Works animations ── */
-function moveCursorTo(cursorEl, targetEl, offsetX, offsetY) {
-  const mockup = cursorEl.parentElement;
-  const mRect = mockup.getBoundingClientRect();
-  const tRect = targetEl.getBoundingClientRect();
-  const x = tRect.left - mRect.left + (offsetX || tRect.width / 2);
-  const y = tRect.top - mRect.top + (offsetY || tRect.height / 2);
-  cursorEl.style.left = x + 'px';
-  cursorEl.style.top = y + 'px';
-}
-function typeText(el, text, speed, cb) {
-  el.textContent = '';
-  let i = 0;
-  const t = setInterval(() => { el.textContent += text[i++]; if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 300); } }, speed);
-  return t;
-}
-function runCard1() {
-  const cursor = document.getElementById('cursor-1');
-  const schoolField = document.getElementById('setup-field-school');
-  const schoolText = document.getElementById('setup-school-text');
-  const blink1 = document.getElementById('setup-blink-1');
-  const tags = ['tag-gr10','tag-gr11','tag-gr12','tag-math','tag-sci','tag-eng'];
-  const prog = document.getElementById('setup-prog');
-  const pct = document.getElementById('setup-pct');
-  const done = document.getElementById('setup-done');
-  schoolText.textContent = '';
-  schoolField.classList.add('active-field');
-  blink1.style.display = 'inline-block';
-  tags.forEach(id => document.getElementById(id).classList.remove('visible'));
-  prog.style.width = '0%'; pct.textContent = '0%';
-  done.classList.remove('visible');
-  setTimeout(() => moveCursorTo(cursor, schoolField, 10, 15), 200);
-  setTimeout(() => typeText(schoolText, 'Greenwood High School', 60, () => {
-    blink1.style.display = 'none'; schoolField.classList.remove('active-field');
-    setTimeout(() => { document.getElementById('tag-gr10').classList.add('visible'); prog.style.width='20%'; pct.textContent='20%'; }, 200);
-    setTimeout(() => { document.getElementById('tag-gr11').classList.add('visible'); prog.style.width='35%'; pct.textContent='35%'; }, 500);
-    setTimeout(() => { document.getElementById('tag-gr12').classList.add('visible'); prog.style.width='50%'; pct.textContent='50%'; }, 800);
-    setTimeout(() => { document.getElementById('tag-math').classList.add('visible'); prog.style.width='65%'; pct.textContent='65%'; }, 1300);
-    setTimeout(() => { document.getElementById('tag-sci').classList.add('visible'); prog.style.width='80%'; pct.textContent='80%'; }, 1700);
-    setTimeout(() => { document.getElementById('tag-eng').classList.add('visible'); prog.style.width='100%'; pct.textContent='100%'; }, 2100);
-    setTimeout(() => { done.classList.add('visible'); setTimeout(runCard1, 3500); }, 2700);
-  }), 600);
-}
-function runCard2() {
-  const cursor = document.getElementById('cursor-2');
-  const nameField = document.getElementById('quiz-name-field');
-  const nameText = document.getElementById('quiz-name-text');
-  const blink2 = document.getElementById('setup-blink-2');
-  const qs = ['qq1','qq2','qq3'];
-  const launch = document.getElementById('quiz-launch');
-  const liveB = document.getElementById('quiz-live');
-  const lCount = document.getElementById('learner-count');
-  const timechip = document.getElementById('quiz-time');
-  nameText.textContent = ''; nameField.classList.add('active-field'); blink2.style.display = 'inline-block';
-  qs.forEach(id => document.getElementById(id).classList.remove('visible'));
-  launch.classList.remove('ready'); liveB.classList.remove('visible'); lCount.classList.remove('visible'); timechip.classList.remove('active-field');
-  setTimeout(() => moveCursorTo(cursor, nameField, 10, 15), 200);
-  setTimeout(() => typeText(nameText, 'Term 2 — Quadratic Equations', 55, () => {
-    blink2.style.display = 'none'; nameField.classList.remove('active-field');
-    setTimeout(() => { document.getElementById('qq1').classList.add('visible'); }, 300);
-    setTimeout(() => { document.getElementById('qq2').classList.add('visible'); }, 650);
-    setTimeout(() => { document.getElementById('qq3').classList.add('visible'); }, 1000);
-    setTimeout(() => { timechip.classList.add('active-field'); moveCursorTo(cursor, timechip, 10, 10); }, 1400);
-    setTimeout(() => { timechip.classList.remove('active-field'); launch.classList.add('ready'); moveCursorTo(cursor, launch, 20, 12); }, 2000);
-    setTimeout(() => {
-      liveB.classList.add('visible'); lCount.classList.add('visible'); lCount.textContent = '👤 0 learners joined';
-      let count = 0;
-      const counter = setInterval(() => { count += 3; if (count > 32) { count = 32; clearInterval(counter); } lCount.textContent = '👤 ' + count + ' learners joined'; }, 80);
-      setTimeout(runCard2, 3800);
-    }, 2600);
-  }), 500);
-}
-function runCard3() {
-  const passEl = document.getElementById('astat-pass');
-  const avgEl = document.getElementById('astat-avg');
-  const bar1 = document.getElementById('hbar1'); const bar2 = document.getElementById('hbar2'); const bar3 = document.getElementById('hbar3');
-  const bp1 = document.getElementById('bar1-pct'); const bp2 = document.getElementById('bar2-pct'); const bp3 = document.getElementById('bar3-pct');
-  const alert1 = document.getElementById('alert1'); const alert2 = document.getElementById('alert2');
-  const improve = document.getElementById('analytics-improve');
-  passEl.textContent = '54%'; avgEl.textContent = '61.4';
-  bar1.style.width='0%'; bar2.style.width='0%'; bar3.style.width='0%';
-  bp1.textContent='0%'; bp2.textContent='0%'; bp3.textContent='0%';
-  alert1.classList.remove('visible'); alert2.classList.remove('visible'); improve.classList.remove('visible');
-  setTimeout(() => { bar1.style.width='78%'; bp1.textContent='78%'; bar2.style.width='65%'; bp2.textContent='65%'; bar3.style.width='71%'; bp3.textContent='71%'; }, 400);
-  setTimeout(() => { let p=54; const t=setInterval(()=>{p+=2; if(p>=78){p=78;clearInterval(t);} passEl.textContent=p+'%';},60); }, 1200);
-  setTimeout(() => { avgEl.textContent='74.2'; }, 2400);
-  setTimeout(() => { alert1.classList.add('visible'); }, 3000);
-  setTimeout(() => { alert2.classList.add('visible'); }, 3500);
-  setTimeout(() => { improve.classList.add('visible'); setTimeout(runCard3, 3800); }, 4200);
-}
-setTimeout(runCard1, 400);
-setTimeout(runCard2, 900);
-setTimeout(runCard3, 1400);
 
 /* ── FAQ ── */
 document.querySelectorAll('.faq-question').forEach(button => {
