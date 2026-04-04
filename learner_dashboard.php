@@ -475,6 +475,10 @@ body {
     .sidebar.collapsed .footer {
         bottom: 20px;
     }
+    .sidebar a,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
+        padding: 7px 12px;
+    }
 }
 
 .main-content {
@@ -1103,10 +1107,30 @@ iframe {
         animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 }
-/* Desktop slide-in menu (no overlay/dim) */
+/* Desktop slide-in menu */
 .sidebar.desktop-open {
     left: 0 !important;
     transform: translateX(0) !important;
+}
+
+/* Desktop dim backdrop */
+@media (min-width: 769px) {
+    .desktop-backdrop {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 4999;
+        transition: opacity var(--transition-speed) ease;
+    }
+    .sidebar.desktop-open ~ .desktop-backdrop {
+        opacity: 1;
+        pointer-events: all;
+    }
 }
 
 /* Default hidden on desktop - slide from left */
@@ -2044,17 +2068,26 @@ window.toggleSidebar = function (forceClose = false) {
         window.setActive("<?= $currentPage ?>");
     }
 
-    // Desktop slide-in (no backdrop)
+    // Desktop slide-in with backdrop
 const desktopToggle = document.getElementById('desktopMenuToggle');
+const desktopBackdrop = document.getElementById('desktopBackdrop');
 
 if (desktopToggle) {
     desktopToggle.addEventListener('click', () => {
-        // Change .add to .toggle so the hamburger can also close it
         sidebar.classList.toggle('desktop-open'); 
-        sidebar.classList.remove('active'); // prevents mobile style conflict
+        sidebar.classList.remove('active');
     });
 
-    // Optional: close with Esc key
+    // Click backdrop to close
+    if (desktopBackdrop) {
+        desktopBackdrop.addEventListener('click', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('desktop-open');
+            }
+        });
+    }
+
+    // Esc key to close
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && sidebar.classList.contains('desktop-open')) {
             sidebar.classList.remove('desktop-open');
