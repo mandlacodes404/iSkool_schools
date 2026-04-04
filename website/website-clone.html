@@ -446,7 +446,7 @@ nav {
   </ul>
   <div class="nav-actions">
     <button class="nav-login">Log In</button>
-    <button class="nav-pilot">Apply for Free Pilot</button>
+    <button class="nav-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
   </div>
   <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -458,7 +458,7 @@ nav {
     <a href="#">How it Works</a>
     <a href="#">For Schools</a>
     <button class="nav-login" style="border-bottom:1px solid #f0f0f0;">Log In</button>
-    <button class="mobile-pilot">Apply for Free Pilot</button>
+    <button class="mobile-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
   </div>
 </nav>
 
@@ -472,7 +472,7 @@ nav {
   <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
   <div class="hero-buttons sr sr-d3">
     <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
-    <a href="#" class="btn btn-primary">Apply for Free Pilot &#8594;</a>
+    <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
   </div>
 </section>
 
@@ -1236,7 +1236,7 @@ function toggleMenu() {
       </table>
     </div>
     <div class="comp-cta-row sr sr-d2">
-      <a href="#" class="comp-cta">Apply for Free Pilot<span class="comp-cta-arrow">&#8599;</span></a>
+      <button class="comp-cta" onclick="openPilotForm()" type="button" style="background:var(--gold);cursor:pointer;">Apply for Free Pilot<span class="comp-cta-arrow">&#8599;</span></button>
     </div>
   </div>
 </section>
@@ -1640,12 +1640,12 @@ setTimeout(gsRunGoLive, 1400);
     <div class="faq-accordion sr sr-d1" id="faqAccordion">
       <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.</div></div>
       <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.</div></div>
-      <div class="faq-item open"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer open">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
+      <div class="faq-item"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
       <div class="faq-item"><button class="faq-question">Can parents access learner progress?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.</div></div>
       <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.</div></div>
       <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.</div></div>
     </div>
-    <div class="faq-cta sr sr-d2"><a href="#" class="faq-button">Apply for Free Pilot →</a></div>
+    <div class="faq-cta sr sr-d2"><button class="faq-button" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Apply for Free Pilot →</button></div>
   </div>
 </section>
 
@@ -1718,7 +1718,7 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
     <p class="footer-tagline">The only LMS that actually works for South African high schools.</p>
     <div class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="terms-of-service.html">Terms of Service</a><a href="#">Contact</a><a href="#">Support</a></div>
     <div class="footer-copyright">© 2026 iSkool. All rights reserved.</div>
-    <a href="learner_demo.html" class="footer-cta">Apply for Free Pilot →</a>
+    <button class="footer-cta" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Apply for Free Pilot →</button>
   </div>
 </footer>
 
@@ -1949,6 +1949,612 @@ function closeDemoModalOutside(e) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeDemoModal();
+});
+</script>
+
+
+<!-- ===================== PILOT APPLICATION MODAL ===================== -->
+<style>
+/* Overlay */
+.pf-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.pf-overlay.open {
+  display: flex;
+  animation: pfFadeIn 0.22s ease;
+}
+@keyframes pfFadeIn { from{opacity:0} to{opacity:1} }
+
+/* Modal box */
+.pf-modal {
+  background: #fff;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.35);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: pfSlideUp 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+.pf-modal::-webkit-scrollbar { width: 0; }
+@keyframes pfSlideUp { from{opacity:0;transform:translateY(32px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+/* Header */
+.pf-header {
+  padding: 28px 32px 0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  border-radius: 28px 28px 0 0;
+}
+.pf-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.pf-close:hover { background: #e0e0e0; }
+
+/* Step indicator */
+.pf-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+}
+.pf-step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #aaa;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+  font-family: 'Syne', sans-serif;
+}
+.pf-step-dot.active { background: var(--gold); color: #111; }
+.pf-step-dot.done { background: #00c47a; color: #fff; }
+.pf-step-line {
+  flex: 1;
+  height: 2px;
+  background: #eee;
+  transition: background 0.4s;
+}
+.pf-step-line.done { background: #00c47a; }
+.pf-step-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 6px;
+}
+.pf-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 4px;
+}
+.pf-sub {
+  font-size: 14px; color: #888;
+  margin-bottom: 20px; line-height: 1.5;
+}
+.pf-divider { height: 1px; background: #f0f0f0; margin: 0 -32px; }
+
+/* Body */
+.pf-body { padding: 24px 32px 28px; }
+
+/* Progress bar */
+.pf-progress-track {
+  height: 4px; background: #eee; border-radius: 999px;
+  overflow: hidden; margin-bottom: 28px;
+}
+.pf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Form fields */
+.pf-field { margin-bottom: 18px; }
+.pf-label {
+  display: block;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  color: #555; margin-bottom: 7px;
+}
+.pf-input, .pf-select, .pf-textarea {
+  width: 100%;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #111;
+  background: white;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.pf-input:focus, .pf-select:focus, .pf-textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+}
+.pf-input.error, .pf-select.error { border-color: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,0.12); }
+.pf-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+.pf-textarea { resize: none; min-height: 90px; line-height: 1.6; }
+.pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Feature pills (multi-select) */
+.pf-pills { display: flex; flex-wrap: wrap; gap: 9px; }
+.pf-pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e5e5;
+  background: white;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+.pf-pill:hover { border-color: var(--teal); color: var(--teal); }
+.pf-pill.selected {
+  background: rgba(79,209,197,0.12);
+  border-color: var(--teal);
+  color: #0d9488;
+}
+
+/* Error message */
+.pf-error-msg {
+  font-size: 12px; color: #f85149;
+  margin-top: 5px; display: none;
+}
+.pf-error-msg.show { display: block; }
+
+/* Footer buttons */
+.pf-footer {
+  padding: 0 32px 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pf-btn-back {
+  padding: 13px 24px;
+  border-radius: 999px;
+  border: 1.5px solid #ddd;
+  background: white;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.pf-btn-back:hover { border-color: #bbb; color: #111; }
+.pf-btn-next {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.pf-btn-next:hover { background: #333; transform: translateY(-1px); }
+.pf-btn-submit {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  background: var(--gold);
+  color: #111;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.35);
+}
+.pf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,200,66,0.45); }
+
+/* Success screen */
+.pf-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 32px 52px;
+}
+.pf-success.show { display: flex; }
+.pf-success-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin-bottom: 24px;
+  animation: popIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.pf-success h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 12px;
+}
+.pf-success p {
+  font-size: 15.5px; color: #666;
+  line-height: 1.7; max-width: 380px;
+  margin-bottom: 8px;
+}
+.pf-success-ref {
+  display: inline-block;
+  background: #f8f9fc;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 13px; color: #888;
+  margin: 16px 0 28px;
+  font-family: 'DM Sans', sans-serif;
+}
+.pf-success-ref strong { color: #111; font-size: 15px; }
+.pf-success-close {
+  padding: 14px 36px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pf-success-close:hover { background: #333; }
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .pf-modal { border-radius: 20px 20px 0 0; max-height: 95vh; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; border-radius: 20px 20px 0 0; }
+  .pf-overlay { align-items: flex-end; padding: 0; }
+  .pf-header { padding: 22px 20px 0; }
+  .pf-body { padding: 20px 20px 24px; }
+  .pf-footer { padding: 0 20px 24px; }
+  .pf-row { grid-template-columns: 1fr; gap: 0; }
+  .pf-title { font-size: 20px; }
+  .pf-success { padding: 36px 20px 44px; }
+}
+</style>
+
+<!-- PILOT FORM OVERLAY -->
+<div class="pf-overlay" id="pfOverlay" onclick="pfCloseOutside(event)">
+  <div class="pf-modal" id="pfModal">
+
+    <!-- CLOSE -->
+    <button class="pf-close" onclick="closePilotForm()" aria-label="Close">&times;</button>
+
+    <!-- HEADER (sticky) -->
+    <div class="pf-header" id="pfHeader">
+      <!-- Step dots -->
+      <div class="pf-steps">
+        <div class="pf-step-dot active" id="pfdot-1">1</div>
+        <div class="pf-step-line" id="pfline-1"></div>
+        <div class="pf-step-dot" id="pfdot-2">2</div>
+        <div class="pf-step-line" id="pfline-2"></div>
+        <div class="pf-step-dot" id="pfdot-3">3</div>
+      </div>
+      <div class="pf-step-label" id="pfStepLabel">Step 1 of 3</div>
+      <div class="pf-title" id="pfStepTitle">About Your School</div>
+      <p class="pf-sub" id="pfStepSub">Tell us a little about your school so we can prepare your pilot.</p>
+      <div class="pf-divider"></div>
+    </div>
+
+    <!-- SUCCESS SCREEN (hidden until submit) -->
+    <div class="pf-success" id="pfSuccess">
+      <div class="pf-success-icon">🎉</div>
+      <h3>Application Submitted!</h3>
+      <p>Thank you for applying. Our team will review your application and get back to you within <strong>48 hours</strong>.</p>
+      <div class="pf-success-ref">Reference: <strong id="pfRefNum">ISK/PIL/001</strong></div>
+      <p style="font-size:13.5px;color:#aaa;">We'll reach out to <strong id="pfEmailRef" style="color:#555;"></strong> to confirm your pilot slot.</p>
+      <button class="pf-success-close" style="margin-top:28px;" onclick="closePilotForm()">Done — Close</button>
+    </div>
+
+    <!-- STEP 1: About the School -->
+    <div class="pf-body" id="pfStep1">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:33%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">School Name *</label>
+        <input class="pf-input" id="pf-school" type="text" placeholder="e.g. Greenwood High School" autocomplete="organization">
+        <div class="pf-error-msg" id="err-school">Please enter your school name</div>
+      </div>
+
+      <div class="pf-row">
+        <div class="pf-field">
+          <label class="pf-label">Province *</label>
+          <select class="pf-select" id="pf-province">
+            <option value="">Select province</option>
+            <option>Gauteng</option>
+            <option>Western Cape</option>
+            <option>KwaZulu-Natal</option>
+            <option>Eastern Cape</option>
+            <option>Limpopo</option>
+            <option>Mpumalanga</option>
+            <option>North West</option>
+            <option>Free State</option>
+            <option>Northern Cape</option>
+          </select>
+          <div class="pf-error-msg" id="err-province">Please select a province</div>
+        </div>
+        <div class="pf-field">
+          <label class="pf-label">School Type *</label>
+          <select class="pf-select" id="pf-type">
+            <option value="">Select type</option>
+            <option>Public School</option>
+            <option>Private School</option>
+            <option>Independent School</option>
+            <option>Special Needs School</option>
+          </select>
+          <div class="pf-error-msg" id="err-type">Please select a school type</div>
+        </div>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Number of Learners *</label>
+        <select class="pf-select" id="pf-learners">
+          <option value="">Select range</option>
+          <option>Under 200</option>
+          <option>200 – 500</option>
+          <option>500 – 1 000</option>
+          <option>1 000 – 2 000</option>
+          <option>More than 2 000</option>
+        </select>
+        <div class="pf-error-msg" id="err-learners">Please select a learner range</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Your Details -->
+    <div class="pf-body" id="pfStep2" style="display:none;">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:66%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">Your Full Name *</label>
+        <input class="pf-input" id="pf-name" type="text" placeholder="e.g. Thabo Nkosi" autocomplete="name">
+        <div class="pf-error-msg" id="err-name">Please enter your full name</div>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Your Role *</label>
+        <select class="pf-select" id="pf-role">
+          <option value="">Select your role</option>
+          <option>Principal</option>
+          <option>Deputy Principal</option>
+          <option>Head of Department (HOD)</option>
+          <option>Teacher</option>
+          <option>IT Administrator</option>
+          <option>School Administrator</option>
+        </select>
+        <div class="pf-error-msg" id="err-role">Please select your role</div>
+      </div>
+
+      <div class="pf-row">
+        <div class="pf-field">
+          <label class="pf-label">Email Address *</label>
+          <input class="pf-input" id="pf-email" type="email" placeholder="you@school.co.za" autocomplete="email">
+          <div class="pf-error-msg" id="err-email">Please enter a valid email</div>
+        </div>
+        <div class="pf-field">
+          <label class="pf-label">Phone Number *</label>
+          <input class="pf-input" id="pf-phone" type="tel" placeholder="e.g. 071 234 5678" autocomplete="tel">
+          <div class="pf-error-msg" id="err-phone">Please enter a phone number</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: What You're Looking For -->
+    <div class="pf-body" id="pfStep3" style="display:none;">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:100%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">Features You're Interested In</label>
+        <div class="pf-pills" id="pfPills">
+          <div class="pf-pill selected" data-val="Quizzes">📝 Quizzes</div>
+          <div class="pf-pill selected" data-val="AI Invigilator">🛡️ AI Invigilator</div>
+          <div class="pf-pill" data-val="Analytics">📈 Analytics</div>
+          <div class="pf-pill" data-val="Gradebook">📒 Gradebook</div>
+          <div class="pf-pill" data-val="Syllabus Tracking">📚 Syllabus Tracking</div>
+          <div class="pf-pill" data-val="Assignments">📁 Assignments</div>
+          <div class="pf-pill" data-val="Parent Communication">👨‍👩‍👧 Parent Communication</div>
+          <div class="pf-pill" data-val="Announcements">🔔 Announcements</div>
+        </div>
+      </div>
+
+      <div class="pf-field" style="margin-top:20px;">
+        <label class="pf-label">How Did You Hear About iSkool?</label>
+        <select class="pf-select" id="pf-source">
+          <option value="">Select an option</option>
+          <option>Word of mouth / colleague</option>
+          <option>Social media</option>
+          <option>Google search</option>
+          <option>iSkool team reached out</option>
+          <option>Education conference or event</option>
+          <option>Department of Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Anything Else? <span style="color:#bbb;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <textarea class="pf-textarea" id="pf-notes" placeholder="Any specific needs, questions, or context about your school..."></textarea>
+      </div>
+    </div>
+
+    <!-- FOOTER BUTTONS -->
+    <div class="pf-footer" id="pfFooter">
+      <button class="pf-btn-back" id="pfBtnBack" style="display:none;" onclick="pfBack()">← Back</button>
+      <button class="pf-btn-next" id="pfBtnNext" onclick="pfNext()">Next Step →</button>
+      <button class="pf-btn-submit" id="pfBtnSubmit" style="display:none;" onclick="pfSubmit()">Submit Application 🚀</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Pilot Form Logic ── */
+let pfCurrentStep = 1;
+const pfTotalSteps = 3;
+
+function openPilotForm() {
+  pfGoToStep(1);
+  document.getElementById('pfSuccess').classList.remove('show');
+  document.getElementById('pfSuccess').style.display = 'none';
+  document.getElementById('pfHeader').style.display = '';
+  document.getElementById('pfStep1').style.display = '';
+  document.getElementById('pfStep2').style.display = 'none';
+  document.getElementById('pfStep3').style.display = 'none';
+  document.getElementById('pfFooter').style.display = '';
+  document.getElementById('pfOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePilotForm() {
+  document.getElementById('pfOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pfCloseOutside(e) {
+  if (e.target === document.getElementById('pfOverlay')) closePilotForm();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePilotForm();
+});
+
+function pfGoToStep(step) {
+  pfCurrentStep = step;
+
+  // Step dots
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('pfdot-' + i);
+    dot.className = 'pf-step-dot';
+    if (i < step)       dot.classList.add('done'), dot.textContent = '✓';
+    else if (i === step) dot.classList.add('active'), dot.textContent = i;
+    else                dot.textContent = i;
+  });
+
+  // Lines
+  [1,2].forEach(i => {
+    document.getElementById('pfline-' + i).className = 'pf-step-line' + (i < step ? ' done' : '');
+  });
+
+  // Labels
+  const labels = ['About Your School','Your Details','What You\'re Looking For'];
+  const subs   = [
+    'Tell us a little about your school so we can prepare your pilot.',
+    'Who should we contact to get your pilot started?',
+    'Help us tailor your iSkool experience from day one.'
+  ];
+  document.getElementById('pfStepLabel').textContent = 'Step ' + step + ' of 3';
+  document.getElementById('pfStepTitle').textContent = labels[step-1];
+  document.getElementById('pfStepSub').textContent   = subs[step-1];
+
+  // Show/hide steps
+  document.getElementById('pfStep1').style.display = step === 1 ? '' : 'none';
+  document.getElementById('pfStep2').style.display = step === 2 ? '' : 'none';
+  document.getElementById('pfStep3').style.display = step === 3 ? '' : 'none';
+
+  // Buttons
+  document.getElementById('pfBtnBack').style.display   = step > 1 ? '' : 'none';
+  document.getElementById('pfBtnNext').style.display   = step < 3 ? '' : 'none';
+  document.getElementById('pfBtnSubmit').style.display = step === 3 ? '' : 'none';
+
+  // Scroll to top of modal
+  document.getElementById('pfModal').scrollTop = 0;
+}
+
+function pfValidate(step) {
+  let valid = true;
+  const required = {
+    1: [
+      { id: 'pf-school',   err: 'err-school',   check: v => v.trim().length > 1 },
+      { id: 'pf-province', err: 'err-province',  check: v => v !== '' },
+      { id: 'pf-type',     err: 'err-type',      check: v => v !== '' },
+      { id: 'pf-learners', err: 'err-learners',  check: v => v !== '' },
+    ],
+    2: [
+      { id: 'pf-name',  err: 'err-name',  check: v => v.trim().length > 1 },
+      { id: 'pf-role',  err: 'err-role',  check: v => v !== '' },
+      { id: 'pf-email', err: 'err-email', check: v => /^[^@]+@[^@]+\.[^@]+$/.test(v) },
+      { id: 'pf-phone', err: 'err-phone', check: v => v.trim().length > 6 },
+    ]
+  };
+  if (!required[step]) return true;
+  required[step].forEach(({ id, err, check }) => {
+    const el = document.getElementById(id);
+    const errEl = document.getElementById(err);
+    const ok = check(el.value);
+    el.classList.toggle('error', !ok);
+    errEl.classList.toggle('show', !ok);
+    if (!ok) valid = false;
+  });
+  return valid;
+}
+
+function pfNext() {
+  if (!pfValidate(pfCurrentStep)) return;
+  pfGoToStep(pfCurrentStep + 1);
+}
+
+function pfBack() {
+  pfGoToStep(pfCurrentStep - 1);
+}
+
+function pfSubmit() {
+  // Generate a fake reference number
+  const ref = 'ISK/PIL/' + String(Math.floor(Math.random() * 900) + 100).padStart(3,'0');
+  document.getElementById('pfRefNum').textContent = ref;
+  document.getElementById('pfEmailRef').textContent = document.getElementById('pf-email').value || 'your email';
+
+  // Hide form, show success
+  document.getElementById('pfHeader').style.display = 'none';
+  document.getElementById('pfStep3').style.display = 'none';
+  document.getElementById('pfFooter').style.display = 'none';
+  const s = document.getElementById('pfSuccess');
+  s.style.display = 'flex';
+  setTimeout(() => s.classList.add('show'), 10);
+}
+
+/* ── Feature pill toggle ── */
+document.querySelectorAll('.pf-pill').forEach(pill => {
+  pill.addEventListener('click', () => pill.classList.toggle('selected'));
 });
 </script>
 
