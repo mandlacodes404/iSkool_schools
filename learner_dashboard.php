@@ -1140,7 +1140,7 @@ iframe {
         transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
         width: var(--sidebar-width);    /* Keep your 240px width */
         box-shadow: 4px 0 20px rgba(0,0,0,0.35); /* subtle shadow when open */
-        z-index: 2000;                  /* Above main content but below header if needed */
+        z-index: 5000;                  /* Must be above the desktop backdrop (4999) */
     }
 
     .sidebar.desktop-open {
