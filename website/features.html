@@ -23,8 +23,8 @@
 
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--dark);
-  color: #fff;
+  background: #f8f7f4;
+  color: #111;
   line-height: 1.6;
   overflow-x: hidden;
 }
@@ -40,9 +40,9 @@ body {
 /* ── NAV ── */
 nav {
   position: fixed; top: 0; left: 0; right: 0;
-  background: rgba(10,10,15,0.85);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid #e8e8e8;
   padding: 14px 5%;
   display: flex; align-items: center; justify-content: space-between;
   z-index: 1000;
@@ -50,14 +50,14 @@ nav {
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
   font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
-  text-decoration: none; color: #fff;
+  text-decoration: none; color: #111;
 }
 .nav-logo svg { width: 32px; height: 32px; }
 .nav-back {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 9px 20px; border-radius: 50px;
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.7);
+  border: 1px solid #ddd;
+  color: #555;
   font-size: 14px; font-weight: 600;
   text-decoration: none;
   transition: all 0.2s;
@@ -80,19 +80,20 @@ nav {
   padding: 120px 5% 80px;
   position: relative;
   overflow: hidden;
+  background: #fff;
 }
 .hero-grid-bg {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(79,209,197,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(79,209,197,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(79,209,197,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,209,197,0.08) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
 }
 .hero-glow {
   position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
   width: 700px; height: 400px;
-  background: radial-gradient(ellipse, rgba(79,209,197,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(79,209,197,0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 .hero-eyebrow {
@@ -115,18 +116,18 @@ nav {
   font-size: clamp(40px, 7vw, 88px);
   font-weight: 800; line-height: 1.02;
   letter-spacing: -3px;
-  margin-bottom: 24px;
+  margin-bottom: 24px; color: #111;
 }
 .hero h1 em { font-style: normal; color: var(--gold); }
 .hero-sub {
   font-size: clamp(16px, 2vw, 20px);
-  color: rgba(255,255,255,0.5);
+  color: #666;
   max-width: 620px; margin: 0 auto 48px;
   line-height: 1.7;
 }
 .hero-scroll-hint {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
-  color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 1px;
+  color: rgba(0,0,0,0.3); font-size: 12px; letter-spacing: 1px;
   text-transform: uppercase; margin-top: 16px;
 }
 .scroll-arrow {
@@ -139,9 +140,9 @@ nav {
 /* ── FEATURE NAV PILLS ── */
 .feat-nav {
   position: sticky; top: 64px; z-index: 100;
-  background: rgba(10,10,15,0.9);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #eee;
   padding: 14px 5%;
   overflow-x: auto;
   scrollbar-width: none;
@@ -154,23 +155,24 @@ nav {
 }
 .feat-nav-pill {
   padding: 8px 18px; border-radius: 50px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid #ddd;
   background: transparent;
-  color: rgba(255,255,255,0.5);
+  color: #777;
   font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
   cursor: pointer; white-space: nowrap;
   transition: all 0.2s; text-decoration: none;
-  display: inline-block;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.feat-nav-pill:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.9); }
-.feat-nav-pill.active { background: #fff; color: #111; border-color: #fff; }
+.feat-nav-pill:hover { border-color: #aaa; color: #111; }
+.feat-nav-pill.active { background: #111; color: #fff; border-color: #111; }
 
 /* ── FEATURE SECTIONS ── */
 .feat-section {
   padding: 120px 5%;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid #ebebeb;
+  background: #f8f7f4;
 }
-.feat-section:nth-child(even) { background: rgba(255,255,255,0.015); }
+.feat-section:nth-child(even) { background: #ffffff; }
 .feat-section-inner { max-width: 1200px; margin: 0 auto; }
 
 .feat-section-header {
@@ -180,8 +182,9 @@ nav {
 .feat-icon-wrap {
   width: 64px; height: 64px; border-radius: 18px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px; flex-shrink: 0;
+  flex-shrink: 0;
 }
+.feat-icon-wrap svg { width: 28px; height: 28px; }
 .feat-header-text {}
 .feat-section-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: 2px;
@@ -191,10 +194,10 @@ nav {
   font-family: 'Syne', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
   font-weight: 800; line-height: 1.08;
-  letter-spacing: -1.5px;
+  letter-spacing: -1.5px; color: #111;
 }
 .feat-section-subtitle {
-  font-size: 18px; color: rgba(255,255,255,0.45);
+  font-size: 18px; color: #666;
   line-height: 1.7; margin-top: 12px;
   max-width: 700px;
 }
@@ -208,10 +211,10 @@ nav {
 .prose-col h4 {
   font-family: 'Syne', sans-serif;
   font-size: 20px; font-weight: 700;
-  margin-bottom: 14px; color: #fff;
+  margin-bottom: 14px; color: #111;
 }
 .prose-col p {
-  font-size: 15.5px; color: rgba(255,255,255,0.5);
+  font-size: 15.5px; color: #555;
   line-height: 1.8; margin-bottom: 16px;
 }
 .prose-col p:last-child { margin-bottom: 0; }
@@ -222,19 +225,20 @@ nav {
   margin-bottom: 64px;
 }
 .stat-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
   border-radius: 20px; padding: 28px 24px;
   text-align: center;
   transition: border-color 0.3s, transform 0.3s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
-.stat-card:hover { border-color: rgba(79,209,197,0.3); transform: translateY(-4px); }
+.stat-card:hover { border-color: var(--teal); transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.08); }
 .stat-num {
   font-family: 'Syne', sans-serif;
   font-size: 44px; font-weight: 800;
   line-height: 1; margin-bottom: 8px;
 }
-.stat-desc { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+.stat-desc { font-size: 13px; color: #888; line-height: 1.4; }
 
 /* ── DETAIL CARDS GRID ── */
 .detail-grid {
@@ -242,26 +246,28 @@ nav {
   margin-bottom: 64px;
 }
 .detail-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
   border-radius: 20px; padding: 28px;
-  transition: border-color 0.3s, background 0.3s;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
   position: relative; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .detail-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0;
   height: 3px;
 }
-.detail-card:hover { background: rgba(255,255,255,0.06); }
-.detail-card-icon { font-size: 24px; margin-bottom: 16px; }
+.detail-card:hover { background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+.detail-card-icon { margin-bottom: 16px; display: flex; align-items: center; }
+.detail-card-icon svg { width: 24px; height: 24px; }
 .detail-card-title {
   font-family: 'Syne', sans-serif;
   font-size: 17px; font-weight: 700;
-  margin-bottom: 10px; color: #fff;
+  margin-bottom: 10px; color: #111;
 }
 .detail-card-text {
-  font-size: 14px; color: rgba(255,255,255,0.45);
+  font-size: 14px; color: #666;
   line-height: 1.7;
 }
 
@@ -269,17 +275,18 @@ nav {
 .how-strip {
   display: flex; flex-direction: column; gap: 0;
   margin-bottom: 64px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid #e8e8e8;
   border-radius: 20px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 .how-row {
   display: flex; align-items: flex-start; gap: 24px;
   padding: 28px 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid #f0f0f0;
   transition: background 0.2s;
 }
 .how-row:last-child { border-bottom: none; }
-.how-row:hover { background: rgba(255,255,255,0.03); }
+.how-row:hover { background: #fafafa; }
 .how-num {
   width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -287,54 +294,54 @@ nav {
   flex-shrink: 0; margin-top: 2px;
 }
 .how-content {}
-.how-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #fff; }
-.how-text { font-size: 14px; color: rgba(255,255,255,0.45); line-height: 1.65; }
+.how-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #111; }
+.how-text { font-size: 14px; color: #666; line-height: 1.65; }
 
 /* ── COMPARISON TABLE ── */
 .compare-table {
   width: 100%; border-collapse: collapse;
   margin-bottom: 64px;
   border-radius: 16px; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid #e8e8e8;
 }
 .compare-table th {
   padding: 16px 20px; text-align: left;
   font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.6);
+  background: #f5f5f5;
+  color: #555;
   letter-spacing: 0.5px;
 }
 .compare-table th:first-child { border-radius: 0; }
 .compare-table td {
   padding: 16px 20px;
-  font-size: 14px; color: rgba(255,255,255,0.6);
-  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px; color: #666;
+  border-top: 1px solid #ebebeb;
 }
-.compare-table tr:hover td { background: rgba(255,255,255,0.02); }
-.compare-table td:first-child { color: rgba(255,255,255,0.85); font-weight: 500; }
+.compare-table tr:hover td { background: #fafafa; }
+.compare-table td:first-child { color: #222; font-weight: 500; }
 .check { color: var(--green); font-weight: 700; }
-.cross { color: rgba(255,255,255,0.2); }
+.cross { color: #ccc; }
 .iskool-col { background: rgba(79,209,197,0.05) !important; color: var(--teal) !important; font-weight: 700; }
 
 /* ── QUOTE BLOCK ── */
 .quote-block {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #f0fdfb;
+  border: 1px solid rgba(79,209,197,0.2);
   border-left: 4px solid var(--teal);
   border-radius: 0 16px 16px 0;
   padding: 28px 32px;
   margin-bottom: 48px;
 }
 .quote-text {
-  font-size: 18px; color: rgba(255,255,255,0.75);
+  font-size: 18px; color: #333;
   line-height: 1.7; font-style: italic;
   margin-bottom: 14px;
 }
-.quote-attr { font-size: 13px; color: rgba(255,255,255,0.3); font-weight: 600; }
+.quote-attr { font-size: 13px; color: #999; font-weight: 600; }
 
 /* ── CTA STRIP ── */
 .cta-strip {
-  background: linear-gradient(135deg, rgba(79,209,197,0.1), rgba(245,200,66,0.08));
+  background: linear-gradient(135deg, #f0fdfb, #fefce8);
   border: 1px solid rgba(79,209,197,0.2);
   border-radius: 28px;
   padding: 60px 48px;
@@ -345,11 +352,11 @@ nav {
   font-family: 'Syne', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
   font-weight: 800; letter-spacing: -1.5px;
-  margin-bottom: 16px;
+  margin-bottom: 16px; color: #111;
 }
 .cta-strip h2 span { color: var(--gold); }
 .cta-strip p {
-  font-size: 17px; color: rgba(255,255,255,0.5);
+  font-size: 17px; color: #555;
   max-width: 500px; margin: 0 auto 36px; line-height: 1.65;
 }
 .cta-btn {
@@ -364,7 +371,7 @@ nav {
 
 /* ── COLOURS PER FEATURE ── */
 .c-teal  { color: var(--teal); }
-.c-gold  { color: var(--gold); }
+.c-gold  { color: #b8860b; }
 .c-orange{ color: var(--orange); }
 .c-blue  { color: var(--blue); }
 .c-green { color: var(--green); }
@@ -376,31 +383,37 @@ nav {
 .bg-green { background: rgba(0,196,122,0.12); border-color: rgba(0,196,122,0.3); }
 .bg-red   { background: rgba(248,81,73,0.12); border-color: rgba(248,81,73,0.3); }
 .border-teal::before { background: var(--teal); }
+.border-teal .detail-card-icon { color: #0d9488; }
 .border-gold::before { background: var(--gold); }
+.border-gold .detail-card-icon { color: #b8860b; }
 .border-orange::before { background: var(--orange); }
+.border-orange .detail-card-icon { color: #ea6b0e; }
 .border-blue::before { background: var(--blue); }
+.border-blue .detail-card-icon { color: #4f7cff; }
 .border-green::before { background: var(--green); }
+.border-green .detail-card-icon { color: #00a86b; }
 .border-red::before { background: var(--red); }
+.border-red .detail-card-icon { color: #e03428; }
 .num-teal { background: rgba(79,209,197,0.15); color: var(--teal); }
-.num-gold { background: rgba(245,200,66,0.15); color: var(--gold); }
+.num-gold { background: rgba(245,200,66,0.2); color: #b8860b; }
 .num-orange { background: rgba(249,115,22,0.15); color: var(--orange); }
 .num-blue { background: rgba(79,124,255,0.15); color: var(--blue); }
 .num-green { background: rgba(0,196,122,0.15); color: var(--green); }
 .num-red { background: rgba(248,81,73,0.15); color: var(--red); }
-.icon-teal  { background: rgba(79,209,197,0.12); }
-.icon-gold  { background: rgba(245,200,66,0.12); }
-.icon-orange{ background: rgba(249,115,22,0.12); }
-.icon-blue  { background: rgba(79,124,255,0.12); }
-.icon-green { background: rgba(0,196,122,0.12); }
-.icon-red   { background: rgba(248,81,73,0.12); }
+.icon-teal  { background: rgba(79,209,197,0.12); color: #0d9488; }
+.icon-gold  { background: rgba(245,200,66,0.12); color: #b8860b; }
+.icon-orange{ background: rgba(249,115,22,0.12); color: #ea6b0e; }
+.icon-blue  { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.icon-green { background: rgba(0,196,122,0.12); color: #00a86b; }
+.icon-red   { background: rgba(248,81,73,0.12); color: #e03428; }
 
 /* ── FOOTER ── */
 footer {
-  background: rgba(255,255,255,0.02);
-  border-top: 1px solid rgba(255,255,255,0.06);
+  background: #f0ede8;
+  border-top: 1px solid #ddd;
   padding: 48px 5%;
   text-align: center;
-  color: rgba(255,255,255,0.3);
+  color: #999;
   font-size: 14px;
 }
 footer a { color: var(--teal); text-decoration: none; }
@@ -455,15 +468,15 @@ footer a { color: var(--teal); text-decoration: none; }
 <!-- STICKY FEATURE NAV -->
 <nav class="feat-nav">
   <div class="feat-nav-inner">
-    <a href="#quizzes"       class="feat-nav-pill active">📋 Quizzes</a>
-    <a href="#assignments"   class="feat-nav-pill">📁 Assignments</a>
-    <a href="#invigilator"   class="feat-nav-pill">🛡 AI Invigilator</a>
-    <a href="#gradebook"     class="feat-nav-pill">📒 Gradebook</a>
-    <a href="#analytics"     class="feat-nav-pill">📈 Analytics</a>
-    <a href="#resources"     class="feat-nav-pill">📚 Resources</a>
-    <a href="#discussions"   class="feat-nav-pill">💬 Discussions</a>
-    <a href="#announcements" class="feat-nav-pill">🔔 Announcements</a>
-    <a href="#calendar"      class="feat-nav-pill">📅 Calendar</a>
+    <a href="#quizzes"       class="feat-nav-pill active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-2"/></svg> Quizzes</a>
+    <a href="#assignments"   class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Assignments</a>
+    <a href="#invigilator"   class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> AI Invigilator</a>
+    <a href="#gradebook"     class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Gradebook</a>
+    <a href="#analytics"     class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Analytics</a>
+    <a href="#resources"     class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Resources</a>
+    <a href="#discussions"   class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Discussions</a>
+    <a href="#announcements" class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Announcements</a>
+    <a href="#calendar"      class="feat-nav-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendar</a>
   </div>
 </nav>
 
@@ -505,27 +518,27 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">🎯</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <div class="detail-card-title">Question Bank</div>
         <div class="detail-card-text">Build a growing personal question bank linked to CAPS topics. Reuse questions across terms and classes. Import from previous years in seconds.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">⏱</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="detail-card-title">Timed & Flexible Modes</div>
         <div class="detail-card-text">Run a strict timed test that mirrors an exam environment, or set a flexible window where learners can complete in their own time within a deadline.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">🔀</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></div>
         <div class="detail-card-title">Question Randomisation</div>
         <div class="detail-card-text">Each learner receives questions in a different order, dramatically reducing copying. Answer options within each question are also shuffled.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">📊</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
         <div class="detail-card-title">Instant Auto-Marking</div>
         <div class="detail-card-text">The moment a learner submits, iSkool calculates their raw score, percentage, and CAPS symbol. Results appear on both teacher and learner dashboards immediately.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">📱</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <div class="detail-card-title">Any Device, Any Browser</div>
         <div class="detail-card-text">Learners take quizzes on their phone, tablet, or laptop — no app download required. Works on low-end Android devices and slow connections.</div>
       </div>
@@ -553,7 +566,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="assignments">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-orange">📁</div>
+      <div class="feat-icon-wrap icon-orange"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-orange">Feature 02</div>
         <h2 class="feat-section-title">Assignments</h2>
@@ -584,27 +597,27 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">📎</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
         <div class="detail-card-title">Multi-Format Submissions</div>
         <div class="detail-card-text">Accept typed answers, uploaded PDFs, images, Word documents, or Google Drive links. Learners can submit from their phone without needing a printer.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">⏰</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="detail-card-title">Hard Deadline Enforcement</div>
         <div class="detail-card-text">Set a hard close time. After the deadline, the system stops accepting submissions automatically — or allows late submissions with an automatic late flag and penalty record.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">📢</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
         <div class="detail-card-title">Automated Reminders</div>
         <div class="detail-card-text">The system sends push notifications to learners who have not yet submitted — 48 hours, 24 hours, and 2 hours before the deadline. No WhatsApp groups needed.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">✏️</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
         <div class="detail-card-title">In-Platform Marking</div>
         <div class="detail-card-text">View, annotate, and mark every submission without leaving iSkool. Type feedback directly on the submission. Release all marks at once or individually.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">📊</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
         <div class="detail-card-title">Completion Analytics</div>
         <div class="detail-card-text">See submission rates per class, per assignment, over time. Identify learners who consistently miss deadlines — before they fall too far behind.</div>
       </div>
@@ -624,7 +637,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="invigilator">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-green">🛡</div>
+      <div class="feat-icon-wrap icon-green"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-green">Feature 03</div>
         <h2 class="feat-section-title">AI Invigilator</h2>
@@ -660,17 +673,17 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-green">
-        <div class="detail-card-icon">👁</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
         <div class="detail-card-title">Tab Switch Detection</div>
         <div class="detail-card-text">Every time a learner opens a new browser tab or switches to a different application, the system logs the event, the time, and the question number they were on.</div>
       </div>
       <div class="detail-card border-green">
-        <div class="detail-card-icon">🔍</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
         <div class="detail-card-title">Browser Exit Monitoring</div>
         <div class="detail-card-text">If a learner minimises the browser, closes it, or navigates away entirely, the session is flagged as an exit event with timestamp and duration recorded.</div>
       </div>
       <div class="detail-card border-green">
-        <div class="detail-card-icon">⚡</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="detail-card-title">Live Teacher Dashboard</div>
         <div class="detail-card-text">Teachers see a real-time list of every learner, their current question, and any flags raised — updated every 3 seconds throughout the session.</div>
       </div>
@@ -680,12 +693,12 @@ footer a { color: var(--teal); text-decoration: none; }
         <div class="detail-card-text">After the quiz closes, the teacher receives a complete session audit log per learner — every anomaly, every exit, with exact timestamps and question context.</div>
       </div>
       <div class="detail-card border-green">
-        <div class="detail-card-icon">📱</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <div class="detail-card-title">No Camera Required</div>
         <div class="detail-card-text">Works on any device, any browser, with no video upload, no extra software, and no high-bandwidth requirement. Designed for real SA school conditions.</div>
       </div>
       <div class="detail-card border-green">
-        <div class="detail-card-icon">⚖️</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M17 6H7"/><path d="M6 12H2l2 6s2-2 4-6z"/><path d="M22 12h-4l-2 6s2-2 4-6z"/></svg></div>
         <div class="detail-card-title">Context-Aware Flagging</div>
         <div class="detail-card-text">A single brief exit is treated differently from multiple exits across multiple questions. The system gives teachers the data to make fair, context-informed decisions.</div>
       </div>
@@ -700,7 +713,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="gradebook">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-blue">📒</div>
+      <div class="feat-icon-wrap icon-blue"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-blue">Feature 04</div>
         <h2 class="feat-section-title">Gradebook</h2>
@@ -731,27 +744,27 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">⚡</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="detail-card-title">Auto-Population</div>
         <div class="detail-card-text">Quiz and assignment marks feed directly into the gradebook the moment they are captured — no copy-pasting, no double entry, no data loss.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">🎓</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
         <div class="detail-card-title">Symbol Assignment</div>
         <div class="detail-card-text">Percentages are automatically converted to CAPS symbols (A through F) using current DBE percentage bands. Updated when DBE bands change nationally.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">📄</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
         <div class="detail-card-title">One-Click Report Cards</div>
         <div class="detail-card-text">Generate a fully formatted PDF report card for any learner at any point in the term. Email directly to parents or download for printing in bulk.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">⚖️</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M17 6H7"/><path d="M6 12H2l2 6s2-2 4-6z"/><path d="M22 12h-4l-2 6s2-2 4-6z"/></svg></div>
         <div class="detail-card-title">CAPS Weighting Engine</div>
         <div class="detail-card-text">Assessment types are weighted correctly per CAPS requirements. The system knows the difference between a class test, SBA, and examination — and calculates accordingly.</div>
       </div>
       <div class="detail-card border-blue">
-        <div class="detail-card-icon">🚨</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
         <div class="detail-card-title">At-Risk Alerts</div>
         <div class="detail-card-text">Learners falling below 50% are automatically flagged. Teachers and HODs see at-risk learners highlighted on their dashboard before the term-end crunch.</div>
       </div>
@@ -771,7 +784,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="analytics">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-gold">📈</div>
+      <div class="feat-icon-wrap icon-gold"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-gold">Feature 05</div>
         <h2 class="feat-section-title">Deep Analytics</h2>
@@ -802,32 +815,32 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">🎯</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <div class="detail-card-title">Question-Level Difficulty</div>
         <div class="detail-card-text">See exactly which questions learners got wrong most often. Re-teach the concepts that actually need it, rather than guessing from an average score.</div>
       </div>
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">📉</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
         <div class="detail-card-title">Term-on-Term Comparison</div>
         <div class="detail-card-text">Track whether class performance is improving or declining across terms. Identify whether intervention strategies are working with real data.</div>
       </div>
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">🏫</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
         <div class="detail-card-title">Principal Dashboard</div>
         <div class="detail-card-text">School-wide view of every class, every subject, every teacher. Aggregate pass rates, at-risk learner counts, and subject performance — all in one screen.</div>
       </div>
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">🚨</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
         <div class="detail-card-title">Proactive At-Risk Flags</div>
         <div class="detail-card-text">Learners are flagged as at-risk weeks before the end of term, when there is still time to intervene — not after results have already been finalised.</div>
       </div>
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">📤</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/><path d="M9 18H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg></div>
         <div class="detail-card-title">Export to PDF & CSV</div>
         <div class="detail-card-text">Every analytics view can be exported for use in department reports, parent evenings, SGB meetings, or DBE submissions.</div>
       </div>
       <div class="detail-card border-gold">
-        <div class="detail-card-icon">🔔</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
         <div class="detail-card-title">Automated Insight Alerts</div>
         <div class="detail-card-text">The system proactively alerts teachers when a class average drops significantly, when a learner's trajectory reverses sharply, or when a quiz reveals a systemic knowledge gap.</div>
       </div>
@@ -842,7 +855,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="resources">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap" style="background:rgba(167,139,250,0.12);font-size:28px;">📚</div>
+      <div class="feat-icon-wrap" style="background:rgba(167,139,250,0.12);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow" style="color:#a78bfa;">Feature 06</div>
         <h2 class="feat-section-title">Resources</h2>
@@ -865,33 +878,33 @@ footer a { color: var(--teal); text-decoration: none; }
     </div>
 
     <div class="detail-grid sr sr-d2">
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">🏷</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
         <div class="detail-card-title">CAPS Topic Tagging</div>
         <div class="detail-card-text">Every resource is tagged to a specific CAPS topic. Learners see only what is relevant to what they are currently studying — no clutter, no confusion.</div>
       </div>
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">📱</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
         <div class="detail-card-title">Any Device Access</div>
         <div class="detail-card-text">Learners access notes and videos on their phone without needing a laptop or printer. Resources are compressed for low-bandwidth viewing where possible.</div>
       </div>
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">👁</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
         <div class="detail-card-title">Access Tracking</div>
         <div class="detail-card-text">Teachers can see which learners have opened which resources. Spot who is studying and who is not — well before the assessment date.</div>
       </div>
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">📂</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
         <div class="detail-card-title">All File Types</div>
         <div class="detail-card-text">Upload PDFs, Word docs, PowerPoints, images, video files, or link to YouTube and Vimeo videos. One upload — accessible to every learner in the class.</div>
       </div>
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">🔒</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <div class="detail-card-title">Class-Restricted Access</div>
         <div class="detail-card-text">Resources are visible only to learners enrolled in the relevant class. Grade 10A cannot see Grade 12A notes. Every resource is securely scoped.</div>
       </div>
-      <div class="detail-card" style="border-color:rgba(167,139,250,0.2);">
-        <div class="detail-card-icon">🔗</div>
+      <div class="detail-card" style="border-color:rgba(167,139,250,0.3);">
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
         <div class="detail-card-title">Linked to Quizzes</div>
         <div class="detail-card-text">Resources can be pinned directly to a quiz — so learners who scored below 60% are automatically shown the relevant revision material when they view their results.</div>
       </div>
@@ -906,7 +919,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="discussions">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-orange">💬</div>
+      <div class="feat-icon-wrap icon-orange"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-orange">Feature 07</div>
         <h2 class="feat-section-title">Discussions</h2>
@@ -930,32 +943,32 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d2">
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">🧵</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg></div>
         <div class="detail-card-title">Threaded Conversations</div>
         <div class="detail-card-text">Questions and replies are organised into threads per topic. Nothing gets lost in a linear chat. Learners can find answers to questions asked weeks ago.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">✅</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <div class="detail-card-title">Teacher-Approved Answers</div>
         <div class="detail-card-text">Teachers can mark a learner's answer as correct and helpful. This creates a peer-learning culture while ensuring accuracy — the wrong answer never gets accidentally validated.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">🔔</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
         <div class="detail-card-title">Topic Notifications</div>
         <div class="detail-card-text">Learners are notified when a teacher responds to their question. Teachers are notified when a new question is posted — so nothing is missed or left unanswered for days.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">🛡</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
         <div class="detail-card-title">Full Moderation Control</div>
         <div class="detail-card-text">Teachers decide who can post, when discussions are open, and whether posts require approval before going live. Inappropriate content can be removed with one click.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">📊</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
         <div class="detail-card-title">Participation Tracking</div>
         <div class="detail-card-text">Teachers see who is participating in academic discussions and who is silent. Engagement data feeds into the at-risk analytics — passivity is often an early warning sign.</div>
       </div>
       <div class="detail-card border-orange">
-        <div class="detail-card-icon">🔗</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
         <div class="detail-card-title">Linked to Resources</div>
         <div class="detail-card-text">Teachers can attach a resource directly to a discussion reply — so when a learner asks "how do I do this?", the answer includes the relevant notes or video link.</div>
       </div>
@@ -970,7 +983,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="announcements">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-red">🔔</div>
+      <div class="feat-icon-wrap icon-red"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-red">Feature 08</div>
         <h2 class="feat-section-title">Announcements</h2>
@@ -993,32 +1006,32 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d2">
       <div class="detail-card border-red">
-        <div class="detail-card-icon">🎯</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <div class="detail-card-title">Precise Targeting</div>
         <div class="detail-card-text">Target any combination of classes, grades, subjects, or roles. Send to Grade 12 Maths learners only, or to every parent in the school — whatever the situation requires.</div>
       </div>
       <div class="detail-card border-red">
-        <div class="detail-card-icon">✅</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <div class="detail-card-title">Read Receipts</div>
         <div class="detail-card-text">See exactly who has opened each announcement and when. Follow up only with those who haven't — no more blasting the same message to everyone.</div>
       </div>
       <div class="detail-card border-red">
-        <div class="detail-card-icon">📌</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
         <div class="detail-card-title">Pinned Notices</div>
         <div class="detail-card-text">Pin critical announcements to the top of every learner's dashboard — exam schedules, policy changes, deadline reminders — so they are impossible to miss.</div>
       </div>
       <div class="detail-card border-red">
-        <div class="detail-card-icon">👪</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="detail-card-title">Parent Reach</div>
         <div class="detail-card-text">Announcements can be sent simultaneously to learners and their linked parents. Parent involvement has been shown to be one of the strongest predictors of learner success.</div>
       </div>
       <div class="detail-card border-red">
-        <div class="detail-card-icon">🗂</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4a1 1 0 0 1 1-1h4l2 3h10a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z"/></svg></div>
         <div class="detail-card-title">Announcement History</div>
         <div class="detail-card-text">Every announcement is permanently archived with its delivery stats. There is an irrefutable record of what was communicated, to whom, and when.</div>
       </div>
       <div class="detail-card border-red">
-        <div class="detail-card-icon">📎</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
         <div class="detail-card-title">Attachments Supported</div>
         <div class="detail-card-text">Attach PDFs, images, or links to any announcement. Send the test schedule as a downloadable PDF — not just a photo of a handwritten notice on a whiteboard.</div>
       </div>
@@ -1033,7 +1046,7 @@ footer a { color: var(--teal); text-decoration: none; }
 <section class="feat-section" id="calendar">
   <div class="feat-section-inner">
     <div class="feat-section-header sr">
-      <div class="feat-icon-wrap icon-teal">📅</div>
+      <div class="feat-icon-wrap icon-teal"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
       <div class="feat-header-text">
         <div class="feat-section-eyebrow c-teal">Feature 09</div>
         <h2 class="feat-section-title">Calendar &amp; Syllabus Tracker</h2>
@@ -1064,27 +1077,27 @@ footer a { color: var(--teal); text-decoration: none; }
 
     <div class="detail-grid sr sr-d3">
       <div class="detail-card border-teal">
-        <div class="detail-card-icon">🔄</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
         <div class="detail-card-title">Auto-Syncing Events</div>
         <div class="detail-card-text">Quizzes, assignments, and deadlines created by teachers auto-populate every enrolled learner's calendar. No learner is ever caught off-guard by an unexpected assessment.</div>
       </div>
       <div class="detail-card border-teal">
-        <div class="detail-card-icon">📊</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
         <div class="detail-card-title">Live Coverage Percentage</div>
         <div class="detail-card-text">See exactly what percentage of the CAPS curriculum has been taught and assessed — per class, per subject, per term. Updated automatically as assessments are completed.</div>
       </div>
       <div class="detail-card border-teal">
-        <div class="detail-card-icon">🏫</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
         <div class="detail-card-title">HOD & Principal View</div>
         <div class="detail-card-text">Leadership see aggregate curriculum coverage across all classes and subjects. Identify which classes are falling behind the CAPS pacing before the end-of-term scramble begins.</div>
       </div>
       <div class="detail-card border-teal">
-        <div class="detail-card-icon">👪</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="detail-card-title">Parent Calendar Access</div>
         <div class="detail-card-text">Parents see upcoming tests, deadlines, and school events on their linked account. Informed parents are more supportive parents — and learner outcomes improve as a result.</div>
       </div>
       <div class="detail-card border-teal">
-        <div class="detail-card-icon">⚠️</div>
+        <div class="detail-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="detail-card-title">Coverage Gap Alerts</div>
         <div class="detail-card-text">The system alerts teachers and HODs when curriculum coverage is falling behind the CAPS pacing guide — weeks before a gap becomes unrecoverable.</div>
       </div>
@@ -1096,8 +1109,8 @@ footer a { color: var(--teal); text-decoration: none; }
     </div>
 
     <!-- CTA STRIP -->
-    <div class="cta-strip sr">
-      <h2>Ready to see all of this <span>working live?</span></h2>
+    <div class="cta-strip sr" style="background:linear-gradient(135deg,#f0fdfb,#fefce8);border-color:rgba(79,209,197,0.25);">
+      <h2 style="color:#111;">Ready to see all of this <span>working live?</span></h2>
       <p>Apply for iSkool's free pilot and your school gets full access to every feature — set up and running within 5 working days.</p>
       <a href="website-clone.html" class="cta-btn">Apply for Free Pilot →</a>
     </div>
