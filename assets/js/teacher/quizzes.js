@@ -865,50 +865,21 @@ window.decodeIntegrity = async function() {
                     <span style="background:rgba(79,209,197,0.2);color:#4fd1c5;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;border:1px solid #4fd1c5;">AI ACTIVE</span>
                 </div>`;
 
-            data.forEach(row => {
+            html += `<div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">`;
+
+            data.forEach((row, i) => {
+                const isLast = i === data.length - 1;
                 html += `
-    <div style="background:rgba(255,255,255,0.04);padding:15px;border-radius:12px;margin-bottom:15px;border-left:5px solid ${row.color};border-top:1px solid rgba(255,255,255,0.05);">
-        
-        <!-- Header: name + risk badge -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-            <strong style="color:#e0e6f0;font-size:15px;">${row.name}</strong>
-            <span style="background:${row.color};color:white;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:900;text-transform:uppercase;flex-shrink:0;margin-left:10px;">
-                ${row.risk} RISK
-            </span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;${isLast ? '' : 'border-bottom:1px solid rgba(255,255,255,0.06);'}">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#f85149;flex-shrink:0;"></div>
+            <span style="color:#e2e8f0;font-size:14px;">${row.name}</span>
         </div>
-
-        <!-- AI Narrative -->
-        <div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;margin-bottom:12px;">
-            <p style="margin:0;font-size:13px;line-height:1.6;color:#cbd5e0;">${row.narrative}</p>
-        </div>
-
-        <!-- Event breakdown pills -->
-<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-    ${row.switches > 0 ? `
-    <span style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.35);color:#f85149;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
-        ⚑ ${row.switches} Interruption${row.switches !== 1 ? 's' : ''}
-    </span>` : ''}
-    ${row.rapid_moves > 0 ? `
-    <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
-        ⚡ ${row.rapid_moves} Rapid Move${row.rapid_moves !== 1 ? 's' : ''}
-    </span>` : ''}
-</div>
-
-        <!-- Flagged questions -->
-        ${row.problem_questions && row.problem_questions !== 'N/A' ? `
-        <div style="margin-bottom:10px;padding:8px 12px;background:rgba(248,81,73,0.05);border-radius:6px;border:1px solid rgba(248,81,73,0.2);">
-            <small style="color:#f85149;font-weight:800;font-size:11px;letter-spacing:0.5px;">
-                ⚑ FLAGGED: Question(s) ${row.problem_questions}
-            </small>
-        </div>` : ''}
-
-        <!-- Footer -->
-        <div style="display:flex;justify-content:space-between;opacity:0.55;margin-top:4px;">
-            <small style="color:#8b949e;">Total Events: <strong>${row.switches}</strong></small>
-            <small style="color:#8b949e;font-size:10px;">Last Event: ${row.last_event_time}</small>
-        </div>
+        <span style="color:#f85149;font-size:12px;font-weight:700;letter-spacing:0.3px;">Q ${row.problem_questions}</span>
     </div>`;
             });
+
+            html += `</div>`;
 
             resultsDiv.innerHTML = html;
         }
