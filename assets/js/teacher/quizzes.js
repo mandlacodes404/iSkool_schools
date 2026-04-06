@@ -38,6 +38,9 @@ window.fetchTeacherQuizzes = async function() {
     }
 };
 
+// Track active quiz for desktop panel
+window._activeDesktopQuizId = null;
+
 function renderTeacherQuizzes(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -46,7 +49,285 @@ function renderTeacherQuizzes(data) {
     const currentTerm = data.current_term || 1;
     const yearName    = data.year_name || '';
 
+    // ── Collect all quizzes flat for desktop panel lookup ──
+    window._allQuizzesFlat = [];
+    terms.forEach(termData => {
+        termData.classes.forEach(cls => {
+            cls.quizzes.forEach(quiz => {
+                window._allQuizzesFlat.push({ ...quiz, class_name: cls.class_name, term: termData.term });
+            });
+        });
+    });
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!terms || terms.length === 0) {
+        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No quizzes found.</p>`;
+    } else {
+        terms.forEach(termData => {
+            const isActive = termData.term === currentTerm;
+            sidebarHtml += `
+                <div class="qz-sidebar-term">
+                    <div class="qz-sidebar-term-label">
+                        TERM ${termData.term}
+                        ${isActive ? '<span class="qz-sidebar-term-active">ACTIVE</span>' : ''}
+                    </div>`;
+            termData.classes.forEach(cls => {
+                sidebarHtml += `<div class="qz-sidebar-class-label">${cls.class_name}</div>`;
+                cls.quizzes.forEach(quiz => {
+                    const statusColor = quiz.status === 'Open' ? '#f28c38'
+                        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
+                    sidebarHtml += `
+                        <div class="qz-sidebar-item" id="qz-sidebar-${quiz.id}"
+                            onclick="selectDesktopQuiz(${quiz.id})">
+                            <div class="qz-sidebar-item-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                            </div>
+                            <div class="qz-sidebar-item-info">
+                                <div class="qz-sidebar-item-title">${quiz.title}</div>
+                                <div class="qz-sidebar-item-meta">${quiz.duration} min</div>
+                            </div>
+                            <span class="qz-sidebar-status-dot" style="background:${statusColor};"></span>
+                        </div>`;
+                });
+            });
+            sidebarHtml += `</div>`;
+        });
+    }
+
+    // ── Build full HTML: header + split layout ──
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .qz-desktop-layout { display: flex !important; }
+                .qz-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .qz-desktop-layout { display: none !important; }
+                .qz-mobile-list    { display: block !important; }
+            }
+
+            .qz-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .qz-sidebar {
+                width: 280px;
+                min-width: 240px;
+                max-width: 300px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .qz-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .qz-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .qz-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .qz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .qz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .qz-sidebar-term { margin-bottom: 4px; }
+            .qz-sidebar-term-label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                color: #555e6a;
+                text-transform: uppercase;
+            }
+            .qz-sidebar-term-active {
+                background: rgba(79,209,197,0.15);
+                color: #4fd1c5;
+                font-size: 9px;
+                padding: 2px 6px;
+                border-radius: 4px;
+                border: 1px solid rgba(79,209,197,0.3);
+            }
+            .qz-sidebar-class-label {
+                padding: 4px 16px 2px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .qz-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .qz-sidebar-item:hover {
+                background: rgba(255,255,255,0.04);
+            }
+            .qz-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .qz-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .qz-sidebar-item-info { flex: 1; min-width: 0; }
+            .qz-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .qz-sidebar-item.active .qz-sidebar-item-title { color: #e2e8f0; }
+            .qz-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+            .qz-sidebar-status-dot {
+                width: 7px; height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            /* Right panel */
+            .qz-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .qz-main-panel::-webkit-scrollbar { width: 5px; }
+            .qz-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .qz-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .qz-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .qz-panel-empty svg { opacity: 0.3; }
+            .qz-panel-empty p { font-size: 14px; margin: 0; }
+
+            .qz-panel-content { padding: 28px 32px; }
+
+            .qz-panel-quiz-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .qz-panel-quiz-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+            }
+            .qz-panel-quiz-meta {
+                font-size: 13px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .qz-panel-status-badge {
+                padding: 3px 10px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .qz-marks-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                padding: 14px 18px;
+                margin-bottom: 12px;
+            }
+            .qz-marks-label {
+                font-size: 13px;
+                color: #8b949e;
+                font-weight: 600;
+            }
+
+            .qz-actions-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-top: 8px;
+            }
+            .qz-action-card {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 12px;
+                padding: 18px 20px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                font-size: 14px;
+                font-weight: 700;
+                color: #c9d1d9;
+            }
+            .qz-action-card:hover {
+                background: rgba(255,255,255,0.06);
+                border-color: rgba(255,255,255,0.15);
+                transform: translateY(-1px);
+            }
+            .qz-action-card.publish { border-color: rgba(79,209,197,0.2); }
+            .qz-action-card.publish:hover { border-color: #4fd1c5; background: rgba(79,209,197,0.08); color: #4fd1c5; }
+            .qz-action-card.close   { border-color: rgba(248,81,73,0.2); }
+            .qz-action-card.close:hover   { border-color: #f85149; background: rgba(248,81,73,0.08); color: #f85149; }
+            .qz-action-card.reopen  { border-color: rgba(34,197,94,0.2); }
+            .qz-action-card.reopen:hover  { border-color: #22c55e; background: rgba(34,197,94,0.08); color: #22c55e; }
+            .qz-action-card.results { border-color: rgba(30,144,255,0.2); }
+            .qz-action-card.results:hover { border-color: #1e90ff; background: rgba(30,144,255,0.08); color: #1e90ff; }
+            .qz-action-card.integrity { border-color: rgba(242,140,56,0.2); }
+            .qz-action-card.integrity:hover { border-color: #f28c38; background: rgba(242,140,56,0.08); color: #f28c38; }
+            .qz-action-card-icon { flex-shrink: 0; }
+            .qz-action-card-text { display: flex; flex-direction: column; gap: 2px; }
+            .qz-action-card-sub  { font-size: 11px; font-weight: 400; color: #555e6a; }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Quizzes</h2>
             <button class="teacher-upload-btn" onclick="openCreateQuiz()">
@@ -57,8 +338,31 @@ function renderTeacherQuizzes(data) {
                 Create Quiz
             </button>
         </div>
+        <div class="teacher-year-badge">${yearName} &bull; Term ${currentTerm} Active</div>
 
-        <div class="teacher-year-badge">${yearName} &bull; Term ${currentTerm} Active</div>`;
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="qz-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="qz-sidebar">
+                <div class="qz-sidebar-header">All Quizzes</div>
+                <div class="qz-sidebar-scroll">${sidebarHtml}</div>
+            </div>
+
+            <!-- Right Main Panel -->
+            <div class="qz-main-panel" id="qz-main-panel">
+                <div class="qz-panel-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <p>Select a quiz from the left to manage it</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <div class="qz-mobile-list">`;
 
     if (!terms || terms.length === 0) {
         html += `<p class="teacher-empty-state">No quizzes found for this year.</p>`;
@@ -153,6 +457,8 @@ function renderTeacherQuizzes(data) {
         });
     }
 
+    html += `</div>`;
+
     // Integrity Modal
     html += `
         <div id="integrityModal" class="teacher-modal-overlay" style="display:none;">
@@ -208,7 +514,122 @@ function renderTeacherQuizzes(data) {
 }
 
 // ─────────────────────────────────────────────
-// QUIZ CARD TOGGLE
+// DESKTOP PANEL: SELECT QUIZ
+// ─────────────────────────────────────────────
+window.selectDesktopQuiz = function(quizId) {
+    // Update sidebar active state
+    document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`qz-sidebar-${quizId}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    window._activeDesktopQuizId = quizId;
+
+    const quiz = (window._allQuizzesFlat || []).find(q => q.id == quizId);
+    if (!quiz) return;
+
+    const panel = document.getElementById('qz-main-panel');
+    if (!panel) return;
+
+    const statusColor = quiz.status === 'Open' ? '#f28c38'
+        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
+
+    const publishLabel = quiz.publish_marks ? 'Published' : 'Hidden';
+    const publishBtnText = quiz.publish_marks ? 'Unpublish Marks' : 'Publish Marks';
+    const statusBtnClass = quiz.status === 'Closed' ? 'reopen' : 'close';
+    const statusBtnText  = quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+
+    panel.innerHTML = `
+        <div class="qz-panel-content">
+            <div class="qz-panel-quiz-header">
+                <div>
+                    <div class="qz-panel-quiz-title" id="qz-panel-title-${quizId}">${quiz.title}</div>
+                    <div class="qz-panel-quiz-meta">
+                        <span>${quiz.class_name}</span>
+                        <span>&bull;</span>
+                        <span>${quiz.duration} min</span>
+                        <span>&bull;</span>
+                        <span>${quiz.start_time}</span>
+                        <span class="qz-panel-status-badge" id="qz-panel-status-badge-${quizId}"
+                            style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
+                            ${quiz.status}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marks Status Row -->
+            <div class="qz-marks-row">
+                <span class="qz-marks-label">Marks Visibility</span>
+                <span class="teacher-quiz-publish-status ${quiz.publish_marks ? 'published' : 'hidden'}"
+                    id="publish-label-${quizId}">${publishLabel}</span>
+            </div>
+
+            <!-- Action Cards Grid -->
+            <div class="qz-actions-grid">
+                <button class="qz-action-card publish"
+                    id="publish-btn-${quizId}"
+                    onclick="togglePublishMarks(${quizId})">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>${publishBtnText}</span>
+                        <span class="qz-action-card-sub">Toggle mark visibility</span>
+                    </div>
+                </button>
+
+                <button class="qz-action-card ${statusBtnClass}"
+                    id="status-btn-${quizId}"
+                    onclick="toggleQuizStatus(${quizId}, '${quiz.status}')">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            ${quiz.status === 'Closed'
+                                ? '<polygon points="10 8 16 12 10 16 10 8"></polygon>'
+                                : '<rect x="9" y="9" width="6" height="6"></rect>'}
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>${statusBtnText}</span>
+                        <span class="qz-action-card-sub">Change quiz access</span>
+                    </div>
+                </button>
+
+                <button class="qz-action-card results"
+                    onclick="openQuizResults(${quizId}, '${quiz.title.replace(/'/g, "\\'")}')">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>View Results</span>
+                        <span class="qz-action-card-sub">See submissions & scores</span>
+                    </div>
+                </button>
+
+                <button class="qz-action-card integrity"
+                    onclick="openIntegrityModal(${quizId}, '${quiz.title.replace(/'/g, "\\'")}')">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>Integrity Report</span>
+                        <span class="qz-action-card-sub">AI-powered analysis</span>
+                    </div>
+                </button>
+            </div>
+        </div>`;
+};
+
+// ─────────────────────────────────────────────
+// QUIZ CARD TOGGLE (mobile)
 // ─────────────────────────────────────────────
 window.toggleQuizDetails = function(quizId) {
     const details  = document.getElementById(`details-${quizId}`);
@@ -242,8 +663,21 @@ window.togglePublishMarks = async function(quizId) {
                 label.textContent = published ? 'Published' : 'Hidden';
                 label.className   = `teacher-quiz-publish-status ${published ? 'published' : 'hidden'}`;
             }
-            if (btn) btn.textContent = published ? 'Unpublish Marks' : 'Publish Marks';
-
+            if (btn) {
+                // Desktop card button keeps full text; mobile button keeps short text
+                const isDesktopBtn = btn.classList.contains('qz-action-card');
+                btn.querySelector ? btn.querySelector('.qz-action-card-text span:first-child')
+                    && (btn.querySelector('.qz-action-card-text span:first-child').textContent = published ? 'Unpublish Marks' : 'Publish Marks')
+                    : (btn.textContent = published ? 'Unpublish Marks' : 'Publish Marks');
+                if (!btn.classList.contains('qz-action-card')) {
+                    btn.textContent = published ? 'Unpublish Marks' : 'Publish Marks';
+                }
+            }
+            // Update cached quiz data so desktop re-select shows correct state
+            if (window._allQuizzesFlat) {
+                const q = window._allQuizzesFlat.find(q => q.id == quizId);
+                if (q) q.publish_marks = published ? 1 : 0;
+            }
             window.teacherQuizzesCache = null;
         } else {
             alert(data.message || 'Failed to update');
@@ -279,6 +713,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
             const badge = document.querySelector(
                 `.teacher-quiz-card[data-quiz-id="${quizId}"] .teacher-quiz-status-badge`
             );
+            const panelBadge = document.getElementById(`qz-panel-status-badge-${quizId}`);
             const btn = document.getElementById(`status-btn-${quizId}`);
 
             if (badge) {
@@ -287,12 +722,31 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
                 badge.style.background = `${statusColor}20`;
                 badge.style.border  = `1px solid ${statusColor}50`;
             }
-            if (btn) {
-                btn.textContent  = newStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
-                btn.className    = `teacher-quiz-action-btn ${newStatus === 'Closed' ? 'reopen' : 'close'}`;
-                btn.onclick      = () => toggleQuizStatus(quizId, newStatus);
+            if (panelBadge) {
+                panelBadge.textContent = newStatus;
+                panelBadge.style.color = statusColor;
+                panelBadge.style.background = `${statusColor}20`;
+                panelBadge.style.border = `1px solid ${statusColor}50`;
             }
-
+            if (btn) {
+                const newBtnText = newStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+                const newBtnClass = newStatus === 'Closed' ? 'reopen' : 'close';
+                // Handle both desktop card and mobile button
+                if (btn.classList.contains('qz-action-card')) {
+                    const span = btn.querySelector('.qz-action-card-text span:first-child');
+                    if (span) span.textContent = newBtnText;
+                    btn.className = `qz-action-card ${newBtnClass}`;
+                } else {
+                    btn.textContent = newBtnText;
+                    btn.className   = `teacher-quiz-action-btn ${newBtnClass}`;
+                }
+                btn.onclick = () => toggleQuizStatus(quizId, newStatus);
+            }
+            // Update cached quiz data
+            if (window._allQuizzesFlat) {
+                const q = window._allQuizzesFlat.find(q => q.id == quizId);
+                if (q) q.status = newStatus;
+            }
             window.teacherQuizzesCache = null;
         } else {
             alert(data.message || 'Failed to update status');
@@ -331,16 +785,22 @@ function renderQuizResults(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // On desktop, render inside the right panel; on mobile render in apiArea
+    const panel = document.getElementById('qz-main-panel');
+    const target = panel || apiArea;
+    const backFn = panel ? `selectDesktopQuiz(${window._activeDesktopQuizId})` : 'fetchTeacherQuizzes()';
+    const backLabel = panel ? 'Back to Quiz' : 'Back to Quizzes';
+
     let html = `
-        <div class="teacher-resources-header">
-            <button class="teacher-back-btn" onclick="fetchTeacherQuizzes()">
+        <div class="teacher-resources-header" style="${panel ? 'padding:20px 32px 0;' : ''}">
+            <button class="teacher-back-btn" onclick="${backFn}">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
-                Back to Quizzes
+                ${backLabel}
             </button>
         </div>
-
+        <div style="${panel ? 'padding:0 32px 28px;' : ''}">
         <h3 class="teacher-quiz-grades-title">${data.quiz_title}</h3>
         <p class="teacher-quiz-grades-meta">${data.results.length} submission${data.results.length !== 1 ? 's' : ''}</p>`;
 
@@ -386,7 +846,8 @@ function renderQuizResults(data) {
         html += `</tbody></table></div>`;
     }
 
-    apiArea.innerHTML = html;
+    html += `</div>`;
+    target.innerHTML = html;
 }
 
 function getGradeBadgeClass(percentage) {
@@ -422,8 +883,12 @@ function renderQuizReview(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    const panel = document.getElementById('qz-main-panel');
+    const target = panel || apiArea;
+    const padStyle = panel ? 'padding:20px 32px 28px;' : '';
+
     let html = `
-        <div class="teacher-resources-header">
+        <div class="teacher-resources-header" style="${panel ? 'padding:20px 32px 0;' : ''}">
             <button class="teacher-back-btn"
                 onclick="renderQuizResults(window.currentQuizResultsData)">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -433,6 +898,7 @@ function renderQuizReview(data) {
             </button>
         </div>
 
+        <div style="${padStyle}">
         <div class="teacher-review-score-card">
             <div class="teacher-review-percentage">${data.percentage}%</div>
             <div class="teacher-review-title">${data.title}</div>
@@ -487,7 +953,8 @@ function renderQuizReview(data) {
         html += `</div>`;
     });
 
-    apiArea.innerHTML = html;
+    html += `</div>`;
+    target.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
