@@ -35,11 +35,183 @@ window.fetchTeacherEvaluations = async function() {
     }
 };
 
+// Track active evaluation for desktop panel
+window._activeDesktopEvalKey = null;
+
 function renderTeacherEvaluations(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // ── Build flat list for desktop panel lookup ──
+    window._allEvalsFlat = [];
+    if (data && data.length > 0) {
+        data.forEach((group, gIdx) => {
+            group.evaluations.forEach((ev, eIdx) => {
+                window._allEvalsFlat.push({ ev, groupIndex: gIdx, evIndex: eIdx, class_name: group.class_name });
+            });
+        });
+    }
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!data || data.length === 0) {
+        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No evaluations released yet.</p>`;
+    } else {
+        data.forEach((group, gIdx) => {
+            sidebarHtml += `<div class="ev-sidebar-class-label">${group.class_name}</div>`;
+            group.evaluations.forEach((ev, eIdx) => {
+                const key = `${gIdx}-${eIdx}`;
+                sidebarHtml += `
+                    <div class="ev-sidebar-item" id="ev-sidebar-${key}"
+                        onclick="selectDesktopEval(${gIdx}, ${eIdx})">
+                        <div class="ev-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </div>
+                        <div class="ev-sidebar-item-info">
+                            <div class="ev-sidebar-item-title">${ev.title}</div>
+                            <div class="ev-sidebar-item-meta">${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}</div>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .ev-desktop-layout { display: flex !important; }
+                .ev-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .ev-desktop-layout { display: none !important; }
+                .ev-mobile-list    { display: block !important; }
+            }
+
+            .ev-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .ev-sidebar {
+                width: 260px;
+                min-width: 220px;
+                max-width: 280px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .ev-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .ev-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .ev-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .ev-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .ev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .ev-sidebar-class-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                color: #555e6a;
+                text-transform: uppercase;
+            }
+            .ev-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .ev-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .ev-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .ev-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .ev-sidebar-item-info { flex: 1; min-width: 0; }
+            .ev-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .ev-sidebar-item.active .ev-sidebar-item-title { color: #e2e8f0; }
+            .ev-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+
+            /* Right panel */
+            .ev-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .ev-main-panel::-webkit-scrollbar { width: 5px; }
+            .ev-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .ev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .ev-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .ev-panel-empty svg { opacity: 0.3; }
+            .ev-panel-empty p { font-size: 14px; margin: 0; }
+
+            .ev-panel-content { padding: 28px 32px; }
+
+            .ev-panel-header {
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .ev-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+            }
+            .ev-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+            }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Evaluations</h2>
             <button class="teacher-upload-btn" onclick="openReleaseEvaluationModal()">
@@ -49,7 +221,33 @@ function renderTeacherEvaluations(data) {
                 </svg>
                 Release Evaluation
             </button>
-        </div>`;
+        </div>
+
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="ev-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="ev-sidebar">
+                <div class="ev-sidebar-header">All Evaluations</div>
+                <div class="ev-sidebar-scroll">
+                    ${sidebarHtml}
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="ev-main-panel" id="ev-main-panel">
+                <div class="ev-panel-empty">
+                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <p>Select an evaluation to view results</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST ═══ -->
+        <div class="ev-mobile-list">`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No evaluations released yet.</p>`;
@@ -85,7 +283,9 @@ function renderTeacherEvaluations(data) {
         });
     }
 
-    // Results Modal
+    html += `</div>`;
+
+    // Results Modal (shared by both desktop panel and mobile)
     html += `
         <div id="evalResultsModal" class="teacher-modal-overlay" style="display:none;">
             <div class="teacher-modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;">
@@ -157,8 +357,72 @@ function renderTeacherEvaluations(data) {
     loadEvalClasses();
 }
 
+// ── DESKTOP PANEL: SELECT EVALUATION ────────────────────────────────────────
+window.selectDesktopEval = function(groupIndex, evIndex) {
+    const key = `${groupIndex}-${evIndex}`;
+
+    document.querySelectorAll('.ev-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`ev-sidebar-${key}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    window._activeDesktopEvalKey = key;
+
+    const ev = window.teacherEvaluationCache[groupIndex].evaluations[evIndex];
+    if (!ev) return;
+
+    const panel = document.getElementById('ev-main-panel');
+    if (!panel) return;
+
+    let body = `
+        <div class="ev-panel-content">
+            <div class="ev-panel-header">
+                <div class="ev-panel-title">${ev.title}</div>
+                <div class="ev-panel-meta">
+                    ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
+                    ${ev.description ? ' &mdash; ' + ev.description : ''}
+                </div>
+            </div>`;
+
+    ev.statements.forEach(s => {
+        body += `<div class="eval-question-block">
+            <div class="eval-question-text">${s.statement}</div>
+            <div class="eval-bars">`;
+
+        s.breakdown.forEach(b => {
+            body += `
+                <div class="eval-bar-container">
+                    <div class="eval-bar-label">${b.label} (${b.count})</div>
+                    <div class="eval-bar-bg">
+                        <div class="eval-bar-fill" style="width:${b.percentage}%;background:${b.color};">
+                            ${b.percentage}%
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        body += `</div></div>`;
+    });
+
+    body += `<div class="eval-comments-section">
+        <div class="eval-comments-title">
+            Anonymous Comments (${ev.response_count} total responses)
+        </div>`;
+
+    if (ev.comments.length === 0) {
+        body += `<p class="eval-no-comments">No additional comments.</p>`;
+    } else {
+        ev.comments.forEach(c => {
+            body += `<div class="eval-comment">${c.replace(/\n/g, '<br>')}</div>`;
+        });
+    }
+
+    body += `</div></div>`;
+
+    panel.innerHTML = body;
+};
+
 // ─────────────────────────────────────────────
-// RESULTS MODAL
+// RESULTS MODAL (mobile)
 // ─────────────────────────────────────────────
 window.openEvaluationResults = function(groupIndex, evIndex) {
     const ev = window.teacherEvaluationCache[groupIndex].evaluations[evIndex];

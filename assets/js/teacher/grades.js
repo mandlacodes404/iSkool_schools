@@ -39,11 +39,194 @@ window.fetchTeacherGrades = async function() {
     }
 };
 
+// Track active quiz for desktop panel
+window._activeDesktopGradeQuizId = null;
+
 function renderTeacherGrades(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // ── Collect all quizzes flat for desktop panel lookup ──
+    window._allGradesQuizzesFlat = [];
+    if (data && data.length > 0) {
+        data.forEach(termData => {
+            termData.classes.forEach(cls => {
+                cls.quizzes.forEach(quiz => {
+                    window._allGradesQuizzesFlat.push({ ...quiz, class_name: cls.class_name, term: termData.term });
+                });
+            });
+        });
+    }
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!data || data.length === 0) {
+        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No quizzes found.</p>`;
+    } else {
+        data.forEach(termData => {
+            sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
+            termData.classes.forEach(cls => {
+                sidebarHtml += `<div class="gr-sidebar-class-label">${cls.class_name}</div>`;
+                cls.quizzes.forEach(quiz => {
+                    sidebarHtml += `
+                        <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
+                            onclick="selectDesktopGradeQuiz(${quiz.id})">
+                            <div class="gr-sidebar-item-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <div class="gr-sidebar-item-info">
+                                <div class="gr-sidebar-item-title">${quiz.title}</div>
+                                <div class="gr-sidebar-item-meta">${quiz.created_at}</div>
+                            </div>
+                        </div>`;
+                });
+            });
+        });
+    }
+
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .gr-desktop-layout { display: flex !important; }
+                .gr-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .gr-desktop-layout { display: none !important; }
+                .gr-mobile-list    { display: block !important; }
+            }
+
+            .gr-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .gr-sidebar {
+                width: 260px;
+                min-width: 220px;
+                max-width: 280px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .gr-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .gr-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .gr-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .gr-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .gr-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .gr-sidebar-term-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                color: #555e6a;
+                text-transform: uppercase;
+            }
+            .gr-sidebar-class-label {
+                padding: 4px 16px 2px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .gr-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .gr-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .gr-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .gr-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .gr-sidebar-item-info { flex: 1; min-width: 0; }
+            .gr-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .gr-sidebar-item.active .gr-sidebar-item-title { color: #e2e8f0; }
+            .gr-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+
+            /* Right panel */
+            .gr-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .gr-main-panel::-webkit-scrollbar { width: 5px; }
+            .gr-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .gr-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .gr-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .gr-panel-empty svg { opacity: 0.3; }
+            .gr-panel-empty p { font-size: 14px; margin: 0; }
+
+            .gr-panel-content { padding: 28px 32px; }
+
+            .gr-panel-header {
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .gr-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 4px;
+            }
+            .gr-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+            }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Grades</h2>
             <button class="teacher-upload-btn" onclick="openAddQuizModal()">
@@ -55,21 +238,46 @@ function renderTeacherGrades(data) {
             </button>
         </div>
 
-        <div class="teacher-grades-info">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px;">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>Click any quiz to view learner grades. Use <strong>Add Quiz</strong> to manually record marks for schools without online quizzes.</span>
-        </div>`;
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="gr-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="gr-sidebar">
+                <div class="gr-sidebar-header">All Quizzes</div>
+                <div class="gr-sidebar-scroll">
+                    ${sidebarHtml}
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="gr-main-panel" id="gr-main-panel">
+                <div class="gr-panel-empty">
+                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <p>Select a quiz to view learner grades</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST ═══ -->
+        <div class="gr-mobile-list">
+            <div class="teacher-grades-info">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Click any quiz to view learner grades. Use <strong>Add Quiz</strong> to manually record marks for schools without online quizzes.</span>
+            </div>`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No quizzes found.</p>`;
     } else {
         data.forEach(termData => {
-            html += `
-                <div class="teacher-term-divider">Term ${termData.term}</div>`;
+            html += `<div class="teacher-term-divider">Term ${termData.term}</div>`;
 
             termData.classes.forEach(cls => {
                 html += `
@@ -101,6 +309,8 @@ function renderTeacherGrades(data) {
             });
         });
     }
+
+    html += `</div>`;
 
     // Add Quiz Modal
     html += `
@@ -152,8 +362,144 @@ function renderTeacherGrades(data) {
     loadGradesClasses();
 }
 
+// ── DESKTOP PANEL: SELECT QUIZ ───────────────────────────────────────────────
+window.selectDesktopGradeQuiz = async function(quizId) {
+    document.querySelectorAll('.gr-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`gr-sidebar-${quizId}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    window._activeDesktopGradeQuizId = quizId;
+
+    const panel  = document.getElementById('gr-main-panel');
+    const loader = document.getElementById('loaderOverlay');
+    if (!panel) return;
+
+    // Show a loading state inside the panel
+    panel.innerHTML = `
+        <div class="gr-panel-empty">
+            <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
+                style="animation:spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
+            </svg>
+            <p>Loading grades...</p>
+        </div>`;
+
+    try {
+        const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        window.currentQuizData = data;
+        renderGradesInPanel(data, panel);
+    } catch (e) {
+        panel.innerHTML = `<div class="gr-panel-empty"><p style="color:#f85149;">Error loading grades.</p></div>`;
+    }
+};
+
+function renderGradesInPanel(data, panel) {
+    let html = `
+        <div class="gr-panel-content">
+            <div class="gr-panel-header">
+                <div class="gr-panel-title">${data.quiz_title}</div>
+                <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
+            </div>`;
+
+    if (data.learners.length === 0) {
+        html += `<p class="teacher-empty-state">No learners found in this class.</p>`;
+    } else {
+        html += `<div class="teacher-grades-table-wrapper">
+            <table class="teacher-grades-table">
+                <thead>
+                    <tr>
+                        <th>Learner</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        data.learners.forEach(learner => {
+            const score = learner.score !== null
+                ? `${learner.score} / ${learner.total}`
+                : '<span style="color:#555e6a;">Not recorded</span>';
+            const perc  = learner.percentage
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${learner.percentage}</span>`
+                : '<span style="color:#555e6a;">—</span>';
+
+            html += `
+                <tr>
+                    <td>${learner.name}</td>
+                    <td>${score}</td>
+                    <td>${perc}</td>
+                    <td>
+                        <button class="teacher-edit-marks-btn"
+                            onclick="openEditMarksInPanel('${learner.email.replace(/'/g, "\\'")}', '${learner.name.replace(/'/g, "\\'")}', ${data.quiz_id}, '${data.quiz_title.replace(/'/g, "\\'")}', ${learner.score ?? 'null'}, ${learner.total ?? 100})">
+                            Edit
+                        </button>
+                    </td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+    }
+
+    html += `</div>`;
+    panel.innerHTML = html;
+}
+
+// Edit marks inline within the desktop panel
+window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentScore, currentTotal) {
+    const panel = document.getElementById('gr-main-panel');
+    if (!panel) return;
+
+    const scoreVal = currentScore !== null ? currentScore : '';
+    const totalVal = currentTotal !== null ? currentTotal : 100;
+
+    panel.innerHTML = `
+        <div class="gr-panel-content">
+            <div class="gr-panel-header" style="display:flex;align-items:center;gap:12px;">
+                <button onclick="renderGradesInPanel(window.currentQuizData, document.getElementById('gr-main-panel'))"
+                    style="background:none;border:1px solid rgba(255,255,255,0.1);color:#8b949e;
+                           border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;
+                           display:flex;align-items:center;gap:6px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Back
+                </button>
+                <div>
+                    <div class="gr-panel-title">Edit Marks</div>
+                    <div class="gr-panel-meta">${name} &bull; ${quizTitle}</div>
+                </div>
+            </div>
+
+            <div class="teacher-edit-marks-box">
+                <label class="teacher-modal-label">Score Received</label>
+                <input type="number" step="0.01" id="editScore" class="teacher-modal-input"
+                    value="${scoreVal}" placeholder="e.g. 15">
+
+                <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
+                <input type="number" step="0.01" id="editTotal" class="teacher-modal-input"
+                    value="${totalVal}" placeholder="e.g. 20">
+
+                <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+                <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
+
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <button class="teacher-modal-cancel" style="flex:1;"
+                        onclick="renderGradesInPanel(window.currentQuizData, document.getElementById('gr-main-panel'))">Cancel</button>
+                    <button class="teacher-modal-submit" style="flex:2;"
+                        id="saveMarksBtn"
+                        onclick="saveMarks('${email.replace(/'/g, "\\'")}', ${quizId})">
+                        Save Marks
+                    </button>
+                </div>
+            </div>
+        </div>`;
+};
+
 // ─────────────────────────────────────────────
-// QUIZ GRADES VIEW
+// QUIZ GRADES VIEW (mobile — replaces full apiArea)
 // ─────────────────────────────────────────────
 window.openQuizGrades = async function(quizId, quizTitle) {
     const apiArea = document.getElementById('api-content-area');
@@ -247,7 +593,7 @@ function getGradeBadgeClass(percentage) {
 }
 
 // ─────────────────────────────────────────────
-// EDIT MARKS VIEW
+// EDIT MARKS VIEW (mobile — replaces full apiArea)
 // ─────────────────────────────────────────────
 window.openEditMarks = function(email, name, quizId, quizTitle, currentScore, currentTotal) {
     const apiArea = document.getElementById('api-content-area');
@@ -334,7 +680,14 @@ window.saveMarks = async function(email, quizId) {
                 const res2  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
                 const fresh = await res2.json();
                 window.currentQuizData = fresh;
-                renderQuizGrades(fresh);
+
+                // Refresh whichever view is active
+                const panel = document.getElementById('gr-main-panel');
+                if (panel) {
+                    renderGradesInPanel(fresh, panel);
+                } else {
+                    renderQuizGrades(fresh);
+                }
             }, 800);
         } else {
             errorDiv.textContent = data.error || 'Failed to save marks.';
