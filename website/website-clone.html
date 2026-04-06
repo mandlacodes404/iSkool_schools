@@ -1126,333 +1126,120 @@ function toggleMenu() {
 
 <!-- ===================== COMPARISON SECTION ===================== -->
 <style>
-/* ── Option C: Expose the Gap — Light Mode ── */
-.comparison-section {
-  background: #ffffff;
-  padding: 100px 5% 110px;
-  border-radius: 28px 28px 0 0;
-  margin-top: -28px;
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-}
-.comparison-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.35;
-  pointer-events: none;
-}
-.comparison-inner { max-width: 960px; margin: 0 auto; position: relative; z-index: 1; }
-
-/* Header */
-.comp-header { text-align: center; margin-bottom: 64px; }
+.comparison-section { background: #ffffff; padding: 100px 5%; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
+.comparison-inner { max-width: 860px; margin: 0 auto; }
+.comparison-header { text-align: center; margin-bottom: 56px; }
 .comp-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .comp-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 16px; }
-.comp-heading em { font-style: normal; color: var(--gold); }
-.comp-sub { font-size: 17px; color: #666; max-width: 500px; margin: 0 auto; line-height: 1.65; }
-
-/* Cards grid */
-.comp-cards { display: flex; flex-direction: column; gap: 14px; }
-
-.comp-card {
-  border-radius: 20px;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid #ebebeb;
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.55s ease, transform 0.55s ease;
-}
-.comp-card.comp-revealed { opacity: 1; transform: translateY(0); }
-
-/* Card halves */
-.comp-half { padding: 26px 28px; display: flex; gap: 16px; align-items: flex-start; position: relative; overflow: hidden; }
-.comp-half-other { background: #f9f9f9; }
-.comp-half-iskool { background: #f0fdf9; border-left: 1px solid rgba(79,209,197,0.2); }
-.comp-half-iskool::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(79,209,197,0.06) 0%, transparent 55%);
-  pointer-events: none;
-}
-
-/* Ghost X watermark on the "other" side */
-.comp-ghost-x {
-  position: absolute;
-  right: 16px; top: 50%; transform: translateY(-50%);
-  font-family: 'Syne', sans-serif;
-  font-size: 72px; font-weight: 800;
-  color: rgba(0,0,0,0.04);
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Icons */
-.comp-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.comp-icon-other { background: #efefef; }
-.comp-icon-iskool { background: rgba(79,209,197,0.12); border: 1px solid rgba(79,209,197,0.25); }
-
-/* Content */
-.comp-content { flex: 1; }
-.comp-brand-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; display: block; }
-.comp-half-other .comp-brand-label { color: #bbb; }
-.comp-half-iskool .comp-brand-label { color: var(--teal); }
-.comp-feat-name { font-family: 'Syne', sans-serif; font-size: 15.5px; font-weight: 700; margin-bottom: 5px; line-height: 1.2; }
-.comp-half-other .comp-feat-name { color: #bbb; }
-.comp-half-iskool .comp-feat-name { color: #111; }
-.comp-feat-desc { font-size: 13px; line-height: 1.55; }
-.comp-half-other .comp-feat-desc { color: #ccc; }
-.comp-half-iskool .comp-feat-desc { color: #555; }
-
-/* Status pills */
-.comp-status {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11.5px; font-weight: 600;
-  margin-top: 12px; padding: 4px 12px;
-  border-radius: 999px;
-}
-.comp-status-missing { background: rgba(248,81,73,0.07); color: #e05050; border: 1px solid rgba(248,81,73,0.15); }
-.comp-status-available { background: rgba(0,196,122,0.08); color: #008f58; border: 1px solid rgba(0,196,122,0.22); }
-.comp-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.comp-status-dot-r { background: #e05050; }
-.comp-status-dot-g { background: #00c47a; animation: comp-blink 1.6s ease-in-out infinite; }
-@keyframes comp-blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
-/* Footer */
-.comp-footer { text-align: center; margin-top: 52px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
-.comp-proof { font-size: 13.5px; color: #888; }
-.comp-proof strong { color: #333; }
-.comp-cta {
-  display: inline-flex; align-items: center; gap: 14px;
-  background: var(--gold); color: #111;
-  font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700;
-  padding: 18px 28px 18px 36px; border-radius: 999px;
-  border: none; cursor: pointer;
-  box-shadow: 0 4px 24px rgba(245,200,66,0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+.comp-sub { font-size: 17px; color: #666; max-width: 520px; margin: 0 auto; line-height: 1.65; }
+.comp-table-wrap { overflow: visible; }
+.comp-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.col-feat { width: 46%; } .col-iskool { width: 27%; } .col-other { width: 27%; }
+.comp-table thead th { padding-bottom: 0; vertical-align: bottom; border: none; background: transparent; }
+.th-iskool-inner { background: #111; border-radius: 16px 16px 0 0; padding: 16px 12px 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.iskool-badge { background: var(--gold); color: #111; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; white-space: nowrap; }
+.th-iskool-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+.th-other-inner { display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; gap: 6px; }
+.th-other-label { font-size: 14px; font-weight: 600; color: #999; }
+.comp-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.feat-cell { padding: 18px 0 18px 4px; font-size: 15px; color: #333; font-weight: 400; }
+.td-iskool { background: #111; text-align: center; padding: 16px 8px; border-bottom: 1px solid #1e1e22 !important; }
+.comp-table tbody tr:last-child .td-iskool { border-radius: 0 0 16px 16px; border-bottom: none !important; }
+.td-other { text-align: center; padding: 16px 8px; }
+.ico-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,196,122,0.15); border: 2px solid #00c47a; color: #00c47a; font-size: 13px; font-weight: 700; }
+.ico-cross { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: #ccc; font-size: 18px; font-weight: 300; }
+.comp-cta-row { display: flex; justify-content: center; margin-top: 52px; }
+.comp-cta { display: inline-flex; align-items: center; gap: 14px; background: var(--gold); color: #111; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; padding: 18px 28px 18px 36px; border-radius: 999px; text-decoration: none; box-shadow: 0 4px 24px rgba(245,200,66,0.3); transition: transform 0.2s, box-shadow 0.2s; }
 .comp-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245,200,66,0.45); }
-.comp-cta-arrow { width: 36px; height: 36px; background: rgba(0,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-
-/* Mobile: stack halves vertically */
+.comp-cta-arrow { width: 36px; height: 36px; background: rgba(0,0,0,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.comp-mobile { display: none; }
+.comp-mobile-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e8e8e8; border-radius: 16px; overflow: hidden; }
+.comp-mobile-table thead th { padding: 18px 12px; background: #fff; border: none; }
+.comp-mobile-table thead tr { border-bottom: 1px solid #e8e8e8; }
+.mob-th-other { width: 50%; text-align: center; border-right: 1px solid #e8e8e8; }
+.mob-th-other-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mob-other-label { font-size: 13px; font-weight: 600; color: #888; }
+.mob-th-iskool { width: 50%; text-align: center; }
+.mob-th-iskool-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mob-iskool-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #111; }
+.comp-mobile-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.comp-mobile-table tbody tr:last-child { border-bottom: none; }
+.mob-vals-row td { padding: 14px 12px; }
+.mob-val-other { text-align: center; background: #f5f5f5; border-right: 1px solid #e8e8e8; border-radius: 12px 0 0 12px; }
+.mob-val-iskool { text-align: center; background: rgba(0,196,122,0.08); border: 2px solid #00c47a; border-radius: 0 12px 12px 0; }
 @media (max-width: 640px) {
-  .comparison-section { padding: 72px 4% 80px; }
-  .comp-header { margin-bottom: 44px; }
+  .comp-table-wrap { display: none; }
+  .comp-mobile { display: block; }
+  .comparison-section { padding: 72px 4%; }
   .comp-heading { letter-spacing: -1px; }
-  .comp-card { grid-template-columns: 1fr; }
-  .comp-half-iskool { border-left: none; border-top: 1px solid rgba(79,209,197,0.2); }
-  .comp-ghost-x { font-size: 52px; }
-  .comp-half { padding: 20px 18px; }
-  .comp-cta { font-size: 15px; padding: 16px 22px 16px 28px; width: 100%; justify-content: center; }
-  .comp-sub { font-size: 15.5px; }
+  .comp-cta { width: 100%; justify-content: center; font-size: 16px; }
 }
 </style>
 
 <section class="comparison-section">
   <div class="comparison-inner">
-
-    <div class="comp-header sr">
-      <div class="comp-eyebrow">Comparison</div>
-      <h2 class="comp-heading">Not all LMS is <em>created equal</em></h2>
-      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for South African high school success.</p>
+    <div class="comparison-header sr">
+      <div class="comp-eyebrow">COMPARISON</div>
+      <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
+      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
     </div>
-
-    <div class="comp-cards">
-
-      <!-- Card 1 -->
-      <div class="comp-card" data-comp-delay="0">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">SA CAPS curriculum alignment</div>
-            <div class="comp-feat-desc">Must be configured manually — if at all possible. No Grade 10–12 structure built in.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">SA CAPS curriculum alignment</div>
-            <div class="comp-feat-desc">Grade 10–12 CAPS structure built in from day one. Topics, terms, and assessments — all aligned.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>Built in · Grade 10–12</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="comp-card" data-comp-delay="80">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">AI quiz invigilation</div>
-            <div class="comp-feat-desc">No tab-switch or browser exit detection. Learners can cheat freely with no audit trail.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">AI quiz invigilation</div>
-            <div class="comp-feat-desc">Detects tab-switching, browser exits and focus loss in real time. Full session audit log per learner.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>Live detection · Per question</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="comp-card" data-comp-delay="160">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">Real-time learner analytics</div>
-            <div class="comp-feat-desc">Basic reporting at best. No live data per learner or per question during an active session.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">Real-time learner analytics</div>
-            <div class="comp-feat-desc">Live insights per learner, per question. Class averages, pass rates, and drop-off points surfaced automatically.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>Live · Per learner &amp; question</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="comp-card" data-comp-delay="240">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">Automated report cards</div>
-            <div class="comp-feat-desc">No automation. Teachers still export grades to spreadsheets and generate reports manually.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">Automated report cards</div>
-            <div class="comp-feat-desc">Enter marks once — iSkool calculates averages, assigns CAPS symbols, and generates one-click PDF reports.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>One-click PDF · No spreadsheets</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 5 -->
-      <div class="comp-card" data-comp-delay="320">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">Syllabus coverage tracking</div>
-            <div class="comp-feat-desc">No CAPS topic mapping. Teachers have no way to track curriculum coverage per class or grade.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">Syllabus coverage tracking</div>
-            <div class="comp-feat-desc">CAPS topics mapped per class and grade. See exactly what's been taught, what's pending, and what's at risk.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>CAPS mapped · Per class &amp; grade</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 6 -->
-      <div class="comp-card" data-comp-delay="400">
-        <div class="comp-half comp-half-other">
-          <div class="comp-ghost-x">✕</div>
-          <div class="comp-icon comp-icon-other">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#ccc" stroke-width="1.5"/><line x1="5" y1="9" x2="13" y2="9" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">Generic LMS</span>
-            <div class="comp-feat-name">Free pilot for SA schools</div>
-            <div class="comp-feat-desc">Expect paid trials, long demo calls, and lock-in contracts before you see a single feature in your school.</div>
-            <div class="comp-status comp-status-missing"><div class="comp-status-dot comp-status-dot-r"></div>Not available</div>
-          </div>
-        </div>
-        <div class="comp-half comp-half-iskool">
-          <div class="comp-icon comp-icon-iskool">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="3,9 7,13 15,5" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <div class="comp-content">
-            <span class="comp-brand-label">iSkool</span>
-            <div class="comp-feat-name">Free pilot for SA schools</div>
-            <div class="comp-feat-desc">No credit card. No contract. Apply in 3 minutes and get your school set up in days, not months.</div>
-            <div class="comp-status comp-status-available"><div class="comp-status-dot comp-status-dot-g"></div>Free · No card · No contract</div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- end .comp-cards -->
-
-    <div class="comp-footer sr sr-d2">
-      <p class="comp-proof">Trusted by SA schools — <strong>join the pilot for free, no strings attached.</strong></p>
-      <button class="comp-cta" onclick="openPilotForm()" type="button">Apply for Free Pilot <span class="comp-cta-arrow">&#8599;</span></button>
+    <div class="comp-table-wrap sr sr-d1">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th class="col-feat"></th>
+            <th class="col-iskool">
+              <div class="th-iskool-inner">
+                <span class="iskool-badge">Best for SA Schools</span>
+                <div class="th-iskool-name">
+                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                  iSkool
+                </div>
+              </div>
+            </th>
+            <th class="col-other"><div class="th-other-inner"><div class="th-other-label">Other LMS</div></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feat-cell">Built for SA CAPS curriculum</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">AI invigilation for quizzes</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Real-time learner analytics</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Automated report cards</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Syllabus coverage tracking</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Free pilot for SA schools</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+        </tbody>
+      </table>
     </div>
-
+    <!-- MOBILE TABLE -->
+    <div class="comp-mobile">
+      <table class="comp-mobile-table">
+        <thead>
+          <tr>
+            <th class="mob-th-other"><div class="mob-th-other-inner"><div class="mob-other-label">Other LMS</div></div></th>
+            <th class="mob-th-iskool"><div class="mob-th-iskool-inner"><svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg><span class="mob-iskool-label">iSkool</span></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for SA CAPS curriculum</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Automated report cards</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus coverage tracking</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot for SA schools</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="comp-cta-row sr sr-d2">
+      <button class="comp-cta" onclick="openPilotForm()" type="button" style="background:var(--gold);cursor:pointer;">Apply for Free Pilot<span class="comp-cta-arrow">&#8599;</span></button>
+    </div>
   </div>
 </section>
-
-<script>
-/* ── Comparison cards scroll-reveal ── */
-(function() {
-  var cards = document.querySelectorAll('.comp-card');
-  if (!cards.length) return;
-  var compObs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (!entry.isIntersecting) return;
-      var el = entry.target;
-      var delay = parseInt(el.getAttribute('data-comp-delay') || 0);
-      setTimeout(function() { el.classList.add('comp-revealed'); }, delay);
-      compObs.unobserve(el);
-    });
-  }, { threshold: 0.12 });
-  cards.forEach(function(card) { compObs.observe(card); });
-})();
-</script>
 
 <style>
 .footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 6; }
