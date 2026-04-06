@@ -40,7 +40,199 @@ function renderTeacherAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // ── Store flat list for desktop panel lookup ──
+    window._allAnnouncementsFlat = [];
+    if (data && data.length > 0) {
+        data.forEach(group => {
+            group.items.forEach(ann => {
+                window._allAnnouncementsFlat.push({ ...ann, class_name: group.class_name });
+            });
+        });
+    }
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!data || data.length === 0) {
+        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No announcements sent yet.</p>`;
+    } else {
+        data.forEach(group => {
+            sidebarHtml += `<div class="an-sidebar-class-label">${group.class_name}</div>`;
+            group.items.forEach(ann => {
+                const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
+                const preview = ann.message.length > 60
+                    ? ann.message.substring(0, 60) + '...'
+                    : ann.message;
+
+                sidebarHtml += `
+                    <div class="an-sidebar-item" id="an-sidebar-${flatIndex}"
+                        onclick="selectDesktopAnnouncement(${flatIndex})">
+                        <div class="an-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="an-sidebar-item-info">
+                            <div class="an-sidebar-item-title">${ann.title}</div>
+                            <div class="an-sidebar-item-meta">${preview}</div>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    // ── Build full HTML ──
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .an-desktop-layout { display: flex !important; }
+                .an-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .an-desktop-layout { display: none !important; }
+                .an-mobile-list    { display: block !important; }
+            }
+
+            .an-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .an-sidebar {
+                width: 280px;
+                min-width: 240px;
+                max-width: 300px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .an-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .an-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .an-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .an-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .an-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .an-sidebar-class-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .an-sidebar-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .an-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .an-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .an-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; margin-top: 2px; }
+            .an-sidebar-item-info { flex: 1; min-width: 0; }
+            .an-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .an-sidebar-item.active .an-sidebar-item-title { color: #e2e8f0; }
+            .an-sidebar-item-meta {
+                font-size: 11px;
+                color: #555e6a;
+                margin-top: 3px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* Right panel */
+            .an-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .an-main-panel::-webkit-scrollbar { width: 5px; }
+            .an-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .an-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .an-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .an-panel-empty svg { opacity: 0.3; }
+            .an-panel-empty p { font-size: 14px; margin: 0; }
+
+            .an-panel-content { padding: 28px 32px; }
+
+            .an-panel-header {
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .an-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 8px;
+            }
+            .an-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .an-panel-message {
+                font-size: 14px;
+                color: #c9d1d9;
+                line-height: 1.8;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                padding: 20px 22px;
+            }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Announcements</h2>
             <button class="teacher-upload-btn" onclick="openCreateAnnouncementModal()">
@@ -50,7 +242,30 @@ function renderTeacherAnnouncements(data) {
                 </svg>
                 Create Announcement
             </button>
-        </div>`;
+        </div>
+
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="an-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="an-sidebar">
+                <div class="an-sidebar-header">All Announcements</div>
+                <div class="an-sidebar-scroll">${sidebarHtml}</div>
+            </div>
+
+            <!-- Right Main Panel -->
+            <div class="an-main-panel" id="an-main-panel">
+                <div class="an-panel-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    </svg>
+                    <p>Select an announcement from the left to read it</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <div class="an-mobile-list">`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No announcements sent yet.</p>`;
@@ -83,6 +298,8 @@ function renderTeacherAnnouncements(data) {
             html += `</div>`;
         });
     }
+
+    html += `</div>`; // close .an-mobile-list
 
     // Create Announcement Modal
     html += `
@@ -130,6 +347,37 @@ function renderTeacherAnnouncements(data) {
     // Load classes into dropdown
     loadAnnouncementClasses();
 }
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT ANNOUNCEMENT
+// ─────────────────────────────────────────────
+window.selectDesktopAnnouncement = function(flatIndex) {
+    // Update sidebar active state
+    document.querySelectorAll('.an-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`an-sidebar-${flatIndex}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    const ann = (window._allAnnouncementsFlat || [])[flatIndex];
+    if (!ann) return;
+
+    const panel = document.getElementById('an-main-panel');
+    if (!panel) return;
+
+    panel.innerHTML = `
+        <div class="an-panel-content">
+            <div class="an-panel-header">
+                <div class="an-panel-title">${ann.title}</div>
+                <div class="an-panel-meta">
+                    <span>${ann.class_name}</span>
+                    <span>&bull;</span>
+                    <span>${ann.display_date}</span>
+                </div>
+            </div>
+            <div class="an-panel-message">
+                ${ann.message.replace(/\n/g, '<br>')}
+            </div>
+        </div>`;
+};
 
 async function loadAnnouncementClasses() {
     try {

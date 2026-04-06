@@ -41,7 +41,221 @@ function renderTeacherAssignments(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // ── Store flat list for desktop panel lookup ──
+    window._allAssignmentsFlat = data || [];
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!data || data.length === 0) {
+        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No assignments created yet.</p>`;
+    } else {
+        data.forEach((assignment, index) => {
+            const subPercent = assignment.total_learners > 0
+                ? Math.round((assignment.submitted_count / assignment.total_learners) * 100)
+                : 0;
+            const dotColor = subPercent === 100 ? '#22c55e'
+                : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+
+            sidebarHtml += `
+                <div class="as-sidebar-item" id="as-sidebar-${index}"
+                    onclick="selectDesktopAssignment(${index})">
+                    <div class="as-sidebar-item-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <div class="as-sidebar-item-info">
+                        <div class="as-sidebar-item-title">${assignment.title}</div>
+                        <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
+                    </div>
+                    <span class="as-sidebar-status-dot" style="background:${dotColor};"></span>
+                </div>`;
+        });
+    }
+
+    // ── Build full HTML ──
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .as-desktop-layout { display: flex !important; }
+                .as-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .as-desktop-layout { display: none !important; }
+                .as-mobile-list    { display: block !important; }
+            }
+
+            .as-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .as-sidebar {
+                width: 280px;
+                min-width: 240px;
+                max-width: 300px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .as-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .as-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .as-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .as-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .as-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .as-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .as-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .as-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .as-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .as-sidebar-item-info { flex: 1; min-width: 0; }
+            .as-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .as-sidebar-item.active .as-sidebar-item-title { color: #e2e8f0; }
+            .as-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+            .as-sidebar-status-dot {
+                width: 7px; height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            /* Right panel */
+            .as-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .as-main-panel::-webkit-scrollbar { width: 5px; }
+            .as-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .as-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .as-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .as-panel-empty svg { opacity: 0.3; }
+            .as-panel-empty p { font-size: 14px; margin: 0; }
+
+            .as-panel-content { padding: 28px 32px; }
+
+            .as-panel-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-wrap: wrap;
+            }
+            .as-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+            }
+            .as-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .as-panel-actions {
+                display: flex;
+                gap: 8px;
+                flex-shrink: 0;
+                flex-wrap: wrap;
+            }
+            .as-panel-desc {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                padding: 16px 18px;
+                font-size: 13px;
+                color: #c9d1d9;
+                line-height: 1.7;
+                margin-bottom: 20px;
+            }
+            .as-panel-progress-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 20px;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                padding: 14px 18px;
+            }
+            .as-panel-progress-bar {
+                flex: 1;
+                height: 6px;
+                background: rgba(255,255,255,0.08);
+                border-radius: 4px;
+                overflow: hidden;
+            }
+            .as-panel-progress-fill {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.4s ease;
+            }
+            .as-panel-progress-label {
+                font-size: 13px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Assignments</h2>
             <button class="teacher-upload-btn" onclick="openCreateAssignment()">
@@ -51,7 +265,32 @@ function renderTeacherAssignments(data) {
                 </svg>
                 Create Assignment
             </button>
-        </div>`;
+        </div>
+
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="as-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="as-sidebar">
+                <div class="as-sidebar-header">All Assignments</div>
+                <div class="as-sidebar-scroll">${sidebarHtml}</div>
+            </div>
+
+            <!-- Right Main Panel -->
+            <div class="as-main-panel" id="as-main-panel">
+                <div class="as-panel-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <p>Select an assignment from the left to view it</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <div class="as-mobile-list">`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No assignments created yet.</p>`;
@@ -180,11 +419,126 @@ function renderTeacherAssignments(data) {
         });
     }
 
+    html += `</div>`; // close .as-mobile-list
+
     apiArea.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
-// TOGGLE SUBMISSIONS
+// DESKTOP PANEL: SELECT ASSIGNMENT
+// ─────────────────────────────────────────────
+window.selectDesktopAssignment = function(index) {
+    // Update sidebar active state
+    document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`as-sidebar-${index}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    const assignment = (window._allAssignmentsFlat || [])[index];
+    if (!assignment) return;
+
+    const panel = document.getElementById('as-main-panel');
+    if (!panel) return;
+
+    const subCount   = assignment.submitted_count;
+    const totalCount = assignment.total_learners;
+    const subPercent = totalCount > 0 ? Math.round((subCount / totalCount) * 100) : 0;
+    const progressColor = subPercent === 100 ? '#22c55e'
+        : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+
+    // Build submissions table rows
+    let tableRows = '';
+    assignment.submissions.forEach(sub => {
+        const statusBadge = sub.submitted
+            ? `<span class="teacher-sub-badge submitted">Submitted</span>
+               <div style="font-size:11px;color:#8b949e;margin-top:3px;">${sub.submitted_at}</div>`
+            : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
+
+        let subContent = '—';
+        if (sub.submitted) {
+            if (sub.submission_type === 'file' && sub.file_url) {
+                subContent = `<a href="${sub.file_url}" target="_blank" class="teacher-sub-file-link">View File</a>`;
+            } else if (sub.submission_type === 'text' && sub.text_answer) {
+                subContent = `<div class="teacher-sub-text">${sub.text_answer.replace(/\n/g, '<br>')}</div>`;
+            } else if (sub.submission_type === 'audio' && sub.audio_url) {
+                subContent = `<audio controls style="max-width:180px;height:32px;"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
+            }
+        }
+
+        tableRows += `
+            <tr>
+                <td>${sub.name}</td>
+                <td>${statusBadge}</td>
+                <td style="color:#8b949e;font-size:13px;">${sub.submission_type || '—'}</td>
+                <td>${subContent}</td>
+            </tr>`;
+    });
+
+    panel.innerHTML = `
+        <div class="as-panel-content">
+            <div class="as-panel-header">
+                <div>
+                    <div class="as-panel-title">${assignment.title}</div>
+                    <div class="as-panel-meta">
+                        <span>${assignment.class_name}</span>
+                        <span>&bull;</span>
+                        <span>Due ${assignment.due_date}</span>
+                    </div>
+                </div>
+                <div class="as-panel-actions">
+                    ${assignment.file_url ? `
+                        <a href="${assignment.file_url}" target="_blank" class="teacher-assignment-file-link">
+                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                            Attachment
+                        </a>` : ''}
+                    <button class="teacher-assignment-download-btn"
+                        onclick="downloadSubmissions(${assignment.id})">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="as-panel-progress-row">
+                <div class="as-panel-progress-bar">
+                    <div class="as-panel-progress-fill"
+                        style="width:${subPercent}%;background:${progressColor};"></div>
+                </div>
+                <span class="as-panel-progress-label" style="color:${progressColor};">
+                    ${subCount}/${totalCount} submitted
+                </span>
+            </div>
+
+            <!-- Description -->
+            <div class="as-panel-desc">
+                ${assignment.description.replace(/\n/g, '<br>')}
+            </div>
+
+            <!-- Submissions Table -->
+            <div class="teacher-grades-table-wrapper">
+                <table class="teacher-grades-table">
+                    <thead>
+                        <tr>
+                            <th>Learner</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Submission</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </div>`;
+};
+
+// ─────────────────────────────────────────────
+// TOGGLE SUBMISSIONS (mobile)
 // ─────────────────────────────────────────────
 window.toggleAssignmentSubmissions = function(index) {
     const subs    = document.getElementById(`asubs-${index}`);
