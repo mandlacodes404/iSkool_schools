@@ -82,27 +82,161 @@ function renderSyllabusPage(data) {
         byTerm[b.term].push(b);
     });
 
-    // Build term tabs
-    const terms     = Object.keys(byTerm).map(Number).sort();
+    const terms      = Object.keys(byTerm).map(Number).sort();
     const activeTerm = terms.includes(currentTerm) ? currentTerm : terms[0];
 
-    const tabsHtml = terms.map(t => `
-        <button class="syl-tab ${t === activeTerm ? 'syl-tab-active' : ''}"
-                onclick="switchSylTab(${t})"
-                id="syl-tab-${t}">
-            Term ${t} ${t === currentTerm ? '<span class="syl-current-badge">Current</span>' : ''}
-        </button>`).join('');
+    // ── Desktop sidebar: term list ──
+    const desktopSidebarHtml = terms.map(t => `
+        <div class="syl-dt-term-item ${t === activeTerm ? 'active' : ''}"
+             id="syl-dt-tab-${t}"
+             onclick="switchSylTab(${t})">
+            <div class="syl-dt-term-name">
+                Term ${t}
+                ${t === currentTerm ? '<span class="syl-current-badge">Current</span>' : ''}
+            </div>
+            <div class="syl-dt-term-count">${byTerm[t].length} subject${byTerm[t].length !== 1 ? 's' : ''}</div>
+        </div>`).join('');
 
-    const panelsHtml = terms.map(t => `
-        <div class="syl-panel" id="syl-panel-${t}"
+    // ── Desktop panel: panels per term ──
+    const desktopPanelsHtml = terms.map(t => `
+        <div class="syl-dt-panel" id="syl-panel-${t}"
              style="display:${t === activeTerm ? 'block' : 'none'};">
+            <div class="syl-dt-panel-header">
+                <h2 class="syl-dt-panel-title">
+                    Term ${t}
+                    ${t === currentTerm ? '<span class="syl-current-badge" style="font-size:11px;">Current Term</span>' : ''}
+                </h2>
+                <p class="syl-dt-panel-sub">${byTerm[t].length} subject brief${byTerm[t].length !== 1 ? 's' : ''} posted</p>
+            </div>
             <div class="syl-cards-grid">
                 ${byTerm[t].map(b => renderBriefCard(b)).join('')}
             </div>
         </div>`).join('');
 
+    // ── Mobile: term tabs ──
+    const mobileTabsHtml = terms.map(t => `
+        <button class="syl-tab ${t === activeTerm ? 'syl-tab-active' : ''}"
+                onclick="switchSylTab(${t})"
+                id="syl-mob-tab-${t}">
+            Term ${t} ${t === currentTerm ? '<span class="syl-current-badge">Current</span>' : ''}
+        </button>`).join('');
+
     return `
         <style>
+            /* ══════════════════════════════════════════
+               DESKTOP SPLIT LAYOUT  (≥ 900px)
+               ══════════════════════════════════════════ */
+            @media (min-width: 900px) {
+                .syl-desktop-layout { display: flex !important; }
+                .syl-mobile-layout  { display: none  !important; }
+            }
+            @media (max-width: 899px) {
+                .syl-desktop-layout { display: none  !important; }
+                .syl-mobile-layout  { display: block !important; }
+            }
+
+            /* Outer container */
+            .syl-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* ── Left sidebar ── */
+            .syl-dt-sidebar {
+                width: 220px;
+                min-width: 200px;
+                max-width: 240px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+            .syl-dt-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .syl-dt-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .syl-dt-term-item {
+                padding: 14px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .syl-dt-term-item:hover { background: rgba(255,255,255,0.04); }
+            .syl-dt-term-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .syl-dt-term-name {
+                font-size: 14px;
+                font-weight: 700;
+                color: #c9d1d9;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 3px;
+            }
+            .syl-dt-term-item.active .syl-dt-term-name { color: #e2e8f0; }
+            .syl-dt-term-count {
+                font-size: 11px;
+                color: #555e6a;
+            }
+
+            /* ── Right panel ── */
+            .syl-dt-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+            }
+            .syl-dt-main-panel::-webkit-scrollbar { width: 5px; }
+            .syl-dt-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .syl-dt-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .syl-dt-panel { padding: 28px 32px; }
+
+            .syl-dt-panel-header { margin-bottom: 24px; }
+            .syl-dt-panel-title {
+                font-size: 20px;
+                font-weight: 900;
+                color: #e2e8f0;
+                margin: 0 0 4px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .syl-dt-panel-sub {
+                font-size: 13px;
+                color: #8b949e;
+                margin: 0;
+            }
+
+            /* ══════════════════════════════════════════
+               SHARED STYLES
+               ══════════════════════════════════════════ */
+
+            /* Mobile wrapper */
             .syl-wrapper {
                 max-width: 900px;
                 margin: 0 auto;
@@ -117,7 +251,8 @@ function renderSyllabusPage(data) {
                 align-items: center;
                 gap: 10px;
             }
-            /* Tabs */
+
+            /* Mobile tabs */
             .syl-tabs {
                 display: flex;
                 gap: 8px;
@@ -138,10 +273,7 @@ function renderSyllabusPage(data) {
                 align-items: center;
                 gap: 6px;
             }
-            .syl-tab:hover {
-                border-color: #4fd1c5;
-                color: #4fd1c5;
-            }
+            .syl-tab:hover { border-color: #4fd1c5; color: #4fd1c5; }
             .syl-tab-active {
                 background: rgba(79,209,197,0.15);
                 border-color: #4fd1c5;
@@ -155,12 +287,14 @@ function renderSyllabusPage(data) {
                 border-radius: 10px;
                 font-weight: 800;
             }
-            /* Cards grid */
+
+            /* Cards grid — used by both layouts */
             .syl-cards-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
                 gap: 16px;
             }
+
             /* Brief card */
             .syl-card {
                 background: #161b22;
@@ -169,9 +303,7 @@ function renderSyllabusPage(data) {
                 padding: 20px;
                 transition: border-color 0.2s ease;
             }
-            .syl-card:hover {
-                border-color: rgba(79,209,197,0.3);
-            }
+            .syl-card:hover { border-color: rgba(79,209,197,0.3); }
             .syl-card-header {
                 display: flex;
                 justify-content: space-between;
@@ -196,7 +328,6 @@ function renderSyllabusPage(data) {
                 white-space: nowrap;
                 flex-shrink: 0;
             }
-            /* Section titles inside card */
             .syl-section-title {
                 font-size: 11px;
                 font-weight: 800;
@@ -205,7 +336,6 @@ function renderSyllabusPage(data) {
                 letter-spacing: 0.8px;
                 margin: 14px 0 8px;
             }
-            /* Topics list */
             .syl-topics {
                 list-style: none;
                 padding: 0;
@@ -221,18 +351,14 @@ function renderSyllabusPage(data) {
                 gap: 8px;
                 font-weight: 600;
             }
-            .syl-topics li:last-child {
-                border-bottom: none;
-            }
+            .syl-topics li:last-child { border-bottom: none; }
             .syl-topics li::before {
                 content: '';
-                width: 5px;
-                height: 5px;
+                width: 5px; height: 5px;
                 border-radius: 50%;
                 background: #4fd1c5;
                 flex-shrink: 0;
             }
-            /* Assessment weighting */
             .syl-assess-row {
                 display: flex;
                 justify-content: space-between;
@@ -240,33 +366,17 @@ function renderSyllabusPage(data) {
                 padding: 6px 0;
                 border-bottom: 1px solid rgba(255,255,255,0.04);
             }
-            .syl-assess-row:last-child {
-                border-bottom: none;
-            }
-            .syl-assess-type {
-                font-size: 13px;
-                color: #c9d1d9;
-                font-weight: 600;
-            }
-            .syl-assess-weight {
-                font-size: 13px;
-                font-weight: 900;
-                color: #4fd1c5;
-            }
+            .syl-assess-row:last-child { border-bottom: none; }
+            .syl-assess-type { font-size: 13px; color: #c9d1d9; font-weight: 600; }
+            .syl-assess-weight { font-size: 13px; font-weight: 900; color: #4fd1c5; }
             .syl-assess-bar-wrap {
-                width: 100%;
-                height: 3px;
+                width: 100%; height: 3px;
                 background: rgba(255,255,255,0.06);
                 border-radius: 2px;
                 margin-top: 4px;
                 overflow: hidden;
             }
-            .syl-assess-bar {
-                height: 100%;
-                border-radius: 2px;
-                background: #4fd1c5;
-            }
-            /* Notes */
+            .syl-assess-bar { height: 100%; border-radius: 2px; background: #4fd1c5; }
             .syl-notes {
                 font-size: 12px;
                 color: #8b949e;
@@ -277,31 +387,55 @@ function renderSyllabusPage(data) {
                 line-height: 1.5;
                 border-left: 3px solid rgba(79,209,197,0.3);
             }
+
             @media (max-width: 480px) {
-                .syl-cards-grid {
-                    grid-template-columns: 1fr;
-                }
-                .syl-wrapper {
-                    padding: 16px 14px;
-                }
+                .syl-cards-grid { grid-template-columns: 1fr; }
+                .syl-wrapper { padding: 16px 14px; }
             }
         </style>
 
-        <div class="syl-wrapper">
-            <div class="syl-page-title">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5"
-                     stroke-width="2" fill="none">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                    <line x1="12" y1="6" x2="16" y2="6"/>
-                    <line x1="12" y1="10" x2="16" y2="10"/>
-                    <line x1="12" y1="14" x2="16" y2="14"/>
-                </svg>
-                Subject Briefs & Outlines
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="syl-desktop-layout">
+
+            <!-- Left Sidebar: term list -->
+            <div class="syl-dt-sidebar">
+                <div class="syl-dt-sidebar-header">Terms</div>
+                <div class="syl-dt-sidebar-scroll">
+                    ${desktopSidebarHtml}
+                </div>
             </div>
 
-            <div class="syl-tabs">${tabsHtml}</div>
-            ${panelsHtml}
+            <!-- Right Panel: subject cards -->
+            <div class="syl-dt-main-panel">
+                ${desktopPanelsHtml}
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LAYOUT (unchanged) ═══ -->
+        <div class="syl-mobile-layout">
+            <div class="syl-wrapper">
+                <div class="syl-page-title">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5"
+                         stroke-width="2" fill="none">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        <line x1="12" y1="6" x2="16" y2="6"/>
+                        <line x1="12" y1="10" x2="16" y2="10"/>
+                        <line x1="12" y1="14" x2="16" y2="14"/>
+                    </svg>
+                    Subject Briefs & Outlines
+                </div>
+
+                <div class="syl-tabs">${mobileTabsHtml}</div>
+
+                ${terms.map(t => `
+                    <div class="syl-mob-panel" id="syl-mob-panel-${t}"
+                         style="display:${t === activeTerm ? 'block' : 'none'};">
+                        <div class="syl-cards-grid">
+                            ${byTerm[t].map(b => renderBriefCard(b)).join('')}
+                        </div>
+                    </div>`).join('')}
+            </div>
         </div>`;
 }
 
@@ -313,7 +447,6 @@ function renderBriefCard(brief) {
         day: 'numeric', month: 'short', year: 'numeric'
     });
 
-    // Topics
     const topicsHtml = brief.topics.length
         ? `<div class="syl-section-title">Syllabus Topics</div>
            <ul class="syl-topics">
@@ -321,7 +454,6 @@ function renderBriefCard(brief) {
            </ul>`
         : '';
 
-    // Assessment weighting — bar colours cycle through a palette
     const barColours = ['#4fd1c5', '#a78bfa', '#f28c38', '#f472b6', '#fdd663', '#34d399'];
     const assessHtml = brief.assessments.length
         ? `<div class="syl-section-title">Assessment Weighting</div>
@@ -333,13 +465,11 @@ function renderBriefCard(brief) {
                        <span class="syl-assess-weight" style="color:${colour};">${a.weight}%</span>
                    </div>
                    <div class="syl-assess-bar-wrap">
-                       <div class="syl-assess-bar"
-                            style="width:${a.weight}%;background:${colour};"></div>
+                       <div class="syl-assess-bar" style="width:${a.weight}%;background:${colour};"></div>
                    </div>`;
            }).join('')}`
         : '';
 
-    // Notes
     const notesHtml = brief.notes
         ? `<div class="syl-notes">📝 ${brief.notes}</div>`
         : '';
@@ -360,18 +490,22 @@ function renderBriefCard(brief) {
 }
 
 // ─────────────────────────────────────────────
-// TAB SWITCHER
+// TAB SWITCHER — works for both desktop & mobile
 // ─────────────────────────────────────────────
 window.switchSylTab = function(term) {
-    // Hide all panels
-    document.querySelectorAll('.syl-panel').forEach(p => p.style.display = 'none');
-    // Deactivate all tabs
-    document.querySelectorAll('.syl-tab').forEach(t => {
-        t.classList.remove('syl-tab-active');
-    });
-    // Show selected
-    const panel = document.getElementById(`syl-panel-${term}`);
-    const tab   = document.getElementById(`syl-tab-${term}`);
-    if (panel) panel.style.display = 'block';
-    if (tab)   tab.classList.add('syl-tab-active');
+    // ── Desktop panels ──
+    document.querySelectorAll('.syl-dt-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.syl-dt-term-item').forEach(t => t.classList.remove('active'));
+    const dtPanel = document.getElementById(`syl-panel-${term}`);
+    const dtTab   = document.getElementById(`syl-dt-tab-${term}`);
+    if (dtPanel) dtPanel.style.display = 'block';
+    if (dtTab)   dtTab.classList.add('active');
+
+    // ── Mobile panels ──
+    document.querySelectorAll('.syl-mob-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.syl-tab').forEach(t => t.classList.remove('syl-tab-active'));
+    const mobPanel = document.getElementById(`syl-mob-panel-${term}`);
+    const mobTab   = document.getElementById(`syl-mob-tab-${term}`);
+    if (mobPanel) mobPanel.style.display = 'block';
+    if (mobTab)   mobTab.classList.add('syl-tab-active');
 };
