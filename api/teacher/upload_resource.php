@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -14,7 +15,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
-$email = $_SESSION['email'];
+$email       = $_SESSION['email'];
 $maxFileSize = 10 * 1024 * 1024;
 
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -24,13 +25,14 @@ if ($yearResult->num_rows === 0) {
 }
 $current_year_id = (int)$yearResult->fetch_assoc()['id'];
 
-$termResult = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termResult   = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 $current_term = $termResult ? (int)$termResult->fetch_assoc()['current_global_term'] : 1;
 
-$title   = trim($_POST['title'] ?? '');
-$classId = (int)($_POST['class_id'] ?? 0);
+$title      = trim($_POST['title'] ?? '');
+$classId    = (int)($_POST['class_id'] ?? 0);
 $forceEmail = isset($_POST['force_email']);
-// ── Teacher display name ──
+
+// Teacher display name
 $stmtUser = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
 $stmtUser->bind_param("s", $email);
 $stmtUser->execute();
@@ -46,7 +48,7 @@ if ($userData) {
     $teacherDisplayName = trim("$tTitle $firstInitial $tSurname");
 }
 
-// ── School name ──
+// School name
 $schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     ? $row['setting_value']
@@ -71,37 +73,42 @@ if ($file['size'] > $maxFileSize) {
     exit();
 }
 
-$allowedTypes = ['pdf','doc','docx','ppt','pptx','jpg','jpeg','png','zip'];
-$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$allowedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
+$ext          = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 if (!in_array($ext, $allowedTypes)) {
     echo json_encode(['success' => false, 'error' => 'Invalid file type.']);
     exit();
 }
 
-$filename   = time() . '_' . preg_replace("/[^A-Za-z0-9._-]/", "", basename($file['name']));
-$targetPath = dirname(__DIR__, 2) . '/resources/' . $filename;
+// ── CHANGED: school-scoped upload directory ──────────────────────────────────
+$baseDir    = dirname(__DIR__, 2) . '/resources';
+$uploadDir  = getSchoolUploadDir($conn, $baseDir);
+$schoolSlug = getSchoolSlug($conn);
+// ─────────────────────────────────────────────────────────────────────────────
 
-if (!is_dir(dirname(__DIR__, 2) . '/resources/')) {
-    mkdir(dirname(__DIR__, 2) . '/resources/', 0755, true);
-}
+$filename   = time() . '_' . preg_replace("/[^A-Za-z0-9._-]/", "", basename($file['name']));
+$targetPath = $uploadDir . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     echo json_encode(['success' => false, 'error' => 'Failed to save file.']);
     exit();
 }
 
+// filename stored in DB includes the school slug subfolder so serving works correctly
+$storedFilename = $schoolSlug . '/' . $filename;
+
 $stmt = $conn->prepare("
     INSERT INTO resources (title, filename, class_id, uploaded_by, academic_year_id, term_number, uploaded_at)
     VALUES (?, ?, ?, ?, ?, ?, NOW())
 ");
-$stmt->bind_param("ssisii", $title, $filename, $classId, $email, $current_year_id, $current_term);
+$stmt->bind_param("ssisii", $title, $storedFilename, $classId, $email, $current_year_id, $current_term);
 $stmt->execute();
 $stmt->close();
 
 // Notify learners
 $cleanBaseUrl = rtrim(BASE_URL, '/');
 $resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=resource_list.php";
-$learnerStmt = $conn->prepare("
+$learnerStmt  = $conn->prepare("
     SELECT u.email, u.name 
     FROM users u
     JOIN class_students cs ON u.email = cs.student_email
@@ -112,8 +119,8 @@ $learnerStmt->execute();
 $learners = $learnerStmt->get_result();
 
 while ($learner = $learners->fetch_assoc()) {
-    $lEmail = $learner['email'];
-    $lName  = $learner['name'];
+    $lEmail     = $learner['email'];
+    $lName      = $learner['name'];
     $isPushSent = false;
 
     $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
@@ -126,7 +133,7 @@ while ($learner = $learners->fetch_assoc()) {
 
     if (!$isPushSent || $forceEmail) {
         try {
-            $mail = new PHPMailer(true);
+            $mail             = new PHPMailer(true);
             $mail->isSMTP();
             $mail->Host       = 'iskool.online';
             $mail->SMTPAuth   = true;
@@ -138,7 +145,7 @@ while ($learner = $learners->fetch_assoc()) {
             $mail->addAddress($lEmail);
             $mail->isHTML(true);
             $mail->Subject = "New Resource: $title";
-            $mail->Body = '
+            $mail->Body    = '
 <!DOCTYPE html>
 <html>
 <head>

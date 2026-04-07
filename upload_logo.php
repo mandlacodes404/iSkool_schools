@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'school_upload_helper.php';  // ← NEW
 
 if (!isset($_SESSION['school_admin'])) {
     header("Location: index.php");
@@ -11,11 +12,11 @@ $message = '';
 
 // Handle logo upload
 if (isset($_POST['upload']) && isset($_FILES['logo'])) {
-    $file = $_FILES['logo'];
-    $fileTmp = $file['tmp_name'];
-    $fileSize = $file['size'];
+    $file      = $_FILES['logo'];
+    $fileTmp   = $file['tmp_name'];
+    $fileSize  = $file['size'];
     $fileError = $file['error'];
-    $fileName = $file['name'];
+    $fileName  = $file['name'];
 
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
@@ -27,24 +28,24 @@ if (isset($_POST['upload']) && isset($_FILES['logo'])) {
     } elseif ($fileSize > 3 * 1024 * 1024) {
         $message = "<p style='color:#f85149;'>File too large (max 3MB).</p>";
     } else {
-        // Define upload location
-        $uploadDir = 'uploads/schools/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+        // ── CHANGED: school-scoped upload directory ──────────────────────────
+        $uploadDir  = getSchoolUploadDir($conn, 'uploads/schools');
+        $schoolSlug = getSchoolSlug($conn);
+        // ─────────────────────────────────────────────────────────────────────
 
-        // Generate clean filename: school_logo.ext
-        $newFileName = 'school_logo.' . $fileExt;
+        // Clean filename: school_logo.ext (one canonical logo per school)
+        $newFileName     = 'school_logo.' . $fileExt;
         $fileDestination = $uploadDir . $newFileName;
 
-        // Delete any old logo files
+        // Remove any old logo files for this school only
         array_map('unlink', glob($uploadDir . 'school_logo.*'));
 
-        // Save new logo
         if (move_uploaded_file($fileTmp, $fileDestination)) {
-            // Update the setting in school_name table
+            // Store the full relative path so it can be served directly
+            $storedPath = 'uploads/schools/' . $schoolSlug . '/' . $newFileName;
+
             $stmt = $conn->prepare("UPDATE school_name SET setting_value = ? WHERE setting_key = 'school_logo'");
-            $stmt->bind_param("s", $fileDestination);
+            $stmt->bind_param("s", $storedPath);
             $stmt->execute();
 
             $message = "<p style='color:#79c0ff;'>Logo updated successfully!</p>";

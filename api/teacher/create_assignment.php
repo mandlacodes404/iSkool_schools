@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 
 header('Content-Type: application/json');
 
@@ -40,8 +41,8 @@ if (!$current_year_id) {
 }
 
 // Get current term
-$termResult       = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
-$current_term     = (int)$termResult->fetch_assoc()['current_global_term'];
+$termResult   = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+$current_term = (int)$termResult->fetch_assoc()['current_global_term'];
 
 // Validate inputs
 $title       = trim($_POST['title'] ?? '');
@@ -56,15 +57,22 @@ if (!$title || !$description || !$due_date || $class_id < 1) {
 }
 
 // Handle file upload
-$filePath    = null;
+$filePath       = null;
 $hasAttachment  = false;
 $attachmentName = '';
 
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = dirname(__DIR__, 2) . '/assignment_Uploads/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+    // ── CHANGED: school-scoped upload directory ──────────────────────────────
+    $baseDir   = dirname(__DIR__, 2) . '/assignment_Uploads';
+    $uploadDir = getSchoolUploadDir($conn, $baseDir);
+    $schoolSlug = getSchoolSlug($conn);
+    // ────────────────────────────────────────────────────────────────────────
+
     $filename = time() . '_' . basename($_FILES['attachment']['name']);
-    $filePath = 'assignment_Uploads/' . $filename;
+
+    // file_url stored in DB as relative path (used by learner to download)
+    $filePath = 'assignment_Uploads/' . $schoolSlug . '/' . $filename;
+
     if (move_uploaded_file($_FILES['attachment']['tmp_name'], $uploadDir . $filename)) {
         $hasAttachment  = true;
         $attachmentName = basename($_FILES['attachment']['name']);
