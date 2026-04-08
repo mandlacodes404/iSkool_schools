@@ -165,26 +165,19 @@ while ($learner = $learners->fetch_assoc()) {
            width="72" height="72" alt="iSkool"
            style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
       <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
+        iSkool
       </p>
     </td>
   </tr>
 
   <!-- HERO -->
-  <tr>
-    <td style="background:#39d5c1;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-        📚 New Resource Available
-      </p>
-    </td>
-  </tr>
+  
 
   <!-- SCHOOL + TEACHER ROW -->
   <tr>
     <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
       <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#e6edf3;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span>
-        &nbsp;·&nbsp;
+        
         <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
       </p>
     </td>
@@ -235,8 +228,7 @@ while ($learner = $learners->fetch_assoc()) {
       <p style="margin:0;font-size:13px;color:#888;">
         Uploaded by
         <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        via
-        <strong style="color:#333;">' . htmlspecialchars($schoolName) . '</strong>
+        
       </p>
 
     </td>
