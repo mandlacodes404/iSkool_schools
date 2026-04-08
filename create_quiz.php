@@ -21,6 +21,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
+$teacherDisplayName = 'Teacher';
+if ($userData) {
+    $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
+    $teacherDisplayName = trim($userData['title'] . ' ' . $firstInitial . ' ' . $userData['surname']);
+}
 
 // ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
@@ -44,9 +49,11 @@ $stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $stmt->execute();
 $classResult = $stmt->get_result();
 
-// Get school name from DB
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+// School name
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
@@ -223,17 +230,8 @@ if ($checkSub->get_result()->num_rows > 0) {
       <img src="https://iskool.online/apple-touch-icon.png"
            width="72" height="72" alt="iSkool"
            style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
-      </p>
-    </td>
-  </tr>
-
-  <!-- HERO -->
-  <tr>
-    <td style="background:#39d5c1;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-        📝 New Quiz Available
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
+       iSkool
       </p>
     </td>
   </tr>
@@ -242,8 +240,6 @@ if ($checkSub->get_result()->num_rows > 0) {
   <tr>
     <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
       <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#e6edf3;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span>
-        &nbsp;·&nbsp;
         <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
       </p>
     </td>
@@ -254,7 +250,7 @@ if ($checkSub->get_result()->num_rows > 0) {
     <td style="background:#ffffff;padding:40px;">
 
       <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
-        Hi <strong>' . htmlspecialchars($learner['name']) . '</strong>, your teacher has posted a new quiz in your class.
+        Hi <strong>' . htmlspecialchars($learner['name']) . '</strong>, your teacher has uploaded a new quiz.
       </p>
 
       <!-- QUIZ TITLE BOX -->
@@ -307,18 +303,6 @@ if ($checkSub->get_result()->num_rows > 0) {
         </tr>
       </table>
 
-      <!-- CTA BUTTON -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td align="center">
-            <a href="https://iskool.online/quiz_list.php?quiz_id=' . $quiz_id . '"
-               style="display:inline-block;background:#39d5c1;color:#0d1117;font-weight:700;font-size:15px;padding:14px 40px;border-radius:30px;text-decoration:none;letter-spacing:0.3px;">
-              Go to Quiz →
-            </a>
-          </td>
-        </tr>
-      </table>
-
       <!-- DIVIDER -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
         <tr>
@@ -330,8 +314,6 @@ if ($checkSub->get_result()->num_rows > 0) {
       <p style="margin:0;font-size:13px;color:#888;">
         Posted by
         <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        via
-        <strong style="color:#333;">' . htmlspecialchars($schoolName) . '</strong>
       </p>
 
     </td>

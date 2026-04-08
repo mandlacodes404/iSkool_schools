@@ -141,7 +141,7 @@ while ($learner = $learners->fetch_assoc()) {
             $mail->Password   = 'ogeQkRitRfdy';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port       = 465;
-            $mail->setFrom('noreply@iskool.online', 'iSkool');
+            $mail->setFrom('noreply@iskool.online', $schoolName);
             $mail->addAddress($lEmail);
             $mail->isHTML(true);
             $mail->Subject = "New Resource: $title";
@@ -164,7 +164,7 @@ while ($learner = $learners->fetch_assoc()) {
       <img src="https://iskool.online/apple-touch-icon.png"
            width="72" height="72" alt="iSkool"
            style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
         iSkool
       </p>
     </td>

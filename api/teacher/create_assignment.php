@@ -104,8 +104,10 @@ $assignment_id = $stmt->insert_id;
 $stmt->close();
 
 // School name
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 // Formatted due date
 $formatted_due_date = date("l, F j, Y", strtotime($due_date));
@@ -133,17 +135,8 @@ $emailBody = '
       <img src="https://iskool.online/apple-touch-icon.png"
            width="72" height="72" alt="iSkool"
            style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
-      </p>
-    </td>
-  </tr>
-
-  <!-- HERO -->
-  <tr>
-    <td style="background:#39d5c1;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-        📝 New Assignment
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
+        iSkool
       </p>
     </td>
   </tr>
@@ -152,8 +145,6 @@ $emailBody = '
   <tr>
     <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
       <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#e6edf3;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span>
-        &nbsp;·&nbsp;
         <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
       </p>
     </td>
@@ -235,18 +226,6 @@ $emailBody = '
         </tr>
       </table>
 
-      <!-- CTA BUTTON -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td align="center">
-            <a href="' . $assignmentLink . '"
-               style="display:inline-block;background:#39d5c1;color:#0d1117;font-weight:700;font-size:15px;padding:14px 40px;border-radius:30px;text-decoration:none;letter-spacing:0.3px;">
-              View Assignment →
-            </a>
-          </td>
-        </tr>
-      </table>
-
       <!-- DIVIDER -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
         <tr>
@@ -258,8 +237,7 @@ $emailBody = '
       <p style="margin:0;font-size:13px;color:#888;">
         Assigned by
         <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        via
-        <strong style="color:#333;">' . htmlspecialchars($schoolName) . '</strong>
+        
       </p>
 
     </td>

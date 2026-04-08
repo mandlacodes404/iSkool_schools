@@ -15,7 +15,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $teacher_email = $_SESSION['email'];
-$teacher_name  = $_SESSION['name'] ?? 'Your Teacher';
+$teacherDisplayName = 'Teacher';
+if ($userData) {
+    $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
+    $teacherDisplayName = trim($userData['title'] . ' ' . $firstInitial . ' ' . $userData['surname']);
+}
 
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($yearResult->num_rows === 0) {
@@ -26,8 +30,11 @@ $current_year_id  = (int)$yearResult->fetch_assoc()['id'];
 $termResult       = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 $current_term     = $termResult ? (int)$termResult->fetch_assoc()['current_global_term'] : 1;
 
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], ['', ' '], $dbName));
+// School name
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 $title       = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
@@ -142,20 +149,11 @@ while ($learner = $learnersResult->fetch_assoc()) {
   </tr>
 
   <!-- HERO -->
-  <tr>
-    <td style="background:#39d5c1;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-        ⭐ New Teacher Evaluation
-      </p>
-    </td>
-  </tr>
 
   <!-- SCHOOL + TEACHER ROW -->
   <tr>
     <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
       <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#e6edf3;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span>
-        &nbsp;·&nbsp;
         <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
       </p>
     </td>
@@ -188,22 +186,10 @@ while ($learner = $learnersResult->fetch_assoc()) {
         <tr>
           <td style="padding:16px 20px;">
             <p style="margin:0;font-size:13px;color:#6a1b9a;line-height:1.7;">
-              Your feedback helps your teacher improve their teaching. 
+              Your feedback helps your teacher adjust their teaching style. 
               All responses are <strong>anonymous</strong> and will not affect your grades.
               Please be honest and thoughtful.
             </p>
-          </td>
-        </tr>
-      </table>
-
-      <!-- CTA BUTTON -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td align="center">
-            <a href="' . $evalLink . '"
-               style="display:inline-block;background:#39d5c1;color:#0d1117;font-weight:700;font-size:15px;padding:14px 40px;border-radius:30px;text-decoration:none;letter-spacing:0.3px;">
-              Complete Evaluation →
-            </a>
           </td>
         </tr>
       </table>
@@ -219,8 +205,6 @@ while ($learner = $learnersResult->fetch_assoc()) {
       <p style="margin:0;font-size:13px;color:#888;">
         Released by
         <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        via
-        <strong style="color:#333;">' . htmlspecialchars($schoolName) . '</strong>
       </p>
 
     </td>
