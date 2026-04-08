@@ -288,6 +288,7 @@ function renderResourceCards(data) {
                 flex-shrink: 0;
                 color: #30363d;
             }
+        </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lrs-desktop-layout">

@@ -319,6 +319,7 @@ function renderAssignmentCards(groupedData) {
                 text-decoration: none;
                 margin-top: 6px;
             }
+        </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="las-desktop-layout">

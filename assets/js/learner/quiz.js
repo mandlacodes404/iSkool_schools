@@ -427,6 +427,7 @@ function renderQuizCards(groupedData) {
                 font-weight: 700;
                 cursor: pointer;
             }
+        </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lqz-desktop-layout">
