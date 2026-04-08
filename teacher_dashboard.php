@@ -409,7 +409,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             position: fixed;
             bottom: 0; left: 0;
             width: 100%;
-            height: 70px;
+            height: 82px;
             background: rgba(66,65,65,0.35);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -451,7 +451,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             #mobileBottomNav { display: flex !important; }
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
-                height: calc(70px + env(safe-area-inset-bottom));
+                height: calc(82px + env(safe-area-inset-bottom));
             }
             .sidebar a.desktop-only { display: none; }
         }
