@@ -868,7 +868,7 @@ iframe {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 70px;                                 /* your preferred height */
+    height: 75px;                                 /* your preferred height */
     background: rgba(27, 27, 27, 0.85);           /* ← #1b1b1b with transparency – exact platform charcoal glass */
     backdrop-filter: blur(20px);                  /* ← premium blur like other glass elements */
     -webkit-backdrop-filter: blur(20px);
@@ -882,7 +882,7 @@ iframe {
     z-index: 4000;
     box-sizing: border-box;
     transition: padding-bottom 0.3s ease, height 0.3s ease;
-   border-top: 3px solid rgba(255, 255, 255, 0.12);
+   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 
@@ -921,8 +921,8 @@ iframe {
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
                 padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(70px + env(safe-area-inset-bottom));
-                height: calc(70px + constant(safe-area-inset-bottom));
+                height: calc(75px + env(safe-area-inset-bottom));
+                height: calc(75px + constant(safe-area-inset-bottom));
             }
 
             iframe {
