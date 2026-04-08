@@ -244,7 +244,50 @@ function renderResourceCards(data) {
                 background: rgba(79,209,197,0.2);
                 border-color: #4fd1c5;
             }
-        </style>
+
+            /* ── MOBILE LIST STYLES ── */
+            .lrs-mobile-teacher-header {
+                padding: 20px 16px 8px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .lrs-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 16px 20px;
+                background: #161b22;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+                cursor: pointer;
+            }
+            .lrs-mobile-row:active {
+                background: rgba(255,255,255,0.04);
+            }
+            .lrs-mobile-row-icon { flex-shrink: 0; opacity: 0.85; }
+            .lrs-mobile-row-body { flex: 1; min-width: 0; }
+            .lrs-mobile-row-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #4fd1c5;
+                margin: 0 0 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lrs-mobile-row-meta {
+                font-size: 12px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lrs-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
+            }
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lrs-desktop-layout">
@@ -269,36 +312,29 @@ function renderResourceCards(data) {
         <div class="lrs-mobile-list">`;
 
     for (const [teacher, files] of Object.entries(data)) {
-        html += `<h3 style="margin: 20px 15px 10px;">${teacher}</h3>`;
+        html += `<div class="lrs-mobile-teacher-header">${teacher}</div>`;
         files.forEach(file => {
             const icon = getFileIcon(file.ext);
-
             html += `
-    <div class="quiz-card resource-item" style="cursor: pointer; transition: 0.2s;" 
-         onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
-        
-        <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-            <div style="flex-shrink: 0;">${icon}</div>
-            
-            <div style="flex: 1;">
-                <h4 style="margin:0; font-size:15px; color: #4fd1c5; text-decoration: none;">
-                    ${file.title} 
-                    <span style="font-size: 11px; color: #888; font-weight: normal; margin-left: 5px;">
-                        (${file.size || 'N/A'})
-                    </span>
-                </h4>
-                
-                <div style="margin-top: 4px; display: flex; align-items: center; gap: 5px;">
-                    <svg viewBox="0 0 24 24" width="10" height="10" stroke="#888" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <small style="color:#888;">Uploaded: ${file.uploaded_at}</small>
-                </div>
-            </div>
-            
-            <div style="color: #444;">
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-        </div>
-    </div>`;
+                <div class="lrs-mobile-row"
+                     onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
+                    <div class="lrs-mobile-row-icon">${icon}</div>
+                    <div class="lrs-mobile-row-body">
+                        <div class="lrs-mobile-row-title">${file.title}</div>
+                        <div class="lrs-mobile-row-meta">
+                            <span>${file.ext ? file.ext.toUpperCase() : 'FILE'}</span>
+                            <span style="color:#30363d;">&bull;</span>
+                            <span>${file.size || 'N/A'}</span>
+                            <span style="color:#30363d;">&bull;</span>
+                            <span>${file.uploaded_at}</span>
+                        </div>
+                    </div>
+                    <div class="lrs-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>`;
         });
     }
 

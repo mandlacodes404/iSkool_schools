@@ -385,7 +385,48 @@ function renderQuizCards(groupedData) {
                 align-items: center;
                 gap: 12px;
             }
-        </style>
+
+            /* ── MOBILE LIST STYLES ── */
+            .lqz-mobile-subject-header {
+                padding: 20px 16px 8px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .lqz-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 16px 20px;
+                background: #161b22;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .lqz-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
+            .lqz-mobile-row-body { flex: 1; min-width: 0; }
+            .lqz-mobile-row-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #e2e8f0;
+                margin: 0 0 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lqz-mobile-row-meta {
+                font-size: 12px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lqz-mobile-row-action {
+                flex-shrink: 0;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+            }
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lqz-desktop-layout">
@@ -409,52 +450,61 @@ function renderQuizCards(groupedData) {
         <div class="lqz-mobile-list">`;
 
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        html += `<h3 style="margin: 20px 15px 10px;">${subject}</h3>`;
-        
+        html += `<div class="lqz-mobile-subject-header">${subject}</div>`;
+
         quizzes.forEach(quiz => {
             const displayDate = formatQuizDate(quiz.start_time);
             let isScheduled = false;
             let startTimeStr = quiz.start_time || "";
-            
             if (startTimeStr) {
                 const startTime = new Date(startTimeStr.replace(/-/g, "/"));
                 isScheduled = (quiz.status === 'Scheduled' && startTime > now);
             }
-
             const isClosed = quiz.status === 'Closed';
-            let actionBtn = '';
 
-           if (quiz.attempt_status === 'submitted') {
-    actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:13px;">✓ Completed</span>`;
-} 
-else if (isClosed) {
-    actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:13px;">Closed</span>`;
-} 
-else if (isScheduled) {
-    const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-    actionBtn = `<span class="quiz-countdown" 
-                       data-start="${startTime.getTime()}" 
-                       data-quiz-id="${quiz.id}"
-                       style="color:#fdd663; font-weight:700; font-size:13px;">
-                    Calculating...
-                 </span>`;
-}
-else if (quiz.attempt_status === 'in_progress') {
-    actionBtn = `<span style="color:#e67e22; font-weight:700; font-size:13px; cursor:pointer;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
-}
-else {
-    actionBtn = `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
-}
+            let actionBtn = '';
+            if (quiz.attempt_status === 'submitted') {
+                actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
+            } else if (isClosed) {
+                actionBtn = `<span class="lqz-mobile-row-action" style="color:#6b7280;">Closed</span>`;
+            } else if (isScheduled) {
+                const startTime = new Date(startTimeStr.replace(/-/g, "/"));
+                actionBtn = `<span class="quiz-countdown lqz-mobile-row-action"
+                                   data-start="${startTime.getTime()}"
+                                   data-quiz-id="${quiz.id}"
+                                   style="color:#fdd663; font-size:11px;">
+                                Calculating...
+                             </span>`;
+            } else if (quiz.attempt_status === 'in_progress') {
+                actionBtn = `<span class="lqz-mobile-row-action" style="color:#e67e22;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
+            } else {
+                actionBtn = `<span class="lqz-mobile-row-action" style="color:#4fd1c5;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
+            }
+
+            const dotColor = quiz.attempt_status === 'submitted' ? '#22c55e'
+                : isClosed ? '#6b7280'
+                : isScheduled ? '#fdd663'
+                : quiz.attempt_status === 'in_progress' ? '#e67e22'
+                : '#4fd1c5';
 
             html += `
-                <div class="quiz-card">
-                    <div>
-                        <h4>${quiz.title} ${quiz.is_summative ? '<i class="fas fa-check-circle" style="color:#4fd1c5; font-size: 0.8em;"></i>' : ''}</h4>
-                        <div class="quiz-info-text">
-                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                             ${quiz.duration} mins | 
-                              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px; margin-left: 4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                              ${displayDate}
+                <div class="lqz-mobile-row">
+                    <div class="lqz-mobile-row-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <div class="lqz-mobile-row-body">
+                        <div class="lqz-mobile-row-title">
+                            ${quiz.title}${quiz.is_summative ? ' <span style="font-size:10px; color:#4fd1c5;">●</span>' : ''}
+                        </div>
+                        <div class="lqz-mobile-row-meta">
+                            <span>${quiz.duration} mins</span>
+                            <span style="color:#333;">&bull;</span>
+                            <span>${displayDate}</span>
+                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                         </div>
                     </div>
                     ${actionBtn}

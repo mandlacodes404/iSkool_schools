@@ -258,7 +258,67 @@ function renderAssignmentCards(groupedData) {
                 flex-wrap: wrap;
                 margin-bottom: 24px;
             }
-        </style>
+
+            /* ── MOBILE LIST STYLES ── */
+            .las-mobile-teacher-header {
+                padding: 20px 16px 8px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .las-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 16px 20px;
+                background: #161b22;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .las-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
+            .las-mobile-row-body { flex: 1; min-width: 0; }
+            .las-mobile-row-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #e2e8f0;
+                margin: 0 0 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .las-mobile-row-meta {
+                font-size: 12px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .las-mobile-row-action {
+                flex-shrink: 0;
+                font-size: 13px;
+                font-weight: 700;
+                text-decoration: none;
+            }
+            .las-mobile-row-desc {
+                font-size: 13px;
+                color: #6b7280;
+                margin: 6px 0 0;
+                line-height: 1.5;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .las-mobile-attachment {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                color: #4fd1c5;
+                text-decoration: none;
+                margin-top: 6px;
+            }
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="las-desktop-layout">
@@ -283,69 +343,45 @@ function renderAssignmentCards(groupedData) {
         <div class="las-mobile-list">`;
 
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<h3 style="margin: 20px 15px 10px;">${teacher}</h3>`;
-        
+        html += `<div class="las-mobile-teacher-header">${teacher}</div>`;
+
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
-            const statusColor = task.is_past_due ? '#f85149' : (isDone ? '#4fd1c5' : '#888');
-            const statusSVG = task.is_past_due 
-                ? `<svg viewBox="0 0 24 24" width="18" height="18" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align: middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>` 
-                : (isDone 
-                    ? `<svg viewBox="0 0 24 24" width="18" height="18" stroke="${statusColor}" stroke-width="2.5" fill="none" style="vertical-align: middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>` 
-                    : `<svg viewBox="0 0 24 24" width="18" height="18" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`);
+            const actionColor = task.is_past_due ? '#6b7280' : (isDone ? '#4fd1c5' : '#e67e22');
+            const actionLabel = task.is_past_due ? 'Locked' : (isDone ? 'Update' : 'Submit');
+            const actionHref = task.is_past_due
+                ? `javascript:void(0)`
+                : `submit_assignment.php?assignment_id=${task.id}`;
+
+            const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
 
             html += `
-                <div class="quiz-card" style="${task.is_past_due ? 'opacity: 0.7;' : ''}">
-                    <div style="flex: 1; padding-right: 20px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-   ${statusSVG}
-   <h4>${task.title}</h4>
-</div>
-                        <div class="quiz-info-text">
-                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;">
-    <path d="M2 3h20v14H2z"></path>
-    <path d="M8 21h8"></path>
-    <path d="M12 17v4"></path>
-</svg> ${task.class_name} | 
-                            <span style="color: ${task.is_past_due ? '#888' : '#888'}">
-                                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;">
-    <circle cx="12" cy="12" r="10"></circle>
-    <polyline points="12 6 12 12 16 14"></polyline>
-</svg> Due: ${task.due_date}
-                            </span>
-                        </div>
-                        <p style="color: #bbb; font-size: 13px; margin-top: 10px; line-height: 1.4;">${task.description || 'No description'}</p>
-                        
-                        <div style="margin-top: 15px; display: flex; gap: 15px;">
-                            ${task.teacher_file ? `
-                               <a href="javascript:void(0)" 
-   onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')" 
-   style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
-    <svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;">
-    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-</svg> Teacher Attachment
-</a>` : ''}
-                            ${task.submission_file ? `
-                               <a href="javascript:void(0)" 
-   onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')" 
-   style="color: #4fd1c5; font-size: 12px; text-decoration:none;">
-    <svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="vertical-align: middle; margin-right: 4px;">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-    <circle cx="12" cy="12" r="3"></circle>
-</svg> View My Work
-</a>` : ''}
-                        </div>
+                <div class="las-mobile-row" style="${task.is_past_due ? 'opacity:0.65;' : ''}">
+                    <div class="las-mobile-row-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
                     </div>
-
-                    <div style="text-align: right; min-width: 80px; display: flex; align-items: center; justify-content: flex-end;">
-    ${task.is_past_due 
-        ? `<span style="color:#8b949e; font-weight:700; font-size:13px;">Locked</span>`
-        : `<a href="submit_assignment.php?assignment_id=${task.id}" 
-              style="color:${isDone ? '#4fd1c5' : '#e67e22'}; font-weight:700; font-size:13px; text-decoration:none;">
-              ${isDone ? 'Update' : 'Submit'}
-           </a>`
-    }
-</div>
+                    <div class="las-mobile-row-body">
+                        <div class="las-mobile-row-title">${task.title}</div>
+                        <div class="las-mobile-row-meta">
+                            <span>${task.class_name}</span>
+                            <span style="color:#333;">&bull;</span>
+                            <span>Due ${task.due_date}</span>
+                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${statusDotColor}; flex-shrink:0;"></span>
+                        </div>
+                        ${task.description ? `<div class="las-mobile-row-desc">${task.description}</div>` : ''}
+                        ${task.teacher_file ? `
+                            <a class="las-mobile-attachment" href="javascript:void(0)"
+                               onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')">
+                                <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                Attachment
+                            </a>` : ''}
+                    </div>
+                    <a class="las-mobile-row-action" href="${actionHref}" style="color:${actionColor};">
+                        ${actionLabel}
+                    </a>
                 </div>`;
         });
     }

@@ -243,6 +243,60 @@ function renderAnnouncements(data) {
                 color: #e2e8f0;
                 line-height: 1.8;
             }
+
+            /* ── MOBILE LIST STYLES ── */
+            .lan-mobile-teacher-header {
+                padding: 20px 16px 8px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .lan-mobile-card {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 16px 20px;
+                background: #161b22;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .lan-mobile-card-icon {
+                flex-shrink: 0;
+                margin-top: 2px;
+                opacity: 0.7;
+            }
+            .lan-mobile-card-body { flex: 1; min-width: 0; }
+            .lan-mobile-card-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+                line-height: 1.4;
+            }
+            .lan-mobile-card-message {
+                font-size: 13px;
+                color: #8b949e;
+                line-height: 1.6;
+                margin: 0 0 8px;
+            }
+            .lan-mobile-card-date {
+                font-size: 11px;
+                color: #555e6a;
+            }
+            .lan-mobile-new-badge {
+                display: inline-block;
+                background: rgba(79,209,197,0.1);
+                color: #4fd1c5;
+                border: 1px solid rgba(79,209,197,0.35);
+                font-size: 9px;
+                font-weight: 800;
+                padding: 2px 6px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+                margin-left: 8px;
+                vertical-align: middle;
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -266,27 +320,28 @@ function renderAnnouncements(data) {
         <div class="lan-mobile-list">`;
 
     for (const [teacher, items] of Object.entries(data)) {
-        html += `
-            <div class="teacher-section" style="margin-bottom:20px; background: #1b1b1b; border-radius:12px; border:1px solid rgba(255,255,255,0.05); overflow:hidden;">
-                <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); color:#8b949e; font-size:16px;">
-                    <i class="fas fa-user-tie" style="margin-right:10px;"></i> ${teacher}
-                </div>
-                <div style="padding:10px;">`;
+        html += `<div class="lan-mobile-teacher-header">${teacher}</div>`;
 
         items.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
             html += `
-                <div class="announcement-card" style="background: rgba(255,255,255,0.03); margin:10px 0; padding:15px; border-radius:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="margin:0; color:#4fd1c5;"><i class="fas fa-bullhorn"></i> ${ann.title}</h4>
-                        ${isNew ? '<span style="background:rgba(79,209,197,0.1); color:#4fd1c5; border:1px solid #4fd1c5; padding:2px 8px; font-size:10px; border-radius:4px; text-transform:uppercase;">New</span>' : ''}
+                <div class="lan-mobile-card">
+                    <div class="lan-mobile-card-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
                     </div>
-                    <p style="margin:10px 0; font-size:14px; line-height:1.5; color:#e2e8f0;">${ann.message.replace(/\n/g, '<br>')}</p>
-                    <small style="color:#8b949e; font-size:12px;">${ann.display_date}</small>
+                    <div class="lan-mobile-card-body">
+                        <div class="lan-mobile-card-title">
+                            ${ann.title}
+                            ${isNew ? '<span class="lan-mobile-new-badge">NEW</span>' : ''}
+                        </div>
+                        <div class="lan-mobile-card-message">${ann.message.replace(/\n/g, '<br>')}</div>
+                        <div class="lan-mobile-card-date">${ann.display_date}</div>
+                    </div>
                 </div>`;
         });
-
-        html += `</div></div>`;
     }
 
     html += `</div>`; // close .lan-mobile-list

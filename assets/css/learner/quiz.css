@@ -52,9 +52,9 @@
     letter-spacing: 1px;
 }
 
-/* 3. The Quiz Card - The exact "Pro" look from our test */
+/* 3. The Quiz Card */
 .quiz-card {
-    background: #1a1919; /* That subtle glass effect */
+    background: #161b22;
     padding: 18px;
     border-radius: 14px;
     margin: 12px 0;
@@ -62,13 +62,34 @@
     justify-content: space-between;
     align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.2s ease-in-out;
+    transition: border-color 0.2s ease-in-out;
 }
 
 .quiz-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-2px);
-    border-color: rgba(79, 209, 197, 0.3); /* Subtle teal glow on hover */
+    border-color: rgba(79, 209, 197, 0.3);
+}
+
+/* ── MOBILE CARD OVERRIDES ── */
+@media (max-width: 899px) {
+    .quiz-card {
+        background: #161b22;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        margin: 0;
+        padding: 16px 20px;
+    }
+
+    .quiz-card:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .quiz-card h4 {
+        font-size: 15px;
+    }
 }
 
 /* 4. Card Content Styles */
