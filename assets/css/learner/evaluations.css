@@ -169,30 +169,44 @@
         padding: 0;
     }
 
+    /* Wrap all cards in a rounded container via the first/last card */
+    .eval-card:first-of-type {
+        border-radius: 12px 12px 0 0;
+    }
+    .eval-card:last-of-type {
+        border-radius: 0 0 12px 12px;
+        border-bottom: none;
+    }
+
     .eval-card {
-        background: #161b22;
+        background: #1a1919;
         border-radius: 0;
         border-left: none;
         border-right: none;
         border-top: none;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        padding: 20px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding: 18px 16px;
         margin-bottom: 0;
     }
 
-    .eval-title { font-size: 17px; }
+    .eval-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
 
     .option-label span {
         font-size: 13px;
+        font-weight: 500;
         padding: 10px 12px;
-        background: rgba(255,255,255,0.03);
-        border-color: rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        border-color: rgba(255,255,255,0.05);
     }
 
     .eval-submit-btn {
         max-width: calc(100% - 32px);
-        border-radius: 12px;
-        margin: 24px 16px 0;
+        font-weight: 700;
+        border-radius: 10px;
+        margin: 20px 16px 0;
         width: calc(100% - 32px);
     }
 }

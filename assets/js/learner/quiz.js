@@ -387,32 +387,43 @@ function renderQuizCards(groupedData) {
             }
 
             /* ── MOBILE LIST STYLES ── */
+            .lqz-mobile-list {
+                background: #1a1919;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 8px 0 16px;
+            }
             .lqz-mobile-subject-header {
-                padding: 20px 16px 8px;
+                padding: 16px 16px 6px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 600;
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                background: #1a1919;
             }
             .lqz-mobile-row {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-                padding: 16px 20px;
-                background: #161b22;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
             }
+            .lqz-mobile-row:last-child { border-bottom: none; }
             .lqz-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
-                font-size: 15px;
-                font-weight: 700;
+                font-size: 14px;
+                font-weight: 600;
                 color: #e2e8f0;
                 margin: 0 0 4px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                gap: 6px;
             }
             .lqz-mobile-row-meta {
                 font-size: 12px;
@@ -424,8 +435,22 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-row-action {
                 flex-shrink: 0;
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: 600;
                 cursor: pointer;
+            }
+            .lqz-summative-badge {
+                display: inline-flex;
+                align-items: center;
+                background: rgba(245,200,66,0.12);
+                color: #f5c842;
+                border: 1px solid rgba(245,200,66,0.3);
+                font-size: 9px;
+                font-weight: 700;
+                padding: 1px 5px;
+                border-radius: 4px;
+                letter-spacing: 0.4px;
+                flex-shrink: 0;
+                white-space: nowrap;
             }
         </style>
 
@@ -499,7 +524,8 @@ function renderQuizCards(groupedData) {
                     </div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
-                            ${quiz.title}${quiz.is_summative ? ' <span style="font-size:10px; color:#4fd1c5;">●</span>' : ''}
+                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${quiz.title}</span>
+                            ${quiz.is_summative ? '<span class="lqz-summative-badge">TERM MARK</span>' : ''}
                         </div>
                         <div class="lqz-mobile-row-meta">
                             <span>${quiz.duration} mins</span>

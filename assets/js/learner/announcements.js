@@ -245,22 +245,30 @@ function renderAnnouncements(data) {
             }
 
             /* ── MOBILE LIST STYLES ── */
+            .lan-mobile-list {
+                background: #1a1919;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 8px 0 16px;
+            }
             .lan-mobile-teacher-header {
-                padding: 20px 16px 8px;
+                padding: 16px 16px 6px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 600;
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                background: #1a1919;
             }
             .lan-mobile-card {
                 display: flex;
                 align-items: flex-start;
                 gap: 14px;
-                padding: 16px 20px;
-                background: #161b22;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
             }
+            .lan-mobile-card:last-child { border-bottom: none; }
             .lan-mobile-card-icon {
                 flex-shrink: 0;
                 margin-top: 2px;
@@ -268,8 +276,8 @@ function renderAnnouncements(data) {
             }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
-                font-size: 15px;
-                font-weight: 700;
+                font-size: 14px;
+                font-weight: 600;
                 color: #e2e8f0;
                 margin: 0 0 6px;
                 line-height: 1.4;
@@ -290,7 +298,7 @@ function renderAnnouncements(data) {
                 color: #4fd1c5;
                 border: 1px solid rgba(79,209,197,0.35);
                 font-size: 9px;
-                font-weight: 800;
+                font-weight: 700;
                 padding: 2px 6px;
                 border-radius: 4px;
                 letter-spacing: 0.5px;

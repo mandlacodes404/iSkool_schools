@@ -246,31 +246,37 @@ function renderResourceCards(data) {
             }
 
             /* ── MOBILE LIST STYLES ── */
+            .lrs-mobile-list {
+                background: #1a1919;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 8px 0 16px;
+            }
             .lrs-mobile-teacher-header {
-                padding: 20px 16px 8px;
+                padding: 16px 16px 6px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 600;
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                background: #1a1919;
             }
             .lrs-mobile-row {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-                padding: 16px 20px;
-                background: #161b22;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
             }
-            .lrs-mobile-row:active {
-                background: rgba(255,255,255,0.04);
-            }
+            .lrs-mobile-row:last-child { border-bottom: none; }
+            .lrs-mobile-row:active { background: rgba(255,255,255,0.04); }
             .lrs-mobile-row-icon { flex-shrink: 0; opacity: 0.85; }
             .lrs-mobile-row-body { flex: 1; min-width: 0; }
             .lrs-mobile-row-title {
-                font-size: 15px;
-                font-weight: 700;
+                font-size: 14px;
+                font-weight: 600;
                 color: #4fd1c5;
                 margin: 0 0 4px;
                 white-space: nowrap;

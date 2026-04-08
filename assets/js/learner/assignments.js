@@ -260,27 +260,35 @@ function renderAssignmentCards(groupedData) {
             }
 
             /* ── MOBILE LIST STYLES ── */
+            .las-mobile-list {
+                background: #1a1919;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 8px 0 16px;
+            }
             .las-mobile-teacher-header {
-                padding: 20px 16px 8px;
+                padding: 16px 16px 6px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 600;
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                background: #1a1919;
             }
             .las-mobile-row {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-                padding: 16px 20px;
-                background: #161b22;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
             }
+            .las-mobile-row:last-child { border-bottom: none; }
             .las-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
             .las-mobile-row-body { flex: 1; min-width: 0; }
             .las-mobile-row-title {
-                font-size: 15px;
-                font-weight: 700;
+                font-size: 14px;
+                font-weight: 600;
                 color: #e2e8f0;
                 margin: 0 0 4px;
                 white-space: nowrap;
@@ -298,7 +306,7 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-row-action {
                 flex-shrink: 0;
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: 600;
                 text-decoration: none;
             }
             .las-mobile-row-desc {
