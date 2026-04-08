@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iSkool — The LMS for South African High Schools</title>
+<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal: #4fd1c5;
+  --teal2: #00e5a0;
+  --orange: #f97316;
+  --gold: #f5c842;
+  --blue: #4f7cff;
+  --red: #f85149;
+  --dark: #0f0f12;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Global scroll-reveal ── */
+.sr { opacity: 0; transform: translateY(44px); transition: opacity 0.75s ease, transform 0.75s ease; }
+.sr.sr-visible { opacity: 1; transform: translateY(0); }
+.sr.sr-d1 { transition-delay: 0.12s; }
+.sr.sr-d2 { transition-delay: 0.24s; }
+.sr.sr-d3 { transition-delay: 0.36s; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #111; line-height: 1.6; }
+
+/* NAV */
+nav {
+  position: relative;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #eee;
+  padding: 14px 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 1000;
+  overflow: visible;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+  text-decoration: none; color: #111;
+}
+.nav-logo svg { width: 36px; height: 36px; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { text-decoration: none; color: #333; font-weight: 500; font-size: 15px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--teal); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.nav-login { background: none; border: none; color: #555; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; padding: 8px 14px; }
+.nav-pilot { padding: 10px 22px; background: #111; color: white; border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+.nav-pilot:hover { background: #333; }
+.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: #111; border-radius: 2px; }
+.mobile-menu {
+  display: none;
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: white; border-bottom: 1px solid #eee;
+  padding: 20px 5%; z-index: 999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.mobile-menu.open { display: flex; flex-direction: column; }
+.mobile-menu a, .mobile-menu button { text-decoration: none; color: #333; font-weight: 500; font-size: 16px; padding: 14px 0; border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: left; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: block; width: 100%; }
+.mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
+
+/* HERO */
+.hero { padding: 96px 20px 80px; text-align: center; position: relative; background: #fff; overflow: hidden; z-index: 1; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 28px 28px; opacity: 0.45; pointer-events: none; }
+.trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
+.trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px, 7vw, 80px); font-weight: 800; line-height: 1.05; letter-spacing: -2.5px; margin-bottom: 24px; position: relative; }
+.hero h1 span { color: var(--gold); }
+.hero p { font-size: clamp(16px, 2vw, 20px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
+.hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+.btn { padding: 15px 32px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+.btn:hover { transform: translateY(-2px); }
+.btn-outline { background: white; color: #111; border: 2px solid #ddd; }
+.btn-outline:hover { border-color: #bbb; }
+.btn-primary { background: #111; color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.btn-primary:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.play-icon { width: 20px; height: 20px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+
+/* ═══════════════════════════
+   ARROW PILL SWITCHER
+═══════════════════════════ */
+.pill-bridge {
+  position: relative;
+  background: #fff;
+  z-index: 10;
+  overflow: visible;
+}
+
+.pill-notch {
+  position: relative;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 20px 0;
+  z-index: 10;
+}
+
+.notch-shape {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+  background: #fff;
+}
+.notch-shape svg { display: block; width: 100%; height: auto; }
+
+/* The arrow pill switcher */
+.pill-switcher {
+  position: relative;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 5px;
+  gap: 4px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  user-select: none;
+}
+
+.pill-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+  line-height: 1;
+}
+.pill-arrow:hover {
+  background: #111;
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.pill-arrow:active { transform: scale(0.96); }
+
+.pill-label-wrap {
+  min-width: 160px;
+  text-align: center;
+  position: relative;
+  height: 36px;
+  overflow: hidden;
+}
+
+.pill-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  background: white;
+  border-radius: 999px;
+  padding: 0 18px;
+  white-space: nowrap;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.pill-label.exit-left  { opacity: 0; transform: translateX(-24px); pointer-events: none; }
+.pill-label.exit-right { opacity: 0; transform: translateX(24px);  pointer-events: none; }
+.pill-label.enter-left  { opacity: 0; transform: translateX(24px);  pointer-events: none; }
+.pill-label.enter-right { opacity: 0; transform: translateX(-24px); pointer-events: none; }
+
+/* dots indicator */
+.pill-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 20;
+}
+.pill-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  transition: background 0.25s, transform 0.25s;
+}
+.pill-dot.active { background: #111; transform: scale(1.3); }
+
+/* DARK SECTION */
+.feature-section { background: var(--dark); padding: 40px 5% 100px; }
+.feature-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 20px; }
+
+/* STACK */
+.stack-wrapper { position: relative; height: 420px; }
+.stack-layer { position: absolute; top: 0; left: 0; right: 0; transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease; transform-origin: top center; will-change: transform, opacity; }
+.stack-layer[data-pos="0"] { z-index: 3; transform: translateY(0px) scale(1); opacity: 1; }
+.stack-layer[data-pos="1"] { z-index: 2; transform: translateY(56px) scale(0.95); opacity: 0.72; }
+.stack-layer[data-pos="2"] { z-index: 1; transform: translateY(104px) scale(0.905); opacity: 0.42; }
+
+/* DEMO CARDS — fixed height so all cards are same size */
+.demo-card {
+  background: white; color: #111; border-radius: 20px; padding: 26px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+  position: relative; overflow: hidden;
+  font-family: 'DM Sans', sans-serif; line-height: 1.6;
+}
+.demo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+
+.card-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 16px; }
+.badge-quiz      { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.badge-assign    { background: rgba(249,115,22,0.12); color: #f97316; }
+.badge-integrity { background: rgba(0,229,160,0.12); color: #00c47a; }
+.badge-grade     { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.badge-analytics { background: rgba(245,200,66,0.12); color: #d4a800; }
+.badge-resources { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.badge-discussion{ background: rgba(249,115,22,0.12); color: #f97316; }
+.badge-announce  { background: rgba(248,81,73,0.12); color: #f85149; }
+.badge-calendar  { background: rgba(79,209,197,0.12); color: #4fd1c5; }
+
+.card-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; line-height: 1.15; }
+.card-sub   { font-size: 13px; color: #666; margin-bottom: 18px; }
+
+.table-mini { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.table-mini th { text-align: left; padding: 9px 8px; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
+.table-mini td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
+.percent-badge { padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; color: white; }
+.progress-bar  { height: 8px; background: #eee; border-radius: 999px; overflow: hidden; margin: 12px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; }
+.topic-item    { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f4f4f4; font-size: 14px; color: #111; }
+.topic-item:last-child { border-bottom: none; }
+.announcement  { background: #f8f9fc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--teal); }
+
+.row-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f4f4f4; font-size: 13.5px; }
+.row-item:last-child { border-bottom: none; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.chip-green  { background: rgba(0,196,122,0.1); color: #00c47a; }
+.chip-orange { background: rgba(249,115,22,0.1); color: var(--orange); }
+.chip-red    { background: rgba(248,81,73,0.1); color: var(--red); }
+.chip-blue   { background: rgba(79,124,255,0.1); color: var(--blue); }
+.chip-teal   { background: rgba(79,209,197,0.1); color: var(--teal); }
+.chip-gold   { background: rgba(245,200,66,0.1); color: #c89a00; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.dot-green  { background: #00c47a; box-shadow: 0 0 6px #00c47a88; animation: dotBlink 1.6s infinite; }
+.dot-orange { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.6); }
+.dot-red    { background: var(--red); box-shadow: 0 0 5px rgba(248,81,73,0.6); }
+@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.mini-bar-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.mini-bar-label{ font-size: 11.5px; color: #777; width: 56px; flex-shrink: 0; }
+.mini-bar-track{ flex: 1; height: 7px; background: #eee; border-radius: 999px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 999px; }
+.fill-teal  { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.fill-gold  { background: var(--gold); }
+.fill-orange{ background: var(--orange); }
+.fill-soft  { background: rgba(79,209,197,0.45); }
+.mini-bar-val { font-size: 11px; color: #888; width: 28px; text-align: right; }
+
+.stat-pill { display: flex; align-items: center; justify-content: center; flex-direction: column; background: #f8f9fc; border-radius: 14px; padding: 14px; text-align: center; }
+.stat-val   { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.stat-label { font-size: 11.5px; color: #888; margin-top: 3px; }
+
+.inv-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; margin-bottom: 7px; background: rgba(0,0,0,0.02); border: 1px solid #f0f0f0; font-size: 13.5px; }
+.inv-row.flagged { background: rgba(249,115,22,0.07); border-color: rgba(249,115,22,0.2); animation: pulseOrange 2s infinite; }
+.inv-row.exited  { background: rgba(248,81,73,0.07); border-color: rgba(248,81,73,0.2); animation: pulseRed 2.4s infinite; }
+@keyframes pulseOrange { 0%,100%{background:rgba(249,115,22,0.07)} 50%{background:rgba(249,115,22,0.14)} }
+@keyframes pulseRed    { 0%,100%{background:rgba(248,81,73,0.07)}  50%{background:rgba(248,81,73,0.14)} }
+.inv-name   { flex: 1; color: #111; }
+.inv-status { font-size: 11.5px; font-weight: 600; }
+.inv-status.ok   { color: #aaa; }
+.inv-status.warn { color: var(--orange); }
+.inv-status.bad  { color: var(--red); }
+.live-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #888; margin-bottom: 12px; }
+.live-dot   { width: 7px; height: 7px; border-radius: 50%; background: #00c47a; animation: livePulse 1.4s infinite; }
+@keyframes livePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.4} }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* RIGHT COPY */
+.feature-copy { color: #fff; font-family: 'DM Sans', sans-serif; }
+.copy-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+.feature-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(24px, 3vw, 36px); font-weight: 800; line-height: 1.15; letter-spacing: -0.8px; margin-bottom: 16px; }
+.feature-copy h3 span { color: var(--gold); }
+.feature-copy p { color: #888; font-size: 15.5px; line-height: 1.75; margin-bottom: 26px; }
+.copy-bullets { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 13px; }
+.copy-bullets li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: #ccc; }
+.bullet-check { width: 21px; height: 21px; border-radius: 50%; background: rgba(79,209,197,0.15); border: 1px solid rgba(79,209,197,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; color: var(--teal); margin-top: 2px; }
+.copy-cta { display: inline-flex; align-items: center; gap: 10px; background: var(--gold); color: #111; padding: 14px 28px; border-radius: 999px; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; border: none; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+.copy-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,200,66,0.35); }
+
+/* TABLET */
+@media (max-width: 900px) {
+  .nav-links, .nav-actions { display: none; }
+  .nav-hamburger { display: flex; }
+  .feature-inner { grid-template-columns: 1fr; gap: 48px; padding-top: 48px; }
+  .feature-inner > div:first-child { order: 1; }
+  .feature-copy { order: 2; }
+  .stack-wrapper { height: 340px; }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .hero { padding: 88px 20px 80px; }
+  .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
+  .pill-label-wrap { min-width: 120px; }
+  .pill-arrow { width: 32px; height: 32px; font-size: 14px; }
+  .feature-section { padding: 60px 5% 130px; }
+  .feature-inner { gap: 36px; padding-top: 32px; }
+  .stack-wrapper { height: 340px; margin-bottom: 60px; }
+  .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
+  .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
+  .demo-card { padding: 18px; }
+  .card-title { font-size: 16px; }
+  .feature-copy h3 { font-size: 26px; }
+  .feature-copy p { font-size: 15px; }
+  .copy-cta { width: 100%; justify-content: center; }
+  .table-mini th:nth-child(2), .table-mini td:nth-child(2) { display: none; }
+}
+
+/* ═══════════════════════════
+   FEATURES SECTION (AI Invigilator + Analytics)
+═══════════════════════════ */
+.features-section { background: #08080c; padding: 100px 0 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 3; }
+.features-header { text-align: center; padding: 0 5% 72px; max-width: 700px; margin: 0 auto; }
+.feat-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+.features-header h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 14px; }
+.features-header h2 span { color: var(--gold); }
+.features-header p { color: rgba(255,255,255,0.4); font-size: 17px; line-height: 1.7; }
+.feat-row { max-width: 1160px; margin: 0 auto; padding: 0 5% 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; opacity: 0; transform: translateY(50px); transition: opacity 0.85s ease, transform 0.85s ease; }
+.feat-row.visible { opacity:1; transform:translateY(0); }
+.feat-row.reverse { direction: rtl; }
+.feat-row.reverse > * { direction: ltr; }
+.feat-copy-eyebrow { display: flex; align-items: center; gap: 10px; font-size: 10.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px; }
+.feat-copy-eyebrow.teal { color: var(--teal); }
+.feat-copy-eyebrow.gold { color: var(--gold); }
+.eyebrow-line { display: inline-block; width: 28px; height: 2px; border-radius: 999px; flex-shrink: 0; }
+.teal .eyebrow-line { background: var(--teal); }
+.gold .eyebrow-line { background: var(--gold); }
+.feat-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 3vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 18px; }
+.feat-copy h3 em { font-style: normal; }
+.feat-copy h3 em.teal { color: var(--teal); }
+.feat-copy h3 em.gold { color: var(--gold); }
+.feat-copy p { font-size: 15.5px; color: rgba(255,255,255,0.45); line-height: 1.78; margin-bottom: 28px; max-width: 440px; }
+.feat-bullets { display: flex; flex-direction: column; gap: 13px; margin-bottom: 36px; }
+.feat-bullet { display: flex; align-items: flex-start; gap: 12px; font-size: 14.5px; color: rgba(255,255,255,0.72); }
+.bullet-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+.bullet-dot.teal { background: rgba(79,209,197,0.15); border: 1px solid rgba(79,209,197,0.35); color: var(--teal); }
+.bullet-dot.gold { background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.35); color: var(--gold); }
+.feat-cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.feat-cta:hover { transform: translateY(-2px); }
+.feat-cta.teal { background: var(--teal); color: #061a18; box-shadow: 0 4px 24px rgba(79,209,197,0.3); }
+.feat-cta.teal:hover { box-shadow: 0 8px 36px rgba(79,209,197,0.45); }
+.feat-cta.gold { background: var(--gold); color: #1a1100; box-shadow: 0 4px 24px rgba(245,200,66,0.3); }
+.feat-cta.gold:hover { box-shadow: 0 8px 36px rgba(245,200,66,0.45); }
+.feat-mockup-wrap { position: relative; }
+.feat-float { position: absolute; bottom: -22px; right: -18px; background: #1c1c26; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 20px; box-shadow: 0 20px 56px rgba(0,0,0,0.55); min-width: 150px; animation: floatBob 4s ease-in-out infinite; z-index: 10; }
+@keyframes floatBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+.float-val.teal { color: var(--teal); }
+.float-val.gold { color: var(--gold); }
+.float-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+.mock-panel { background: #13131a; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
+.mock-topbar { background: #0d0d14; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.mock-dots { display: flex; gap: 6px; }
+.mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mock-topbar-title { font-size: 11px; color: rgba(255,255,255,0.3); margin-left: 8px; }
+.mock-body { padding: 20px; }
+.inv-row2 { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+.inv-row2.flagged { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.25); animation: pulseRow 2s ease-in-out infinite; }
+.inv-row2.exited { background: rgba(248,81,73,0.07); border-color: rgba(248,81,73,0.2); animation: pulseRowRed 2.4s ease-in-out infinite; }
+@keyframes pulseRow    { 0%,100%{background:rgba(249,115,22,0.08);} 50%{background:rgba(249,115,22,0.16);} }
+@keyframes pulseRowRed { 0%,100%{background:rgba(248,81,73,0.07);} 50%{background:rgba(248,81,73,0.14);} }
+.inv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.inv-dot.green  { background: #00c47a; box-shadow: 0 0 6px #00c47a88; animation: dotBlink 1.6s ease-in-out infinite; }
+.inv-dot.orange { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.6); }
+.inv-dot.red    { background: #f85149; box-shadow: 0 0 5px rgba(248,81,73,0.6); }
+.inv-name2  { font-size: 13.5px; color: rgba(255,255,255,0.85); flex: 1; }
+.inv-status2{ font-size: 11.5px; font-weight: 600; }
+.inv-status2.ok   { color: rgba(255,255,255,0.3); }
+.inv-status2.warn { color: var(--orange); }
+.inv-status2.bad  { color: #f85149; }
+.inv-summary { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.inv-stat { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; text-align: center; }
+.inv-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.inv-stat-val.teal   { color: var(--teal); }
+.inv-stat-val.orange { color: var(--orange); }
+.inv-stat-val.red    { color: #f85149; }
+.inv-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+.live-badge2 { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+.live-dot2 { width: 7px; height: 7px; border-radius: 50%; background: #00c47a; animation: livePulse 1.4s ease-in-out infinite; }
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.anal-stat { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 14px; text-align: center; }
+.anal-stat-val { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; }
+.anal-stat-val.teal { color: var(--teal); }
+.anal-stat-val.gold { color: var(--gold); }
+.anal-stat-sub   { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+.anal-stat-trend { font-size: 10px; font-weight: 700; margin-top: 3px; color: #00c47a; }
+.bar-chart { display: flex; flex-direction: column; gap: 9px; }
+.bar-row   { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 11.5px; color: rgba(255,255,255,0.4); width: 62px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 7px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 999px; width: 0; transition: width 1.4s cubic-bezier(0.25, 1, 0.5, 1); }
+.bar-fill.teal   { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.bar-fill.gold   { background: var(--gold); }
+.bar-fill.orange { background: var(--orange); }
+.bar-fill.soft   { background: rgba(79,209,197,0.45); }
+.bar-val { font-size: 11.5px; color: rgba(255,255,255,0.45); width: 32px; text-align: right; }
+.feat-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent); max-width: 1160px; margin: 0 auto 80px; padding: 0 5%; }
+@media (max-width: 900px) {
+  .feat-row { grid-template-columns: 1fr; gap: 48px; }
+  .feat-row.reverse { direction: ltr; }
+  .feat-float { display: none; }
+}
+@media (max-width: 600px) {
+  .features-section { padding: 72px 0 80px; }
+  .feat-row { padding-bottom: 64px; }
+  .feat-copy h3 { font-size: 26px; }
+  .feat-cta { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
+      </g>
+    </svg>
+    iSkool
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Platform</a></li>
+    <li><a href="#">How it Works</a></li>
+    <li><a href="#">For Schools</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="nav-login">Log In</button>
+    <button class="nav-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- MOBILE MENU — inside nav so position:absolute top:100% works -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#">Platform</a>
+    <a href="#">How it Works</a>
+    <a href="#">For Schools</a>
+    <button class="nav-login" style="border-bottom:1px solid #f0f0f0;">Log In</button>
+    <button class="mobile-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="trust-badge sr">
+    <div class="trust-dot"></div>
+    Trusted by South African High Schools
+  </div>
+  <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
+  <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
+  <div class="hero-buttons sr sr-d3">
+    <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
+    <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
+  </div>
+</section>
+
+<!-- PILL BRIDGE -->
+<div style="position:relative; background:#ffffff; padding: 28px 0 0; z-index:5;">
+
+  <!-- Arrow Pill Switcher -->
+  <div style="display:flex; flex-direction:column; align-items:center; position:relative; z-index:20; gap:10px;">
+    <div class="pill-switcher">
+      <button class="pill-arrow" id="pill-prev" onclick="switchFeature(-1)" aria-label="Previous feature">&#8592;</button>
+      <div class="pill-label-wrap">
+        <div class="pill-label" id="pill-label">Quizzes</div>
+      </div>
+      <button class="pill-arrow" id="pill-next" onclick="switchFeature(1)" aria-label="Next feature">&#8594;</button>
+    </div>
+    <!-- Dot indicators -->
+    <div class="pill-dots" id="pill-dots"></div>
+  </div>
+
+  <!-- Dark notch below pill -->
+  <div style="position:relative; height:44px; margin-top:8px;">
+    <div style="position:absolute; inset:0; background:#0f0f12;"></div>
+    <div style="
+      position:absolute;
+      top:0; left:50%; transform:translateX(-50%);
+      width:680px;
+      height:44px;
+      background:#ffffff;
+      border-radius:0 0 28px 28px;
+    "></div>
+  </div>
+
+</div>
+
+<!-- DARK FEATURE SECTION -->
+<section class="feature-section">
+  <div class="feature-inner">
+    <div>
+
+      <!-- ── QUIZZES ── -->
+      <div class="tab-panel active" id="panel-0">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📋 Quizzes</div>
+              <div class="card-title">Term 2 — Live Quizzes</div>
+              <div class="card-sub">2 open · 1 upcoming</div>
+              <div style="background:#f8f9fc;padding:14px;border-radius:12px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:start;">
+                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A · Maths · 15 Qs</small></div>
+                  <span class="percent-badge" style="background:#00c47a">Open</span>
+                </div>
+                <div style="margin-top:6px;font-size:12px;color:#00c47a;font-weight:600;">⏱ 42 min remaining</div>
+              </div>
+              <div style="background:#f8f9fc;padding:14px;border-radius:12px;">
+                <div style="display:flex;justify-content:space-between;">
+                  <div><strong>Functions &amp; Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
+                  <span class="percent-badge" style="background:#00c47a">Open</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
+              <div class="card-title">Integrity Monitor</div>
+              <div class="card-sub">Real-time quiz protection</div>
+              <p style="font-size:13.5px;line-height:1.6;margin-bottom:14px;color:#555;">Records every session. Detects tab switching, browser exit, or focus loss — question by question.</p>
+              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">✓ Verified &amp; Tested · Powered by AI</div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-quiz">📁 Assignment</div>
+              <div class="card-title">Chapter 5 – Calculus</div>
+              <div class="card-sub">Grade 12A · Due 20 May 2025</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span><strong>18</strong> of 32 submitted</span>
+                <span style="color:var(--teal)">56% completion</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ASSIGNMENTS ── -->
+      <div class="tab-panel" id="panel-1">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-assign">📁 Assignments</div>
+              <div class="card-title">Grade 12A — Term 2</div>
+              <div class="card-sub">4 assignments this term</div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Chapter 5 — Calculus</div><div style="font-size:12px;color:#888;">Due 20 May · 18/32 submitted</div></div><span class="chip chip-orange">56%</span></div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Trigonometry Worksheet</div><div style="font-size:12px;color:#888;">Due 28 May · 30/32 submitted</div></div><span class="chip chip-green">94%</span></div>
+              <div class="row-item"><div style="width:34px;height:34px;background:#fef9e6;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Statistics Investigation</div><div style="font-size:12px;color:#888;">Due 5 Jun · Not open yet</div></div><span class="chip chip-gold">Soon</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-assign">📊 Submissions</div>
+              <div class="card-title">Calculus — Submissions</div>
+              <div class="card-sub">Deadline: 20 May 2025</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;"><span><strong>18</strong> submitted</span><span><strong>14</strong> pending</span></div>
+              <div class="row-item"><span class="status-dot dot-green"></span>Amahle Dube<span style="margin-left:auto;font-size:12px;color:#00c47a;font-weight:600">Submitted</span></div>
+              <div class="row-item"><span class="status-dot dot-orange"></span>Sipho Nkosi<span style="margin-left:auto;font-size:12px;color:var(--orange);font-weight:600">Late</span></div>
+              <div class="row-item"><span class="status-dot" style="background:#ddd;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></span>Thandi Mokoena<span style="margin-left:auto;font-size:12px;color:#aaa;font-weight:600">Pending</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-assign">✅ Results</div>
+              <div class="card-title">Calculus — Marked</div>
+              <div class="card-sub">Auto-marked · 18 submitted</div>
+              <table class="table-mini">
+                <thead><tr><th>Learner</th><th>Score</th><th>Symbol</th></tr></thead>
+                <tbody>
+                  <tr><td>Amahle Dube</td><td>38/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Sipho Nkosi</td><td>29/40</td><td><span class="percent-badge" style="background:var(--orange)">C</span></td></tr>
+                  <tr><td>Thandi Mokoena</td><td>35/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AI INVIGILATOR ── -->
+      <div class="tab-panel" id="panel-2">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="live-badge"><div class="live-dot"></div>Live · 28 learners · updating every 3s</div>
+              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
+              <div class="card-title">Grade 12A — Live Monitor</div>
+              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Amahle Dube</span><span class="inv-status ok">Q 9/15</span></div>
+              <div class="inv-row flagged"><span class="status-dot dot-orange"></span><span class="inv-name">Sipho Nkosi</span><span class="inv-status warn">⚠ Tab switch</span></div>
+              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Thandi Mokoena</span><span class="inv-status ok">Q 7/15</span></div>
+              <div class="inv-row exited"><span class="status-dot dot-red"></span><span class="inv-name">Lerato Khumalo</span><span class="inv-status bad">⛔ Exit detected</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">📋 Audit Trail</div>
+              <div class="card-title">Session Log — Sipho Nkosi</div>
+              <div class="card-sub">14 May 2025 · Quadratic Quiz</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:02</span><span class="chip chip-green">Started quiz</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-orange">Tab switch · Q5</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-green">Returned · Q5</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:28</span><span class="chip chip-orange">Tab switch · Q11</span></div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:47</span><span class="chip chip-blue">Submitted</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-integrity">📊 Report</div>
+              <div class="card-title">Integrity Summary</div>
+              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal);font-size:22px;">25</div><div class="stat-label">Clean</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--orange);font-size:22px;">2</div><div class="stat-label">Flagged</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--red);font-size:22px;">1</div><div class="stat-label">Exited</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GRADEBOOK ── -->
+      <div class="tab-panel" id="panel-3">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-grade">📒 Gradebook</div>
+              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-sub">Term 2 · 4 assessments</div>
+              <table class="table-mini">
+                <thead><tr><th>Learner</th><th>T1</th><th>T2</th><th>Avg</th><th>Sym</th></tr></thead>
+                <tbody>
+                  <tr><td>Amahle Dube</td><td>88%</td><td>92%</td><td><strong>90%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Sipho Nkosi</td><td>72%</td><td>78%</td><td><strong>75%</strong></td><td><span class="percent-badge" style="background:var(--orange)">B</span></td></tr>
+                  <tr><td>Thandi Mokoena</td><td>80%</td><td>85%</td><td><strong>82%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
+                  <tr><td>Bongani Zulu</td><td>48%</td><td>54%</td><td><strong>51%</strong></td><td><span class="percent-badge" style="background:var(--red)">D</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-grade">📑 Report Card</div>
+              <div class="card-title">Amahle Dube</div>
+              <div class="card-sub">Grade 12A · Term 2 · 2025</div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Mathematics</span><span class="percent-badge" style="background:#00c47a">90% · A</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Physical Science</span><span class="percent-badge" style="background:#00c47a">85% · A</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">English FAL</span><span class="percent-badge" style="background:var(--orange)">74% · B</span></div>
+              <div class="row-item"><span style="flex:1;font-size:13.5px;">Life Sciences</span><span class="percent-badge" style="background:#00c47a">88% · A</span></div>
+              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#555;">Overall Average: <strong style="color:#00c47a;font-size:16px;">84.3%</strong> · Symbol: <strong>A</strong></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-grade">📊 Class Stats</div>
+              <div class="card-title">Term 2 Class Overview</div>
+              <div class="card-sub">Grade 12A · Mathematics</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Class Avg</div></div>
+              </div>
+              <div style="font-size:12.5px;color:#888;text-align:center;">↑ 10% improvement vs Term 1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYTICS ── -->
+      <div class="tab-panel" id="panel-4">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-analytics">📈 Analytics</div>
+              <div class="card-title">Term 2 Performance</div>
+              <div class="card-sub">Across 4 classes · 3 subjects</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate <span style="color:#00c47a;font-size:10px;">↑10%</span></div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Avg Score</div></div>
+              </div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 12A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:94%"></div></div><span class="mini-bar-val">94%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 11B</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label">Gr 10A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-soft" style="width:62%"></div></div><span class="mini-bar-val">62%</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-analytics">⚠️ At-Risk</div>
+              <div class="card-title">Learners Needing Help</div>
+              <div class="card-sub">Below 50% this term</div>
+              <div class="row-item"><span style="font-size:16px;">🔴</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Bongani Zulu · Gr 12A</div><div style="font-size:12px;color:#888;">48% avg · 3 missed assignments</div></div><span class="chip chip-red" style="font-size:11px;">At risk</span></div>
+              <div class="row-item"><span style="font-size:16px;">🟠</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Lerato Khumalo · Gr 11B</div><div style="font-size:12px;color:#888;">52% avg · flagged</div></div><span class="chip chip-orange" style="font-size:11px;">Watch</span></div>
+              <div class="row-item"><span style="font-size:16px;">🟡</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Kamo Sithole · Gr 10A</div><div style="font-size:12px;color:#888;">55% avg · borderline</div></div><span class="chip chip-gold" style="font-size:11px;">Monitor</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-analytics">❓ Questions</div>
+              <div class="card-title">Question Difficulty</div>
+              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
+              <div class="mini-bar-row" style="margin-top:10px;"><span class="mini-bar-label" style="width:40px;">Q1</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:96%"></div></div><span class="mini-bar-val">96%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q5</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q8</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:54%"></div></div><span class="mini-bar-val">54%</span></div>
+              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q13</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:38%"></div></div><span class="mini-bar-val">38%</span></div>
+              <div style="font-size:12px;color:#888;margin-top:8px;padding:8px;background:#fff5ed;border-radius:8px;">⚠ Q8 &amp; Q13 need re-teaching</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RESOURCES ── -->
+      <div class="tab-panel" id="panel-5">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-resources">📚 Resources</div>
+              <div class="card-title">Grade 12A — Mathematics</div>
+              <div class="card-sub">8 resources uploaded this term</div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Calculus Summary Notes</div><div style="font-size:12px;color:#888;">PDF · 2.1 MB · Added 2 May</div></div><span style="font-size:10px;font-weight:700;color:var(--orange);">PDF</span></div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#eef2ff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🎬</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Quadratics Explained</div><div style="font-size:12px;color:#888;">Video · 14 min · Added 5 May</div></div><span style="font-size:10px;font-weight:700;color:var(--blue);">VIDEO</span></div>
+              <div class="row-item"><div style="width:36px;height:36px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📊</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Worksheet 3 — Equations</div><div style="font-size:12px;color:#888;">DOCX · 340 KB · Added 8 May</div></div><span style="font-size:10px;font-weight:700;color:#00c47a;">DOC</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-resources">🎬 Preview</div>
+              <div class="card-title">Quadratics Explained</div>
+              <div class="card-sub">14:22 · Grade 12A · Ms N. Sithole</div>
+              <div style="background:#f0f0f5;border-radius:12px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                <div style="width:44px;height:44px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">▶</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="chip chip-blue">Grade 12A</span><span class="chip chip-teal">Mathematics</span><span class="chip chip-gold">Term 2</span></div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-resources">📎 Linked to Topic</div>
+              <div class="card-title">Quadratic Equations</div>
+              <div class="card-sub">CAPS Grade 12 · 3 resources linked</div>
+              <div class="row-item">📄 <span style="flex:1;font-size:13.5px;">Calculus Summary Notes</span><span class="chip chip-orange" style="font-size:10px;">PDF</span></div>
+              <div class="row-item">🎬 <span style="flex:1;font-size:13.5px;">Quadratics Explained</span><span class="chip chip-blue" style="font-size:10px;">VIDEO</span></div>
+              <div class="row-item">📊 <span style="flex:1;font-size:13.5px;">Worksheet 3</span><span class="chip chip-green" style="font-size:10px;">DOC</span></div>
+              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px;font-size:12.5px;color:#555;text-align:center;">3 learners haven't viewed any resources yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DISCUSSIONS ── -->
+      <div class="tab-panel" id="panel-6">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">💬 Discussions</div>
+              <div class="card-title">Grade 12A — Open Threads</div>
+              <div class="card-sub">3 active · 12 total posts</div>
+              <div style="background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Amahle Dube</span><span style="font-size:11px;color:#aaa;">2h ago</span></div>
+                <div style="font-size:13px;color:#555;margin-bottom:8px;">Can someone explain how to factorise when a ≠ 1?</div>
+                <div style="display:flex;gap:6px;"><span class="chip chip-teal" style="font-size:11px;">4 replies</span><span class="chip chip-blue" style="font-size:11px;">Maths</span></div>
+              </div>
+              <div style="background:#f8f9fc;border-radius:12px;padding:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Sipho Nkosi</span><span style="font-size:11px;color:#aaa;">5h ago</span></div>
+                <div style="font-size:13px;color:#555;">When is the next test?</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">💬 Thread</div>
+              <div class="card-title">Factorising when a ≠ 1</div>
+              <div class="card-sub">Grade 12A · 4 replies</div>
+              <div style="background:#f8f9fc;padding:12px;border-radius:10px;font-size:13px;margin-bottom:10px;color:#333;"><strong>Amahle Dube:</strong> Can someone explain how to factorise when a ≠ 1?</div>
+              <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;background:white;border-radius:8px;border-left:3px solid var(--teal);">
+                <div><div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:2px;">Ms N. Sithole · Teacher</div><div style="font-size:12px;color:#555;">Use the product-sum method: multiply a×c, then find factors that add to b.</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-discussion">🏆 Most Active</div>
+              <div class="card-title">Top Contributors</div>
+              <div class="card-sub">This week · Grade 12A</div>
+              <div class="row-item"><span style="font-size:18px;">🥇</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Amahle Dube</div><div style="font-size:12px;color:#888;">8 posts · 3 helpful answers</div></div></div>
+              <div class="row-item"><span style="font-size:18px;">🥈</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Thandi Mokoena</div><div style="font-size:12px;color:#888;">5 posts · 2 helpful answers</div></div></div>
+              <div class="row-item"><span style="font-size:18px;">🥉</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Nomsa Dlamini</div><div style="font-size:12px;color:#888;">3 posts</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="tab-panel" id="panel-7">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">🔔 Announcements</div>
+              <div class="card-title">School-Wide Updates</div>
+              <div class="card-sub">3 new since yesterday</div>
+              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
+                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📋</span>
+                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Term 2 Test Schedule Released</div><div style="font-size:12.5px;color:#666;">Tests begin 14 May. Bring calculators and stationery.</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 2h ago · All Grade 12</div></div>
+              </div>
+              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;">
+                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📐</span>
+                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Extra Maths Support Class</div><div style="font-size:12.5px;color:#666;">Saturday 10 May · 09:00 · Room 12</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 1 day ago · Grade 11 &amp; 12</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">📌 Pinned</div>
+              <div class="card-title">Term 2 Test Schedule</div>
+              <div class="card-sub">Posted by Ms N. Sithole · 2h ago</div>
+              <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:12px;">All Grade 12 learners must note the following test dates. Arrive 10 minutes early and bring your geometry set.</p>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Mathematics</div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Physical Science</div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--blue);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">27 May</span>English FAL</div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-announce">📬 Reach</div>
+              <div class="card-title">Announcement Stats</div>
+              <div class="card-sub">Term 2 Test Schedule · May 2025</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">142</div><div class="stat-label">Learners reached</div></div>
+                <div class="stat-pill"><div class="stat-val" style="color:#00c47a">94%</div><div class="stat-label">Read rate</div></div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
+              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">9 learners haven't seen this yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CALENDAR ── -->
+      <div class="tab-panel" id="panel-8">
+        <div class="stack-wrapper">
+          <div class="stack-layer" data-pos="0">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📅 Calendar</div>
+              <div class="card-title">May 2025</div>
+              <div class="card-sub">12 academic events this month</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f0fdfb;border-radius:10px;border-left:3px solid var(--teal);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:var(--teal);text-transform:uppercase;">14 MAY</div><div style="font-size:13px;font-weight:600;">Quadratic Equations Quiz</div><div style="font-size:11.5px;color:#888;">Grade 12A · 09:00</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff5ed;border-radius:10px;border-left:3px solid var(--orange);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:var(--orange);text-transform:uppercase;">17 MAY</div><div style="font-size:13px;font-weight:600;">Parent Consultation Day</div><div style="font-size:11.5px;color:#888;">All grades · 08:00–14:00</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fef9e6;border-radius:10px;border-left:3px solid var(--gold);">
+                  <div><div style="font-size:10.5px;font-weight:700;color:#c89a00;text-transform:uppercase;">20 MAY</div><div style="font-size:13px;font-weight:600;">Calculus Assignment Due</div><div style="font-size:11.5px;color:#888;">Grade 12A · 23:59</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="1">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">🎯 Syllabus Plan</div>
+              <div class="card-title">May Coverage Plan</div>
+              <div class="card-sub">Grade 12A · Mathematics</div>
+              <div class="topic-item">✅ <span style="flex:1;">Quadratic Equations</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
+              <div class="topic-item">✅ <span style="flex:1;">Functions &amp; Graphs</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
+              <div class="topic-item">⏳ <span style="flex:1;">Calculus — Derivatives</span><span style="color:var(--orange);font-size:12px;font-weight:600;">In progress</span></div>
+              <div class="topic-item">⭕ <span style="flex:1;">Integration</span><span style="color:#bbb;font-size:12px;font-weight:600;">Upcoming</span></div>
+              <div class="progress-bar" style="margin-top:12px;"><div class="progress-fill" style="width:55%"></div></div>
+              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">55% of May plan complete</div>
+            </div>
+          </div>
+          <div class="stack-layer" data-pos="2">
+            <div class="demo-card">
+              <div class="card-badge badge-calendar">📌 Upcoming</div>
+              <div class="card-title">Next 7 Days</div>
+              <div class="card-sub">All classes · Academic events</div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Maths Quiz · Gr 12A</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">17 May</span>Parent Consultation Day</div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--gold);color:#111;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Calculus Due · Gr 12A</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end left col -->
+
+    <!-- RIGHT COPY -->
+    <div class="feature-copy">
+      <span class="copy-eyebrow" id="copy-eyebrow">Quizzes</span>
+      <h3 id="copy-heading">Run powerful quizzes with <span>AI watching over</span> every learner</h3>
+      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.</p>
+      <ul class="copy-bullets" id="copy-bullets">
+        <li><div class="bullet-check">✓</div>Live learner progress tracked question by question</li>
+        <li><div class="bullet-check">✓</div>Tab-switch &amp; browser exit detection built in</li>
+        <li><div class="bullet-check">✓</div>Auto-marked with instant results &amp; reports</li>
+      </ul>
+      
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═══════════════════════════════════════════
+   ARROW PILL SWITCHER — 9 features, infinite wrap
+═══════════════════════════════════════════ */
+const features = [
+  {
+    label: 'Quizzes',
+    eyebrow: 'Quizzes',
+    heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
+    desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
+    bullets: ['Live learner progress tracked question by question', 'Tab-switch & browser exit detection built in', 'Auto-marked with instant results & reports']
+  },
+  {
+    label: 'Assignments',
+    eyebrow: 'Assignments',
+    heading: 'Set, track and mark <span>assignments with ease</span>',
+    desc: "Create assignments, set deadlines, and track submission progress across all your classes in one place. Auto-marking saves you hours every week.",
+    bullets: ['Per-learner submission status at a glance', 'Late submission flagging built in', 'Auto-marked with instant feedback to learners']
+  },
+  {
+    label: 'AI Invigilator',
+    eyebrow: 'AI Invigilator',
+    heading: 'Every quiz watched in <span>real time</span>',
+    desc: "iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.",
+    bullets: ['Detects tab-switching & browser minimization', 'Flags anomalies per learner, per question', 'Full session audit log after each quiz closes']
+  },
+  {
+    label: 'Gradebook',
+    eyebrow: 'Gradebook',
+    heading: 'Capture marks and <span>generate reports</span> in seconds',
+    desc: "No more spreadsheets. Enter marks once — iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.",
+    bullets: ['Mark entries auto-calculate class averages', 'Symbol assignment (A–F) based on CAPS thresholds', 'One-click PDF report cards per learner']
+  },
+  {
+    label: 'Analytics',
+    eyebrow: 'Deep Analytics',
+    heading: "See every learner's story <span>at a glance</span>",
+    desc: "Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.",
+    bullets: ['Per-class pass rates with term-on-term trends', 'Question-by-question difficulty breakdown', 'Admin dashboard for principals & HODs']
+  },
+  {
+    label: 'Resources',
+    eyebrow: 'Resources',
+    heading: 'Upload notes, videos and worksheets <span>per topic</span>',
+    desc: "Link learning materials directly to CAPS topics. Learners find exactly what they need, when they need it — all organised by subject and grade.",
+    bullets: ['Upload PDFs, videos and documents', 'Linked directly to CAPS syllabus topics', 'Track which learners have viewed each resource']
+  },
+  {
+    label: 'Discussions',
+    eyebrow: 'Discussions',
+    heading: 'Foster class conversations <span>in a safe space</span>',
+    desc: "Run moderated class discussions where learners ask questions and teachers respond. No WhatsApp groups, no noise — just focused academic conversation.",
+    bullets: ['Threaded discussions per class or subject', 'Teacher moderation and pinned replies', 'Participation tracked per learner']
+  },
+  {
+    label: 'Announcements',
+    eyebrow: 'Announcements',
+    heading: 'Keep learners and parents <span>always in the loop</span>',
+    desc: "Post announcements to specific classes, grades, or the whole school. Track who has read them and follow up with those who haven't.",
+    bullets: ['Target by class, grade or school-wide', 'Read receipts so nothing gets missed', 'Pinned notices stay top-of-feed']
+  },
+  {
+    label: 'Calendar',
+    eyebrow: 'Calendar',
+    heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
+    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Sync academic events to learner calendars and never fall behind the curriculum again.",
+    bullets: ['CAPS topic mapping for Grade 10–12', 'Events auto-synced to learner dashboards', 'Coverage progress tracked per class']
+  }
+];
+
+let currentIndex = 0;
+let cycleTimers = {};
+
+/* ── Build dot indicators ── */
+const dotsWrap = document.getElementById('pill-dots');
+features.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'pill-dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goToFeature(i, i > currentIndex ? 'right' : 'left');
+  dotsWrap.appendChild(d);
+});
+
+/* ── Stack helpers ── */
+function applyPositions(layers) {
+  const s = [
+    { zIndex: 3, transform: 'translateY(0px) scale(1)', opacity: '1' },
+    { zIndex: 2, transform: 'translateY(56px) scale(0.95)', opacity: '0.72' },
+    { zIndex: 1, transform: 'translateY(104px) scale(0.905)', opacity: '0.42' }
+  ];
+  layers.forEach(l => {
+    const p = parseInt(l.dataset.pos);
+    l.style.zIndex = s[p].zIndex;
+    l.style.transform = s[p].transform;
+    l.style.opacity = s[p].opacity;
+  });
+}
+
+function startCardCycle(panelId) {
+  stopCardCycle(panelId);
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const layers = panel.querySelectorAll('.stack-layer');
+  if (layers.length < 2) return;
+  cycleTimers[panelId] = setInterval(() => {
+    const np = Array.from(layers).map(l => (parseInt(l.dataset.pos) + layers.length - 1) % layers.length);
+    layers.forEach((l, i) => { l.dataset.pos = np[i]; });
+    applyPositions(layers);
+  }, 2400);
+}
+
+function stopCardCycle(panelId) {
+  if (cycleTimers[panelId]) { clearInterval(cycleTimers[panelId]); delete cycleTimers[panelId]; }
+}
+
+/* ── Pill label animation ── */
+function animatePillLabel(direction, newLabel) {
+  const labelEl = document.getElementById('pill-label');
+  const exitClass  = direction === 'right' ? 'exit-left'  : 'exit-right';
+  const enterClass = direction === 'right' ? 'enter-left' : 'enter-right';
+
+  labelEl.classList.add(exitClass);
+  setTimeout(() => {
+    labelEl.textContent = newLabel;
+    labelEl.classList.remove(exitClass);
+    labelEl.classList.add(enterClass);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        labelEl.classList.remove(enterClass);
+      });
+    });
+  }, 180);
+}
+
+/* ── Update dot indicators ── */
+function updateDots(index) {
+  document.querySelectorAll('.pill-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === index);
+  });
+}
+
+/* ── Update right-side copy ── */
+function updateCopy(f) {
+  document.getElementById('copy-eyebrow').textContent = f.eyebrow;
+  document.getElementById('copy-heading').innerHTML = f.heading;
+  document.getElementById('copy-desc').textContent = f.desc;
+  document.getElementById('copy-bullets').innerHTML = f.bullets
+    .map(b => `<li><div class="bullet-check">✓</div>${b}</li>`)
+    .join('');
+}
+
+/* ── Main switch function ── */
+function goToFeature(newIndex, direction) {
+  if (newIndex === currentIndex) return;
+
+  const oldPanelId = 'panel-' + currentIndex;
+  const newPanelId = 'panel-' + newIndex;
+
+  stopCardCycle(oldPanelId);
+
+  // Hide old panel
+  document.getElementById(oldPanelId).classList.remove('active');
+
+  // Show new panel
+  const newPanel = document.getElementById(newPanelId);
+  newPanel.classList.add('active');
+  const layers = newPanel.querySelectorAll('.stack-layer');
+  layers.forEach((l, i) => { l.dataset.pos = i; });
+  applyPositions(layers);
+
+  // Animate pill label
+  animatePillLabel(direction, features[newIndex].label);
+
+  // Update dots & copy
+  currentIndex = newIndex;
+  updateDots(currentIndex);
+  updateCopy(features[currentIndex]);
+
+  // Start cycling cards
+  startCardCycle(newPanelId);
+}
+
+/* ── Arrow click handler (infinite wrap) ── */
+function switchFeature(dir) {
+  const newIndex = (currentIndex + dir + features.length) % features.length;
+  const direction = dir > 0 ? 'right' : 'left';
+  goToFeature(newIndex, direction);
+}
+
+/* ── Init ── */
+document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelectorAll('.stack-layer')));
+startCardCycle('panel-0');
+
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+</script>
+
+<!-- ===================== COMPARISON SECTION ===================== -->
+<style>
+.comparison-section { background: #ffffff; padding: 100px 5%; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
+.comparison-inner { max-width: 860px; margin: 0 auto; }
+.comparison-header { text-align: center; margin-bottom: 56px; }
+.comp-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.comp-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 16px; }
+.comp-sub { font-size: 17px; color: #666; max-width: 520px; margin: 0 auto; line-height: 1.65; }
+.comp-table-wrap { overflow: visible; }
+.comp-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.col-feat { width: 46%; } .col-iskool { width: 27%; } .col-other { width: 27%; }
+.comp-table thead th { padding-bottom: 0; vertical-align: bottom; border: none; background: transparent; }
+.th-iskool-inner { background: #111; border-radius: 16px 16px 0 0; padding: 16px 12px 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.iskool-badge { background: var(--gold); color: #111; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 999px; white-space: nowrap; }
+.th-iskool-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+.th-other-inner { display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; gap: 6px; }
+.th-other-label { font-size: 14px; font-weight: 600; color: #999; }
+.comp-table tbody tr { border-bottom: 1px solid #f0f0f0; }
+.feat-cell { padding: 18px 0 18px 4px; font-size: 15px; color: #333; font-weight: 400; }
+.td-iskool { background: #111; text-align: center; padding: 16px 8px; border-bottom: 1px solid #1e1e22 !important; }
+.comp-table tbody tr:last-child .td-iskool { border-radius: 0 0 16px 16px; border-bottom: none !important; }
+.td-other { text-align: center; padding: 16px 8px; }
+.ico-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,196,122,0.15); border: 2px solid #00c47a; color: #00c47a; font-size: 13px; font-weight: 700; }
+.ico-cross { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: #ccc; font-size: 18px; font-weight: 300; }
+.comp-cta-row { display: flex; justify-content: center; margin-top: 52px; }
+.comp-cta { display: inline-flex; align-items: center; gap: 14px; background: var(--gold); color: #111; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; padding: 18px 28px 18px 36px; border-radius: 999px; text-decoration: none; box-shadow: 0 4px 24px rgba(245,200,66,0.3); transition: transform 0.2s, box-shadow 0.2s; }
+.comp-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(245,200,66,0.45); }
+.comp-cta-arrow { width: 36px; height: 36px; background: rgba(0,0,0,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.comp-mobile { display: none; }
+.comp-mobile-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e8e8e8; border-radius: 16px; overflow: hidden; }
+.comp-mobile-table thead th { padding: 18px 12px; background: #fff; border: none; }
+.comp-mobile-table thead tr { border-bottom: 1px solid #e8e8e8; }
+.mob-th-other { width: 50%; text-align: center; border-right: 1px solid #e8e8e8; }
+.mob-th-other-inner { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mob-other-label { font-size: 13px; font-weight: 600; color: #888; }
+.mob-th-iskool { width: 50%; text-align: center; }
+.mob-th-iskool-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mob-iskool-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #111; }
+.comp-mobile-table tbody tr { border-bottom: 1px solid #e8e8e8; }
+.comp-mobile-table tbody tr:last-child { border-bottom: none; }
+.mob-vals-row td { padding: 14px 12px; }
+.mob-val-other { text-align: center; background: #f5f5f5; border-right: 1px solid #e8e8e8; border-radius: 12px 0 0 12px; }
+.mob-val-iskool { text-align: center; background: rgba(0,196,122,0.08); border: 2px solid #00c47a; border-radius: 0 12px 12px 0; }
+@media (max-width: 640px) {
+  .comp-table-wrap { display: none; }
+  .comp-mobile { display: block; }
+  .comparison-section { padding: 72px 4%; }
+  .comp-heading { letter-spacing: -1px; }
+  .comp-cta { width: 100%; justify-content: center; font-size: 16px; }
+}
+</style>
+
+<section class="comparison-section">
+  <div class="comparison-inner">
+    <div class="comparison-header sr">
+      <div class="comp-eyebrow">COMPARISON</div>
+      <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
+      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: South African high school success.</p>
+    </div>
+    <div class="comp-table-wrap sr sr-d1">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th class="col-feat"></th>
+            <th class="col-iskool">
+              <div class="th-iskool-inner">
+                <span class="iskool-badge">Best for SA Schools</span>
+                <div class="th-iskool-name">
+                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                  iSkool
+                </div>
+              </div>
+            </th>
+            <th class="col-other"><div class="th-other-inner"><div class="th-other-label">Other LMS</div></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feat-cell">Built for SA CAPS curriculum</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">AI invigilation for quizzes</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Real-time learner analytics</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Automated report cards</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Syllabus coverage tracking</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Free pilot for SA schools</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- MOBILE TABLE -->
+    <div class="comp-mobile">
+      <table class="comp-mobile-table">
+        <thead>
+          <tr>
+            <th class="mob-th-other"><div class="mob-th-other-inner"><div class="mob-other-label">Other LMS</div></div></th>
+            <th class="mob-th-iskool"><div class="mob-th-iskool-inner"><svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg><span class="mob-iskool-label">iSkool</span></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for SA CAPS curriculum</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Automated report cards</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus coverage tracking</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot for SA schools</td></tr>
+          <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+  </div>
+</section>
+
+<style>
+.footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 6; }
+.footer-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+.footer-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: white; text-decoration: none; }
+.footer-logo svg { width: 48px; height: 48px; }
+.footer-tagline { font-size: 17px; color: #aaa; max-width: 420px; margin: 0 auto 48px; line-height: 1.5; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; margin-bottom: 60px; font-size: 15px; }
+.footer-links a { color: #ccc; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--teal); }
+.footer-copyright { color: #666; font-size: 13px; margin-bottom: 40px; }
+.footer-cta { display: inline-flex; align-items: center; gap: 12px; background: #f5c842; color: #111; font-weight: 700; font-size: 17px; padding: 18px 48px; border-radius: 9999px; text-decoration: none; box-shadow: 0 10px 30px rgba(245,200,66,0.35); transition: all 0.3s ease; }
+.footer-cta:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.45); }
+@media (max-width: 600px) { .footer { padding: 60px 5% 50px; } .footer-links { gap: 20px; font-size: 14px; } .footer-logo { font-size: 28px; } .footer-tagline { font-size: 15.5px; } }
+</style>
+
+<!-- ===================== FEATURES SECTION ===================== -->
+<section class="features-section">
+  <div class="features-header sr">
+    <span class="feat-eyebrow">World-class features</span>
+    <h2>Built for the <span>classroom</span></h2>
+    <p>The tools that separate iSkool from every other platform — purpose-built for South African high schools.</p>
+    <a href="features.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 28px;border-radius:50px;border:1px solid rgba(79,209,197,0.35);color:var(--teal);font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s;background:rgba(79,209,197,0.06);" onmouseover="this.style.background='rgba(79,209,197,0.12)';this.style.borderColor='rgba(79,209,197,0.6)';" onmouseout="this.style.background='rgba(79,209,197,0.06)';this.style.borderColor='rgba(79,209,197,0.35)';">Explore all 9 features in depth →</a>
+  </div>
+  <div class="feat-row" id="feat-inv">
+    <div class="feat-copy">
+      <div class="feat-copy-eyebrow teal"><span class="eyebrow-line"></span>AI Invigilator</div>
+      <h3>Every quiz watched<br>in <em class="teal">real time</em></h3>
+      <p>iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.</p>
+      <div class="feat-bullets">
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Detects tab-switching &amp; browser minimization</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Flags anomalies per learner, per question</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Full session audit log after each quiz closes</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>AI-verified &amp; tested on live learners</div>
+      </div>
+      <a href="features.html#invigilator" class="feat-cta teal">Explore AI Invigilator →</a>
+    </div>
+    <div class="feat-mockup-wrap">
+      <div class="mock-panel">
+        <div class="mock-topbar">
+          <div class="mock-dots"><div class="mock-dot" style="background:#f85149;"></div><div class="mock-dot" style="background:#f5c842;"></div><div class="mock-dot" style="background:#00c47a;"></div></div>
+          <span class="mock-topbar-title">AI Invigilator — Grade 12A — Live</span>
+        </div>
+        <div class="mock-body">
+          <div class="live-badge2"><div class="live-dot2"></div>Live session · 28 learners · updating every 3s</div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Amahle Dube</span><span class="inv-status2 ok">Q 9 / 15</span></div>
+          <div class="inv-row2 flagged"><div class="inv-dot orange"></div><span class="inv-name2">Sipho Nkosi</span><span class="inv-status2 warn">⚠ Tab switch</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Thandi Mokoena</span><span class="inv-status2 ok">Q 7 / 15</span></div>
+          <div class="inv-row2 exited"><div class="inv-dot red"></div><span class="inv-name2">Lerato Khumalo</span><span class="inv-status2 bad">⛔ Exit detected</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Bongani Zulu</span><span class="inv-status2 ok">Q 11 / 15</span></div>
+          <div class="inv-row2"><div class="inv-dot green"></div><span class="inv-name2">Nomsa Dlamini</span><span class="inv-status2 ok">Q 8 / 15</span></div>
+          <div class="inv-summary">
+            <div class="inv-stat"><div class="inv-stat-val teal">25</div><div class="inv-stat-label">Active</div></div>
+            <div class="inv-stat"><div class="inv-stat-val orange">2</div><div class="inv-stat-label">Flagged</div></div>
+            <div class="inv-stat"><div class="inv-stat-val red">1</div><div class="inv-stat-label">Exited</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feat-float"><div class="float-val teal">2</div><div class="float-label">Anomalies flagged</div></div>
+    </div>
+  </div>
+  <div class="feat-divider"></div>
+  <div class="feat-row reverse" id="feat-anal">
+    <div class="feat-copy">
+      <div class="feat-copy-eyebrow gold"><span class="eyebrow-line"></span>Deep Analytics</div>
+      <h3>See every learner's<br>story <em class="gold">at a glance</em></h3>
+      <p>Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.</p>
+      <div class="feat-bullets">
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Per-class pass rates with term-on-term trends</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Question-by-question difficulty breakdown</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>One-click PDF report cards per learner</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Admin dashboard for principals &amp; HODs</div>
+      </div>
+      <a href="features.html#analytics" class="feat-cta gold">Explore Deep Analytics →</a>
+    </div>
+    <div class="feat-mockup-wrap">
+      <div class="mock-panel">
+        <div class="mock-topbar">
+          <div class="mock-dots"><div class="mock-dot" style="background:#f85149;"></div><div class="mock-dot" style="background:#f5c842;"></div><div class="mock-dot" style="background:#00c47a;"></div></div>
+          <span class="mock-topbar-title">Analytics — Term 2 Overview</span>
+        </div>
+        <div class="mock-body">
+          <div class="analytics-grid">
+            <div class="anal-stat"><div class="anal-stat-val teal" id="analPct">0%</div><div class="anal-stat-sub">Pass Rate</div><div class="anal-stat-trend">↑ 10% vs Term 1</div></div>
+            <div class="anal-stat"><div class="anal-stat-val gold" id="analAvg">0</div><div class="anal-stat-sub">Class Average</div><div class="anal-stat-trend">↑ 6.1 pts</div></div>
+          </div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">Grade 12A</span><div class="bar-track"><div class="bar-fill teal" id="bar1"></div></div><span class="bar-val">94%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 11B</span><div class="bar-track"><div class="bar-fill gold" id="bar2"></div></div><span class="bar-val">78%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 10A</span><div class="bar-track"><div class="bar-fill soft" id="bar3"></div></div><span class="bar-val">62%</span></div>
+            <div class="bar-row"><span class="bar-label">Grade 12B</span><div class="bar-track"><div class="bar-fill orange" id="bar4"></div></div><span class="bar-val">71%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="feat-float" style="bottom:-22px;right:-18px;"><div class="float-val gold">94%</div><div class="float-label">Top class this term</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GET STARTED ===================== -->
+<style>
+.hiw-section { background: #ffffff; padding: 110px 5% 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 4; }
+.hiw-inner { max-width: 1160px; margin: 0 auto; }
+.hiw-header { text-align: center; margin-bottom: 64px; }
+.hiw-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.hiw-heading { font-family: 'Syne', sans-serif; font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; }
+.hiw-sub { font-size: 17px; color: #777; max-width: 520px; margin: 12px auto 0; line-height: 1.65; }
+.hiw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.hiw-card { background: #f0ede8; border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; }
+.hiw-mockup { flex: 1; min-height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 28px 24px 20px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.hiw-step-body { padding: 24px 28px 32px; }
+.hiw-step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--gold); color: #111; font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.hiw-step-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: #111; margin-bottom: 8px; line-height: 1.2; }
+.hiw-step-text { font-size: 14.5px; color: #555; line-height: 1.65; }
+.hiw-step-text strong { color: #111; }
+.fake-cursor { position: absolute; width: 18px; height: 18px; pointer-events: none; z-index: 100; transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1); }
+.fake-cursor svg { width: 18px; height: 18px; }
+.ui-panel { width: 100%; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; position: relative; }
+.ui-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #111; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.ui-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+.ui-field { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #111; background: white; margin-bottom: 12px; min-height: 38px; display: flex; align-items: center; overflow: hidden; }
+.ui-field.active { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
+.typed-text { display: inline; }
+.cursor-blink { display: inline-block; width: 2px; height: 14px; background: var(--teal); margin-left: 1px; animation: cur-blink 1s step-end infinite; vertical-align: middle; }
+@keyframes cur-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.gs-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.gs-tag { padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; opacity: 0; transform: scale(0.8); transition: opacity 0.3s, transform 0.3s; }
+.gs-tag.teal { background: rgba(79,209,197,0.12); color: #0d9488; }
+.gs-tag.gold { background: rgba(245,200,66,0.15); color: #92650a; }
+.gs-tag.blue { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.gs-tag.visible { opacity: 1; transform: scale(1); }
+.gs-prog-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.gs-prog-track { flex: 1; height: 6px; background: #eee; border-radius: 999px; overflow: hidden; }
+.gs-prog-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--teal2)); border-radius: 999px; width: 0%; transition: width 0.4s ease; }
+.gs-prog-pct { font-size: 11px; color: #888; }
+.gs-done { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; background: #d1fae5; color: #065f46; }
+.gs-done.visible { opacity: 1; }
+.gs-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.gs-stat-box { background: #f8f9fc; border-radius: 10px; padding: 10px 12px; text-align: center; }
+.gs-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.gs-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+.gs-action-btn { width: 100%; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: center; font-family: 'DM Sans', sans-serif; opacity: 0.3; transition: opacity 0.4s, background 0.4s; color: #111; background: var(--gold); margin-top: 10px; }
+.gs-action-btn.ready { opacity: 1; }
+.gs-live-pulse { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: gs-pg 1.5s ease-in-out infinite; }
+.gs-live-pill { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 0.4s; margin-top: 10px; }
+.gs-live-pill.visible { opacity: 1; }
+@keyframes gs-pg { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+.gs-alert-row { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.gs-alert-item { display: flex; align-items: center; gap: 8px; background: #f0fdf8; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; color: #333; opacity: 0; transform: translateX(-8px); transition: opacity 0.35s, transform 0.35s; border-left: 3px solid var(--teal); }
+.gs-alert-item.visible { opacity: 1; transform: translateX(0); }
+.gs-code-block { background: #1a1a1a; border-radius: 10px; padding: 12px 14px; font-family: 'Courier New', monospace; font-size: 12px; color: #e0e0e0; margin-bottom: 10px; line-height: 1.6; }
+.gs-code-line { opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; }
+.gs-code-line.visible { opacity: 1; transform: translateY(0); }
+.gs-code-kw { color: #4fd1c5; }
+.gs-code-str { color: #f5c842; }
+.gs-copy-btn { display: flex; align-items: center; justify-content: space-between; background: #f0f0f0; border-radius: 8px; padding: 7px 12px; font-size: 11.5px; color: #555; margin-bottom: 8px; opacity: 0; transition: opacity 0.3s; }
+.gs-copy-btn.visible { opacity: 1; }
+.gs-copy-action { font-size: 10px; font-weight: 700; color: var(--teal); }
+.gs-domain-row { display: flex; align-items: center; gap: 8px; background: #f8f9fc; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 12.5px; transition: opacity 0.4s; }
+.gs-domain-status { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.gs-status-active { background: #d1fae5; color: #065f46; }
+.gs-status-pending { background: #fef9e6; color: #92650a; }
+@media (max-width: 900px) { .hiw-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } .hiw-mockup { min-height: 260px; } }
+@media (max-width: 600px) { .hiw-section { padding: 72px 5% 80px; } .hiw-heading { letter-spacing: -1px; } .hiw-step-body { padding: 20px 22px 28px; } }
+</style>
+
+<section class="hiw-section">
+  <div class="hiw-inner">
+    <div class="hiw-header sr">
+      <div class="hiw-eyebrow">GET STARTED</div>
+      <h2 class="hiw-heading">Up and Running in Three Steps</h2>
+      <p class="hiw-sub">From application to your first live class — iSkool gets your school set up fast, with zero technical headaches.</p>
+    </div>
+    <div class="hiw-grid">
+
+      <!-- CARD 1: Apply for Pilot -->
+      <div class="hiw-card sr">
+        <div class="hiw-mockup" id="hiw-mockup-1">
+          <div class="fake-cursor" id="cur-1" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="apply-ui">
+            <div class="ui-title">📋 Pilot Application</div>
+            <div class="ui-label">School Name</div>
+            <div class="ui-field active" id="apply-school"><span class="typed-text" id="apply-school-text"></span><span class="cursor-blink" id="apply-blink"></span></div>
+            <div class="ui-label">Province</div>
+            <div class="ui-field" id="apply-province-field"><span class="typed-text" id="apply-province-text"></span></div>
+            <div class="ui-label">No. of Learners</div>
+            <div class="ui-field" id="apply-learners-field"><span class="typed-text" id="apply-learners-text"></span></div>
+            <div class="ui-label">Interested In</div>
+            <div class="gs-tag-row" id="apply-tags">
+              <span class="gs-tag teal" id="atag-q">Quizzes</span>
+              <span class="gs-tag teal" id="atag-a">Analytics</span>
+              <span class="gs-tag gold" id="atag-r">Reports</span>
+              <span class="gs-tag blue" id="atag-s">Syllabus</span>
+            </div>
+            <div class="gs-prog-row"><div class="gs-prog-track"><div class="gs-prog-fill" id="apply-prog"></div></div><span class="gs-prog-pct" id="apply-pct">0%</span></div>
+            <div class="gs-action-btn" id="apply-btn" style="margin-top:10px;">Submit Application</div>
+            <div class="gs-done" id="apply-done">🎉 Application Submitted!</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">1</div>
+          <div class="hiw-step-title">Apply for the Free Pilot</div>
+          <p class="hiw-step-text">Fill in a quick application — school name, province, and learner count. <strong>We review every application within 48 hours</strong> and reach out to confirm your pilot slot.</p>
+        </div>
+      </div>
+
+      <!-- CARD 2: Domain & School Setup -->
+      <div class="hiw-card sr sr-d1">
+        <div class="hiw-mockup" id="hiw-mockup-2">
+          <div class="fake-cursor" id="cur-2" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="setup-ui-gs">
+            <div class="ui-title">🌐 School Setup</div>
+            <div class="ui-label">Your iSkool Domain</div>
+            <div class="gs-domain-row" id="gs-domain-row" style="opacity:0;">
+              <span style="font-size:16px;">🔗</span>
+              <span style="font-weight:700;color:#111;flex:1;">landulwazi.iskool.co.za</span>
+              <span class="gs-domain-status gs-status-active" id="gs-domain-status">● Live</span>
+            </div>
+            <div class="ui-label">Grades Configured</div>
+            <div class="gs-tag-row"><span class="gs-tag teal" id="sg-10">Grade 10</span><span class="gs-tag teal" id="sg-11">Grade 11</span><span class="gs-tag teal" id="sg-12">Grade 12</span></div>
+            <div class="ui-label">Subjects Loaded</div>
+            <div class="gs-tag-row"><span class="gs-tag gold" id="ss-m">Maths</span><span class="gs-tag gold" id="ss-s">Science</span><span class="gs-tag gold" id="ss-e">English</span><span class="gs-tag blue" id="ss-l">Life Sciences</span></div>
+            <div class="gs-stat-row" id="gs-stats" style="opacity:0;transition:opacity 0.5s;">
+              <div class="gs-stat-box"><div class="gs-stat-val" style="color:var(--teal);" id="st-teachers">0</div><div class="gs-stat-label">Teachers Added</div></div>
+              <div class="gs-stat-box"><div class="gs-stat-val" style="color:var(--gold);" id="st-classes">0</div><div class="gs-stat-label">Classes Created</div></div>
+            </div>
+            <div class="gs-done" id="setup-done-gs">✓ School is Ready</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">2</div>
+          <div class="hiw-step-title">Get Your Domain &amp; School Set Up</div>
+          <p class="hiw-step-text">We configure your custom iSkool domain, load your grades and subjects, and <strong>set up every class automatically</strong>. No IT department needed — we handle everything.</p>
+        </div>
+      </div>
+
+      <!-- CARD 3: Share Codes & Go Live -->
+      <div class="hiw-card sr sr-d2">
+        <div class="hiw-mockup" id="hiw-mockup-3">
+          <div class="fake-cursor" id="cur-3" style="left:50%;top:50%;"><svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2L8.5 16L10.5 10.5L16 8.5L2 2Z" fill="#111" stroke="white" stroke-width="1.2"/></svg></div>
+          <div class="ui-panel" id="golive-ui">
+            <div class="ui-title">🚀 Go Live</div>
+            <div class="ui-label">Access Codes Generated</div>
+            <div class="gs-code-block" id="gs-code-block">
+              <div class="gs-code-line" id="cl1"><span class="gs-code-kw">Grade 12A</span> — <span class="gs-code-str">GR12A-LAND-2025</span></div>
+              <div class="gs-code-line" id="cl2"><span class="gs-code-kw">Grade 11B</span> — <span class="gs-code-str">GR11B-LAND-2025</span></div>
+              <div class="gs-code-line" id="cl3"><span class="gs-code-kw">Grade 10A</span> — <span class="gs-code-str">GR10A-LAND-2025</span></div>
+            </div>
+            <div class="gs-copy-btn" id="gs-copy-btn"><span>📋 Copy all codes to share</span><span class="gs-copy-action">COPY</span></div>
+            <div class="ui-label" style="margin-top:2px;">Learners Joining</div>
+            <div class="gs-alert-row">
+              <div class="gs-alert-item" id="jf1">🎓 Amahle Dube joined <strong>Grade 12A</strong></div>
+              <div class="gs-alert-item" id="jf2">🎓 Sipho Nkosi joined <strong>Grade 12A</strong></div>
+              <div class="gs-alert-item" id="jf3">🎓 Thandi Mokoena joined <strong>Grade 11B</strong></div>
+            </div>
+            <div class="gs-live-pill" id="gs-live-count"><div class="gs-live-pulse"></div><span id="gs-live-num">0</span> learners online now</div>
+          </div>
+        </div>
+        <div class="hiw-step-body">
+          <div class="hiw-step-num">3</div>
+          <div class="hiw-step-title">Share Access Codes &amp; Go Live</div>
+          <p class="hiw-step-text">Share unique class access codes with your learners. They sign in instantly — <strong>no email required, no app download</strong>. Your school is live and learning from day one.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+/* ── Cursor helper ── */
+function gsCursor(curEl, targetEl, offX, offY) {
+  const mock = curEl.parentElement;
+  const mR = mock.getBoundingClientRect();
+  const tR = targetEl.getBoundingClientRect();
+  curEl.style.left = (tR.left - mR.left + (offX !== undefined ? offX : tR.width / 2)) + 'px';
+  curEl.style.top  = (tR.top  - mR.top  + (offY !== undefined ? offY : tR.height / 2)) + 'px';
+}
+function gsType(el, text, speed, cb) {
+  el.textContent = '';
+  let i = 0;
+  const t = setInterval(() => { el.textContent += text[i++]; if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 280); } }, speed);
+}
+
+/* ── Card 1: Apply ── */
+function gsRunApply() {
+  const cur = document.getElementById('cur-1');
+  const sF = document.getElementById('apply-school'); const sT = document.getElementById('apply-school-text'); const bl = document.getElementById('apply-blink');
+  const pF = document.getElementById('apply-province-field'); const pT = document.getElementById('apply-province-text');
+  const lF = document.getElementById('apply-learners-field'); const lT = document.getElementById('apply-learners-text');
+  const tags = ['atag-q','atag-a','atag-r','atag-s'];
+  const prog = document.getElementById('apply-prog'); const pct = document.getElementById('apply-pct');
+  const btn = document.getElementById('apply-btn'); const done = document.getElementById('apply-done');
+  sT.textContent=''; pT.textContent=''; lT.textContent='';
+  bl.style.display='inline-block'; sF.classList.add('active');
+  tags.forEach(id => document.getElementById(id).classList.remove('visible'));
+  prog.style.width='0%'; pct.textContent='0%';
+  btn.classList.remove('ready'); btn.style.opacity='0.3'; done.classList.remove('visible');
+  setTimeout(() => gsCursor(cur, sF, 10, 18), 200);
+  setTimeout(() => gsType(sT, 'Landulwazi Comprehensive School', 52, () => {
+    bl.style.display='none'; sF.classList.remove('active');
+    prog.style.width='25%'; pct.textContent='25%';
+    setTimeout(() => { pF.classList.add('active'); gsCursor(cur, pF, 10, 18);
+      setTimeout(() => gsType(pT, 'Gauteng', 70, () => {
+        pF.classList.remove('active'); prog.style.width='50%'; pct.textContent='50%';
+        setTimeout(() => { lF.classList.add('active'); gsCursor(cur, lF, 10, 18);
+          setTimeout(() => gsType(lT, '420', 90, () => {
+            lF.classList.remove('active'); prog.style.width='70%'; pct.textContent='70%';
+            setTimeout(() => { document.getElementById('atag-q').classList.add('visible'); prog.style.width='78%'; pct.textContent='78%'; }, 300);
+            setTimeout(() => { document.getElementById('atag-a').classList.add('visible'); prog.style.width='85%'; pct.textContent='85%'; }, 600);
+            setTimeout(() => { document.getElementById('atag-r').classList.add('visible'); prog.style.width='92%'; pct.textContent='92%'; }, 900);
+            setTimeout(() => { document.getElementById('atag-s').classList.add('visible'); prog.style.width='100%'; pct.textContent='100%'; }, 1200);
+            setTimeout(() => { btn.classList.add('ready'); btn.style.opacity='1'; gsCursor(cur, btn, btn.offsetWidth/2, 18); }, 1700);
+            setTimeout(() => { btn.style.opacity='0'; done.classList.add('visible'); setTimeout(gsRunApply, 3200); }, 2500);
+          }), 300);
+        }, 400);
+      }), 300);
+    }, 400);
+  }), 500);
+}
+
+/* ── Card 2: Setup ── */
+function gsRunSetup() {
+  const cur = document.getElementById('cur-2');
+  const domRow = document.getElementById('gs-domain-row'); const domStatus = document.getElementById('gs-domain-status');
+  const grades = ['sg-10','sg-11','sg-12']; const subjects = ['ss-m','ss-s','ss-e','ss-l'];
+  const stats = document.getElementById('gs-stats');
+  const tEl = document.getElementById('st-teachers'); const cEl = document.getElementById('st-classes');
+  const done = document.getElementById('setup-done-gs');
+  domRow.style.opacity='0'; domStatus.className='gs-domain-status gs-status-pending'; domStatus.textContent='⏳ Setting up';
+  grades.forEach(id => document.getElementById(id).classList.remove('visible'));
+  subjects.forEach(id => document.getElementById(id).classList.remove('visible'));
+  stats.style.opacity='0'; tEl.textContent='0'; cEl.textContent='0'; done.classList.remove('visible');
+  setTimeout(() => { gsCursor(cur, domRow, 80, 14); domRow.style.opacity='1'; }, 500);
+  setTimeout(() => { domStatus.className='gs-domain-status gs-status-active'; domStatus.textContent='● Live'; }, 1400);
+  setTimeout(() => { document.getElementById('sg-10').classList.add('visible'); gsCursor(cur, document.getElementById('sg-10'), 20, 10); }, 1900);
+  setTimeout(() => document.getElementById('sg-11').classList.add('visible'), 2200);
+  setTimeout(() => document.getElementById('sg-12').classList.add('visible'), 2500);
+  setTimeout(() => document.getElementById('ss-m').classList.add('visible'), 3000);
+  setTimeout(() => document.getElementById('ss-s').classList.add('visible'), 3300);
+  setTimeout(() => document.getElementById('ss-e').classList.add('visible'), 3600);
+  setTimeout(() => document.getElementById('ss-l').classList.add('visible'), 3900);
+  setTimeout(() => {
+    stats.style.opacity='1'; gsCursor(cur, stats, 60, 20);
+    let t=0,c=0;
+    const ti=setInterval(()=>{t++;tEl.textContent=t;if(t>=12)clearInterval(ti);},80);
+    const ci=setInterval(()=>{c++;cEl.textContent=c;if(c>=9)clearInterval(ci);},110);
+  }, 4400);
+  setTimeout(() => { done.classList.add('visible'); setTimeout(gsRunSetup, 3500); }, 5800);
+}
+
+/* ── Card 3: Go Live ── */
+function gsRunGoLive() {
+  const cur = document.getElementById('cur-3');
+  const cb = document.getElementById('gs-code-block');
+  const lines = ['cl1','cl2','cl3']; const cpBtn = document.getElementById('gs-copy-btn');
+  const joins = ['jf1','jf2','jf3']; const liveC = document.getElementById('gs-live-count'); const liveN = document.getElementById('gs-live-num');
+  lines.forEach(id => document.getElementById(id).classList.remove('visible'));
+  cpBtn.classList.remove('visible'); joins.forEach(id => document.getElementById(id).classList.remove('visible'));
+  liveC.classList.remove('visible'); liveN.textContent='0';
+  setTimeout(() => { gsCursor(cur, cb, 60, 12); document.getElementById('cl1').classList.add('visible'); }, 500);
+  setTimeout(() => document.getElementById('cl2').classList.add('visible'), 900);
+  setTimeout(() => document.getElementById('cl3').classList.add('visible'), 1300);
+  setTimeout(() => { cpBtn.classList.add('visible'); gsCursor(cur, cpBtn, cpBtn.offsetWidth-40, 12); }, 1900);
+  setTimeout(() => { document.getElementById('jf1').classList.add('visible'); liveC.classList.add('visible'); }, 2700);
+  setTimeout(() => { document.getElementById('jf2').classList.add('visible'); let n=1; const ni=setInterval(()=>{n++;liveN.textContent=n;if(n>=32)clearInterval(ni);},90); }, 3200);
+  setTimeout(() => { document.getElementById('jf3').classList.add('visible'); gsCursor(cur, liveC, 60, 12); }, 3700);
+  setTimeout(gsRunGoLive, 4800);
+}
+
+setTimeout(gsRunApply,  400);
+setTimeout(gsRunSetup,  900);
+setTimeout(gsRunGoLive, 1400);
+</script>
+
+<style>
+.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
+.faq-inner { max-width: 720px; margin: 0 auto; }
+.faq-header { text-align: center; margin-bottom: 60px; }
+.faq-small { color: #f5c842; font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+.faq-title { font-family: 'Syne', sans-serif; font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; color: #111; }
+.faq-accordion { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+.faq-item { border-bottom: 1px solid #eee; }
+.faq-item:last-child { border-bottom: none; }
+.faq-question { width: 100%; padding: 28px 32px; background: none; border: none; text-align: left; font-size: 17px; font-weight: 600; color: #111; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s ease; }
+.faq-question:hover { background: #fdfaf5; }
+.faq-answer { padding: 0 32px 28px; color: #555; line-height: 1.7; font-size: 15.5px; display: none; }
+.faq-answer.open { display: block; }
+.faq-icon { width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #666; flex-shrink: 0; transition: all 0.3s ease; }
+.faq-item.open .faq-icon { background: #f5c842; color: #111; transform: rotate(45deg); }
+.faq-cta { margin-top: 60px; text-align: center; }
+.faq-button { display: inline-flex; align-items: center; gap: 12px; background: #f5c842; color: #111; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; padding: 18px 42px; border-radius: 9999px; text-decoration: none; box-shadow: 0 10px 30px rgba(245,200,66,0.3); transition: all 0.3s ease; }
+.faq-button:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.4); }
+</style>
+
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-header sr"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
+    <div class="faq-accordion sr sr-d1" id="faqAccordion">
+      <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.</div></div>
+      <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.</div></div>
+      <div class="faq-item"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
+      <div class="faq-item"><button class="faq-question">Can parents access learner progress?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.</div></div>
+      <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.</div></div>
+      <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.</div></div>
+    </div>
+    <div class="faq-cta sr sr-d2"><button class="faq-button" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Apply for Free Pilot →</button></div>
+  </div>
+</section>
+
+<script>
+
+/* ── FAQ ── */
+document.querySelectorAll('.faq-question').forEach(button => {
+  button.addEventListener('click', () => {
+    const item = button.parentElement;
+    const answer = item.querySelector('.faq-answer');
+    const icon = button.querySelector('.faq-icon');
+    document.querySelectorAll('.faq-item').forEach(other => {
+      if (other !== item) { other.classList.remove('open'); other.querySelector('.faq-answer').classList.remove('open'); other.querySelector('.faq-icon').textContent = '+'; }
+    });
+    const isOpen = item.classList.toggle('open');
+    answer.classList.toggle('open', isOpen);
+    icon.textContent = isOpen ? '×' : '+';
+  });
+});
+
+/* ── Scroll reveal for features section ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('visible');
+    if (entry.target.id === 'feat-anal') {
+      setTimeout(() => {
+        document.getElementById('bar1').style.width = '94%';
+        document.getElementById('bar2').style.width = '78%';
+        document.getElementById('bar3').style.width = '62%';
+        document.getElementById('bar4').style.width = '71%';
+        countUp('analPct', 0, 78, 1300, '%');
+        countUp('analAvg', 0, 74.2, 1300, '', 1);
+      }, 250);
+    }
+  });
+}, { threshold: 0.18 });
+document.querySelectorAll('.feat-row').forEach(el => observer.observe(el));
+function countUp(id, from, to, dur, suffix, decimals) {
+  decimals = decimals || 0; suffix = suffix || '';
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now();
+  (function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * ease).toFixed(decimals) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  })(performance.now());
+}
+
+/* ── Global scroll-reveal observer ── */
+const srObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('sr-visible');
+      srObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
+</script>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#4fd1c5" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/></g></svg>
+      iSkool
+    </a>
+    <p class="footer-tagline">The only LMS that actually works for South African high schools.</p>
+    <div class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="terms-of-service.html">Terms of Service</a><a href="contact.html">Contact</a><a href="contact.html">Support</a></div>
+    <div class="footer-copyright">© 2026 iSkool. All rights reserved.</div>
+    
+  </div>
+</footer>
+
+
+<!-- ===================== DEMO MODAL ===================== -->
+<style>
+.demo-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.demo-modal-overlay.open {
+  display: flex;
+  animation: dmFadeIn 0.22s ease;
+}
+@keyframes dmFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.demo-modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 36px 32px 32px;
+  max-width: 560px;
+  width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  position: relative;
+  animation: dmSlideUp 0.28s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes dmSlideUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.demo-modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+  line-height: 1;
+}
+.demo-modal-close:hover { background: #e0e0e0; }
+.demo-modal-eyebrow {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #4fd1c5; margin-bottom: 10px;
+}
+.demo-modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800; line-height: 1.15;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 6px;
+}
+.demo-modal-sub {
+  font-size: 14.5px; color: #777;
+  margin-bottom: 28px; line-height: 1.55;
+}
+.demo-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.demo-card {
+  border: 2px solid #eee;
+  border-radius: 16px;
+  padding: 20px 18px;
+  text-decoration: none;
+  color: #111;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  cursor: pointer;
+  background: #fff;
+}
+.demo-card:hover:not(.demo-card-locked) {
+  border-color: #4fd1c5;
+  box-shadow: 0 8px 28px rgba(79,209,197,0.18);
+  transform: translateY(-3px);
+}
+.demo-card-locked {
+  opacity: 0.62;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+.demo-card-locked:hover { transform: none; box-shadow: none; border-color: #eee; }
+.demo-card-icon {
+  font-size: 26px; line-height: 1;
+}
+.demo-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  color: #111; line-height: 1.2;
+}
+.demo-card-desc {
+  font-size: 12.5px; color: #888; line-height: 1.5;
+}
+.demo-card-action {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 700;
+  color: #4fd1c5; margin-top: 4px;
+}
+.demo-card-locked .demo-card-action {
+  color: #bbb;
+}
+.demo-lock-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10.5px; font-weight: 700;
+  color: #999;
+  letter-spacing: 0.3px;
+}
+.demo-lock-icon {
+  font-size: 13px;
+}
+.demo-card-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+.demo-card-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #111;
+}
+.demo-card-locked:hover .demo-card-tooltip { display: block; }
+
+@media (max-width: 480px) {
+  .demo-modal { padding: 28px 20px 24px; border-radius: 20px; }
+  .demo-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .demo-card { padding: 16px 14px; }
+  .demo-card-icon { font-size: 22px; }
+  .demo-card-name { font-size: 14px; }
+}
+</style>
+
+<!-- Modal HTML -->
+<div class="demo-modal-overlay" id="demoModalOverlay" onclick="closeDemoModalOutside(event)">
+  <div class="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demoModalTitle">
+    <button class="demo-modal-close" onclick="closeDemoModal()" aria-label="Close">&times;</button>
+    <div class="demo-modal-eyebrow">Live Demo</div>
+    <div class="demo-modal-title" id="demoModalTitle">Which dashboard would you like to explore?</div>
+    <p class="demo-modal-sub">Each role has its own experience. Pick yours and see iSkool in action.</p>
+    <div class="demo-cards">
+
+      <!-- Learner — LIVE -->
+      <a href="learner_demo.html" class="demo-card">
+        <div class="demo-card-icon">🎓</div>
+        <div class="demo-card-name">Learner</div>
+        <div class="demo-card-desc">Quizzes, assignments, results &amp; resources</div>
+        <div class="demo-card-action">Explore &rarr;</div>
+      </a>
+
+      <!-- Teacher — LIVE -->
+      <a href="teacher_demo.html" class="demo-card">
+        <div class="demo-card-icon">🧑‍🏫</div>
+        <div class="demo-card-name">Teacher</div>
+        <div class="demo-card-desc">Set assessments, track class performance</div>
+        <div class="demo-card-action">Explore &rarr;</div>
+      </a>
+
+      <!-- Admin — LOCKED -->
+      <div class="demo-card demo-card-locked">
+        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
+        <div class="demo-card-icon">🏫</div>
+        <div class="demo-card-name">Admin</div>
+        <div class="demo-card-desc">School-wide oversight &amp; management</div>
+        <div class="demo-card-action">Coming Soon</div>
+        <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
+      </div>
+
+      <!-- Principal — LOCKED -->
+      <div class="demo-card demo-card-locked">
+        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
+        <div class="demo-card-icon">👔</div>
+        <div class="demo-card-name">Principal</div>
+        <div class="demo-card-desc">Analytics, reports &amp; school performance</div>
+        <div class="demo-card-action">Coming Soon</div>
+        <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function openDemoModal() {
+  const overlay = document.getElementById('demoModalOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDemoModal() {
+  const overlay = document.getElementById('demoModalOverlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeDemoModalOutside(e) {
+  if (e.target === document.getElementById('demoModalOverlay')) closeDemoModal();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDemoModal();
+});
+</script>
+
+
+<!-- ===================== PILOT APPLICATION MODAL ===================== -->
+<style>
+/* Overlay */
+.pf-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.pf-overlay.open {
+  display: flex;
+  animation: pfFadeIn 0.22s ease;
+}
+@keyframes pfFadeIn { from{opacity:0} to{opacity:1} }
+
+/* Modal box */
+.pf-modal {
+  background: #fff;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.35);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: pfSlideUp 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+.pf-modal::-webkit-scrollbar { width: 0; }
+@keyframes pfSlideUp { from{opacity:0;transform:translateY(32px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+/* Header */
+.pf-header {
+  padding: 28px 32px 0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  border-radius: 28px 28px 0 0;
+}
+.pf-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.pf-close:hover { background: #e0e0e0; }
+
+/* Step indicator */
+.pf-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+}
+.pf-step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #aaa;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+  font-family: 'Syne', sans-serif;
+}
+.pf-step-dot.active { background: var(--gold); color: #111; }
+.pf-step-dot.done { background: #00c47a; color: #fff; }
+.pf-step-line {
+  flex: 1;
+  height: 2px;
+  background: #eee;
+  transition: background 0.4s;
+}
+.pf-step-line.done { background: #00c47a; }
+.pf-step-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 6px;
+}
+.pf-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 4px;
+}
+.pf-sub {
+  font-size: 14px; color: #888;
+  margin-bottom: 20px; line-height: 1.5;
+}
+.pf-divider { height: 1px; background: #f0f0f0; margin: 0 -32px; }
+
+/* Body */
+.pf-body { padding: 24px 32px 28px; }
+
+/* Progress bar */
+.pf-progress-track {
+  height: 4px; background: #eee; border-radius: 999px;
+  overflow: hidden; margin-bottom: 28px;
+}
+.pf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal2));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Form fields */
+.pf-field { margin-bottom: 18px; }
+.pf-label {
+  display: block;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  color: #555; margin-bottom: 7px;
+}
+.pf-input, .pf-select, .pf-textarea {
+  width: 100%;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #111;
+  background: white;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.pf-input:focus, .pf-select:focus, .pf-textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+}
+.pf-input.error, .pf-select.error { border-color: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,0.12); }
+.pf-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+.pf-textarea { resize: none; min-height: 90px; line-height: 1.6; }
+.pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* Feature pills (multi-select) */
+.pf-pills { display: flex; flex-wrap: wrap; gap: 9px; }
+.pf-pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e5e5;
+  background: white;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+.pf-pill:hover { border-color: var(--teal); color: var(--teal); }
+.pf-pill.selected {
+  background: rgba(79,209,197,0.12);
+  border-color: var(--teal);
+  color: #0d9488;
+}
+
+/* Error message */
+.pf-error-msg {
+  font-size: 12px; color: #f85149;
+  margin-top: 5px; display: none;
+}
+.pf-error-msg.show { display: block; }
+
+/* Footer buttons */
+.pf-footer {
+  padding: 0 32px 28px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pf-btn-back {
+  padding: 13px 24px;
+  border-radius: 999px;
+  border: 1.5px solid #ddd;
+  background: white;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.pf-btn-back:hover { border-color: #bbb; color: #111; }
+.pf-btn-next {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.pf-btn-next:hover { background: #333; transform: translateY(-1px); }
+.pf-btn-submit {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  background: var(--gold);
+  color: #111;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+  box-shadow: 0 4px 20px rgba(245,200,66,0.35);
+}
+.pf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,200,66,0.45); }
+
+/* Success screen */
+.pf-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 32px 52px;
+}
+.pf-success.show { display: flex; }
+.pf-success-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin-bottom: 24px;
+  animation: popIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.pf-success h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -0.5px; color: #111;
+  margin-bottom: 12px;
+}
+.pf-success p {
+  font-size: 15.5px; color: #666;
+  line-height: 1.7; max-width: 380px;
+  margin-bottom: 8px;
+}
+.pf-success-ref {
+  display: inline-block;
+  background: #f8f9fc;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 13px; color: #888;
+  margin: 16px 0 28px;
+  font-family: 'DM Sans', sans-serif;
+}
+.pf-success-ref strong { color: #111; font-size: 15px; }
+.pf-success-close {
+  padding: 14px 36px;
+  border-radius: 999px;
+  border: none;
+  background: #111;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pf-success-close:hover { background: #333; }
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .pf-modal { border-radius: 20px 20px 0 0; max-height: 95vh; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; border-radius: 20px 20px 0 0; }
+  .pf-overlay { align-items: flex-end; padding: 0; }
+  .pf-header { padding: 22px 20px 0; }
+  .pf-body { padding: 20px 20px 24px; }
+  .pf-footer { padding: 0 20px 24px; }
+  .pf-row { grid-template-columns: 1fr; gap: 0; }
+  .pf-title { font-size: 20px; }
+  .pf-success { padding: 36px 20px 44px; }
+}
+</style>
+
+<!-- PILOT FORM OVERLAY -->
+<div class="pf-overlay" id="pfOverlay" onclick="pfCloseOutside(event)">
+  <div class="pf-modal" id="pfModal">
+
+    <!-- CLOSE -->
+    <button class="pf-close" onclick="closePilotForm()" aria-label="Close">&times;</button>
+
+    <!-- HEADER (sticky) -->
+    <div class="pf-header" id="pfHeader">
+      <!-- Step dots -->
+      <div class="pf-steps">
+        <div class="pf-step-dot active" id="pfdot-1">1</div>
+        <div class="pf-step-line" id="pfline-1"></div>
+        <div class="pf-step-dot" id="pfdot-2">2</div>
+        <div class="pf-step-line" id="pfline-2"></div>
+        <div class="pf-step-dot" id="pfdot-3">3</div>
+      </div>
+      <div class="pf-step-label" id="pfStepLabel">Step 1 of 3</div>
+      <div class="pf-title" id="pfStepTitle">About Your School</div>
+      <p class="pf-sub" id="pfStepSub">Tell us a little about your school so we can prepare your pilot.</p>
+      <div class="pf-divider"></div>
+    </div>
+
+    <!-- SUCCESS SCREEN (hidden until submit) -->
+    <div class="pf-success" id="pfSuccess">
+      <div class="pf-success-icon">🎉</div>
+      <h3>Application Submitted!</h3>
+      <p>Thank you for applying. Our team will review your application and get back to you within <strong>48 hours</strong>.</p>
+      <div class="pf-success-ref">Reference: <strong id="pfRefNum">ISK/PIL/001</strong></div>
+      <p style="font-size:13.5px;color:#aaa;">We'll reach out to <strong id="pfEmailRef" style="color:#555;"></strong> to confirm your pilot slot.</p>
+      <button class="pf-success-close" style="margin-top:28px;" onclick="closePilotForm()">Done — Close</button>
+    </div>
+
+    <!-- STEP 1: About the School -->
+    <div class="pf-body" id="pfStep1">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:33%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">School Name *</label>
+        <input class="pf-input" id="pf-school" type="text" placeholder="e.g. Greenwood High School" autocomplete="organization">
+        <div class="pf-error-msg" id="err-school">Please enter your school name</div>
+      </div>
+
+      <div class="pf-row">
+        <div class="pf-field">
+          <label class="pf-label">Province *</label>
+          <select class="pf-select" id="pf-province">
+            <option value="">Select province</option>
+            <option>Gauteng</option>
+            <option>Western Cape</option>
+            <option>KwaZulu-Natal</option>
+            <option>Eastern Cape</option>
+            <option>Limpopo</option>
+            <option>Mpumalanga</option>
+            <option>North West</option>
+            <option>Free State</option>
+            <option>Northern Cape</option>
+          </select>
+          <div class="pf-error-msg" id="err-province">Please select a province</div>
+        </div>
+        <div class="pf-field">
+          <label class="pf-label">School Type *</label>
+          <select class="pf-select" id="pf-type">
+            <option value="">Select type</option>
+            <option>Public School</option>
+            <option>Private School</option>
+            <option>Independent School</option>
+            <option>Special Needs School</option>
+          </select>
+          <div class="pf-error-msg" id="err-type">Please select a school type</div>
+        </div>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Number of Learners *</label>
+        <select class="pf-select" id="pf-learners">
+          <option value="">Select range</option>
+          <option>Under 200</option>
+          <option>200 – 500</option>
+          <option>500 – 1 000</option>
+          <option>1 000 – 2 000</option>
+          <option>More than 2 000</option>
+        </select>
+        <div class="pf-error-msg" id="err-learners">Please select a learner range</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Your Details -->
+    <div class="pf-body" id="pfStep2" style="display:none;">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:66%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">Your Full Name *</label>
+        <input class="pf-input" id="pf-name" type="text" placeholder="e.g. Thabo Nkosi" autocomplete="name">
+        <div class="pf-error-msg" id="err-name">Please enter your full name</div>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Your Role *</label>
+        <select class="pf-select" id="pf-role">
+          <option value="">Select your role</option>
+          <option>Principal</option>
+          <option>Deputy Principal</option>
+          <option>Head of Department (HOD)</option>
+          <option>Teacher</option>
+          <option>IT Administrator</option>
+          <option>School Administrator</option>
+        </select>
+        <div class="pf-error-msg" id="err-role">Please select your role</div>
+      </div>
+
+      <div class="pf-row">
+        <div class="pf-field">
+          <label class="pf-label">Email Address *</label>
+          <input class="pf-input" id="pf-email" type="email" placeholder="you@school.co.za" autocomplete="email">
+          <div class="pf-error-msg" id="err-email">Please enter a valid email</div>
+        </div>
+        <div class="pf-field">
+          <label class="pf-label">Phone Number *</label>
+          <input class="pf-input" id="pf-phone" type="tel" placeholder="e.g. 071 234 5678" autocomplete="tel">
+          <div class="pf-error-msg" id="err-phone">Please enter a phone number</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: What You're Looking For -->
+    <div class="pf-body" id="pfStep3" style="display:none;">
+      <div class="pf-progress-track"><div class="pf-progress-fill" style="width:100%"></div></div>
+
+      <div class="pf-field">
+        <label class="pf-label">Features You're Interested In</label>
+        <div class="pf-pills" id="pfPills">
+          <div class="pf-pill selected" data-val="Quizzes">📝 Quizzes</div>
+          <div class="pf-pill selected" data-val="AI Invigilator">🛡️ AI Invigilator</div>
+          <div class="pf-pill" data-val="Analytics">📈 Analytics</div>
+          <div class="pf-pill" data-val="Gradebook">📒 Gradebook</div>
+          <div class="pf-pill" data-val="Syllabus Tracking">📚 Syllabus Tracking</div>
+          <div class="pf-pill" data-val="Assignments">📁 Assignments</div>
+          <div class="pf-pill" data-val="Parent Communication">👨‍👩‍👧 Parent Communication</div>
+          <div class="pf-pill" data-val="Announcements">🔔 Announcements</div>
+        </div>
+      </div>
+
+      <div class="pf-field" style="margin-top:20px;">
+        <label class="pf-label">How Did You Hear About iSkool?</label>
+        <select class="pf-select" id="pf-source">
+          <option value="">Select an option</option>
+          <option>Word of mouth / colleague</option>
+          <option>Social media</option>
+          <option>Google search</option>
+          <option>iSkool team reached out</option>
+          <option>Education conference or event</option>
+          <option>Department of Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="pf-field">
+        <label class="pf-label">Anything Else? <span style="color:#bbb;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <textarea class="pf-textarea" id="pf-notes" placeholder="Any specific needs, questions, or context about your school..."></textarea>
+      </div>
+    </div>
+
+    <!-- FOOTER BUTTONS -->
+    <div class="pf-footer" id="pfFooter">
+      <button class="pf-btn-back" id="pfBtnBack" style="display:none;" onclick="pfBack()">← Back</button>
+      <button class="pf-btn-next" id="pfBtnNext" onclick="pfNext()">Next Step →</button>
+      <button class="pf-btn-submit" id="pfBtnSubmit" style="display:none;" onclick="pfSubmit()">Submit Application 🚀</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Pilot Form Logic ── */
+let pfCurrentStep = 1;
+const pfTotalSteps = 3;
+
+function openPilotForm() {
+  pfGoToStep(1);
+  document.getElementById('pfSuccess').classList.remove('show');
+  document.getElementById('pfSuccess').style.display = 'none';
+  document.getElementById('pfHeader').style.display = '';
+  document.getElementById('pfStep1').style.display = '';
+  document.getElementById('pfStep2').style.display = 'none';
+  document.getElementById('pfStep3').style.display = 'none';
+  document.getElementById('pfFooter').style.display = '';
+  document.getElementById('pfOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePilotForm() {
+  document.getElementById('pfOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pfCloseOutside(e) {
+  if (e.target === document.getElementById('pfOverlay')) closePilotForm();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePilotForm();
+});
+
+function pfGoToStep(step) {
+  pfCurrentStep = step;
+
+  // Step dots
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('pfdot-' + i);
+    dot.className = 'pf-step-dot';
+    if (i < step)       dot.classList.add('done'), dot.textContent = '✓';
+    else if (i === step) dot.classList.add('active'), dot.textContent = i;
+    else                dot.textContent = i;
+  });
+
+  // Lines
+  [1,2].forEach(i => {
+    document.getElementById('pfline-' + i).className = 'pf-step-line' + (i < step ? ' done' : '');
+  });
+
+  // Labels
+  const labels = ['About Your School','Your Details','What You\'re Looking For'];
+  const subs   = [
+    'Tell us a little about your school so we can prepare your pilot.',
+    'Who should we contact to get your pilot started?',
+    'Help us tailor your iSkool experience from day one.'
+  ];
+  document.getElementById('pfStepLabel').textContent = 'Step ' + step + ' of 3';
+  document.getElementById('pfStepTitle').textContent = labels[step-1];
+  document.getElementById('pfStepSub').textContent   = subs[step-1];
+
+  // Show/hide steps
+  document.getElementById('pfStep1').style.display = step === 1 ? '' : 'none';
+  document.getElementById('pfStep2').style.display = step === 2 ? '' : 'none';
+  document.getElementById('pfStep3').style.display = step === 3 ? '' : 'none';
+
+  // Buttons
+  document.getElementById('pfBtnBack').style.display   = step > 1 ? '' : 'none';
+  document.getElementById('pfBtnNext').style.display   = step < 3 ? '' : 'none';
+  document.getElementById('pfBtnSubmit').style.display = step === 3 ? '' : 'none';
+
+  // Scroll to top of modal
+  document.getElementById('pfModal').scrollTop = 0;
+}
+
+function pfValidate(step) {
+  let valid = true;
+  const required = {
+    1: [
+      { id: 'pf-school',   err: 'err-school',   check: v => v.trim().length > 1 },
+      { id: 'pf-province', err: 'err-province',  check: v => v !== '' },
+      { id: 'pf-type',     err: 'err-type',      check: v => v !== '' },
+      { id: 'pf-learners', err: 'err-learners',  check: v => v !== '' },
+    ],
+    2: [
+      { id: 'pf-name',  err: 'err-name',  check: v => v.trim().length > 1 },
+      { id: 'pf-role',  err: 'err-role',  check: v => v !== '' },
+      { id: 'pf-email', err: 'err-email', check: v => /^[^@]+@[^@]+\.[^@]+$/.test(v) },
+      { id: 'pf-phone', err: 'err-phone', check: v => v.trim().length > 6 },
+    ]
+  };
+  if (!required[step]) return true;
+  required[step].forEach(({ id, err, check }) => {
+    const el = document.getElementById(id);
+    const errEl = document.getElementById(err);
+    const ok = check(el.value);
+    el.classList.toggle('error', !ok);
+    errEl.classList.toggle('show', !ok);
+    if (!ok) valid = false;
+  });
+  return valid;
+}
+
+function pfNext() {
+  if (!pfValidate(pfCurrentStep)) return;
+  pfGoToStep(pfCurrentStep + 1);
+}
+
+function pfBack() {
+  pfGoToStep(pfCurrentStep - 1);
+}
+
+function pfSubmit() {
+  // Generate a fake reference number
+  const ref = 'ISK/PIL/' + String(Math.floor(Math.random() * 900) + 100).padStart(3,'0');
+  document.getElementById('pfRefNum').textContent = ref;
+  document.getElementById('pfEmailRef').textContent = document.getElementById('pf-email').value || 'your email';
+
+  // Hide form, show success
+  document.getElementById('pfHeader').style.display = 'none';
+  document.getElementById('pfStep3').style.display = 'none';
+  document.getElementById('pfFooter').style.display = 'none';
+  const s = document.getElementById('pfSuccess');
+  s.style.display = 'flex';
+  setTimeout(() => s.classList.add('show'), 10);
+}
+
+/* ── Feature pill toggle ── */
+document.querySelectorAll('.pf-pill').forEach(pill => {
+  pill.addEventListener('click', () => pill.classList.toggle('selected'));
+});
+</script>
+
+</body>
+</html>

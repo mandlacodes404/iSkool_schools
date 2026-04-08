@@ -33,8 +33,10 @@ if ($userData) {
 }
 
 // School name
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], ['', ' '], $dbName));
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 // Academic year
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -121,36 +123,109 @@ while ($recipient = $recipients->fetch_assoc()) {
             $mail->addAddress($rEmail);
             $mail->isHTML(true);
             $mail->Subject = htmlspecialchars($title);
-            $mail->Body    = '
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-            <meta charset="UTF-8">
-            <style>
-              body { margin:0; padding:0; font-family:Verdana,sans-serif; font-size:16px; line-height:1.6; }
-              .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); border:1px solid #eee; }
-              .header { padding:40px; text-align:center; background:#161b22; color:#ffffff; }
-              .header h1 { margin:0; font-size:32px; color:#1db954; }
-              .body { padding:40px; background:#ffffff; color:#333333; }
-              .body h2 { color:#1db954; font-size:24px; margin-bottom:20px; }
-              .footer { padding:30px; text-align:center; background:#f4f4f4; font-size:14px; color:#666666; }
-            </style>
-            </head>
-            <body>
-              <div class="wrapper">
-                <div class="header"><h1>iSkool</h1></div>
-                <div class="body">
-                  <h2>' . htmlspecialchars($title) . '</h2>
-                  <p>' . nl2br(htmlspecialchars($msg)) . '</p>
-                </div>
-                <div class="footer">
-                  <p>From: ' . htmlspecialchars($teacherDisplayName) . '</p>
-                  <p>Best regards, ' . htmlspecialchars($schoolName) . '</p>
-                  <p>Powered by iSkool &copy; ' . date("Y") . '</p>
-                </div>
-              </div>
-            </body>
-            </html>';
+           $mail->Body = '
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <img src="https://iskool.online/apple-touch-icon.png"
+           width="72" height="72" alt="iSkool"
+           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
+        iSkool
+      </p>
+    </td>
+  </tr>
+
+
+  <!-- SCHOOL + TEACHER ROW -->
+  <tr>
+    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
+      <p style="margin:0;font-size:13px;color:#8b949e;">
+        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
+      </p>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background:#ffffff;padding:40px;">
+
+      <!-- ANNOUNCEMENT TITLE -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
+              Announcement
+            </p>
+            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+              ' . htmlspecialchars($title) . '
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- MESSAGE -->
+      <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.8;">
+        ' . nl2br(htmlspecialchars($msg)) . '
+      </p>
+
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
+        </tr>
+      </table>
+
+      <!-- FROM -->
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding:0;">
+            <p style="margin:0;font-size:13px;color:#888;">
+              Sent by
+              <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
+             
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
+        iSkool LMS · Johannesburg, South Africa
+      </p>
+      <p style="margin:0;font-size:12px;color:#484f58;">
+        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
+      </p>
+      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
+        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>';
             $mail->send();
         } catch (Exception $e) {
             error_log("Email failed to $rEmail: " . $mail->ErrorInfo);

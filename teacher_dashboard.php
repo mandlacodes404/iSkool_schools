@@ -133,9 +133,9 @@ $schoolLogo = 'uploads/schools/default_school.png';
         .teacher-email { font-size: 12px; color: #aaa; margin-top: 4px; }
 
         .sidebar a, .sidebar .footer {
-            color: var(--text-color);
+            color: #b2b5b9;
             text-decoration: none;
-            padding: 5px 12px;
+            padding: 7px 12px;
             margin-bottom: 0px;
             border-radius: var(--card-radius);
             display: flex;
@@ -143,16 +143,17 @@ $schoolLogo = 'uploads/schools/default_school.png';
             transition: all 0.2s ease;
             white-space: nowrap;
             overflow: hidden;
-            font-weight: 200;
+            font-weight: 100;
         }
         .sidebar-footer {
-            display: none;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: auto;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            position: absolute;
+            bottom: 10px;
+            width: calc(100% - 40px);
+            text-align: left;
+            padding: 0;
+            border-top: none;
         }
-        .sidebar-footer span { font-size: 13px; color: #777; letter-spacing: 1px; }
+        .sidebar-footer span { font-size: 15px; font-weight: 700; color: #777; }
         .sidebar a:hover { background: rgba(79,209,197,0.08); transform: translateX(3px); }
         .sidebar a.active { background: rgba(79,209,197,0.2); border-left: 4px solid var(--accent-color); }
         .sidebar a i { font-size: 16px; margin-right: 10px; }
@@ -408,7 +409,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             position: fixed;
             bottom: 0; left: 0;
             width: 100%;
-            height: 70px;
+            height: 82px;
             background: rgba(66,65,65,0.35);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -440,7 +441,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         @media (max-width: 768px) {
             #mobileToggle { display: block; }
             .top-nav-school-name { display: none; }
-            .sidebar-footer { display: block !important; }
+            .sidebar-footer { width: calc(100% - 40px); }
             .sidebar { left: -100%; width: 300px; }
             .sidebar.active { left: 0; width: 300px; }
             .main-content { margin-left: 0 !important; }
@@ -450,7 +451,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             #mobileBottomNav { display: flex !important; }
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
-                height: calc(70px + env(safe-area-inset-bottom));
+                height: calc(82px + env(safe-area-inset-bottom));
             }
             .sidebar a.desktop-only { display: none; }
         }
@@ -756,7 +757,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
             </button>
 
             <button class="top-nav-tab" id="tab-calendar"
-                    onclick="loadTeacherManual(); setTopNavTab('tab-calendar')">
+                    onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
                      stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -1171,15 +1172,16 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=4.3"></script>
-<script src="assets/js/teacher/quizzes.js?v=1.4"></script>
-<script src="assets/js/teacher/announcements.js?v=1.6"></script>
-<script src="assets/js/teacher/evaluations.js?v=1.4"></script>
+<script src="assets/js/teacher/dashboard.js?v=4.4"></script>
+<script src="assets/js/teacher/quizzes.js?v=1.7"></script>
+<script src="assets/js/teacher/announcements.js?v=1.7"></script>
+<script src="assets/js/teacher/evaluations.js?v=1.5"></script>
 <script src="assets/js/teacher/resources.js?v=1.2"></script>
-<script src="assets/js/teacher/grades.js?v=1.1"></script>
-<script src="assets/js/teacher/assignments.js?v=1.0"></script>
+<script src="assets/js/teacher/grades.js?v=1.2"></script>
+<script src="assets/js/teacher/assignments.js?v=1.1"></script>
 <script src="assets/js/teacher/discussions.js?v=1.0"></script>
-<script src="assets/js/teacher/sbo.js?v=1.1"></script>
+<script src="assets/js/teacher/sbo.js?v=1.3"></script>
 <script src="assets/js/teacher/analytics.js?v=1.1"></script>
+<script src="assets/js/teacher/teacher_calendar.js?v=1.1"></script>
 </body>
 </html>

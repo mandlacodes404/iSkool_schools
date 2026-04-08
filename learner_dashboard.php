@@ -207,8 +207,8 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learner Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.6">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -474,6 +474,10 @@ body {
     }
     .sidebar.collapsed .footer {
         bottom: 20px;
+    }
+    .sidebar a,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
+        padding: 7px 12px;
     }
 }
 
@@ -864,7 +868,7 @@ iframe {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 70px;                                 /* your preferred height */
+    height: 82px;                                 /* your preferred height */
     background: rgba(27, 27, 27, 0.85);           /* ← #1b1b1b with transparency – exact platform charcoal glass */
     backdrop-filter: blur(20px);                  /* ← premium blur like other glass elements */
     -webkit-backdrop-filter: blur(20px);
@@ -878,7 +882,7 @@ iframe {
     z-index: 4000;
     box-sizing: border-box;
     transition: padding-bottom 0.3s ease, height 0.3s ease;
-   border-top: 3px solid rgba(255, 255, 255, 0.12);
+   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 
@@ -917,8 +921,8 @@ iframe {
             #mobileBottomNav {
                 padding-bottom: env(safe-area-inset-bottom);
                 padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(70px + env(safe-area-inset-bottom));
-                height: calc(70px + constant(safe-area-inset-bottom));
+                height: calc(82px + env(safe-area-inset-bottom));
+                height: calc(82px + constant(safe-area-inset-bottom));
             }
 
             iframe {
@@ -1103,10 +1107,30 @@ iframe {
         animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 }
-/* Desktop slide-in menu (no overlay/dim) */
+/* Desktop slide-in menu */
 .sidebar.desktop-open {
     left: 0 !important;
     transform: translateX(0) !important;
+}
+
+/* Desktop dim backdrop */
+@media (min-width: 769px) {
+    .desktop-backdrop {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 4999;
+        transition: opacity var(--transition-speed) ease;
+    }
+    .sidebar.desktop-open ~ .desktop-backdrop {
+        opacity: 1;
+        pointer-events: all;
+    }
 }
 
 /* Default hidden on desktop - slide from left */
@@ -1116,7 +1140,7 @@ iframe {
         transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
         width: var(--sidebar-width);    /* Keep your 240px width */
         box-shadow: 4px 0 20px rgba(0,0,0,0.35); /* subtle shadow when open */
-        z-index: 2000;                  /* Above main content but below header if needed */
+        z-index: 5000;                  /* Must be above the desktop backdrop (4999) */
     }
 
     .sidebar.desktop-open {
@@ -1503,7 +1527,9 @@ document.addEventListener("DOMContentLoaded", function () {
          } else if (savedPage === 'syllabus') {
             window.fetchSyllabus();
         } else if (savedPage.includes("evaluation_list.php")) {
-            window.fetchEvaluaions();
+            window.fetchEvaluations();
+        } else if (savedPage === 'learner_calendar') {
+            window.fetchLearnerCalendar();
         } else if (savedPage.includes("discussion_list.php")) {
             window.fetchDiscussions();
         } 
@@ -1527,6 +1553,7 @@ document.addEventListener("DOMContentLoaded", function () {
     savedPage !== "evaluation_list.php" &&
     savedPage !== "syllabus" &&
     savedPage !== "grades" &&
+    savedPage !== "learner_calendar" &&
     savedPage !== "announcement_list.php"
 ) {
     iframe.style.display = 'block';   // ← ADD THIS
@@ -2041,17 +2068,26 @@ window.toggleSidebar = function (forceClose = false) {
         window.setActive("<?= $currentPage ?>");
     }
 
-    // Desktop slide-in (no backdrop)
+    // Desktop slide-in with backdrop
 const desktopToggle = document.getElementById('desktopMenuToggle');
+const desktopBackdrop = document.getElementById('desktopBackdrop');
 
 if (desktopToggle) {
     desktopToggle.addEventListener('click', () => {
-        // Change .add to .toggle so the hamburger can also close it
         sidebar.classList.toggle('desktop-open'); 
-        sidebar.classList.remove('active'); // prevents mobile style conflict
+        sidebar.classList.remove('active');
     });
 
-    // Optional: close with Esc key
+    // Click backdrop to close
+    if (desktopBackdrop) {
+        desktopBackdrop.addEventListener('click', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('desktop-open');
+            }
+        });
+    }
+
+    // Esc key to close
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && sidebar.classList.contains('desktop-open')) {
             sidebar.classList.remove('desktop-open');
@@ -2162,6 +2198,13 @@ window.handleHeaderBack = function() {
 if (currentTitle === 'Discussion') {
     if (typeof fetchDiscussions === 'function') {
         window.fetchDiscussions();
+        return;
+    }
+}
+
+if (currentTitle === 'Calendar') {
+    if (typeof loadManual === 'function') {
+        window.loadManual();
         return;
     }
 }
@@ -2379,15 +2422,16 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=1.5"></script>
-<script src="assets/js/learner/quiz.js?v=3.0"></script>
-<script src="assets/js/learner/assignments.js?v=2.2"></script>
-<script src="assets/js/learner/resources.js?v=2.0"></script>
-<script src="assets/js/learner/announcements.js?v=1.4"></script>
-<script src="assets/js/learner/grades.js?v=1.5"></script>
-<script src="assets/js/learner/evaluations.js?v=1.1"></script>
-<script src="assets/js/learner/discussions.js?v=2.2"></script>
-<script src="assets/js/learner/syllabus.js?v=1.0"></script>
+<script src="assets/js/learner/manual.js?v=1.8"></script>
+<script src="assets/js/learner/quiz.js?v=3.4"></script>
+<script src="assets/js/learner/assignments.js?v=2.6"></script>
+<script src="assets/js/learner/resources.js?v=2.4"></script>
+<script src="assets/js/learner/announcements.js?v=1.7"></script>
+<script src="assets/js/learner/grades.js?v=1.6"></script>
+<script src="assets/js/learner/evaluations.js?v=1.6"></script>
+<script src="assets/js/learner/discussions.js?v=2.9"></script>
+<script src="assets/js/learner/syllabus.js?v=1.1"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

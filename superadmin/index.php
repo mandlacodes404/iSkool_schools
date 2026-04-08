@@ -74,21 +74,18 @@ function cPanelAPI(string $module, string $func, array $params = []): array {
 //  STEP 1 — CREATE DATABASE VIA CPANEL API
 // ============================================================
 function createDatabase(string $dbName): array {
-    // cPanel UAPI expects the FULL name including prefix
-    // e.g. iskowdbw_testschool NOT just testschool
-    $res = cPanelAPI('Mysql', 'create_database', ['name' => $dbName]);
+    // cPanel API only needs the suffix — it adds iskowdbw_ prefix automatically
+    $suffix = str_replace(DB_PREFIX, '', $dbName);
     
-    if (!empty($res['errors'])) {
-        return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
-    }
+    $res = cPanelAPI('Mysql', 'create_database', ['name' => $suffix]);
+    if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
 
-    // Privileges also needs full name
+    // Grant all privileges to the DB user — also uses suffix only
     cPanelAPI('Mysql', 'set_privileges_on_database', [
-        'user'       => 'iskowdbw',
-        'database'   => $dbName,
+        'user'       => DB_USER,
+        'database'   => $suffix,
         'privileges' => 'ALL PRIVILEGES',
     ]);
-    
     return ['ok' => true];
 }
 // ============================================================
@@ -97,14 +94,6 @@ function createDatabase(string $dbName): array {
 function runTemplate(string $dbName, string $schoolName, string $adminEmail,
                      string $adminPassword, string $adminFirstName,
                      string $adminLastName, array $keys): array {
-
-    ini_set('max_execution_time', 300);
-    ini_set('memory_limit', '256M');
-
-    // DEBUG — remove after testing
-    error_log('TEMPLATE PATH: ' . TEMPLATE_PATH);
-    error_log('FILE EXISTS: ' . (file_exists(TEMPLATE_PATH) ? 'YES' : 'NO'));
-
     if (!file_exists(TEMPLATE_PATH)) {
         return ['ok' => false, 'msg' => 'Template SQL file not found at: ' . TEMPLATE_PATH];
     }
@@ -134,24 +123,18 @@ function runTemplate(string $dbName, string $schoolName, string $adminEmail,
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, $dbName);
     if ($conn->connect_error) return ['ok' => false, 'msg' => 'Cannot connect to new DB: ' . $conn->connect_error];
     $conn->set_charset('utf8mb4');
-// Execute entire SQL file at once using multi_query
-$conn->multi_query($sql);
 
-// Consume all result sets to avoid "commands out of sync" error
-do {
-    if ($result = $conn->store_result()) {
-        $result->free();
+    // Split and execute statement by statement
+    $statements = array_filter(array_map('trim', explode(';', $sql)));
+    foreach ($statements as $stmt) {
+        if (empty($stmt) || strpos($stmt, '--') === 0) continue;
+        if (!$conn->query($stmt)) {
+            $conn->close();
+            return ['ok' => false, 'msg' => 'SQL error: ' . $conn->error . ' → ' . substr($stmt, 0, 80)];
+        }
     }
-} while ($conn->more_results() && $conn->next_result());
-
-// Check for errors
-if ($conn->errno) {
     $conn->close();
-    return ['ok' => false, 'msg' => 'SQL error: ' . $conn->error];
-}
-
-$conn->close();
-return ['ok' => true];
+    return ['ok' => true];
 }
 
 // ============================================================
@@ -159,19 +142,11 @@ return ['ok' => true];
 // ============================================================
 function createSubdomain(string $subdomain): array {
     $res = cPanelAPI('SubDomain', 'addsubdomain', [
-        'domain'     => $subdomain,
+        'domain'    => $subdomain,
         'rootdomain' => MAIN_DOMAIN,
-        'dir'        => 'public_html',
+        'dir'       => '/public_html',
     ]);
-
-    // If subdomain already exists treat it as success
-    if (!empty($res['errors'])) {
-        $errorMsg = implode(', ', $res['errors']);
-        if (stripos($errorMsg, 'already exists') !== false) {
-            return ['ok' => true]; // Already exists — that's fine
-        }
-        return ['ok' => false, 'msg' => $errorMsg];
-    }
+    if (!empty($res['errors'])) return ['ok' => false, 'msg' => implode(', ', $res['errors'])];
     return ['ok' => true];
 }
 
@@ -182,27 +157,30 @@ function sendWelcomeEmail(string $toEmail, string $toName, string $schoolName,
                           string $subdomain, string $adminPassword, array $keys): array {
     // PHPMailer — assumes composer autoload or manual include
     // Place PHPMailer in /superadmin/PHPMailer/
-     $autoload = dirname(__DIR__) . '/vendor/autoload.php';
-if (!file_exists($autoload)) {
-    return ['ok' => false, 'msg' => 'Composer autoload not found at: ' . $autoload];
-}
-require_once $autoload;
+    $mailerPath = __DIR__ . '/PHPMailer/src/';
+    if (!file_exists($mailerPath . 'PHPMailer.php')) {
+        return ['ok' => false, 'msg' => 'PHPMailer not found. Upload it to /superadmin/PHPMailer/src/'];
+    }
 
-$mail = new PHPMailer\PHPMailer\PHPMailer(true);
-    $schoolUrl = 'https://' . $subdomain . '.' . MAIN_DOMAIN;        
+    require_once $mailerPath . 'PHPMailer.php';
+    require_once $mailerPath . 'SMTP.php';
+    require_once $mailerPath . 'Exception.php';
+
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    $schoolUrl = 'https://' . $subdomain . '.' . MAIN_DOMAIN;
 
     try {
-    $mail->isSMTP();
-    $mail->Host       = SMTP_HOST;
-    $mail->SMTPAuth   = true;
-    $mail->Username   = SMTP_USER;
-    $mail->Password   = SMTP_PASS;
-    $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port       = SMTP_PORT;
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASS;
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = SMTP_PORT;
 
-    $mail->setFrom(SMTP_USER, 'iSkool Support');
-    $mail->addAddress($toEmail, $toName);
-    $mail->isHTML(true);
+        $mail->setFrom(SMTP_USER, 'iSkool Support');
+        $mail->addAddress($toEmail, $toName);
+        $mail->isHTML(true);
         $mail->Subject = 'Welcome to iSkool — Your School Platform is Ready';
         $mail->Body    = buildWelcomeEmailHTML(
             $toName, $schoolName, $schoolUrl,
@@ -239,19 +217,16 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
   <!-- HEADER -->
-  <!-- HEADER -->
-<tr>
-  <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-    <img src="https://iskool.online/apple-touch-icon.png"
-         width="80"
-         height="80"
-         alt="iSkool"
-         style="display:block;margin:0 auto 12px;border-radius:16px;border:2px solid rgba(57,213,193,0.3);">
-    <p style="margin:0;font-size:13px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-      Learning Management System
-    </p>
-  </td>
-</tr>
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <h1 style="margin:0;font-size:32px;font-weight:700;color:#ffffff;letter-spacing:-1px;">
+        i<span style="color:#39d5c1;">Skool</span>
+      </h1>
+      <p style="margin:8px 0 0;font-size:13px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
+        Learning Management System
+      </p>
+    </td>
+  </tr>
 
   <!-- HERO -->
   <tr>

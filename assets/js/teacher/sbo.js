@@ -36,6 +36,9 @@ window.fetchTeacherSyllabus = async function() {
     }
 };
 
+// Track active brief for desktop panel
+window._activeSBOBriefIndex = null;
+
 function renderTeacherSyllabus(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -48,7 +51,229 @@ function renderTeacherSyllabus(data) {
         `<option value="${c.id}">${c.name}</option>`
     ).join('');
 
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!briefs.length) {
+        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No syllabus briefs found.</p>`;
+    } else {
+        // Group by term
+        const byTerm = {};
+        briefs.forEach((brief, idx) => {
+            const t = brief.term || 0;
+            if (!byTerm[t]) byTerm[t] = [];
+            byTerm[t].push({ brief, idx });
+        });
+
+        Object.keys(byTerm).sort((a,b) => a - b).forEach(term => {
+            sidebarHtml += `<div class="sbo-sidebar-term-label">TERM ${term}</div>`;
+            byTerm[term].forEach(({ brief, idx }) => {
+                sidebarHtml += `
+                    <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
+                        onclick="selectDesktopSBO(${idx})">
+                        <div class="sbo-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                        <div class="sbo-sidebar-item-info">
+                            <div class="sbo-sidebar-item-title">${brief.subject}</div>
+                            <div class="sbo-sidebar-item-meta">${brief.class_name}</div>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
     let html = `
+        <style>
+            /* ── Desktop split layout ── */
+            @media (min-width: 900px) {
+                .sbo-desktop-layout { display: flex !important; }
+                .sbo-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .sbo-desktop-layout { display: none !important; }
+                .sbo-mobile-list    { display: block !important; }
+            }
+
+            .sbo-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            /* Left sidebar */
+            .sbo-sidebar {
+                width: 260px;
+                min-width: 220px;
+                max-width: 280px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .sbo-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .sbo-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .sbo-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .sbo-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .sbo-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .sbo-sidebar-term-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                color: #555e6a;
+                text-transform: uppercase;
+            }
+            .sbo-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .sbo-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .sbo-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .sbo-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .sbo-sidebar-item-info { flex: 1; min-width: 0; }
+            .sbo-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .sbo-sidebar-item.active .sbo-sidebar-item-title { color: #e2e8f0; }
+            .sbo-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+
+            /* Right panel */
+            .sbo-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .sbo-main-panel::-webkit-scrollbar { width: 5px; }
+            .sbo-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .sbo-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .sbo-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .sbo-panel-empty svg { opacity: 0.3; }
+            .sbo-panel-empty p { font-size: 14px; margin: 0; }
+
+            .sbo-panel-content { padding: 28px 32px; }
+
+            .sbo-panel-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 24px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .sbo-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+            }
+            .sbo-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .sbo-term-badge {
+                background: rgba(79,209,197,0.1);
+                color: #4fd1c5;
+                padding: 4px 10px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 800;
+                white-space: nowrap;
+            }
+            .sbo-section-label {
+                font-size: 11px;
+                font-weight: 800;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                margin-bottom: 8px;
+            }
+            .sbo-topics-wrap {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .sbo-topic-chip {
+                background: rgba(79,209,197,0.1);
+                color: #4fd1c5;
+                padding: 3px 8px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 700;
+            }
+            .sbo-assess-row {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                padding: 14px 18px;
+                margin-bottom: 12px;
+                font-size: 13px;
+                color: #c9d1d9;
+            }
+            .sbo-notes-block {
+                margin-top: 20px;
+                padding-top: 16px;
+                border-top: 1px solid rgba(255,255,255,0.05);
+                font-size: 13px;
+                color: #8b949e;
+                line-height: 1.6;
+            }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Syllabus</h2>
             <button class="teacher-upload-btn" onclick="openSBODrawer()">
@@ -60,39 +285,68 @@ function renderTeacherSyllabus(data) {
             </button>
         </div>
 
-        <!-- FILTERS -->
-        <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
-            <select id="sboFilterClass" onchange="filterSyllabus()"
-                    style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
-                           padding:8px 14px;border-radius:8px;font-size:13px;
-                           font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
-                           min-width:160px;">
-                <option value="">All Classes</option>
-                ${classOptions}
-            </select>
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="sbo-desktop-layout">
+            <!-- Left Sidebar -->
+            <div class="sbo-sidebar">
+                <div class="sbo-sidebar-header">All Syllabi</div>
+                <div class="sbo-sidebar-scroll">
+                    ${sidebarHtml}
+                </div>
+            </div>
 
-            <select id="sboFilterTerm" onchange="filterSyllabus()"
-                    style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
-                           padding:8px 14px;border-radius:8px;font-size:13px;
-                           font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
-                           min-width:140px;">
-                <option value="">All Terms</option>
-                <option value="1">Term 1</option>
-                <option value="2">Term 2</option>
-                <option value="3">Term 3</option>
-                <option value="4">Term 4</option>
-            </select>
+            <!-- Right Panel -->
+            <div class="sbo-main-panel" id="sbo-main-panel">
+                <div class="sbo-panel-empty">
+                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <p>Select a syllabus to view details</p>
+                </div>
+            </div>
         </div>
 
-        <!-- RESULTS -->
-        <div id="sboResultsContainer">
-            ${buildSBOCards(briefs)}
+        <!-- ═══ MOBILE LIST ═══ -->
+        <div class="sbo-mobile-list">
+            <!-- FILTERS -->
+            <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+                <select id="sboFilterClass" onchange="filterSyllabus()"
+                        style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
+                               padding:8px 14px;border-radius:8px;font-size:13px;
+                               font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
+                               min-width:160px;">
+                    <option value="">All Classes</option>
+                    ${classOptions}
+                </select>
+
+                <select id="sboFilterTerm" onchange="filterSyllabus()"
+                        style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
+                               padding:8px 14px;border-radius:8px;font-size:13px;
+                               font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
+                               min-width:140px;">
+                    <option value="">All Terms</option>
+                    <option value="1">Term 1</option>
+                    <option value="2">Term 2</option>
+                    <option value="3">Term 3</option>
+                    <option value="4">Term 4</option>
+                </select>
+            </div>
+
+            <!-- RESULTS -->
+            <div id="sboResultsContainer">
+                ${buildSBOCards(briefs)}
+            </div>
         </div>`;
 
     apiArea.innerHTML = html;
 
-    // Store briefs on the container for filtering
-    document.getElementById('sboResultsContainer').dataset.briefs = JSON.stringify(briefs);
+    // Store briefs globally for desktop panel and mobile filter
+    window._allSBOBriefs = briefs;
+
+    // Also keep dataset on results container for mobile filter
+    const rc = document.getElementById('sboResultsContainer');
+    if (rc) rc.dataset.briefs = JSON.stringify(briefs);
 }
 
 function buildSBOCards(briefs) {
@@ -188,7 +442,69 @@ function buildSBOCards(briefs) {
     }).join('');
 }
 
-// ── CLIENT-SIDE FILTER ──
+// ── DESKTOP PANEL: SELECT BRIEF ──────────────────────────────────────────────
+window.selectDesktopSBO = function(idx) {
+    document.querySelectorAll('.sbo-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`sbo-sidebar-${idx}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    window._activeSBOBriefIndex = idx;
+
+    const brief = (window._allSBOBriefs || [])[idx];
+    if (!brief) return;
+
+    const panel = document.getElementById('sbo-main-panel');
+    if (!panel) return;
+
+    const topicCount  = brief.topics?.length || 0;
+    const updatedDate = brief.updated_at
+        ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
+        : '';
+
+    const topicsHtml = topicCount
+        ? brief.topics.map(t => `<span class="sbo-topic-chip">${t}</span>`).join('')
+        : '<span style="font-size:13px;color:#555e6a;">No topics listed.</span>';
+
+    const assessHtml = brief.assessments?.length
+        ? brief.assessments.map(a => `
+            <div class="sbo-assess-row">
+                <span style="font-weight:700;color:#e2e8f0;">${a.type}</span>
+                <span style="float:right;color:#4fd1c5;font-weight:800;">${a.weight}%</span>
+            </div>`).join('')
+        : '<p style="font-size:13px;color:#555e6a;margin:0;">No assessments listed.</p>';
+
+    panel.innerHTML = `
+        <div class="sbo-panel-content">
+            <div class="sbo-panel-header">
+                <div>
+                    <div class="sbo-panel-title">${brief.subject}</div>
+                    <div class="sbo-panel-meta">
+                        <span>${brief.class_name}</span>
+                        ${updatedDate ? `<span>&bull;</span><span>Updated ${updatedDate}</span>` : ''}
+                    </div>
+                </div>
+                <span class="sbo-term-badge">Term ${brief.term}</span>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <div class="sbo-section-label">Topics (${topicCount})</div>
+                <div class="sbo-topics-wrap">${topicsHtml}</div>
+            </div>
+
+            <div>
+                <div class="sbo-section-label">Assessment Weighting</div>
+                ${assessHtml}
+            </div>
+
+            ${brief.notes ? `
+            <div class="sbo-notes-block">
+                <div class="sbo-section-label">Notes</div>
+                ${brief.notes}
+            </div>` : ''}
+        </div>`;
+};
+
+// ── CLIENT-SIDE FILTER (mobile only) ────────────────────────────────────────
 window.filterSyllabus = function() {
     const classFilter = document.getElementById('sboFilterClass').value;
     const termFilter  = document.getElementById('sboFilterTerm').value;

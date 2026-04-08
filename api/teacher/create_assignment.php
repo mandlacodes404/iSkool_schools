@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 
 header('Content-Type: application/json');
 
@@ -40,8 +41,8 @@ if (!$current_year_id) {
 }
 
 // Get current term
-$termResult       = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
-$current_term     = (int)$termResult->fetch_assoc()['current_global_term'];
+$termResult   = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+$current_term = (int)$termResult->fetch_assoc()['current_global_term'];
 
 // Validate inputs
 $title       = trim($_POST['title'] ?? '');
@@ -56,15 +57,22 @@ if (!$title || !$description || !$due_date || $class_id < 1) {
 }
 
 // Handle file upload
-$filePath    = null;
+$filePath       = null;
 $hasAttachment  = false;
 $attachmentName = '';
 
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = dirname(__DIR__, 2) . '/assignment_Uploads/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+    // ── CHANGED: school-scoped upload directory ──────────────────────────────
+    $baseDir   = dirname(__DIR__, 2) . '/assignment_Uploads';
+    $uploadDir = getSchoolUploadDir($conn, $baseDir);
+    $schoolSlug = getSchoolSlug($conn);
+    // ────────────────────────────────────────────────────────────────────────
+
     $filename = time() . '_' . basename($_FILES['attachment']['name']);
-    $filePath = 'assignment_Uploads/' . $filename;
+
+    // file_url stored in DB as relative path (used by learner to download)
+    $filePath = 'assignment_Uploads/' . $schoolSlug . '/' . $filename;
+
     if (move_uploaded_file($_FILES['attachment']['tmp_name'], $uploadDir . $filename)) {
         $hasAttachment  = true;
         $attachmentName = basename($_FILES['attachment']['name']);
@@ -96,8 +104,10 @@ $assignment_id = $stmt->insert_id;
 $stmt->close();
 
 // School name
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 // Formatted due date
 $formatted_due_date = date("l, F j, Y", strtotime($due_date));
@@ -108,46 +118,151 @@ $assignmentLink = $cleanBaseUrl . "/learner_dashboard.php?page=assignment_list.p
 // Email body
 $emailBody = '
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<style>
-  body { margin:0; padding:0; font-family:Verdana,Arial,sans-serif; font-size:16px; line-height:1.6; }
-  .wrapper { max-width:600px; margin:30px auto; border-radius:16px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.2); }
-  .header { padding:40px; text-align:center; background:#161b22; }
-  .header h1 { margin:0; font-size:32px; font-weight:bold; color:#4fd1c5; }
-  .body { padding:40px; background:#1e1e1e; color:#c9d1d9; }
-  .body h2 { color:#4fd1c5; font-size:24px; margin-bottom:20px; }
-  .highlight { background:#2d333b; padding:20px; border-radius:12px; margin:25px 0; border-left:5px solid #4fd1c5; }
-  .cta-button { display:inline-block; padding:16px 32px; margin:30px 0; background:#4fd1c5; color:#000; font-weight:bold; border-radius:30px; text-decoration:none; font-size:17px; }
-  .footer { padding:30px; text-align:center; background:#161b22; font-size:14px; color:#8b949e; }
-  .due-date { font-weight:bold; color:#4fd1c5; font-size:18px; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
-  <div class="wrapper">
-    <div class="header"><h1>iSkool</h1></div>
-    <div class="body">
-      <h2>New Assignment</h2>
-      <p>Hi {{name}},</p>
-      <p>A new assignment has been released in your class.</p>
-      <div class="highlight">
-        <strong>' . htmlspecialchars($title) . '</strong><br><br>
-        ' . nl2br(htmlspecialchars($description)) . '<br><br>
-        <span class="due-date">Due Date: ' . $formatted_due_date . '</span>' .
-        ($hasAttachment ? '<br><br><em>📎 Attachment: ' . htmlspecialchars($attachmentName) . '</em>' : '') . '<br><br>
-        <em>Assigned by: ' . htmlspecialchars($teacherDisplayName) . '</em>
-      </div>
-      <p style="text-align:center;">
-        <a href="' . $assignmentLink . '" class="cta-button">View Assignment</a>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <img src="https://iskool.online/apple-touch-icon.png"
+           width="72" height="72" alt="iSkool"
+           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
+        iSkool
       </p>
-      <p>Please complete and submit before the due date. Good luck!</p>
-    </div>
-    <div class="footer">
-      <p>Best regards,<br>' . htmlspecialchars($schoolName) . '</p>
-      <p>Powered by iSkool &copy; ' . date("Y") . '</p>
-    </div>
-  </div>
+    </td>
+  </tr>
+
+  <!-- SCHOOL + TEACHER ROW -->
+  <tr>
+    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
+      <p style="margin:0;font-size:13px;color:#8b949e;">
+        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
+      </p>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background:#ffffff;padding:40px;">
+
+      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
+        Hi <strong>{{name}}</strong>, a new assignment has been posted in your class.
+      </p>
+
+      <!-- ASSIGNMENT TITLE BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:20px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
+              Assignment
+            </p>
+            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+              ' . htmlspecialchars($title) . '
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- DESCRIPTION -->
+      <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.8;">
+        ' . nl2br(htmlspecialchars($description)) . '
+      </p>
+
+      <!-- DUE DATE + ATTACHMENT ROW -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+        <tr>
+          <!-- DUE DATE -->
+          <td width="50%" style="padding-right:8px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f57f17;margin-bottom:4px;">
+                    Due Date
+                  </p>
+                  <p style="margin:0;font-size:15px;font-weight:700;color:#e65100;">
+                    ' . $formatted_due_date . '
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <!-- ATTACHMENT -->
+          <td width="50%" style="padding-left:8px;">
+            ' . ($hasAttachment ? '
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4fd;border:1px solid #b3d9f7;border-radius:8px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1565c0;margin-bottom:4px;">
+                    Attachment
+                  </p>
+                  <p style="margin:0;font-size:14px;font-weight:600;color:#0d47a1;">
+                    📎 ' . htmlspecialchars($attachmentName) . '
+                  </p>
+                </td>
+              </tr>
+            </table>' : '
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:4px;">
+                    Attachment
+                  </p>
+                  <p style="margin:0;font-size:14px;color:#aaa;">
+                    No attachment
+                  </p>
+                </td>
+              </tr>
+            </table>') . '
+          </td>
+        </tr>
+      </table>
+
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
+        </tr>
+      </table>
+
+      <!-- FROM -->
+      <p style="margin:0;font-size:13px;color:#888;">
+        Assigned by
+        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
+        
+      </p>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
+        iSkool LMS · Johannesburg, South Africa
+      </p>
+      <p style="margin:0;font-size:12px;color:#484f58;">
+        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
+      </p>
+      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
+        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
 </body>
 </html>';
 

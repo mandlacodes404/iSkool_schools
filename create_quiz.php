@@ -21,6 +21,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
+$teacherDisplayName = 'Teacher';
+if ($userData) {
+    $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
+    $teacherDisplayName = trim($userData['title'] . ' ' . $firstInitial . ' ' . $userData['surname']);
+}
 
 // ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
@@ -44,9 +49,11 @@ $stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
 $stmt->execute();
 $classResult = $stmt->get_result();
 
-// Get school name from DB
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], [' ', ' '], $dbName));
+// School name
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
@@ -204,122 +211,136 @@ if ($checkSub->get_result()->num_rows > 0) {
                 $mail->addAddress($currentEmail);
                 $mail->isHTML(true);
                 $mail->Subject = 'New Quiz: ' . $quiz_title;
-                $mail->Body = '
+              $mail->Body = '
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Quiz Alert</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #0d1117;
-    font-family: "Inter", system-ui, Arial, sans-serif;
-    color: #e0e6f0;
-  }
-  .email-wrapper {
-    max-width: 600px;
-    margin: 30px auto;
-    background-color: #1a202c;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-  }
-  .email-header {
-    background-color: #161b22;
-    padding: 30px;
-    text-align: center;
-  }
-  .email-header h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #4fd1c5;
-  }
-  .email-header p {
-    margin: 6px 0 0;
-    font-size: 14px;
-    color: #e0e6f0;
-  }
-  .email-body {
-    padding: 30px;
-    text-align: left;
-  }
-  .email-body p {
-    margin: 0 0 15px;
-    font-size: 16px;
-    line-height: 1.6;
-    color: #e0e6f0;
-  }
-  .email-body h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #4fd1c5;
-    margin: 0 0 20px;
-  }
-  .cta-button {
-    display: inline-block;
-    padding: 12px 25px;
-    margin-top: 15px;
-    background-color: #4fd1c5;
-    color: #0d1117;
-    font-weight: 600;
-    border-radius: 25px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-  }
-  .cta-button:hover {
-    background-color: #1ed760;
-  }
-  .email-footer {
-    background-color: #161b22;
-    padding: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: #8b949e;
-  }
-  @media (max-width: 480px) {
-    .email-wrapper {
-      margin: 20px 10px;
-    }
-    .email-header, .email-body, .email-footer {
-      padding: 20px;
-    }
-    .email-header h1 {
-      font-size: 24px;
-    }
-    .email-body h2 {
-      font-size: 20px;
-    }
-    .email-body p {
-      font-size: 15px;
-    }
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
-  <div class="email-wrapper">
-    <div class="email-header">
-      <h1><i class="fas fa-poll"></i> iSkool</h1>
-      <p>Your Digital Classroom</p>
-    </div>
-    <div class="email-body">
-      <p>Hello ' . htmlspecialchars($learner['name']) . ',</p>
-      <h2>New Quiz: ' . htmlspecialchars($quiz_title) . '</h2>
-      <p>Your teacher has posted a new quiz titled "<strong>' . htmlspecialchars($quiz_title) . '</strong>" with status: <strong>' . htmlspecialchars($status) . '</strong>. If the quiz is open, you can attempt it now!</p>
-      <a href="http://iskool.online/quiz_list.php?quiz_id=' . $quiz_id . '" class="cta-button">Go to Quiz</a>
-    </div>
-    <div class="email-footer">
-      <p>Best regards, ' . htmlspecialchars($schoolName) . '</p>
-      <p>Powered by iSkool &copy; 2025</p>
-    </div>
-  </div>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <img src="https://iskool.online/apple-touch-icon.png"
+           width="72" height="72" alt="iSkool"
+           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
+       iSkool
+      </p>
+    </td>
+  </tr>
+
+  <!-- SCHOOL + TEACHER ROW -->
+  <tr>
+    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
+      <p style="margin:0;font-size:13px;color:#8b949e;">
+        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
+      </p>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background:#ffffff;padding:40px;">
+
+      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
+        Hi <strong>' . htmlspecialchars($learner['name']) . '</strong>, your teacher has uploaded a new quiz.
+      </p>
+
+      <!-- QUIZ TITLE BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:20px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
+              Quiz
+            </p>
+            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+              ' . htmlspecialchars($quiz_title) . '
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- QUIZ DETAILS ROW -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+        <tr>
+          <!-- STATUS -->
+          <td width="50%" style="padding-right:8px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:' . ($status === 'Open' ? '#e8faf8' : '#f8f9fa') . ';border:1px solid ' . ($status === 'Open' ? '#b2dfdb' : '#e9ecef') . ';border-radius:8px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:' . ($status === 'Open' ? '#0d6e62' : '#888') . ';margin-bottom:4px;">
+                    Status
+                  </p>
+                  <p style="margin:0;font-size:15px;font-weight:700;color:' . ($status === 'Open' ? '#39d5c1' : '#555') . ';">
+                    ' . ($status === 'Open' ? '🟢 ' : '🔵 ') . htmlspecialchars($status) . '
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <!-- DURATION -->
+          <td width="50%" style="padding-left:8px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f57f17;margin-bottom:4px;">
+                    Duration
+                  </p>
+                  <p style="margin:0;font-size:15px;font-weight:700;color:#e65100;">
+                    ⏱ ' . htmlspecialchars($duration) . ' min
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
+        </tr>
+      </table>
+
+      <!-- FROM -->
+      <p style="margin:0;font-size:13px;color:#888;">
+        Posted by
+        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
+      </p>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
+        iSkool LMS · Johannesburg, South Africa
+      </p>
+      <p style="margin:0;font-size:12px;color:#484f58;">
+        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
+      </p>
+      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
+        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
 </body>
-</html>
-';
+</html>';
             $mail->send();
             } catch (Exception $e) {
                 error_log("Email failed for $currentEmail: " . $mail->ErrorInfo);

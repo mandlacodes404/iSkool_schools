@@ -15,7 +15,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $teacher_email = $_SESSION['email'];
-$teacher_name  = $_SESSION['name'] ?? 'Your Teacher';
+$teacherDisplayName = 'Teacher';
+if ($userData) {
+    $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
+    $teacherDisplayName = trim($userData['title'] . ' ' . $firstInitial . ' ' . $userData['surname']);
+}
 
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($yearResult->num_rows === 0) {
@@ -26,8 +30,11 @@ $current_year_id  = (int)$yearResult->fetch_assoc()['id'];
 $termResult       = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
 $current_term     = $termResult ? (int)$termResult->fetch_assoc()['current_global_term'] : 1;
 
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_', '_'], ['', ' '], $dbName));
+// School name
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
+    ? $row['setting_value']
+    : $_SERVER['HTTP_HOST'];
 
 $title       = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
@@ -116,25 +123,115 @@ while ($learner = $learnersResult->fetch_assoc()) {
             $mail->addAddress($lEmail);
             $mail->isHTML(true);
             $mail->Subject = "New Evaluation: " . $title;
-            $mail->Body    = '
-            <div style="max-width:600px;margin:30px auto;font-family:Verdana,sans-serif;background:#161b22;border-radius:16px;overflow:hidden;">
-                <div style="padding:30px;background:#0d1117;text-align:center;">
-                    <h1 style="color:#4fd1c5;margin:0;">iSkool</h1>
-                </div>
-                <div style="padding:30px;color:#c9d1d9;">
-                    <h2 style="color:#4fd1c5;">New Evaluation: ' . htmlspecialchars($title) . '</h2>
-                    <p>Hi ' . htmlspecialchars($lName) . ',</p>
-                    <p>Your teacher has released a new evaluation. Please complete it.</p>
-                    <p style="text-align:center;">
-                        <a href="' . $evalLink . '" style="background:#4fd1c5;color:#000;padding:14px 28px;border-radius:25px;text-decoration:none;font-weight:bold;">
-                            Complete Evaluation
-                        </a>
-                    </p>
-                </div>
-                <div style="padding:20px;text-align:center;color:#8b949e;font-size:13px;">
-                    Powered by iSkool &copy; ' . date("Y") . '
-                </div>
-            </div>';
+       $mail->Body = '
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
+      <img src="https://iskool.online/apple-touch-icon.png"
+           width="72" height="72" alt="iSkool"
+           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
+      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
+        Learning Management System
+      </p>
+    </td>
+  </tr>
+
+  <!-- HERO -->
+
+  <!-- SCHOOL + TEACHER ROW -->
+  <tr>
+    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
+      <p style="margin:0;font-size:13px;color:#8b949e;">
+        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
+      </p>
+    </td>
+  </tr>
+
+  <!-- BODY -->
+  <tr>
+    <td style="background:#ffffff;padding:40px;">
+
+      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
+        Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has released a new evaluation and needs your honest feedback.
+      </p>
+
+      <!-- EVALUATION TITLE BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
+              Evaluation
+            </p>
+            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
+              ' . htmlspecialchars($title) . '
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- INFO BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3e5f5;border:1px solid #ce93d8;border-radius:8px;margin-bottom:28px;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <p style="margin:0;font-size:13px;color:#6a1b9a;line-height:1.7;">
+              Your feedback helps your teacher adjust their teaching style. 
+              All responses are <strong>anonymous</strong> and will not affect your grades.
+              Please be honest and thoughtful.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
+        </tr>
+      </table>
+
+      <!-- FROM -->
+      <p style="margin:0;font-size:13px;color:#888;">
+        Released by
+        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
+      </p>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
+        iSkool LMS · Johannesburg, South Africa
+      </p>
+      <p style="margin:0;font-size:12px;color:#484f58;">
+        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
+      </p>
+      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
+        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>';
             $mail->send();
         } catch (Exception $e) {
             error_log("Eval email failed to $lEmail: " . $mail->ErrorInfo);

@@ -71,6 +71,8 @@ function afterHomeRender() {
             window.learnerCalState.month,
             window.learnerCalState.year
         );
+          if (typeof window.showLearnerCalIcon === 'function') window.showLearnerCalIcon();
+
     }
 }
 
