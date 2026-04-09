@@ -27,10 +27,11 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #
 
 /* NAV */
 nav {
-  position: relative;
-  background: rgba(255,255,255,0.95);
+  position: sticky;
+  top: 0;
+  background: #fff;
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #eee;
+  border-bottom: none;
   padding: 14px 5%;
   display: flex; align-items: center; justify-content: space-between;
   z-index: 1000;
@@ -54,7 +55,7 @@ nav {
 .mobile-menu {
   display: none;
   position: absolute; top: 100%; left: 0; right: 0;
-  background: white; border-bottom: 1px solid #eee;
+  background: white; border-bottom: none;
   padding: 20px 5%; z-index: 999;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
@@ -63,7 +64,7 @@ nav {
 .mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
 /* HERO */
-.hero { padding: 96px 20px 80px; text-align: center; position: relative; background: #fff; overflow: hidden; z-index: 1; }
+.hero { padding: 96px 5% 80px; text-align: center; position: relative; background: #fff; overflow: hidden; z-index: 1; }
 .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 28px 28px; opacity: 0.45; pointer-events: none; }
 .trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
 .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
@@ -72,6 +73,19 @@ nav {
 .hero h1 span { color: var(--gold); }
 .hero p { font-size: clamp(16px, 2vw, 20px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
 .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
+
+/* Desktop hero split: title left, subtext+buttons right */
+.hero-inner { position: relative; z-index: 1; }
+@media (min-width: 900px) {
+  .hero { text-align: left; }
+  .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; max-width: 1200px; margin: 0 auto; }
+  .hero-left { display: flex; flex-direction: column; align-items: flex-start; }
+  .hero-right { display: flex; flex-direction: column; align-items: flex-start; }
+  .trust-badge { align-self: flex-start; }
+  .hero h1 { margin-bottom: 0; }
+  .hero p { margin: 0 0 36px; max-width: 100%; }
+  .hero-buttons { justify-content: flex-start; }
+}
 .btn { padding: 15px 32px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
 .btn:hover { transform: translateY(-2px); }
 .btn-outline { background: white; color: #111; border: 2px solid #ddd; }
@@ -306,8 +320,10 @@ nav {
 
 /* MOBILE */
 @media (max-width: 600px) {
-  .hero { padding: 88px 20px 80px; }
+  .hero { padding: 88px 20px 80px; text-align: center; }
   .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
+  .hero-left, .hero-right { align-items: center; }
+  .hero p { margin: 0 auto 40px; }
   .hero-buttons { flex-direction: column; align-items: center; }
   .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
   .pill-label-wrap { min-width: 120px; }
@@ -464,15 +480,21 @@ nav {
 
 <!-- HERO -->
 <section class="hero">
-  <div class="trust-badge sr">
-    <div class="trust-dot"></div>
-    Trusted by South African High Schools
-  </div>
-  <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
-  <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
-  <div class="hero-buttons sr sr-d3">
-    <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
-    <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="trust-badge sr">
+        <div class="trust-dot"></div>
+        Trusted by South African High Schools
+      </div>
+      <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
+    </div>
+    <div class="hero-right">
+      <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
+      <div class="hero-buttons sr sr-d3">
+        <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
+        <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
+      </div>
+    </div>
   </div>
 </section>
 
