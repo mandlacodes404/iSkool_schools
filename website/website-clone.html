@@ -29,16 +29,17 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #
 
 /* NAV */
 nav {
-  position: sticky;
+  position: fixed;
   top: 0;
-  background: #fff;
+  left: 0;
+  right: 0;
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(12px);
   border-bottom: none;
   padding: 14px 5%;
   display: flex; align-items: center; justify-content: space-between;
   z-index: 1000;
   overflow: visible;
-  max-width: 100%;
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -67,24 +68,24 @@ nav {
 .mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
 /* HERO */
-.hero { padding: 96px 5% 80px; text-align: center; position: relative; background: #fff; overflow: hidden; z-index: 1; }
+.hero { padding: 140px 5% 72px; text-align: center; position: relative; background: #fff; overflow: hidden; z-index: 1; }
 .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 28px 28px; opacity: 0.45; pointer-events: none; }
 .trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
 .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
 @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
-.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 24px; position: relative; }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 3.8vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 24px; position: relative; }
 .hero h1 span { color: var(--gold); }
-.hero p { font-size: clamp(16px, 2vw, 20px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
+.hero p { font-size: clamp(15px, 1.5vw, 18px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
 .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
 
 /* Desktop hero split: title left, subtext+buttons right */
 .hero-inner { position: relative; z-index: 1; }
 @media (min-width: 900px) {
-  .hero { text-align: left; }
+  .hero { text-align: left; padding: 120px 5% 64px; }
   .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; max-width: 1200px; margin: 0 auto; }
   .hero-left { display: flex; flex-direction: column; align-items: flex-start; }
   .hero-right { display: flex; flex-direction: column; align-items: flex-start; }
-  .trust-badge { align-self: flex-start; }
+  .trust-badge { display: none; } /* hidden on desktop */
   .hero h1 { margin-bottom: 0; }
   .hero p { margin: 0 0 36px; max-width: 100%; }
   .hero-buttons { justify-content: flex-start; }
