@@ -17,6 +17,8 @@
   --dark: #0f0f12;
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* Prevent horizontal overflow globally on mobile */
+html, body { overflow-x: hidden; max-width: 100%; }
 /* ── Global scroll-reveal ── */
 .sr { opacity: 0; transform: translateY(44px); transition: opacity 0.75s ease, transform 0.75s ease; }
 .sr.sr-visible { opacity: 1; transform: translateY(0); }
@@ -36,6 +38,7 @@ nav {
   display: flex; align-items: center; justify-content: space-between;
   z-index: 1000;
   overflow: visible;
+  max-width: 100%;
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -69,7 +72,7 @@ nav {
 .trust-badge { display: inline-flex; align-items: center; gap: 8px; background: #fef9e6; border: 1px solid #f5c84250; color: #d97706; padding: 8px 22px; border-radius: 50px; font-size: 14px; font-weight: 600; margin-bottom: 28px; position: relative; }
 .trust-dot { width: 8px; height: 8px; border-radius: 50%; background: #d97706; animation: pulse-dot 2s ease-in-out infinite; }
 @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
-.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px, 7vw, 80px); font-weight: 800; line-height: 1.05; letter-spacing: -2.5px; margin-bottom: 24px; position: relative; }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 24px; position: relative; }
 .hero h1 span { color: var(--gold); }
 .hero p { font-size: clamp(16px, 2vw, 20px); color: #555; max-width: 660px; margin: 0 auto 40px; line-height: 1.65; position: relative; }
 .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
@@ -85,6 +88,14 @@ nav {
   .hero h1 { margin-bottom: 0; }
   .hero p { margin: 0 0 36px; max-width: 100%; }
   .hero-buttons { justify-content: flex-start; }
+}
+/* Fix any child sections that might overflow on mobile */
+@media (max-width: 900px) {
+  * { max-width: 100%; }
+  img, svg, video, iframe { max-width: 100%; height: auto; }
+  .pill-switcher { max-width: calc(100vw - 40px); }
+  .demo-card { max-width: 100%; }
+  .mock-panel { max-width: 100%; }
 }
 .btn { padding: 15px 32px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
 .btn:hover { transform: translateY(-2px); }
@@ -320,17 +331,18 @@ nav {
 
 /* MOBILE */
 @media (max-width: 600px) {
-  .hero { padding: 88px 20px 80px; text-align: center; }
-  .hero h1 { letter-spacing: -1.5px; line-height: 1.1; }
+  .hero { padding: 88px 20px 80px; text-align: center; overflow: hidden; }
+  .hero h1 { letter-spacing: -1.5px; line-height: 1.1; font-size: clamp(30px, 8vw, 48px); }
   .hero-left, .hero-right { align-items: center; }
   .hero p { margin: 0 auto 40px; }
+  .trust-badge { align-self: center; }
   .hero-buttons { flex-direction: column; align-items: center; }
   .btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; }
   .pill-label-wrap { min-width: 120px; }
   .pill-arrow { width: 32px; height: 32px; font-size: 14px; }
   .feature-section { padding: 60px 5% 130px; }
   .feature-inner { gap: 36px; padding-top: 32px; }
-  .stack-wrapper { height: 340px; margin-bottom: 130px; } /* EDIT: increased margin-bottom from 60px to 130px to prevent stacked cards overlapping the copy text on mobile */
+  .stack-wrapper { height: 340px; margin-bottom: 130px; }
   .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
   .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
   .demo-card { padding: 18px; }
