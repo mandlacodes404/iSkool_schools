@@ -58,13 +58,16 @@ nav {
 .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
 .nav-hamburger span { display: block; width: 24px; height: 2px; background: #111; border-radius: 2px; }
 .mobile-menu {
-  display: none;
+  display: flex; flex-direction: column;
   position: absolute; top: 100%; left: 0; right: 0;
   background: #f5f0eb; border-bottom: none;
-  padding: 20px 5%; z-index: 999;
+  padding: 0 5%; z-index: 999;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.mobile-menu.open { display: flex; flex-direction: column; }
+.mobile-menu.open { max-height: 400px; padding: 20px 5%; }
 .mobile-menu a, .mobile-menu button { text-decoration: none; color: #333; font-weight: 500; font-size: 16px; padding: 14px 0; border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: left; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: block; width: 100%; }
 .mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 14px 22px; border-radius: 50px; font-weight: 600; text-align: center; border: none; border-bottom: none; }
 
@@ -1021,6 +1024,12 @@ startCardCycle(0);
 function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
 }
+function closeMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+document.querySelectorAll('#mobileMenu a, #mobileMenu button').forEach(el => {
+  el.addEventListener('click', closeMenu);
+});
 </script>
 
 <!-- ===================== COMPARISON SECTION ===================== -->
