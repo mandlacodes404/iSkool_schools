@@ -591,6 +591,7 @@ body {
   <div class="pers-form">
     <input class="pers-input" id="persName" type="text" placeholder="Your full name (e.g. Thabo Nkosi)" autocomplete="off">
     <input class="pers-input" id="persSchool" type="text" placeholder="Your school name" autocomplete="off">
+    <input class="pers-input" id="persCode" type="password" placeholder="Access code" autocomplete="off">
     <button class="pers-btn" onclick="launchDemo()">
       Launch Demo &nbsp;→
     </button>
@@ -761,8 +762,11 @@ function getSchoolInitials(school) { return school.trim().split(/\s+/).map(w=>w[
 function launchDemo() {
   const nameVal = document.getElementById('persName').value.trim();
   const schoolVal = document.getElementById('persSchool').value.trim();
+  const codeVal = document.getElementById('persCode').value.trim();
   if (!nameVal) { document.getElementById('persName').focus(); showToast('Please enter your name'); return; }
   if (!schoolVal) { document.getElementById('persSchool').focus(); showToast('Please enter your school name'); return; }
+  if (codeVal !== 'TEACHER2025') { document.getElementById('persCode').focus(); document.getElementById('persCode').style.borderColor='#f85149'; showToast('❌ Incorrect access code'); return; }
+  document.getElementById('persCode').style.borderColor='';
   TEACHER.name = nameVal; TEACHER.firstName = getFirstName(nameVal);
   TEACHER.initials = getInitials(nameVal);
   TEACHER.email = nameVal.toLowerCase().replace(/\s+/g,'.') + '@iskool.demo';
