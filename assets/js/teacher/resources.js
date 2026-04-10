@@ -32,7 +32,6 @@ window.fetchTeacherResources = async function() {
             </p>`;
     } finally {
         if (loader) loader.style.display = 'none';
-       
     }
 };
 
@@ -40,52 +39,294 @@ function renderTeacherResources(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    // ── Store flat list for desktop panel lookup ──
+    window._allResourcesFlat = [];
+    if (data && data.length > 0) {
+        data.forEach(group => {
+            group.items.forEach(item => {
+                window._allResourcesFlat.push({ ...item, class_name: group.class_name });
+            });
+        });
+    }
+
+    // ── Build left sidebar list ──
+    let sidebarHtml = '';
+    if (!data || data.length === 0) {
+        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No resources uploaded yet.</p>`;
+    } else {
+        data.forEach(group => {
+            sidebarHtml += `<div class="rs-sidebar-class-label">${group.class_name}</div>`;
+            group.items.forEach(item => {
+                const flatIndex = window._allResourcesFlat.findIndex(r => r.id === item.id);
+                sidebarHtml += `
+                    <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
+                        onclick="selectDesktopResource(${flatIndex})">
+                        <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext)}</div>
+                        <div class="rs-sidebar-item-info">
+                            <div class="rs-sidebar-item-title">${item.title}</div>
+                            <div class="rs-sidebar-item-meta">${item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    // ── Build full HTML ──
     let html = `
+        <style>
+            @media (min-width: 900px) {
+                .rs-desktop-layout { display: flex !important; }
+                .rs-mobile-list    { display: none !important; }
+            }
+            @media (max-width: 899px) {
+                .rs-desktop-layout { display: none !important; }
+                .rs-mobile-list    { display: block !important; }
+            }
+
+            .rs-desktop-layout {
+                display: flex;
+                gap: 0;
+                height: calc(100vh - 140px);
+                min-height: 500px;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                margin-top: 12px;
+            }
+
+            .rs-sidebar {
+                width: 280px;
+                min-width: 240px;
+                max-width: 300px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            .rs-sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                color: #4fd1c5;
+                text-transform: uppercase;
+                flex-shrink: 0;
+            }
+            .rs-sidebar-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            .rs-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .rs-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .rs-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .rs-sidebar-class-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .rs-sidebar-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+                transition: all 0.15s ease;
+            }
+            .rs-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .rs-sidebar-item.active {
+                background: rgba(79,209,197,0.08);
+                border-left-color: #4fd1c5;
+            }
+            .rs-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .rs-sidebar-item-info { flex: 1; min-width: 0; }
+            .rs-sidebar-item-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #c9d1d9;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .rs-sidebar-item.active .rs-sidebar-item-title { color: #e2e8f0; }
+            .rs-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+
+            .rs-main-panel {
+                flex: 1;
+                background: #0d1117;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            .rs-main-panel::-webkit-scrollbar { width: 5px; }
+            .rs-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .rs-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .rs-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .rs-panel-empty svg { opacity: 0.3; }
+            .rs-panel-empty p { font-size: 14px; margin: 0; }
+
+            .rs-panel-content { padding: 28px 32px; }
+
+            .rs-panel-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-wrap: wrap;
+            }
+            .rs-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 6px;
+            }
+            .rs-panel-meta {
+                font-size: 13px;
+                color: #8b949e;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .rs-panel-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+            .rs-panel-preview {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 12px;
+                padding: 40px 32px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 16px;
+                min-height: 200px;
+            }
+            .rs-panel-preview-label {
+                font-size: 14px;
+                color: #8b949e;
+                text-align: center;
+                line-height: 1.6;
+            }
+            .rs-panel-open-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(79,209,197,0.12);
+                border: 1px solid rgba(79,209,197,0.3);
+                color: #4fd1c5;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background 0.15s;
+                text-decoration: none;
+            }
+            .rs-panel-open-btn:hover { background: rgba(79,209,197,0.2); }
+            .rs-panel-delete-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(248,81,73,0.1);
+                border: 1px solid rgba(248,81,73,0.25);
+                color: #f85149;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+            .rs-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+        </style>
+
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Resources</h2>
-            <button class="teacher-upload-btn" onclick="openUploadResourceModal()">
+            <button class="teacher-upload-btn" onclick="openUploadResourceForm()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 Upload Resource
             </button>
-        </div>`;
+        </div>
+
+        <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
+        <div class="rs-desktop-layout">
+            <div class="rs-sidebar">
+                <div class="rs-sidebar-header">All Resources</div>
+                <div class="rs-sidebar-scroll">${sidebarHtml}</div>
+            </div>
+            <div class="rs-main-panel" id="rs-main-panel">
+                <div class="rs-panel-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <p>Select a resource from the left to view it</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <div class="rs-mobile-list">`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No resources uploaded yet.</p>`;
-        apiArea.innerHTML = html;
-        
+    } else {
+        data.forEach(group => {
+            html += `<div class="teacher-resource-section">
+                <div class="teacher-resource-class-label">${group.class_name}</div>`;
+
+            group.items.forEach(item => {
+                const icon = getTeacherFileIcon(item.ext);
+                html += `
+                    <div class="teacher-resource-card" onclick="openTeacherResource('resources/${item.filename}')">
+                        <div class="teacher-resource-icon">${icon}</div>
+                        <div class="teacher-resource-info">
+                            <div class="teacher-resource-name">${item.title}</div>
+                            <div class="teacher-resource-meta">${item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                        </div>
+                        <button class="teacher-resource-delete" onclick="event.stopPropagation(); confirmDeleteResource(${item.id})">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6l-1 14H6L5 6"></path>
+                                <path d="M10 11v6"></path><path d="M14 11v6"></path>
+                                <path d="M9 6V4h6v2"></path>
+                            </svg>
+                        </button>
+                    </div>`;
+            });
+
+            html += `</div>`;
+        });
     }
 
-    data.forEach(group => {
-        html += `<div class="teacher-resource-section">
-            <div class="teacher-resource-class-label">${group.class_name}</div>`;
+    html += `</div>`; // close .rs-mobile-list
 
-        group.items.forEach(item => {
-            const icon = getTeacherFileIcon(item.ext);
-            html += `
-                <div class="teacher-resource-card" onclick="openTeacherResource('resources/${item.filename}')">
-                    <div class="teacher-resource-icon">${icon}</div>
-                    <div class="teacher-resource-info">
-                        <div class="teacher-resource-name">${item.title}</div>
-                        <div class="teacher-resource-meta">${item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
-                    </div>
-                    <button class="teacher-resource-delete" onclick="event.stopPropagation(); confirmDeleteResource(${item.id})">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14H6L5 6"></path>
-                            <path d="M10 11v6"></path><path d="M14 11v6"></path>
-                            <path d="M9 6V4h6v2"></path>
-                        </svg>
-                    </button>
-                </div>`;
-        });
-
-        html += `</div>`;
-    });
-
-    // Upload Modal
+    // Delete modal (shared desktop+mobile) + Upload modal (mobile only)
     html += `
         <div id="uploadResourceModal" class="teacher-modal-overlay" style="display:none;">
             <div class="teacher-modal-box">
@@ -147,10 +388,9 @@ function renderTeacherResources(data) {
 
     apiArea.innerHTML = html;
 
-    // Setup file drop area
+    // Wire up file drop for mobile modal
     const dropArea = document.getElementById('teacherFileDropArea');
     const fileInput = document.getElementById('resourceFile');
-
     dropArea?.addEventListener('click', () => fileInput.click());
     dropArea?.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('dragover'); });
     dropArea?.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
@@ -162,7 +402,150 @@ function renderTeacherResources(data) {
     });
     fileInput?.addEventListener('change', updateFileName);
 
-    // Load classes into dropdown
+    loadResourceClasses();
+}
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT RESOURCE
+// ─────────────────────────────────────────────
+window.selectDesktopResource = function(flatIndex) {
+    document.querySelectorAll('.rs-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`rs-sidebar-${flatIndex}`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    const item = (window._allResourcesFlat || [])[flatIndex];
+    if (!item) return;
+
+    const panel = document.getElementById('rs-main-panel');
+    if (!panel) return;
+
+    const icon = getTeacherFileIcon(item.ext);
+    const bigIcon = icon.replace('width="22"', 'width="52"').replace('height="22"', 'height="52"');
+
+    panel.innerHTML = `
+        <div class="rs-panel-content">
+            <div class="rs-panel-header">
+                <div>
+                    <div class="rs-panel-title">${item.title}</div>
+                    <div class="rs-panel-meta">
+                        <span>${item.class_name}</span>
+                        <span>&bull;</span>
+                        <span>${item.ext.toUpperCase()}</span>
+                        <span>&bull;</span>
+                        <span>${item.uploaded_at}</span>
+                    </div>
+                </div>
+                <div class="rs-panel-actions">
+                    <button class="rs-panel-delete-btn" onclick="confirmDeleteResource(${item.id})">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14H6L5 6"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="rs-panel-preview">
+                <div style="opacity:0.55;">${bigIcon}</div>
+                <div class="rs-panel-preview-label">
+                    <strong style="color:#c9d1d9;">${item.title}</strong><br>
+                    <span style="font-size:12px;">${item.ext.toUpperCase()} &middot; Uploaded ${item.uploaded_at}</span>
+                </div>
+                <a href="resources/${item.filename}" target="_blank" class="rs-panel-open-btn">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Open File
+                </a>
+            </div>
+        </div>`;
+};
+
+// ─────────────────────────────────────────────
+// ROUTER: panel on desktop, modal on mobile
+// ─────────────────────────────────────────────
+window.openUploadResourceForm = function() {
+    const panel = document.getElementById('rs-main-panel');
+    if (window.innerWidth >= 900 && panel) {
+        openUploadResourcePanel(panel);
+    } else {
+        openUploadResourceModal();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL FORM
+// ─────────────────────────────────────────────
+function openUploadResourcePanel(panel) {
+    document.querySelectorAll('.rs-sidebar-item').forEach(el => el.classList.remove('active'));
+
+    panel.innerHTML = `
+        <div class="rs-panel-content">
+            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
+                        display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">Upload Resource</div>
+                <button onclick="fetchTeacherResources()"
+                    style="background:none;border:none;color:#8b949e;font-size:22px;
+                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            </div>
+
+            <label class="teacher-modal-label">Resource Title</label>
+            <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes">
+
+            <label class="teacher-modal-label">Select Class</label>
+            <select id="resourceClass" class="teacher-modal-input">
+                <option value="">-- Choose Class --</option>
+            </select>
+
+            <label class="teacher-modal-label">Select File (Max 10MB)</label>
+            <div class="teacher-file-drop" id="teacherFileDropArea">
+                <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>Click or drag file here</p>
+                <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+            </div>
+            <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+
+            <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                <input type="checkbox" id="resourceForceEmail">
+                Also send email notification
+            </label>
+
+            <div id="uploadResourceError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;">
+                <button onclick="fetchTeacherResources()"
+                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    Cancel
+                </button>
+                <button onclick="submitUploadResource()"
+                    class="teacher-modal-submit" id="uploadResourceSubmitBtn"
+                    style="flex:2;padding:13px;font-size:14px;">
+                    Upload Resource
+                </button>
+            </div>
+        </div>`;
+
+    const dropArea = document.getElementById('teacherFileDropArea');
+    const fileInput = document.getElementById('resourceFile');
+    dropArea?.addEventListener('click', () => fileInput.click());
+    dropArea?.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('dragover'); });
+    dropArea?.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea?.addEventListener('drop', e => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        updateFileName();
+    });
+    fileInput?.addEventListener('change', updateFileName);
+
     loadResourceClasses();
 }
 
@@ -199,28 +582,28 @@ window.openUploadResourceModal = function() {
 window.closeUploadResourceModal = function() {
     const modal = document.getElementById('uploadResourceModal');
     if (modal) modal.style.display = 'none';
-    document.getElementById('resourceTitle').value = '';
-    document.getElementById('resourceClass').value = '';
-    document.getElementById('resourceFile').value = '';
-    document.getElementById('resourceFileName').textContent = '';
-    document.getElementById('uploadResourceError').style.display = 'none';
+    const t  = document.getElementById('resourceTitle');      if (t)  t.value = '';
+    const c  = document.getElementById('resourceClass');      if (c)  c.value = '';
+    const f  = document.getElementById('resourceFile');       if (f)  f.value = '';
+    const fn = document.getElementById('resourceFileName');   if (fn) fn.textContent = '';
+    const err = document.getElementById('uploadResourceError'); if (err) err.style.display = 'none';
 };
 
 window.submitUploadResource = async function() {
-    const title    = document.getElementById('resourceTitle').value.trim();
-    const classId  = document.getElementById('resourceClass').value;
-    const file     = document.getElementById('resourceFile').files[0];
-    const forceEmail = document.getElementById('resourceForceEmail').checked;
-    const errorDiv = document.getElementById('uploadResourceError');
-    const submitBtn = document.getElementById('uploadResourceSubmitBtn');
-    const loader   = document.getElementById('loaderOverlay');
+    const title      = document.getElementById('resourceTitle')?.value.trim();
+    const classId    = document.getElementById('resourceClass')?.value;
+    const file       = document.getElementById('resourceFile')?.files[0];
+    const forceEmail = document.getElementById('resourceForceEmail')?.checked;
+    const errorDiv   = document.getElementById('uploadResourceError');
+    const submitBtn  = document.getElementById('uploadResourceSubmitBtn');
+    const loader     = document.getElementById('loaderOverlay');
 
-    errorDiv.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
 
-    if (!title) { errorDiv.textContent = 'Please enter a title.'; errorDiv.style.display = 'block'; return; }
-    if (!classId) { errorDiv.textContent = 'Please select a class.'; errorDiv.style.display = 'block'; return; }
-    if (!file) { errorDiv.textContent = 'Please select a file.'; errorDiv.style.display = 'block'; return; }
-    if (file.size > 10 * 1024 * 1024) { errorDiv.textContent = 'File too large. Max 10MB.'; errorDiv.style.display = 'block'; return; }
+    if (!title)   { if (errorDiv) { errorDiv.textContent = 'Please enter a title.';   errorDiv.style.display = 'block'; } return; }
+    if (!classId) { if (errorDiv) { errorDiv.textContent = 'Please select a class.';  errorDiv.style.display = 'block'; } return; }
+    if (!file)    { if (errorDiv) { errorDiv.textContent = 'Please select a file.';   errorDiv.style.display = 'block'; } return; }
+    if (file.size > 10 * 1024 * 1024) { if (errorDiv) { errorDiv.textContent = 'File too large. Max 10MB.'; errorDiv.style.display = 'block'; } return; }
 
     const fd = new FormData();
     fd.append('title', title);
@@ -228,8 +611,7 @@ window.submitUploadResource = async function() {
     fd.append('resource', file);
     if (forceEmail) fd.append('force_email', '1');
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Uploading...';
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
     if (loader) loader.style.display = 'flex';
 
     try {
@@ -237,19 +619,17 @@ window.submitUploadResource = async function() {
         const data = await res.json();
 
         if (data.success) {
-            closeUploadResourceModal();
+            const modal = document.getElementById('uploadResourceModal');
+            if (modal && modal.style.display === 'flex') closeUploadResourceModal();
             window.teacherResourceCache = null;
             fetchTeacherResources();
         } else {
-            errorDiv.textContent = data.error || 'Upload failed.';
-            errorDiv.style.display = 'block';
+            if (errorDiv) { errorDiv.textContent = data.error || 'Upload failed.'; errorDiv.style.display = 'block'; }
         }
     } catch (e) {
-        errorDiv.textContent = 'Connection error. Please try again.';
-        errorDiv.style.display = 'block';
+        if (errorDiv) { errorDiv.textContent = 'Connection error. Please try again.'; errorDiv.style.display = 'block'; }
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Upload';
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Upload'; }
         if (loader) loader.style.display = 'none';
     }
 };
