@@ -2425,7 +2425,7 @@ function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.t
 <script src="assets/js/learner/manual.js?v=1.8"></script>
 <script src="assets/js/learner/quiz.js?v=3.4"></script>
 <script src="assets/js/learner/assignments.js?v=2.6"></script>
-<script src="assets/js/learner/resources.js?v=2.4"></script>
+<script src="assets/js/learner/resources.js?v=2.5"></script>
 <script src="assets/js/learner/announcements.js?v=1.7"></script>
 <script src="assets/js/learner/grades.js?v=1.6"></script>
 <script src="assets/js/learner/evaluations.js?v=1.6"></script>

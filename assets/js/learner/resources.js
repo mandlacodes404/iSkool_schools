@@ -180,6 +180,7 @@ function renderResourceCards(data) {
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
+                overflow: hidden;
             }
             .lrs-main-panel::-webkit-scrollbar { width: 5px; }
             .lrs-main-panel::-webkit-scrollbar-track { background: transparent; }
@@ -351,7 +352,7 @@ function renderResourceCards(data) {
 }
 
 // ─────────────────────────────────────────────
-// DESKTOP PANEL: SELECT RESOURCE
+// DESKTOP PANEL: SELECT RESOURCE (inline preview)
 // ─────────────────────────────────────────────
 window.selectDesktopLearnerResource = function(flatIdx) {
     document.querySelectorAll('.lrs-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -364,37 +365,165 @@ window.selectDesktopLearnerResource = function(flatIdx) {
     const panel = document.getElementById('lrs-main-panel');
     if (!panel) return;
 
-    const icon = getFileIcon(file.ext);
+    const ext  = (file.ext || '').toLowerCase();
+    const path = file.path;
+    const safeTitle = file.title.replace(/'/g, "\\'");
+
+    // ── Build preview area based on file type ──
+    let previewHtml = '';
+
+    if (ext === 'pdf') {
+        previewHtml = `
+            <div class="lrs-preview-wrap">
+                <iframe
+                    src="${path}"
+                    class="lrs-preview-iframe"
+                    title="${file.title}">
+                </iframe>
+            </div>`;
+    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        previewHtml = `
+            <div class="lrs-preview-wrap lrs-preview-img-wrap">
+                <img src="${path}" alt="${file.title}" class="lrs-preview-img">
+            </div>`;
+    } else {
+        // Non-previewable file — show fallback
+        const icon = getFileIcon(file.ext);
+        previewHtml = `
+            <div class="lrs-preview-fallback">
+                <div style="opacity:0.5;">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
+                <p class="lrs-preview-fallback-label">Preview not available for .${ext.toUpperCase()} files</p>
+                <a href="${path}" target="_blank" class="lrs-open-btn" style="margin-top:0;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Open File
+                </a>
+            </div>`;
+    }
 
     panel.innerHTML = `
-        <div class="lrs-panel-content">
-            <div class="lrs-panel-header">
-                <div class="lrs-panel-icon" style="transform:scale(1.6);transform-origin:top left;margin-right:8px;">
-                    ${icon}
-                </div>
-                <div>
-                    <div class="lrs-panel-title">${file.title}</div>
-                    <div class="lrs-panel-meta">
-                        <span>${file.teacher}</span>
-                        <span>&bull;</span>
-                        <span>${file.ext ? file.ext.toUpperCase() : 'FILE'}</span>
-                        <span>&bull;</span>
-                        <span>${file.size || 'N/A'}</span>
-                        <span>&bull;</span>
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="#8b949e" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span>Uploaded: ${file.uploaded_at}</span>
-                    </div>
+        <style>
+            .lrs-preview-topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 14px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-shrink: 0;
+                flex-wrap: wrap;
+            }
+            .lrs-preview-topbar-info { flex: 1; min-width: 0; }
+            .lrs-preview-topbar-title {
+                font-size: 14px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lrs-preview-topbar-meta {
+                font-size: 11px;
+                color: #555e6a;
+                margin-top: 2px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lrs-preview-topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+            .lrs-preview-open-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(79,209,197,0.1);
+                border: 1px solid rgba(79,209,197,0.3);
+                color: #4fd1c5;
+                padding: 7px 14px;
+                border-radius: 7px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background 0.15s;
+            }
+            .lrs-preview-open-btn:hover { background: rgba(79,209,197,0.2); }
+            .lrs-preview-wrap {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                min-height: 0;
+            }
+            .lrs-preview-iframe {
+                flex: 1;
+                width: 100%;
+                height: 100%;
+                border: none;
+                background: #fff;
+                display: block;
+            }
+            .lrs-preview-img-wrap {
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                background: rgba(255,255,255,0.02);
+                overflow-y: auto;
+            }
+            .lrs-preview-img {
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 8px;
+                object-fit: contain;
+                box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+            }
+            .lrs-preview-fallback {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 16px;
+                padding: 40px;
+                color: #555e6a;
+            }
+            .lrs-preview-fallback-label {
+                font-size: 14px;
+                color: #555e6a;
+                margin: 0;
+                text-align: center;
+            }
+        </style>
+
+        <!-- Top bar: title + open-in-new-tab button -->
+        <div class="lrs-preview-topbar">
+            <div class="lrs-preview-topbar-info">
+                <div class="lrs-preview-topbar-title">${file.title}</div>
+                <div class="lrs-preview-topbar-meta">
+                    <span>${file.teacher}</span>
+                    <span>&bull;</span>
+                    <span>${ext ? ext.toUpperCase() : 'FILE'}</span>
+                    <span>&bull;</span>
+                    <span>${file.size || 'N/A'}</span>
+                    <span>&bull;</span>
+                    <span>${file.uploaded_at}</span>
                 </div>
             </div>
-            <button class="lrs-open-btn"
-                onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                Open Resource
-            </button>
-        </div>`;
+            <div class="lrs-preview-topbar-actions">
+                <a href="${path}" target="_blank" class="lrs-preview-open-btn">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Open in new tab
+                </a>
+            </div>
+        </div>
+
+        ${previewHtml}`;
 };
 
 function getFileIcon(ext) {
