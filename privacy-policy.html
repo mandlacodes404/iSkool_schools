@@ -14,13 +14,13 @@
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', system-ui, sans-serif; background: #fff; color: #111; line-height: 1.6; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color: #111; line-height: 1.6; }
 
 /* ── NAV ── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
-  border-bottom: 1px solid #eee; padding: 14px 5%;
+  background: rgba(245,240,235,0.97); backdrop-filter: blur(12px);
+  padding: 14px 5%;
   display: flex; align-items: center; justify-content: space-between;
 }
 .nav-logo {
@@ -39,7 +39,7 @@ nav {
 
 /* ── HERO BANNER ── */
 .legal-hero {
-  background: var(--dark);
+  background: #f5f0eb;
   padding: 140px 5% 72px;
   position: relative;
   overflow: hidden;
@@ -47,16 +47,17 @@ nav {
 .legal-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(79,209,197,0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.45;
   pointer-events: none;
 }
 .legal-hero-inner { max-width: 860px; margin: 0 auto; position: relative; }
 .legal-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(79,209,197,0.12);
-  border: 1px solid rgba(79,209,197,0.25);
-  color: var(--gold);
+  background: #fef9e6;
+  border: 1px solid rgba(245,200,66,0.4);
+  color: #d97706;
   padding: 6px 18px; border-radius: 50px;
   font-size: 12px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
@@ -66,18 +67,18 @@ nav {
   font-family: 'Syne', sans-serif;
   font-size: clamp(36px, 5vw, 60px);
   font-weight: 800; line-height: 1.06;
-  letter-spacing: -2px; color: #fff;
+  letter-spacing: -2px; color: #111;
   margin-bottom: 16px;
 }
-.legal-hero h1 span { color: var(--gold); }
+.legal-hero h1 span { color: #d4a800; }
 .legal-meta {
   display: flex; flex-wrap: wrap; gap: 24px;
   margin-top: 28px;
 }
 .legal-meta-item {
-  font-size: 13px; color: rgba(255,255,255,0.45);
+  font-size: 13px; color: #888;
 }
-.legal-meta-item strong { color: rgba(255,255,255,0.7); font-weight: 600; }
+.legal-meta-item strong { color: #444; font-weight: 600; }
 
 /* ── CONTENT LAYOUT ── */
 .legal-wrap {
@@ -358,7 +359,7 @@ nav {
         <li>The right to object to the processing of your personal information in certain circumstances.</li>
         <li>The right to lodge a complaint with the Information Regulator of South Africa if you believe your rights have been violated.</li>
       </ul>
-      <p>To exercise any of these rights, contact us at <strong>privacy@iskool.co.za</strong>.</p>
+      <p>To exercise any of these rights, contact us at <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="addddfc4dbccced4edc4dec6c2c2c183cec283d7cc">[email&#160;protected]</a></strong>.</p>
     </div>
 
     <div class="legal-section" id="s9">
@@ -380,7 +381,7 @@ nav {
       <div class="legal-contact-grid">
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Email</div>
-          <a href="mailto:privacy@iskool.co.za">privacy@iskool.co.za</a>
+          <a href="/cdn-cgi/l/email-protection#acdcdec5dacdcfd5ecc5dfc7c3c3c082cfc382d6cd"><span class="__cf_email__" data-cfemail="19696b706f787a6059706a72767675377a76376378">[email&#160;protected]</span></a>
         </div>
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Address</div>
@@ -402,25 +403,13 @@ nav {
     <a href="website-clone.html">Home</a>
     <a href="privacy-policy.html">Privacy Policy</a>
     <a href="terms-of-service.html">Terms of Service</a>
-    <a href="mailto:legal@iskool.co.za">Contact</a>
+    <a href="/cdn-cgi/l/email-protection#a9c5cccec8c5e9c0dac2c6c6c587cac687d3c8">Contact</a>
   </div>
   <p>© 2026 iSkool (Pty) Ltd. All rights reserved. Johannesburg, South Africa.</p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* Active TOC link on scroll */
 const sections = document.querySelectorAll('.legal-section');
 const tocLinks = document.querySelectorAll('.toc-list a');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      tocLinks.forEach(l => l.classList.remove('active'));
-      const link = document.querySelector('.toc-list a[href="#' + entry.target.id + '"]');
-      if (link) link.classList.add('active');
-    }
-  });
-}, { rootMargin: '-20% 0px -70% 0px' });
-sections.forEach(s => observer.observe(s));
-</script>
-</body>
-</html>
+const observer = new IntersectionObse
