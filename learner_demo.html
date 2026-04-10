@@ -106,6 +106,29 @@ body {
   box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
 }
 .pers-input::placeholder { color: #555e6a; }
+@keyframes pers-shake {
+  0%,100% { transform: translateX(0); }
+  15%      { transform: translateX(-8px); }
+  30%      { transform: translateX(7px); }
+  45%      { transform: translateX(-6px); }
+  60%      { transform: translateX(5px); }
+  75%      { transform: translateX(-3px); }
+  90%      { transform: translateX(2px); }
+}
+.pers-input.pers-error {
+  border-color: #f85149;
+  box-shadow: 0 0 0 3px rgba(248,81,73,0.18);
+  animation: pers-shake 0.45s cubic-bezier(0.36,0.07,0.19,0.97);
+}
+.pers-error-msg {
+  font-size: 12.5px; font-weight: 700;
+  color: #f85149; text-align: center;
+  margin-top: -8px; margin-bottom: 12px;
+  opacity: 0; transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.pers-error-msg.show { opacity: 1; transform: translateY(0); }
 .pers-btn {
   width: 100%; background: #fff; color: #131314;
   border: none; border-radius: 24px; padding: 15px;
@@ -773,6 +796,7 @@ body {
     <input class="pers-input" id="persName" type="text" placeholder="Your full name (e.g. Thabo Mahlangu)" autocomplete="off">
     <input class="pers-input" id="persSchool" type="text" placeholder="Your school name" autocomplete="off">
     <input class="pers-input" id="persCode" type="password" placeholder="Access code" autocomplete="off">
+    <div class="pers-error-msg" id="persCodeErr">Incorrect access code — please try again</div>
     <button class="pers-btn" onclick="launchDemo()">Launch Demo &nbsp;→</button>
     <p class="pers-note">No account needed · Demo data only · Nothing is saved</p>
   </div>
@@ -905,8 +929,23 @@ function launchDemo() {
   const codeVal   = document.getElementById('persCode').value.trim();
   if (!nameVal)   { document.getElementById('persName').focus();   showToast('Please enter your name');        return; }
   if (!schoolVal) { document.getElementById('persSchool').focus(); showToast('Please enter your school name'); return; }
-  if (codeVal !== 'LEARNER2025') { document.getElementById('persCode').focus(); document.getElementById('persCode').style.borderColor='#f85149'; showToast('❌ Incorrect access code'); return; }
-  document.getElementById('persCode').style.borderColor='';
+  if (codeVal !== 'LEARNER2025') {
+    const inp = document.getElementById('persCode');
+    const err = document.getElementById('persCodeErr');
+    inp.focus();
+    inp.classList.remove('pers-error');
+    err.classList.remove('show');
+    void inp.offsetWidth; // force reflow to restart animation
+    inp.classList.add('pers-error');
+    err.classList.add('show');
+    inp.addEventListener('input', () => {
+      inp.classList.remove('pers-error');
+      err.classList.remove('show');
+    }, { once: true });
+    return;
+  }
+  document.getElementById('persCode').classList.remove('pers-error');
+  document.getElementById('persCodeErr').classList.remove('show');
   LEARNER.name      = nameVal;
   LEARNER.firstName = getFirstName(nameVal);
   LEARNER.initials  = getInitials(nameVal);
