@@ -222,21 +222,47 @@ nav {
 .feature-section { background: var(--dark); padding: 40px 5% 100px; }
 .feature-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 20px; }
 
-/* STACK */
-.stack-wrapper { position: relative; height: 420px; }
-.stack-layer { position: absolute; top: 0; left: 0; right: 0; transition: transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease; transform-origin: top center; will-change: transform, opacity; }
-.stack-layer[data-pos="0"] { z-index: 3; transform: translateY(0px) scale(1); opacity: 1; }
-.stack-layer[data-pos="1"] { z-index: 2; transform: translateY(56px) scale(0.95); opacity: 0.72; }
-.stack-layer[data-pos="2"] { z-index: 1; transform: translateY(104px) scale(0.905); opacity: 0.42; }
+/* BROWSER FRAME */
+.browser-frame { background: #1a1a24; border-radius: 16px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.07); }
+.browser-topbar { background: #13131c; padding: 10px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.browser-dots { display: flex; gap: 6px; }
+.browser-dot { width: 11px; height: 11px; border-radius: 50%; }
+.browser-dot:nth-child(1) { background: #f85149; }
+.browser-dot:nth-child(2) { background: #f5c842; }
+.browser-dot:nth-child(3) { background: #00c47a; }
+.browser-urlbar { flex: 1; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 5px 12px; font-size: 11.5px; color: rgba(255,255,255,0.3); font-family: 'DM Sans', sans-serif; }
+.browser-body { background: #f5f0eb; position: relative; height: 380px; overflow: hidden; }
+.screen { position: absolute; inset: 0; padding: 20px; opacity: 0; transition: opacity 0.7s ease; pointer-events: none; font-family: 'DM Sans', sans-serif; color: #111; }
+.screen.active { opacity: 1; pointer-events: auto; }
+/* screen internals */
+.sc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sc-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #111; }
+.sc-badge { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.sc-badge.green { background: rgba(0,196,122,0.15); color: #00a86b; }
+.sc-badge.orange { background: rgba(249,115,22,0.15); color: #f97316; }
+.sc-badge.blue { background: rgba(79,124,255,0.15); color: #4f7cff; }
+.sc-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: white; border-radius: 10px; margin-bottom: 7px; font-size: 13px; }
+.sc-row-label { flex: 1; font-weight: 500; }
+.sc-row-sub { font-size: 11px; color: #888; }
+.sc-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.sc-pill.green { background: rgba(0,196,122,0.12); color: #00a86b; }
+.sc-pill.orange { background: rgba(249,115,22,0.12); color: #f97316; }
+.sc-pill.red { background: rgba(248,81,73,0.12); color: #f85149; }
+.sc-pill.blue { background: rgba(79,124,255,0.12); color: #4f7cff; }
+.sc-pill.gold { background: rgba(245,200,66,0.12); color: #b8860b; }
+.sc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sc-dot.green { background: #00c47a; }
+.sc-dot.orange { background: #f97316; }
+.sc-dot.red { background: #f85149; }
+.sc-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.sc-stat { background: white; border-radius: 10px; padding: 12px 14px; }
+.sc-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.sc-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+.sc-progress-wrap { background: #e0dbd4; border-radius: 999px; height: 6px; overflow: hidden; margin-top: 6px; }
+.sc-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.sc-section-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 8px; }
 
-/* DEMO CARDS — fixed height so all cards are same size */
-.demo-card {
-  background: white; color: #111; border-radius: 20px; padding: 26px;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.45);
-  position: relative; overflow: hidden;
-  font-family: 'DM Sans', sans-serif; line-height: 1.6;
-}
-.demo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+/* demo-card removed */
 
 .card-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 16px; }
 .badge-quiz      { background: rgba(79,124,255,0.12); color: #4f7cff; }
@@ -328,7 +354,7 @@ nav {
   .feature-inner { grid-template-columns: 1fr; gap: 48px; padding-top: 48px; }
   .feature-inner > div:first-child { order: 1; }
   .feature-copy { order: 2; }
-  .stack-wrapper { height: 340px; }
+
 }
 
 /* MOBILE */
@@ -344,10 +370,7 @@ nav {
   .pill-arrow { width: 32px; height: 32px; font-size: 14px; }
   .feature-section { padding: 60px 5% 130px; }
   .feature-inner { gap: 36px; padding-top: 32px; }
-  .stack-wrapper { height: 340px; margin-bottom: 130px; }
-  .stack-layer[data-pos="1"] { transform: translateY(40px) scale(0.95); opacity: 0.72; }
-  .stack-layer[data-pos="2"] { transform: translateY(76px) scale(0.905); opacity: 0.42; }
-  .demo-card { padding: 18px; }
+  .browser-body { height: 320px; }
   .card-title { font-size: 16px; }
   .feature-copy h3 { font-size: 26px; }
   .feature-copy p { font-size: 15px; }
@@ -463,7 +486,7 @@ nav {
 <nav>
   <a href="#" class="nav-logo">
     <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
-      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#f5c842" stroke="none">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none">
         <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
       </g>
     </svg>
@@ -500,10 +523,10 @@ nav {
         <div class="trust-dot"></div>
         Trusted by South African High Schools
       </div>
-      <h1 class="sr sr-d1">The Only LMS That <span>Actually Works</span><br>for SA High Schools</h1>
+      <h1 class="sr sr-d1">We help schools <span>elevate using</span><br>digital tools</h1>
     </div>
     <div class="hero-right">
-      <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the South African curriculum.</p>
+      <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the Schools.</p>
       <div class="hero-buttons sr sr-d3">
         <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
         <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
@@ -548,405 +571,248 @@ nav {
   <div class="feature-inner">
     <div>
 
-      <!-- ── QUIZZES ── -->
-      <div class="tab-panel active" id="panel-0">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-quiz">📋 Quizzes</div>
-              <div class="card-title">Term 2 — Live Quizzes</div>
-              <div class="card-sub">2 open · 1 upcoming</div>
-              <div style="background:#f8f9fc;padding:14px;border-radius:12px;margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;align-items:start;">
-                  <div><strong>Quadratic Equations</strong><br><small style="color:#666;">Grade 12A · Maths · 15 Qs</small></div>
-                  <span class="percent-badge" style="background:#00c47a">Open</span>
-                </div>
-                <div style="margin-top:6px;font-size:12px;color:#00c47a;font-weight:600;">⏱ 42 min remaining</div>
-              </div>
-              <div style="background:#f8f9fc;padding:14px;border-radius:12px;">
-                <div style="display:flex;justify-content:space-between;">
-                  <div><strong>Functions &amp; Graphs</strong><br><small style="color:#666;">Grade 11B</small></div>
-                  <span class="percent-badge" style="background:#00c47a">Open</span>
-                </div>
-              </div>
-            </div>
+      <!-- BROWSER FRAME -->
+      <div class="browser-frame">
+        <div class="browser-topbar">
+          <div class="browser-dots">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
-              <div class="card-title">Integrity Monitor</div>
-              <div class="card-sub">Real-time quiz protection</div>
-              <p style="font-size:13.5px;line-height:1.6;margin-bottom:14px;color:#555;">Records every session. Detects tab switching, browser exit, or focus loss — question by question.</p>
-              <div style="background:#e6f7f0;color:#006d4e;padding:12px;border-radius:10px;font-weight:600;text-align:center;">✓ Verified &amp; Tested · Powered by AI</div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-quiz">📁 Assignment</div>
-              <div class="card-title">Chapter 5 – Calculus</div>
-              <div class="card-sub">Grade 12A · Due 20 May 2025</div>
-              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;">
-                <span><strong>18</strong> of 32 submitted</span>
-                <span style="color:var(--teal)">56% completion</span>
-              </div>
-            </div>
-          </div>
+          <div class="browser-urlbar">iskool.online/dashboard</div>
         </div>
-      </div>
+        <div class="browser-body">
 
-      <!-- ── ASSIGNMENTS ── -->
-      <div class="tab-panel" id="panel-1">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-assign">📁 Assignments</div>
-              <div class="card-title">Grade 12A — Term 2</div>
-              <div class="card-sub">4 assignments this term</div>
-              <div class="row-item"><div style="width:34px;height:34px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Chapter 5 — Calculus</div><div style="font-size:12px;color:#888;">Due 20 May · 18/32 submitted</div></div><span class="chip chip-orange">56%</span></div>
-              <div class="row-item"><div style="width:34px;height:34px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Trigonometry Worksheet</div><div style="font-size:12px;color:#888;">Due 28 May · 30/32 submitted</div></div><span class="chip chip-green">94%</span></div>
-              <div class="row-item"><div style="width:34px;height:34px;background:#fef9e6;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Statistics Investigation</div><div style="font-size:12px;color:#888;">Due 5 Jun · Not open yet</div></div><span class="chip chip-gold">Soon</span></div>
+          <!-- QUIZZES screen 0 -->
+          <div class="screen active" id="panel-0-a">
+            <div class="sc-section-label">📋 Quizzes — Live</div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Quadratic Equations</div><div class="sc-row-sub">Grade 12A · 15 questions · 42 min left</div></div>
+              <span class="sc-pill green">Open</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Functions &amp; Graphs</div><div class="sc-row-sub">Grade 11B · 10 questions</div></div>
+              <span class="sc-pill green">Open</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Calculus Introduction</div><div class="sc-row-sub">Grade 12B · Scheduled 16 May</div></div>
+              <span class="sc-pill blue">Upcoming</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-assign">📊 Submissions</div>
-              <div class="card-title">Calculus — Submissions</div>
-              <div class="card-sub">Deadline: 20 May 2025</div>
-              <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;"><span><strong>18</strong> submitted</span><span><strong>14</strong> pending</span></div>
-              <div class="row-item"><span class="status-dot dot-green"></span>Amahle Dube<span style="margin-left:auto;font-size:12px;color:#00c47a;font-weight:600">Submitted</span></div>
-              <div class="row-item"><span class="status-dot dot-orange"></span>Sipho Nkosi<span style="margin-left:auto;font-size:12px;color:var(--orange);font-weight:600">Late</span></div>
-              <div class="row-item"><span class="status-dot" style="background:#ddd;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></span>Thandi Mokoena<span style="margin-left:auto;font-size:12px;color:#aaa;font-weight:600">Pending</span></div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-assign">✅ Results</div>
-              <div class="card-title">Calculus — Marked</div>
-              <div class="card-sub">Auto-marked · 18 submitted</div>
-              <table class="table-mini">
-                <thead><tr><th>Learner</th><th>Score</th><th>Symbol</th></tr></thead>
-                <tbody>
-                  <tr><td>Amahle Dube</td><td>38/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
-                  <tr><td>Sipho Nkosi</td><td>29/40</td><td><span class="percent-badge" style="background:var(--orange)">C</span></td></tr>
-                  <tr><td>Thandi Mokoena</td><td>35/40</td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── AI INVIGILATOR ── -->
-      <div class="tab-panel" id="panel-2">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="live-badge"><div class="live-dot"></div>Live · 28 learners · updating every 3s</div>
-              <div class="card-badge badge-integrity">🛡 AI Invigilator</div>
-              <div class="card-title">Grade 12A — Live Monitor</div>
-              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Amahle Dube</span><span class="inv-status ok">Q 9/15</span></div>
-              <div class="inv-row flagged"><span class="status-dot dot-orange"></span><span class="inv-name">Sipho Nkosi</span><span class="inv-status warn">⚠ Tab switch</span></div>
-              <div class="inv-row"><span class="status-dot dot-green"></span><span class="inv-name">Thandi Mokoena</span><span class="inv-status ok">Q 7/15</span></div>
-              <div class="inv-row exited"><span class="status-dot dot-red"></span><span class="inv-name">Lerato Khumalo</span><span class="inv-status bad">⛔ Exit detected</span></div>
+          <!-- QUIZZES screen 1 -->
+          <div class="screen" id="panel-0-b">
+            <div class="sc-section-label">🛡 AI Invigilator — Live Session</div>
+            <div class="sc-row">
+              <div class="sc-dot green"></div>
+              <div style="flex:1"><div class="sc-row-label">Amahle Dube</div><div class="sc-row-sub">Q 9 of 15</div></div>
+              <span class="sc-pill green">On track</span>
+            </div>
+            <div class="sc-row" style="background:#fff5ed;">
+              <div class="sc-dot orange"></div>
+              <div style="flex:1"><div class="sc-row-label">Sipho Nkosi</div><div class="sc-row-sub">Tab switch detected · Q5</div></div>
+              <span class="sc-pill orange">⚠ Flagged</span>
+            </div>
+            <div class="sc-row">
+              <div class="sc-dot green"></div>
+              <div style="flex:1"><div class="sc-row-label">Thandi Mokoena</div><div class="sc-row-sub">Q 7 of 15</div></div>
+              <span class="sc-pill green">On track</span>
+            </div>
+            <div class="sc-row" style="background:#fff0f0;">
+              <div class="sc-dot red"></div>
+              <div style="flex:1"><div class="sc-row-label">Lerato Khumalo</div><div class="sc-row-sub">Browser exit detected</div></div>
+              <span class="sc-pill red">⛔ Exited</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-integrity">📋 Audit Trail</div>
-              <div class="card-title">Session Log — Sipho Nkosi</div>
-              <div class="card-sub">14 May 2025 · Quadratic Quiz</div>
-              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:02</span><span class="chip chip-green">Started quiz</span></div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-orange">Tab switch · Q5</span></div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:14</span><span class="chip chip-green">Returned · Q5</span></div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:28</span><span class="chip chip-orange">Tab switch · Q11</span></div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12.5px;"><span style="color:#aaa;width:44px;flex-shrink:0">09:47</span><span class="chip chip-blue">Submitted</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-integrity">📊 Report</div>
-              <div class="card-title">Integrity Summary</div>
-              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;">
-                <div class="stat-pill"><div class="stat-val" style="color:var(--teal);font-size:22px;">25</div><div class="stat-label">Clean</div></div>
-                <div class="stat-pill"><div class="stat-val" style="color:var(--orange);font-size:22px;">2</div><div class="stat-label">Flagged</div></div>
-                <div class="stat-pill"><div class="stat-val" style="color:var(--red);font-size:22px;">1</div><div class="stat-label">Exited</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── GRADEBOOK ── -->
-      <div class="tab-panel" id="panel-3">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-grade">📒 Gradebook</div>
-              <div class="card-title">Grade 12A — Mathematics</div>
-              <div class="card-sub">Term 2 · 4 assessments</div>
-              <table class="table-mini">
-                <thead><tr><th>Learner</th><th>T1</th><th>T2</th><th>Avg</th><th>Sym</th></tr></thead>
-                <tbody>
-                  <tr><td>Amahle Dube</td><td>88%</td><td>92%</td><td><strong>90%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
-                  <tr><td>Sipho Nkosi</td><td>72%</td><td>78%</td><td><strong>75%</strong></td><td><span class="percent-badge" style="background:var(--orange)">B</span></td></tr>
-                  <tr><td>Thandi Mokoena</td><td>80%</td><td>85%</td><td><strong>82%</strong></td><td><span class="percent-badge" style="background:#00c47a">A</span></td></tr>
-                  <tr><td>Bongani Zulu</td><td>48%</td><td>54%</td><td><strong>51%</strong></td><td><span class="percent-badge" style="background:var(--red)">D</span></td></tr>
-                </tbody>
-              </table>
+          <!-- QUIZZES screen 2 -->
+          <div class="screen" id="panel-0-c">
+            <div class="sc-section-label">📊 Results — Quadratic Equations</div>
+            <div class="sc-stat-row">
+              <div class="sc-stat"><div class="sc-stat-val" style="color:var(--teal)">78%</div><div class="sc-stat-label">Class average</div></div>
+              <div class="sc-stat"><div class="sc-stat-val" style="color:#00c47a">25/32</div><div class="sc-stat-label">Submitted</div></div>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Amahle Dube</div></div>
+              <span class="sc-pill green">38/40 · A</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Sipho Nkosi</div></div>
+              <span class="sc-pill orange">29/40 · C</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Thandi Mokoena</div></div>
+              <span class="sc-pill green">35/40 · A</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-grade">📑 Report Card</div>
-              <div class="card-title">Amahle Dube</div>
-              <div class="card-sub">Grade 12A · Term 2 · 2025</div>
-              <div class="row-item"><span style="flex:1;font-size:13.5px;">Mathematics</span><span class="percent-badge" style="background:#00c47a">90% · A</span></div>
-              <div class="row-item"><span style="flex:1;font-size:13.5px;">Physical Science</span><span class="percent-badge" style="background:#00c47a">85% · A</span></div>
-              <div class="row-item"><span style="flex:1;font-size:13.5px;">English FAL</span><span class="percent-badge" style="background:var(--orange)">74% · B</span></div>
-              <div class="row-item"><span style="flex:1;font-size:13.5px;">Life Sciences</span><span class="percent-badge" style="background:#00c47a">88% · A</span></div>
-              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#555;">Overall Average: <strong style="color:#00c47a;font-size:16px;">84.3%</strong> · Symbol: <strong>A</strong></div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-grade">📊 Class Stats</div>
-              <div class="card-title">Term 2 Class Overview</div>
-              <div class="card-sub">Grade 12A · Mathematics</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
-                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate</div></div>
-                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Class Avg</div></div>
-              </div>
-              <div style="font-size:12.5px;color:#888;text-align:center;">↑ 10% improvement vs Term 1</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── ANALYTICS ── -->
-      <div class="tab-panel" id="panel-4">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-analytics">📈 Analytics</div>
-              <div class="card-title">Term 2 Performance</div>
-              <div class="card-sub">Across 4 classes · 3 subjects</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
-                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">78%</div><div class="stat-label">Pass Rate <span style="color:#00c47a;font-size:10px;">↑10%</span></div></div>
-                <div class="stat-pill"><div class="stat-val" style="color:var(--gold)">74.2</div><div class="stat-label">Avg Score</div></div>
-              </div>
-              <div class="mini-bar-row"><span class="mini-bar-label">Gr 12A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:94%"></div></div><span class="mini-bar-val">94%</span></div>
-              <div class="mini-bar-row"><span class="mini-bar-label">Gr 11B</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
-              <div class="mini-bar-row"><span class="mini-bar-label">Gr 10A</span><div class="mini-bar-track"><div class="mini-bar-fill fill-soft" style="width:62%"></div></div><span class="mini-bar-val">62%</span></div>
+          <!-- ASSIGNMENTS screen 0 -->
+          <div class="screen" id="panel-1-a">
+            <div class="sc-section-label">📁 Assignments — Grade 12A · Term 2</div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Chapter 5 — Calculus</div><div class="sc-row-sub">Due 20 May · 18/32 submitted</div></div>
+              <span class="sc-pill orange">56%</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Trigonometry Worksheet</div><div class="sc-row-sub">Due 28 May · 30/32 submitted</div></div>
+              <span class="sc-pill green">94%</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Statistics Investigation</div><div class="sc-row-sub">Due 5 Jun · Not open yet</div></div>
+              <span class="sc-pill gold">Soon</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-analytics">⚠️ At-Risk</div>
-              <div class="card-title">Learners Needing Help</div>
-              <div class="card-sub">Below 50% this term</div>
-              <div class="row-item"><span style="font-size:16px;">🔴</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Bongani Zulu · Gr 12A</div><div style="font-size:12px;color:#888;">48% avg · 3 missed assignments</div></div><span class="chip chip-red" style="font-size:11px;">At risk</span></div>
-              <div class="row-item"><span style="font-size:16px;">🟠</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Lerato Khumalo · Gr 11B</div><div style="font-size:12px;color:#888;">52% avg · flagged</div></div><span class="chip chip-orange" style="font-size:11px;">Watch</span></div>
-              <div class="row-item"><span style="font-size:16px;">🟡</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Kamo Sithole · Gr 10A</div><div style="font-size:12px;color:#888;">55% avg · borderline</div></div><span class="chip chip-gold" style="font-size:11px;">Monitor</span></div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-analytics">❓ Questions</div>
-              <div class="card-title">Question Difficulty</div>
-              <div class="card-sub">Quadratic Quiz · Grade 12A</div>
-              <div class="mini-bar-row" style="margin-top:10px;"><span class="mini-bar-label" style="width:40px;">Q1</span><div class="mini-bar-track"><div class="mini-bar-fill fill-teal" style="width:96%"></div></div><span class="mini-bar-val">96%</span></div>
-              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q5</span><div class="mini-bar-track"><div class="mini-bar-fill fill-gold" style="width:78%"></div></div><span class="mini-bar-val">78%</span></div>
-              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q8</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:54%"></div></div><span class="mini-bar-val">54%</span></div>
-              <div class="mini-bar-row"><span class="mini-bar-label" style="width:40px;">Q13</span><div class="mini-bar-track"><div class="mini-bar-fill fill-orange" style="width:38%"></div></div><span class="mini-bar-val">38%</span></div>
-              <div style="font-size:12px;color:#888;margin-top:8px;padding:8px;background:#fff5ed;border-radius:8px;">⚠ Q8 &amp; Q13 need re-teaching</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── RESOURCES ── -->
-      <div class="tab-panel" id="panel-5">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-resources">📚 Resources</div>
-              <div class="card-title">Grade 12A — Mathematics</div>
-              <div class="card-sub">8 resources uploaded this term</div>
-              <div class="row-item"><div style="width:36px;height:36px;background:#fff5ed;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📄</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Calculus Summary Notes</div><div style="font-size:12px;color:#888;">PDF · 2.1 MB · Added 2 May</div></div><span style="font-size:10px;font-weight:700;color:var(--orange);">PDF</span></div>
-              <div class="row-item"><div style="width:36px;height:36px;background:#eef2ff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🎬</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Quadratics Explained</div><div style="font-size:12px;color:#888;">Video · 14 min · Added 5 May</div></div><span style="font-size:10px;font-weight:700;color:var(--blue);">VIDEO</span></div>
-              <div class="row-item"><div style="width:36px;height:36px;background:#f0fdf4;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📊</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Worksheet 3 — Equations</div><div style="font-size:12px;color:#888;">DOCX · 340 KB · Added 8 May</div></div><span style="font-size:10px;font-weight:700;color:#00c47a;">DOC</span></div>
+          <!-- ASSIGNMENTS screen 1 -->
+          <div class="screen" id="panel-1-b">
+            <div class="sc-section-label">📊 Submissions — Calculus Assignment</div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px;"><span>18 submitted</span><span>14 pending</span></div>
+              <div class="sc-progress-wrap"><div class="sc-progress-fill" style="width:56%"></div></div>
+            </div>
+            <div class="sc-row">
+              <div class="sc-dot green"></div>
+              <div style="flex:1"><div class="sc-row-label">Amahle Dube</div></div>
+              <span class="sc-pill green">Submitted</span>
+            </div>
+            <div class="sc-row">
+              <div class="sc-dot orange"></div>
+              <div style="flex:1"><div class="sc-row-label">Sipho Nkosi</div></div>
+              <span class="sc-pill orange">Late</span>
+            </div>
+            <div class="sc-row">
+              <div class="sc-dot" style="background:#ccc;"></div>
+              <div style="flex:1"><div class="sc-row-label">Thandi Mokoena</div></div>
+              <span style="font-size:11px;color:#aaa;">Pending</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-resources">🎬 Preview</div>
-              <div class="card-title">Quadratics Explained</div>
-              <div class="card-sub">14:22 · Grade 12A · Ms N. Sithole</div>
-              <div style="background:#f0f0f5;border-radius:12px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
-                <div style="width:44px;height:44px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">▶</div>
-              </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="chip chip-blue">Grade 12A</span><span class="chip chip-teal">Mathematics</span><span class="chip chip-gold">Term 2</span></div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-resources">📎 Linked to Topic</div>
-              <div class="card-title">Quadratic Equations</div>
-              <div class="card-sub">CAPS Grade 12 · 3 resources linked</div>
-              <div class="row-item">📄 <span style="flex:1;font-size:13.5px;">Calculus Summary Notes</span><span class="chip chip-orange" style="font-size:10px;">PDF</span></div>
-              <div class="row-item">🎬 <span style="flex:1;font-size:13.5px;">Quadratics Explained</span><span class="chip chip-blue" style="font-size:10px;">VIDEO</span></div>
-              <div class="row-item">📊 <span style="flex:1;font-size:13.5px;">Worksheet 3</span><span class="chip chip-green" style="font-size:10px;">DOC</span></div>
-              <div style="margin-top:10px;background:#f8f9fc;border-radius:10px;padding:10px;font-size:12.5px;color:#555;text-align:center;">3 learners haven't viewed any resources yet</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── DISCUSSIONS ── -->
-      <div class="tab-panel" id="panel-6">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-discussion">💬 Discussions</div>
-              <div class="card-title">Grade 12A — Open Threads</div>
-              <div class="card-sub">3 active · 12 total posts</div>
-              <div style="background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Amahle Dube</span><span style="font-size:11px;color:#aaa;">2h ago</span></div>
-                <div style="font-size:13px;color:#555;margin-bottom:8px;">Can someone explain how to factorise when a ≠ 1?</div>
-                <div style="display:flex;gap:6px;"><span class="chip chip-teal" style="font-size:11px;">4 replies</span><span class="chip chip-blue" style="font-size:11px;">Maths</span></div>
-              </div>
-              <div style="background:#f8f9fc;border-radius:12px;padding:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;">Sipho Nkosi</span><span style="font-size:11px;color:#aaa;">5h ago</span></div>
-                <div style="font-size:13px;color:#555;">When is the next test?</div>
-              </div>
+          <!-- AI INVIGILATOR screen 0 -->
+          <div class="screen" id="panel-2-a">
+            <div class="sc-section-label">🛡 AI Invigilator — Integrity Report</div>
+            <div class="sc-stat-row">
+              <div class="sc-stat"><div class="sc-stat-val" style="color:var(--teal)">25</div><div class="sc-stat-label">Clean sessions</div></div>
+              <div class="sc-stat"><div class="sc-stat-val" style="color:#f97316">3</div><div class="sc-stat-label">Flagged</div></div>
+            </div>
+            <div class="sc-row" style="background:#fff5ed;">
+              <div class="sc-dot orange"></div>
+              <div style="flex:1"><div class="sc-row-label">Sipho Nkosi</div><div class="sc-row-sub">2× tab switch detected</div></div>
+              <span class="sc-pill orange">Flagged</span>
+            </div>
+            <div class="sc-row" style="background:#fff0f0;">
+              <div class="sc-dot red"></div>
+              <div style="flex:1"><div class="sc-row-label">Lerato Khumalo</div><div class="sc-row-sub">Browser exit at Q11</div></div>
+              <span class="sc-pill red">Exited</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-discussion">💬 Thread</div>
-              <div class="card-title">Factorising when a ≠ 1</div>
-              <div class="card-sub">Grade 12A · 4 replies</div>
-              <div style="background:#f8f9fc;padding:12px;border-radius:10px;font-size:13px;margin-bottom:10px;color:#333;"><strong>Amahle Dube:</strong> Can someone explain how to factorise when a ≠ 1?</div>
-              <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;background:white;border-radius:8px;border-left:3px solid var(--teal);">
-                <div><div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:2px;">Ms N. Sithole · Teacher</div><div style="font-size:12px;color:#555;">Use the product-sum method: multiply a×c, then find factors that add to b.</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-discussion">🏆 Most Active</div>
-              <div class="card-title">Top Contributors</div>
-              <div class="card-sub">This week · Grade 12A</div>
-              <div class="row-item"><span style="font-size:18px;">🥇</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Amahle Dube</div><div style="font-size:12px;color:#888;">8 posts · 3 helpful answers</div></div></div>
-              <div class="row-item"><span style="font-size:18px;">🥈</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Thandi Mokoena</div><div style="font-size:12px;color:#888;">5 posts · 2 helpful answers</div></div></div>
-              <div class="row-item"><span style="font-size:18px;">🥉</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;">Nomsa Dlamini</div><div style="font-size:12px;color:#888;">3 posts</div></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── ANNOUNCEMENTS ── -->
-      <div class="tab-panel" id="panel-7">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-announce">🔔 Announcements</div>
-              <div class="card-title">School-Wide Updates</div>
-              <div class="card-sub">3 new since yesterday</div>
-              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;margin-bottom:10px;">
-                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📋</span>
-                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Term 2 Test Schedule Released</div><div style="font-size:12.5px;color:#666;">Tests begin 14 May. Bring calculators and stationery.</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 2h ago · All Grade 12</div></div>
-              </div>
-              <div style="display:flex;gap:12px;background:#f8f9fc;border-radius:12px;padding:14px;">
-                <span style="font-size:20px;flex-shrink:0;margin-top:1px;">📐</span>
-                <div><div style="font-size:13.5px;font-weight:700;margin-bottom:3px;">Extra Maths Support Class</div><div style="font-size:12.5px;color:#666;">Saturday 10 May · 09:00 · Room 12</div><div style="font-size:11px;color:#bbb;margin-top:5px;">Posted 1 day ago · Grade 11 &amp; 12</div></div>
-              </div>
+          <!-- GRADEBOOK screen 0 -->
+          <div class="screen" id="panel-3-a">
+            <div class="sc-section-label">📒 Gradebook — Grade 12A · Mathematics</div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Amahle Dube</div><div class="sc-row-sub">Term avg: 90%</div></div>
+              <span class="sc-pill green">A</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Sipho Nkosi</div><div class="sc-row-sub">Term avg: 75%</div></div>
+              <span class="sc-pill orange">B</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Thandi Mokoena</div><div class="sc-row-sub">Term avg: 82%</div></div>
+              <span class="sc-pill green">A</span>
+            </div>
+            <div class="sc-row">
+              <div style="flex:1"><div class="sc-row-label">Bongani Zulu</div><div class="sc-row-sub">Term avg: 51%</div></div>
+              <span class="sc-pill red">D</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-announce">📌 Pinned</div>
-              <div class="card-title">Term 2 Test Schedule</div>
-              <div class="card-sub">Posted by Ms N. Sithole · 2h ago</div>
-              <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:12px;">All Grade 12 learners must note the following test dates. Arrive 10 minutes early and bring your geometry set.</p>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Mathematics</div>
-                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Physical Science</div>
-                <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="background:var(--blue);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">27 May</span>English FAL</div>
-              </div>
-            </div>
-          </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-announce">📬 Reach</div>
-              <div class="card-title">Announcement Stats</div>
-              <div class="card-sub">Term 2 Test Schedule · May 2025</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
-                <div class="stat-pill"><div class="stat-val" style="color:var(--teal)">142</div><div class="stat-label">Learners reached</div></div>
-                <div class="stat-pill"><div class="stat-val" style="color:#00c47a">94%</div><div class="stat-label">Read rate</div></div>
-              </div>
-              <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
-              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">9 learners haven't seen this yet</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── CALENDAR ── -->
-      <div class="tab-panel" id="panel-8">
-        <div class="stack-wrapper">
-          <div class="stack-layer" data-pos="0">
-            <div class="demo-card">
-              <div class="card-badge badge-calendar">📅 Calendar</div>
-              <div class="card-title">May 2025</div>
-              <div class="card-sub">12 academic events this month</div>
-              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f0fdfb;border-radius:10px;border-left:3px solid var(--teal);">
-                  <div><div style="font-size:10.5px;font-weight:700;color:var(--teal);text-transform:uppercase;">14 MAY</div><div style="font-size:13px;font-weight:600;">Quadratic Equations Quiz</div><div style="font-size:11.5px;color:#888;">Grade 12A · 09:00</div></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff5ed;border-radius:10px;border-left:3px solid var(--orange);">
-                  <div><div style="font-size:10.5px;font-weight:700;color:var(--orange);text-transform:uppercase;">17 MAY</div><div style="font-size:13px;font-weight:600;">Parent Consultation Day</div><div style="font-size:11.5px;color:#888;">All grades · 08:00–14:00</div></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fef9e6;border-radius:10px;border-left:3px solid var(--gold);">
-                  <div><div style="font-size:10.5px;font-weight:700;color:#c89a00;text-transform:uppercase;">20 MAY</div><div style="font-size:13px;font-weight:600;">Calculus Assignment Due</div><div style="font-size:11.5px;color:#888;">Grade 12A · 23:59</div></div>
-                </div>
-              </div>
+          <!-- ANALYTICS screen 0 -->
+          <div class="screen" id="panel-4-a">
+            <div class="sc-section-label">📈 Analytics — Term 2 Performance</div>
+            <div class="sc-stat-row">
+              <div class="sc-stat"><div class="sc-stat-val" style="color:var(--teal)">78%</div><div class="sc-stat-label">Pass rate ↑10%</div></div>
+              <div class="sc-stat"><div class="sc-stat-val" style="color:#d97706">74.2</div><div class="sc-stat-label">Class average</div></div>
+            </div>
+            <div class="sc-section-label" style="margin-top:4px;">By class</div>
+            <div class="sc-row"><div style="flex:1">Grade 12A</div><div class="sc-progress-wrap" style="width:120px"><div class="sc-progress-fill" style="width:94%"></div></div><span style="font-size:12px;color:#888;margin-left:8px;">94%</span></div>
+            <div class="sc-row"><div style="flex:1">Grade 11B</div><div class="sc-progress-wrap" style="width:120px"><div class="sc-progress-fill" style="width:78%"></div></div><span style="font-size:12px;color:#888;margin-left:8px;">78%</span></div>
+            <div class="sc-row"><div style="flex:1">Grade 10A</div><div class="sc-progress-wrap" style="width:120px"><div class="sc-progress-fill" style="width:62%"></div></div><span style="font-size:12px;color:#888;margin-left:8px;">62%</span></div>
+          </div>
+
+          <!-- RESOURCES screen 0 -->
+          <div class="screen" id="panel-5-a">
+            <div class="sc-section-label">📚 Resources — Grade 12A · Mathematics</div>
+            <div class="sc-row">
+              <span style="font-size:20px;">📄</span>
+              <div style="flex:1"><div class="sc-row-label">Calculus Summary Notes</div><div class="sc-row-sub">PDF · 2.1 MB · Added 2 May</div></div>
+              <span class="sc-pill orange">PDF</span>
+            </div>
+            <div class="sc-row">
+              <span style="font-size:20px;">🎬</span>
+              <div style="flex:1"><div class="sc-row-label">Quadratics Explained</div><div class="sc-row-sub">Video · 14 min · Added 5 May</div></div>
+              <span class="sc-pill blue">VIDEO</span>
+            </div>
+            <div class="sc-row">
+              <span style="font-size:20px;">📊</span>
+              <div style="flex:1"><div class="sc-row-label">Worksheet 3 — Equations</div><div class="sc-row-sub">DOCX · 340 KB · Added 8 May</div></div>
+              <span class="sc-pill green">DOC</span>
             </div>
           </div>
-          <div class="stack-layer" data-pos="1">
-            <div class="demo-card">
-              <div class="card-badge badge-calendar">🎯 Syllabus Plan</div>
-              <div class="card-title">May Coverage Plan</div>
-              <div class="card-sub">Grade 12A · Mathematics</div>
-              <div class="topic-item">✅ <span style="flex:1;">Quadratic Equations</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
-              <div class="topic-item">✅ <span style="flex:1;">Functions &amp; Graphs</span><span style="color:#00c47a;font-size:12px;font-weight:600;">Done</span></div>
-              <div class="topic-item">⏳ <span style="flex:1;">Calculus — Derivatives</span><span style="color:var(--orange);font-size:12px;font-weight:600;">In progress</span></div>
-              <div class="topic-item">⭕ <span style="flex:1;">Integration</span><span style="color:#bbb;font-size:12px;font-weight:600;">Upcoming</span></div>
-              <div class="progress-bar" style="margin-top:12px;"><div class="progress-fill" style="width:55%"></div></div>
-              <div style="font-size:12px;color:#888;text-align:center;margin-top:4px;">55% of May plan complete</div>
+
+          <!-- DISCUSSIONS screen 0 -->
+          <div class="screen" id="panel-6-a">
+            <div class="sc-section-label">💬 Discussions — Grade 12A · Maths</div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">How do I approach Q13?</span><span style="font-size:11px;color:#aaa;">2h ago</span></div>
+              <div class="sc-row-sub">Sipho Nkosi · 3 replies</div>
+            </div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">Calculus notes available?</span><span style="font-size:11px;color:#aaa;">5h ago</span></div>
+              <div class="sc-row-sub">Thandi Mokoena · 1 reply</div>
+            </div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">Test format confirmed?</span><span style="font-size:11px;color:#aaa;">Yesterday</span></div>
+              <div class="sc-row-sub">Amahle Dube · 7 replies · 📌 Pinned</div>
             </div>
           </div>
-          <div class="stack-layer" data-pos="2">
-            <div class="demo-card">
-              <div class="card-badge badge-calendar">📌 Upcoming</div>
-              <div class="card-title">Next 7 Days</div>
-              <div class="card-sub">All classes · Academic events</div>
-              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--teal);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">14 May</span>Maths Quiz · Gr 12A</div>
-                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--orange);color:white;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">17 May</span>Parent Consultation Day</div>
-                <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="background:var(--gold);color:#111;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;">20 May</span>Calculus Due · Gr 12A</div>
-              </div>
+
+          <!-- ANNOUNCEMENTS screen 0 -->
+          <div class="screen" id="panel-7-a">
+            <div class="sc-section-label">📢 Announcements</div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;border-left:3px solid var(--teal);padding-left:14px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">Term 2 Test Schedule</span><span class="sc-pill green">New</span></div>
+              <div class="sc-row-sub">Ms N. Sithole · All Grade 12 · 2h ago · 94% read</div>
+            </div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;border-left:3px solid #d97706;padding-left:14px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">Parent Consultation Day</span><span style="font-size:11px;color:#aaa;">17 May</span></div>
+              <div class="sc-row-sub">Admin · All grades · 1d ago</div>
+            </div>
+            <div class="sc-row" style="flex-direction:column;align-items:flex-start;gap:4px;border-left:3px solid #ccc;padding-left:14px;">
+              <div style="display:flex;width:100%;justify-content:space-between;"><span class="sc-row-label">Calculus Assignment Reminder</span><span style="font-size:11px;color:#aaa;">2d ago</span></div>
+              <div class="sc-row-sub">Ms N. Sithole · Grade 12A</div>
             </div>
           </div>
-        </div>
-      </div>
+
+          <!-- CALENDAR screen 0 -->
+          <div class="screen" id="panel-8-a">
+            <div class="sc-section-label">📅 Calendar — May 2025</div>
+            <div class="sc-row" style="border-left:3px solid var(--teal);padding-left:12px;">
+              <div style="flex:1"><div class="sc-row-label">Quadratic Equations Quiz</div><div class="sc-row-sub">14 May · Grade 12A · 09:00</div></div>
+            </div>
+            <div class="sc-row" style="border-left:3px solid #f97316;padding-left:12px;">
+              <div style="flex:1"><div class="sc-row-label">Parent Consultation Day</div><div class="sc-row-sub">17 May · All grades · 08:00–14:00</div></div>
+            </div>
+            <div class="sc-row" style="border-left:3px solid #d97706;padding-left:12px;">
+              <div style="flex:1"><div class="sc-row-label">Calculus Assignment Due</div><div class="sc-row-sub">20 May · Grade 12A · 23:59</div></div>
+            </div>
+          </div>
+
+        </div><!-- /browser-body -->
+      </div><!-- /browser-frame -->
 
     </div><!-- end left col -->
+
 
     <!-- RIGHT COPY -->
     <div class="feature-copy">
@@ -1045,36 +911,39 @@ features.forEach((_, i) => {
   dotsWrap.appendChild(d);
 });
 
-/* ── Stack helpers ── */
-function applyPositions(layers) {
-  const s = [
-    { zIndex: 3, transform: 'translateY(0px) scale(1)', opacity: '1' },
-    { zIndex: 2, transform: 'translateY(56px) scale(0.95)', opacity: '0.72' },
-    { zIndex: 1, transform: 'translateY(104px) scale(0.905)', opacity: '0.42' }
-  ];
-  layers.forEach(l => {
-    const p = parseInt(l.dataset.pos);
-    l.style.zIndex = s[p].zIndex;
-    l.style.transform = s[p].transform;
-    l.style.opacity = s[p].opacity;
+/* ── Screen crossfade ── */
+const screenMap = {
+  0: ['panel-0-a','panel-0-b','panel-0-c'],
+  1: ['panel-1-a','panel-1-b'],
+  2: ['panel-2-a'],
+  3: ['panel-3-a'],
+  4: ['panel-4-a'],
+  5: ['panel-5-a'],
+  6: ['panel-6-a'],
+  7: ['panel-7-a'],
+  8: ['panel-8-a']
+};
+
+function showScreen(ids, idx) {
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
   });
 }
 
-function startCardCycle(panelId) {
-  stopCardCycle(panelId);
-  const panel = document.getElementById(panelId);
-  if (!panel) return;
-  const layers = panel.querySelectorAll('.stack-layer');
-  if (layers.length < 2) return;
-  cycleTimers[panelId] = setInterval(() => {
-    const np = Array.from(layers).map(l => (parseInt(l.dataset.pos) + layers.length - 1) % layers.length);
-    layers.forEach((l, i) => { l.dataset.pos = np[i]; });
-    applyPositions(layers);
-  }, 2400);
+function startCardCycle(panelIndex) {
+  stopCardCycle(panelIndex);
+  const ids = screenMap[panelIndex];
+  if (!ids || ids.length < 2) return;
+  let idx = 0; showScreen(ids, idx);
+  cycleTimers[panelIndex] = setInterval(() => {
+    idx = (idx + 1) % ids.length;
+    showScreen(ids, idx);
+  }, 3000);
 }
 
-function stopCardCycle(panelId) {
-  if (cycleTimers[panelId]) { clearInterval(cycleTimers[panelId]); delete cycleTimers[panelId]; }
+function stopCardCycle(panelIndex) {
+  if (cycleTimers[panelIndex]) { clearInterval(cycleTimers[panelIndex]); delete cycleTimers[panelIndex]; }
 }
 
 /* ── Pill label animation ── */
@@ -1120,17 +989,10 @@ function goToFeature(newIndex, direction) {
   const oldPanelId = 'panel-' + currentIndex;
   const newPanelId = 'panel-' + newIndex;
 
-  stopCardCycle(oldPanelId);
+  stopCardCycle(currentIndex);
 
-  // Hide old panel
-  document.getElementById(oldPanelId).classList.remove('active');
-
-  // Show new panel
-  const newPanel = document.getElementById(newPanelId);
-  newPanel.classList.add('active');
-  const layers = newPanel.querySelectorAll('.stack-layer');
-  layers.forEach((l, i) => { l.dataset.pos = i; });
-  applyPositions(layers);
+  // Hide all screens of old feature
+  (screenMap[currentIndex]||[]).forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active'); });
 
   // Animate pill label
   animatePillLabel(direction, features[newIndex].label);
@@ -1140,8 +1002,10 @@ function goToFeature(newIndex, direction) {
   updateDots(currentIndex);
   updateCopy(features[currentIndex]);
 
-  // Start cycling cards
-  startCardCycle(newPanelId);
+  // Show first screen of new feature, start cycling
+  const ids = screenMap[currentIndex] || [];
+  if (ids.length) { showScreen(ids, 0); }
+  startCardCycle(currentIndex);
 }
 
 /* ── Arrow click handler (infinite wrap) ── */
@@ -1152,8 +1016,7 @@ function switchFeature(dir) {
 }
 
 /* ── Init ── */
-document.querySelectorAll('.tab-panel').forEach(p => applyPositions(p.querySelectorAll('.stack-layer')));
-startCardCycle('panel-0');
+startCardCycle(0);
 
 function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
@@ -1228,7 +1091,7 @@ function toggleMenu() {
               <div class="th-iskool-inner">
                 <span class="iskool-badge">Best for SA Schools</span>
                 <div class="th-iskool-name">
-                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#f5c842" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+                  <svg width="22" height="22" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
                   iSkool
                 </div>
               </div>
@@ -1252,7 +1115,7 @@ function toggleMenu() {
         <thead>
           <tr>
             <th class="mob-th-other"><div class="mob-th-other-inner"><div class="mob-other-label">Other LMS</div></div></th>
-            <th class="mob-th-iskool"><div class="mob-th-iskool-inner"><svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#f5c842" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg><span class="mob-iskool-label">iSkool</span></div></th>
+            <th class="mob-th-iskool"><div class="mob-th-iskool-inner"><svg width="28" height="28" viewBox="0 0 880 805" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg><span class="mob-iskool-label">iSkool</span></div></th>
           </tr>
         </thead>
         <tbody>
@@ -1747,7 +1610,7 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
 <footer class="footer">
   <div class="footer-inner">
     <a href="#" class="footer-logo">
-      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#f5c842" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/></g></svg>
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/></g></svg>
       iSkool
     </a>
     <p class="footer-tagline">The only LMS that actually works for South African high schools.</p>
