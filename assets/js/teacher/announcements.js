@@ -235,7 +235,7 @@ function renderTeacherAnnouncements(data) {
 
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Announcements</h2>
-            <button class="teacher-upload-btn" onclick="openCreateAnnouncementModal()">
+            <button class="teacher-upload-btn" onclick="openCreateAnnouncementForm()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -396,6 +396,78 @@ async function loadAnnouncementClasses() {
     }
 }
 
+// ─────────────────────────────────────────────
+// ROUTER: panel on desktop, modal on mobile
+// ─────────────────────────────────────────────
+window.openCreateAnnouncementForm = function() {
+    const panel = document.getElementById('an-main-panel');
+    if (window.innerWidth >= 900 && panel) {
+        openCreateAnnouncementPanel(panel);
+    } else {
+        openCreateAnnouncementModal();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL FORM
+// ─────────────────────────────────────────────
+function openCreateAnnouncementPanel(panel) {
+    // Clear sidebar active state
+    document.querySelectorAll('.an-sidebar-item').forEach(el => el.classList.remove('active'));
+
+    panel.innerHTML = `
+        <div class="an-panel-content">
+            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
+                        display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">New Announcement</div>
+                <button onclick="fetchTeacherAnnouncements()"
+                    style="background:none;border:none;color:#8b949e;font-size:22px;
+                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            </div>
+
+            <label class="teacher-modal-label">Title</label>
+            <input type="text" id="annTitle" class="teacher-modal-input" placeholder="e.g. Test next week">
+
+            <label class="teacher-modal-label">Message</label>
+            <textarea id="annMessage" class="teacher-modal-input" rows="5"
+                style="resize:vertical;" placeholder="Type your announcement here..."></textarea>
+
+            <label class="teacher-modal-label">Select Class</label>
+            <select id="annClass" class="teacher-modal-input">
+                <option value="">-- Choose Class --</option>
+            </select>
+
+            <label class="teacher-modal-label">Send Email Alert To</label>
+            <select id="annSendTo" class="teacher-modal-input">
+                <option value="learners" selected>Learners Only</option>
+                <option value="parents">Parents Only</option>
+            </select>
+
+            <label class="teacher-modal-label"
+                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                <input type="checkbox" id="annForceEmail">
+                Also send email notification
+            </label>
+
+            <div id="createAnnError"
+                style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;">
+                <button onclick="fetchTeacherAnnouncements()"
+                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    Cancel
+                </button>
+                <button onclick="submitCreateAnnouncement()"
+                    class="teacher-modal-submit" id="createAnnSubmitBtn"
+                    style="flex:2;padding:13px;font-size:14px;">
+                    Send Announcement
+                </button>
+            </div>
+        </div>`;
+
+    loadAnnouncementClasses();
+}
+
 window.openCreateAnnouncementModal = function() {
     const modal = document.getElementById('createAnnouncementModal');
     if (modal) modal.style.display = 'flex';
@@ -444,7 +516,11 @@ window.submitCreateAnnouncement = async function() {
         const data = await res.json();
 
         if (data.success) {
-            closeCreateAnnouncementModal();
+            // Close modal if open, otherwise just refresh
+            const modal = document.getElementById('createAnnouncementModal');
+            if (modal && modal.style.display === 'flex') {
+                closeCreateAnnouncementModal();
+            }
             window.teacherAnnouncementCache = null;
             fetchTeacherAnnouncements();
         } else {

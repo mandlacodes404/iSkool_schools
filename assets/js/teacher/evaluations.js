@@ -214,7 +214,7 @@ function renderTeacherEvaluations(data) {
 
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Evaluations</h2>
-            <button class="teacher-upload-btn" onclick="openReleaseEvaluationModal()">
+            <button class="teacher-upload-btn" onclick="openReleaseEvaluationForm()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -480,20 +480,117 @@ window.closeEvalResultsModal = function() {
 // ─────────────────────────────────────────────
 // RELEASE MODAL
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// ROUTER: panel on desktop, modal on mobile
+// ─────────────────────────────────────────────
+window.openReleaseEvaluationForm = function() {
+    const panel = document.getElementById('ev-main-panel');
+    if (window.innerWidth >= 900 && panel) {
+        openReleaseEvaluationPanel(panel);
+    } else {
+        openReleaseEvaluationModal();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL FORM
+// ─────────────────────────────────────────────
+function openReleaseEvaluationPanel(panel) {
+    document.querySelectorAll('.ev-sidebar-item').forEach(el => el.classList.remove('active'));
+
+    panel.innerHTML = `
+        <div class="ev-panel-content">
+            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
+                        display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">Release Evaluation</div>
+                <button onclick="fetchTeacherEvaluations()"
+                    style="background:none;border:none;color:#8b949e;font-size:22px;
+                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            </div>
+
+            <label class="teacher-modal-label">Title *</label>
+            <input type="text" id="evalTitle" class="teacher-modal-input"
+                placeholder="e.g. Term 1 Feedback">
+
+            <label class="teacher-modal-label">Description (optional)</label>
+            <textarea id="evalDescription" class="teacher-modal-input" rows="3"
+                style="resize:vertical;" placeholder="Optional description..."></textarea>
+
+            <label class="teacher-modal-label">Select Class *</label>
+            <select id="evalClass" class="teacher-modal-input">
+                <option value="">-- Choose Class --</option>
+            </select>
+
+            <label class="teacher-modal-label"
+                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                <input type="checkbox" id="evalUseDefault" checked>
+                Use default questions (recommended)
+            </label>
+
+            <div style="margin-top:8px;">
+                <a href="javascript:void(0)" onclick="toggleDefaultPreview()"
+                    style="color:#4fd1c5;font-size:13px;text-decoration:none;">
+                    👁 View default questions
+                </a>
+                <div id="defaultStatementsPreview"
+                    style="display:none;margin-top:10px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;"></div>
+            </div>
+
+            <div id="customStatements" style="margin-top:16px;"></div>
+            <button type="button" onclick="addCustomStatement()"
+                style="background:rgba(79,209,197,0.1);border:1px dashed #4fd1c5;color:#4fd1c5;
+                       padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;
+                       margin-top:8px;width:100%;">
+                + Add Custom Question
+            </button>
+
+            <label class="teacher-modal-label"
+                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                <input type="checkbox" id="evalForceEmail">
+                Also send email notification
+            </label>
+
+            <div id="releaseEvalError"
+                style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+
+            <div style="display:flex;gap:12px;margin-top:24px;">
+                <button onclick="fetchTeacherEvaluations()"
+                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    Cancel
+                </button>
+                <button onclick="submitReleaseEvaluation()"
+                    class="teacher-modal-submit" id="releaseEvalSubmitBtn"
+                    style="flex:2;padding:13px;font-size:14px;">
+                    Release
+                </button>
+            </div>
+        </div>`;
+
+    loadEvalClasses();
+}
+
 window.openReleaseEvaluationModal = function() {
     document.getElementById('releaseEvalModal').style.display = 'flex';
 };
 
 window.closeReleaseEvaluationModal = function() {
-    document.getElementById('releaseEvalModal').style.display = 'none';
-    document.getElementById('evalTitle').value = '';
-    document.getElementById('evalDescription').value = '';
-    document.getElementById('evalClass').value = '';
-    document.getElementById('evalUseDefault').checked = true;
-    document.getElementById('evalForceEmail').checked = false;
-    document.getElementById('customStatements').innerHTML = '';
-    document.getElementById('defaultStatementsPreview').style.display = 'none';
-    document.getElementById('releaseEvalError').style.display = 'none';
+    const modal = document.getElementById('releaseEvalModal');
+    if (modal) modal.style.display = 'none';
+    // Reset fields wherever they live (panel or modal)
+    ['evalTitle','evalDescription','evalClass'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const useDefault = document.getElementById('evalUseDefault');
+    if (useDefault) useDefault.checked = true;
+    const forceEmail = document.getElementById('evalForceEmail');
+    if (forceEmail) forceEmail.checked = false;
+    const customStatements = document.getElementById('customStatements');
+    if (customStatements) customStatements.innerHTML = '';
+    const preview = document.getElementById('defaultStatementsPreview');
+    if (preview) preview.style.display = 'none';
+    const errorDiv = document.getElementById('releaseEvalError');
+    if (errorDiv) errorDiv.style.display = 'none';
 };
 
 async function loadEvalClasses() {

@@ -963,11 +963,13 @@ function renderQuizReview(data) {
 window.openCreateQuiz = async function() {
     const apiArea = document.getElementById('api-content-area');
     const loader  = document.getElementById('loaderOverlay');
+    const panel   = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+    const target  = isDesktop ? panel : apiArea;
 
     if (loader) loader.style.display = 'flex';
 
     try {
-        // Load classes and term info in parallel
         const [classRes, termRes] = await Promise.all([
             fetch('api/teacher/get_classes.php'),
             fetch('api/teacher/get_quizzes.php')
@@ -981,23 +983,33 @@ window.openCreateQuiz = async function() {
             classOptions += `<option value="${c.id}">${c.name}</option>`;
         });
 
-        apiArea.innerHTML = `
-            <div class="teacher-resources-header">
+        // Clear sidebar active state on desktop
+        if (isDesktop) {
+            document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
+        }
+
+        const headerPad = isDesktop ? 'padding:20px 32px 0;' : '';
+        const formPad   = isDesktop ? 'padding:0 32px 32px;' : '';
+        const titleSize = isDesktop ? '18px' : '22px';
+        const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
+
+        target.innerHTML = `
+            <div class="teacher-resources-header" style="${headerPad}">
                 <button class="teacher-back-btn" onclick="fetchTeacherQuizzes()">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
-                    Back to Quizzes
+                    ${isDesktop ? 'Back' : 'Back to Quizzes'}
                 </button>
             </div>
 
-            <div style="max-width:700px;margin:0 auto;">
-                <h2 style="color:#4fd1c5;font-size:22px;margin:0 0 24px;font-weight:800;">Create a New Quiz</h2>
+            <div style="max-width:${isDesktop ? '560px' : '700px'};margin:0 auto;${formPad}">
+                <h2 style="color:#4fd1c5;font-size:${titleSize};margin:${titleMargin};font-weight:800;">Create a New Quiz</h2>
 
                 <form id="createQuizForm" enctype="multipart/form-data">
 
                     <label class="teacher-modal-label">Quiz Title *</label>
-                    <input type="text" name="quiz_title" class="teacher-modal-input" 
+                    <input type="text" name="quiz_title" class="teacher-modal-input"
                         placeholder="e.g. Chapter 3 Test" required>
 
                     <label class="teacher-modal-label">Assign to Class *</label>
@@ -1006,7 +1018,7 @@ window.openCreateQuiz = async function() {
                     </select>
 
                     <label class="teacher-modal-label">Duration (minutes) *</label>
-                    <input type="number" name="duration" class="teacher-modal-input" 
+                    <input type="number" name="duration" class="teacher-modal-input"
                         min="1" max="180" placeholder="e.g. 60" required style="max-width:160px;">
 
                     <label class="teacher-modal-label">Start Time *</label>
@@ -1021,7 +1033,7 @@ window.openCreateQuiz = async function() {
 
                     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
                         <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
-                            <input type="checkbox" name="publish_marks" value="1" 
+                            <input type="checkbox" name="publish_marks" value="1"
                                 style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
                             Publish marks immediately after submission
                         </label>
@@ -1035,8 +1047,8 @@ window.openCreateQuiz = async function() {
 
                         <div id="cqWeightContainer" style="display:none;margin-left:28px;">
                             <label class="teacher-modal-label">Weight % of term mark</label>
-                            <input type="number" name="weight_percent" id="cqWeight" 
-                                class="teacher-modal-input" min="0" max="100" step="0.1" 
+                            <input type="number" name="weight_percent" id="cqWeight"
+                                class="teacher-modal-input" min="0" max="100" step="0.1"
                                 placeholder="e.g. 30" style="max-width:150px;">
                         </div>
 
@@ -1048,42 +1060,42 @@ window.openCreateQuiz = async function() {
                     </div>
 
                     <!-- Term Info -->
-                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:16px;margin:20px 0;text-align:center;">
-                        <div style="font-size:20px;font-weight:800;color:#4fd1c5;">Posting to: TERM ${currentTerm}</div>
-                        <div style="font-size:13px;color:#8b949e;margin-top:4px;">This quiz belongs to the current active term.</div>
+                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
+                        <div style="font-size:18px;font-weight:800;color:#4fd1c5;">Posting to: TERM ${currentTerm}</div>
+                        <div style="font-size:12px;color:#8b949e;margin-top:4px;">This quiz belongs to the current active term.</div>
                     </div>
 
                     <!-- Layout Mode -->
                     <label class="teacher-modal-label" style="margin-bottom:10px;">Quiz Layout Mode</label>
                     <div style="display:flex;gap:12px;margin-bottom:8px;">
                         <label style="flex:1;cursor:pointer;">
-                            <input type="radio" name="layout_mode" value="single_page" checked 
+                            <input type="radio" name="layout_mode" value="single_page" checked
                                 style="display:none;" onchange="toggleCqMultiPage(this)">
-                            <div class="cq-mode-card" id="cqModeSingle" 
-                                style="background:#1a1919;border:2px solid #4fd1c5;border-radius:10px;padding:16px;text-align:center;transition:all 0.3s;">
-                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:6px;">
+                            <div class="cq-mode-card" id="cqModeSingle"
+                                style="background:#1a1919;border:2px solid #4fd1c5;border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:4px;">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                 </svg>
-                                <div style="font-weight:700;color:#e2e8f0;font-size:14px;">Single Page</div>
+                                <div style="font-weight:700;color:#e2e8f0;font-size:13px;">Single Page</div>
                             </div>
                         </label>
                         <label style="flex:1;cursor:pointer;">
-                            <input type="radio" name="layout_mode" value="multi_page" 
+                            <input type="radio" name="layout_mode" value="multi_page"
                                 style="display:none;" onchange="toggleCqMultiPage(this)">
                             <div class="cq-mode-card" id="cqModeMulti"
-                                style="background:#1a1919;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;text-align:center;transition:all 0.3s;">
-                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#8b949e" stroke-width="2" fill="none" style="margin-bottom:6px;">
+                                style="background:#1a1919;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#8b949e" stroke-width="2" fill="none" style="margin-bottom:4px;">
                                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                                     <line x1="8" y1="21" x2="16" y2="21"></line>
                                     <line x1="12" y1="17" x2="12" y2="21"></line>
                                 </svg>
-                                <div style="font-weight:700;color:#8b949e;font-size:14px;">Multi-Page</div>
+                                <div style="font-weight:700;color:#8b949e;font-size:13px;">Multi-Page</div>
                             </div>
                         </label>
                     </div>
 
-                    <div id="cqMultiPageOptions" style="display:none;background:rgba(79,209,197,0.04);border:1px dashed rgba(79,209,197,0.3);border-radius:10px;padding:16px;margin-bottom:16px;">
+                    <div id="cqMultiPageOptions" style="display:none;background:rgba(79,209,197,0.04);border:1px dashed rgba(79,209,197,0.3);border-radius:10px;padding:14px;margin-bottom:16px;">
                         <div style="font-size:12px;font-weight:800;color:#4fd1c5;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Multi-Page Security</div>
                         <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;margin-bottom:10px;cursor:pointer;">
                             <input type="checkbox" name="shuffle_questions" value="1"
@@ -1098,22 +1110,24 @@ window.openCreateQuiz = async function() {
                     </div>
 
                     <!-- Questions -->
-                    <div style="margin-top:24px;">
-                        <div style="font-size:15px;font-weight:800;color:#e2e8f0;margin-bottom:16px;">Questions</div>
-                        <div id="cqQuestionsContainer"></div>
-                        <button type="button" onclick="addCqQuestion()"
-                            style="width:100%;background:rgba(34,197,94,0.1);border:1px dashed rgba(34,197,94,0.4);color:#22c55e;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:24px;">
-                            + Add Another Question
-                        </button>
-                    </div>
+                    <label class="teacher-modal-label" style="margin-top:8px;">Questions *</label>
+                    <div id="cqQuestionsContainer"></div>
+                    <button type="button" onclick="addCqQuestion()"
+                        style="width:100%;margin-top:8px;margin-bottom:16px;background:rgba(79,209,197,0.08);
+                               border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;
+                               padding:10px;cursor:pointer;font-size:13px;font-weight:700;">
+                        + Add Question
+                    </button>
 
-                    <div id="cqError" style="color:#ff5555;font-size:14px;margin-bottom:12px;display:none;"></div>
+                    <div id="cqError" style="color:#ff5555;font-size:14px;margin-top:8px;display:none;"></div>
 
-                    <div style="display:flex;gap:12px;margin-bottom:40px;">
-                        <button type="button" onclick="fetchTeacherQuizzes()" class="teacher-modal-cancel" style="flex:1;padding:14px;">
+                    <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;">
+                        <button type="button" onclick="fetchTeacherQuizzes()"
+                            class="teacher-modal-cancel" style="flex:1;padding:13px;">
                             Cancel
                         </button>
-                        <button type="submit" class="teacher-modal-submit" id="cqSubmitBtn" style="flex:2;padding:14px;font-size:15px;">
+                        <button type="submit" class="teacher-modal-submit"
+                            id="cqSubmitBtn" style="flex:2;padding:13px;font-size:14px;">
                             Create Quiz
                         </button>
                     </div>
@@ -1121,14 +1135,15 @@ window.openCreateQuiz = async function() {
                 </form>
             </div>`;
 
-        // Add first question automatically
+        // Add first question
+        window.cqQuestionIndex = 0;
         addCqQuestion();
 
-        // Handle form submit
+        // Handle submit
         const form = document.getElementById('createQuizForm');
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const errorDiv = document.getElementById('cqError');
+            const errorDiv  = document.getElementById('cqError');
             const submitBtn = document.getElementById('cqSubmitBtn');
             errorDiv.style.display = 'none';
 
@@ -1138,17 +1153,17 @@ window.openCreateQuiz = async function() {
 
             const fd = new FormData(form);
             try {
-                const res  = await fetch('create_quiz.php', { method: 'POST', body: fd });
-                const text = await res.text();
-                let data;
-                try { data = JSON.parse(text); }
-                catch(_) { throw new Error('Invalid server response'); }
+                const res  = await fetch('api/teacher/create_quiz.php', {
+                    method: 'POST',
+                    body: fd
+                });
+                const data = await res.json();
 
                 if (data.success) {
                     window.teacherQuizzesCache = null;
                     fetchTeacherQuizzes();
                 } else {
-                    errorDiv.textContent = data.message || 'Failed to create quiz.';
+                    errorDiv.textContent = data.error || 'Failed to create quiz.';
                     errorDiv.style.display = 'block';
                 }
             } catch (err) {
@@ -1163,7 +1178,7 @@ window.openCreateQuiz = async function() {
 
     } catch (e) {
         console.error(e);
-        if (apiArea) apiArea.innerHTML = `
+        target.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading create quiz form.
             </p>`;
@@ -1171,6 +1186,7 @@ window.openCreateQuiz = async function() {
         if (loader) loader.style.display = 'none';
     }
 };
+
 
 // ─────────────────────────────────────────────
 // CREATE QUIZ HELPERS

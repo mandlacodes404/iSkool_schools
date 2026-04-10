@@ -276,7 +276,7 @@ function renderTeacherSyllabus(data) {
 
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Syllabus</h2>
-            <button class="teacher-upload-btn" onclick="openSBODrawer()">
+            <button class="teacher-upload-btn" onclick="openSBOForm()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -518,7 +518,106 @@ window.filterSyllabus = function() {
     container.innerHTML = buildSBOCards(briefs);
 };
 
-// ── SBO DRAWER (CREATE) ──────────────────────────────────────────────────────
+// ── ROUTER ───────────────────────────────────────────────────────────────────
+window.openSBOForm = function() {
+    const panel = document.getElementById('sbo-main-panel');
+    if (window.innerWidth >= 900 && panel) {
+        openSBOPanel(panel);
+    } else {
+        openSBODrawer();
+    }
+};
+
+// ── DESKTOP PANEL FORM ───────────────────────────────────────────────────────
+async function openSBOPanel(panel) {
+    document.querySelectorAll('.sbo-sidebar-item').forEach(el => el.classList.remove('active'));
+
+    panel.innerHTML = `
+        <div class="sbo-panel-content">
+            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.07);
+                        display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">📚 Release Syllabus</div>
+                <button onclick="fetchTeacherSyllabus()"
+                    style="background:none;border:none;color:#8b949e;font-size:22px;
+                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            </div>
+
+            <label class="teacher-modal-label">Class</label>
+            <select id="sboClass" class="teacher-modal-input">
+                <option value="">Loading classes...</option>
+            </select>
+
+            <label class="teacher-modal-label">Term</label>
+            <select id="sboTerm" class="teacher-modal-input">
+                <option value="">-- Select Term --</option>
+                <option value="1">Term 1</option>
+                <option value="2">Term 2</option>
+                <option value="3">Term 3</option>
+                <option value="4">Term 4</option>
+            </select>
+
+            <label class="teacher-modal-label">Subject Name</label>
+            <input type="text" id="sboSubject" class="teacher-modal-input"
+                placeholder="e.g. Mathematics">
+
+            <label class="teacher-modal-label">Syllabus Topics</label>
+            <div id="sboTopicsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <button onclick="addSBOTopic()"
+                style="margin-top:8px;background:rgba(79,209,197,0.1);border:1px dashed rgba(79,209,197,0.4);
+                       color:#4fd1c5;border-radius:8px;padding:8px;width:100%;cursor:pointer;
+                       font-size:13px;font-weight:700;">
+                + Add Topic
+            </button>
+
+            <label class="teacher-modal-label" style="margin-top:16px;">Assessment Weighting</label>
+            <div id="sboAssessmentsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <button onclick="addSBOAssessment()"
+                style="margin-top:8px;background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.4);
+                       color:#a78bfa;border-radius:8px;padding:8px;width:100%;cursor:pointer;
+                       font-size:13px;font-weight:700;">
+                + Add Assessment
+            </button>
+            <div id="sboWeightTotal"
+                style="margin-top:8px;font-size:12px;font-weight:700;color:#8b949e;text-align:right;">
+                Total: 0%
+            </div>
+
+            <label class="teacher-modal-label" style="margin-top:16px;">
+                Additional Notes <span style="color:#8b949e;font-weight:400;">(optional)</span>
+            </label>
+            <textarea id="sboNotes" class="teacher-modal-input"
+                placeholder="e.g. No exam this term — focus on continuous assessment"
+                style="height:70px;resize:vertical;"></textarea>
+
+            <div id="sboError" style="color:#ff5555;font-size:13px;display:none;margin-top:8px;"></div>
+
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button onclick="fetchTeacherSyllabus()"
+                    class="teacher-modal-cancel" style="flex:1;">Cancel</button>
+                <button onclick="saveSBO()"
+                    class="teacher-modal-submit" style="flex:1;">Post & Notify</button>
+            </div>
+        </div>`;
+
+    // Load classes
+    try {
+        const res     = await fetch('api/teacher/get_classes.php');
+        const classes = await res.json();
+        const sel     = document.getElementById('sboClass');
+        sel.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(c => {
+            sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    } catch(e) {
+        const sel = document.getElementById('sboClass');
+        if (sel) sel.innerHTML = '<option value="">Failed to load</option>';
+    }
+
+    addSBOTopic();
+    addSBOAssessment();
+}
+
+// ── SBO DRAWER (mobile only) ─────────────────────────────────────────────────
 
 window.openSBODrawer = async function() {
     const existing = document.getElementById('sboDrawer');
@@ -715,7 +814,9 @@ window.saveSBO = async function() {
     if (!term)     { err.textContent = 'Please select a term.';  err.style.display = 'block'; return; }
     if (!subject)  { err.textContent = 'Please enter a subject name.'; err.style.display = 'block'; return; }
 
-    const btn = document.querySelector('#sboDrawer .teacher-modal-submit');
+    // Find submit btn in either panel or drawer
+    const btn = document.querySelector('#sbo-main-panel .teacher-modal-submit')
+             || document.querySelector('#sboDrawer .teacher-modal-submit');
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
 
     try {
@@ -727,8 +828,8 @@ window.saveSBO = async function() {
         const data = await res.json();
 
         if (data.success) {
+            // Close drawer if open (mobile), panel handles via fetchTeacherSyllabus
             closeSBODrawer();
-            // Clear cache and reload page
             window.teacherSBOCache = null;
             fetchTeacherSyllabus();
             if (typeof window.showToast === 'function') {

@@ -561,6 +561,11 @@ window.downloadSubmissions = function(assignmentId) {
 window.openCreateAssignment = async function() {
     const apiArea = document.getElementById('api-content-area');
     const loader  = document.getElementById('loaderOverlay');
+    const panel   = document.getElementById('as-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+
+    // Target: panel on desktop, full apiArea on mobile
+    const target = isDesktop ? panel : apiArea;
 
     if (loader) loader.style.display = 'flex';
 
@@ -578,18 +583,27 @@ window.openCreateAssignment = async function() {
             classOptions += `<option value="${c.id}">${c.name}</option>`;
         });
 
-        apiArea.innerHTML = `
-            <div class="teacher-resources-header">
-                <button class="teacher-back-btn" onclick="fetchTeacherAssignments()">
+        // Clear sidebar active state on desktop
+        if (isDesktop) {
+            document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
+        }
+
+        const backFn    = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
+        const headerPad = isDesktop ? 'padding:20px 32px 0;' : '';
+        const formPad   = isDesktop ? 'padding:0 32px 32px;' : '';
+
+        target.innerHTML = `
+            <div class="teacher-resources-header" style="${headerPad}">
+                <button class="teacher-back-btn" onclick="${isDesktop ? 'fetchTeacherAssignments()' : 'fetchTeacherAssignments()'}">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
-                    Back to Assignments
+                    ${isDesktop ? 'Back' : 'Back to Assignments'}
                 </button>
             </div>
 
-            <div style="max-width:640px;margin:0 auto;">
-                <h2 style="color:#4fd1c5;font-size:22px;margin:0 0 24px;font-weight:800;">
+            <div style="max-width:560px;margin:0 auto;${formPad}">
+                <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:${isDesktop ? '0 0 20px' : '0 0 24px'};font-weight:800;">
                     Create New Assignment
                 </h2>
 
@@ -600,7 +614,7 @@ window.openCreateAssignment = async function() {
                         placeholder="e.g. Chapter 5 Essay" required>
 
                     <label class="teacher-modal-label">Description *</label>
-                    <textarea name="description" class="teacher-modal-input" rows="5"
+                    <textarea name="description" class="teacher-modal-input" rows="4"
                         style="resize:vertical;" placeholder="Describe the assignment..." required></textarea>
 
                     <label class="teacher-modal-label">Due Date *</label>
@@ -611,11 +625,11 @@ window.openCreateAssignment = async function() {
                         ${classOptions}
                     </select>
 
-                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:16px;margin:20px 0;text-align:center;">
-                        <div style="font-size:20px;font-weight:800;color:#4fd1c5;">
+                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
+                        <div style="font-size:18px;font-weight:800;color:#4fd1c5;">
                             Posting to: TERM ${currentTerm}
                         </div>
-                        <div style="font-size:13px;color:#8b949e;margin-top:4px;">
+                        <div style="font-size:12px;color:#8b949e;margin-top:4px;">
                             This assignment belongs to the current active term.
                         </div>
                     </div>
@@ -627,18 +641,18 @@ window.openCreateAssignment = async function() {
                     <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;margin-top:16px;">
                         <input type="checkbox" name="force_email" value="1"
                             style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;margin-top:2px;flex-shrink:0;">
-                        <span>Learners automatically get mobile notifications. Tick this box to also send email notifications (not recommended — heavy on server).</span>
+                        <span>Learners automatically get mobile notifications. Tick this box to also send email notifications.</span>
                     </label>
 
                     <div id="caError" style="color:#ff5555;font-size:14px;margin-top:12px;display:none;"></div>
 
-                    <div style="display:flex;gap:12px;margin-top:24px;margin-bottom:40px;">
+                    <div style="display:flex;gap:12px;margin-top:20px;margin-bottom:32px;">
                         <button type="button" onclick="fetchTeacherAssignments()"
-                            class="teacher-modal-cancel" style="flex:1;padding:14px;">
+                            class="teacher-modal-cancel" style="flex:1;padding:13px;">
                             Cancel
                         </button>
                         <button type="submit" class="teacher-modal-submit"
-                            id="caSubmitBtn" style="flex:2;padding:14px;font-size:15px;">
+                            id="caSubmitBtn" style="flex:2;padding:13px;font-size:14px;">
                             Create Assignment
                         </button>
                     </div>
@@ -685,7 +699,7 @@ window.openCreateAssignment = async function() {
 
     } catch (e) {
         console.error(e);
-        if (apiArea) apiArea.innerHTML = `
+        target.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading create assignment form.
             </p>`;
