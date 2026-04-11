@@ -1035,7 +1035,19 @@ document.querySelectorAll('#mobileMenu a, #mobileMenu button').forEach(el => {
 <!-- ===================== COMPARISON SECTION ===================== -->
 <style>
 .comparison-section { background: #f5f0eb; padding: 100px 5%; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
-.comparison-inner { max-width: 860px; margin: 0 auto; }
+.comparison-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px 28px 0 0;
+  background-image:
+    linear-gradient(rgba(79,209,197,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,209,197,0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+.comparison-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
 .comparison-header { text-align: center; margin-bottom: 56px; }
 .comp-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .comp-heading { font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; color: #111; margin-bottom: 16px; }
