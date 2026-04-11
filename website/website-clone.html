@@ -278,8 +278,8 @@ nav {
 .badge-announce  { background: rgba(248,81,73,0.12); color: #f85149; }
 .badge-calendar  { background: rgba(79,209,197,0.12); color: #4fd1c5; }
 
-.card-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; line-height: 1.15; }
-.card-sub   { font-size: 13px; color: #666; margin-bottom: 18px; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 4px; line-height: 1.15; color: #fff; }
+.card-sub   { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 18px; }
 
 .table-mini { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
 .table-mini th { text-align: left; padding: 9px 8px; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
@@ -387,7 +387,7 @@ nav {
 .features-section { background: #08080c; padding: 100px 0 120px; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 3; }
 .features-header { text-align: center; padding: 0 5% 72px; max-width: 700px; margin: 0 auto; }
 .feat-eyebrow { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
-.features-header h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 14px; }
+.features-header h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -2px; margin-bottom: 14px; color: #fff; }
 .features-header h2 span { color: var(--gold); }
 .features-header p { color: rgba(255,255,255,0.4); font-size: 17px; line-height: 1.7; }
 .feat-row { max-width: 1160px; margin: 0 auto; padding: 0 5% 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; opacity: 0; transform: translateY(50px); transition: opacity 0.85s ease, transform 0.85s ease; }
@@ -400,7 +400,7 @@ nav {
 .eyebrow-line { display: inline-block; width: 28px; height: 2px; border-radius: 999px; flex-shrink: 0; }
 .teal .eyebrow-line { background: var(--teal); }
 .gold .eyebrow-line { background: var(--gold); }
-.feat-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 3vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 18px; }
+.feat-copy h3 { font-family: 'Syne', sans-serif; font-size: clamp(26px, 3vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 18px; color: #fff; }
 .feat-copy h3 em { font-style: normal; }
 .feat-copy h3 em.teal { color: var(--teal); }
 .feat-copy h3 em.gold { color: var(--gold); }
@@ -2150,14 +2150,43 @@ document.addEventListener('keydown', function(e) {
 
 /* Mobile responsive */
 @media (max-width: 600px) {
-  .pf-modal { border-radius: 20px 20px 0 0; max-height: 95vh; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; border-radius: 20px 20px 0 0; }
+  .pf-modal {
+    border-radius: 24px 24px 0 0;
+    max-height: 82vh;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-width: 100%;
+  }
   .pf-overlay { align-items: flex-end; padding: 0; }
-  .pf-header { padding: 22px 20px 0; }
-  .pf-body { padding: 20px 20px 24px; }
-  .pf-footer { padding: 0 20px 24px; }
+  .pf-header { padding: 16px 20px 0; }
+  .pf-body { padding: 16px 20px 20px; }
+  .pf-footer { padding: 0 20px 28px; }
   .pf-row { grid-template-columns: 1fr; gap: 0; }
-  .pf-title { font-size: 20px; }
-  .pf-success { padding: 36px 20px 44px; }
+  .pf-title { font-size: 18px; }
+  .pf-success { padding: 32px 20px 44px; }
+  /* drag handle so users know they can swipe down to dismiss */
+  .pf-modal::before {
+    content: '';
+    display: block;
+    width: 40px; height: 4px;
+    background: #ddd;
+    border-radius: 999px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+  /* make close button bigger and always visible on mobile */
+  .pf-close {
+    width: 36px; height: 36px;
+    font-size: 20px;
+    background: #f0f0f0;
+    border-radius: 50%;
+  }
+  /* compress step dots text */
+  .pf-step-label, .pf-step-sub { font-size: 11px; }
+  .pf-step-title { font-size: 16px; }
+  /* compress input sizes on mobile */
+  .pf-input, .pf-select, .pf-textarea { font-size: 15px; padding: 11px 14px; }
+  .pf-label { font-size: 10.5px; }
 }
 </style>
 
