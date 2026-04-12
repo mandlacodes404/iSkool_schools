@@ -1,107 +1,89 @@
 <?php
 /**
- * iSkool School Dashboard — Get Announcements API
+ * iSkool — api/school/get_announcements.php
+ * Role: school_admin / admin
+ * Returns all school-wide announcements (class_id IS NULL) for the admin dashboard.
  */
+
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
-session_start();
-require_once '../../config.php';
+ini_set('log_errors', 1);
+ini_set('error_log', 'php_errors.log');
 
-if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 'admin'])) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit();
-}
+session_start();
+require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');
 
-$yearId = 0;
-$res = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-if ($row = $res->fetch_assoc()) $yearId = $row['id'];
+if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 'admin'])) {
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    ob_end_flush();
+    exit;
+}
 
-// ── Filters from GET params ──
-$filterClass   = (int)($_GET['class_id']    ?? 0);
-$filterTerm    = (int)($_GET['term']        ?? 0);
-$filterSendTo  = trim($_GET['send_to']      ?? '');
-$filterTeacher = trim($_GET['teacher_email']?? '');
+// ── Active academic year ──
+$yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$currentYearId = ($yearRes && $row = $yearRes->fetch_assoc()) ? (int)$row['id'] : 0;
 
-// ── Build WHERE ──
-$where = ["1=1"];
-if ($yearId)        $where[] = "a.academic_year_id = $yearId";
-if ($filterClass)   $where[] = "a.class_id = $filterClass";
-if ($filterTerm)    $where[] = "a.term_number = $filterTerm";
-if ($filterSendTo)  $where[] = "a.send_to = '" . $conn->real_escape_string($filterSendTo) . "'";
-if ($filterTeacher) $where[] = "a.created_by = '" . $conn->real_escape_string($filterTeacher) . "'";
-
-$whereSQL = implode(' AND ', $where);
-
-// ── Fetch announcements ──
-$announcements = [];
-$aRes = $conn->query("
-    SELECT a.id, a.title, a.message, a.created_at,
-           a.term_number, a.send_to, a.target_role,
-           a.created_by,
-           u.name, u.surname, u.profile_pic,
-           c.name class_name, c.id class_id
+// ── Fetch school-wide announcements (class_id IS NULL) ──
+// Join with users to get the sender's display name
+$res = $conn->query("
+    SELECT 
+        a.id,
+        a.title,
+        a.message,
+        a.created_by,
+        a.created_at,
+        a.send_to,
+        a.target_role,
+        a.term_number,
+        CONCAT(
+            COALESCE(u.title, ''), ' ',
+            UPPER(SUBSTR(TRIM(COALESCE(u.name, '')), 1, 1)), '. ',
+            COALESCE(u.surname, '')
+        ) AS sender_display,
+        u.name    AS sender_name,
+        u.surname AS sender_surname,
+        u.role    AS sender_role
     FROM announcements a
-    JOIN users u ON u.email = a.created_by
-    LEFT JOIN classes c ON c.id = a.class_id
-    WHERE $whereSQL
+    LEFT JOIN users u ON u.email = a.created_by
+    WHERE a.class_id IS NULL
+      AND a.academic_year_id = $currentYearId
     ORDER BY a.created_at DESC
+    LIMIT 100
 ");
 
-while ($row = $aRes->fetch_assoc()) {
-    $announcements[] = [
-        'id'          => $row['id'],
-        'title'       => $row['title'],
-        'message'     => $row['message'],
-        'created_at'  => $row['created_at'],
-        'term'        => $row['term_number'],
-        'send_to'     => $row['send_to'],
-        'target_role' => $row['target_role'],
-        'teacher_name'=> trim($row['name'] . ' ' . $row['surname']),
-        'teacher_email'=> $row['created_by'],
-        'profile_pic' => $row['profile_pic'],
-        'class_name'  => $row['class_name'] ?? 'All Classes',
-        'class_id'    => $row['class_id'],
-    ];
+$announcements = [];
+
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        // Clean up display name
+        $displayName = trim($row['sender_display']);
+        // Fallback: if name is empty, use email prefix
+        if ($displayName === '.' || empty(trim($displayName, '. '))) {
+            $displayName = explode('@', $row['created_by'])[0];
+        }
+
+        $announcements[] = [
+            'id'             => (int)$row['id'],
+            'title'          => $row['title'],
+            'message'        => $row['message'],
+            'created_by'     => $row['created_by'],
+            'sender_display' => $displayName,
+            'sender_role'    => $row['sender_role'] ?? 'school_admin',
+            'target_role'    => $row['target_role'],  // 'all' | 'learners' | 'teachers'
+            'send_to'        => $row['send_to'],
+            'term_number'    => (int)$row['term_number'],
+            'created_at'     => $row['created_at'],
+        ];
+    }
 }
-
-// ── Filter options ──
-$classes = [];
-$cRes = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
-while ($c = $cRes->fetch_assoc()) $classes[] = $c;
-
-$teachers = [];
-$tRes = $conn->query("
-    SELECT DISTINCT u.email, u.name, u.surname
-    FROM announcements a
-    JOIN users u ON u.email = a.created_by
-    " . ($yearId ? "WHERE a.academic_year_id = $yearId" : "") . "
-    ORDER BY u.surname ASC
-");
-while ($t = $tRes->fetch_assoc()) {
-    $teachers[] = [
-        'email' => $t['email'],
-        'name'  => trim($t['name'] . ' ' . $t['surname']),
-    ];
-}
-
-// ── Summary stats ──
-$totalRes = $conn->query("
-    SELECT COUNT(*) total,
-           SUM(send_to = 'learners') for_learners,
-           SUM(send_to = 'parents') for_parents
-    FROM announcements
-    " . ($yearId ? "WHERE academic_year_id = $yearId" : "") . "
-")->fetch_assoc();
 
 echo json_encode([
+    'success'       => true,
     'announcements' => $announcements,
-    'classes'       => $classes,
-    'teachers'      => $teachers,
-    'total'         => (int)$totalRes['total'],
-    'for_learners'  => (int)$totalRes['for_learners'],
-    'for_parents'   => (int)$totalRes['for_parents'],
+    'count'         => count($announcements),
 ]);
+
+ob_end_flush();

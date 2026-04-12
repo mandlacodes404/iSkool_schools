@@ -1,4 +1,27 @@
 <?php
+/**
+ * iSkool — api/teacher/get_announcements.php
+ * Role: teacher
+ * Returns:
+ *   [
+ *     {
+ *       "class_name": "From School",   // school-wide group (always first if any exist)
+ *       "is_school": true,
+ *       "items": [ { id, title, message, created_at, display_date } ]
+ *     },
+ *     {
+ *       "class_name": "Grade 10A",
+ *       "is_school": false,
+ *       "items": [ ... ]
+ *     },
+ *     ...
+ *   ]
+ *
+ * "From School" group = school-wide announcements sent by admin (class_id IS NULL)
+ *   that target teachers or everyone.
+ * Other groups = the teacher's own class-level announcements, grouped by class.
+ */
+
 session_start();
 require_once dirname(__DIR__, 2) . '/config.php';
 
@@ -11,44 +34,102 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-$currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-if ($currentYearResult->num_rows === 0) {
+// ── Active academic year ──
+$yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+if (!$yearRes || $yearRes->num_rows === 0) {
     echo json_encode(['error' => 'No active academic year']);
     exit();
 }
-$current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
+$current_academic_year_id = (int)$yearRes->fetch_assoc()['id'];
 
-$stmt = $conn->prepare("
-    SELECT 
-        a.id, a.title, a.message, a.created_at,
-        c.id AS class_id, c.name AS class_name
+$result = [];
+
+// ══════════════════════════════════════
+// 1. SCHOOL-WIDE ANNOUNCEMENTS FROM ADMIN
+//    target_role IN ('all', 'teachers'), class_id IS NULL
+// ══════════════════════════════════════
+$schoolStmt = $conn->prepare("
+    SELECT
+        a.id,
+        a.title,
+        a.message,
+        a.created_at
+    FROM announcements a
+    WHERE a.class_id IS NULL
+      AND a.academic_year_id = ?
+      AND a.target_role IN ('all', 'teachers')
+    ORDER BY a.created_at DESC
+");
+$schoolStmt->bind_param("i", $current_academic_year_id);
+$schoolStmt->execute();
+$schoolRes = $schoolStmt->get_result();
+
+$schoolItems = [];
+while ($row = $schoolRes->fetch_assoc()) {
+    $schoolItems[] = [
+        'id'           => (int)$row['id'],
+        'title'        => $row['title']   ?? '(No Title)',
+        'message'      => $row['message'] ?? '',
+        'created_at'   => $row['created_at'],
+        'display_date' => date('d M Y, H:i', strtotime($row['created_at'])),
+    ];
+}
+$schoolStmt->close();
+
+// Only include the school group if there are any
+if (!empty($schoolItems)) {
+    $result[] = [
+        'class_name' => 'From School',
+        'is_school'  => true,
+        'items'      => $schoolItems,
+    ];
+}
+
+// ══════════════════════════════════════
+// 2. TEACHER'S OWN CLASS ANNOUNCEMENTS
+//    grouped by class
+// ══════════════════════════════════════
+$teacherStmt = $conn->prepare("
+    SELECT
+        a.id,
+        a.title,
+        a.message,
+        a.created_at,
+        c.id   AS class_id,
+        c.name AS class_name
     FROM announcements a
     JOIN classes c ON a.class_id = c.id
     WHERE a.created_by = ?
       AND a.academic_year_id = ?
     ORDER BY a.created_at DESC
 ");
-$stmt->bind_param("si", $email, $current_academic_year_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$teacherStmt->bind_param("si", $email, $current_academic_year_id);
+$teacherStmt->execute();
+$teacherRes = $teacherStmt->get_result();
 
-$grouped = [];
-while ($row = $result->fetch_assoc()) {
+$classGroups = [];
+while ($row = $teacherRes->fetch_assoc()) {
     $cid = $row['class_id'];
-    if (!isset($grouped[$cid])) {
-        $grouped[$cid] = [
+    if (!isset($classGroups[$cid])) {
+        $classGroups[$cid] = [
             'class_name' => $row['class_name'],
-            'items'      => []
+            'is_school'  => false,
+            'items'      => [],
         ];
     }
-    $grouped[$cid]['items'][] = [
-        'id'         => $row['id'],
-        'title'      => $row['title'],
-        'message'    => $row['message'],
-        'created_at' => $row['created_at'],
-        'display_date' => date('d M Y, H:i', strtotime($row['created_at']))
+    $classGroups[$cid]['items'][] = [
+        'id'           => (int)$row['id'],
+        'title'        => $row['title']   ?? '(No Title)',
+        'message'      => $row['message'] ?? '',
+        'created_at'   => $row['created_at'],
+        'display_date' => date('d M Y, H:i', strtotime($row['created_at'])),
     ];
 }
-$stmt->close();
+$teacherStmt->close();
 
-echo json_encode(array_values($grouped));
+// Merge class groups into result
+foreach ($classGroups as $group) {
+    $result[] = $group;
+}
+
+echo json_encode($result);
