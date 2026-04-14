@@ -1200,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="assets/js/school/teachers.js?v=1.4"></script>
 <script src="assets/js/school/analytics.js?v=1.3"></script>
 <script src="assets/js/school/settings.js?v=1.0"></script>
-<script src="assets/js/school/announcements.js?v=1.4"></script>
+<script src="assets/js/school/announcements.js?v=1.5"></script>
 <script src="assets/js/school/content.js?v=1.4"></script>
 </body>
 </html>
