@@ -524,6 +524,23 @@ function renderThread(data) {
             .disc-typing-dots span:nth-child(2){animation-delay:0.2s}
             .disc-typing-dots span:nth-child(3){animation-delay:0.4s}
             @keyframes discTypeBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
+
+            /* ── VOICE NOTE PLAYER ── */
+            .disc-voice-player { display:flex; align-items:center; gap:10px; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.18); border-radius:10px; padding:9px 13px; margin-top:8px; min-width:180px; max-width:280px; }
+            .disc-voice-play-btn { width:32px; height:32px; border-radius:50%; background:#4fd1c5; border:none; color:#0d1117; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; transition:0.15s; }
+            .disc-voice-play-btn:hover { background:#38b2ac; }
+            .disc-voice-info { flex:1; min-width:0; }
+            .disc-voice-bar { height:3px; background:rgba(255,255,255,0.1); border-radius:2px; margin-bottom:5px; overflow:hidden; cursor:pointer; }
+            .disc-voice-bar-fill { height:100%; background:#4fd1c5; border-radius:2px; width:0%; transition:width 0.25s linear; }
+            .disc-voice-time { font-size:10px; color:#8b949e; font-weight:700; font-family:'Nunito',sans-serif; }
+
+            /* ── VOICE RECORDER UI ── */
+            .disc-voice-preview { display:none; align-items:center; gap:8px; background:#1b1b1b; border:1px solid rgba(79,209,197,0.25); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; }
+            .disc-voice-preview.show { display:flex; }
+            .disc-voice-rec-dot { width:8px; height:8px; border-radius:50%; background:#f85149; animation:discRecPulse 1s infinite; flex-shrink:0; }
+            @keyframes discRecPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+            .disc-voice-rec-done { width:8px; height:8px; border-radius:50%; background:#4fd1c5; flex-shrink:0; }
+            .disc-tool-btn.recording { color:#f85149; animation:discRecPulse 1s infinite; }
         </style>
 
         <div class="disc-thread-wrap">
@@ -595,10 +612,27 @@ function buildPostCard(r, user_role, is_in_class, discId) {
         const ext   = r.attachment.split('.').pop().toLowerCase();
         const path  = 'uploads/discussions/' + r.attachment;
         const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
-        attachHtml  = `<div class="disc-attachment">` + (isImg
-            ? `<img src="${path}" onclick="discOpenMedia('${path}','image')">`
-            : `<div class="disc-pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf"></i> Open PDF</div>`)
-            + `</div>`;
+        const isVoice = ['webm','ogg','m4a','mp3'].includes(ext);
+        if (isVoice) {
+            const uid = 'vp_' + (r.id || Math.random().toString(36).slice(2));
+            attachHtml = `
+                <div class="disc-voice-player">
+                    <button class="disc-voice-play-btn" id="btn_${uid}" onclick="discVoiceToggle('${uid}','${path}')">
+                        <i class="fas fa-play" id="icon_${uid}"></i>
+                    </button>
+                    <div class="disc-voice-info">
+                        <div class="disc-voice-bar" onclick="discVoiceSeek(event,'${uid}')">
+                            <div class="disc-voice-bar-fill" id="fill_${uid}"></div>
+                        </div>
+                        <span class="disc-voice-time" id="time_${uid}">0:00</span>
+                    </div>
+                </div>`;
+        } else {
+            attachHtml = `<div class="disc-attachment">` + (isImg
+                ? `<img src="${path}" onclick="discOpenMedia('${path}','image')">`
+                : `<div class="disc-pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf"></i> Open PDF</div>`)
+                + `</div>`;
+        }
     }
 
     const replyBtn  = is_in_class && r.id !== undefined
@@ -650,6 +684,12 @@ function buildCompose(discId) {
                 <span id="discFileName"></span>
                 <button onclick="discClearFile()" style="background:none;border:none;color:#f85149;cursor:pointer;margin-left:auto;font-size:16px;">✕</button>
             </div>
+            <div class="disc-voice-preview" id="discVoicePreview">
+                <span id="discVoiceDot" class="disc-voice-rec-dot"></span>
+                <span id="discVoiceStatus" style="flex:1;font-weight:700;color:#e2e8f0;">Recording… 0:00</span>
+                <button onclick="discStopRecording()" style="background:none;border:none;color:#4fd1c5;cursor:pointer;font-size:16px;" title="Stop"><i class="fas fa-stop-circle"></i></button>
+                <button onclick="discCancelRecording()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;" title="Discard">✕</button>
+            </div>
             <div class="disc-compose-box">
                 <textarea id="discTextarea" placeholder="Add to the discussion…" rows="1"></textarea>
                 <div class="disc-toolbar">
@@ -657,6 +697,9 @@ function buildCompose(discId) {
                         <i class="fas fa-paperclip"></i>
                         <input type="file" id="discFileInput" accept="image/*,.pdf" style="display:none;">
                     </label>
+                    <button class="disc-tool-btn" id="discMicBtn" title="Record voice note (max 2 min)" onclick="discToggleRecording(${discId})">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                     <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
                         <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
                         <i class="fas fa-user-secret"></i> Anonymous
@@ -783,14 +826,19 @@ window.discSubmitReply = async function(discId) {
     const replyTo = window._discReplyTo ?? 0;
     const message = ta ? ta.value.trim() : '';
 
-    if (!message && (!fi || !fi.files[0])) return;
+    if (!message && (!fi || !fi.files[0]) && !_discVoiceBlob) return;
 
     const fd = new FormData();
     fd.append('discussion_id', discId);
     fd.append('message', message);
     fd.append('anonymous', anon?.checked ? '1' : '0');
     fd.append('reply_to', replyTo);
-    if (fi?.files[0]) fd.append('attachment', fi.files[0]);
+    if (_discVoiceBlob) {
+        const ext  = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
+        fd.append('attachment', _discVoiceBlob, `voice_${Date.now()}.${ext}`);
+    } else if (fi?.files[0]) {
+        fd.append('attachment', fi.files[0]);
+    }
 
     const btn = document.querySelector('.disc-post-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
@@ -804,6 +852,10 @@ window.discSubmitReply = async function(discId) {
         if (fi) fi.value = '';
         discCancelReply();
         discClearFile();
+        // Clear voice note state
+        _discVoiceBlob = null;
+        _discAudioChunks = [];
+        document.getElementById('discVoicePreview')?.classList.remove('show');
 
         const scroll   = document.getElementById('discPostsScroll');
         const bottomEl = document.getElementById('discBottom');
@@ -861,6 +913,145 @@ window.discClearFile = function() {
     document.getElementById('discFilePreview')?.classList.remove('show');
     const img = document.getElementById('discPreviewImg');
     if (img) img.style.display = 'none';
+};
+
+// ─────────────────────────────────────────────
+// VOICE NOTE — RECORDER
+// ─────────────────────────────────────────────
+let _discMediaRecorder  = null;
+let _discAudioChunks    = [];
+let _discVoiceBlob      = null;
+let _discRecordTimer    = null;
+let _discRecordSeconds  = 0;
+const VOICE_MAX_SECONDS = 120; // 2-minute limit
+
+window.discToggleRecording = async function(discId) {
+    if (_discMediaRecorder && _discMediaRecorder.state === 'recording') {
+        discStopRecording();
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        _discAudioChunks   = [];
+        _discVoiceBlob     = null;
+        _discRecordSeconds = 0;
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+        _discMediaRecorder = new MediaRecorder(stream, { mimeType });
+
+        _discMediaRecorder.ondataavailable = e => { if (e.data.size > 0) _discAudioChunks.push(e.data); };
+        _discMediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            _discVoiceBlob = new Blob(_discAudioChunks, { type: mimeType });
+            _discShowVoiceReady(mimeType);
+        };
+
+        _discMediaRecorder.start(250);
+
+        // Show recording UI
+        const preview = document.getElementById('discVoicePreview');
+        const dot     = document.getElementById('discVoiceDot');
+        const status  = document.getElementById('discVoiceStatus');
+        const micBtn  = document.getElementById('discMicBtn');
+        if (preview) preview.classList.add('show');
+        if (dot)     dot.className = 'disc-voice-rec-dot';
+        if (micBtn)  micBtn.classList.add('recording');
+
+        _discRecordTimer = setInterval(() => {
+            _discRecordSeconds++;
+            const m = Math.floor(_discRecordSeconds / 60);
+            const s = String(_discRecordSeconds % 60).padStart(2, '0');
+            if (status) status.textContent = `Recording… ${m}:${s}`;
+            if (_discRecordSeconds >= VOICE_MAX_SECONDS) discStopRecording();
+        }, 1000);
+
+    } catch (err) {
+        alert('Microphone access denied. Please allow microphone permissions.');
+    }
+};
+
+window.discStopRecording = function() {
+    if (_discMediaRecorder && _discMediaRecorder.state === 'recording') {
+        _discMediaRecorder.stop();
+    }
+    clearInterval(_discRecordTimer);
+    _discRecordTimer = null;
+    document.getElementById('discMicBtn')?.classList.remove('recording');
+};
+
+window.discCancelRecording = function() {
+    discStopRecording();
+    _discVoiceBlob = null;
+    _discAudioChunks = [];
+    document.getElementById('discVoicePreview')?.classList.remove('show');
+};
+
+function _discShowVoiceReady(mimeType) {
+    const dot    = document.getElementById('discVoiceDot');
+    const status = document.getElementById('discVoiceStatus');
+    const m = Math.floor(_discRecordSeconds / 60);
+    const s = String(_discRecordSeconds % 60).padStart(2, '0');
+    if (dot)    { dot.className = 'disc-voice-rec-done'; }
+    if (status) status.textContent = `Voice note ready · ${m}:${s}`;
+}
+
+// ─────────────────────────────────────────────
+// VOICE NOTE — INLINE PLAYER
+// ─────────────────────────────────────────────
+const _discAudioPlayers = {};
+
+window.discVoiceToggle = function(uid, path) {
+    if (!_discAudioPlayers[uid]) {
+        _discAudioPlayers[uid] = new Audio(path);
+        _discAudioPlayers[uid].addEventListener('timeupdate', () => _discVoiceProgress(uid));
+        _discAudioPlayers[uid].addEventListener('ended',      () => _discVoiceEnded(uid));
+    }
+    const audio = _discAudioPlayers[uid];
+    if (audio.paused) {
+        // Pause all others first
+        Object.keys(_discAudioPlayers).forEach(k => {
+            if (k !== uid && !_discAudioPlayers[k].paused) {
+                _discAudioPlayers[k].pause();
+                document.getElementById('icon_' + k)?.setAttribute('class', 'fas fa-play');
+            }
+        });
+        audio.play();
+        document.getElementById('icon_' + uid)?.setAttribute('class', 'fas fa-pause');
+    } else {
+        audio.pause();
+        document.getElementById('icon_' + uid)?.setAttribute('class', 'fas fa-play');
+    }
+};
+
+function _discVoiceProgress(uid) {
+    const audio = _discAudioPlayers[uid];
+    if (!audio || !audio.duration) return;
+    const pct  = (audio.currentTime / audio.duration) * 100;
+    const fill = document.getElementById('fill_' + uid);
+    const time = document.getElementById('time_' + uid);
+    if (fill) fill.style.width = pct + '%';
+    if (time) {
+        const m = Math.floor(audio.currentTime / 60);
+        const s = String(Math.floor(audio.currentTime % 60)).padStart(2, '0');
+        time.textContent = `${m}:${s}`;
+    }
+}
+
+function _discVoiceEnded(uid) {
+    const fill = document.getElementById('fill_' + uid);
+    const time = document.getElementById('time_' + uid);
+    const icon = document.getElementById('icon_' + uid);
+    if (fill) fill.style.width = '0%';
+    if (time) time.textContent = '0:00';
+    if (icon) icon.setAttribute('class', 'fas fa-play');
+}
+
+window.discVoiceSeek = function(event, uid) {
+    const audio = _discAudioPlayers[uid];
+    if (!audio || !audio.duration) return;
+    const bar   = event.currentTarget;
+    const ratio = event.offsetX / bar.offsetWidth;
+    audio.currentTime = ratio * audio.duration;
 };
 
 // ─────────────────────────────────────────────

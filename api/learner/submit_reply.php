@@ -31,7 +31,7 @@ if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
     $file    = $_FILES['attachment'];
-    $allowed = ['jpg','jpeg','png','gif','pdf','webp'];
+    $allowed = ['jpg','jpeg','png','gif','pdf','webp','webm','ogg'];
     $ext     = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if (in_array($ext, $allowed) && $file['size'] <= 10 * 1024 * 1024) {
         $filename = uniqid('disc_') . '.' . $ext;
