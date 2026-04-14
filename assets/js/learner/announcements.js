@@ -35,7 +35,7 @@ window.fetchAnnouncements = async function() {
         const response = await fetch('api/learner/get_announcements.php');
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
-        window.announcementCache = data; 
+        window.announcementCache = data;
         renderAnnouncements(data);
     } catch (error) {
         console.error("Fetch Error:", error);
@@ -52,7 +52,19 @@ function renderAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    if (Object.keys(data).length === 0) {
+    // data shape expected:
+    // {
+    //   school_wide: [ { id, title, message, created_at, display_date, sender } ],
+    //   teacher:     { "Teacher Name": [ { id, title, message, created_at, display_date } ], ... }
+    // }
+
+    const schoolWide  = data.school_wide  || [];
+    const teacherData = data.teacher      || {};
+
+    const hasSchoolWide  = schoolWide.length > 0;
+    const hasTeacher     = Object.keys(teacherData).length > 0;
+
+    if (!hasSchoolWide && !hasTeacher) {
         apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No announcements found.</p>";
         return;
     }
@@ -60,28 +72,43 @@ function renderAnnouncements(data) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // ── Build flat list for desktop panel lookup ──
+    // ── Build flat list (school-wide FIRST, then teacher) ──
     window._allLearnerAnnouncementsFlat = [];
-    for (const [teacher, items] of Object.entries(data)) {
+
+    schoolWide.forEach(ann => {
+        window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'school', teacher: ann.sender || 'School Admin' });
+    });
+
+    for (const [teacher, items] of Object.entries(teacherData)) {
         items.forEach(ann => {
-            window._allLearnerAnnouncementsFlat.push({ ...ann, teacher });
+            window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'teacher', teacher });
         });
     }
 
     // ── Build sidebar HTML ──
     let sidebarHtml = '';
     let flatIdx = 0;
-    for (const [teacher, items] of Object.entries(data)) {
-        sidebarHtml += `<div class="lan-sidebar-teacher-label">${teacher}</div>`;
-        items.forEach(ann => {
+
+    // School-wide section
+    if (hasSchoolWide) {
+        sidebarHtml += `
+            <div class="lan-sidebar-section-label lan-section-school">
+                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                School-wide
+            </div>`;
+
+        schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
             sidebarHtml += `
-                <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
+                <div class="lan-sidebar-item lan-sidebar-item--school" id="lan-sidebar-${flatIdx}"
                     onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                     <div class="lan-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                     </div>
                     <div class="lan-sidebar-item-info">
@@ -92,6 +119,41 @@ function renderAnnouncements(data) {
                 </div>`;
             flatIdx++;
         });
+    }
+
+    // Teacher section
+    if (hasTeacher) {
+        sidebarHtml += `
+            <div class="lan-sidebar-section-label lan-section-teacher" style="margin-top:${hasSchoolWide ? '8px' : '0'}">
+                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                From Teachers
+            </div>`;
+
+        for (const [teacher, items] of Object.entries(teacherData)) {
+            sidebarHtml += `<div class="lan-sidebar-teacher-label">${teacher}</div>`;
+            items.forEach(ann => {
+                const isNew = new Date(ann.created_at) > sevenDaysAgo;
+                sidebarHtml += `
+                    <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
+                        onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
+                        <div class="lan-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="lan-sidebar-item-info">
+                            <div class="lan-sidebar-item-title">${ann.title}</div>
+                            <div class="lan-sidebar-item-meta">${ann.display_date}</div>
+                        </div>
+                        ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
+                    </div>`;
+                flatIdx++;
+            });
+        }
     }
 
     // ── Build full HTML ──
@@ -146,14 +208,31 @@ function renderAnnouncements(data) {
             .lan-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lan-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
+            /* Section labels (School-wide / From Teachers) */
+            .lan-sidebar-section-label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .lan-section-school  { color: #d29522; border-top: 1px solid rgba(210,149,34,0.15); margin-top: 4px; }
+            .lan-section-school:first-child { border-top: none; margin-top: 0; }
+            .lan-section-teacher { color: #4fd1c5; border-top: 1px solid rgba(79,209,197,0.12); margin-top: 4px; }
+
+            /* Teacher sub-label */
             .lan-sidebar-teacher-label {
-                padding: 8px 16px 4px;
+                padding: 6px 16px 2px 24px;
                 font-size: 10px;
                 font-weight: 700;
-                color: #8b949e;
+                color: #555e6a;
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
             }
+
             .lan-sidebar-item {
                 display: flex;
                 align-items: center;
@@ -168,6 +247,12 @@ function renderAnnouncements(data) {
                 background: rgba(79,209,197,0.08);
                 border-left-color: #4fd1c5;
             }
+            /* School-wide active gets orange accent */
+            .lan-sidebar-item--school.active {
+                background: rgba(210,149,34,0.08);
+                border-left-color: #d29522;
+            }
+
             .lan-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
             .lan-sidebar-item-info { flex: 1; min-width: 0; }
             .lan-sidebar-item-title {
@@ -234,10 +319,26 @@ function renderAnnouncements(data) {
                 color: #4fd1c5;
                 margin: 0 0 8px;
             }
-            .lan-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
+            .lan-panel-title--school { color: #d29522; }
+            .lan-panel-meta { font-size: 13px; color: #8b949e; }
+
+            /* School-wide badge in panel */
+            .lan-school-wide-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: rgba(210,149,34,0.1);
+                color: #d29522;
+                border: 1px solid rgba(210,149,34,0.35);
+                font-size: 10px;
+                font-weight: 800;
+                padding: 3px 8px;
+                border-radius: 5px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                margin-bottom: 10px;
             }
+
             .lan-panel-message {
                 font-size: 14px;
                 color: #e2e8f0;
@@ -251,13 +352,34 @@ function renderAnnouncements(data) {
                 overflow: hidden;
                 margin: 8px 0 16px;
             }
-            .lan-mobile-teacher-header {
-                padding: 16px 16px 6px;
-                font-size: 11px;
-                font-weight: 600;
-                color: #8b949e;
+            .lan-mobile-section-header {
+                padding: 12px 16px 6px;
+                font-size: 10px;
+                font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lan-mobile-section-header--school {
+                color: #d29522;
+                background: rgba(210,149,34,0.06);
+                border-bottom: 1px solid rgba(210,149,34,0.12);
+            }
+            .lan-mobile-section-header--teacher {
+                color: #4fd1c5;
+                background: rgba(79,209,197,0.04);
+                border-top: 1px solid rgba(79,209,197,0.1);
+                border-bottom: 1px solid rgba(79,209,197,0.1);
+            }
+            .lan-mobile-teacher-header {
+                padding: 8px 16px 4px 20px;
+                font-size: 10px;
+                font-weight: 600;
+                color: #555e6a;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
                 background: #1a1919;
             }
             .lan-mobile-card {
@@ -268,12 +390,11 @@ function renderAnnouncements(data) {
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
             }
-            .lan-mobile-card:last-child { border-bottom: none; }
-            .lan-mobile-card-icon {
-                flex-shrink: 0;
-                margin-top: 2px;
-                opacity: 0.7;
+            .lan-mobile-card--school {
+                border-left: 3px solid rgba(210,149,34,0.5);
             }
+            .lan-mobile-card:last-child { border-bottom: none; }
+            .lan-mobile-card-icon { flex-shrink: 0; margin-top: 2px; opacity: 0.7; }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
                 font-size: 14px;
@@ -288,10 +409,7 @@ function renderAnnouncements(data) {
                 line-height: 1.6;
                 margin: 0 0 8px;
             }
-            .lan-mobile-card-date {
-                font-size: 11px;
-                color: #555e6a;
-            }
+            .lan-mobile-card-date { font-size: 11px; color: #555e6a; }
             .lan-mobile-new-badge {
                 display: inline-block;
                 background: rgba(79,209,197,0.1);
@@ -324,20 +442,28 @@ function renderAnnouncements(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST ═══ -->
         <div class="lan-mobile-list">`;
 
-    for (const [teacher, items] of Object.entries(data)) {
-        html += `<div class="lan-mobile-teacher-header">${teacher}</div>`;
+    // Mobile — School-wide section
+    if (hasSchoolWide) {
+        html += `
+            <div class="lan-mobile-section-header lan-mobile-section-header--school">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#d29522" stroke-width="2.5" fill="none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                School-wide Announcements
+            </div>`;
 
-        items.forEach(ann => {
+        schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
             html += `
-                <div class="lan-mobile-card">
+                <div class="lan-mobile-card lan-mobile-card--school">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                     </div>
                     <div class="lan-mobile-card-body">
@@ -346,10 +472,46 @@ function renderAnnouncements(data) {
                             ${isNew ? '<span class="lan-mobile-new-badge">NEW</span>' : ''}
                         </div>
                         <div class="lan-mobile-card-message">${ann.message.replace(/\n/g, '<br>')}</div>
-                        <div class="lan-mobile-card-date">${ann.display_date}</div>
+                        <div class="lan-mobile-card-date">${ann.sender || 'School Admin'} &bull; ${ann.display_date}</div>
                     </div>
                 </div>`;
         });
+    }
+
+    // Mobile — Teacher section
+    if (hasTeacher) {
+        html += `
+            <div class="lan-mobile-section-header lan-mobile-section-header--teacher">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                From Teachers
+            </div>`;
+
+        for (const [teacher, items] of Object.entries(teacherData)) {
+            html += `<div class="lan-mobile-teacher-header">${teacher}</div>`;
+            items.forEach(ann => {
+                const isNew = new Date(ann.created_at) > sevenDaysAgo;
+                html += `
+                    <div class="lan-mobile-card">
+                        <div class="lan-mobile-card-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="lan-mobile-card-body">
+                            <div class="lan-mobile-card-title">
+                                ${ann.title}
+                                ${isNew ? '<span class="lan-mobile-new-badge">NEW</span>' : ''}
+                            </div>
+                            <div class="lan-mobile-card-message">${ann.message.replace(/\n/g, '<br>')}</div>
+                            <div class="lan-mobile-card-date">${ann.display_date}</div>
+                        </div>
+                    </div>`;
+            });
+        }
     }
 
     html += `</div>`; // close .lan-mobile-list
@@ -375,12 +537,22 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const isNew = new Date(ann.created_at) > sevenDaysAgo;
 
+    const isSchool = ann._type === 'school';
+
     panel.innerHTML = `
         <div class="lan-panel-content">
             <div class="lan-panel-header">
                 <div>
-                    <div class="lan-panel-title">
-                        <i class="fas fa-bullhorn" style="margin-right:8px;"></i>${ann.title}
+                    ${isSchool ? `
+                        <div class="lan-school-wide-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                            School-wide
+                        </div>` : ''}
+                    <div class="lan-panel-title ${isSchool ? 'lan-panel-title--school' : ''}">
+                        <i class="${isSchool ? 'fas fa-school' : 'fas fa-bullhorn'}" style="margin-right:8px;"></i>${ann.title}
                     </div>
                     <div class="lan-panel-meta">${ann.teacher} &bull; ${ann.display_date}</div>
                 </div>

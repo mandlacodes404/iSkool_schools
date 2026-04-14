@@ -47,6 +47,13 @@ $classQuery->close();
 // ══════════════════════════════════════
 $schoolAnnouncements = [];
 
+// ── Get school name for sender label ──
+$schoolName = 'School Admin';
+$snRes = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($snRes && $snRow = $snRes->fetch_assoc()) {
+    $schoolName = trim($snRow['setting_value']) ?: 'School Admin';
+}
+
 $schoolStmt = $conn->prepare("
     SELECT
         a.id,
@@ -67,10 +74,11 @@ $schoolRes = $schoolStmt->get_result();
 while ($row = $schoolRes->fetch_assoc()) {
     $schoolAnnouncements[] = [
         'id'           => (int)$row['id'],
-        'title'        => $row['title']        ?? '(No Title)',
-        'message'      => $row['message']       ?? '',
+        'title'        => $row['title']   ?? '(No Title)',
+        'message'      => $row['message'] ?? '',
         'created_at'   => $row['created_at'],
         'display_date' => date('F j, Y, g:i a', strtotime($row['created_at'])),
+        'sender'       => $schoolName,
     ];
 }
 $schoolStmt->close();
@@ -117,6 +125,6 @@ if ($classId) {
 }
 
 echo json_encode([
-    'school'   => $schoolAnnouncements,
-    'teachers' => $teacherGrouped,
+    'school_wide' => $schoolAnnouncements,
+    'teacher'     => $teacherGrouped,
 ]);
