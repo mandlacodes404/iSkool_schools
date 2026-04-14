@@ -78,7 +78,7 @@ $stmt = $conn->prepare("
         (NULL, ?, ?, ?, ?, ?, ?, ?)
 ");
 $stmt->bind_param(
-    "ssssiiss",
+    "sssiiss",      // ← 7 type chars (removed one 's')
     $title,
     $message,
     $adminEmail,
