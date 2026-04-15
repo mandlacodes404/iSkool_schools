@@ -14,13 +14,13 @@ window.fetchResources = async function() {
     }
 
     const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    const loader = document.getElementById("loaderOverlay");
+    const iframe  = document.getElementById('mainFrame');
+    const loader  = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
     // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
-    if (iframe) iframe.style.display = 'none';
+    if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
     // 4. CACHE CHECK (Instant Load)
@@ -36,7 +36,7 @@ window.fetchResources = async function() {
         const response = await fetch('api/learner/get_resources.php');
         if (!response.ok) throw new Error('Failed to fetch resources');
         const data = await response.json();
-        window.resourceCache = data; 
+        window.resourceCache = data;
         renderResourceCards(data);
     } catch (error) {
         console.error("Resource Fetch Error:", error);
@@ -72,15 +72,23 @@ function renderResourceCards(data) {
     for (const [teacher, files] of Object.entries(data)) {
         sidebarHtml += `<div class="lrs-sidebar-teacher-label">${teacher}</div>`;
         files.forEach(file => {
+            const isVideo = file.resource_type === 'video';
+            const metaLabel = isVideo
+                ? 'VIDEO'
+                : (file.ext ? file.ext.toUpperCase() : 'FILE');
+            const metaRight = isVideo
+                ? 'YouTube'
+                : (file.size || 'N/A');
+
             sidebarHtml += `
                 <div class="lrs-sidebar-item" id="lrs-sidebar-${flatIdx}"
                     onclick="selectDesktopLearnerResource(${flatIdx})">
                     <div class="lrs-sidebar-item-icon">
-                        ${getFileIcon(file.ext)}
+                        ${getFileIcon(file.ext, isVideo)}
                     </div>
                     <div class="lrs-sidebar-item-info">
                         <div class="lrs-sidebar-item-title">${file.title}</div>
-                        <div class="lrs-sidebar-item-meta">${file.ext ? file.ext.toUpperCase() : 'FILE'} &middot; ${file.size || 'N/A'}</div>
+                        <div class="lrs-sidebar-item-meta">${metaLabel} &middot; ${metaRight}</div>
                     </div>
                 </div>`;
             flatIdx++;
@@ -246,6 +254,64 @@ function renderResourceCards(data) {
                 border-color: #4fd1c5;
             }
 
+            /* ── VIDEO EMBED STYLES ── */
+            .lrs-video-wrap {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                min-height: 0;
+                background: #000;
+            }
+            .lrs-video-iframe-wrap {
+                position: relative;
+                flex: 1;
+                min-height: 0;
+                background: #000;
+            }
+            .lrs-video-iframe-wrap iframe {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+
+            /* ── MOBILE VIDEO STYLES ── */
+            .lrs-mobile-video-wrap {
+                width: 100%;
+                aspect-ratio: 16 / 9;
+                background: #000;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-top: 4px;
+            }
+            .lrs-mobile-video-wrap iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                display: block;
+            }
+            .lrs-mobile-video-card {
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding: 14px 16px;
+            }
+            .lrs-mobile-video-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #4fd1c5;
+                margin: 0 0 4px;
+            }
+            .lrs-mobile-video-meta {
+                font-size: 12px;
+                color: #8b949e;
+                margin: 0 0 10px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
             /* ── MOBILE LIST STYLES ── */
             .lrs-mobile-list {
                 background: #1a1919;
@@ -316,33 +382,60 @@ function renderResourceCards(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST ═══ -->
         <div class="lrs-mobile-list">`;
 
     for (const [teacher, files] of Object.entries(data)) {
         html += `<div class="lrs-mobile-teacher-header">${teacher}</div>`;
         files.forEach(file => {
-            const icon = getFileIcon(file.ext);
-            html += `
-                <div class="lrs-mobile-row"
-                     onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
-                    <div class="lrs-mobile-row-icon">${icon}</div>
-                    <div class="lrs-mobile-row-body">
-                        <div class="lrs-mobile-row-title">${file.title}</div>
-                        <div class="lrs-mobile-row-meta">
-                            <span>${file.ext ? file.ext.toUpperCase() : 'FILE'}</span>
-                            <span style="color:#30363d;">&bull;</span>
-                            <span>${file.size || 'N/A'}</span>
+            const isVideo = file.resource_type === 'video';
+
+            if (isVideo) {
+                // ── Mobile: inline video embed ──
+                html += `
+                    <div class="lrs-mobile-video-card">
+                        <div class="lrs-mobile-video-title">${file.title}</div>
+                        <div class="lrs-mobile-video-meta">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="#ff4444" stroke="none">
+                                <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
+                            </svg>
+                            <span>VIDEO</span>
                             <span style="color:#30363d;">&bull;</span>
                             <span>${file.uploaded_at}</span>
                         </div>
-                    </div>
-                    <div class="lrs-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
-                </div>`;
+                        <div class="lrs-mobile-video-wrap">
+                            <iframe
+                                src="${file.video_url}"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                title="${file.title}">
+                            </iframe>
+                        </div>
+                    </div>`;
+            } else {
+                // ── Mobile: regular file row ──
+                const icon = getFileIcon(file.ext, false);
+                html += `
+                    <div class="lrs-mobile-row"
+                         onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
+                        <div class="lrs-mobile-row-icon">${icon}</div>
+                        <div class="lrs-mobile-row-body">
+                            <div class="lrs-mobile-row-title">${file.title}</div>
+                            <div class="lrs-mobile-row-meta">
+                                <span>${file.ext ? file.ext.toUpperCase() : 'FILE'}</span>
+                                <span style="color:#30363d;">&bull;</span>
+                                <span>${file.size || 'N/A'}</span>
+                                <span style="color:#30363d;">&bull;</span>
+                                <span>${file.uploaded_at}</span>
+                            </div>
+                        </div>
+                        <div class="lrs-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>`;
+            }
         });
     }
 
@@ -365,46 +458,11 @@ window.selectDesktopLearnerResource = function(flatIdx) {
     const panel = document.getElementById('lrs-main-panel');
     if (!panel) return;
 
-    const ext  = (file.ext || '').toLowerCase();
-    const path = file.path;
-    const safeTitle = file.title.replace(/'/g, "\\'");
+    const isVideo = file.resource_type === 'video';
+    const ext     = (file.ext || '').toLowerCase();
 
-    // ── Build preview area based on file type ──
-    let previewHtml = '';
-
-    if (ext === 'pdf') {
-        previewHtml = `
-            <div class="lrs-preview-wrap">
-                <iframe
-                    src="${path}"
-                    class="lrs-preview-iframe"
-                    title="${file.title}">
-                </iframe>
-            </div>`;
-    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-        previewHtml = `
-            <div class="lrs-preview-wrap lrs-preview-img-wrap">
-                <img src="${path}" alt="${file.title}" class="lrs-preview-img">
-            </div>`;
-    } else {
-        // Non-previewable file — show fallback
-        const icon = getFileIcon(file.ext);
-        previewHtml = `
-            <div class="lrs-preview-fallback">
-                <div style="opacity:0.5;">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
-                <p class="lrs-preview-fallback-label">Preview not available for .${ext.toUpperCase()} files</p>
-                <a href="${path}" target="_blank" class="lrs-open-btn" style="margin-top:0;">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Open File
-                </a>
-            </div>`;
-    }
-
-    panel.innerHTML = `
+    // ── Shared top bar styles ──
+    const topbarStyles = `
         <style>
             .lrs-preview-topbar {
                 display: flex;
@@ -415,6 +473,7 @@ window.selectDesktopLearnerResource = function(flatIdx) {
                 border-bottom: 1px solid rgba(255,255,255,0.07);
                 flex-shrink: 0;
                 flex-wrap: wrap;
+                background: #0d1117;
             }
             .lrs-preview-topbar-info { flex: 1; min-width: 0; }
             .lrs-preview-topbar-title {
@@ -432,6 +491,7 @@ window.selectDesktopLearnerResource = function(flatIdx) {
                 display: flex;
                 align-items: center;
                 gap: 6px;
+                flex-wrap: wrap;
             }
             .lrs-preview-topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
             .lrs-preview-open-btn {
@@ -450,6 +510,22 @@ window.selectDesktopLearnerResource = function(flatIdx) {
                 transition: background 0.15s;
             }
             .lrs-preview-open-btn:hover { background: rgba(79,209,197,0.2); }
+            .lrs-yt-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(255,68,68,0.1);
+                border: 1px solid rgba(255,68,68,0.3);
+                color: #ff6b6b;
+                padding: 7px 14px;
+                border-radius: 7px;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background 0.15s;
+            }
+            .lrs-yt-btn:hover { background: rgba(255,68,68,0.2); }
             .lrs-preview-wrap {
                 flex: 1;
                 display: flex;
@@ -495,9 +571,110 @@ window.selectDesktopLearnerResource = function(flatIdx) {
                 margin: 0;
                 text-align: center;
             }
-        </style>
+            /* Desktop video embed */
+            .lrs-video-embed-wrap {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                background: #000;
+                min-height: 0;
+                position: relative;
+            }
+            .lrs-video-embed-wrap iframe {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+        </style>`;
 
-        <!-- Top bar: title + open-in-new-tab button -->
+    // ── VIDEO BRANCH ──
+    if (isVideo) {
+        // Convert embed URL back to watch URL for "open in YouTube" button
+        const youtubeWatchUrl = (file.video_url || '').replace(
+            /youtube\.com\/embed\/([A-Za-z0-9_-]{11}).*/,
+            'youtube.com/watch?v=$1'
+        );
+
+        panel.innerHTML = `
+            ${topbarStyles}
+
+            <div class="lrs-preview-topbar">
+                <div class="lrs-preview-topbar-info">
+                    <div class="lrs-preview-topbar-title">${file.title}</div>
+                    <div class="lrs-preview-topbar-meta">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="#ff4444" stroke="none">
+                            <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
+                        </svg>
+                        <span>VIDEO</span>
+                        <span>&bull;</span>
+                        <span>${file.teacher}</span>
+                        <span>&bull;</span>
+                        <span>${file.uploaded_at}</span>
+                    </div>
+                </div>
+                <div class="lrs-preview-topbar-actions">
+                    <a href="https://${youtubeWatchUrl}" target="_blank" class="lrs-yt-btn">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="#ff6b6b" stroke="none">
+                            <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
+                        </svg>
+                        Open in YouTube
+                    </a>
+                </div>
+            </div>
+
+            <!-- Full-panel YouTube embed -->
+            <div class="lrs-video-embed-wrap">
+                <iframe
+                    src="${file.video_url}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowfullscreen
+                    title="${file.title}">
+                </iframe>
+            </div>`;
+        return;
+    }
+
+    // ── FILE BRANCH ──
+    const path = file.path;
+
+    let previewHtml = '';
+
+    if (ext === 'pdf') {
+        previewHtml = `
+            <div class="lrs-preview-wrap">
+                <iframe
+                    src="${path}"
+                    class="lrs-preview-iframe"
+                    title="${file.title}">
+                </iframe>
+            </div>`;
+    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        previewHtml = `
+            <div class="lrs-preview-wrap lrs-preview-img-wrap">
+                <img src="${path}" alt="${file.title}" class="lrs-preview-img">
+            </div>`;
+    } else {
+        const icon = getFileIcon(file.ext, false);
+        previewHtml = `
+            <div class="lrs-preview-fallback">
+                <div style="opacity:0.5;">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
+                <p class="lrs-preview-fallback-label">Preview not available for .${ext.toUpperCase()} files</p>
+                <a href="${path}" target="_blank" class="lrs-open-btn" style="margin-top:0;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    Open File
+                </a>
+            </div>`;
+    }
+
+    panel.innerHTML = `
+        ${topbarStyles}
+
         <div class="lrs-preview-topbar">
             <div class="lrs-preview-topbar-info">
                 <div class="lrs-preview-topbar-title">${file.title}</div>
@@ -526,8 +703,16 @@ window.selectDesktopLearnerResource = function(flatIdx) {
         ${previewHtml}`;
 };
 
-function getFileIcon(ext) {
+function getFileIcon(ext, isVideo = false) {
     const color = "#4fd1c5";
+
+    // Video icon (YouTube red play button style)
+    if (isVideo) {
+        return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${color}" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="3" ry="3"></rect>
+            <polygon points="10 9 16 12 10 15" fill="${color}" stroke="none"></polygon>
+        </svg>`;
+    }
     // PDF Icon
     if (ext === 'pdf') {
         return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15h3a2 2 0 0 1 0 4h-3V15z"></path></svg>`;
@@ -536,13 +721,11 @@ function getFileIcon(ext) {
     if (['jpg', 'jpeg', 'png'].includes(ext)) {
         return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
     }
-    // Word/Doc Icon
+    // Word/Doc/Default Icon
     return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
 }
 
 // Reuse your Menu Logic
 window.openResourceMenu = function(btn) {
-    // Here you would trigger your #resourcePopup logic from the original file
-    // For now, let's keep it simple:
-    window.open(path, '_blank'); 
+    window.open(path, '_blank');
 };
