@@ -57,14 +57,15 @@ function renderTeacherResources(data) {
         data.forEach(group => {
             sidebarHtml += `<div class="rs-sidebar-class-label">${group.class_name}</div>`;
             group.items.forEach(item => {
+                const isVideo  = item.resource_type === 'video';
                 const flatIndex = window._allResourcesFlat.findIndex(r => r.id === item.id);
                 sidebarHtml += `
                     <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
                         onclick="selectDesktopResource(${flatIndex})">
-                        <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext)}</div>
+                        <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext, isVideo)}</div>
                         <div class="rs-sidebar-item-info">
                             <div class="rs-sidebar-item-title">${item.title}</div>
-                            <div class="rs-sidebar-item-meta">${item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                            <div class="rs-sidebar-item-meta">${isVideo ? 'VIDEO' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
                         </div>
                     </div>`;
             });
@@ -301,13 +302,17 @@ function renderTeacherResources(data) {
                 <div class="teacher-resource-class-label">${group.class_name}</div>`;
 
             group.items.forEach(item => {
-                const icon = getTeacherFileIcon(item.ext);
+                const isVideo = item.resource_type === 'video';
+                const icon = getTeacherFileIcon(item.ext, isVideo);
+                const clickAction = isVideo
+                    ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
+                    : `openTeacherResource('resources/${item.filename}')`;
                 html += `
-                    <div class="teacher-resource-card" onclick="openTeacherResource('resources/${item.filename}')">
+                    <div class="teacher-resource-card" onclick="${clickAction}">
                         <div class="teacher-resource-icon">${icon}</div>
                         <div class="teacher-resource-info">
                             <div class="teacher-resource-name">${item.title}</div>
-                            <div class="teacher-resource-meta">${item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                            <div class="teacher-resource-meta">${isVideo ? '▶ Video' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
                         </div>
                         <button class="teacher-resource-delete" onclick="event.stopPropagation(); confirmDeleteResource(${item.id})">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -343,18 +348,45 @@ function renderTeacherResources(data) {
                         <option value="">-- Choose Class --</option>
                     </select>
 
-                    <label class="teacher-modal-label">Select File (Max 10MB)</label>
-                    <div class="teacher-file-drop" id="teacherFileDropArea">
-                        <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <p>Click or drag file here</p>
-                        <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                        <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+                    <label class="teacher-modal-label">Resource Type</label>
+                    <div style="display:flex;gap:8px;margin-bottom:16px;">
+                        <button id="rsTypeFile" onclick="rsSetType('file')"
+                            style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(79,209,197,0.4);
+                                   background:rgba(79,209,197,0.12);color:#4fd1c5;font-weight:700;
+                                   font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                            📎 File
+                        </button>
+                        <button id="rsTypeVideo" onclick="rsSetType('video')"
+                            style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+                                   background:transparent;color:#8b949e;font-weight:700;
+                                   font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                            ▶ Video (YouTube)
+                        </button>
                     </div>
-                    <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+
+                    <div id="rsFileSection">
+                        <label class="teacher-modal-label">Select File (Max 10MB)</label>
+                        <div class="teacher-file-drop" id="teacherFileDropArea">
+                            <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p>Click or drag file here</p>
+                            <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                            <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+                        </div>
+                        <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+                    </div>
+
+                    <div id="rsVideoSection" style="display:none;">
+                        <label class="teacher-modal-label">YouTube URL</label>
+                        <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
+                            placeholder="e.g. https://www.youtube.com/watch?v=...">
+                        <p style="font-size:12px;color:#8b949e;margin:8px 0 0;line-height:1.6;">
+                            ⚠️ Set the video to <strong style="color:#e2e8f0;">Unlisted</strong> on YouTube so only your learners can watch it.
+                        </p>
+                    </div>
 
                     <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
                         <input type="checkbox" id="resourceForceEmail">
@@ -419,7 +451,52 @@ window.selectDesktopResource = function(flatIndex) {
     const panel = document.getElementById('rs-main-panel');
     if (!panel) return;
 
-    const icon = getTeacherFileIcon(item.ext);
+    const isVideo = item.resource_type === 'video';
+
+    if (isVideo) {
+        const icon    = getTeacherFileIcon('', true);
+        const bigIcon = icon.replace('width="22"', 'width="52"').replace('height="22"', 'height="52"');
+        panel.innerHTML = `
+            <div class="rs-panel-content">
+                <div class="rs-panel-header">
+                    <div>
+                        <div class="rs-panel-title">${item.title}</div>
+                        <div class="rs-panel-meta">
+                            <span>${item.class_name}</span>
+                            <span>&bull;</span>
+                            <span>YouTube Video</span>
+                            <span>&bull;</span>
+                            <span>${item.uploaded_at}</span>
+                        </div>
+                    </div>
+                    <div class="rs-panel-actions">
+                        <button class="rs-panel-delete-btn" onclick="confirmDeleteResource(${item.id})">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6l-1 14H6L5 6"></path>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                <div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">
+                    <iframe
+                        src="${item.video_url}&autoplay=0&color=white&iv_load_policy=3"
+                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="margin:12px 0 0;font-size:12px;color:#555e6a;text-align:center;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="#555e6a" stroke-width="2" fill="none" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    Learners watch this video directly inside iSkool — no YouTube account needed.
+                </p>
+            </div>`;
+        return;
+    }
+
+    // ── File resource ──
+    const icon    = getTeacherFileIcon(item.ext);
     const bigIcon = icon.replace('width="22"', 'width="52"').replace('height="22"', 'height="52"');
 
     panel.innerHTML = `
@@ -500,18 +577,45 @@ function openUploadResourcePanel(panel) {
                 <option value="">-- Choose Class --</option>
             </select>
 
-            <label class="teacher-modal-label">Select File (Max 10MB)</label>
-            <div class="teacher-file-drop" id="teacherFileDropArea">
-                <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <p>Click or drag file here</p>
-                <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+            <label class="teacher-modal-label">Resource Type</label>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <button id="rsTypeFile" onclick="rsSetType('file')"
+                    style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(79,209,197,0.4);
+                           background:rgba(79,209,197,0.12);color:#4fd1c5;font-weight:700;
+                           font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                    📎 File
+                </button>
+                <button id="rsTypeVideo" onclick="rsSetType('video')"
+                    style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+                           background:transparent;color:#8b949e;font-weight:700;
+                           font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                    ▶ Video (YouTube)
+                </button>
             </div>
-            <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+
+            <div id="rsFileSection">
+                <label class="teacher-modal-label">Select File (Max 10MB)</label>
+                <div class="teacher-file-drop" id="teacherFileDropArea">
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Click or drag file here</p>
+                    <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                    <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+                </div>
+                <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+            </div>
+
+            <div id="rsVideoSection" style="display:none;">
+                <label class="teacher-modal-label">YouTube URL</label>
+                <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
+                    placeholder="e.g. https://www.youtube.com/watch?v=...">
+                <p style="font-size:12px;color:#8b949e;margin:8px 0 0;line-height:1.6;">
+                    ⚠️ Set the video to <strong style="color:#e2e8f0;">Unlisted</strong> on YouTube so only learners with the link can watch it.
+                </p>
+            </div>
 
             <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
                 <input type="checkbox" id="resourceForceEmail">
@@ -589,29 +693,87 @@ window.closeUploadResourceModal = function() {
     const err = document.getElementById('uploadResourceError'); if (err) err.style.display = 'none';
 };
 
+window.rsSetType = function(type) {
+    const fileSection  = document.getElementById('rsFileSection');
+    const videoSection = document.getElementById('rsVideoSection');
+    const fileBtn      = document.getElementById('rsTypeFile');
+    const videoBtn     = document.getElementById('rsTypeVideo');
+    const activeStyle  = 'border:1px solid rgba(79,209,197,0.4);background:rgba(79,209,197,0.12);color:#4fd1c5;';
+    const inactiveStyle = 'border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b949e;';
+    if (type === 'video') {
+        if (fileSection)  fileSection.style.display  = 'none';
+        if (videoSection) videoSection.style.display = 'block';
+        if (fileBtn)  fileBtn.style.cssText  += inactiveStyle;
+        if (videoBtn) videoBtn.style.cssText += activeStyle;
+    } else {
+        if (fileSection)  fileSection.style.display  = 'block';
+        if (videoSection) videoSection.style.display = 'none';
+        if (fileBtn)  fileBtn.style.cssText  += activeStyle;
+        if (videoBtn) videoBtn.style.cssText += inactiveStyle;
+    }
+    window._rsCurrentType = type;
+};
+
+// Mobile: open a video fullscreen overlay
+window.openTeacherVideoPanel = function(item) {
+    if (typeof item === 'string') { try { item = JSON.parse(item); } catch(e) { return; } }
+    const existing = document.getElementById('rsVideoOverlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'rsVideoOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;';
+    overlay.innerHTML = `
+        <div style="padding:14px 16px;background:rgba(0,0,0,0.6);display:flex;align-items:center;gap:12px;flex-shrink:0;">
+            <button onclick="document.getElementById('rsVideoOverlay').remove()"
+                style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;
+                       padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;
+                       font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px;font-size:13px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Back
+            </button>
+            <div style="font-size:14px;font-weight:700;color:#e2e8f0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0;">
+            <iframe src="${item.video_url}&autoplay=1&color=white&iv_load_policy=3"
+                style="width:100%;height:100%;border:none;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+        </div>`;
+    document.body.appendChild(overlay);
+};
+
 window.submitUploadResource = async function() {
     const title      = document.getElementById('resourceTitle')?.value.trim();
     const classId    = document.getElementById('resourceClass')?.value;
-    const file       = document.getElementById('resourceFile')?.files[0];
     const forceEmail = document.getElementById('resourceForceEmail')?.checked;
     const errorDiv   = document.getElementById('uploadResourceError');
     const submitBtn  = document.getElementById('uploadResourceSubmitBtn');
     const loader     = document.getElementById('loaderOverlay');
+    const type       = window._rsCurrentType || 'file';
 
     if (errorDiv) errorDiv.style.display = 'none';
 
-    if (!title)   { if (errorDiv) { errorDiv.textContent = 'Please enter a title.';   errorDiv.style.display = 'block'; } return; }
-    if (!classId) { if (errorDiv) { errorDiv.textContent = 'Please select a class.';  errorDiv.style.display = 'block'; } return; }
-    if (!file)    { if (errorDiv) { errorDiv.textContent = 'Please select a file.';   errorDiv.style.display = 'block'; } return; }
-    if (file.size > 10 * 1024 * 1024) { if (errorDiv) { errorDiv.textContent = 'File too large. Max 10MB.'; errorDiv.style.display = 'block'; } return; }
+    if (!title)   { if (errorDiv) { errorDiv.textContent = 'Please enter a title.';  errorDiv.style.display = 'block'; } return; }
+    if (!classId) { if (errorDiv) { errorDiv.textContent = 'Please select a class.'; errorDiv.style.display = 'block'; } return; }
 
     const fd = new FormData();
     fd.append('title', title);
     fd.append('class_id', classId);
-    fd.append('resource', file);
+    fd.append('resource_type', type);
     if (forceEmail) fd.append('force_email', '1');
 
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
+    if (type === 'video') {
+        const videoUrl = document.getElementById('resourceVideoUrl')?.value.trim();
+        if (!videoUrl) { if (errorDiv) { errorDiv.textContent = 'Please enter a YouTube URL.'; errorDiv.style.display = 'block'; } return; }
+        fd.append('video_url', videoUrl);
+    } else {
+        const file = document.getElementById('resourceFile')?.files[0];
+        if (!file)    { if (errorDiv) { errorDiv.textContent = 'Please select a file.';   errorDiv.style.display = 'block'; } return; }
+        if (file.size > 10 * 1024 * 1024) { if (errorDiv) { errorDiv.textContent = 'File too large. Max 10MB.'; errorDiv.style.display = 'block'; } return; }
+        fd.append('resource', file);
+    }
+
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = type === 'video' ? 'Saving...' : 'Uploading...'; }
     if (loader) loader.style.display = 'flex';
 
     try {
@@ -622,6 +784,7 @@ window.submitUploadResource = async function() {
             const modal = document.getElementById('uploadResourceModal');
             if (modal && modal.style.display === 'flex') closeUploadResourceModal();
             window.teacherResourceCache = null;
+            window._rsCurrentType = 'file';
             fetchTeacherResources();
         } else {
             if (errorDiv) { errorDiv.textContent = data.error || 'Upload failed.'; errorDiv.style.display = 'block'; }
@@ -629,7 +792,7 @@ window.submitUploadResource = async function() {
     } catch (e) {
         if (errorDiv) { errorDiv.textContent = 'Connection error. Please try again.'; errorDiv.style.display = 'block'; }
     } finally {
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Upload'; }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Upload Resource'; }
         if (loader) loader.style.display = 'none';
     }
 };
@@ -677,8 +840,9 @@ window.openTeacherResource = function(path) {
     window.open(path, '_blank');
 };
 
-function getTeacherFileIcon(ext) {
+function getTeacherFileIcon(ext, isVideo = false) {
     const color = "#4fd1c5";
+    if (isVideo) return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>`;
     if (ext === 'pdf') return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15h3a2 2 0 0 1 0 4h-3V15z"></path></svg>`;
     if (['jpg','jpeg','png'].includes(ext)) return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
     return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`;

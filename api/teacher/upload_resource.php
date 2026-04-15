@@ -18,6 +18,69 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 $email       = $_SESSION['email'];
 $maxFileSize = 10 * 1024 * 1024;
 
+// ── YouTube ID extractor ──────────────────────────────────────────────────────
+function extractYouTubeId(string $url): ?string {
+    $patterns = [
+        '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/',
+    ];
+    foreach ($patterns as $p) {
+        if (preg_match($p, $url, $m)) return $m[1];
+    }
+    return null;
+}
+
+// ── Notify learners (shared by file & video branches) ────────────────────────
+function notifyLearners($conn, $classId, $yearId, $title, $teacherEmail, $teacherDisplay, $schoolName, $forceEmail) {
+    $cleanBaseUrl = rtrim(BASE_URL, '/');
+    $resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=resource_list.php";
+
+    $learnerStmt = $conn->prepare("
+        SELECT u.email, u.name
+        FROM users u
+        JOIN class_students cs ON u.email = cs.student_email
+        WHERE cs.class_id = ? AND cs.academic_year_id = ? AND u.role = 'learner'
+    ");
+    $learnerStmt->bind_param("ii", $classId, $yearId);
+    $learnerStmt->execute();
+    $learners = $learnerStmt->get_result();
+
+    while ($learner = $learners->fetch_assoc()) {
+        $lEmail     = $learner['email'];
+        $lName      = $learner['name'];
+        $isPushSent = false;
+
+        $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
+        $checkSub->bind_param("s", $lEmail);
+        $checkSub->execute();
+        if ($checkSub->get_result()->num_rows > 0) {
+            $isPushSent = sendPushToUser($conn, $lEmail, $title, "A study material has been uploaded.", $resourceLink);
+        }
+        $checkSub->close();
+
+        if (!$isPushSent || $forceEmail) {
+            try {
+                $mail             = new PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = 'iskool.online';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'noreply@iskool.online';
+                $mail->Password   = 'ogeQkRitRfdy';
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port       = 465;
+                $mail->setFrom('noreply@iskool.online', $schoolName);
+                $mail->addAddress($lEmail);
+                $mail->isHTML(true);
+                $mail->Subject = "New Resource: $title";
+                $mail->Body    = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;"><tr><td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;"><img src="https://iskool.online/apple-touch-icon.png" width="72" height="72" alt="iSkool" style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);"><p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">iSkool</p></td></tr><tr><td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;"><p style="margin:0;font-size:13px;color:#8b949e;"><span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span></p></td></tr><tr><td style="background:#ffffff;padding:40px;"><p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has uploaded a new resource for your class.</p><table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;"><tr><td style="padding:16px 20px;"><p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">Resource</p><p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">📎 ' . htmlspecialchars($title) . '</p></td></tr></table><p style="margin:0;font-size:13px;color:#888;">Uploaded by <strong style="color:#333;">' . htmlspecialchars($teacherDisplay) . '</strong></p></td></tr><tr><td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;"><p style="margin:0 0 4px;font-size:13px;color:#8b949e;">iSkool LMS · Johannesburg, South Africa</p><p style="margin:0;font-size:12px;color:#484f58;"><a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a></p></td></tr></table></td></tr></table></body></html>';
+                $mail->send();
+            } catch (Exception $e) {
+                error_log("Email failed to $lEmail: " . $mail->ErrorInfo);
+            }
+        }
+    }
+    $learnerStmt->close();
+}
+
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($yearResult->num_rows === 0) {
     echo json_encode(['success' => false, 'error' => 'No active academic year']);
@@ -31,8 +94,9 @@ $current_term = $termResult ? (int)$termResult->fetch_assoc()['current_global_te
 $title      = trim($_POST['title'] ?? '');
 $classId    = (int)($_POST['class_id'] ?? 0);
 $forceEmail = isset($_POST['force_email']);
+$resourceType = ($_POST['resource_type'] ?? 'file') === 'video' ? 'video' : 'file';
 
-// Teacher display name
+// ── Teacher display name (needed by both branches) ────────────────────────────
 $stmtUser = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
 $stmtUser->bind_param("s", $email);
 $stmtUser->execute();
@@ -48,7 +112,7 @@ if ($userData) {
     $teacherDisplayName = trim("$tTitle $firstInitial $tSurname");
 }
 
-// School name
+// ── School name (needed by both branches) ─────────────────────────────────────
 $schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     ? $row['setting_value']
@@ -62,6 +126,36 @@ if ($classId <= 0) {
     echo json_encode(['success' => false, 'error' => 'Please select a class.']);
     exit();
 }
+
+// ── VIDEO BRANCH ─────────────────────────────────────────────────────────────
+if ($resourceType === 'video') {
+    $rawUrl   = trim($_POST['video_url'] ?? '');
+    $videoId  = extractYouTubeId($rawUrl);
+
+    if (!$videoId) {
+        echo json_encode(['success' => false, 'error' => 'Invalid YouTube URL. Please paste a valid YouTube link.']);
+        exit();
+    }
+
+    $videoUrl = 'https://www.youtube.com/embed/' . $videoId . '?rel=0&modestbranding=1';
+    $emptyStr = '';
+
+    $stmt = $conn->prepare("
+        INSERT INTO resources (title, filename, class_id, uploaded_by, academic_year_id, term_number, resource_type, video_url, uploaded_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'video', ?, NOW())
+    ");
+    $stmt->bind_param("ssisiss", $title, $emptyStr, $classId, $email, $current_year_id, $current_term, $videoUrl);
+    $stmt->execute();
+    $stmt->close();
+
+    // Notify learners (same as file, reuses the block below)
+    notifyLearners($conn, $classId, $current_year_id, $title, $email, $teacherDisplayName, $schoolName, $forceEmail);
+
+    echo json_encode(['success' => true]);
+    exit();
+}
+
+// ── FILE BRANCH ──────────────────────────────────────────────────────────────
 if (!isset($_FILES['resource']) || $_FILES['resource']['error'] !== UPLOAD_ERR_OK) {
     echo json_encode(['success' => false, 'error' => 'File upload failed.']);
     exit();
@@ -98,170 +192,13 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
 $storedFilename = $schoolSlug . '/' . $filename;
 
 $stmt = $conn->prepare("
-    INSERT INTO resources (title, filename, class_id, uploaded_by, academic_year_id, term_number, uploaded_at)
-    VALUES (?, ?, ?, ?, ?, ?, NOW())
+    INSERT INTO resources (title, filename, class_id, uploaded_by, academic_year_id, term_number, resource_type, uploaded_at)
+    VALUES (?, ?, ?, ?, ?, ?, 'file', NOW())
 ");
 $stmt->bind_param("ssisii", $title, $storedFilename, $classId, $email, $current_year_id, $current_term);
 $stmt->execute();
 $stmt->close();
 
-// Notify learners
-$cleanBaseUrl = rtrim(BASE_URL, '/');
-$resourceLink = $cleanBaseUrl . "/learner_dashboard.php?page=resource_list.php";
-$learnerStmt  = $conn->prepare("
-    SELECT u.email, u.name 
-    FROM users u
-    JOIN class_students cs ON u.email = cs.student_email
-    WHERE cs.class_id = ? AND cs.academic_year_id = ? AND u.role = 'learner'
-");
-$learnerStmt->bind_param("ii", $classId, $current_year_id);
-$learnerStmt->execute();
-$learners = $learnerStmt->get_result();
-
-while ($learner = $learners->fetch_assoc()) {
-    $lEmail     = $learner['email'];
-    $lName      = $learner['name'];
-    $isPushSent = false;
-
-    $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
-    $checkSub->bind_param("s", $lEmail);
-    $checkSub->execute();
-    if ($checkSub->get_result()->num_rows > 0) {
-        $isPushSent = sendPushToUser($conn, $lEmail, $title, "A study material has been uploaded.", $resourceLink);
-    }
-    $checkSub->close();
-
-    if (!$isPushSent || $forceEmail) {
-        try {
-            $mail             = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host       = 'iskool.online';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = 'noreply@iskool.online';
-            $mail->Password   = 'ogeQkRitRfdy';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = 465;
-            $mail->setFrom('noreply@iskool.online', $schoolName);
-            $mail->addAddress($lEmail);
-            $mail->isHTML(true);
-            $mail->Subject = "New Resource: $title";
-            $mail->Body    = '
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-  <!-- HEADER -->
-  <tr>
-    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-      <img src="https://iskool.online/apple-touch-icon.png"
-           width="72" height="72" alt="iSkool"
-           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
-        iSkool
-      </p>
-    </td>
-  </tr>
-
-  <!-- HERO -->
-  
-
-  <!-- SCHOOL + TEACHER ROW -->
-  <tr>
-    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
-      <p style="margin:0;font-size:13px;color:#8b949e;">
-        
-        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
-      </p>
-    </td>
-  </tr>
-
-  <!-- BODY -->
-  <tr>
-    <td style="background:#ffffff;padding:40px;">
-
-      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
-        Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has uploaded a new resource for your class.
-      </p>
-
-      <!-- RESOURCE TITLE BOX -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
-              Resource
-            </p>
-            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-              📎 ' . htmlspecialchars($title) . '
-            </p>
-          </td>
-        </tr>
-      </table>
-
-      <!-- INFO BOX -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4fd;border:1px solid #b3d9f7;border-radius:8px;margin-bottom:28px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:13px;color:#1565c0;line-height:1.7;">
-              Log in to your iSkool dashboard to view and download this resource.
-              Resources are available anytime from your <strong>Resources</strong> section.
-            </p>
-          </td>
-        </tr>
-      </table>
-
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
-        </tr>
-      </table>
-
-      <!-- FROM -->
-      <p style="margin:0;font-size:13px;color:#888;">
-        Uploaded by
-        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        
-      </p>
-
-    </td>
-  </tr>
-
-  <!-- FOOTER -->
-  <tr>
-    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
-        iSkool LMS · Johannesburg, South Africa
-      </p>
-      <p style="margin:0;font-size:12px;color:#484f58;">
-        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
-      </p>
-      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
-        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
-      </p>
-    </td>
-  </tr>
-
-</table>
-</td></tr>
-</table>
-</body>
-</html>';
-            $mail->send();
-        } catch (Exception $e) {
-            error_log("Email failed to $lEmail: " . $mail->ErrorInfo);
-        }
-    }
-}
-$learnerStmt->close();
+notifyLearners($conn, $classId, $current_year_id, $title, $email, $teacherDisplayName, $schoolName, $forceEmail);
 
 echo json_encode(['success' => true]);

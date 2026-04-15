@@ -20,6 +20,7 @@ $current_year_id = (int)$yearResult->fetch_assoc()['id'];
 
 $stmt = $conn->prepare("
     SELECT r.id, r.title, r.filename, r.uploaded_at,
+           r.resource_type, r.video_url,
            c.id AS class_id, c.name AS class_name
     FROM resources r
     JOIN classes c ON r.class_id = c.id
@@ -43,11 +44,13 @@ foreach ($rows as $row) {
     }
     $ext = strtolower(pathinfo($row['filename'], PATHINFO_EXTENSION));
     $grouped[$cid]['items'][] = [
-        'id'          => $row['id'],
-        'title'       => $row['title'],
-        'filename'    => $row['filename'],
-        'ext'         => $ext,
-        'uploaded_at' => date('d M Y, H:i', strtotime($row['uploaded_at']))
+        'id'            => $row['id'],
+        'title'         => $row['title'],
+        'filename'      => $row['filename'],
+        'ext'           => $ext,
+        'resource_type' => $row['resource_type'] ?? 'file',
+        'video_url'     => $row['video_url'] ?? null,
+        'uploaded_at'   => date('d M Y, H:i', strtotime($row['uploaded_at']))
     ];
 }
 
