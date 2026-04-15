@@ -89,8 +89,10 @@ if ($result && $row = $result->fetch_assoc()) {
     overflow-x: hidden;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
+    padding: 20px 0;
+    box-sizing: border-box;
 
     
 }
@@ -246,6 +248,24 @@ if ($result && $row = $result->fetch_assoc()) {
     display: flex;          /* ← ADD THIS */
     flex-direction: column; /* ← ADD THIS */
     align-items: center;    /* ← ADD THIS */
+    max-height: 92vh;
+    overflow-y: auto;
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+.container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.container::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
 }
 
 .container.show {
@@ -439,7 +459,8 @@ button:hover {
         .container {
             padding: 1rem;
             margin: 1rem auto;
-            max-height: 80vh;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .form-box p,
@@ -498,7 +519,8 @@ button:hover {
 
         .container {
             padding: 0.75rem;
-            max-height: 75vh;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .book-icon {
@@ -693,10 +715,16 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
 
                 <input type="email" name="email" placeholder="Email" required>
                 <div class="password-wrapper">
-                    <input type="password" name="password" id="register-password" placeholder="Password" required>
+                    <input type="password" name="password" id="register-password" placeholder="Password (min. 8 characters)" required minlength="8">
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
                 </div>
-                
+                <div id="password-strength-msg" style="font-size:12px; color:#ff5555; margin: -6px 0 8px 12px; display:none;">Password must be at least 8 characters.</div>
+                <div class="password-wrapper">
+                    <input type="password" name="confirm_password" id="confirm-password" placeholder="Confirm Password" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm-password', this)"></i>
+                </div>
+                <div id="password-match-msg" style="font-size:12px; color:#ff5555; margin: -6px 0 8px 12px; display:none;">Passwords do not match.</div>
+
                 <label>Select Role:</label>
                 <select name="role" required>
                     <option value="">-- Select Role --</option>
@@ -793,10 +821,53 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             icon.classList.add("fa-eye");
         }
     }
-    const form = document.querySelector("form");
+
+    // Password validation for register form
+    const regPassword = document.getElementById('register-password');
+    const confirmPassword = document.getElementById('confirm-password');
+    const strengthMsg = document.getElementById('password-strength-msg');
+    const matchMsg = document.getElementById('password-match-msg');
     const loader = document.getElementById("loaderOverlay");
-    form.addEventListener("submit", () => {
-        loader.classList.add("show");
+
+    regPassword.addEventListener('input', function() {
+        if (this.value.length > 0 && this.value.length < 8) {
+            strengthMsg.style.display = 'block';
+        } else {
+            strengthMsg.style.display = 'none';
+        }
+    });
+
+    confirmPassword.addEventListener('input', function() {
+        if (this.value.length > 0 && this.value !== regPassword.value) {
+            matchMsg.style.display = 'block';
+        } else {
+            matchMsg.style.display = 'none';
+        }
+    });
+
+    // Form submit handlers
+    document.querySelectorAll("form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            // Only validate register form
+            if (this.querySelector('#register-password')) {
+                const pwd = regPassword.value;
+                const confirmPwd = confirmPassword.value;
+
+                if (pwd.length < 8) {
+                    e.preventDefault();
+                    strengthMsg.style.display = 'block';
+                    regPassword.focus();
+                    return;
+                }
+                if (pwd !== confirmPwd) {
+                    e.preventDefault();
+                    matchMsg.style.display = 'block';
+                    confirmPassword.focus();
+                    return;
+                }
+            }
+            loader.classList.add("show");
+        });
     });
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("service-worker.js")

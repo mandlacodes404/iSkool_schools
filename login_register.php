@@ -12,7 +12,6 @@ if (isset($_POST['register'])) {
     $first_name = trim($_POST['name'] ?? '');
     $surname    = trim($_POST['surname'] ?? '');
     $email      = trim($_POST['email']);
-    $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role       = $_POST['role'];
     $access_key = trim($_POST['access_key']);
     $gender     = $_POST['gender'];
@@ -32,6 +31,25 @@ if (isset($_POST['register'])) {
         header("Location: index.php");
         exit();
     }
+
+    $raw_password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'] ?? '';
+
+    if (strlen($raw_password) < 8) {
+        $_SESSION['register_error'] = 'Password must be at least 8 characters long.';
+        $_SESSION['active_form'] = 'register';
+        header("Location: index.php");
+        exit();
+    }
+
+    if ($raw_password !== $confirm_password) {
+        $_SESSION['register_error'] = 'Passwords do not match. Please try again.';
+        $_SESSION['active_form'] = 'register';
+        header("Location: index.php");
+        exit();
+    }
+
+    $password = password_hash($raw_password, PASSWORD_DEFAULT);
 
     $keyStmt = $conn->prepare("SELECT id FROM access_keys WHERE role = ? AND access_key = ?");
     $keyStmt->bind_param("ss", $role, $access_key);
