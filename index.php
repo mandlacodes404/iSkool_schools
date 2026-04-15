@@ -676,13 +676,12 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     </g>
                 </svg>
             </div>
-            <h1 class="brand-panel-title">iSkool<br><span>Learning Management System</span></h1>
-            <p class="brand-panel-tagline">Built for South African high schools. Manage classes, quizzes, announcements, grades and more — all in one place.</p>
+            <h1 class="brand-panel-title">iSkool <span>LMS</span></h1>
             <div class="brand-panel-school">
                 <div class="brand-panel-school-dot"></div>
                 <span class="brand-panel-school-name"><?= htmlspecialchars($schoolName) ?></span>
             </div>
-            <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool EdTech</div>
+            <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v.1.0.0</div>
         </div>
 
         <!-- RIGHT: Form panel -->
