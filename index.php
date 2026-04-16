@@ -229,22 +229,40 @@ body {
 
 /* ── Preview animation card styles ── */
 .preview-card {
-    background: #222221;
+    background: #1e1e1c;
     border-radius: 16px;
     border: 1px solid #2e2e2c;
     padding: 18px 20px;
     opacity: 0;
-    transform: translateY(22px) scale(0.98);
-    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    transform: translateY(20px) scale(0.98);
+    transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1);
     box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    pointer-events: none;
 }
-.preview-card.pv-visible { opacity: 1; transform: translateY(0) scale(1); }
+.preview-card.pv-visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.preview-card.pv-exit {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.98);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* preview-wrap is the stage for one card at a time */
+.preview-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+}
 
 .pv-header { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
 .pv-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .pv-icon.green  { background: #0e2e22; }
 .pv-icon.orange { background: #2e1a0e; }
 .pv-icon.purple { background: #1c1830; }
+.pv-icon.blue   { background: #0d1e2e; }
+.pv-icon.red    { background: #2a0e0e; }
 
 .pv-title { font-size: 13px; font-weight: 600; color: #e3e3e3; }
 .pv-sub   { font-size: 11px; color: #666; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
@@ -290,7 +308,7 @@ body {
 .pv-check svg { opacity: 0; transition: opacity 0.2s; }
 .pv-check.done svg { opacity: 1; }
 
-/* Stats */
+/* Stats / Analytics */
 .pv-stat-grid { display: flex; gap: 8px; margin-bottom: 12px; }
 .pv-stat-box { flex: 1; background: #2a2a28; border-radius: 9px; padding: 9px 10px; text-align: center; }
 .pv-stat-num { font-size: 18px; font-weight: 600; color: #e3e3e3; font-variant-numeric: tabular-nums; }
@@ -304,6 +322,48 @@ body {
 /* Pulse dot */
 .pv-pulse { width: 7px; height: 7px; border-radius: 50%; background: #3ecf8e; display: inline-block; animation: pvPulse 1.8s infinite ease-in-out; }
 @keyframes pvPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.4; } }
+
+/* Quiz styles */
+.pv-quiz-q { font-size: 12.5px; color: #ccc; margin-bottom: 10px; line-height: 1.5; opacity: 0; transform: translateY(5px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.pv-quiz-q.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-quiz-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px; border: 1px solid #2e2e2c;
+    font-size: 12px; color: #aaa; margin-bottom: 6px; cursor: default;
+    opacity: 0; transform: translateX(-6px);
+    transition: opacity 0.35s ease, transform 0.35s ease, background 0.3s, border-color 0.3s;
+}
+.pv-quiz-opt.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-quiz-opt.selected { background: #1a2e1a; border-color: #3ecf8e; color: #3ecf8e; }
+.pv-quiz-opt.wrong    { background: #2a1414; border-color: #cf5050; color: #cf7070; }
+.pv-quiz-circle { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #444; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.3s, border-color 0.3s; }
+.pv-quiz-opt.selected .pv-quiz-circle { background: #3ecf8e; border-color: #3ecf8e; }
+.pv-quiz-opt.wrong    .pv-quiz-circle { background: #cf5050; border-color: #cf5050; }
+
+/* AI Invigilator styles */
+.pv-inv-screen { background: #111; border-radius: 10px; padding: 12px; margin-bottom: 8px; opacity: 0; transition: opacity 0.4s ease; }
+.pv-inv-screen.pv-vis { opacity: 1; }
+.pv-inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+.pv-inv-face { background: #1e1e1c; border-radius: 6px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #2a2a28; transition: border-color 0.3s; }
+.pv-inv-face.alert { border-color: #cf5050; background: #1f1010; }
+.pv-inv-status { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
+.pv-inv-badge { padding: 3px 9px; border-radius: 99px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; opacity: 0; transition: opacity 0.4s ease; }
+.pv-inv-badge.active { background: #0e2e22; color: #3ecf8e; opacity: 1; }
+.pv-inv-badge.warn   { background: #2a1a0e; color: #e07b3a; opacity: 1; }
+.pv-inv-alert-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; background: #1f1010; border: 1px solid #3a1a1a; font-size: 11.5px; color: #cf7070; opacity: 0; transform: translateY(4px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.pv-inv-alert-row.pv-vis { opacity: 1; transform: translateY(0); }
+
+/* Announcement styles */
+.pv-ann-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid #222; opacity: 0; transform: translateY(5px); transition: opacity 0.38s ease, transform 0.38s ease; }
+.pv-ann-item.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-ann-item:last-child { border-bottom: none; }
+.pv-ann-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.pv-ann-text { font-size: 12px; color: #ccc; line-height: 1.5; }
+.pv-ann-meta { font-size: 10px; color: #444; margin-top: 2px; }
+.pv-ann-badge { display: inline-block; padding: 1px 7px; border-radius: 99px; font-size: 10px; margin-right: 5px; }
+.pv-ann-badge.urgent { background: #2a1010; color: #cf7070; }
+.pv-ann-badge.info   { background: #0d1e2e; color: #5ba4e0; }
+.pv-ann-badge.event  { background: #1c1830; color: #8b80d1; }
 
 /* ── Right form panel ── */
 .form-panel {
@@ -372,10 +432,9 @@ body {
     }
 
     .preview-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
+        position: relative;
         width: 100%;
+        min-height: 280px;
     }
 
     .form-panel {
@@ -756,50 +815,86 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         <div class="brand-panel">
             <div class="preview-wrap">
 
-                <!-- Card 1: Announcements / Chat -->
+                <!-- Card 1: Class Discussion -->
                 <div class="preview-card" id="pv1">
                     <div class="pv-header">
                         <div class="pv-icon orange">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07b3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         </div>
                         <div>
-                            <div class="pv-title">Class announcements</div>
-                            <div class="pv-sub">Live updates from teachers</div>
+                            <div class="pv-title">Class discussion</div>
+                            <div class="pv-sub"><span class="pv-pulse"></span> Grade 10 · Maths</div>
                         </div>
                     </div>
                     <div class="pv-chat">
                         <div class="pv-bubble user" id="pv-b1">Sir, when is the Maths test?</div>
                         <div class="pv-typing" id="pv-typing"><div class="pv-dot"></div><div class="pv-dot"></div><div class="pv-dot"></div></div>
-                        <div class="pv-bubble ai" id="pv-b2">Friday 9am, Grade 10. Chapter 4 &amp; 5. Good luck!</div>
+                        <div class="pv-bubble ai" id="pv-b2">Friday 9am — Chapter 4 &amp; 5. Good luck! 📚</div>
+                        <div class="pv-bubble user" id="pv-b3">Will past papers be uploaded?</div>
+                        <div class="pv-bubble ai" id="pv-b4">Yes, check Resources by Thursday.</div>
                     </div>
                 </div>
 
-                <!-- Card 2: Tasks -->
+                <!-- Card 2: Announcements -->
                 <div class="preview-card" id="pv2">
                     <div class="pv-header">
-                        <div class="pv-icon green">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        <div class="pv-icon blue">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5ba4e0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         </div>
                         <div>
-                            <div class="pv-title">Today's tasks</div>
-                            <div class="pv-sub"><span class="pv-pulse"></span> 3 pending</div>
+                            <div class="pv-title">Announcements</div>
+                            <div class="pv-sub">School-wide &amp; class notices</div>
                         </div>
                     </div>
-                    <div class="pv-task" id="pv-t1"><div class="pv-check" id="pv-c1"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Submit Science assignment</div>
-                    <div class="pv-task" id="pv-t2"><div class="pv-check" id="pv-c2"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Mark Grade 8 tests</div>
-                    <div class="pv-task" id="pv-t3"><div class="pv-check" id="pv-c3"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Upload timetable</div>
-                    <div class="pv-task" id="pv-t4"><div class="pv-check" id="pv-c4"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Review parent messages</div>
+                    <div class="pv-ann-item" id="pv-a1">
+                        <div class="pv-ann-dot" style="background:#cf5050;"></div>
+                        <div>
+                            <div class="pv-ann-text"><span class="pv-ann-badge urgent">Urgent</span>Term 2 fees due 30 April</div>
+                            <div class="pv-ann-meta">Bursar · 2 hrs ago</div>
+                        </div>
+                    </div>
+                    <div class="pv-ann-item" id="pv-a2">
+                        <div class="pv-ann-dot" style="background:#5ba4e0;"></div>
+                        <div>
+                            <div class="pv-ann-text"><span class="pv-ann-badge info">Notice</span>Library closes at 3pm this week</div>
+                            <div class="pv-ann-meta">Admin · Yesterday</div>
+                        </div>
+                    </div>
+                    <div class="pv-ann-item" id="pv-a3">
+                        <div class="pv-ann-dot" style="background:#8b80d1;"></div>
+                        <div>
+                            <div class="pv-ann-text"><span class="pv-ann-badge event">Event</span>Science fair: Friday 2pm, Hall B</div>
+                            <div class="pv-ann-meta">Mrs Dlamini · 3 days ago</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Card 3: Stats -->
+                <!-- Card 3: Auto Quiz -->
                 <div class="preview-card" id="pv3">
                     <div class="pv-header">
                         <div class="pv-icon purple">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b80d1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b80d1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                         </div>
                         <div>
-                            <div class="pv-title">School stats</div>
-                            <div class="pv-sub">This term</div>
+                            <div class="pv-title">Auto quiz</div>
+                            <div class="pv-sub">Life Sciences · Grade 11</div>
+                        </div>
+                    </div>
+                    <div class="pv-quiz-q" id="pv-qq">What is the powerhouse of the cell?</div>
+                    <div class="pv-quiz-opt" id="pv-qo1"><div class="pv-quiz-circle"></div>Nucleus</div>
+                    <div class="pv-quiz-opt" id="pv-qo2"><div class="pv-quiz-circle"></div>Mitochondria</div>
+                    <div class="pv-quiz-opt" id="pv-qo3"><div class="pv-quiz-circle"></div>Ribosome</div>
+                </div>
+
+                <!-- Card 4: Teacher Analytics -->
+                <div class="preview-card" id="pv4">
+                    <div class="pv-header">
+                        <div class="pv-icon green">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Teacher analytics</div>
+                            <div class="pv-sub">This term's overview</div>
                         </div>
                     </div>
                     <div class="pv-stat-grid">
@@ -810,12 +905,43 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     <div class="pv-bar-group">
                         <div>
                             <div class="pv-bar-lbl-row"><span>Pass rate</span><span id="pv-bl1">0%</span></div>
-                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf1" style="background:#8b80d1;"></div></div>
+                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf1" style="background:#3ecf8e;"></div></div>
                         </div>
                         <div>
                             <div class="pv-bar-lbl-row"><span>Submissions</span><span id="pv-bl2">0%</span></div>
-                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf2" style="background:#3ecf8e;"></div></div>
+                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf2" style="background:#8b80d1;"></div></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: AI Invigilator -->
+                <div class="preview-card" id="pv5">
+                    <div class="pv-header">
+                        <div class="pv-icon red">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cf5050" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">AI invigilator</div>
+                            <div class="pv-sub" id="pv-inv-sub">Monitoring exam session</div>
+                        </div>
+                    </div>
+                    <div class="pv-inv-screen" id="pv-inv-screen">
+                        <div class="pv-inv-grid">
+                            <div class="pv-inv-face" id="pv-if1">🧑</div>
+                            <div class="pv-inv-face" id="pv-if2">👩</div>
+                            <div class="pv-inv-face" id="pv-if3">🧑</div>
+                            <div class="pv-inv-face" id="pv-if4">👦</div>
+                            <div class="pv-inv-face" id="pv-if5">👩</div>
+                            <div class="pv-inv-face" id="pv-if6">🧑</div>
+                        </div>
+                        <div class="pv-inv-status">
+                            <span id="pv-inv-badge" class="pv-inv-badge active">● LIVE</span>
+                            <span style="font-size:11px;color:#444;">6 learners · Maths P1</span>
+                        </div>
+                    </div>
+                    <div class="pv-inv-alert-row" id="pv-inv-alert">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#cf7070" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Suspicious activity detected — Learner 4
                     </div>
                 </div>
 
@@ -1102,7 +1228,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             .catch(err => console.error("Service Worker failed", err));
     }
 
-    // ── Preview panel animation ──
+    // ── Preview panel animation (5-card one-at-a-time loop) ──
     const pvDelay = ms => new Promise(r => setTimeout(r, ms));
 
     function pvCountUp(el, target, suffix, duration) {
@@ -1126,79 +1252,141 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         }, iv);
     }
 
-    async function runPreview() {
-        await pvDelay(600);
+    function pvShow(id) {
+        const el = document.getElementById(id);
+        el.style.transition = '';
+        el.classList.remove('pv-exit');
+        el.classList.add('pv-visible');
+    }
 
-        // Card 1
-        document.getElementById('pv1').classList.add('pv-visible');
-        await pvDelay(600);
-        document.getElementById('pv-b1').classList.add('pv-vis');
-        await pvDelay(800);
-        document.getElementById('pv-typing').classList.add('pv-vis');
-        await pvDelay(1500);
-        document.getElementById('pv-typing').style.opacity = '0';
-        await pvDelay(300);
-        document.getElementById('pv-b2').classList.add('pv-vis');
+    async function pvHide(id) {
+        const el = document.getElementById(id);
+        el.classList.add('pv-exit');
+        await pvDelay(450);
+        el.classList.remove('pv-visible', 'pv-exit');
+    }
 
-        await pvDelay(700);
-
-        // Card 2
-        document.getElementById('pv2').classList.add('pv-visible');
-        await pvDelay(350);
-        for (let i = 1; i <= 4; i++) {
-            await pvDelay(150);
-            document.getElementById('pv-t' + i).classList.add('pv-vis');
-        }
+    // ── Card 1: Class Discussion ──
+    async function pvCard1() {
+        pvShow('pv1');
         await pvDelay(500);
-        document.getElementById('pv-c1').classList.add('done');
-        document.getElementById('pv-t1').classList.add('done-txt');
-        await pvDelay(300);
-        document.getElementById('pv-c2').classList.add('done');
-        document.getElementById('pv-t2').classList.add('done-txt');
-
+        document.getElementById('pv-b1').classList.add('pv-vis');
         await pvDelay(700);
+        document.getElementById('pv-typing').classList.add('pv-vis');
+        await pvDelay(1400);
+        document.getElementById('pv-typing').style.opacity = '0';
+        await pvDelay(250);
+        document.getElementById('pv-b2').classList.add('pv-vis');
+        await pvDelay(700);
+        document.getElementById('pv-b3').classList.add('pv-vis');
+        await pvDelay(600);
+        document.getElementById('pv-b4').classList.add('pv-vis');
+        await pvDelay(2200);
+        await pvHide('pv1');
+        // reset
+        ['pv-b1','pv-b2','pv-b3','pv-b4'].forEach(id => document.getElementById(id).classList.remove('pv-vis'));
+        document.getElementById('pv-typing').classList.remove('pv-vis');
+        document.getElementById('pv-typing').style.opacity = '';
+    }
 
-        // Card 3
-        document.getElementById('pv3').classList.add('pv-visible');
+    // ── Card 2: Announcements ──
+    async function pvCard2() {
+        pvShow('pv2');
+        await pvDelay(400);
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(260);
+            document.getElementById('pv-a' + i).classList.add('pv-vis');
+        }
+        await pvDelay(2800);
+        await pvHide('pv2');
+        for (let i = 1; i <= 3; i++) document.getElementById('pv-a' + i).classList.remove('pv-vis');
+    }
+
+    // ── Card 3: Auto Quiz ──
+    async function pvCard3() {
+        pvShow('pv3');
+        await pvDelay(450);
+        document.getElementById('pv-qq').classList.add('pv-vis');
+        await pvDelay(400);
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(200);
+            document.getElementById('pv-qo' + i).classList.add('pv-vis');
+        }
+        await pvDelay(900);
+        // wrong answer selected first
+        document.getElementById('pv-qo1').classList.add('wrong');
+        await pvDelay(900);
+        document.getElementById('pv-qo1').classList.remove('wrong');
+        await pvDelay(300);
+        // correct answer
+        document.getElementById('pv-qo2').classList.add('selected');
+        await pvDelay(2400);
+        await pvHide('pv3');
+        document.getElementById('pv-qq').classList.remove('pv-vis');
+        for (let i = 1; i <= 3; i++) {
+            const o = document.getElementById('pv-qo' + i);
+            o.classList.remove('pv-vis','selected','wrong');
+        }
+    }
+
+    // ── Card 4: Teacher Analytics ──
+    async function pvCard4() {
+        pvShow('pv4');
         await pvDelay(450);
         pvCountUp(document.getElementById('pv-sn1'), 742, '', 900);
         pvCountUp(document.getElementById('pv-sn2'), 58, '', 900);
         pvCountUp(document.getElementById('pv-sn3'), 91, '%', 900);
-        await pvDelay(250);
+        await pvDelay(300);
         pvAnimBar(document.getElementById('pv-bf1'), document.getElementById('pv-bl1'), 82, 1100);
         await pvDelay(200);
         pvAnimBar(document.getElementById('pv-bf2'), document.getElementById('pv-bl2'), 67, 1100);
-
-        await pvDelay(4200);
-        resetPreview();
+        await pvDelay(3200);
+        await pvHide('pv4');
+        document.getElementById('pv-sn1').textContent = '0';
+        document.getElementById('pv-sn2').textContent = '0';
+        document.getElementById('pv-sn3').textContent = '0%';
+        document.getElementById('pv-bf1').style.width = '0%'; document.getElementById('pv-bl1').textContent = '0%';
+        document.getElementById('pv-bf2').style.width = '0%'; document.getElementById('pv-bl2').textContent = '0%';
     }
 
-    async function resetPreview() {
-        ['pv1','pv2','pv3'].forEach(id => {
-            const el = document.getElementById(id);
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(22px) scale(0.98)';
-        });
+    // ── Card 5: AI Invigilator ──
+    async function pvCard5() {
+        pvShow('pv5');
+        await pvDelay(400);
+        document.getElementById('pv-inv-screen').classList.add('pv-vis');
+        await pvDelay(1800);
+        // flash alert on face 4
+        document.getElementById('pv-if4').classList.add('alert');
+        document.getElementById('pv-inv-badge').className = 'pv-inv-badge warn';
+        document.getElementById('pv-inv-badge').textContent = '⚠ ALERT';
+        document.getElementById('pv-inv-sub').textContent = 'Suspicious activity flagged';
+        await pvDelay(500);
+        document.getElementById('pv-inv-alert').classList.add('pv-vis');
+        await pvDelay(2800);
+        await pvHide('pv5');
+        // reset
+        document.getElementById('pv-inv-screen').classList.remove('pv-vis');
+        document.getElementById('pv-if4').classList.remove('alert');
+        document.getElementById('pv-inv-badge').className = 'pv-inv-badge active';
+        document.getElementById('pv-inv-badge').textContent = '● LIVE';
+        document.getElementById('pv-inv-sub').textContent = 'Monitoring exam session';
+        document.getElementById('pv-inv-alert').classList.remove('pv-vis');
+    }
+
+    async function runPreview() {
         await pvDelay(600);
-        ['pv1','pv2','pv3'].forEach(id => document.getElementById(id).classList.remove('pv-visible'));
-        ['pv-b1','pv-b2'].forEach(id => document.getElementById(id).classList.remove('pv-vis'));
-        document.getElementById('pv-typing').style.opacity = '0';
-        document.getElementById('pv-typing').classList.remove('pv-vis');
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById('pv-t' + i).classList.remove('pv-vis','done-txt');
-            document.getElementById('pv-c' + i).classList.remove('done');
+        while (true) {
+            await pvCard1();
+            await pvDelay(350);
+            await pvCard2();
+            await pvDelay(350);
+            await pvCard3();
+            await pvDelay(350);
+            await pvCard4();
+            await pvDelay(350);
+            await pvCard5();
+            await pvDelay(350);
         }
-        ['pv-sn1','pv-sn2'].forEach(id => document.getElementById(id).textContent = '0');
-        document.getElementById('pv-sn3').textContent = '0%';
-        document.getElementById('pv-bf1').style.width = '0%';
-        document.getElementById('pv-bf2').style.width = '0%';
-        document.getElementById('pv-bl1').textContent = '0%';
-        document.getElementById('pv-bl2').textContent = '0%';
-        await pvDelay(100);
-        ['pv1','pv2','pv3'].forEach(id => { document.getElementById(id).style.transition = ''; });
-        await pvDelay(300);
-        runPreview();
     }
 
     runPreview();</script>
