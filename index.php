@@ -217,10 +217,93 @@ body {
     animation: fadeSlideIn 1.2s ease forwards;
 }
 
-/* ── Left branding panel (desktop only) ── */
+/* ── Logo + school name above form — desktop only ── */
+#form-top-brand {
+    display: none;
+}
+
+/* ── Left preview panel (desktop only) ── */
 .brand-panel {
     display: none; /* hidden on mobile, shown on desktop */
 }
+
+/* ── Preview animation card styles ── */
+.preview-card {
+    background: #222221;
+    border-radius: 16px;
+    border: 1px solid #2e2e2c;
+    padding: 18px 20px;
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+.preview-card.pv-visible { opacity: 1; transform: translateY(0) scale(1); }
+
+.pv-header { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
+.pv-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pv-icon.green  { background: #0e2e22; }
+.pv-icon.orange { background: #2e1a0e; }
+.pv-icon.purple { background: #1c1830; }
+
+.pv-title { font-size: 13px; font-weight: 600; color: #e3e3e3; }
+.pv-sub   { font-size: 11px; color: #666; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+
+/* Chat bubbles */
+.pv-chat { display: flex; flex-direction: column; gap: 8px; }
+.pv-bubble {
+    padding: 9px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.5; max-width: 90%;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.pv-bubble.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-bubble.user { background: #ffffff; color: #131314; align-self: flex-end; border-bottom-right-radius: 3px; }
+.pv-bubble.ai   { background: #2a2a28; color: #d0d0d0; align-self: flex-start; border-bottom-left-radius: 3px; }
+
+.pv-typing {
+    display: flex; gap: 5px; align-items: center; padding: 9px 13px;
+    background: #2a2a28; border-radius: 12px; border-bottom-left-radius: 3px;
+    width: fit-content; opacity: 0; transition: opacity 0.3s ease;
+}
+.pv-typing.pv-vis { opacity: 1; }
+.pv-dot { width: 6px; height: 6px; border-radius: 50%; background: #555; animation: pvBounce 1.1s infinite ease-in-out; }
+.pv-dot:nth-child(2) { animation-delay: 0.18s; }
+.pv-dot:nth-child(3) { animation-delay: 0.36s; }
+@keyframes pvBounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+
+/* Tasks */
+.pv-task {
+    display: flex; align-items: center; gap: 10px; padding: 5px 0;
+    font-size: 12.5px; color: #ccc;
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.pv-task.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-task.done-txt { color: #555; text-decoration: line-through; }
+.pv-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid #444; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s, border-color 0.3s;
+}
+.pv-check.done { background: #3ecf8e; border-color: #3ecf8e; }
+.pv-check svg { opacity: 0; transition: opacity 0.2s; }
+.pv-check.done svg { opacity: 1; }
+
+/* Stats */
+.pv-stat-grid { display: flex; gap: 8px; margin-bottom: 12px; }
+.pv-stat-box { flex: 1; background: #2a2a28; border-radius: 9px; padding: 9px 10px; text-align: center; }
+.pv-stat-num { font-size: 18px; font-weight: 600; color: #e3e3e3; font-variant-numeric: tabular-nums; }
+.pv-stat-lbl { font-size: 10px; color: #555; margin-top: 2px; letter-spacing: 0.04em; }
+
+.pv-bar-group { display: flex; flex-direction: column; gap: 8px; }
+.pv-bar-lbl-row { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-bottom: 3px; }
+.pv-bar-track { height: 5px; background: #2a2a28; border-radius: 99px; overflow: hidden; }
+.pv-bar-fill { height: 100%; border-radius: 99px; width: 0%; transition: width 1.2s cubic-bezier(0.22,1,0.36,1); }
+
+/* Pulse dot */
+.pv-pulse { width: 7px; height: 7px; border-radius: 50%; background: #3ecf8e; display: inline-block; animation: pvPulse 1.8s infinite ease-in-out; }
+@keyframes pvPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.4; } }
 
 /* ── Right form panel ── */
 .form-panel {
@@ -261,75 +344,38 @@ body {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: flex-start;
-        flex: 0 0 42%;
-        padding: 60px 52px;
+        align-items: stretch;
+        flex: 0 0 48%;
+        padding: 48px 40px;
         background: #111110;
         border-right: 1px solid #2a2a2a;
         box-sizing: border-box;
         position: sticky;
         top: 0;
         height: 100vh;
+        overflow: hidden;
     }
 
-    .brand-panel-logo svg {
-        width: 72px;
-        height: 72px;
-        margin-bottom: 32px;
-        display: block;
-    }
-
-    .brand-panel-title {
-        font-size: 32px;
-        font-weight: 600;
-        color: #E3E3E3;
-        line-height: 1.3;
-        margin: 0 0 16px 0;
-        letter-spacing: -0.5px;
-    }
-
-    .brand-panel-title span {
-        color: #a09d9d;
-        font-weight: 400;
-    }
-
-    .brand-panel-tagline {
-        font-size: 14px;
-        color: #666;
-        line-height: 1.6;
-        margin: 0 0 48px 0;
-        max-width: 300px;
-    }
-
+    .brand-panel-logo,
+    .brand-panel-title,
+    .brand-panel-tagline,
     .brand-panel-school {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 16px;
-        background: #1a1a1a;
-        border: 1px solid #2a2a2a;
-        border-radius: 10px;
-    }
-
-    .brand-panel-school-dot {
-        width: 8px;
-        height: 8px;
-        background: #3ecf8e;
-        border-radius: 50%;
-        flex-shrink: 0;
-        box-shadow: 0 0 6px #3ecf8e88;
-    }
-
-    .brand-panel-school-name {
-        font-size: 13px;
-        color: #aaa;
+        display: none;
     }
 
     .brand-panel-footer {
         position: absolute;
-        bottom: 40px;
+        bottom: 28px;
+        left: 40px;
         font-size: 12px;
-        color: #444;
+        color: #333;
+    }
+
+    .preview-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        width: 100%;
     }
 
     .form-panel {
@@ -346,6 +392,45 @@ body {
     /* Hide the logo inside the login form on desktop — branding panel handles it */
     #iskool-brand {
         display: none !important;
+    }
+
+    /* Logo + school name above the login form on desktop */
+    #form-top-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 36px;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    #form-logo-svg svg {
+        display: block;
+        width: 54px;
+        height: 54px;
+    }
+
+    #form-school-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+    }
+
+    #form-school-dot {
+        width: 8px; height: 8px;
+        background: #3ecf8e;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-shadow: 0 0 6px #3ecf8e88;
+    }
+
+    #form-school-name {
+        font-size: 13px;
+        color: #aaa;
     }
 }
 
@@ -667,25 +752,93 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     <!-- Login/Register container -->
     <div class="container">
 
-        <!-- LEFT: Branding panel (desktop only) -->
+        <!-- LEFT: Animated Preview Panel (desktop only) -->
         <div class="brand-panel">
-            <div class="brand-panel-logo">
-                <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880.000000 805.000000" preserveAspectRatio="xMidYMid meet">
-                    <g transform="translate(0.000000,805.000000) scale(0.100000,-0.100000)" fill="#a09d9dff" stroke="none">
-                        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
-                    </g>
-                </svg>
-            </div>
-            <h1 class="brand-panel-title">iSkool <span>LMS</span></h1>
-            <div class="brand-panel-school">
-                <div class="brand-panel-school-dot"></div>
-                <span class="brand-panel-school-name"><?= htmlspecialchars($schoolName) ?></span>
+            <div class="preview-wrap">
+
+                <!-- Card 1: Announcements / Chat -->
+                <div class="preview-card" id="pv1">
+                    <div class="pv-header">
+                        <div class="pv-icon orange">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07b3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Class announcements</div>
+                            <div class="pv-sub">Live updates from teachers</div>
+                        </div>
+                    </div>
+                    <div class="pv-chat">
+                        <div class="pv-bubble user" id="pv-b1">Sir, when is the Maths test?</div>
+                        <div class="pv-typing" id="pv-typing"><div class="pv-dot"></div><div class="pv-dot"></div><div class="pv-dot"></div></div>
+                        <div class="pv-bubble ai" id="pv-b2">Friday 9am, Grade 10. Chapter 4 &amp; 5. Good luck!</div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Tasks -->
+                <div class="preview-card" id="pv2">
+                    <div class="pv-header">
+                        <div class="pv-icon green">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Today's tasks</div>
+                            <div class="pv-sub"><span class="pv-pulse"></span> 3 pending</div>
+                        </div>
+                    </div>
+                    <div class="pv-task" id="pv-t1"><div class="pv-check" id="pv-c1"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Submit Science assignment</div>
+                    <div class="pv-task" id="pv-t2"><div class="pv-check" id="pv-c2"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Mark Grade 8 tests</div>
+                    <div class="pv-task" id="pv-t3"><div class="pv-check" id="pv-c3"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Upload timetable</div>
+                    <div class="pv-task" id="pv-t4"><div class="pv-check" id="pv-c4"><svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="#131314" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Review parent messages</div>
+                </div>
+
+                <!-- Card 3: Stats -->
+                <div class="preview-card" id="pv3">
+                    <div class="pv-header">
+                        <div class="pv-icon purple">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b80d1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">School stats</div>
+                            <div class="pv-sub">This term</div>
+                        </div>
+                    </div>
+                    <div class="pv-stat-grid">
+                        <div class="pv-stat-box"><div class="pv-stat-num" id="pv-sn1">0</div><div class="pv-stat-lbl">Learners</div></div>
+                        <div class="pv-stat-box"><div class="pv-stat-num" id="pv-sn2">0</div><div class="pv-stat-lbl">Teachers</div></div>
+                        <div class="pv-stat-box"><div class="pv-stat-num" id="pv-sn3">0%</div><div class="pv-stat-lbl">Attendance</div></div>
+                    </div>
+                    <div class="pv-bar-group">
+                        <div>
+                            <div class="pv-bar-lbl-row"><span>Pass rate</span><span id="pv-bl1">0%</span></div>
+                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf1" style="background:#8b80d1;"></div></div>
+                        </div>
+                        <div>
+                            <div class="pv-bar-lbl-row"><span>Submissions</span><span id="pv-bl2">0%</span></div>
+                            <div class="pv-bar-track"><div class="pv-bar-fill" id="pv-bf2" style="background:#3ecf8e;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v.1.0.0</div>
         </div>
 
         <!-- RIGHT: Form panel -->
         <div class="form-panel">
+        <!-- Logo + School Name (desktop: shown here, replaces brand panel header) -->
+        <div id="form-top-brand">
+            <div id="form-logo-svg">
+                <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 880.000000 805.000000" preserveAspectRatio="xMidYMid meet">
+                    <g transform="translate(0.000000,805.000000) scale(0.100000,-0.100000)" fill="#a09d9dff" stroke="none">
+                        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
+                    </g>
+                </svg>
+            </div>
+            <div id="form-school-badge">
+                <div id="form-school-dot"></div>
+                <span id="form-school-name"><?= htmlspecialchars($schoolName) ?></span>
+            </div>
+        </div>
         <!-- LOGIN FORM -->
         <div class="form-box <?= isActiveForm('login', $activeForm); ?>" id="login-form">
             <form action="login_register.php" method="post">
@@ -948,7 +1101,106 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             .then(reg => console.log("Service Worker registered", reg))
             .catch(err => console.error("Service Worker failed", err));
     }
- 
-    </script>
+
+    // ── Preview panel animation ──
+    const pvDelay = ms => new Promise(r => setTimeout(r, ms));
+
+    function pvCountUp(el, target, suffix, duration) {
+        let val = 0;
+        const steps = 40, inc = target / steps, iv = duration / steps;
+        const t = setInterval(() => {
+            val = Math.min(val + inc, target);
+            el.textContent = Math.round(val).toLocaleString() + suffix;
+            if (val >= target) clearInterval(t);
+        }, iv);
+    }
+
+    function pvAnimBar(fillEl, lblEl, pct, duration) {
+        fillEl.style.width = pct + '%';
+        let val = 0;
+        const steps = 40, inc = pct / steps, iv = duration / steps;
+        const t = setInterval(() => {
+            val = Math.min(val + inc, pct);
+            lblEl.textContent = Math.round(val) + '%';
+            if (val >= pct) clearInterval(t);
+        }, iv);
+    }
+
+    async function runPreview() {
+        await pvDelay(600);
+
+        // Card 1
+        document.getElementById('pv1').classList.add('pv-visible');
+        await pvDelay(600);
+        document.getElementById('pv-b1').classList.add('pv-vis');
+        await pvDelay(800);
+        document.getElementById('pv-typing').classList.add('pv-vis');
+        await pvDelay(1500);
+        document.getElementById('pv-typing').style.opacity = '0';
+        await pvDelay(300);
+        document.getElementById('pv-b2').classList.add('pv-vis');
+
+        await pvDelay(700);
+
+        // Card 2
+        document.getElementById('pv2').classList.add('pv-visible');
+        await pvDelay(350);
+        for (let i = 1; i <= 4; i++) {
+            await pvDelay(150);
+            document.getElementById('pv-t' + i).classList.add('pv-vis');
+        }
+        await pvDelay(500);
+        document.getElementById('pv-c1').classList.add('done');
+        document.getElementById('pv-t1').classList.add('done-txt');
+        await pvDelay(300);
+        document.getElementById('pv-c2').classList.add('done');
+        document.getElementById('pv-t2').classList.add('done-txt');
+
+        await pvDelay(700);
+
+        // Card 3
+        document.getElementById('pv3').classList.add('pv-visible');
+        await pvDelay(450);
+        pvCountUp(document.getElementById('pv-sn1'), 742, '', 900);
+        pvCountUp(document.getElementById('pv-sn2'), 58, '', 900);
+        pvCountUp(document.getElementById('pv-sn3'), 91, '%', 900);
+        await pvDelay(250);
+        pvAnimBar(document.getElementById('pv-bf1'), document.getElementById('pv-bl1'), 82, 1100);
+        await pvDelay(200);
+        pvAnimBar(document.getElementById('pv-bf2'), document.getElementById('pv-bl2'), 67, 1100);
+
+        await pvDelay(4200);
+        resetPreview();
+    }
+
+    async function resetPreview() {
+        ['pv1','pv2','pv3'].forEach(id => {
+            const el = document.getElementById(id);
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(22px) scale(0.98)';
+        });
+        await pvDelay(600);
+        ['pv1','pv2','pv3'].forEach(id => document.getElementById(id).classList.remove('pv-visible'));
+        ['pv-b1','pv-b2'].forEach(id => document.getElementById(id).classList.remove('pv-vis'));
+        document.getElementById('pv-typing').style.opacity = '0';
+        document.getElementById('pv-typing').classList.remove('pv-vis');
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById('pv-t' + i).classList.remove('pv-vis','done-txt');
+            document.getElementById('pv-c' + i).classList.remove('done');
+        }
+        ['pv-sn1','pv-sn2'].forEach(id => document.getElementById(id).textContent = '0');
+        document.getElementById('pv-sn3').textContent = '0%';
+        document.getElementById('pv-bf1').style.width = '0%';
+        document.getElementById('pv-bf2').style.width = '0%';
+        document.getElementById('pv-bl1').textContent = '0%';
+        document.getElementById('pv-bl2').textContent = '0%';
+        await pvDelay(100);
+        ['pv1','pv2','pv3'].forEach(id => { document.getElementById(id).style.transition = ''; });
+        await pvDelay(300);
+        runPreview();
+    }
+
+    runPreview();</script>
 </body>
 </html>
