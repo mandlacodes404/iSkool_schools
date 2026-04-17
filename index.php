@@ -61,7 +61,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login Application - iSkool</title>
+<title>Login - iSkool</title>
 
 <link rel="manifest" href="https://iskool.online/manifest.json">
 
@@ -227,9 +227,9 @@ body {
     display: none; /* hidden on mobile, shown on desktop */
 }
 
-/* ── Brand panel intro copy ── */
+/* ── Brand panel intro eyebrow ── */
 .bp-intro {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
@@ -248,7 +248,6 @@ body {
     color: #555;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin-bottom: 10px;
     font-family: 'Inter', sans-serif;
 }
 
@@ -262,22 +261,55 @@ body {
     flex-shrink: 0;
 }
 
-.bp-intro-headline {
-    font-size: 22px;
-    font-weight: 600;
-    color: #e3e3e3;
-    margin: 0 0 10px 0;
-    line-height: 1.3;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.02em;
+/* ── Typewriter intro card ── */
+.pv-intro-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
-.bp-intro-sub {
-    font-size: 13px;
-    color: #666;
-    margin: 0 0 4px 0;
-    line-height: 1.6;
+.pv-tw-wrap {
+    text-align: left;
+    width: 100%;
+}
+
+.pv-tw-line {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e3e3e3;
     font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    min-height: 1.4em;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.pv-tw-line2 {
+    font-size: 13px;
+    font-weight: 400;
+    color: #666;
+    margin-top: 8px;
+    letter-spacing: 0;
+}
+
+.pv-tw-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: #3ecf8e;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: twBlink 0.75s step-end infinite;
+}
+
+@keyframes twBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 /* ── Preview animation card styles ── */
@@ -520,12 +552,39 @@ body {
         flex: 0 0 48%;
         padding: 48px 40px;
         background: #111110;
-        border-right: 1px solid #2a2a2a;
+        border-right: none;
         box-sizing: border-box;
         position: sticky;
         top: 0;
         height: 100vh;
         overflow: hidden;
+    }
+
+    /* Curved SVG divider on right edge of brand panel */
+    .brand-panel::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -1px;
+        width: 32px;
+        height: 100%;
+        background: #111110;
+        clip-path: polygon(0 0, 60% 0, 100% 6%, 100% 94%, 60% 100%, 0 100%);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* Thin accent line on the curved edge */
+    .brand-panel::before {
+        content: '';
+        position: absolute;
+        top: 6%;
+        right: 18px;
+        width: 1px;
+        height: 88%;
+        background: linear-gradient(to bottom, transparent, #2a2a2a 15%, #2a2a2a 85%, transparent);
+        z-index: 3;
+        pointer-events: none;
     }
 
     .brand-panel-logo,
@@ -926,17 +985,23 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         <!-- LEFT: Animated Preview Panel (desktop only) -->
         <div class="brand-panel">
 
-            <!-- Intro copy above preview cards -->
+            <!-- Eyebrow only above preview -->
             <div class="bp-intro">
                 <div class="bp-intro-eyebrow">
                     <span class="bp-live-dot"></span>
                     <span>Live preview</span>
                 </div>
-                <h2 class="bp-intro-headline">Built for South African schools.</h2>
-                <p class="bp-intro-sub">Everything learners, teachers, and principals need — in one platform.</p>
             </div>
 
             <div class="preview-wrap">
+
+                <!-- Card 0: Typewriter Intro -->
+                <div class="preview-card pv-intro-card" id="pv0">
+                    <div class="pv-tw-wrap">
+                        <div class="pv-tw-line" id="pv-tw1"></div>
+                        <div class="pv-tw-line pv-tw-line2" id="pv-tw2"></div>
+                    </div>
+                </div>
 
                 <!-- Card 1: Class Discussion -->
                 <div class="preview-card" id="pv1">
@@ -1691,8 +1756,43 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         }
     }
 
+    // ── Card 0: Typewriter Intro (plays once at start) ──
+    async function pvTypewriter(elId, text, speed) {
+        const el = document.getElementById(elId);
+        el.innerHTML = '';
+        const cursor = document.createElement('span');
+        cursor.className = 'pv-tw-cursor';
+        el.appendChild(cursor);
+        for (let i = 0; i < text.length; i++) {
+            el.insertBefore(document.createTextNode(text[i]), cursor);
+            await pvDelay(speed);
+        }
+        return cursor;
+    }
+
+    async function pvCard0() {
+        pvShow('pv0');
+        await pvDelay(400);
+        // Line 1
+        const c1 = await pvTypewriter('pv-tw1', 'Get a glimpse of iSkool', 52);
+        await pvDelay(700);
+        c1.remove();
+        // Line 2 fades in via typewriter
+        const c2 = await pvTypewriter('pv-tw2', 'A smarter way to run your school.', 44);
+        await pvDelay(1200);
+        c2.remove();
+        await pvDelay(400);
+        await pvHide('pv0');
+        // Reset lines
+        document.getElementById('pv-tw1').innerHTML = '';
+        document.getElementById('pv-tw2').innerHTML = '';
+    }
+
     async function runPreview() {
         await pvDelay(600);
+        // Play intro once, then loop cards
+        await pvCard0();
+        await pvDelay(350);
         while (true) {
             await pvCard1();
             await pvDelay(350);
