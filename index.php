@@ -365,6 +365,65 @@ body {
 .pv-ann-badge.info   { background: #0d1e2e; color: #5ba4e0; }
 .pv-ann-badge.event  { background: #1c1830; color: #8b80d1; }
 
+/* Academic Calendar styles */
+.pv-cal-month { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; opacity: 0; transition: opacity 0.4s ease; }
+.pv-cal-month.pv-vis { opacity: 1; }
+.pv-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 10px; }
+.pv-cal-day { height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555; opacity: 0; transform: scale(0.85); transition: opacity 0.25s ease, transform 0.25s ease; }
+.pv-cal-day.pv-vis { opacity: 1; transform: scale(1); }
+.pv-cal-day.today { background: #3ecf8e; color: #0a1f15; font-weight: 600; }
+.pv-cal-day.has-event { background: #1c1830; color: #8b80d1; }
+.pv-cal-day.holiday { background: #2a1010; color: #cf7070; }
+.pv-event-list { display: flex; flex-direction: column; gap: 6px; }
+.pv-event-row { display: flex; align-items: center; gap: 9px; opacity: 0; transform: translateX(-6px); transition: opacity 0.35s ease, transform 0.35s ease; }
+.pv-event-row.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pv-event-label { font-size: 12px; color: #ccc; }
+.pv-event-date { font-size: 10px; color: #444; margin-left: auto; }
+
+/* Learner Dashboard styles */
+.pv-subj-grid { display: flex; flex-direction: column; gap: 7px; }
+.pv-subj-row { display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateY(5px); transition: opacity 0.38s ease, transform 0.38s ease; }
+.pv-subj-row.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-subj-ico { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+.pv-subj-name { font-size: 12px; color: #ccc; flex: 1; }
+.pv-subj-track { flex: 2; height: 4px; background: #2a2a28; border-radius: 99px; overflow: hidden; }
+.pv-subj-fill { height: 100%; border-radius: 99px; width: 0%; transition: width 1s cubic-bezier(0.22,1,0.36,1); }
+.pv-subj-pct { font-size: 11px; color: #888; min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+.pv-grade-badge { padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; min-width: 28px; text-align: center; }
+.pv-grade-badge.a { background: #0e2e22; color: #3ecf8e; }
+.pv-grade-badge.b { background: #0d1e2e; color: #5ba4e0; }
+.pv-grade-badge.c { background: #1c1830; color: #8b80d1; }
+
+/* Admin Dashboard styles */
+.pv-admin-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 10px; }
+.pv-admin-box { background: #2a2a28; border-radius: 10px; padding: 10px 12px; opacity: 0; transform: translateY(6px); transition: opacity 0.38s ease, transform 0.38s ease; }
+.pv-admin-box.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-admin-num { font-size: 20px; font-weight: 600; color: #e3e3e3; font-variant-numeric: tabular-nums; }
+.pv-admin-lbl { font-size: 10px; color: #555; margin-top: 2px; }
+.pv-admin-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 1px solid #222; font-size: 11.5px; color: #888; opacity: 0; transition: opacity 0.38s ease; }
+.pv-admin-row.pv-vis { opacity: 1; }
+.pv-admin-chip { padding: 2px 8px; border-radius: 99px; font-size: 10px; }
+.pv-admin-chip.ok  { background: #0e2e22; color: #3ecf8e; }
+.pv-admin-chip.off { background: #2a1a0e; color: #e07b3a; }
+
+/* Auto Grading styles */
+.pv-grade-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; opacity: 0; transition: opacity 0.4s ease; }
+.pv-grade-header.pv-vis { opacity: 1; }
+.pv-grade-title { font-size: 12px; color: #ccc; }
+.pv-grade-total { font-size: 18px; font-weight: 600; color: #e3e3e3; font-variant-numeric: tabular-nums; }
+.pv-grade-total span { font-size: 11px; color: #444; font-weight: 400; }
+.pv-q-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #1e1e1c; opacity: 0; transform: translateX(-5px); transition: opacity 0.32s ease, transform 0.32s ease; }
+.pv-q-row.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-q-row:last-child { border-bottom: none; }
+.pv-q-num { font-size: 10px; color: #444; min-width: 18px; }
+.pv-q-bar-wrap { flex: 1; height: 4px; background: #222; border-radius: 99px; overflow: hidden; }
+.pv-q-bar { height: 100%; border-radius: 99px; width: 0%; transition: width 0.7s cubic-bezier(0.22,1,0.36,1); }
+.pv-q-mark { font-size: 11px; min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+.pv-q-mark.correct { color: #3ecf8e; }
+.pv-q-mark.partial { color: #e07b3a; }
+.pv-q-mark.wrong   { color: #cf5050; }
+
 /* ── Right form panel ── */
 .form-panel {
     flex: 1;
@@ -945,6 +1004,93 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     </div>
                 </div>
 
+                <!-- Card 6: Academic Calendar -->
+                <div class="preview-card" id="pv6">
+                    <div class="pv-header">
+                        <div class="pv-icon green">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ecf8e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Academic calendar</div>
+                            <div class="pv-sub">Term 2 · April 2025</div>
+                        </div>
+                    </div>
+                    <div class="pv-cal-month" id="pv-cal-month">April 2025</div>
+                    <div class="pv-cal-grid">
+                        <div class="pv-cal-day" id="pvc-1">1</div><div class="pv-cal-day" id="pvc-2">2</div>
+                        <div class="pv-cal-day has-event" id="pvc-3">3</div><div class="pv-cal-day" id="pvc-4">4</div>
+                        <div class="pv-cal-day" id="pvc-5">5</div><div class="pv-cal-day holiday" id="pvc-6">6</div>
+                        <div class="pv-cal-day" id="pvc-7">7</div><div class="pv-cal-day" id="pvc-8">8</div>
+                        <div class="pv-cal-day" id="pvc-9">9</div><div class="pv-cal-day today" id="pvc-10">10</div>
+                        <div class="pv-cal-day" id="pvc-11">11</div><div class="pv-cal-day has-event" id="pvc-12">12</div>
+                        <div class="pv-cal-day" id="pvc-13">13</div><div class="pv-cal-day" id="pvc-14">14</div>
+                    </div>
+                    <div class="pv-event-list">
+                        <div class="pv-event-row" id="pv-ev1"><div class="pv-event-dot" style="background:#8b80d1;"></div><span class="pv-event-label">Grade 12 Mock Exams</span><span class="pv-event-date">Apr 3</span></div>
+                        <div class="pv-event-row" id="pv-ev2"><div class="pv-event-dot" style="background:#cf5050;"></div><span class="pv-event-label">Public Holiday</span><span class="pv-event-date">Apr 6</span></div>
+                        <div class="pv-event-row" id="pv-ev3"><div class="pv-event-dot" style="background:#3ecf8e;"></div><span class="pv-event-label">Parent-Teacher Meeting</span><span class="pv-event-date">Apr 12</span></div>
+                    </div>
+                </div>
+
+                <!-- Card 7: Learner Dashboard -->
+                <div class="preview-card" id="pv7">
+                    <div class="pv-header">
+                        <div class="pv-icon blue">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5ba4e0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Learner dashboard</div>
+                            <div class="pv-sub">Thabo M. · Grade 10</div>
+                        </div>
+                    </div>
+                    <div class="pv-subj-grid">
+                        <div class="pv-subj-row" id="pv-sr1"><div class="pv-subj-ico" style="background:#0e2e22;">📐</div><span class="pv-subj-name">Mathematics</span><div class="pv-subj-track"><div class="pv-subj-fill" id="pv-sf1" style="background:#3ecf8e;"></div></div><span class="pv-subj-pct" id="pv-sp1">0%</span><span class="pv-grade-badge a">A</span></div>
+                        <div class="pv-subj-row" id="pv-sr2"><div class="pv-subj-ico" style="background:#0d1e2e;">🔬</div><span class="pv-subj-name">Life Sciences</span><div class="pv-subj-track"><div class="pv-subj-fill" id="pv-sf2" style="background:#5ba4e0;"></div></div><span class="pv-subj-pct" id="pv-sp2">0%</span><span class="pv-grade-badge b">B+</span></div>
+                        <div class="pv-subj-row" id="pv-sr3"><div class="pv-subj-ico" style="background:#1c1830;">📖</div><span class="pv-subj-name">English HL</span><div class="pv-subj-track"><div class="pv-subj-fill" id="pv-sf3" style="background:#8b80d1;"></div></div><span class="pv-subj-pct" id="pv-sp3">0%</span><span class="pv-grade-badge c">B</span></div>
+                        <div class="pv-subj-row" id="pv-sr4"><div class="pv-subj-ico" style="background:#2e1a0e;">🌍</div><span class="pv-subj-name">Geography</span><div class="pv-subj-track"><div class="pv-subj-fill" id="pv-sf4" style="background:#e07b3a;"></div></div><span class="pv-subj-pct" id="pv-sp4">0%</span><span class="pv-grade-badge b">B</span></div>
+                    </div>
+                </div>
+
+                <!-- Card 8: Admin Dashboard -->
+                <div class="preview-card" id="pv8">
+                    <div class="pv-header">
+                        <div class="pv-icon purple">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b80d1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Admin dashboard</div>
+                            <div class="pv-sub">School overview · Live</div>
+                        </div>
+                    </div>
+                    <div class="pv-admin-stats">
+                        <div class="pv-admin-box" id="pv-ab1"><div class="pv-admin-num" id="pv-an1">0</div><div class="pv-admin-lbl">Total Learners</div></div>
+                        <div class="pv-admin-box" id="pv-ab2"><div class="pv-admin-num" id="pv-an2">0</div><div class="pv-admin-lbl">Teachers</div></div>
+                        <div class="pv-admin-box" id="pv-ab3"><div class="pv-admin-num" id="pv-an3">0</div><div class="pv-admin-lbl">Active Classes</div></div>
+                        <div class="pv-admin-box" id="pv-ab4"><div class="pv-admin-num" id="pv-an4">0%</div><div class="pv-admin-lbl">Avg Attendance</div></div>
+                    </div>
+                    <div class="pv-admin-row" id="pv-ar1"><span>System status</span><span class="pv-admin-chip ok">● Online</span></div>
+                    <div class="pv-admin-row" id="pv-ar2"><span>Pending registrations</span><span style="color:#e3e3e3;font-weight:600;">12</span></div>
+                    <div class="pv-admin-row" id="pv-ar3"><span>Reports generated today</span><span style="color:#e3e3e3;font-weight:600;">7</span></div>
+                </div>
+
+                <!-- Card 9: Auto Grading -->
+                <div class="preview-card" id="pv9">
+                    <div class="pv-header">
+                        <div class="pv-icon orange">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07b3a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Auto grading</div>
+                            <div class="pv-sub">Maths P1 · 28 submissions</div>
+                        </div>
+                    </div>
+                    <div class="pv-grade-header" id="pv-gh"><span class="pv-grade-title">Lerato S. · Question breakdown</span><div class="pv-grade-total"><span id="pv-gtotal">0</span><span>/50</span></div></div>
+                    <div class="pv-q-row" id="pv-qr1"><span class="pv-q-num">Q1</span><div class="pv-q-bar-wrap"><div class="pv-q-bar" id="pv-qb1" style="background:#3ecf8e;"></div></div><span class="pv-q-mark correct" id="pv-qm1">0/10</span></div>
+                    <div class="pv-q-row" id="pv-qr2"><span class="pv-q-num">Q2</span><div class="pv-q-bar-wrap"><div class="pv-q-bar" id="pv-qb2" style="background:#3ecf8e;"></div></div><span class="pv-q-mark correct" id="pv-qm2">0/10</span></div>
+                    <div class="pv-q-row" id="pv-qr3"><span class="pv-q-num">Q3</span><div class="pv-q-bar-wrap"><div class="pv-q-bar" id="pv-qb3" style="background:#e07b3a;"></div></div><span class="pv-q-mark partial" id="pv-qm3">0/15</span></div>
+                    <div class="pv-q-row" id="pv-qr4"><span class="pv-q-num">Q4</span><div class="pv-q-bar-wrap"><div class="pv-q-bar" id="pv-qb4" style="background:#cf5050;"></div></div><span class="pv-q-mark wrong" id="pv-qm4">0/15</span></div>
+                </div>
+
             </div>
             <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v.1.0.0</div>
         </div>
@@ -1373,6 +1519,114 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         document.getElementById('pv-inv-alert').classList.remove('pv-vis');
     }
 
+    // ── Card 6: Academic Calendar ──
+    async function pvCard6() {
+        pvShow('pv6');
+        await pvDelay(350);
+        document.getElementById('pv-cal-month').classList.add('pv-vis');
+        await pvDelay(200);
+        for (let i = 1; i <= 14; i++) {
+            await pvDelay(60);
+            document.getElementById('pvc-' + i).classList.add('pv-vis');
+        }
+        await pvDelay(400);
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(250);
+            document.getElementById('pv-ev' + i).classList.add('pv-vis');
+        }
+        await pvDelay(2500);
+        await pvHide('pv6');
+        document.getElementById('pv-cal-month').classList.remove('pv-vis');
+        for (let i = 1; i <= 14; i++) document.getElementById('pvc-' + i).classList.remove('pv-vis');
+        for (let i = 1; i <= 3; i++) document.getElementById('pv-ev' + i).classList.remove('pv-vis');
+    }
+
+    // ── Card 7: Learner Dashboard ──
+    async function pvCard7() {
+        const subjects = [
+            { id: 1, pct: 88, label: '88%' },
+            { id: 2, pct: 74, label: '74%' },
+            { id: 3, pct: 71, label: '71%' },
+            { id: 4, pct: 68, label: '68%' },
+        ];
+        pvShow('pv7');
+        await pvDelay(400);
+        for (const s of subjects) {
+            await pvDelay(220);
+            document.getElementById('pv-sr' + s.id).classList.add('pv-vis');
+            await pvDelay(100);
+            document.getElementById('pv-sf' + s.id).style.width = s.pct + '%';
+            pvCountUp(document.getElementById('pv-sp' + s.id), s.pct, '%', 900);
+        }
+        await pvDelay(2600);
+        await pvHide('pv7');
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById('pv-sr' + i).classList.remove('pv-vis');
+            document.getElementById('pv-sf' + i).style.width = '0%';
+            document.getElementById('pv-sp' + i).textContent = '0%';
+        }
+    }
+
+    // ── Card 8: Admin Dashboard ──
+    async function pvCard8() {
+        pvShow('pv8');
+        await pvDelay(350);
+        for (let i = 1; i <= 4; i++) {
+            await pvDelay(150);
+            document.getElementById('pv-ab' + i).classList.add('pv-vis');
+        }
+        await pvDelay(300);
+        pvCountUp(document.getElementById('pv-an1'), 742, '', 1000);
+        pvCountUp(document.getElementById('pv-an2'), 58, '', 1000);
+        pvCountUp(document.getElementById('pv-an3'), 24, '', 1000);
+        pvCountUp(document.getElementById('pv-an4'), 91, '%', 1000);
+        await pvDelay(600);
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(200);
+            document.getElementById('pv-ar' + i).classList.add('pv-vis');
+        }
+        await pvDelay(2600);
+        await pvHide('pv8');
+        for (let i = 1; i <= 4; i++) document.getElementById('pv-ab' + i).classList.remove('pv-vis');
+        ['pv-an1','pv-an2','pv-an3'].forEach(id => document.getElementById(id).textContent = '0');
+        document.getElementById('pv-an4').textContent = '0%';
+        for (let i = 1; i <= 3; i++) document.getElementById('pv-ar' + i).classList.remove('pv-vis');
+    }
+
+    // ── Card 9: Auto Grading ──
+    async function pvCard9() {
+        const qs = [
+            { id: 1, scored: 9,  total: 10, pct: 90,  cls: 'correct', label: '9/10'  },
+            { id: 2, scored: 8,  total: 10, pct: 80,  cls: 'correct', label: '8/10'  },
+            { id: 3, scored: 10, total: 15, pct: 67,  cls: 'partial', label: '10/15' },
+            { id: 4, scored: 5,  total: 15, pct: 33,  cls: 'wrong',   label: '5/15'  },
+        ];
+        pvShow('pv9');
+        await pvDelay(350);
+        document.getElementById('pv-gh').classList.add('pv-vis');
+        await pvDelay(300);
+        let runningTotal = 0;
+        for (const q of qs) {
+            await pvDelay(280);
+            document.getElementById('pv-qr' + q.id).classList.add('pv-vis');
+            await pvDelay(120);
+            document.getElementById('pv-qb' + q.id).style.width = q.pct + '%';
+            document.getElementById('pv-qm' + q.id).textContent = q.label;
+            document.getElementById('pv-qm' + q.id).className = 'pv-q-mark ' + q.cls;
+            runningTotal += q.scored;
+            pvCountUp(document.getElementById('pv-gtotal'), runningTotal, '', 400);
+        }
+        await pvDelay(2500);
+        await pvHide('pv9');
+        document.getElementById('pv-gh').classList.remove('pv-vis');
+        document.getElementById('pv-gtotal').textContent = '0';
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById('pv-qr' + i).classList.remove('pv-vis');
+            document.getElementById('pv-qb' + i).style.width = '0%';
+            document.getElementById('pv-qm' + i).textContent = '0/' + (i <= 2 ? '10' : '15');
+        }
+    }
+
     async function runPreview() {
         await pvDelay(600);
         while (true) {
@@ -1385,6 +1639,14 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             await pvCard4();
             await pvDelay(350);
             await pvCard5();
+            await pvDelay(350);
+            await pvCard6();
+            await pvDelay(350);
+            await pvCard7();
+            await pvDelay(350);
+            await pvCard8();
+            await pvDelay(350);
+            await pvCard9();
             await pvDelay(350);
         }
     }
