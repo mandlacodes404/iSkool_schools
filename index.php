@@ -509,6 +509,138 @@ body {
 .pv-q-mark.partial { color: #e07b3a; }
 .pv-q-mark.wrong   { color: #cf5050; }
 
+
+/* ── Card 10: Evaluations ── */
+.pv-eval-layout {
+    display: flex;
+    gap: 10px;
+    height: 110px;
+}
+.pv-eval-sidebar {
+    width: 44%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-right: 1px solid #222;
+    padding-right: 10px;
+}
+.pv-eval-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    border-left: 2px solid transparent;
+    font-size: 11px;
+    color: #666;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.pv-eval-item.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-eval-item.active { background: rgba(167,139,250,0.08); border-left-color: #a78bfa; color: #ccc; }
+.pv-eval-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.pv-eval-dot.pending { background: #e07b3a; }
+.pv-eval-dot.done    { background: #3ecf8e; }
+.pv-eval-name { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pv-eval-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pv-eval-q {
+    font-size: 11.5px;
+    color: #ccc;
+    line-height: 1.4;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.pv-eval-q.pv-vis { opacity: 1; }
+.pv-eval-options { display: flex; flex-direction: column; gap: 4px; }
+.pv-eval-opt {
+    font-size: 10.5px;
+    color: #666;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #222;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s, border-color 0.3s, color 0.3s;
+    cursor: default;
+}
+.pv-eval-opt.pv-vis { opacity: 1; transform: translateY(0); }
+.pv-eval-opt.selected { background: rgba(167,139,250,0.12); border-color: #a78bfa; color: #a78bfa; }
+
+/* ── Card 11: Syllabus ── */
+.pv-syl-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.pv-syl-tabs.pv-vis { opacity: 1; }
+.pv-syl-tab {
+    font-size: 10.5px;
+    color: #555;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 1px solid #222;
+    cursor: default;
+}
+.pv-syl-tab.active { background: rgba(79,209,197,0.1); border-color: #4fd1c5; color: #4fd1c5; }
+.pv-syl-current {
+    font-size: 9px;
+    background: #4fd1c5;
+    color: #0a1f15;
+    border-radius: 99px;
+    padding: 0px 5px;
+    margin-left: 3px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.pv-syl-card { opacity: 0; transform: translateY(6px); transition: opacity 0.45s ease, transform 0.45s ease; }
+.pv-syl-card.pv-vis { opacity: 1; transform: translateY(0); }
+
+.pv-syl-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.pv-syl-subject { font-size: 13px; font-weight: 600; color: #e3e3e3; }
+.pv-syl-teacher { font-size: 11px; color: #666; margin-top: 2px; }
+.pv-syl-date    { font-size: 10px; color: #444; white-space: nowrap; }
+
+.pv-syl-section-lbl {
+    font-size: 10px; font-weight: 700; color: #555;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin: 8px 0 5px;
+}
+.pv-syl-topics { list-style: none; padding: 0; margin: 0 0 4px; display: flex; flex-direction: column; gap: 3px; }
+.pv-syl-topic {
+    font-size: 11.5px; color: #ccc;
+    display: flex; align-items: center; gap: 7px;
+    opacity: 0; transform: translateX(-5px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.pv-syl-topic.pv-vis { opacity: 1; transform: translateX(0); }
+.pv-syl-topic::before {
+    content: ''; width: 5px; height: 5px;
+    border-radius: 50%; background: #4fd1c5; flex-shrink: 0;
+}
+
+.pv-syl-assess-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px; color: #ccc; margin-top: 4px;
+    opacity: 0; transition: opacity 0.35s ease;
+}
+.pv-syl-assess-row.pv-vis { opacity: 1; }
+.pv-syl-atype { color: #aaa; }
+.pv-syl-apct  { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pv-syl-abar-wrap { height: 3px; background: #222; border-radius: 99px; overflow: hidden; margin-bottom: 2px; }
+.pv-syl-abar  { height: 100%; border-radius: 99px; width: 0%; transition: width 1s cubic-bezier(0.22,1,0.36,1); }
+
 /* ── Right form panel ── */
 .form-panel {
     flex: 1;
@@ -1220,6 +1352,87 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     <div class="pv-q-row" id="pv-qr4"><span class="pv-q-num">Q4</span><div class="pv-q-bar-wrap"><div class="pv-q-bar" id="pv-qb4" style="background:#cf5050;"></div></div><span class="pv-q-mark wrong" id="pv-qm4">0/15</span></div>
                 </div>
 
+                <!-- Card 10: Teacher Evaluations -->
+                <div class="preview-card" id="pv10">
+                    <div class="pv-header">
+                        <div class="pv-icon" style="background:#1a1030;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Teacher evaluations</div>
+                            <div class="pv-sub">Rate your educators &middot; Term 2</div>
+                        </div>
+                    </div>
+                    <div class="pv-eval-layout">
+                        <div class="pv-eval-sidebar">
+                            <div class="pv-eval-item active" id="pv-ev-i1">
+                                <span class="pv-eval-dot pending"></span>
+                                <span class="pv-eval-name">Mr Khumalo &middot; Maths</span>
+                            </div>
+                            <div class="pv-eval-item" id="pv-ev-i2">
+                                <span class="pv-eval-dot done"></span>
+                                <span class="pv-eval-name">Mrs Dlamini &middot; English</span>
+                            </div>
+                            <div class="pv-eval-item" id="pv-ev-i3">
+                                <span class="pv-eval-dot pending"></span>
+                                <span class="pv-eval-name">Mr Sithole &middot; Physics</span>
+                            </div>
+                        </div>
+                        <div class="pv-eval-panel">
+                            <div class="pv-eval-q" id="pv-eval-q">The teacher explains concepts clearly.</div>
+                            <div class="pv-eval-options">
+                                <div class="pv-eval-opt" id="pv-eopt1">Strongly Agree</div>
+                                <div class="pv-eval-opt" id="pv-eopt2">Agree</div>
+                                <div class="pv-eval-opt" id="pv-eopt3">Neutral</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 11: Subject Brief & Outline -->
+                <div class="preview-card" id="pv11">
+                    <div class="pv-header">
+                        <div class="pv-icon" style="background:#0a1e1a;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <div class="pv-title">Subject brief &amp; outline</div>
+                            <div class="pv-sub">Term 2 &middot; Mathematics</div>
+                        </div>
+                    </div>
+                    <div class="pv-syl-tabs">
+                        <span class="pv-syl-tab" id="pv-st1">Term 1</span>
+                        <span class="pv-syl-tab active" id="pv-st2">Term 2 <span class="pv-syl-current">Current</span></span>
+                        <span class="pv-syl-tab" id="pv-st3">Term 3</span>
+                    </div>
+                    <div class="pv-syl-card" id="pv-syl-card">
+                        <div class="pv-syl-card-header">
+                            <div>
+                                <div class="pv-syl-subject">Mathematics</div>
+                                <div class="pv-syl-teacher">Mr Khumalo</div>
+                            </div>
+                            <div class="pv-syl-date">Updated Apr 2</div>
+                        </div>
+                        <div class="pv-syl-section-lbl">Syllabus Topics</div>
+                        <ul class="pv-syl-topics">
+                            <li class="pv-syl-topic" id="pv-sta">Quadratic Equations</li>
+                            <li class="pv-syl-topic" id="pv-stb">Functions &amp; Graphs</li>
+                            <li class="pv-syl-topic" id="pv-stc">Euclidean Geometry</li>
+                        </ul>
+                        <div class="pv-syl-section-lbl">Assessment Weighting</div>
+                        <div class="pv-syl-assess-row" id="pv-sa1">
+                            <span class="pv-syl-atype">Tests</span>
+                            <span class="pv-syl-apct" style="color:#4fd1c5;">40%</span>
+                        </div>
+                        <div class="pv-syl-abar-wrap"><div class="pv-syl-abar" id="pv-sab1" style="background:#4fd1c5;width:0%;"></div></div>
+                        <div class="pv-syl-assess-row" id="pv-sa2">
+                            <span class="pv-syl-atype">Assignments</span>
+                            <span class="pv-syl-apct" style="color:#a78bfa;">30%</span>
+                        </div>
+                        <div class="pv-syl-abar-wrap"><div class="pv-syl-abar" id="pv-sab2" style="background:#a78bfa;width:0%;"></div></div>
+                    </div>
+                </div>
+
             </div>
             <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v.1.0.0</div>
         </div>
@@ -1788,6 +2001,72 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         document.getElementById('pv-tw2').innerHTML = '';
     }
 
+
+    // ── Card 10: Teacher Evaluations ──
+    async function pvCard10() {
+        pvShow('pv10');
+        await pvDelay(350);
+        // Sidebar items slide in
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(200);
+            document.getElementById('pv-ev-i' + i).classList.add('pv-vis');
+        }
+        await pvDelay(300);
+        // Question fades in
+        document.getElementById('pv-eval-q').classList.add('pv-vis');
+        await pvDelay(300);
+        // Options appear
+        for (let i = 1; i <= 3; i++) {
+            await pvDelay(180);
+            document.getElementById('pv-eopt' + i).classList.add('pv-vis');
+        }
+        await pvDelay(800);
+        // User selects "Agree"
+        document.getElementById('pv-eopt2').classList.add('selected');
+        await pvDelay(2200);
+        await pvHide('pv10');
+        // Reset
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById('pv-ev-i' + i).classList.remove('pv-vis');
+            document.getElementById('pv-eopt' + i).classList.remove('pv-vis', 'selected');
+        }
+        document.getElementById('pv-eval-q').classList.remove('pv-vis');
+    }
+
+    // ── Card 11: Subject Brief & Outline ──
+    async function pvCard11() {
+        pvShow('pv11');
+        await pvDelay(350);
+        // Tabs fade in
+        document.getElementById('pv11').querySelector('.pv-syl-tabs').classList.add('pv-vis');
+        await pvDelay(400);
+        // Brief card appears
+        document.getElementById('pv-syl-card').classList.add('pv-vis');
+        await pvDelay(350);
+        // Topics slide in
+        for (const id of ['pv-sta', 'pv-stb', 'pv-stc']) {
+            await pvDelay(220);
+            document.getElementById(id).classList.add('pv-vis');
+        }
+        await pvDelay(300);
+        // Assessment rows + bars
+        document.getElementById('pv-sa1').classList.add('pv-vis');
+        document.getElementById('pv-sab1').style.width = '40%';
+        await pvDelay(220);
+        document.getElementById('pv-sa2').classList.add('pv-vis');
+        document.getElementById('pv-sab2').style.width = '30%';
+        await pvDelay(2600);
+        await pvHide('pv11');
+        // Reset
+        document.getElementById('pv11').querySelector('.pv-syl-tabs').classList.remove('pv-vis');
+        document.getElementById('pv-syl-card').classList.remove('pv-vis');
+        for (const id of ['pv-sta', 'pv-stb', 'pv-stc']) document.getElementById(id).classList.remove('pv-vis');
+        document.getElementById('pv-sa1').classList.remove('pv-vis');
+        document.getElementById('pv-sa2').classList.remove('pv-vis');
+        document.getElementById('pv-sab1').style.width = '0%';
+        document.getElementById('pv-sab2').style.width = '0%';
+    }
+
     async function runPreview() {
         await pvDelay(600);
         // Play intro once, then loop cards
@@ -1811,6 +2090,10 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             await pvCard8();
             await pvDelay(350);
             await pvCard9();
+            await pvDelay(350);
+            await pvCard10();
+            await pvDelay(350);
+            await pvCard11();
             await pvDelay(350);
         }
     }
