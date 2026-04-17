@@ -326,6 +326,14 @@ body {
     width: 100%;
     box-sizing: border-box;
     pointer-events: none;
+    -webkit-mask-image:
+        linear-gradient(to right,  transparent 0%, black 10%, black 90%, transparent 100%),
+        linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+            mask-image:
+        linear-gradient(to right,  transparent 0%, black 10%, black 90%, transparent 100%),
+        linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-composite: destination-in;
+            mask-composite: intersect;
 }
 .preview-card.pv-visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 .preview-card.pv-exit {
