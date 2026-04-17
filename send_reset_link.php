@@ -57,121 +57,88 @@ try {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
-  <!-- HEADER -->
+  <!-- LOGO -->
   <tr>
-    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-      <img src="https://iskool.online/apple-touch-icon.png"
-           width="72" height="72" alt="iSkool"
-           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
-      </p>
-    </td>
-  </tr>
-
-  <!-- HERO -->
-  <tr>
-    <td style="background:#f85149;padding:20px 40px;text-align:center;">
-      <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff;">
-        🔐 Password Reset Request
-      </p>
+    <td style="padding:0 0 32px 0;">
+      <table cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="vertical-align:middle;padding-right:8px;">
+            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool"
+                 style="display:block;border-radius:5px;">
+          </td>
+          <td style="vertical-align:middle;">
+            <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 
   <!-- BODY -->
   <tr>
-    <td style="background:#ffffff;padding:40px;">
+    <td style="padding:0 0 32px 0;">
 
-      <p style="margin:0 0 16px;font-size:15px;color:#333;line-height:1.6;">
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
+        Reset your password
+      </p>
+
+      <p style="margin:0 0 16px;font-size:16px;color:#0d0d0d;line-height:1.6;">
         Hi there,
       </p>
 
-      <p style="margin:0 0 24px;font-size:15px;color:#555;line-height:1.7;">
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
         We received a request to reset the password for your iSkool account.
-        Click the button below to set a new password.
+        Click the link below to set a new password. This link expires in 1 hour.
       </p>
 
-      <!-- RESET BUTTON -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td align="center">
-            <a href="' . $resetLink . '"
-               style="display:inline-block;background:#f85149;color:#ffffff;font-weight:700;font-size:15px;padding:14px 40px;border-radius:30px;text-decoration:none;letter-spacing:0.3px;">
-              Reset My Password →
-            </a>
-          </td>
-        </tr>
-      </table>
+      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">
+        <a href="' . $resetLink . '" style="color:#0866ff;text-decoration:none;font-weight:500;">Reset my password</a>
+      </p>
 
-      <!-- EXPIRY WARNING -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8e1;border:1px solid #ffe082;border-left:4px solid #ffc107;border-radius:4px;margin-bottom:24px;">
-        <tr>
-          <td style="padding:14px 18px;">
-            <p style="margin:0;font-size:13px;color:#795548;line-height:1.6;">
-              ⏱ <strong>This link will expire in 1 hour.</strong>
-              If you do not reset your password within this time you will need to request a new link.
-            </p>
-          </td>
-        </tr>
-      </table>
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
+        If the link above does not work, copy and paste this URL into your browser:
+      </p>
 
-      <!-- LINK FALLBACK -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;margin-bottom:24px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:8px;">
-              Button not working? Copy this link
-            </p>
-            <p style="margin:0;font-size:12px;color:#39d5c1;word-break:break-all;font-family:monospace;">
-              ' . $resetLink . '
-            </p>
-          </td>
-        </tr>
-      </table>
+      <p style="margin:0 0 32px;font-size:13px;color:#4a4a4a;word-break:break-all;line-height:1.6;">
+        ' . $resetLink . '
+      </p>
 
       <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
-        </tr>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
       </table>
 
-      <!-- SECURITY NOTICE -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#fce4ec;border:1px solid #f48fb1;border-left:4px solid #f85149;border-radius:4px;">
-        <tr>
-          <td style="padding:14px 18px;">
-            <p style="margin:0;font-size:12px;color:#880e4f;line-height:1.6;">
-              🔒 If you did not request a password reset please ignore this email —
-              your password will remain unchanged. If you are concerned about your account
-              security contact us at
-              <a href="mailto:support@iskool.online" style="color:#c62828;">support@iskool.online</a>
-            </p>
-          </td>
-        </tr>
-      </table>
+      <p style="margin:0;font-size:14px;color:#6a6a6a;line-height:1.6;">
+        If you did not request a password reset, you can ignore this email — your password will remain unchanged.
+        If you are concerned about your account security, contact us at
+        <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
+      </p>
+
+      <p style="margin:24px 0 0;font-size:14px;color:#4a4a4a;line-height:1.6;">
+        Thanks,<br>iSkool Support
+      </p>
 
     </td>
   </tr>
 
   <!-- FOOTER -->
   <tr>
-    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
-        iSkool LMS · Johannesburg, South Africa
+    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
+      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
+        iSkool (Pty) Ltd, Johannesburg, South Africa
+        &nbsp;&middot;&nbsp;
+        <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iskool.online</a>
+        &nbsp;&middot;&nbsp;
+        <a href="mailto:support@iskool.online" style="color:#8a8a8a;text-decoration:none;">support@iskool.online</a>
       </p>
-      <p style="margin:0;font-size:12px;color:#484f58;">
-        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
-      </p>
-      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
-        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+      <p style="margin:6px 0 0;font-size:12px;color:#8a8a8a;">
+        This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.
       </p>
     </td>
   </tr>
