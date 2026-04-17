@@ -69,7 +69,7 @@ try {
       <table cellpadding="0" cellspacing="0">
         <tr>
           <td style="vertical-align:middle;padding-right:8px;">
-            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool"
+            <img src="https://iskool.online/apple-touch-icon.png" width="28" height="28" alt="iSkool"
                  style="display:block;border-radius:5px;">
           </td>
           <td style="vertical-align:middle;">
