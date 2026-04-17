@@ -227,6 +227,59 @@ body {
     display: none; /* hidden on mobile, shown on desktop */
 }
 
+/* ── Brand panel intro copy ── */
+.bp-intro {
+    margin-bottom: 28px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+}
+
+.container.show .bp-intro {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bp-intro-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: 'Inter', sans-serif;
+}
+
+.bp-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3ecf8e;
+    display: inline-block;
+    animation: pvPulse 1.8s infinite ease-in-out;
+    flex-shrink: 0;
+}
+
+.bp-intro-headline {
+    font-size: 22px;
+    font-weight: 600;
+    color: #e3e3e3;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+.bp-intro-sub {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 4px 0;
+    line-height: 1.6;
+    font-family: 'Inter', sans-serif;
+}
+
 /* ── Preview animation card styles ── */
 .preview-card {
     background: #1e1e1c;
@@ -487,7 +540,7 @@ body {
         bottom: 28px;
         left: 40px;
         font-size: 12px;
-        color: #333;
+        color: #7e7a7a;
     }
 
     .preview-wrap {
@@ -872,6 +925,17 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
 
         <!-- LEFT: Animated Preview Panel (desktop only) -->
         <div class="brand-panel">
+
+            <!-- Intro copy above preview cards -->
+            <div class="bp-intro">
+                <div class="bp-intro-eyebrow">
+                    <span class="bp-live-dot"></span>
+                    <span>Live preview</span>
+                </div>
+                <h2 class="bp-intro-headline">Built for South African schools.</h2>
+                <p class="bp-intro-sub">Everything learners, teachers, and principals need — in one platform.</p>
+            </div>
+
             <div class="preview-wrap">
 
                 <!-- Card 1: Class Discussion -->
