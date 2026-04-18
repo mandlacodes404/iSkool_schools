@@ -1153,7 +1153,7 @@ window.openCreateQuiz = async function() {
 
             const fd = new FormData(form);
             try {
-                const res  = await fetch('api/teacher/create_quiz.php', {
+                const res  = await fetch('../../../create_quiz.php', {
                     method: 'POST',
                     body: fd
                 });
