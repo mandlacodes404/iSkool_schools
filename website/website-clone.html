@@ -103,7 +103,7 @@ nav {
   opacity: 1;
   transform: translateY(0);
 }
-.mobile-menu a, .mobile-menu button {
+.mobile-menu > a, .mobile-menu > button {
   text-decoration: none;
   color: #111;
   font-family: 'DM Sans', sans-serif;
@@ -123,14 +123,14 @@ nav {
   transform: translateY(16px);
   transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s;
 }
-.mobile-menu a:last-of-type { border-bottom: none; }
-.mobile-menu a:hover, .mobile-menu button:hover { color: #555; }
-/* Staggered fade-in for links */
-.mobile-menu.open a:nth-child(1), .mobile-menu.open button:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.08s; }
-.mobile-menu.open a:nth-child(2), .mobile-menu.open button:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.13s; }
-.mobile-menu.open a:nth-child(3), .mobile-menu.open button:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.18s; }
-.mobile-menu.open a:nth-child(4), .mobile-menu.open button:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.23s; }
-.mobile-menu.open a:nth-child(5), .mobile-menu.open button:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.28s; }
+.mobile-menu > a:last-of-type { border-bottom: none; }
+.mobile-menu > a:hover, .mobile-menu > button:hover { color: #555; }
+/* Staggered fade-in for direct child links (skip .menu-header) */
+.mobile-menu.open > a:nth-child(2), .mobile-menu.open > button:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.08s; }
+.mobile-menu.open > a:nth-child(3), .mobile-menu.open > button:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.13s; }
+.mobile-menu.open > a:nth-child(4), .mobile-menu.open > button:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.18s; }
+.mobile-menu.open > a:nth-child(5), .mobile-menu.open > button:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.23s; }
+.mobile-menu.open > a:nth-child(6), .mobile-menu.open > button:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.28s; }
 /* CTA button at bottom */
 .mobile-menu .mobile-pilot {
   margin-top: 36px;
@@ -165,30 +165,34 @@ nav {
   opacity: 0;
   transform: translateY(-8px);
   transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
+  z-index: 10;
 }
 .mobile-menu.open .menu-header {
   opacity: 1;
   transform: translateY(0);
 }
+/* Match nav-logo exactly */
 .menu-header-logo {
   display: flex; align-items: center; gap: 9px;
   font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600;
   text-decoration: none; color: #111; letter-spacing: -0.02em;
 }
 .menu-header-logo svg { width: 30px; height: 30px; }
+/* Close button — pinned, no flex interference */
 .menu-close-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #111;
+  flex-shrink: 0;
   transition: opacity 0.2s;
 }
 .menu-close-btn:hover { opacity: 0.5; }
-.menu-close-btn svg { width: 20px; height: 20px; }
+.menu-close-btn svg { width: 22px; height: 22px; display: block; }
 
 /* HERO */
 .hero { padding: 140px 5% 72px; text-align: center; position: relative; background: #f5f0eb; overflow: hidden; z-index: 1; }
