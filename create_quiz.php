@@ -21,6 +21,18 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
+
+// Fetch teacher user data
+$userData = null;
+$uStmt = $conn->prepare("SELECT name, surname, title FROM users WHERE email = ? LIMIT 1");
+$uStmt->bind_param("s", $email);
+$uStmt->execute();
+$uResult = $uStmt->get_result();
+if ($uResult->num_rows > 0) {
+    $userData = $uResult->fetch_assoc();
+}
+$uStmt->close();
+
 $teacherDisplayName = 'Teacher';
 if ($userData) {
     $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
@@ -93,7 +105,7 @@ $stmt = $conn->prepare("
 /**
  * 2. Added "i" at the end for is_linear (integer 0 or 1)
  */
-$stmt->bind_param("siisiiisssdsii", 
+$stmt->bind_param("siisiiissidsii", 
     $quiz_title, 
     $duration, 
     $publish_marks, 
