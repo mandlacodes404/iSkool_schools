@@ -58,13 +58,13 @@ body::before {
 }
 .top-logo {
   display: flex; align-items: center; gap: 10px;
-  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600;
   text-decoration: none; color: #111;
 }
 .top-logo svg { width: 32px; height: 32px; }
 .top-back {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 50px;
+  padding: 8px 18px; border-radius: 8px;
   border: 1.5px solid #e0e0e0;
   color: #555; font-size: 13.5px; font-weight: 600;
   text-decoration: none;
@@ -83,8 +83,8 @@ body::before {
   background: #fef9e6;
   border: 1px solid rgba(245,200,66,0.4);
   color: var(--gold-dark);
-  padding: 6px 18px; border-radius: 50px;
-  font-size: 11.5px; font-weight: 700;
+  padding: 6px 18px; border-radius: 8px;
+  font-size: 11.5px; font-weight: 600;
   letter-spacing: 1px; text-transform: uppercase;
   margin-bottom: 20px;
 }
@@ -96,10 +96,10 @@ body::before {
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 
 .contact-header h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(32px, 5vw, 56px);
-  font-weight: 800; line-height: 1.06;
-  letter-spacing: -2px; color: #111;
+  font-weight: 600; line-height: 1.06;
+  letter-spacing: -0.03em; color: #111;
   margin-bottom: 12px;
 }
 .contact-header h1 span { color: var(--gold-dark); }
@@ -113,7 +113,7 @@ body::before {
 .gold-line {
   width: 48px; height: 3px;
   background: var(--gold);
-  border-radius: 999px;
+  border-radius: 8px;
   margin: 20px auto 0;
 }
 
@@ -150,8 +150,8 @@ body::before {
 .icon-neutral{ background: #f4f4f4; }
 .contact-card-icon svg { width: 20px; height: 20px; }
 .contact-card-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 13.5px; font-weight: 700; color: #111;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 600; color: #111;
 }
 .contact-card-val {
   font-size: 13.5px; font-weight: 600;
@@ -170,7 +170,7 @@ body::before {
   display: inline-flex; align-items: center; gap: 10px;
   background: #f0fdfb;
   border: 1px solid rgba(79,209,197,0.25);
-  border-radius: 50px;
+  border-radius: 8px;
   padding: 8px 18px;
   margin-bottom: 40px;
   font-size: 13px; color: #0d9488;
@@ -204,10 +204,10 @@ body::before {
 }
 
 .form-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px; font-weight: 600;
   color: #111; margin-bottom: 4px;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.015em;
 }
 .form-sub {
   font-size: 14.5px; color: #888; margin-bottom: 28px;
@@ -221,7 +221,7 @@ body::before {
 .cf-field { margin-bottom: 18px; }
 .cf-label {
   display: block;
-  font-size: 11.5px; font-weight: 700;
+  font-size: 11.5px; font-weight: 600;
   letter-spacing: 0.5px; text-transform: uppercase;
   color: #555; margin-bottom: 7px;
 }
@@ -261,12 +261,12 @@ body::before {
 .cf-submit {
   width: 100%;
   padding: 15px 24px;
-  border-radius: 50px;
+  border-radius: 8px;
   border: none;
   background: var(--gold);
   color: #111;
   font-family: 'DM Sans', sans-serif;
-  font-size: 16px; font-weight: 700;
+  font-size: 16px; font-weight: 600;
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
   margin-top: 4px;
@@ -295,8 +295,8 @@ body::before {
 }
 @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
 .cf-success h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 24px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 24px; font-weight: 600;
   color: #111; margin-bottom: 10px;
 }
 .cf-success p {
@@ -305,11 +305,11 @@ body::before {
   margin-bottom: 24px;
 }
 .cf-success-reset {
-  padding: 12px 28px; border-radius: 50px;
+  padding: 12px 28px; border-radius: 8px;
   border: 1.5px solid #e0e0e0;
   background: white; color: #555;
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 600;
+  font-size: 14px; font-weight: 400;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 }
@@ -323,7 +323,7 @@ body::before {
   .contact-header { margin-bottom: 40px; }
 }
 @media (max-width: 500px) {
-  .contact-header h1 { letter-spacing: -1px; }
+  .contact-header h1 { letter-spacing: -0.02em; }
   .form-title { font-size: 19px; }
 }
 </style>

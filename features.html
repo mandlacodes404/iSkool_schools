@@ -48,24 +48,24 @@ nav {
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
-  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600;
   text-decoration: none; color: #111;
 }
 .nav-logo svg { width: 32px; height: 32px; }
 .nav-back {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 20px; border-radius: 50px;
+  padding: 9px 20px; border-radius: 8px;
   border: 1px solid #ddd;
   color: #555;
-  font-size: 14px; font-weight: 600;
+  font-size: 14px; font-weight: 400;
   text-decoration: none;
   transition: all 0.2s;
 }
 .nav-back:hover { border-color: var(--teal); color: var(--teal); }
 .nav-pilot-btn {
   padding: 10px 22px; background: var(--gold); color: #111;
-  border: none; border-radius: 50px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  border: none; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400;
   cursor: pointer; text-decoration: none;
   transition: box-shadow 0.2s, transform 0.2s;
 }
@@ -100,8 +100,8 @@ nav {
   background: rgba(79,209,197,0.1);
   border: 1px solid rgba(79,209,197,0.25);
   color: var(--teal);
-  padding: 7px 20px; border-radius: 50px;
-  font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  padding: 7px 20px; border-radius: 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
   margin-bottom: 28px;
 }
 .hero-eyebrow-dot {
@@ -111,10 +111,10 @@ nav {
 }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 .hero h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(40px, 7vw, 88px);
-  font-weight: 800; line-height: 1.02;
-  letter-spacing: -3px;
+  font-weight: 600; line-height: 1.02;
+  letter-spacing: -0.03em;
   margin-bottom: 24px; color: #111;
 }
 .hero h1 em { font-style: normal; color: var(--gold); }
@@ -153,7 +153,7 @@ nav {
   min-width: max-content;
 }
 .feat-nav-pill {
-  padding: 8px 18px; border-radius: 50px;
+  padding: 8px 18px; border-radius: 8px;
   border: 1px solid #ddd;
   background: transparent;
   color: #777;
@@ -186,14 +186,14 @@ nav {
 .feat-icon-wrap svg { width: 28px; height: 28px; }
 .feat-header-text {}
 .feat-section-eyebrow {
-  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
   text-transform: uppercase; margin-bottom: 8px;
 }
 .feat-section-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 800; line-height: 1.08;
-  letter-spacing: -1.5px; color: #111;
+  font-weight: 600; line-height: 1.08;
+  letter-spacing: -0.025em; color: #111;
 }
 .feat-section-subtitle {
   font-size: 18px; color: #666;
@@ -208,8 +208,8 @@ nav {
 }
 .prose-block.single { grid-template-columns: 1fr; }
 .prose-col h4 {
-  font-family: 'Syne', sans-serif;
-  font-size: 20px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px; font-weight: 600;
   margin-bottom: 14px; color: #111;
 }
 .prose-col p {
@@ -233,8 +233,8 @@ nav {
 }
 .stat-card:hover { border-color: var(--teal); transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.08); }
 .stat-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 44px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 44px; font-weight: 600;
   line-height: 1; margin-bottom: 8px;
 }
 .stat-desc { font-size: 13px; color: #888; line-height: 1.4; }
@@ -261,8 +261,8 @@ nav {
 .detail-card-icon { margin-bottom: 16px; display: flex; align-items: center; }
 .detail-card-icon svg { width: 24px; height: 24px; }
 .detail-card-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 17px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px; font-weight: 600;
   margin-bottom: 10px; color: #111;
 }
 .detail-card-text {
@@ -289,11 +289,11 @@ nav {
 .how-num {
   width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
   flex-shrink: 0; margin-top: 2px;
 }
 .how-content {}
-.how-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #111; }
+.how-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: #111; }
 .how-text { font-size: 14px; color: #666; line-height: 1.65; }
 
 /* ── COMPARISON TABLE ── */
@@ -305,7 +305,7 @@ nav {
 }
 .compare-table th {
   padding: 16px 20px; text-align: left;
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
   background: #f5f5f5;
   color: #555;
   letter-spacing: 0.5px;
@@ -318,9 +318,9 @@ nav {
 }
 .compare-table tr:hover td { background: #fafafa; }
 .compare-table td:first-child { color: #222; font-weight: 500; }
-.check { color: var(--green); font-weight: 700; }
+.check { color: var(--green); font-weight: 600; }
 .cross { color: #ccc; }
-.iskool-col { background: rgba(79,209,197,0.05) !important; color: var(--teal) !important; font-weight: 700; }
+.iskool-col { background: rgba(79,209,197,0.05) !important; color: var(--teal) !important; font-weight: 600; }
 
 /* ── QUOTE BLOCK ── */
 .quote-block {
@@ -348,9 +348,9 @@ nav {
   margin: 80px 0 0;
 }
 .cta-strip h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 800; letter-spacing: -1.5px;
+  font-weight: 600; letter-spacing: -0.025em;
   margin-bottom: 16px; color: #111;
 }
 .cta-strip h2 span { color: var(--gold); }
@@ -360,9 +360,9 @@ nav {
 }
 .cta-btn {
   display: inline-flex; align-items: center; gap: 10px;
-  padding: 16px 36px; border-radius: 50px;
+  padding: 16px 36px; border-radius: 8px;
   background: var(--gold); color: #111;
-  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600;
   text-decoration: none; border: none; cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
