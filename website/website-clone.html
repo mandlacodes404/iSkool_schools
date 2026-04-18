@@ -55,107 +55,104 @@ nav {
 .nav-login { background: none; border: none; color: #999; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; cursor: pointer; padding: 8px 12px; }
 .nav-pilot { padding: 9px 20px; background: #111; color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; letter-spacing: 0.01em; }
 .nav-pilot:hover { background: #222; }
-/* ── Hamburger button ── */
+/* ── Hamburger: 3 bars, 3rd shorter (Anthropic style) ── */
 .nav-hamburger {
   display: none;
   flex-direction: column;
-  justify-content: center;
   gap: 5px;
   cursor: pointer;
   background: none;
   border: none;
-  padding: 6px;
-  width: 36px;
-  height: 36px;
+  padding: 4px;
+  align-items: flex-start;
+  z-index: 1100;
   position: relative;
-  z-index: 1002;
 }
-/* Three lines that morph into X */
 .nav-hamburger .bar {
   display: block;
-  width: 22px;
   height: 1.5px;
   background: #111;
   border-radius: 2px;
-  transform-origin: center;
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1),
-              opacity 0.2s ease,
-              top 0.3s cubic-bezier(0.4,0,0.2,1);
-  position: relative;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, width 0.35s ease;
 }
-/* X state */
-.nav-hamburger.is-open .bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-.nav-hamburger.is-open .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.nav-hamburger.is-open .bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+.nav-hamburger .bar:nth-child(1) { width: 22px; }
+.nav-hamburger .bar:nth-child(2) { width: 22px; }
+.nav-hamburger .bar:nth-child(3) { width: 14px; }
+/* Morph to X when open */
+.nav-hamburger.is-open .bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); width: 22px; }
+.nav-hamburger.is-open .bar:nth-child(2) { opacity: 0; }
+.nav-hamburger.is-open .bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); width: 22px; }
 
-/* ── Page blur backdrop ── */
-.menu-backdrop {
-  display: none;
+/* ── Full-screen overlay menu ── */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: fixed;
   inset: 0;
-  z-index: 998;
-  background: rgba(245,240,235,0.3);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-.menu-backdrop.open {
-  display: block;
-}
-.menu-backdrop.visible {
-  opacity: 1;
-}
-
-/* ── Mobile menu panel ── */
-.mobile-menu {
-  display: flex; flex-direction: column;
-  position: fixed;
-  top: 0; right: 0;
-  width: min(300px, 85vw);
-  height: 100dvh;
   background: #f5f0eb;
-  padding: 80px 28px 40px;
-  z-index: 1001;
-  box-shadow: -12px 0 48px rgba(0,0,0,0.12);
-  transform: translateX(100%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
+  z-index: 1050;
+  padding: 80px 8%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
-.mobile-menu.open { transform: translateX(0); }
-
+.mobile-menu.open {
+  pointer-events: all;
+  opacity: 1;
+  transform: translateY(0);
+}
 .mobile-menu a, .mobile-menu button {
   text-decoration: none;
-  color: #222;
-  font-weight: 500;
-  font-size: 17px;
-  padding: 16px 0;
-  border: none;
-  background: none;
+  color: #111;
   font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: clamp(28px, 8vw, 42px);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  padding: 18px 0;
+  border: none;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: none;
   text-align: left;
   cursor: pointer;
-  border-bottom: 1px solid rgba(0,0,0,0.07);
   display: block;
   width: 100%;
-  letter-spacing: -0.01em;
-  transition: color 0.2s, padding-left 0.2s;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s;
 }
-.mobile-menu a:hover,
-.mobile-menu button:hover { color: #111; padding-left: 4px; }
 .mobile-menu a:last-of-type { border-bottom: none; }
+.mobile-menu a:hover, .mobile-menu button:hover { color: #555; }
+/* Staggered fade-in for links */
+.mobile-menu.open a:nth-child(1), .mobile-menu.open button:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0.08s; }
+.mobile-menu.open a:nth-child(2), .mobile-menu.open button:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.13s; }
+.mobile-menu.open a:nth-child(3), .mobile-menu.open button:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.18s; }
+.mobile-menu.open a:nth-child(4), .mobile-menu.open button:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.23s; }
+.mobile-menu.open a:nth-child(5), .mobile-menu.open button:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.28s; }
+/* CTA button at bottom */
 .mobile-menu .mobile-pilot {
-  margin-top: 24px;
+  margin-top: 36px;
   background: #111;
   color: white;
-  padding: 14px 20px;
+  padding: 16px 28px;
   border-radius: 10px;
   font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.01em;
   text-align: center;
   border: none;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  border-bottom: none;
+  display: inline-block;
+  width: auto;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s;
 }
+.mobile-menu.open .mobile-pilot { opacity:1; transform:translateY(0); transition-delay:0.33s; }
+.mobile-menu .mobile-pilot:hover { background: #333; color: white; }
 
 /* HERO */
 .hero { padding: 140px 5% 72px; text-align: center; position: relative; background: #f5f0eb; overflow: hidden; z-index: 1; }
@@ -602,16 +599,13 @@ nav {
   </button>
 </nav>
 
-<!-- Backdrop blur overlay -->
-<div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
-
-<!-- MOBILE MENU — fixed panel, slides in from right -->
+<!-- Full-screen overlay menu — outside nav -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="#features" onclick="closeMenu()">Features</a>
   <a href="#get-started" onclick="closeMenu()">Get started</a>
   <a href="contact.html" onclick="closeMenu()">Contact us</a>
-  <button class="nav-login" style="border-bottom:1px solid rgba(0,0,0,0.07);" onclick="closeMenu();location.href='#faq'">FAQs</button>
-  <button class="mobile-pilot" onclick="closeMenu();openPilotForm()">Apply for Free Pilot</button>
+  <a href="#faq" onclick="closeMenu()">FAQs</a>
+  <button class="mobile-pilot" onclick="closeMenu();openPilotForm()">Apply for Free Pilot →</button>
 </div>
 
 <!-- HERO -->
@@ -1118,33 +1112,24 @@ function switchFeature(dir) {
 startCardCycle(0);
 
 function toggleMenu() {
-  const menu     = document.getElementById('mobileMenu');
-  const backdrop = document.getElementById('menuBackdrop');
-  const btn      = document.getElementById('navHamburger');
-  const isOpen   = menu.classList.contains('open');
-  if (isOpen) {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('navHamburger');
+  if (menu.classList.contains('open')) {
     closeMenu();
   } else {
     menu.classList.add('open');
     btn.classList.add('is-open');
-    backdrop.classList.add('open');
-    requestAnimationFrame(() => backdrop.classList.add('visible'));
     document.body.style.overflow = 'hidden';
   }
 }
 function closeMenu() {
-  const menu     = document.getElementById('mobileMenu');
-  const backdrop = document.getElementById('menuBackdrop');
-  const btn      = document.getElementById('navHamburger');
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('navHamburger');
   menu.classList.remove('open');
   btn.classList.remove('is-open');
-  backdrop.classList.remove('visible');
-  setTimeout(() => backdrop.classList.remove('open'), 350);
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeMenu();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 </script>
 
 <!-- ===================== COMPARISON SECTION ===================== -->
