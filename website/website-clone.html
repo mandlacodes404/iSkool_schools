@@ -55,21 +55,107 @@ nav {
 .nav-login { background: none; border: none; color: #999; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400; cursor: pointer; padding: 8px 12px; }
 .nav-pilot { padding: 9px 20px; background: #111; color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; letter-spacing: 0.01em; }
 .nav-pilot:hover { background: #222; }
-.nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
-.nav-hamburger span { display: block; width: 24px; height: 2px; background: #111; border-radius: 2px; }
+/* ── Hamburger button ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  position: relative;
+  z-index: 1002;
+}
+/* Three lines that morph into X */
+.nav-hamburger .bar {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: #111;
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.2s ease,
+              top 0.3s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+/* X state */
+.nav-hamburger.is-open .bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-hamburger.is-open .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.is-open .bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── Page blur backdrop ── */
+.menu-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(245,240,235,0.3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.menu-backdrop.open {
+  display: block;
+}
+.menu-backdrop.visible {
+  opacity: 1;
+}
+
+/* ── Mobile menu panel ── */
 .mobile-menu {
   display: flex; flex-direction: column;
-  position: absolute; top: 100%; left: 0; right: 0;
-  background: #f5f0eb; border-bottom: none;
-  padding: 0 5%; z-index: 999;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.7s cubic-bezier(0.4, 0, 0.2, 1), padding 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  position: fixed;
+  top: 0; right: 0;
+  width: min(300px, 85vw);
+  height: 100dvh;
+  background: #f5f0eb;
+  padding: 80px 28px 40px;
+  z-index: 1001;
+  box-shadow: -12px 0 48px rgba(0,0,0,0.12);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
 }
-.mobile-menu.open { max-height: 400px; padding: 20px 5%; }
-.mobile-menu a, .mobile-menu button { text-decoration: none; color: #333; font-weight: 500; font-size: 16px; padding: 14px 0; border: none; background: none; font-family: 'DM Sans', sans-serif; text-align: left; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: block; width: 100%; }
-.mobile-menu .mobile-pilot { margin-top: 12px; background: #111; color: white; padding: 12px 20px; border-radius: 8px; font-weight: 500; text-align: center; border: none; border-bottom: none; font-size: 14px; }
+.mobile-menu.open { transform: translateX(0); }
+
+.mobile-menu a, .mobile-menu button {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+  font-size: 17px;
+  padding: 16px 0;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  display: block;
+  width: 100%;
+  letter-spacing: -0.01em;
+  transition: color 0.2s, padding-left 0.2s;
+}
+.mobile-menu a:hover,
+.mobile-menu button:hover { color: #111; padding-left: 4px; }
+.mobile-menu a:last-of-type { border-bottom: none; }
+.mobile-menu .mobile-pilot {
+  margin-top: 24px;
+  background: #111;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-align: center;
+  border: none;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
 
 /* HERO */
 .hero { padding: 140px 5% 72px; text-align: center; position: relative; background: #f5f0eb; overflow: hidden; z-index: 1; }
@@ -511,19 +597,22 @@ nav {
     <button class="nav-login" onclick="location.href='#faq'">FAQs</button>
     <button class="nav-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
   </div>
-  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
+  <button class="nav-hamburger" id="navHamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
   </button>
-
-  <!-- MOBILE MENU — inside nav so position:absolute top:100% works -->
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="#features">Features</a>
-    <a href="#get-started">Get started</a>
-    <a href="contact.html">Contact us</a>
-    <button class="nav-login" style="border-bottom:1px solid #f0f0f0;" onclick="location.href='#faq'">FAQs</button>
-    <button class="mobile-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
-  </div>
 </nav>
+
+<!-- Backdrop blur overlay -->
+<div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
+
+<!-- MOBILE MENU — fixed panel, slides in from right -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" onclick="closeMenu()">Features</a>
+  <a href="#get-started" onclick="closeMenu()">Get started</a>
+  <a href="contact.html" onclick="closeMenu()">Contact us</a>
+  <button class="nav-login" style="border-bottom:1px solid rgba(0,0,0,0.07);" onclick="closeMenu();location.href='#faq'">FAQs</button>
+  <button class="mobile-pilot" onclick="closeMenu();openPilotForm()">Apply for Free Pilot</button>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -1029,13 +1118,32 @@ function switchFeature(dir) {
 startCardCycle(0);
 
 function toggleMenu() {
-  document.getElementById('mobileMenu').classList.toggle('open');
+  const menu     = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('menuBackdrop');
+  const btn      = document.getElementById('navHamburger');
+  const isOpen   = menu.classList.contains('open');
+  if (isOpen) {
+    closeMenu();
+  } else {
+    menu.classList.add('open');
+    btn.classList.add('is-open');
+    backdrop.classList.add('open');
+    requestAnimationFrame(() => backdrop.classList.add('visible'));
+    document.body.style.overflow = 'hidden';
+  }
 }
 function closeMenu() {
-  document.getElementById('mobileMenu').classList.remove('open');
+  const menu     = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('menuBackdrop');
+  const btn      = document.getElementById('navHamburger');
+  menu.classList.remove('open');
+  btn.classList.remove('is-open');
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.remove('open'), 350);
+  document.body.style.overflow = '';
 }
-document.querySelectorAll('#mobileMenu a, #mobileMenu button').forEach(el => {
-  el.addEventListener('click', closeMenu);
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeMenu();
 });
 </script>
 
