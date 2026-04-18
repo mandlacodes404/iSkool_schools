@@ -123,121 +123,60 @@ $emailBody = '
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
-  <!-- HEADER -->
+  <!-- SCHOOL NAME -->
   <tr>
-    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-      <img src="https://iskool.online/apple-touch-icon.png"
-           width="72" height="72" alt="iSkool"
-           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;">
-        iSkool
-      </p>
-    </td>
-  </tr>
-
-  <!-- SCHOOL + TEACHER ROW -->
-  <tr>
-    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
-      <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
-      </p>
+    <td style="padding:0 0 32px 0;">
+      <span style="font-size:17px;font-weight:700;color:#0d0d0d;letter-spacing:-0.3px;">' . htmlspecialchars($schoolName) . '</span>
     </td>
   </tr>
 
   <!-- BODY -->
   <tr>
-    <td style="background:#ffffff;padding:40px;">
+    <td style="padding:0 0 32px 0;">
 
-      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
-        Hi <strong>{{name}}</strong>, a new assignment has been posted in your class.
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
+        New assignment: ' . htmlspecialchars($title) . '
       </p>
 
-      <!-- ASSIGNMENT TITLE BOX -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:20px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
-              Assignment
-            </p>
-            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-              ' . htmlspecialchars($title) . '
-            </p>
-          </td>
-        </tr>
-      </table>
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
+        Hi {{name}}, a new assignment has been posted in your class.
+      </p>
 
-      <!-- DESCRIPTION -->
-      <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.8;">
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.8;">
         ' . nl2br(htmlspecialchars($description)) . '
       </p>
 
-      <!-- DUE DATE + ATTACHMENT ROW -->
+      <!-- DIVIDER -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+      </table>
+
+      <!-- DETAILS TABLE -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
         <tr>
-          <!-- DUE DATE -->
-          <td width="50%" style="padding-right:8px;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
-              <tr>
-                <td style="padding:14px 16px;">
-                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f57f17;margin-bottom:4px;">
-                    Due Date
-                  </p>
-                  <p style="margin:0;font-size:15px;font-weight:700;color:#e65100;">
-                    ' . $formatted_due_date . '
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <!-- ATTACHMENT -->
-          <td width="50%" style="padding-left:8px;">
-            ' . ($hasAttachment ? '
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f4fd;border:1px solid #b3d9f7;border-radius:8px;">
-              <tr>
-                <td style="padding:14px 16px;">
-                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1565c0;margin-bottom:4px;">
-                    Attachment
-                  </p>
-                  <p style="margin:0;font-size:14px;font-weight:600;color:#0d47a1;">
-                    📎 ' . htmlspecialchars($attachmentName) . '
-                  </p>
-                </td>
-              </tr>
-            </table>' : '
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;">
-              <tr>
-                <td style="padding:14px 16px;">
-                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:4px;">
-                    Attachment
-                  </p>
-                  <p style="margin:0;font-size:14px;color:#aaa;">
-                    No attachment
-                  </p>
-                </td>
-              </tr>
-            </table>') . '
-          </td>
+          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:120px;vertical-align:top;">Due date</td>
+          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . $formatted_due_date . '</td>
         </tr>
+        ' . ($hasAttachment ? '
+        <tr>
+          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Attachment</td>
+          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . htmlspecialchars($attachmentName) . '</td>
+        </tr>' : '') . '
       </table>
 
       <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
-        </tr>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
       </table>
 
-      <!-- FROM -->
-      <p style="margin:0;font-size:13px;color:#888;">
-        Assigned by
-        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-        
+      <p style="margin:0;font-size:14px;color:#6a6a6a;line-height:1.6;">
+        Assigned by ' . htmlspecialchars($teacherDisplayName) . '
       </p>
 
     </td>
@@ -245,17 +184,11 @@ $emailBody = '
 
   <!-- FOOTER -->
   <tr>
-    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
-        iSkool LMS · Johannesburg, South Africa
-      </p>
-      <p style="margin:0;font-size:12px;color:#484f58;">
-        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
-      </p>
-      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
-        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
+    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
+      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
+        ' . htmlspecialchars($schoolName) . '
+        &nbsp;&middot;&nbsp;
+        Powered by <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iSkool</a>
       </p>
     </td>
   </tr>
