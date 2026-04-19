@@ -12,7 +12,7 @@ if ($result && $row = $result->fetch_assoc()) {
 header('Content-Type: application/manifest+json');
 
 echo json_encode([
-    "name"             => $schoolName,
+    "name"             => "iSkool",
     "short_name"       => $schoolName,
     "id"               => "/",
     "description"      => "Your school learning platform",
