@@ -1,0 +1,4 @@
+# Route manifest.json -> manifest.php for dynamic school name
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^manifest\.json$ manifest.php [L]
