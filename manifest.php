@@ -13,7 +13,7 @@ header('Content-Type: application/manifest+json');
 
 echo json_encode([
     "name"             => $schoolName,
-    "short_name"       => "iSkool",
+    "short_name"       => $schoolName,
     "id"               => "/",
     "description"      => "Your school learning platform",
     "start_url"        => "/",
