@@ -63,7 +63,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login - iSkool</title>
 
-<link rel="manifest" href="https://iskool.online/manifest.json">
+<link rel="manifest" href="https://iskool.online/manifest.php">
 
 <meta name="theme-color" content="#1a1919">
 

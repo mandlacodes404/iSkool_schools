@@ -21,18 +21,6 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $email = $_SESSION['email'];
-
-// Fetch teacher user data
-$userData = null;
-$uStmt = $conn->prepare("SELECT name, surname, title FROM users WHERE email = ? LIMIT 1");
-$uStmt->bind_param("s", $email);
-$uStmt->execute();
-$uResult = $uStmt->get_result();
-if ($uResult->num_rows > 0) {
-    $userData = $uResult->fetch_assoc();
-}
-$uStmt->close();
-
 $teacherDisplayName = 'Teacher';
 if ($userData) {
     $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
@@ -105,7 +93,7 @@ $stmt = $conn->prepare("
 /**
  * 2. Added "i" at the end for is_linear (integer 0 or 1)
  */
-$stmt->bind_param("siisiiissidsii", 
+$stmt->bind_param("siisiiisssdsii", 
     $quiz_title, 
     $duration, 
     $publish_marks, 
@@ -226,41 +214,20 @@ if ($checkSub->get_result()->num_rows > 0) {
               $mail->Body = '
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
+    <tr><td style="padding:40px 44px 36px;">
 
-  <!-- SCHOOL NAME -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-      <span style="font-size:17px;font-weight:700;color:#0d0d0d;letter-spacing:-0.3px;">' . htmlspecialchars($schoolName) . '</span>
-    </td>
-  </tr>
+      <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#0d0d0d;letter-spacing:-0.3px;">' . htmlspecialchars($schoolName) . '</p>
 
-  <!-- BODY -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">New quiz: ' . htmlspecialchars($quiz_title) . '</p>
 
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
-        New quiz: ' . htmlspecialchars($quiz_title) . '
-      </p>
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">Hi ' . htmlspecialchars($learner['name']) . ', a new quiz has been posted in your class.</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
 
-      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        Hi ' . htmlspecialchars($learner['name']) . ', a new quiz has been posted in your class.
-      </p>
-
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
-      </table>
-
-      <!-- DETAILS TABLE -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
         <tr>
           <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:120px;vertical-align:top;">Status</td>
@@ -272,30 +239,18 @@ if ($checkSub->get_result()->num_rows > 0) {
         </tr>
       </table>
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
+
+      <p style="margin:0 0 36px;font-size:14px;color:#6a6a6a;line-height:1.6;">Posted by ' . htmlspecialchars($teacherDisplayName) . '</p>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
+          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iSkool</a></p>
+        </td></tr>
       </table>
 
-      <p style="margin:0;font-size:14px;color:#6a6a6a;line-height:1.6;">
-        Posted by ' . htmlspecialchars($teacherDisplayName) . '
-      </p>
-
-    </td>
-  </tr>
-
-  <!-- FOOTER -->
-  <tr>
-    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
-      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
-        ' . htmlspecialchars($schoolName) . '
-        &nbsp;&middot;&nbsp;
-        Powered by <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iSkool</a>
-      </p>
-    </td>
-  </tr>
-
-</table>
+    </td></tr>
+  </table>
 </td></tr>
 </table>
 </body>

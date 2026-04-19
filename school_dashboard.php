@@ -53,6 +53,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>School Dashboard — <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
+    <link rel="manifest" href="/manifest.php">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

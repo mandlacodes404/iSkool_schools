@@ -76,110 +76,52 @@ try {
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
+    <tr><td style="padding:40px 44px 36px;">
 
-  <!-- LOGO -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-      <table cellpadding="0" cellspacing="0">
+      <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
         <tr>
-          <td style="vertical-align:middle;padding-right:8px;">
-            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
-          </td>
-          <td style="vertical-align:middle;">
-            <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
-          </td>
+          <td style="vertical-align:middle;padding-right:8px;"><img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;"></td>
+          <td style="vertical-align:middle;"><span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span></td>
         </tr>
       </table>
-    </td>
-  </tr>
 
-  <!-- BODY -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">New affiliate application</p>
 
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
-        New affiliate application
-      </p>
+      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">A new affiliate application has been submitted. Reference: <strong style="color:#0d0d0d;">' . $ref . '</strong></p>
 
-      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        A new affiliate application has been submitted. Reference:
-        <strong style="color:#0d0d0d;">' . $ref . '</strong>
-      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
 
-      <!-- DIVIDER -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:140px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . $full_name . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $email . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $phone . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Province</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $province . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Background</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $background . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Preferred path</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $preferred_path . '</td></tr>
+        <tr><td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">School reach</td><td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $school_reach . '</td></tr>
       </table>
 
-      <!-- DETAILS TABLE -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:140px;vertical-align:top;">Name</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . $full_name . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Email</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $email . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Phone</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $phone . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Province</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $province . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Background</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $background . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Preferred path</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $preferred_path . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">School reach</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;">' . $school_reach . '</td>
-        </tr>
-      </table>
-
-      <!-- SCHOOL CONNECTIONS -->
       <p style="margin:0 0 6px;font-size:14px;color:#6a6a6a;">School connections</p>
       <p style="margin:0 0 24px;font-size:14px;color:#0d0d0d;line-height:1.7;">' . nl2br($school_connections) . '</p>
 
-      ' . (!empty($notes) ? '
-      <p style="margin:0 0 6px;font-size:14px;color:#6a6a6a;">Additional notes</p>
-      <p style="margin:0 0 24px;font-size:14px;color:#0d0d0d;line-height:1.7;">' . nl2br($notes) . '</p>
-      ' : '') . '
+      ' . (!empty($notes) ? '<p style="margin:0 0 6px;font-size:14px;color:#6a6a6a;">Additional notes</p><p style="margin:0 0 24px;font-size:14px;color:#0d0d0d;line-height:1.7;">' . nl2br($notes) . '</p>' : '') . '
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
+
+      <p style="margin:0 0 36px;font-size:13px;color:#6a6a6a;line-height:1.6;">Submitted ' . date('d F Y') . ' at ' . date('H:i') . ' &middot; Reference: ' . $ref . '</p>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
+          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp; <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a></p>
+        </td></tr>
       </table>
 
-      <p style="margin:0;font-size:13px;color:#6a6a6a;line-height:1.6;">
-        Submitted ' . date('d F Y') . ' at ' . date('H:i') . ' &middot; Reference: ' . $ref . '
-      </p>
-
-    </td>
-  </tr>
-
-  <!-- FOOTER -->
-  <tr>
-    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
-      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
-        iSkool (Pty) Ltd, Johannesburg, South Africa
-        &nbsp;&middot;&nbsp;
-        <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iskool.online</a>
-      </p>
-    </td>
-  </tr>
-
-</table>
+    </td></tr>
+  </table>
 </td></tr>
 </table>
 </body>
@@ -210,15 +152,13 @@ try {
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
+    <tr><td style="padding:40px 44px 36px;">
 
-  <!-- LOGO -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-      <table cellpadding="0" cellspacing="0">
+      <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
         <tr>
           <td style="vertical-align:middle;padding-right:8px;">
             <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
@@ -228,16 +168,8 @@ try {
           </td>
         </tr>
       </table>
-    </td>
-  </tr>
 
-  <!-- BODY -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
-        Thanks for applying, ' . $full_name . '.
-      </p>
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">Thanks for applying, ' . $full_name . '.</p>
 
       <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
         We\'ve received your affiliate application and our team will review it within 3–5 business days.
@@ -247,41 +179,21 @@ try {
       <p style="margin:0 0 8px;font-size:14px;color:#6a6a6a;">Your reference number</p>
       <p style="margin:0 0 28px;font-size:20px;font-weight:600;color:#0d0d0d;letter-spacing:0.5px;">' . $ref . '</p>
 
-      <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        Here is what happens next:
-      </p>
+      <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">Here is what happens next:</p>
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+        <tr><td style="border-top:1px solid #e8e6e2;"></td></tr>
       </table>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
-        <tr>
-          <td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
-            We review your application (3–5 business days)
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
-            If approved, you\'ll receive your partner agreement
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
-            Your unique referral code is issued
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">
-            You start referring schools and earning commission
-          </td>
-        </tr>
+        <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">We review your application (3–5 business days)</td></tr>
+        <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">If approved, you\'ll receive your partner agreement</td></tr>
+        <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Your unique referral code is issued</td></tr>
+        <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">You start referring schools and earning commission</td></tr>
       </table>
 
-      <!-- DIVIDER -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0 24px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
+        <tr><td style="border-top:1px solid #e8e6e2;"></td></tr>
       </table>
 
       <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
@@ -289,28 +201,21 @@ try {
         <a href="mailto:info@iskool.online" style="color:#0866ff;text-decoration:none;">info@iskool.online</a>.
       </p>
 
-      <p style="margin:0;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        Thanks,<br>iSkool Team
-      </p>
+      <p style="margin:0 0 36px;font-size:16px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Team</p>
 
-    </td>
-  </tr>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
+          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">
+            iSkool (Pty) Ltd, Johannesburg, South Africa
+            &nbsp;&middot;&nbsp;
+            <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a>
+          </p>
+          <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+        </td></tr>
+      </table>
 
-  <!-- FOOTER -->
-  <tr>
-    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
-      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
-        iSkool (Pty) Ltd, Johannesburg, South Africa
-        &nbsp;&middot;&nbsp;
-        <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iskool.online</a>
-      </p>
-      <p style="margin:6px 0 0;font-size:12px;color:#8a8a8a;">
-        This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.
-      </p>
-    </td>
-  </tr>
-
-</table>
+    </td></tr>
+  </table>
 </td></tr>
 </table>
 </body>

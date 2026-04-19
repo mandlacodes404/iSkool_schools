@@ -121,9 +121,24 @@ if ($role === 'learner') {
     $roleColor = '#f59e0b';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Log in and go to My Child to link your account to your child.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Once linked you can track your child\'s grades and quiz results in real time.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">Allow notifications to get instant alerts when new results are published.</td></tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f59e0b;color:#0d1117;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">1</span>
+                    Log in and go to <strong>My Child</strong> to link your account to your child.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f59e0b;color:#0d1117;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">2</span>
+                    Once linked you can track your child\'s <strong>grades and quiz results</strong> in real time.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f59e0b;color:#0d1117;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">3</span>
+                    Allow <strong>notifications</strong> to get instant alerts when new results are published.
+                </td>
+            </tr>
         </table>';
 
 } elseif ($role === 'school_admin') {
@@ -132,10 +147,30 @@ if ($role === 'learner') {
     $roleColor = '#f85149';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Log in and go to Classes — create your school\'s classes before inviting anyone.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Share the Teacher Access Key with your teachers so they can register.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Share the Learner Access Key with your learners to register and join classes.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">Check the Analytics dashboard to monitor school-wide performance from day one.</td></tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">1</span>
+                    Log in and go to <strong>Classes</strong> — create your school\'s classes before inviting anyone.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">2</span>
+                    Share the <strong>Teacher Access Key</strong> with your teachers so they can register.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">3</span>
+                    Share the <strong>Learner Access Key</strong> with your learners to register and join classes.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:10px 0;font-size:13px;color:#555;">
+                    <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">4</span>
+                    Check the <strong>Analytics</strong> dashboard to monitor school-wide performance from day one.
+                </td>
+            </tr>
         </table>';
 }
 
@@ -163,40 +198,25 @@ try {
     $mail->Body    = '
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:40px 20px;">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
+    <tr><td style="padding:40px 44px 36px;">
 
-  <!-- LOGO -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-      <table cellpadding="0" cellspacing="0">
+      <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
         <tr>
           <td style="vertical-align:middle;padding-right:8px;">
-            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool"
-                 style="display:block;border-radius:5px;">
+            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
           </td>
           <td style="vertical-align:middle;">
             <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
           </td>
         </tr>
       </table>
-    </td>
-  </tr>
 
-  <!-- BODY -->
-  <tr>
-    <td style="padding:0 0 32px 0;">
-
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">
-        Welcome to iSkool, ' . htmlspecialchars($first_name) . '.
-      </p>
+      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">Welcome to iSkool, ' . htmlspecialchars($first_name) . '.</p>
 
       <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
         Your account has been successfully created at
@@ -204,12 +224,8 @@ try {
         Here are your account details.
       </p>
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
-      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
 
-      <!-- ACCOUNT DETAILS -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
         <tr>
           <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:100px;vertical-align:top;">School</td>
@@ -217,9 +233,7 @@ try {
         </tr>
         <tr>
           <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Platform</td>
-          <td style="padding:8px 0;font-size:14px;">
-            <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . $schoolUrl . '</a>
-          </td>
+          <td style="padding:8px 0;font-size:14px;"><a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . $schoolUrl . '</a></td>
         </tr>
         <tr>
           <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Role</td>
@@ -227,49 +241,35 @@ try {
         </tr>
       </table>
 
-      <!-- GETTING STARTED -->
       <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">Here is how to get started:</p>
       ' . $roleTips . '
 
-      <!-- LOG IN LINK -->
       <p style="margin:24px 0 32px;font-size:16px;line-height:1.6;">
         <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;font-weight:500;">Log in to iSkool</a>
       </p>
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-        <tr><td style="border-top:1px solid #e5e5e5;"></td></tr>
-      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
 
       <p style="margin:0 0 24px;font-size:14px;color:#6a6a6a;line-height:1.7;">
         If you did not register for this account, contact us immediately at
         <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
       </p>
 
-      <p style="margin:0;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        Thanks,<br>iSkool Support
-      </p>
+      <p style="margin:0 0 36px;font-size:14px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Support</p>
 
-    </td>
-  </tr>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
+          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">
+            iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
+            <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
+            <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
+          </p>
+          <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+        </td></tr>
+      </table>
 
-  <!-- FOOTER -->
-  <tr>
-    <td style="border-top:1px solid #e5e5e5;padding:24px 0 0 0;">
-      <p style="margin:0;font-size:12px;color:#8a8a8a;line-height:1.6;">
-        iSkool (Pty) Ltd, Johannesburg, South Africa
-        &nbsp;&middot;&nbsp;
-        <a href="https://iskool.online" style="color:#8a8a8a;text-decoration:none;">iskool.online</a>
-        &nbsp;&middot;&nbsp;
-        <a href="mailto:support@iskool.online" style="color:#8a8a8a;text-decoration:none;">support@iskool.online</a>
-      </p>
-      <p style="margin:6px 0 0;font-size:12px;color:#8a8a8a;">
-        This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.
-      </p>
-    </td>
-  </tr>
-
-</table>
+    </td></tr>
+  </table>
 </td></tr>
 </table>
 </body>
