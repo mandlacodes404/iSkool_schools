@@ -13,56 +13,53 @@
   --gold-light: #fef3c7;
   --ios: #007AFF;
   --android: #34A853;
-  --muted: #888;
+  --muted: #777;
   --border: rgba(0,0,0,0.08);
-  --card: #fff;
+  --app-bg: #0d1117;
+  --app-accent: #4fd1c5;
+  --app-card: #1b1b1b;
+  --app-text: #e2e8f0;
+  --app-border: rgba(255,255,255,0.07);
 }
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--cream);
   color: var(--dark);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ── HEADER ── */
-.guide-header {
-  padding: 48px 5% 0;
-  max-width: 760px;
-  margin: 0 auto;
-}
+.page-wrap { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+.guide-header { padding: 44px 0 0; }
 .guide-logo {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 48px;
-  text-decoration: none; color: var(--dark);
+  margin-bottom: 44px; text-decoration: none; color: var(--dark);
+  width: fit-content;
 }
-.guide-logo svg { width: 32px; height: 32px; }
-.guide-logo span { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+.guide-logo svg { width: 30px; height: 30px; }
+.guide-logo span { font-weight: 600; font-size: 16px; letter-spacing: -0.02em; }
 .guide-tag {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--gold-light);
-  border: 1px solid rgba(217,119,6,0.2);
-  color: var(--gold);
-  padding: 6px 16px; border-radius: 50px;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; margin-bottom: 20px;
+  background: var(--gold-light); border: 1px solid rgba(217,119,6,0.2);
+  color: var(--gold); padding: 5px 14px; border-radius: 50px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 18px;
 }
 .guide-tag span { width:6px; height:6px; border-radius:50%; background:var(--gold); display:block; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 h1 {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(28px, 6vw, 44px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-bottom: 16px;
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+  margin-bottom: 14px;
 }
 .guide-subtitle {
-  font-size: 16px; color: var(--muted);
-  margin-bottom: 40px; max-width: 520px;
-  font-weight: 400; line-height: 1.7;
+  font-size: 15px; color: var(--muted);
+  margin-bottom: 36px; line-height: 1.75; font-weight: 400;
 }
 
 /* ── OS TABS ── */
@@ -70,333 +67,272 @@ h1 {
   display: flex; gap: 4px;
   background: rgba(0,0,0,0.06);
   border-radius: 12px; padding: 4px;
-  margin-bottom: 40px;
-  max-width: 340px;
+  margin-bottom: 36px; width: fit-content;
 }
 .os-tab {
-  flex: 1; padding: 10px 16px;
-  border: none; border-radius: 9px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 600;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.25s ease;
-  background: transparent; color: var(--muted);
+  padding: 9px 20px; border: none; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: all 0.22s ease; background: transparent; color: var(--muted);
 }
-.os-tab.active {
-  background: #fff;
-  color: var(--dark);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.os-tab svg { width: 16px; height: 16px; }
+.os-tab.active { background: #fff; color: var(--dark); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.os-tab svg { width: 15px; height: 15px; }
 
-/* ── SECTIONS ── */
-.guide-section { display: none; max-width: 760px; margin: 0 auto; padding: 0 5% 80px; }
+/* ── SECTION ── */
+.guide-section { display: none; padding-bottom: 80px; }
 .guide-section.active { display: block; }
 
 /* ── PART LABEL ── */
 .part-label {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--muted);
-  margin-bottom: 20px; margin-top: 40px;
+  margin: 36px 0 16px;
   display: flex; align-items: center; gap: 12px;
 }
 .part-label::after { content:''; flex:1; height:1px; background: var(--border); }
 
-/* ── STEP CARDS ── */
-.steps { display: flex; flex-direction: column; gap: 4px; }
+/* ── STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 3px; }
 .step {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px 24px 24px 20px;
-  display: flex; gap: 20px; align-items: flex-start;
-  transition: box-shadow 0.2s;
-  position: relative; overflow: hidden;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 20px 20px 18px;
+  display: flex; gap: 16px; align-items: flex-start;
 }
-.step:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
 .step-num {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 13px;
-  flex-shrink: 0; margin-top: 2px;
+  font-weight: 800; font-size: 13px; flex-shrink: 0; margin-top: 1px;
 }
-.ios-color .step-num { background: rgba(0,122,255,0.1); color: var(--ios); }
-.android-color .step-num { background: rgba(52,168,83,0.1); color: var(--android); }
+.ios .step-num { background: rgba(0,122,255,0.1); color: var(--ios); }
+.android .step-num { background: rgba(52,168,83,0.1); color: var(--android); }
+.step-body { flex: 1; min-width: 0; }
+.step-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; letter-spacing: -0.01em; }
+.step-desc { font-size: 13px; color: #555; line-height: 1.65; }
+.step-desc strong { color: var(--dark); }
 
-.step-body { flex: 1; }
-.step-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; letter-spacing: -0.01em; }
-.step-desc { font-size: 14px; color: #555; line-height: 1.65; }
-
-/* ── PHONE MOCKUP ── */
-.phone-mockup {
-  width: 100%;
-  max-width: 320px;
-  margin: 24px 0 8px;
-  border-radius: 32px;
-  background: #1a1a1a;
-  padding: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.06);
-  position: relative;
-}
-.phone-screen {
-  background: #f5f0eb;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-}
-.phone-notch {
-  background: #1a1a1a;
-  height: 24px;
-  width: 100px;
-  border-radius: 0 0 14px 14px;
-  margin: 0 auto;
-  position: relative; z-index: 2;
-}
-
-/* ── SAFARI BROWSER MOCKUP ── */
-.browser-bar {
-  background: #f2f2f7;
-  padding: 10px 14px;
-  display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-.browser-url {
-  flex: 1; background: #fff;
-  border-radius: 8px; padding: 6px 10px;
-  font-size: 11px; color: #555;
-  font-family: monospace;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.browser-content {
-  padding: 20px 16px;
-  min-height: 160px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px;
-}
-.iskool-mini-logo {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: #0d1117;
-  display: flex; align-items: center; justify-content: center;
-}
-.iskool-mini-name { font-weight: 700; font-size: 14px; color: #111; }
-.iskool-mini-url { font-size: 11px; color: #888; }
-
-/* ── SAFARI SHARE SHEET ── */
-.share-sheet {
-  background: #f2f2f7;
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
-  margin-top: 8px;
-}
-.share-sheet-title {
-  text-align: center; font-size: 12px; color: #888;
-  margin-bottom: 14px; font-weight: 500;
-}
-.share-row {
-  display: flex; gap: 8px; overflow-x: auto;
-  padding-bottom: 8px; margin-bottom: 12px;
-  scrollbar-width: none;
-}
-.share-row::-webkit-scrollbar { display:none; }
-.share-item {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  min-width: 56px;
-}
-.share-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: #fff; display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-.share-icon.highlighted {
-  background: #fff;
-  box-shadow: 0 0 0 2px var(--ios), 0 0 0 4px rgba(0,122,255,0.15);
-  animation: highlight-pulse 1.5s ease-in-out infinite;
-}
-@keyframes highlight-pulse {
-  0%,100% { box-shadow: 0 0 0 2px var(--ios), 0 0 0 4px rgba(0,122,255,0.15); }
-  50% { box-shadow: 0 0 0 2px var(--ios), 0 0 0 8px rgba(0,122,255,0.3); }
-}
-.share-item span { font-size: 10px; color: #555; text-align: center; line-height: 1.2; }
-
-/* ── SAFARI BOTTOM BAR ── */
-.safari-bottom {
-  background: #f2f2f7;
-  border-top: 1px solid rgba(0,0,0,0.1);
-  padding: 10px 20px;
-  display: flex; justify-content: space-around; align-items: center;
-}
-.safari-bottom svg { width: 22px; height: 22px; color: var(--ios); }
-.safari-share-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-}
-.safari-share-btn .label { font-size: 9px; color: var(--ios); }
-
-/* ── ADD TO HOME SCREEN DIALOG ── */
-.a2hs-dialog {
-  background: #f2f2f7;
-  border-radius: 14px;
-  margin: 12px;
-  padding: 16px;
-}
-.a2hs-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 12px; padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-.a2hs-icon {
-  width: 44px; height: 44px; border-radius: 10px;
-  background: #0d1117;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.a2hs-info { flex: 1; }
-.a2hs-name { font-weight: 700; font-size: 14px; }
-.a2hs-url { font-size: 11px; color: #888; }
-.a2hs-add-btn {
-  background: var(--ios); color: #fff;
-  border-radius: 8px; padding: 10px;
-  text-align: center; font-weight: 700; font-size: 14px;
-  animation: btn-pulse 1.5s ease-in-out infinite;
-}
-@keyframes btn-pulse {
-  0%,100% { opacity:1; } 50% { opacity:0.75; }
-}
-
-/* ── ANDROID CHROME MOCKUP ── */
-.chrome-bar {
-  background: #fff;
-  padding: 10px 14px;
-  display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-.chrome-url {
-  flex: 1; background: #f1f3f4;
-  border-radius: 20px; padding: 6px 12px;
-  font-size: 11px; color: #555;
-  font-family: monospace;
-}
-.chrome-dots {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 4px; cursor: pointer;
-}
-.chrome-dots span { width: 4px; height: 4px; border-radius: 50%; background: #555; display: block; }
-.chrome-dots.highlighted span { background: var(--android); }
-
-/* Chrome menu */
-.chrome-menu {
-  background: #fff;
-  border-radius: 8px;
-  margin: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  overflow: hidden;
-}
-.chrome-menu-item {
-  padding: 13px 16px;
-  font-size: 13px; color: #333;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  display: flex; align-items: center; gap: 12px;
-}
-.chrome-menu-item:last-child { border-bottom: none; }
-.chrome-menu-item.highlighted {
-  background: rgba(52,168,83,0.08);
-  color: var(--android);
-  font-weight: 600;
-}
-
-/* ── NOTIFICATION STEPS ── */
-.notif-banner {
-  background: #1c1c1e;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 10px 0;
-  display: flex; align-items: flex-start; gap: 12px;
-}
-.notif-icon {
-  width: 36px; height: 36px; border-radius: 8px;
-  background: #0d1117;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.notif-text .notif-title { font-size: 13px; font-weight: 600; color: #fff; }
-.notif-text .notif-body { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-
-.allow-btn {
-  background: rgba(0,122,255,0.2);
-  border: 1px solid rgba(0,122,255,0.4);
-  color: var(--ios); border-radius: 8px;
-  padding: 10px; text-align: center;
-  font-weight: 700; font-size: 13px;
-  margin-top: 8px;
-  animation: btn-pulse 1.5s ease-in-out infinite;
-}
-.allow-btn.android { 
-  background: rgba(52,168,83,0.15);
-  border-color: rgba(52,168,83,0.4);
-  color: var(--android);
-}
-
-/* ── TIPS BOX ── */
-.tip-box {
-  background: var(--gold-light);
-  border: 1px solid rgba(217,119,6,0.2);
-  border-radius: 14px;
-  padding: 18px 20px;
-  margin-top: 20px;
-  display: flex; gap: 14px; align-items: flex-start;
-}
-.tip-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-.tip-text { font-size: 13px; color: #92400e; line-height: 1.65; }
-.tip-text strong { font-weight: 700; display: block; margin-bottom: 4px; }
-
-/* ── SUCCESS STATE ── */
-.success-box {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  padding: 28px 24px;
-  text-align: center;
-  margin-top: 8px;
-}
-.success-icon { font-size: 40px; margin-bottom: 12px; }
-.success-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-.success-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
-
-/* ── TAP INDICATOR ANIMATION ── */
+/* ── TAP INDICATOR ── */
 .tap-indicator {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(0,0,0,0.06); border-radius: 20px;
-  padding: 4px 10px 4px 6px; margin-top: 8px;
-  font-size: 12px; color: #555; font-weight: 500;
+  background: rgba(0,0,0,0.05); border-radius: 20px;
+  padding: 4px 10px 4px 6px; margin-top: 10px;
+  font-size: 11px; color: #555; font-weight: 600;
 }
-.tap-dot {
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  animation: tap-anim 1.5s ease-in-out infinite;
-}
-.ios-color .tap-dot { background: rgba(0,122,255,0.15); }
-.android-color .tap-dot { background: rgba(52,168,83,0.15); }
-@keyframes tap-anim {
-  0%,100% { transform:scale(1); opacity:1; }
-  50% { transform:scale(0.85); opacity:0.6; }
-}
+.tap-dot { animation: tap 1.5s ease-in-out infinite; display:inline-block; }
+@keyframes tap { 0%,100%{transform:scale(1)} 50%{transform:scale(0.8)} }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 600px) {
-  .guide-header, .guide-section { padding-left: 20px; padding-right: 20px; }
-  .step { padding: 18px 16px; gap: 14px; }
-  .phone-mockup { max-width: 100%; }
+/* ── PHONE MOCKUP ── */
+.phone-wrap { margin: 16px 0 4px; }
+.phone {
+  width: 100%; max-width: 280px;
+  background: #1a1a1a;
+  border-radius: 36px; padding: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05);
 }
+.phone-notch {
+  width: 80px; height: 20px;
+  background: #1a1a1a; border-radius: 0 0 12px 12px;
+  margin: 0 auto 0; position: relative; z-index: 2;
+}
+.phone-screen { background: #f0f0f5; border-radius: 24px; overflow: hidden; }
+.phone-screen.dark { background: var(--app-bg); }
+
+/* Safari UI */
+.safari-bar {
+  background: #f2f2f7; padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.safari-url {
+  flex:1; background:#fff; border-radius:7px; padding:5px 10px;
+  font-size:10px; color:#555; font-family:monospace;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.safari-bottom-bar {
+  background: #f2f2f7; border-top: 1px solid rgba(0,0,0,0.1);
+  padding: 8px 16px; display: flex; justify-content: space-around; align-items: center;
+}
+.safari-share {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  color: var(--ios);
+}
+.safari-share svg { width: 18px; height: 18px; }
+.safari-share span { font-size: 8px; font-weight: 600; }
+.safari-nav-btn { color: rgba(0,0,0,0.2); }
+.safari-nav-btn svg { width: 18px; height: 18px; }
+
+/* Screen content */
+.screen-content {
+  padding: 16px; min-height: 120px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.app-mini-icon {
+  width: 44px; height: 44px; border-radius: 11px;
+  background: var(--app-bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.app-mini-name { font-weight: 700; font-size: 13px; }
+.app-mini-url { font-size: 10px; color: #888; }
+
+/* Share sheet */
+.share-sheet {
+  background: #f2f2f7; padding: 12px;
+}
+.share-sheet-hint { text-align:center; font-size:10px; color:#888; margin-bottom:10px; font-weight:500; }
+.share-row {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width:none;
+}
+.share-row::-webkit-scrollbar { display:none; }
+.share-item { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:52px; }
+.share-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: #fff; display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.share-icon.glow {
+  box-shadow: 0 0 0 2.5px var(--ios), 0 0 12px rgba(0,122,255,0.3);
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%,100%{ box-shadow: 0 0 0 2.5px var(--ios), 0 0 12px rgba(0,122,255,0.3); }
+  50%{ box-shadow: 0 0 0 2.5px var(--ios), 0 0 20px rgba(0,122,255,0.5); }
+}
+.share-item span { font-size:9px; color:#555; text-align:center; line-height:1.2; }
+
+/* A2HS dialog */
+.a2hs-box { background:#f2f2f7; border-radius:12px; margin:10px; padding:14px; }
+.a2hs-row { display:flex; align-items:center; gap:10px; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid rgba(0,0,0,0.07); }
+.a2hs-icon { width:40px; height:40px; border-radius:9px; background:var(--app-bg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.a2hs-name { font-weight:700; font-size:13px; }
+.a2hs-url { font-size:10px; color:#888; }
+.a2hs-confirm-btn {
+  background: var(--ios); color:#fff; border-radius:8px;
+  padding:9px; text-align:center; font-weight:700; font-size:13px;
+  animation: pulse-btn 1.5s ease-in-out infinite;
+}
+@keyframes pulse-btn { 0%,100%{opacity:1} 50%{opacity:0.75} }
+.a2hs-top-bar {
+  background:#f2f2f7; padding:9px 14px;
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid rgba(0,0,0,0.07);
+}
+.a2hs-top-bar span { font-size:12px; font-weight:600; }
+.a2hs-top-bar .cancel { color:var(--ios); }
+.a2hs-top-bar .add { color:var(--ios); font-weight:700; }
+
+/* iSkool app screen */
+.app-screen {
+  background: var(--app-bg); min-height: 200px; padding: 0;
+}
+.app-header {
+  background: #161b22; padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+}
+.app-header-left { display:flex; align-items:center; gap:8px; }
+.app-school-name { font-size:11px; font-weight:600; color: var(--app-text); }
+.app-settings-btn {
+  width:28px; height:28px; border-radius:7px;
+  background: rgba(255,255,255,0.06);
+  display:flex; align-items:center; justify-content:center;
+  animation: glow-teal 1.5s ease-in-out infinite;
+}
+@keyframes glow-teal {
+  0%,100%{ box-shadow: 0 0 0 2px var(--app-accent), 0 0 8px rgba(79,209,197,0.3); }
+  50%{ box-shadow: 0 0 0 2px var(--app-accent), 0 0 16px rgba(79,209,197,0.5); }
+}
+.app-settings-btn svg { width:14px; height:14px; stroke: var(--app-accent); }
+.app-body { padding:12px 14px; }
+.app-nav-item {
+  display:flex; align-items:center; gap:8px; padding:9px 10px;
+  border-radius:8px; margin-bottom:2px;
+  font-size:12px; color: var(--app-text); font-weight:500;
+}
+.app-nav-item svg { width:14px; height:14px; stroke: var(--app-accent); flex-shrink:0; }
+.app-nav-item.active { background: rgba(79,209,197,0.1); }
+
+/* Settings screen */
+.settings-screen { background: var(--app-bg); padding: 12px 14px; min-height: 200px; }
+.settings-title { font-size:14px; font-weight:700; color:var(--app-text); margin-bottom:12px; text-align:center; }
+.settings-btn {
+  width:100%; padding:10px 12px; border-radius:9px; margin-bottom:6px;
+  display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600;
+  background: rgba(79,209,197,0.1); border:1px solid rgba(79,209,197,0.25);
+  color: var(--app-accent);
+}
+.settings-btn.glow-btn {
+  animation: glow-teal 1.5s ease-in-out infinite;
+}
+.settings-btn svg { width:13px; height:13px; stroke:currentColor; flex-shrink:0; }
+.settings-btn.danger { background:rgba(248,81,73,0.1); border-color:rgba(248,81,73,0.25); color:#ff6666; }
+
+/* Notification popup */
+.notif-allow-box {
+  background: #1c1c1e; border-radius:14px; padding:18px; margin:10px;
+  text-align:center;
+}
+.notif-allow-icon { font-size:28px; margin-bottom:10px; }
+.notif-allow-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:6px; line-height:1.4; }
+.notif-allow-sub { font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:16px; line-height:1.5; }
+.notif-allow-btns { display:flex; gap:8px; }
+.notif-allow-btns .deny { flex:1; background:rgba(255,255,255,0.08); border-radius:8px; padding:9px; font-size:12px; color:rgba(255,255,255,0.5); font-weight:500; }
+.notif-allow-btns .allow { flex:1; border-radius:8px; padding:9px; font-size:12px; font-weight:700; animation:pulse-btn 1.5s infinite; }
+.notif-allow-btns .allow.ios { background:var(--ios); color:#fff; }
+.notif-allow-btns .allow.android { background:var(--android); color:#fff; }
+
+/* Notification previews */
+.notif-preview {
+  background: #1c1c1e; border-radius:12px; padding:12px 14px;
+  display:flex; align-items:flex-start; gap:10px; margin-bottom:6px;
+}
+.notif-app-icon { width:32px; height:32px; border-radius:7px; background:var(--app-bg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.notif-title-text { font-size:12px; font-weight:600; color:#fff; }
+.notif-body-text { font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; }
+
+/* Chrome */
+.chrome-bar {
+  background:#fff; padding:8px 12px;
+  display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid rgba(0,0,0,0.08);
+}
+.chrome-url { flex:1; background:#f1f3f4; border-radius:20px; padding:5px 10px; font-size:10px; color:#555; font-family:monospace; }
+.chrome-dots { display:flex; flex-direction:column; gap:2.5px; padding:2px 4px; cursor:pointer; }
+.chrome-dots span { width:3.5px; height:3.5px; border-radius:50%; background:#555; display:block; }
+.chrome-dots.lit span { background:var(--android); }
+.chrome-menu { background:#fff; border-radius:8px; margin:8px; box-shadow:0 4px 20px rgba(0,0,0,0.15); overflow:hidden; }
+.chrome-menu-item { padding:11px 14px; font-size:12px; color:#333; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center; gap:10px; }
+.chrome-menu-item:last-child { border:none; }
+.chrome-menu-item.lit { background:rgba(52,168,83,0.08); color:var(--android); font-weight:700; }
+
+/* TIP BOX */
+.tip-box {
+  background: var(--gold-light); border: 1px solid rgba(217,119,6,0.18);
+  border-radius:12px; padding:16px 18px; margin-top:16px;
+  display:flex; gap:12px; align-items:flex-start;
+}
+.tip-icon { font-size:18px; flex-shrink:0; margin-top:2px; }
+.tip-text { font-size:13px; color:#92400e; line-height:1.65; }
+.tip-text strong { display:block; margin-bottom:3px; font-size:14px; }
+
+/* SUCCESS */
+.success-box {
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:28px; text-align:center; margin-top:6px;
+}
+.success-icon { font-size:36px; margin-bottom:10px; }
+.success-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin-bottom:6px; }
+.success-desc { font-size:13px; color:var(--muted); line-height:1.65; }
+
+@media(max-width:500px) { .phone { max-width:100%; } }
 </style>
 </head>
 <body>
 
+<div class="page-wrap">
 <div class="guide-header">
+  <!-- LOGO -->
   <a href="#" class="guide-logo">
-    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
       <g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none">
-        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
       </g>
     </svg>
     <span>iSkool</span>
@@ -404,216 +340,256 @@ h1 {
 
   <div class="guide-tag"><span></span> Setup Guide</div>
   <h1>Get the iSkool app on your phone</h1>
-  <p class="guide-subtitle">Follow the steps below to install iSkool and turn on notifications — so you never miss a quiz, assignment, or announcement.</p>
+  <p class="guide-subtitle">Follow these steps to install iSkool and turn on notifications — so you never miss a quiz, assignment, or announcement from your teacher.</p>
 
   <div class="os-tabs">
-    <button class="os-tab active" onclick="switchTab('ios', this)">
+    <button class="os-tab active" onclick="switchTab('ios',this)">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
       iPhone (iOS)
     </button>
-    <button class="os-tab" onclick="switchTab('android', this)">
+    <button class="os-tab" onclick="switchTab('android',this)">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341a.576.576 0 0 1-.576.576H7.053a.576.576 0 0 1-.576-.576V9.194c0-.318.258-.576.576-.576h9.894c.318 0 .576.258.576.576v6.147zM7.8 6.5l-.9-1.6a.2.2 0 0 0-.346.2l.916 1.63A5.947 5.947 0 0 0 6 9.77h12a5.947 5.947 0 0 0-1.47-3.04l.916-1.63a.2.2 0 0 0-.346-.2L16.2 6.5A5.923 5.923 0 0 0 12 5.5 5.923 5.923 0 0 0 7.8 6.5zm2.45.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm3.5 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zM5 10.77v6.46A1.77 1.77 0 0 0 6.77 19H7v2.23a.77.77 0 1 0 1.54 0V19h6.92v2.23a.77.77 0 1 0 1.54 0V19h.23A1.77 1.77 0 0 0 19 17.23V10.77H5z"/></svg>
       Android
     </button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     iOS SECTION
-══════════════════════════════════════════════ -->
-<div class="guide-section active ios-color" id="section-ios">
+<!-- ══════ iOS ══════ -->
+<div class="guide-section ios active" id="section-ios">
 
   <div class="part-label">Part 1 — Add iSkool to your Home Screen</div>
-
   <div class="steps">
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
         <div class="step-title">Open Safari on your iPhone</div>
-        <div class="step-desc">iSkool must be installed through <strong>Safari</strong> — not Chrome or any other browser. Look for the Safari icon on your home screen (blue compass icon).</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap the Safari icon</div>
+        <div class="step-desc">iSkool must be installed through <strong>Safari</strong> — not Chrome or any other browser. Find the Safari icon (blue compass) on your home screen and open it.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap the Safari icon</div>
       </div>
     </div>
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
         <div class="step-title">Go to your school's iSkool link</div>
-        <div class="step-desc">Type your school's iSkool address in the Safari address bar at the top and press Go. It will look something like:<br><strong style="font-family:monospace;font-size:13px;">yourschool.iskool.online</strong></div>
-        <div class="phone-mockup">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="browser-bar">
-              <div class="browser-url">yourschool.iskool.online</div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            </div>
-            <div class="browser-content">
-              <div class="iskool-mini-logo">
-                <svg width="24" height="24" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157l-5 1073 41 11c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71z"/></g></svg>
+        <div class="step-desc">Type your school's link in the Safari address bar at the top and press <strong>Go</strong>. It looks like: <strong style="font-family:monospace;">yourschool.iskool.online</strong></div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="safari-bar">
+                <div class="safari-url">yourschool.iskool.online</div>
               </div>
-              <div class="iskool-mini-name">iSkool</div>
-              <div class="iskool-mini-url">yourschool.iskool.online</div>
-            </div>
-            <div class="safari-bottom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 19l-7-7 7-7"/></svg>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19l7-7-7-7"/></svg>
-              <div class="safari-share-btn" style="color:var(--ios);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-                <span class="label">Share</span>
+              <div class="screen-content">
+                <div class="app-mini-icon">
+                  <svg width="22" height="22" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407z"/></g></svg>
+                </div>
+                <div class="app-mini-name">iSkool</div>
+                <div class="app-mini-url">yourschool.iskool.online</div>
               </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+              <div class="safari-bottom-bar">
+                <span class="safari-nav-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 19l-7-7 7-7"/></svg></span>
+                <span class="safari-nav-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19l7-7-7-7"/></svg></span>
+                <div class="safari-share" style="color:var(--ios)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                  <span>Share</span>
+                </div>
+                <span class="safari-nav-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+                <span class="safari-nav-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg></span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Tap the Share button at the bottom</div>
-        <div class="step-desc">Look for the <strong>Share button</strong> — it's the icon at the bottom centre of Safari that looks like a box with an arrow pointing up ↑. Tap it.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap the share icon (box with arrow up)</div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="browser-bar">
-              <div class="browser-url">yourschool.iskool.online</div>
-            </div>
-            <div class="browser-content" style="min-height:80px;"></div>
-            <div class="share-sheet">
-              <div class="share-sheet-title">Share Sheet — scroll to find "Add to Home Screen"</div>
-              <div class="share-row">
-                <div class="share-item"><div class="share-icon">📋</div><span>Copy</span></div>
-                <div class="share-item"><div class="share-icon highlighted">🏠</div><span>Add to Home Screen</span></div>
-                <div class="share-item"><div class="share-icon">📖</div><span>Add Bookmark</span></div>
-                <div class="share-item"><div class="share-icon">📤</div><span>AirDrop</span></div>
-                <div class="share-item"><div class="share-icon">✉️</div><span>Mail</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="step-title">Tap the Share button at the bottom centre</div>
+        <div class="step-desc">Look for the <strong>Share button</strong> at the bottom of Safari — it looks like a box with an arrow pointing up ↑. Tap it to open the Share Sheet.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap the share icon (↑ box with arrow)</div>
       </div>
     </div>
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Scroll down and tap "Add to Home Screen"</div>
-        <div class="step-desc">In the Share Sheet that appears, <strong>scroll down</strong> through the icons until you see <strong>"Add to Home Screen"</strong>. It has a house icon. Tap it.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap "Add to Home Screen"</div>
-      </div>
-    </div>
-
-    <div class="step ios-color">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <div class="step-title">Keep the name as "iSkool" and tap Add</div>
-        <div class="step-desc">A screen will appear showing the app name. Leave it as <strong>"iSkool"</strong> and tap <strong>Add</strong> in the top right corner. The app icon will appear on your home screen.</div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="browser-bar" style="justify-content:space-between;">
-              <span style="font-size:13px;color:var(--ios);font-weight:500;">Cancel</span>
-              <span style="font-size:14px;font-weight:600;">Add to Home Screen</span>
-              <span style="font-size:13px;color:var(--ios);font-weight:700;" class="">Add</span>
-            </div>
-            <div class="a2hs-dialog">
-              <div class="a2hs-header">
-                <div class="a2hs-icon">
-                  <svg width="24" height="24" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157l-5 1073 41 11c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71z"/></g></svg>
-                </div>
-                <div class="a2hs-info">
-                  <div class="a2hs-name">iSkool</div>
-                  <div class="a2hs-url">yourschool.iskool.online</div>
+        <div class="step-title">Scroll and tap "Add to Home Screen"</div>
+        <div class="step-desc">In the Share Sheet, <strong>scroll across the icons</strong> until you see <strong>"Add to Home Screen"</strong> (house icon). Tap it.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="safari-bar"><div class="safari-url">yourschool.iskool.online</div></div>
+              <div class="screen-content" style="min-height:60px;padding:10px;"></div>
+              <div class="share-sheet">
+                <div class="share-sheet-hint">← scroll to find "Add to Home Screen"</div>
+                <div class="share-row">
+                  <div class="share-item"><div class="share-icon">📋</div><span>Copy Link</span></div>
+                  <div class="share-item"><div class="share-icon glow">🏠</div><span>Add to Home Screen</span></div>
+                  <div class="share-item"><div class="share-icon">📖</div><span>Add Bookmark</span></div>
+                  <div class="share-item"><div class="share-icon">✉️</div><span>Mail</span></div>
+                  <div class="share-item"><div class="share-icon">💬</div><span>Message</span></div>
                 </div>
               </div>
-              <div class="a2hs-add-btn">Add to Home Screen</div>
             </div>
           </div>
         </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Add to Home Screen"</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Keep the name as "iSkool" then tap Add</div>
+        <div class="step-desc">A screen will appear with the app name. Leave it as <strong>"iSkool"</strong> and tap <strong>Add</strong> in the top right corner.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="a2hs-top-bar">
+                <span class="cancel">Cancel</span>
+                <span style="font-size:12px;font-weight:600;">Add to Home Screen</span>
+                <span class="add">Add</span>
+              </div>
+              <div class="a2hs-box">
+                <div class="a2hs-row">
+                  <div class="a2hs-icon">
+                    <svg width="20" height="20" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407z"/></g></svg>
+                  </div>
+                  <div>
+                    <div class="a2hs-name">iSkool</div>
+                    <div class="a2hs-url">yourschool.iskool.online</div>
+                  </div>
+                </div>
+                <div class="a2hs-confirm-btn">Add to Home Screen</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Add" in the top right</div>
       </div>
     </div>
 
   </div>
 
   <div class="tip-box">
-    <div class="tip-icon">💡</div>
-    <div class="tip-text">
-      <strong>Done! iSkool is now on your home screen.</strong>
-      Open it by tapping the iSkool icon — it will open like a real app, without any Safari browser bars. Now let's turn on notifications below.
-    </div>
+    <div class="tip-icon">✅</div>
+    <div class="tip-text"><strong>iSkool is now on your home screen!</strong>The iSkool icon will appear on your home screen just like a real app. Now let's turn on notifications.</div>
   </div>
 
-  <!-- PART 2 — NOTIFICATIONS -->
+  <!-- PART 2 iOS -->
   <div class="part-label">Part 2 — Turn on Notifications</div>
   <div class="steps">
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Open iSkool from your home screen</div>
-        <div class="step-desc">Tap the <strong>iSkool icon</strong> you just added to your home screen to open the app. Do <strong>not</strong> open it through Safari — it must be opened from the icon.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap the iSkool icon on your home screen</div>
+        <div class="step-title">Open iSkool from your home screen icon</div>
+        <div class="step-desc">Tap the <strong>iSkool icon</strong> on your home screen — not Safari. It must be opened from the icon for notifications to work on iPhone.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap the iSkool icon on your home screen</div>
       </div>
     </div>
 
-    <div class="step ios-color">
+    <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Log in to your account</div>
-        <div class="step-desc">Enter your school email and password to log in. If you don't have your login details, ask your teacher.</div>
-      </div>
-    </div>
-
-    <div class="step ios-color">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <div class="step-title">Tap "Allow" when asked about notifications</div>
-        <div class="step-desc">After logging in, iSkool will ask if it can send you notifications. <strong>Tap "Allow"</strong> so you get alerts for new quizzes, assignments and announcements.</div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen" style="background:#0d1117;padding:20px 16px;">
-            <div style="background:#1c1c1e;border-radius:16px;padding:20px;text-align:center;">
-              <div style="font-size:32px;margin-bottom:12px;">🔔</div>
-              <div style="font-weight:700;font-size:15px;color:#fff;margin-bottom:8px;">"iSkool" Would Like to Send You Notifications</div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:20px;line-height:1.5;">Notifications may include alerts, sounds and icon badges.</div>
-              <div style="display:flex;gap:8px;">
-                <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:10px;padding:11px;text-align:center;font-size:14px;color:rgba(255,255,255,0.6);font-weight:500;">Don't Allow</div>
-                <div style="flex:1;background:var(--ios);border-radius:10px;padding:11px;text-align:center;font-size:14px;color:#fff;font-weight:700;animation:btn-pulse 1.5s infinite;">Allow</div>
+        <div class="step-title">Log in and go to Settings</div>
+        <div class="step-desc">After logging in, tap the <strong>⚙ gear icon</strong> in the top right corner of your dashboard to open Settings.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark">
+              <div class="app-header">
+                <div class="app-header-left">
+                  <div class="app-mini-icon" style="width:28px;height:28px;border-radius:7px;">
+                    <svg width="14" height="14" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875z"/></g></svg>
+                  </div>
+                  <span class="app-school-name">Your School Name</span>
+                </div>
+                <div class="app-settings-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="app-body">
+                <div class="app-nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+                <div class="app-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Quiz</div>
+                <div class="app-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments</div>
               </div>
             </div>
           </div>
         </div>
-        <div class="tap-indicator" style="margin-top:12px;"><div class="tap-dot">👆</div> Tap "Allow" — not "Don't Allow"</div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap the ⚙ gear icon — top right</div>
       </div>
     </div>
 
-    <div class="step ios-color">
-      <div class="step-num">4</div>
+    <div class="step">
+      <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">You're all set! 🎉</div>
-        <div class="step-desc">You'll now receive notifications from iSkool whenever your teacher posts a new quiz, assignment or announcement. They'll appear on your lock screen like this:</div>
-        <div style="margin-top:16px;">
-          <div class="notif-banner">
-            <div class="notif-icon">
-              <svg width="20" height="20" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031z"/></g></svg>
-            </div>
-            <div class="notif-text">
-              <div class="notif-title">New Quiz: Mathematics Chapter 4</div>
-              <div class="notif-body">from iSkool · Status: Scheduled</div>
+        <div class="step-title">Tap "Sync Notifications" in Settings</div>
+        <div class="step-desc">In the Settings page, scroll down and tap the <strong>"Sync Notifications"</strong> button (bell icon). This is what activates push notifications for your account.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark">
+              <div class="settings-screen">
+                <div class="settings-title">Settings</div>
+                <div class="settings-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Update Profile Picture</div>
+                <div class="settings-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="17"/></svg> Remove Profile Picture</div>
+                <div class="settings-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Logout</div>
+                <div class="settings-btn glow-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Sync Notifications</div>
+              </div>
             </div>
           </div>
-          <div class="notif-banner">
-            <div class="notif-icon">
-              <svg width="20" height="20" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031z"/></g></svg>
+        </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Sync Notifications"</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Tap "Allow" on the notification popup</div>
+        <div class="step-desc">Your iPhone will show a popup asking if iSkool can send notifications. <strong>Tap "Allow"</strong> — not "Don't Allow".</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark" style="padding:10px;">
+              <div class="notif-allow-box">
+                <div class="notif-allow-icon">🔔</div>
+                <div class="notif-allow-title">"iSkool" Would Like to Send You Notifications</div>
+                <div class="notif-allow-sub">Notifications may include alerts, sounds and icon badges.</div>
+                <div class="notif-allow-btns">
+                  <div class="deny">Don't Allow</div>
+                  <div class="allow ios">Allow</div>
+                </div>
+              </div>
             </div>
-            <div class="notif-text">
-              <div class="notif-title">New Assignment: Essay Due Friday</div>
-              <div class="notif-body">from iSkool · Due: Friday, 25 April 2025</div>
-            </div>
+          </div>
+        </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Allow"</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Done! Here's what notifications look like 🎉</div>
+        <div class="step-desc">You'll now receive alerts on your lock screen whenever your teacher posts something new:</div>
+        <div style="margin-top:14px;">
+          <div class="notif-preview">
+            <div class="notif-app-icon"><svg width="16" height="16" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875z"/></g></svg></div>
+            <div><div class="notif-title-text">📝 New Quiz: Mathematics Chapter 4</div><div class="notif-body-text">from iSkool · Status: Scheduled</div></div>
+          </div>
+          <div class="notif-preview">
+            <div class="notif-app-icon"><svg width="16" height="16" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875z"/></g></svg></div>
+            <div><div class="notif-title-text">📢 New Announcement from your teacher</div><div class="notif-body-text">from iSkool · Tap to open</div></div>
           </div>
         </div>
       </div>
@@ -623,92 +599,68 @@ h1 {
 
   <div class="success-box">
     <div class="success-icon">✅</div>
-    <div class="success-title">You're ready to go!</div>
-    <div class="success-desc">iSkool is installed on your iPhone and notifications are on. You won't miss anything from your teachers.</div>
+    <div class="success-title">You're all set!</div>
+    <div class="success-desc">iSkool is installed on your iPhone and notifications are active. You won't miss anything from your teachers.</div>
   </div>
 
 </div>
 
-<!-- ══════════════════════════════════════════════
-     ANDROID SECTION
-══════════════════════════════════════════════ -->
-<div class="guide-section android-color" id="section-android">
+<!-- ══════ ANDROID ══════ -->
+<div class="guide-section android" id="section-android">
 
   <div class="part-label">Part 1 — Add iSkool to your Home Screen</div>
   <div class="steps">
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
         <div class="step-title">Open Google Chrome on your Android phone</div>
-        <div class="step-desc">iSkool works best through <strong>Google Chrome</strong> on Android. Find the Chrome icon on your home screen or app drawer and open it.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap the Chrome icon</div>
+        <div class="step-desc">iSkool works best through <strong>Google Chrome</strong> on Android. Open Chrome from your home screen or app drawer.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap the Chrome icon</div>
       </div>
     </div>
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
         <div class="step-title">Go to your school's iSkool link</div>
-        <div class="step-desc">Tap the address bar at the top, type your school's iSkool address and press Go:<br><strong style="font-family:monospace;font-size:13px;">yourschool.iskool.online</strong></div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="chrome-bar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <div class="chrome-url">yourschool.iskool.online</div>
-              <div class="chrome-dots highlighted"><span></span><span></span><span></span></div>
-            </div>
-            <div class="browser-content">
-              <div class="iskool-mini-logo"><svg width="24" height="24" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407z"/></g></svg></div>
-              <div class="iskool-mini-name">iSkool</div>
-              <div class="iskool-mini-url">yourschool.iskool.online</div>
-            </div>
-          </div>
-        </div>
+        <div class="step-desc">Tap the address bar, type your school's link and press Go: <strong style="font-family:monospace;">yourschool.iskool.online</strong></div>
       </div>
     </div>
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Tap the three dots menu (⋮) in the top right</div>
-        <div class="step-desc">Once the page loads, look for the <strong>three vertical dots</strong> in the top right corner of Chrome. Tap them to open the Chrome menu.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap ⋮ in the top right corner</div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="chrome-bar">
-              <div class="chrome-url">yourschool.iskool.online</div>
-              <div class="chrome-dots highlighted"><span></span><span></span><span></span></div>
-            </div>
-            <div class="chrome-menu">
-              <div class="chrome-menu-item">⭐ Bookmark</div>
-              <div class="chrome-menu-item highlighted">🏠 Add to Home screen</div>
-              <div class="chrome-menu-item">🔗 Share</div>
-              <div class="chrome-menu-item">⬇️ Download</div>
-              <div class="chrome-menu-item">⚙️ Settings</div>
+        <div class="step-title">Tap the three dots ⋮ in the top right</div>
+        <div class="step-desc">Once the page loads, tap the <strong>three vertical dots</strong> in the top right corner of Chrome to open the browser menu.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="chrome-bar">
+                <div class="chrome-url">yourschool.iskool.online</div>
+                <div class="chrome-dots lit"><span></span><span></span><span></span></div>
+              </div>
+              <div class="chrome-menu">
+                <div class="chrome-menu-item">⭐ Bookmark</div>
+                <div class="chrome-menu-item lit">🏠 Add to Home screen</div>
+                <div class="chrome-menu-item">🔗 Share</div>
+                <div class="chrome-menu-item">⬇️ Download</div>
+                <div class="chrome-menu-item">⚙️ Settings</div>
+              </div>
             </div>
           </div>
         </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap ⋮ then "Add to Home screen"</div>
       </div>
     </div>
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Tap "Add to Home screen"</div>
-        <div class="step-desc">In the Chrome menu, find and tap <strong>"Add to Home screen"</strong>. A pop-up will appear showing the iSkool app name and icon.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap "Add to Home screen"</div>
-      </div>
-    </div>
-
-    <div class="step android-color">
-      <div class="step-num">5</div>
-      <div class="step-body">
         <div class="step-title">Keep the name as "iSkool" and tap Add</div>
-        <div class="step-desc">Leave the name as <strong>"iSkool"</strong> and tap <strong>"Add"</strong> to confirm. The iSkool icon will now appear on your home screen.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap "Add" to confirm</div>
+        <div class="step-desc">A popup appears showing the app name. Leave it as <strong>"iSkool"</strong> and tap <strong>Add</strong> to confirm. The icon will appear on your home screen.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap "Add" to confirm</div>
       </div>
     </div>
 
@@ -716,62 +668,99 @@ h1 {
 
   <div class="tip-box">
     <div class="tip-icon">💡</div>
-    <div class="tip-text">
-      <strong>iSkool is now on your home screen!</strong>
-      On Android, Chrome may also show an automatic "Install app" banner at the bottom of the screen — you can tap that instead of using the menu. Either way works perfectly.
-    </div>
+    <div class="tip-text"><strong>Tip — Chrome may show an automatic banner!</strong>Chrome sometimes shows an "Install app" banner at the bottom of the screen automatically. You can tap that instead of using the ⋮ menu — both work perfectly.</div>
   </div>
 
   <!-- PART 2 ANDROID -->
   <div class="part-label">Part 2 — Turn on Notifications</div>
   <div class="steps">
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Open iSkool from your home screen</div>
-        <div class="step-desc">Tap the <strong>iSkool icon</strong> on your home screen to open the app. Log in with your school email and password.</div>
-        <div class="tap-indicator"><div class="tap-dot">👆</div> Tap the iSkool icon</div>
+        <div class="step-title">Open iSkool from your home screen and log in</div>
+        <div class="step-desc">Tap the <strong>iSkool icon</strong> on your home screen and log in with your school email and password.</div>
+        <div class="tap-indicator"><span class="tap-dot">👆</span> Tap the iSkool icon on home screen</div>
       </div>
     </div>
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Tap "Allow" when asked about notifications</div>
-        <div class="step-desc">After logging in, iSkool will ask permission to send you notifications. <strong>Tap "Allow"</strong> to make sure you receive alerts for quizzes, assignments and announcements.</div>
-        <div class="phone-mockup" style="margin-top:16px;">
-          <div class="phone-notch"></div>
-          <div class="phone-screen" style="background:#0d1117;padding:20px 16px;">
-            <div style="background:#2a2a2a;border-radius:16px;padding:20px;text-align:center;">
-              <div style="font-size:32px;margin-bottom:12px;">🔔</div>
-              <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:8px;">Allow iSkool to send you notifications?</div>
-              <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:20px;line-height:1.5;">You'll get alerts for new quizzes, assignments and announcements.</div>
-              <div style="display:flex;gap:8px;">
-                <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:10px;padding:11px;text-align:center;font-size:13px;color:rgba(255,255,255,0.5);font-weight:500;">Block</div>
-                <div style="flex:1;background:var(--android);border-radius:10px;padding:11px;text-align:center;font-size:13px;color:#fff;font-weight:700;animation:btn-pulse 1.5s infinite;">Allow</div>
+        <div class="step-title">Tap the ⚙ gear icon to open Settings</div>
+        <div class="step-desc">After logging in, tap the <strong>⚙ gear icon</strong> in the top right corner of your dashboard to go to Settings.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark">
+              <div class="app-header">
+                <div class="app-header-left">
+                  <div class="app-mini-icon" style="width:28px;height:28px;border-radius:7px;">
+                    <svg width="14" height="14" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875z"/></g></svg>
+                  </div>
+                  <span class="app-school-name">Your School Name</span>
+                </div>
+                <div class="app-settings-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>
+                </div>
+              </div>
+              <div class="app-body">
+                <div class="app-nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+                <div class="app-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Quiz</div>
+                <div class="app-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Assignments</div>
               </div>
             </div>
           </div>
         </div>
-        <div class="tap-indicator" style="margin-top:12px;"><div class="tap-dot">👆</div> Tap "Allow"</div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap the ⚙ gear icon — top right</div>
       </div>
     </div>
 
-    <div class="step android-color">
+    <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">You're all set! 🎉</div>
-        <div class="step-desc">Notifications from iSkool will now appear on your Android phone whenever your teacher posts something new:</div>
-        <div style="margin-top:16px;">
-          <div class="notif-banner">
-            <div class="notif-icon"><svg width="20" height="20" viewBox="0 0 880 805"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031z"/></g></svg></div>
-            <div class="notif-text">
-              <div class="notif-title">📝 New Quiz: Life Sciences Term 2</div>
-              <div class="notif-body">from iSkool · Tap to open</div>
+        <div class="step-title">Tap "Sync Notifications"</div>
+        <div class="step-desc">In Settings, tap the <strong>"Sync Notifications"</strong> button with the bell icon to activate push notifications for your account.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark">
+              <div class="settings-screen">
+                <div class="settings-title">Settings</div>
+                <div class="settings-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Update Profile Picture</div>
+                <div class="settings-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="17"/></svg> Remove Profile Picture</div>
+                <div class="settings-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Logout</div>
+                <div class="settings-btn glow-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Sync Notifications</div>
+              </div>
             </div>
           </div>
         </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Sync Notifications"</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Tap "Allow" on the notification popup</div>
+        <div class="step-desc">Android will ask if iSkool can send you notifications. <strong>Tap "Allow"</strong> to confirm.</div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen dark" style="padding:10px;">
+              <div class="notif-allow-box">
+                <div class="notif-allow-icon">🔔</div>
+                <div class="notif-allow-title">Allow iSkool to send you notifications?</div>
+                <div class="notif-allow-sub">You'll get alerts for new quizzes, assignments and announcements.</div>
+                <div class="notif-allow-btns">
+                  <div class="deny">Block</div>
+                  <div class="allow android">Allow</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tap-indicator" style="margin-top:12px;"><span class="tap-dot">👆</span> Tap "Allow"</div>
       </div>
     </div>
 
@@ -779,11 +768,12 @@ h1 {
 
   <div class="success-box">
     <div class="success-icon">✅</div>
-    <div class="success-title">You're ready to go!</div>
-    <div class="success-desc">iSkool is installed on your Android phone and notifications are on. You won't miss anything from your teachers.</div>
+    <div class="success-title">You're all set!</div>
+    <div class="success-desc">iSkool is installed on your Android phone and notifications are active. You won't miss anything from your teachers.</div>
   </div>
 
 </div>
+</div><!-- .page-wrap -->
 
 <script>
 function switchTab(os, btn) {
