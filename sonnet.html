@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonnet — Building What's Missing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0e;
+    --bg-2: #161616;
+    --bg-3: #1e1e1e;
+    --text: #f0ede6;
+    --text-muted: #8a8680;
+    --text-dim: #5a5754;
+    --accent: #c96a3a;
+    --accent-light: #e07a45;
+    --border: rgba(240,237,230,0.08);
+    --border-hover: rgba(240,237,230,0.15);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    transition: background 0.4s ease;
+  }
+
+  nav.scrolled {
+    background: rgba(14,14,14,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text) !important;
+    border: 1px solid var(--border-hover);
+    padding: 8px 20px;
+    border-radius: 4px;
+    transition: border-color 0.2s, background 0.2s !important;
+  }
+
+  .nav-cta:hover {
+    background: rgba(240,237,230,0.06) !important;
+    border-color: rgba(240,237,230,0.3) !important;
+    color: var(--text) !important;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 96px;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,106,58,0.12) 0%, transparent 70%);
+    top: 10%;
+    right: -100px;
+    pointer-events: none;
+    animation: pulse 8s ease-in-out infinite;
+  }
+
+  .hero-glow-2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,106,58,0.06) 0%, transparent 70%);
+    bottom: 20%;
+    left: -50px;
+    pointer-events: none;
+    animation: pulse 10s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+  }
+
+  .hero-tag {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-headline {
+    font-family: var(--serif);
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .hero-sub {
+    margin-top: 28px;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-actions {
+    margin-top: 44px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 400;
+    color: #0e0e0e;
+    background: var(--text);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover {
+    background: #e0ddd6;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    padding: 12px 0;
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--text); }
+
+  .btn-ghost svg { transition: transform 0.2s; }
+  .btn-ghost:hover svg { transform: translateX(4px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 48px;
+  }
+
+  /* ── FEATURED / PORTFOLIO ── */
+  .section {
+    padding: 96px 48px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURED STORY (iSkool) ── */
+  .featured-story {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 380px;
+    transition: border-color 0.3s;
+    cursor: pointer;
+  }
+
+  .featured-story:hover { border-color: var(--border-hover); }
+
+  .featured-story-content {
+    padding: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .featured-story-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .tag-live {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4ade80;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .tag-soon {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(201,106,58,0.08);
+    border: 1px solid rgba(201,106,58,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .tag-category {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .featured-story-title {
+    font-family: var(--serif);
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .featured-story-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .featured-story-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-top: 40px;
+    transition: color 0.2s;
+    width: fit-content;
+  }
+
+  .featured-story-link:hover { color: var(--text); }
+  .featured-story-link svg { transition: transform 0.2s; }
+  .featured-story-link:hover svg { transform: translateX(4px); }
+
+  .featured-story-visual {
+    background: var(--bg-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-story-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% 40%, rgba(201,106,58,0.08) 0%, transparent 60%);
+  }
+
+  /* Lottie-style SVG illustration */
+  .illustration {
+    width: 180px;
+    height: 180px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── RELEASES GRID ── */
+  .releases-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 48px;
+  }
+
+  .release-card {
+    background: var(--bg);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+
+  .release-card:hover { background: var(--bg-2); }
+
+  .release-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .release-date {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .release-category {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .release-card-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .release-card-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .release-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    margin-top: auto;
+    transition: color 0.2s;
+    width: fit-content;
+  }
+
+  .release-link:hover { color: var(--text); }
+
+  /* ── PHILOSOPHY SECTION ── */
+  .philosophy {
+    padding: 120px 48px;
+    background: var(--bg-2);
+  }
+
+  .philosophy-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 96px;
+    align-items: start;
+  }
+
+  .philosophy-left .section-label { margin-bottom: 32px; }
+
+  .philosophy-headline {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--text);
+  }
+
+  .philosophy-headline em {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .philosophy-body {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-top: 28px;
+    max-width: 440px;
+  }
+
+  .philosophy-right {
+    padding-top: 56px;
+  }
+
+  .value-item {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .value-item:first-child { border-top: 1px solid var(--border); }
+
+  .value-number {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding-top: 2px;
+  }
+
+  .value-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .value-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── PORTFOLIO SECTION ── */
+  .portfolio-section {
+    padding: 96px 48px;
+  }
+
+  .portfolio-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 56px;
+  }
+
+  .portfolio-headline {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.5vw, 48px);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .portfolio-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .portfolio-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .portfolio-card.iskool::before {
+    background: radial-gradient(circle at 80% 20%, rgba(201,106,58,0.06) 0%, transparent 60%);
+  }
+
+  .portfolio-card.smarties::before {
+    background: radial-gradient(circle at 20% 80%, rgba(100,140,255,0.06) 0%, transparent 60%);
+  }
+
+  .portfolio-card:hover { border-color: var(--border-hover); }
+  .portfolio-card:hover::before { opacity: 1; }
+
+  .portfolio-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .portfolio-product-name {
+    font-family: var(--serif);
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .portfolio-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .portfolio-icon.iskool-icon {
+    background: rgba(201,106,58,0.1);
+    border: 1px solid rgba(201,106,58,0.15);
+  }
+
+  .portfolio-icon.smarties-icon {
+    background: rgba(100,140,255,0.1);
+    border: 1px solid rgba(100,140,255,0.15);
+  }
+
+  .portfolio-tagline {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .portfolio-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  .portfolio-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .portfolio-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .portfolio-link:hover { color: var(--text); }
+  .portfolio-link svg { transition: transform 0.2s; }
+  .portfolio-link:hover svg { transform: translateX(4px); }
+
+  /* ── MISSION STATEMENT ── */
+  .mission-statement {
+    padding: 120px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mission-statement::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(201,106,58,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .mission-quote {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 52px);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .mission-quote em {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 64px 48px 48px;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 64px;
+  }
+
+  .footer-brand-name {
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .footer-brand-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 280px;
+  }
+
+  .footer-col-title {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-links a {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--text); }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-copy {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .footer-bottom-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-bottom-links a {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-bottom-links a:hover { color: var(--text-muted); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Sonnet</a>
+  <ul class="nav-links">
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#philosophy">About</a></li>
+    <li><a href="#news">News</a></li>
+    <li><a href="#contact" class="nav-cta">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+
+  <p class="hero-tag">Building what's missing</p>
+  <h1 class="hero-headline">
+    Category-defining software<br>
+    for <em>underserved markets</em>
+  </h1>
+  <p class="hero-sub">
+    We find the blind spots. We build in blue oceans. We don't add noise to crowded markets — we create clarity where there was none.
+  </p>
+  <div class="hero-actions">
+    <a href="#portfolio" class="btn-primary">Our portfolio</a>
+    <a href="#philosophy" class="btn-ghost">
+      Our story
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<!-- FEATURED RELEASE -->
+<section class="section" id="news">
+  <p class="section-label">Latest from Sonnet</p>
+
+  <!-- iSkool featured card -->
+  <div class="featured-story reveal">
+    <div class="featured-story-content">
+      <div>
+        <div class="featured-story-meta">
+          <span class="tag-live">Live</span>
+          <span class="tag-category">Education Technology</span>
+        </div>
+        <h2 class="featured-story-title">iSkool<br>Version 1</h2>
+        <p class="featured-story-desc">
+          The first purpose-built learning management system for South African high schools. Not a classroom tool repurposed for schools — built from the ground up for educators, learners, and administrators.
+        </p>
+      </div>
+      <a href="#" class="featured-story-link">
+        Visit iSkool
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="featured-story-visual">
+      <!-- Hand-drawn style SVG illustration -->
+      <svg class="illustration" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Book pages -->
+        <path d="M40 130 Q40 50 90 40 Q140 50 140 130" stroke="#f0ede6" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3">
+          <animate attributeName="d" dur="6s" repeatCount="indefinite"
+            values="M40 130 Q40 50 90 40 Q140 50 140 130;
+                    M40 130 Q42 52 90 41 Q138 52 140 130;
+                    M40 130 Q40 50 90 40 Q140 50 140 130" keyTimes="0;0.5;1"/>
+        </path>
+        <!-- Center spine -->
+        <line x1="90" y1="40" x2="90" y2="140" stroke="#f0ede6" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        <!-- Text lines left -->
+        <line x1="55" y1="72" x2="83" y2="72" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+        <line x1="55" y1="82" x2="83" y2="82" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+        <line x1="55" y1="92" x2="78" y2="92" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.15"/>
+        <line x1="55" y1="102" x2="83" y2="102" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+        <line x1="55" y1="112" x2="70" y2="112" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.15"/>
+        <!-- Text lines right -->
+        <line x1="97" y1="72" x2="125" y2="72" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+        <line x1="97" y1="82" x2="125" y2="82" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+        <line x1="97" y1="92" x2="118" y2="92" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.15"/>
+        <line x1="97" y1="102" x2="125" y2="102" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+        <line x1="97" y1="112" x2="112" y2="112" stroke="#f0ede6" stroke-width="1" stroke-linecap="round" opacity="0.15"/>
+        <!-- Accent dot -->
+        <circle cx="90" cy="152" r="3" fill="#c96a3a" opacity="0.7"/>
+        <!-- Orbiting dots -->
+        <circle r="2.5" fill="#c96a3a" opacity="0.5">
+          <animateMotion dur="4s" repeatCount="indefinite" path="M90,152 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0"/>
+        </circle>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Release cards grid -->
+  <div class="releases-grid">
+    <div class="release-card reveal reveal-delay-1">
+      <div class="release-card-meta">
+        <span class="release-date">2025</span>
+        <span class="release-date">·</span>
+        <span class="release-category">Pilot</span>
+      </div>
+      <h3 class="release-card-title">Landulwazi Comprehensive School goes live on iSkool</h3>
+      <p class="release-card-desc">Our first active pilot deployment — real educators, real learners, real results.</p>
+      <a href="#" class="release-link">
+        Read more
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="release-card reveal reveal-delay-2">
+      <div class="release-card-meta">
+        <span class="release-date">Coming Soon</span>
+        <span class="release-date">·</span>
+        <span class="tag-soon" style="font-size:11px; padding: 2px 8px;">Project</span>
+      </div>
+      <h3 class="release-card-title">Introducing Project Smarties</h3>
+      <p class="release-card-desc">A dedicated university community platform. No noise. Just your campus — societies, SRCs, faculties, and students in one clean space.</p>
+      <a href="#" class="release-link">
+        Learn more
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="release-card reveal reveal-delay-3">
+      <div class="release-card-meta">
+        <span class="release-date">Always</span>
+        <span class="release-date">·</span>
+        <span class="release-category">Philosophy</span>
+      </div>
+      <h3 class="release-card-title">We build for the audiences technology forgot</h3>
+      <p class="release-card-desc">Every Sonnet product starts with one question: who is the right tool missing for?</p>
+      <a href="#philosophy" class="release-link">
+        Our approach
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- MISSION STATEMENT -->
+<section class="mission-statement reveal">
+  <p class="mission-quote">
+    "A sonnet is fourteen lines of <em>constrained genius.</em> Within strict limits, it produces some of the most powerful writing ever created. Sonnet the company operates the same way."
+  </p>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="philosophy">
+  <div class="philosophy-inner">
+    <div class="philosophy-left reveal">
+      <p class="section-label">The Sonnet Way</p>
+      <h2 class="philosophy-headline">
+        We don't chase<br>
+        crowded spaces.<br>
+        We build in <em>blue oceans.</em>
+      </h2>
+      <p class="philosophy-body">
+        Sonnet identifies the blind spots in technology — the audiences being underserved, the problems being ignored — and builds exactly what's missing. Not generic tools adapted for specific audiences. Purpose-built from day one.
+      </p>
+    </div>
+    <div class="philosophy-right reveal reveal-delay-2">
+      <div class="value-item">
+        <span class="value-number">01</span>
+        <div>
+          <h3 class="value-title">Build for the forgotten audience</h3>
+          <p class="value-desc">Every Sonnet product starts with a question: who is technology not serving well enough? We find that person and we build for them specifically — not as an afterthought, but as the entire point.</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-number">02</span>
+        <div>
+          <h3 class="value-title">Constraint is craft</h3>
+          <p class="value-desc">Emerging markets, limited infrastructure, tight budgets — these are our design parameters, not our excuses. The best solutions are born from the tightest constraints.</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-number">03</span>
+        <div>
+          <h3 class="value-title">Blue ocean thinking</h3>
+          <p class="value-desc">We study markets for what's missing, not what's popular. Every Sonnet product should feel inevitable — like it should have existed years ago.</p>
+        </div>
+      </div>
+      <div class="value-item">
+        <span class="value-number">04</span>
+        <div>
+          <h3 class="value-title">Purpose-built, always</h3>
+          <p class="value-desc">Generic tools adapted for specific audiences are a compromise. Every Sonnet product is designed from the ground up for its audience. No repurposing. No duct tape.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section class="portfolio-section" id="portfolio">
+  <div class="portfolio-header reveal">
+    <div>
+      <p class="section-label">Our portfolio</p>
+      <h2 class="portfolio-headline">Two products.<br>One philosophy.</h2>
+    </div>
+  </div>
+
+  <div class="portfolio-grid">
+    <div class="portfolio-card iskool reveal reveal-delay-1">
+      <div class="portfolio-card-header">
+        <div>
+          <p class="portfolio-tagline">Education Technology</p>
+          <h3 class="portfolio-product-name">iSkool</h3>
+        </div>
+        <div class="portfolio-icon iskool-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L2 8l10 5 10-5-10-5z" stroke="#c96a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 16l10 5 10-5" stroke="#c96a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12l10 5 10-5" stroke="#c96a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <p class="portfolio-desc">
+        The learning management system built specifically for schools. Not a classroom tool. Not a collaboration platform with a gradebook bolted on. A purpose-built LMS for high school educators, learners, and administrators.
+      </p>
+      <div class="portfolio-card-footer">
+        <span class="tag-live">Live — Version 1</span>
+        <a href="#" class="portfolio-link">
+          Visit iSkool
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="portfolio-card smarties reveal reveal-delay-2">
+      <div class="portfolio-card-header">
+        <div>
+          <p class="portfolio-tagline">University & Campus</p>
+          <h3 class="portfolio-product-name">Smarties</h3>
+        </div>
+        <div class="portfolio-icon smarties-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="8" r="3" stroke="#648cff" stroke-width="1.5"/>
+            <path d="M6 20c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#648cff" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M18 8c1.105 0 2 .895 2 2s-.895 2-2 2" stroke="#648cff" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 8c-1.105 0-2 .895-2 2s.895 2 2 2" stroke="#648cff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <p class="portfolio-desc">
+        A dedicated university community platform. Clean, focused, student-native. Societies, SRCs, faculties, and students — all in one noise-free space built exclusively for campus life.
+      </p>
+      <div class="portfolio-card-footer">
+        <span class="tag-soon">Project — Coming Soon</span>
+        <a href="#" class="portfolio-link">
+          Learn more
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="footer-top">
+    <div>
+      <p class="footer-brand-name">Sonnet</p>
+      <p class="footer-brand-desc">Building category-defining software for underserved markets — globally. We find the gaps, the blind spots, the audiences that technology forgot.</p>
+    </div>
+    <div>
+      <p class="footer-col-title">Portfolio</p>
+      <ul class="footer-links">
+        <li><a href="#">iSkool</a></li>
+        <li><a href="#">Smarties</a></li>
+        <li><a href="#">Coming next</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Company</p>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">News</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Legal</p>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2025 Sonnet. All rights reserved.</p>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
