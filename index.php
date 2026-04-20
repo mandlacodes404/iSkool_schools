@@ -747,7 +747,20 @@ body {
         background: #1a1919;
         padding: 60px 64px;
         justify-content: flex-start;
-        align-items: center;
+    }
+
+    /* Keep the shorter login form vertically centred */
+    #login-form.active {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Register form gets breathing room at top and bottom */
+    #register-form.active {
+        padding-top: 20px;
+        padding-bottom: 40px;
     }
 
     .form-panel > .form-box {
@@ -796,20 +809,6 @@ body {
     #form-school-name {
         font-size: 13px;
         color: #aaa;
-    }
-
-    /* Login form: vertically centre in the panel */
-    #login-form {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: calc(100vh - 120px);
-    }
-
-    /* Register form: start from top so nothing gets clipped */
-    #register-form {
-        padding-top: 20px;
-        padding-bottom: 40px;
     }
 }
 
@@ -1543,7 +1542,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                 </div>
                 <button type="submit" name="login">Login</button>
                 <p>Don't have an account? 
-                   <a href="#" onclick="document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.add('active'); return false;">Register</a>
+                   <a href="#" onclick="document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.add('active'); document.querySelector('.form-panel').scrollTo({top:0,behavior:'smooth'}); return false;">Register</a>
                 </p>
                 <p style="text-align:center; margin-top: 8px;">
                     <a href="forgot_password.php" style="color:#00bfff;">Forgot your password?</a>
@@ -1612,7 +1611,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
 
                 <button type="submit" name="register">Register</button>
                 <p>Already have an account? 
-                   <a href="#" onclick="document.getElementById('register-form').classList.remove('active'); document.getElementById('login-form').classList.add('active'); return false;">Login</a>
+                   <a href="#" onclick="document.getElementById('register-form').classList.remove('active'); document.getElementById('login-form').classList.add('active'); document.querySelector('.form-panel').scrollTo({top:0,behavior:'smooth'}); return false;">Login</a>
                 </p>
             </form>
         </div>
