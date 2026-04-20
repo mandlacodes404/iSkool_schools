@@ -191,7 +191,8 @@ if ($checkSub->get_result()->num_rows > 0) {
         $currentEmail, 
         "New Quiz: " . $quiz_title, 
         "Status: " . $status,
-        $quizLink // <--- Add this here
+        $quizLink,
+        $schoolName
     );
 }
         $checkSub->close();

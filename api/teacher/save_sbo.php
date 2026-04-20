@@ -96,6 +96,12 @@ $learnersStmt->execute();
 $learners = $learnersStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $learnersStmt->close();
 
+// ── School name ──
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
+    ? $snRow['setting_value']
+    : 'iSkool';
+
 $cleanBaseUrl = rtrim(BASE_URL, '/');
 
 foreach ($learners as $learner) {
@@ -104,7 +110,8 @@ foreach ($learners as $learner) {
         $learner['student_email'],
         "📚 Term {$term} Syllabus — {$className}",
         "Term {$term} syllabus has been posted for {$subject} by {$teacherName}",
-        $cleanBaseUrl . '/learner_dashboard.php?page=syllabus'
+        $cleanBaseUrl . '/learner_dashboard.php?page=syllabus',
+        $schoolName
     );
 }
 

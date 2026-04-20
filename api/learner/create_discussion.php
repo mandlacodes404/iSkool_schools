@@ -75,8 +75,10 @@ foreach ($tagged_teachers as $t) {
 $stmt->close();
 
 // Notifications (push + email) — same logic as create_discussion.php
-$dbName     = $conn->query("SELECT DATABASE()")->fetch_row()[0];
-$schoolName = ucwords(str_replace(['iskool_','_'], ['',''], $dbName));
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
+    ? $snRow['setting_value']
+    : 'iSkool';
 
 $cleanBaseUrl            = rtrim(BASE_URL, '/');
 $learnerDiscussionLink = $cleanBaseUrl . '/learner_dashboard.php?page=discussion&id=' . $disc_id;
@@ -119,7 +121,7 @@ $classmates = $cmStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $cmStmt->close();
 
 foreach ($classmates as $cm) {
-    $pushed = sendPushToUser($conn, $cm['email'], "New Discussion: $title", "$creator_display started a topic.", $learnerDiscussionLink);
+    $pushed = sendPushToUser($conn, $cm['email'], "New Discussion: $title", "$creator_display started a topic.", $learnerDiscussionLink, $schoolName);
     if (!$pushed) {
         try {
             $mail = new PHPMailer(true);
@@ -146,7 +148,7 @@ if (!empty($tagged_teachers)) {
     $tStmt->close();
 
     foreach ($teachers as $t) {
-        sendPushToUser($conn, $t['email'], "Tagged in Discussion", "$creator_display tagged you.", $teacherDiscussionLink);
+        sendPushToUser($conn, $t['email'], "Tagged in Discussion", "$creator_display tagged you.", $teacherDiscussionLink, $schoolName);
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP(); $mail->Host = 'iskool.online'; $mail->SMTPAuth = true;

@@ -104,7 +104,8 @@ while ($learner = $learnersResult->fetch_assoc()) {
             $conn, $lEmail,
             "📊 New Evaluation: " . $title,
             "Your teacher requested your feedback. Please complete the evaluation.",
-            $evalLink
+            $evalLink,
+            $schoolName
         );
     }
     $checkSub->close();

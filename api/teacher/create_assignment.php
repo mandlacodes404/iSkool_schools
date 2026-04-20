@@ -196,7 +196,8 @@ while ($learner = $learnersResult->fetch_assoc()) {
             $currentEmail,
             $pushTitle,
             'Due: ' . $formatted_due_date,
-            $assignmentLink
+            $assignmentLink,
+            $schoolName
         );
     }
 
