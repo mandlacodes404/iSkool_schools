@@ -72,7 +72,7 @@ try {
         <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
           <tr>
             <td style="vertical-align:middle;padding-right:8px;">
-              <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
+              <img src="https://iskool.online/apple-touch-icon.png" width="30" height="30" alt="iSkool" style="display:block;border-radius:5px;">
             </td>
             <td style="vertical-align:middle;">
               <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
