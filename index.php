@@ -746,7 +746,8 @@ body {
         flex: 1;
         background: #1a1919;
         padding: 60px 64px;
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
     }
 
     .form-panel > .form-box {
@@ -795,6 +796,20 @@ body {
     #form-school-name {
         font-size: 13px;
         color: #aaa;
+    }
+
+    /* Login form: vertically centre in the panel */
+    #login-form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: calc(100vh - 120px);
+    }
+
+    /* Register form: start from top so nothing gets clipped */
+    #register-form {
+        padding-top: 20px;
+        padding-bottom: 40px;
     }
 }
 

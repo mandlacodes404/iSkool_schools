@@ -15,7 +15,7 @@ echo json_encode([
     "name"             => "iSkool",
     "short_name"       => $schoolName,
     "id"               => "/",
-    "description"      => "Your school learning platform",
+    "description"      => "Learning Management system",
     "start_url"        => "/",
     "display"          => "standalone",
     "background_color" => "#0d1117",
