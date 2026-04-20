@@ -14,8 +14,9 @@ $stmt->execute();
 $userResult = $stmt->get_result();
 
 if ($userResult->num_rows === 0) {
-    $_SESSION['reset_message'] = "No account found with that email.";
-    header("Location: forgot_password.php");
+    $_SESSION['reset_error'] = "No account found with that email.";
+    $_SESSION['active_form'] = 'forgot-form';
+    header("Location: index.php");
     exit();
 }
 
@@ -137,10 +138,12 @@ try {
 
     $mail->send();
     $_SESSION['reset_message'] = "Reset link sent to your email.";
+    $_SESSION['active_form'] = 'forgot-form';
 
 } catch (Exception $e) {
     $_SESSION['reset_error'] = "Email could not be sent. Please try again later.";
+    $_SESSION['active_form'] = 'forgot-form';
 }
 
-header("Location: forgot_password.php");
+header("Location: index.php");
 exit();

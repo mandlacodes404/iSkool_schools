@@ -32,8 +32,10 @@ $errors = [
     'register' => $_SESSION['register_error'] ?? ''
 ];
 $activeForm = $_SESSION['active_form'] ?? 'login';
+$resetMessage = $_SESSION['reset_message'] ?? '';
+$resetError   = $_SESSION['reset_error'] ?? '';
 
-unset($_SESSION['login_error'], $_SESSION['register_error'], $_SESSION['active_form']);
+unset($_SESSION['login_error'], $_SESSION['register_error'], $_SESSION['active_form'], $_SESSION['reset_message'], $_SESSION['reset_error']);
 
 function showError($error){
     return !empty($error) ? "<p class='error-message' style='color:red;'>$error</p>" : '';
@@ -1542,10 +1544,10 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                 </div>
                 <button type="submit" name="login">Login</button>
                 <p>Don't have an account? 
-                   <a href="#" onclick="document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.add('active'); document.querySelector('.form-panel').scrollTo({top:0,behavior:'smooth'}); return false;">Register</a>
+                   <a href="#" onclick="showForm('register-form'); return false;">Register</a>
                 </p>
                 <p style="text-align:center; margin-top: 8px;">
-                    <a href="forgot_password.php" style="color:#00bfff;">Forgot your password?</a>
+                    <a href="#" onclick="showForm('forgot-form'); return false;" style="color:#00bfff;">Forgot your password?</a>
                 </p>
             </form>
         </div>
@@ -1611,9 +1613,33 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
 
                 <button type="submit" name="register">Register</button>
                 <p>Already have an account? 
-                   <a href="#" onclick="document.getElementById('register-form').classList.remove('active'); document.getElementById('login-form').classList.add('active'); document.querySelector('.form-panel').scrollTo({top:0,behavior:'smooth'}); return false;">Login</a>
+                   <a href="#" onclick="showForm('login-form'); return false;">Login</a>
                 </p>
             </form>
+        </div>
+        <!-- FORGOT PASSWORD FORM -->
+        <div class="form-box <?= ($activeForm === 'forgot-form') ? 'active' : '' ?>" id="forgot-form">
+            <h2>Forgot password?</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; text-align:center;">Enter your email and we'll send you a reset link.</p>
+
+            <?php if (!empty($resetMessage)): ?>
+                <div style="color:#00ff99; font-size:14px; background:rgba(0,255,153,0.1); padding:10px; border-radius:12px; margin-bottom:16px; text-align:center;">
+                    <?= htmlspecialchars($resetMessage) ?>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($resetError)): ?>
+                <div style="color:#ff4d4d; font-size:14px; background:rgba(255,77,77,0.1); padding:10px; border-radius:12px; margin-bottom:16px; text-align:center;">
+                    <?= htmlspecialchars($resetError) ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="send_reset_link.php" method="POST">
+                <input type="email" name="email" placeholder="Email address" required>
+                <button type="submit">Send Reset Link</button>
+            </form>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="#" onclick="showForm('login-form'); return false;" style="color:#888; font-size:14px;">← Back to login</a>
+            </p>
         </div>
         </div><!-- /.form-panel -->
     </div><!-- /.container -->
@@ -1626,6 +1652,14 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         </div>
     </div>
     <script>
+    // ── Form switcher ──────────────────────────────────────────────────────────
+    function showForm(id) {
+        document.querySelectorAll('.form-box').forEach(f => f.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const panel = document.querySelector('.form-panel');
+        if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // Show glowing logo loader first, then fade out and show container + brand
     window.onload = function () {
         const animationWrapper = document.getElementById('animation-wrapper');
