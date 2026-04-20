@@ -205,7 +205,7 @@ if (!empty($joinedClassIds)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Learner Dashboard</title>
+    <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.8">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.6">
@@ -488,7 +488,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-   
+    position: relative;
 }
 
 /*.sidebar.collapsed ~ .main-content {
@@ -627,34 +627,60 @@ iframe {
     font-size: 15px;
 }
 
- /* Loader */
-        #loaderOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; color: white; font-size: 18px;
-        }
-
-.sidebar.collapsed ~ #loaderOverlay {
-    left: var(--sidebar-collapsed-width);
-    width: calc(100% - var(--sidebar-collapsed-width));
+/* ── SCOPED LOADER ── */
+#loaderOverlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(13, 17, 23, 0.6);
+    backdrop-filter: blur(2px);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 800;
+    pointer-events: all;
 }
 
+/* Orbital dots container */
 .loader {
-            border: 6px solid #e2e8f0; border-top: 6px solid var(--accent-color);
-            border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-top: 20px;
-        }
-
-.loader-text {
-    color: var(--text-color);
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
+    width: 48px;
+    height: 48px;
+    position: relative;
+    animation: none;
+    border: none;
+    border-radius: 0;
+    background: none;
+    margin: 0;
 }
 
-@keyframes spin { 
-    to { transform: rotate(360deg); } 
+/* Each dot orbits the center */
+.loader::before,
+.loader::after,
+.loader-dot3,
+.loader-dot4 {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4fd1c5;
+    top: 50%;
+    left: 50%;
+    margin: -4px 0 0 -4px;
+    transform-origin: 0 0;
 }
+
+.loader::before  { animation: orbit 1.2s linear infinite 0s;    opacity: 1;    background: #4fd1c5; }
+.loader::after   { animation: orbit 1.2s linear infinite -0.3s; opacity: 0.75; background: #4fd1c5; }
+.loader-dot3     { animation: orbit 1.2s linear infinite -0.6s; opacity: 0.5;  background: #4fd1c5; }
+.loader-dot4     { animation: orbit 1.2s linear infinite -0.9s; opacity: 0.25; background: #4fd1c5; }
+
+@keyframes orbit {
+    0%   { transform: rotate(0deg)   translateX(18px) rotate(0deg);   }
+    100% { transform: rotate(360deg) translateX(18px) rotate(-360deg); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
     body {
@@ -1433,12 +1459,13 @@ iframe {
 
     <div id="api-content-area" style="display:none;"></div>
 <iframe id="mainFrame" name="mainFrame" src="about:blank" style="display:none;"></iframe>
-</div>
-
 
 <div id="loaderOverlay">
-    <div class="loader-text">Processing...</div>
-    <div class="loader"></div>
+    <div class="loader">
+        <div class="loader-dot3"></div>
+        <div class="loader-dot4"></div>
+    </div>
+</div>
 </div>
 
 <script>
