@@ -859,14 +859,6 @@ iframe {
     #mobileToggle {
         display: none;
     }
-
-    .sidebar {
-        left: 0;
-    }
-
-    .sidebar.active {
-        width: var(--sidebar-width);
-    }
 }
 
 /* Update this block to use an INSET shadow instead of a BORDER */
@@ -2444,8 +2436,7 @@ document.addEventListener("DOMContentLoaded", function () {
    
 });
 
-function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); }
-function toggleDesktopSidebar() { document.querySelector('.sidebar').classList.toggle('collapsed'); }
+
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
