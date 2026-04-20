@@ -4,15 +4,8 @@ require __DIR__ . '/vendor/autoload.php';
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
-// Fetch school name from DB
-$schoolName = 'iSkool'; // fallback
-$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
-if ($result && $row = $result->fetch_assoc()) {
-    $schoolName = trim($row['setting_value']);
-}
-
-// Added $targetUrl as a 5th parameter with a default of null
-function sendPushToUser($conn, $email, $title, $message, $targetUrl = null) {
+// Added $targetUrl as a 5th parameter and $schoolName as a 6th parameter
+function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool') {
     // 1. Get all device subscriptions for this email
     $stmt = $conn->prepare("SELECT endpoint, p256dh, auth FROM user_subscriptions WHERE user_email = ?");
     $stmt->bind_param("s", $email);

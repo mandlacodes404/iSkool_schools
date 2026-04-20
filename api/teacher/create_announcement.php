@@ -105,7 +105,7 @@ while ($recipient = $recipients->fetch_assoc()) {
     $checkSub->bind_param("s", $rEmail);
     $checkSub->execute();
     if ($checkSub->get_result()->num_rows > 0) {
-        $isPushSent = sendPushToUser($conn, $rEmail, $fullPushTitle, $msg, $announcementLink);
+        $isPushSent = sendPushToUser($conn, $rEmail, $fullPushTitle, $msg, $announcementLink, $schoolName);
     }
     $checkSub->close();
 
