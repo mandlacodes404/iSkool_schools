@@ -53,7 +53,7 @@ function notifyLearners($conn, $classId, $yearId, $title, $teacherEmail, $teache
         $checkSub->bind_param("s", $lEmail);
         $checkSub->execute();
         if ($checkSub->get_result()->num_rows > 0) {
-            $isPushSent = sendPushToUser($conn, $lEmail, $title, "A study material has been uploaded.", $resourceLink, $schoolName);
+            $isPushSent = sendPushToUser($conn, $lEmail, "📂 New Resource: " . $title, "A study material has been uploaded.", $resourceLink, $schoolName, 'https://iskool.online/assets/icons/resource.png');
         }
         $checkSub->close();
 

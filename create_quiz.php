@@ -189,10 +189,11 @@ if ($checkSub->get_result()->num_rows > 0) {
     $isPushSent = sendPushToUser(
         $conn, 
         $currentEmail, 
-        "New Quiz: " . $quiz_title, 
+        "📝 New Quiz: " . $quiz_title, 
         "Status: " . $status,
         $quizLink,
-        $schoolName
+        $schoolName,
+        'https://iskool.online/assets/icons/quiz.png'
     );
 }
         $checkSub->close();

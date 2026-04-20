@@ -190,14 +190,15 @@ while ($learner = $learnersResult->fetch_assoc()) {
     $checkSub->close();
 
     if ($subResult->num_rows > 0) {
-        $pushTitle  = $teacherDisplayName . ': ' . $title;
+        $pushTitle  = '📋 New Assignment: ' . $title;
         $isPushSent = sendPushToUser(
             $conn,
             $currentEmail,
             $pushTitle,
             'Due: ' . $formatted_due_date,
             $assignmentLink,
-            $schoolName
+            $schoolName,
+            'https://iskool.online/assets/icons/assignment.png'
         );
     }
 

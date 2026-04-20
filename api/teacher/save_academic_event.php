@@ -91,6 +91,12 @@ $learnersStmt->execute();
 $learners = $learnersStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $learnersStmt->close();
 
+// ── School name ──
+$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
+    ? $snRow['setting_value']
+    : 'iSkool';
+
 $notifTitle   = "📅 Academic Calendar — {$className}";
 $notifMessage = "{$title} on {$formattedDate}";
 
@@ -100,7 +106,9 @@ foreach ($learners as $learner) {
         $learner['student_email'],
         $notifTitle,
         $notifMessage,
-        'learner_dashboard.php'
+        'learner_dashboard.php',
+        $schoolName,
+        'https://iskool.online/assets/icons/calendar.png'
     );
 }
 

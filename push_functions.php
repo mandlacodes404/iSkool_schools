@@ -5,7 +5,7 @@ use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
 // Added $targetUrl as a 5th parameter and $schoolName as a 6th parameter
-function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool') {
+function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool', $icon = 'https://iskool.online/uploads/schools/default_school.png') {
     // 1. Get all device subscriptions for this email
     $stmt = $conn->prepare("SELECT endpoint, p256dh, auth FROM user_subscriptions WHERE user_email = ?");
     $stmt->bind_param("s", $email);
@@ -40,7 +40,7 @@ function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $sch
             json_encode([
                 'title' => $schoolName,          // short, bold — e.g. "Greenwood High"
                  'body'  => $title . "\n" . $message,  // the actual content, shown in normal weight
-                'icon'  => 'https://iskool.online/uploads/schools/default_school.png',
+                'icon'  => $icon,
                 // --- NEW: This is the payload the Service Worker reads ---
                 'data'  => [
                     'url' => $targetUrl 

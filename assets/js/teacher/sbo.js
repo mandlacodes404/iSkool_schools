@@ -289,7 +289,7 @@ function renderTeacherSyllabus(data) {
         <div class="sbo-desktop-layout">
             <!-- Left Sidebar -->
             <div class="sbo-sidebar">
-                <div class="sbo-sidebar-header">All Syllabi</div>
+                <div class="sbo-sidebar-header">All Syllabus</div>
                 <div class="sbo-sidebar-scroll">
                     ${sidebarHtml}
                 </div>
