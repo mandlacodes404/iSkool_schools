@@ -3,6 +3,13 @@ require __DIR__ . '/vendor/autoload.php';
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
+// Fetch school name from DB
+$schoolName = 'iSkool'; // fallback
+$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $schoolName = trim($row['setting_value']);
+}
+
 // Added $targetUrl as a 5th parameter with a default of null
 function sendPushToUser($conn, $email, $title, $message, $targetUrl = null) {
     // 1. Get all device subscriptions for this email
@@ -37,8 +44,8 @@ function sendPushToUser($conn, $email, $title, $message, $targetUrl = null) {
         $webPush->queueNotification(
             $subscription,
             json_encode([
-                'title' => $title,
-                'body'  => $message,
+                'title' => $schoolName,          // short, bold — e.g. "Greenwood High"
+                 'body'  => $title . "\n" . $message,  // the actual content, shown in normal weight
                 'icon'  => 'https://iskool.online/uploads/schools/default_school.png',
                 // --- NEW: This is the payload the Service Worker reads ---
                 'data'  => [
