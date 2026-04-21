@@ -174,12 +174,22 @@
   .hero {
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0 48px 96px;
+    align-items: center;
+    padding: 0 48px;
+    padding-top: 80px;
     position: relative;
     background: var(--bg);
     overflow: hidden;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
   }
 
   .hero-noise {
@@ -192,24 +202,20 @@
 
   .hero-glow {
     position: absolute;
-    width: 600px;
-    height: 600px;
+    width: 500px; height: 500px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(204,120,92,0.08) 0%, transparent 70%);
-    top: 10%;
-    right: -100px;
+    background: radial-gradient(circle, rgba(204,120,92,0.07) 0%, transparent 70%);
+    top: 10%; right: -80px;
     pointer-events: none;
     animation: pulse 8s ease-in-out infinite;
   }
 
   .hero-glow-2 {
     position: absolute;
-    width: 400px;
-    height: 400px;
+    width: 350px; height: 350px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(204,120,92,0.05) 0%, transparent 70%);
-    bottom: 20%;
-    left: -50px;
+    background: radial-gradient(circle, rgba(204,120,92,0.04) 0%, transparent 70%);
+    bottom: 20%; left: -40px;
     pointer-events: none;
     animation: pulse 10s ease-in-out infinite reverse;
   }
@@ -219,24 +225,26 @@
     50% { transform: scale(1.1); opacity: 0.7; }
   }
 
+  /* Left text column */
+  .hero-left { position: relative; z-index: 1; }
+
   .hero-tag {
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--accent);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     opacity: 0;
     animation: fadeUp 0.8s ease forwards 0.2s;
   }
 
   .hero-headline {
     font-family: var(--serif);
-    font-size: clamp(52px, 7vw, 96px);
-    line-height: 1.0;
+    font-size: clamp(36px, 4.2vw, 66px);
+    line-height: 1.05;
     letter-spacing: -0.03em;
     color: var(--text);
-    max-width: 900px;
     opacity: 0;
     animation: fadeUp 0.8s ease forwards 0.4s;
   }
@@ -247,23 +255,110 @@
   }
 
   .hero-sub {
-    margin-top: 28px;
-    font-size: 17px;
+    margin-top: 22px;
+    font-size: 15px;
     font-weight: 300;
     color: var(--text-muted);
-    max-width: 520px;
-    line-height: 1.7;
+    max-width: 420px;
+    line-height: 1.75;
     opacity: 0;
     animation: fadeUp 0.8s ease forwards 0.6s;
   }
 
   .hero-actions {
-    margin-top: 44px;
+    margin-top: 36px;
     display: flex;
     align-items: center;
     gap: 20px;
     opacity: 0;
     animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  /* Right animation box — Claude login card style */
+  .hero-right {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1s;
+  }
+
+  .anim-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border-hover);
+    border-radius: 16px;
+    padding: 56px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 420px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.4) inset,
+      0 -1px 0 0 rgba(0,0,0,0.04) inset,
+      0 24px 64px rgba(26,26,25,0.06),
+      0 4px 12px rgba(26,26,25,0.04);
+  }
+
+  .anim-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(204,120,92,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* The SVG illustration area */
+  .anim-stage {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .anim-stage svg { overflow: visible; }
+
+  /* Label below illustration */
+  .anim-label {
+    margin-top: 20px;
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.25;
+    text-align: center;
+    color: var(--text);
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .anim-sub {
+    margin-top: 8px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* Progress dots */
+  .anim-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: 28px;
+  }
+  .anim-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border-hover);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .anim-dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
   }
 
   .btn-primary {
@@ -889,10 +984,17 @@
 
     /* Hero */
     .hero {
-      padding: 0 20px 72px;
+      padding: 100px 20px 64px;
       min-height: 100svh;
+      align-items: flex-start;
     }
-    .hero-headline { font-size: clamp(40px, 11vw, 64px); }
+    .hero-inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .hero-right { order: -1; }
+    .anim-box { min-height: 360px; padding: 44px 28px 32px; }
+    .hero-headline { font-size: clamp(34px, 9vw, 52px); }
     .hero-sub { font-size: 15px; max-width: 100%; }
     .hero-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
     .btn-primary { width: 100%; text-align: center; padding: 14px 28px; }
@@ -998,22 +1100,48 @@
   <div class="hero-glow"></div>
   <div class="hero-glow-2"></div>
 
-  <p class="hero-tag">Building what's missing</p>
-  <h1 class="hero-headline">
-    Category-defining software<br>
-    for <em>underserved markets</em>
-  </h1>
-  <p class="hero-sub">
-    We find the blind spots. We build in blue oceans. We don't add noise to crowded markets — we create clarity where there was none.
-  </p>
-  <div class="hero-actions">
-    <a href="#portfolio" class="btn-primary">Our portfolio</a>
-    <a href="#philosophy" class="btn-ghost">
-      Our story
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
+  <div class="hero-inner">
+    <!-- LEFT: text -->
+    <div class="hero-left">
+      <p class="hero-tag">Building what's missing</p>
+      <h1 class="hero-headline">
+        Category-defining<br>
+        software for<br>
+        <em>underserved markets</em>
+      </h1>
+      <p class="hero-sub">
+        We find the blind spots. We build in blue oceans. We don't add noise to crowded markets — we create clarity where there was none.
+      </p>
+      <div class="hero-actions">
+        <a href="#portfolio" class="btn-primary">Our portfolio</a>
+        <a href="#philosophy" class="btn-ghost">
+          Our story
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT: animation box -->
+    <div class="hero-right">
+      <div class="anim-box">
+        <div class="anim-stage">
+          <!-- SVGs injected by JS -->
+          <svg id="heroSvg" width="130" height="130" viewBox="0 0 130 130" style="overflow:visible"></svg>
+        </div>
+        <p class="anim-label" id="heroLabel">Amplify your ideas</p>
+        <p class="anim-sub" id="heroSub">Keep thinking with Claude</p>
+        <div class="anim-dots" id="heroDots">
+          <div class="anim-dot active"></div>
+          <div class="anim-dot"></div>
+          <div class="anim-dot"></div>
+          <div class="anim-dot"></div>
+          <div class="anim-dot"></div>
+          <div class="anim-dot"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1083,7 +1211,7 @@
         <span class="release-date">·</span>
         <span class="release-category">Pilot</span>
       </div>
-      <h3 class="release-card-title">Landulwazi Comprehensive School goes live on iSkool</h3>
+      <h3 class="release-card-title">Schools get the opportunity to use iSkool for free</h3>
       <p class="release-card-desc">Our first active pilot deployment — real educators, real learners, real results.</p>
       <a href="#" class="release-link">
         Read more
@@ -1400,7 +1528,189 @@
 </footer>
 
 <script>
-  // Nav scroll effect
+// ── HERO ANIMATION ENGINE ──────────────────────────────────────────
+const SLIDES = [
+  {
+    label: 'Amplify your ideas',
+    sub: 'Keep thinking with us',
+    draw: (svg) => {
+      // Megaphone
+      addPath(svg, 'M20,45 L20,65 L35,65 L35,45 L80,22 L80,88 L35,65 M35,65 L35,82 Q35,90 43,90 Q51,90 51,82 L51,65', '#1a1a19', 2.2, 1300, 0);
+      addPath(svg, 'M90,44 Q100,55 90,66', '#1a1a19', 2, 500, 1200);
+      addPath(svg, 'M98,36 Q114,55 98,74', '#1a1a19', 2, 500, 1400);
+      addPath(svg, 'M106,27 Q128,55 106,83', '#1a1a19', 2, 500, 1600);
+      addCircle(svg, 27, 55, 5, '#cc785c', 2000);
+    }
+  },
+  {
+    label: 'Collaborate & explore',
+    sub: 'Meet your thinking partner',
+    draw: (svg) => {
+      // Two figures
+      addPath(svg, 'M32,95 Q19,80 22,60 Q24,44 32,38 Q44,25 52,38 Q58,48 52,62 Q46,76 38,80 Q32,84 30,95 M38,60 Q46,65 52,58 M38,68 Q32,78 24,72', '#1a1a19', 2.2, 1800, 0);
+      addCircle(svg, 42, 22, 8, '#cc785c', 1700);
+      addPath(svg, 'M98,95 Q112,78 108,58 Q106,42 98,36 Q86,22 78,36 Q72,46 78,62 Q84,78 92,82 Q100,86 102,95 M92,60 Q84,64 78,58 M90,70 Q98,80 106,74', '#1a1a19', 2.2, 1800, 400);
+      addCircle(svg, 88, 22, 8, '#9a9489', 2100);
+      addPath(svg, 'M54,55 Q65,40 76,55', 'rgba(26,26,25,0.3)', 1.5, 700, 2600);
+    }
+  },
+  {
+    label: 'Build & create',
+    sub: 'The AI for problem solvers',
+    draw: (svg) => {
+      // Code brackets
+      addPath(svg, 'M42,18 L30,18 Q22,18 22,26 L22,80 Q22,88 30,88 L42,88', '#1a1a19', 2.5, 900, 0);
+      addPath(svg, 'M82,18 L94,18 Q102,18 102,26 L102,80 Q102,88 94,88 L82,88', '#1a1a19', 2.5, 900, 200);
+      addPath(svg, 'M72,14 L54,90', '#cc785c', 3, 600, 1000);
+      addPath(svg, 'M62,6 L42,-2 M62,6 L82,-2 M62,6 L62,16 M62,96 L42,104 M62,96 L82,104 M62,96 L62,86', 'rgba(26,26,25,0.4)', 1.5, 800, 1500);
+      addCircle(svg, 62, 6, 4, '#cc785c', 2200);
+      addCircle(svg, 62, 96, 4, '#1a1a19', 2400);
+    }
+  },
+  {
+    label: 'Endless possibilities',
+    sub: 'How you can use Claude',
+    draw: (svg) => {
+      // OK hand
+      addPath(svg, 'M36,80 Q26,72 24,60 Q22,46 30,40 Q38,34 46,42 Q50,48 48,56 Q46,62 40,64 M48,56 Q50,36 54,28 Q58,18 66,20 Q74,22 72,34 Q70,44 64,50 M64,50 Q68,32 72,26 Q76,18 84,20 Q92,22 90,34 Q88,44 82,52 M82,52 Q86,38 88,34 Q92,26 98,28 Q104,32 102,44 Q100,56 90,64 M40,64 L42,82 Q42,96 50,100 Q58,104 62,96 L90,64', '#1a1a19', 2.2, 2300, 0);
+      addPath(svg, 'M14,38 L5,29 M9,51 L-1,49 M15,63 L5,70', '#cc785c', 2, 400, 2200);
+    }
+  },
+  {
+    label: 'See further, think deeper',
+    sub: 'A space to think',
+    draw: (svg) => {
+      // Eye
+      addPath(svg, 'M5,55 Q40,10 65,10 Q90,10 125,55 Q90,100 65,100 Q40,100 5,55 Z', '#1a1a19', 2.2, 1500, 0);
+      // Iris (circle via dash trick)
+      const iris = addCirclePath(svg, 65, 55, 22, '#1a1a19', 2, 700, 1400);
+      addCircle(svg, 65, 55, 9, '#cc785c', 2000);
+      addPath(svg, 'M48,36 L34,22 M82,36 L96,22 M48,74 L34,88 M82,74 L96,88', 'rgba(26,26,25,0.2)', 1, 600, 2500);
+      // Stars
+      addPath(svg, 'M18,22 L20,16 L22,22 L28,24 L22,26 L20,32 L18,26 L12,24 Z', '#1a1a19', 1.6, 450, 2800);
+      addPath(svg, 'M108,16 L110,11 L112,16 L117,18 L112,20 L110,25 L108,20 L103,18 Z', '#1a1a19', 1.6, 450, 3000);
+    }
+  },
+  {
+    label: 'Spark new ideas',
+    sub: 'Brainstorm anything',
+    draw: (svg) => {
+      // Lightbulb
+      addPath(svg, 'M65,8 Q90,8 96,30 Q102,50 88,66 Q80,76 78,86 L78,98 Q78,104 72,106 L58,106 Q52,104 52,98 L52,86 Q50,76 42,66 Q28,50 34,30 Q40,8 65,8 Z M54,106 L76,106 M54,114 L76,114 M58,114 L58,122 Q58,128 65,128 Q72,128 72,122 L72,114', '#1a1a19', 2.2, 1900, 0);
+      addPath(svg, 'M65,0 L65,-9 M90,6 L96,0 M108,28 L117,23 M22,28 L13,23 M40,6 L34,0', '#cc785c', 2, 300, 1800);
+      addCircle(svg, 56, 36, 5, '#9a9489', 2200);
+    }
+  }
+];
+
+// Helpers
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+function addPath(svg, d, stroke, sw, drawMs, delayMs) {
+  const el = document.createElementNS(SVG_NS, 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', sw);
+  el.setAttribute('stroke-linecap', 'round');
+  el.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(el);
+  const L = Math.ceil(el.getTotalLength ? el.getTotalLength() : 200);
+  el.style.strokeDasharray = L;
+  el.style.strokeDashoffset = L;
+  setTimeout(() => {
+    el.style.transition = `stroke-dashoffset ${drawMs}ms cubic-bezier(0.4,0,0.2,1)`;
+    el.style.strokeDashoffset = 0;
+  }, delayMs + 16);
+  return el;
+}
+
+function addCircle(svg, cx, cy, r, fill, delayMs) {
+  const el = document.createElementNS(SVG_NS, 'circle');
+  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+  el.setAttribute('r', 0); el.setAttribute('fill', fill);
+  el.style.opacity = 0;
+  svg.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = `opacity 350ms ease, r 350ms cubic-bezier(0.34,1.56,0.64,1)`;
+    el.style.opacity = 1;
+    el.setAttribute('r', r);
+  }, delayMs + 16);
+  return el;
+}
+
+function addCirclePath(svg, cx, cy, r, stroke, sw, drawMs, delayMs) {
+  const el = document.createElementNS(SVG_NS, 'circle');
+  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+  el.setAttribute('r', r);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', stroke);
+  el.setAttribute('stroke-width', sw);
+  const circ = Math.ceil(2 * Math.PI * r);
+  el.style.strokeDasharray = circ;
+  el.style.strokeDashoffset = circ;
+  svg.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = `stroke-dashoffset ${drawMs}ms ease`;
+    el.style.strokeDashoffset = 0;
+  }, delayMs + 16);
+  return el;
+}
+
+// Fade text in/out
+function fadeText(el, text, duration = 300) {
+  el.style.transition = `opacity ${duration}ms ease`;
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.textContent = text;
+    el.style.opacity = 1;
+  }, duration + 50);
+}
+
+// Main loop
+let currentSlide = 0;
+const heroSvg   = document.getElementById('heroSvg');
+const heroLabel = document.getElementById('heroLabel');
+const heroSub   = document.getElementById('heroSub');
+const dots      = document.querySelectorAll('.anim-dot');
+
+async function runSlide(idx) {
+  const slide = SLIDES[idx];
+
+  // Update dots
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+  // Clear SVG
+  heroSvg.innerHTML = '';
+
+  // Fade in text
+  fadeText(heroLabel, slide.label);
+  fadeText(heroSub, slide.sub);
+
+  // Draw paths
+  slide.draw(heroSvg);
+
+  // Hold, then erase with fade
+  await delay(3800);
+
+  // Fade SVG out
+  heroSvg.style.transition = 'opacity 500ms ease';
+  heroSvg.style.opacity = 0;
+  await delay(550);
+  heroSvg.style.opacity = 1;
+  heroSvg.style.transition = '';
+
+  currentSlide = (idx + 1) % SLIDES.length;
+  setTimeout(() => runSlide(currentSlide), 100);
+}
+
+// Kick off after page load
+setTimeout(() => runSlide(0), 1200);
+// ── END HERO ANIMATION ─────────────────────────────────────────────
+
+
+// Nav scroll effect
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 40);
