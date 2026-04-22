@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iSkool — LMS</title>
+<title>iSkool — LMS by Sonnet</title>
 <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <style>
@@ -48,6 +48,14 @@ nav {
   text-decoration: none; color: #111; letter-spacing: -0.02em;
 }
 .nav-logo svg { width: 30px; height: 30px; }
+.nav-logo-text { display: flex; flex-direction: column; gap: 1px; }
+.nav-logo-byline {
+  font-size: 10px;
+  font-weight: 400;
+  color: #aaa;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
 .nav-links { display: flex; gap: 28px; list-style: none; }
 .nav-links a { text-decoration: none; color: #666; font-weight: 400; font-size: 14px; transition: color 0.2s; }
 .nav-links a:hover { color: #111; }
@@ -623,7 +631,10 @@ nav {
         <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/>
       </g>
     </svg>
-    iSkool
+    <div class="nav-logo-text">
+      iSkool
+      <span class="nav-logo-byline">by Sonnet</span>
+    </div>
   </a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
@@ -1316,18 +1327,127 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu();
 </section>
 
 <style>
-.footer { background: #0a0a0a; color: #ddd; padding: 80px 5% 40px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 6; }
-.footer-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
-.footer-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 600; color: white; text-decoration: none; letter-spacing: -0.02em; }
-.footer-logo svg { width: 32px; height: 32px; }
-.footer-tagline { font-size: 15px; color: rgba(255,255,255,0.35); max-width: 400px; margin: 0 auto 44px; line-height: 1.7; font-weight: 400; }
-.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; margin-bottom: 60px; font-size: 15px; }
-.footer-links a { color: #ccc; text-decoration: none; transition: color 0.2s; }
-.footer-links a:hover { color: var(--teal); }
-.footer-copyright { color: #666; font-size: 13px; margin-bottom: 40px; }
-.footer-cta { display: inline-flex; align-items: center; gap: 10px; background: rgba(245,200,66,0.9); color: #111; font-weight: 500; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 20px rgba(245,200,66,0.2); transition: all 0.2s ease; }
-.footer-cta:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(245,200,66,0.45); }
-@media (max-width: 600px) { .footer { padding: 60px 5% 50px; } .footer-links { gap: 20px; font-size: 14px; } .footer-logo { font-size: 28px; } .footer-tagline { font-size: 15.5px; } }
+/* ── FOOTER (Sonnet-style grid) ── */
+.footer {
+  background: #191918;
+  color: #ede8df;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  border-radius: 0;
+  margin-top: 0;
+  padding: 64px 5% 48px;
+  position: relative;
+  z-index: 6;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1100px;
+  margin: 0 auto 64px;
+}
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+}
+.footer-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.footer-brand-logo svg { width: 28px; height: 28px; }
+.footer-brand-logo span {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ede8df;
+  letter-spacing: -0.02em;
+}
+.footer-brand-desc {
+  font-size: 14px;
+  color: #8a8478;
+  line-height: 1.7;
+  max-width: 260px;
+}
+/* "A Sonnet product" badge */
+.footer-sonnet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  padding: 6px 12px;
+  border: 1px solid rgba(237,232,223,0.1);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #4a4740;
+  text-decoration: none;
+  width: fit-content;
+  transition: border-color 0.2s, color 0.2s;
+  letter-spacing: 0.02em;
+}
+.footer-sonnet-badge:hover { border-color: rgba(237,232,223,0.25); color: #8a8478; }
+.footer-sonnet-badge svg { width: 14px; height: 14px; fill: #4a4740; }
+.footer-col-title {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4a4740;
+  margin-bottom: 20px;
+}
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-links a {
+  font-size: 14px;
+  color: #8a8478;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: #ede8df; }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 32px;
+  border-top: 1px solid rgba(237,232,223,0.08);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.footer-copy {
+  font-size: 13px;
+  color: #4a4740;
+}
+.footer-bottom-links {
+  display: flex;
+  gap: 24px;
+}
+.footer-bottom-links a {
+  font-size: 13px;
+  color: #4a4740;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-bottom-links a:hover { color: #8a8478; }
+@media (max-width: 768px) {
+  .footer { padding: 48px 5% 40px; }
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .footer-top > .footer-brand {
+    grid-column: 1 / -1;
+  }
+  .footer-brand-desc { max-width: 100%; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+@media (max-width: 480px) {
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-top > .footer-brand { grid-column: 1; }
+}
 </style>
 
 <!-- ===================== FEATURES SECTION ===================== -->
@@ -1690,7 +1810,7 @@ setTimeout(gsRunGoLive, 1400);
 </script>
 
 <style>
-.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 28px 28px 0 0; margin-top: -28px; position: relative; z-index: 2; }
+.faq-section { background: #f8f5f0; padding: 100px 5% 120px; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 0; margin-top: 0; position: relative; z-index: 2; }
 .faq-inner { max-width: 720px; margin: 0 auto; }
 .faq-header { text-align: center; margin-bottom: 60px; }
 .faq-small { color: rgba(245,200,66,0.7); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
@@ -1785,15 +1905,63 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
 </script>
 
 <footer class="footer">
-  <div class="footer-inner">
-    <a href="#" class="footer-logo">
-      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z m-675 -1313 c220 -112 177 -430 -65 -480 -151 -31 -300 93 -300 250 0 108 76 213 175 245 56 18 138 12 190 -15z m2656 -1035 c69 -20 125 -65 160 -127 38 -69 41 -170 7 -234 -70 -131 -234 -182 -358 -110 -190 112 -162 395 47 467 65 22 81 23 144 4z m-3767 -518 c123 -62 173 -222 106 -345 -69 -126 -213 -173 -334 -107 -66 36 -107 85 -126 149 -20 67 -19 105 6 170 51 138 213 200 348 133z m2463 -1639 c66 -46 81 -141 33 -203 -76 -101 -209 -79 -250 41 -9 27 -10 47 -2 76 11 45 64 104 99 111 37 8 90 -3 120 -25z"/></g></svg>
-      iSkool
-    </a>
-    <p class="footer-tagline">The only LMS built for schools.</p>
-    <div class="footer-links"><a href="privacy-policy.html">Privacy Policy</a><a href="terms-of-service.html">Terms of Service</a><a href="affiliate-programme.html">Partner Programme</a><a href="contact.html">Contact</a></div>
-    <div class="footer-copyright">© 2026 iSkool. All rights reserved.</div>
-    
+  <div class="footer-top">
+
+    <!-- Brand column -->
+    <div class="footer-brand">
+      <a href="#" class="footer-brand-logo">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+        <span>iSkool</span>
+      </a>
+      <p class="footer-brand-desc">The only LMS built from the ground up for South African schools — CAPS-aligned, educator-first, and built for every classroom.</p>
+      <!-- A Sonnet product badge -->
+      <a href="https://sonnet.co.za" class="footer-sonnet-badge" target="_blank" rel="noopener">
+        <svg viewBox="0 0 779 700" xmlns="http://www.w3.org/2000/svg"><path d="M5625 5520 c-11 -5 -132 -51 -270 -101 -255 -92 -636 -232 -667 -244 -10 -4 -18 -10 -18 -14 0 -4 51 -35 114 -70 63 -34 121 -68 130 -74 14 -11 5 -26 -75 -125 -50 -62 -94 -111 -98 -109 -30 16 -115 51 -192 80 -204 76 -409 116 -640 124 -474 16 -865 -114 -1131 -378 -166 -166 -268 -375 -299 -614 -37 -297 49 -563 246 -760 201 -202 472 -328 990 -459 510 -130 688 -217 767 -376 18 -36 22 -63 22 -135 1 -79 -3 -98 -28 -153 -63 -136 -221 -224 -450 -253 -289 -35 -649 52 -926 224 -84 53 -193 133 -274 202 l-65 55 -73 -88 c-115 -139 -352 -433 -368 -458 -13 -21 -12 -25 10 -50 14 -14 66 -59 115 -99 319 -257 697 -419 1124 -482 169 -25 486 -22 641 5 315 57 544 164 737 346 228 215 343 483 343 800 0 383 -155 652 -495 863 -160 100 -424 194 -860 308 -444 116 -597 191 -658 323 -32 69 -31 198 3 267 50 103 165 186 317 227 62 16 108 21 228 21 133 1 163 -2 260 -27 189 -48 324 -115 545 -269 l114 -80 21 28 c11 15 47 62 80 104 34 42 106 135 160 206 103 135 312 403 326 419 6 6 55 -36 124 -104 63 -62 117 -111 120 -108 3 2 16 128 30 279 14 151 36 383 48 517 25 261 25 256 -28 232z" transform="translate(0,700) scale(0.1,-0.1)"/></svg>
+        A Sonnet product
+      </a>
+    </div>
+
+    <!-- Product column -->
+    <div>
+      <p class="footer-col-title">Product</p>
+      <ul class="footer-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#demo" onclick="openDemoModal();return false;">Live Demo</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <!-- Company column -->
+    <div>
+      <p class="footer-col-title">Company</p>
+      <ul class="footer-links">
+        <li><a href="https://sonnet.co.za" target="_blank" rel="noopener">About Sonnet</a></li>
+        <li><a href="#">News</a></li>
+        <li><a href="affiliate-programme.html">Partner Programme</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Legal column -->
+    <div>
+      <p class="footer-col-title">Legal</p>
+      <ul class="footer-links">
+        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="terms-of-service.html">Terms of Service</a></li>
+        <li><a href="#">POPIA Compliance</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 iSkool by Sonnet. All rights reserved.</p>
+    <div class="footer-bottom-links">
+      <a href="privacy-policy.html">Privacy</a>
+      <a href="terms-of-service.html">Terms</a>
+      <a href="contact.html">Contact</a>
+    </div>
   </div>
 </footer>
 
