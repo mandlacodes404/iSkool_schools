@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>News & Updates — iSkool by Sonnet</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root { --teal:#4fd1c5; --gold:#f5c842; --accent:#d97706; --dark:#0f0f12; --cream:#f5f0eb; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--cream);color:#111;line-height:1.6;overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(245,240,235,0.97);backdrop-filter:blur(12px);padding:14px 5%;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;text-decoration:none;color:#111;letter-spacing:-0.02em;}
+.nav-logo svg{width:30px;height:30px;}
+.nav-logo-text{display:flex;flex-direction:column;gap:1px;}
+.nav-logo-byline{font-size:10px;font-weight:400;color:#aaa;letter-spacing:0.04em;line-height:1;}
+.nav-back{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:400;color:#555;text-decoration:none;transition:color 0.2s;}
+.nav-back:hover{color:var(--accent);}
+
+/* HERO */
+.news-hero{background:var(--cream);padding:148px 5% 72px;position:relative;overflow:hidden;}
+.news-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#ddd 1px,transparent 1px);background-size:28px 28px;opacity:0.45;pointer-events:none;}
+.news-hero-inner{max-width:1100px;margin:0 auto;position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.news-eyebrow{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
+.news-hero h1{font-family:'DM Sans',sans-serif;font-size:clamp(40px,6vw,68px);font-weight:700;line-height:1.05;letter-spacing:-0.03em;color:#111;}
+.news-hero h1 em{font-style:italic;font-weight:400;color:#888;}
+.news-meta-row{display:flex;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.news-count{font-size:13px;color:#888;}
+/* Filter pills */
+.filter-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+.pill{padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid #ddd;background:transparent;color:#666;cursor:pointer;transition:all 0.18s;}
+.pill:hover{border-color:#aaa;color:#111;}
+.pill.active{background:#111;color:#f5f0eb;border-color:#111;}
+
+/* FEATURED POST */
+.featured-wrap{max-width:1100px;margin:0 auto;padding:64px 5% 0;}
+.featured-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#bbb;margin-bottom:28px;}
+.featured-card{
+  background:#111;border-radius:20px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:380px;cursor:pointer;
+  transition:transform 0.25s;
+}
+.featured-card:hover{transform:translateY(-3px);}
+.featured-card-content{padding:52px 48px;display:flex;flex-direction:column;justify-content:space-between;}
+.featured-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);color:var(--gold);padding:5px 14px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:24px;width:fit-content;}
+.featured-card h2{font-family:'DM Sans',sans-serif;font-size:clamp(22px,3vw,34px);font-weight:700;line-height:1.15;letter-spacing:-0.02em;color:#f5f0eb;margin-bottom:16px;}
+.featured-card-desc{font-size:15px;color:rgba(245,240,235,0.5);line-height:1.75;}
+.featured-card-footer{margin-top:32px;display:flex;align-items:center;justify-content:space-between;}
+.featured-date{font-size:13px;color:rgba(245,240,235,0.3);}
+.featured-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--gold);text-decoration:none;}
+.featured-visual{background:linear-gradient(135deg,#1a1a18 0%,#0d0d0c 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.featured-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 40% 50%,rgba(245,200,66,0.1) 0%,transparent 60%);}
+.featured-visual-icon{font-size:80px;position:relative;z-index:1;opacity:0.9;}
+
+/* NEWS GRID */
+.news-grid-section{max-width:1100px;margin:0 auto;padding:64px 5% 100px;}
+.news-grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;}
+.news-grid-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#bbb;}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+
+.news-card{
+  background:#f0ece4;border:1px solid rgba(0,0,0,0.07);
+  border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:border-color 0.2s,transform 0.2s;
+  display:flex;flex-direction:column;
+}
+.news-card:hover{border-color:rgba(0,0,0,0.18);transform:translateY(-2px);}
+.news-card-visual{height:160px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden;}
+.news-card-visual.teal{background:linear-gradient(135deg,rgba(79,209,197,0.15),rgba(79,209,197,0.05));}
+.news-card-visual.gold{background:linear-gradient(135deg,rgba(245,200,66,0.15),rgba(245,200,66,0.05));}
+.news-card-visual.dark{background:linear-gradient(135deg,#1a1a18,#111);color:#fff;}
+.news-card-body{padding:28px 28px 24px;flex:1;display:flex;flex-direction:column;}
+.news-card-tag{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.news-card h3{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;line-height:1.25;letter-spacing:-0.01em;color:#111;margin-bottom:10px;}
+.news-card-desc{font-size:14px;color:#666;line-height:1.7;flex:1;}
+.news-card-footer{margin-top:20px;display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid rgba(0,0,0,0.07);}
+.news-card-date{font-size:12px;color:#aaa;}
+.news-card-link{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;}
+.news-card-link:hover{color:#111;}
+
+/* NEWSLETTER BAND */
+.newsletter-band{background:#f8f5f0;padding:80px 5%;text-align:center;border-top:1px solid rgba(0,0,0,0.07);}
+.newsletter-band h2{font-family:'DM Sans',sans-serif;font-size:clamp(24px,3.5vw,38px);font-weight:700;letter-spacing:-0.02em;color:#111;margin-bottom:12px;}
+.newsletter-band p{font-size:16px;color:#666;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;}
+.newsletter-form{display:flex;gap:10px;justify-content:center;max-width:440px;margin:0 auto;}
+.newsletter-input{flex:1;padding:12px 18px;border:1.5px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:#fff;color:#111;outline:none;transition:border-color 0.2s;}
+.newsletter-input:focus{border-color:#aaa;}
+.newsletter-btn{padding:12px 24px;background:#111;color:#f5f0eb;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+.newsletter-btn:hover{background:#333;}
+
+/* FOOTER (shared) */
+.page-footer{background:#191918;color:#ede8df;padding:64px 5% 48px;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;max-width:1100px;margin:0 auto 64px;}
+.footer-brand-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:16px;}
+.footer-brand-logo svg{width:26px;height:26px;}
+.footer-brand-logo span{font-size:16px;font-weight:600;color:#ede8df;letter-spacing:-0.02em;}
+.footer-brand-desc{font-size:14px;color:#8a8478;line-height:1.7;max-width:260px;}
+.footer-sonnet-badge{display:inline-flex;align-items:center;gap:7px;margin-top:20px;padding:6px 12px;border:1px solid rgba(237,232,223,0.1);border-radius:4px;font-size:12px;color:#4a4740;text-decoration:none;width:fit-content;transition:border-color 0.2s,color 0.2s;}
+.footer-sonnet-badge:hover{border-color:rgba(237,232,223,0.25);color:#8a8478;}
+.footer-sonnet-badge svg{width:14px;height:14px;fill:#4a4740;}
+.footer-col-title{font-size:12px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4a4740;margin-bottom:20px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.footer-links a{font-size:14px;color:#8a8478;text-decoration:none;transition:color 0.2s;}
+.footer-links a:hover{color:#ede8df;}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid rgba(237,232,223,0.08);max-width:1100px;margin:0 auto;}
+.footer-copy{font-size:13px;color:#4a4740;}
+.footer-bottom-links{display:flex;gap:24px;}
+.footer-bottom-links a{font-size:13px;color:#4a4740;text-decoration:none;transition:color 0.2s;}
+.footer-bottom-links a:hover{color:#8a8478;}
+
+/* SR */
+.sr{opacity:0;transform:translateY(28px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.sr.sr-visible{opacity:1;transform:translateY(0);}
+.sr-d1{transition-delay:0.1s;}.sr-d2{transition-delay:0.2s;}.sr-d3{transition-delay:0.3s;}
+
+/* Responsive */
+@media(max-width:900px){
+  .news-grid{grid-template-columns:1fr 1fr;}
+  .featured-card{grid-template-columns:1fr;}
+  .featured-visual{min-height:200px;}
+}
+@media(max-width:600px){
+  .news-grid{grid-template-columns:1fr;}
+  .newsletter-form{flex-direction:column;}
+  .news-hero-inner{flex-direction:column;align-items:flex-start;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:28px;}
+  .footer-top>div:first-child{grid-column:1/-1;}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:16px;}
+}
+@media(max-width:400px){.footer-top{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="iskool.html" class="nav-logo">
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none">
+        <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/>
+      </g>
+    </svg>
+    <div class="nav-logo-text">iSkool<span class="nav-logo-byline">by Sonnet</span></div>
+  </a>
+  <a href="iskool.html" class="nav-back">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to iSkool
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="news-hero">
+  <div class="news-hero-inner">
+    <div>
+      <div class="news-eyebrow">News & Updates</div>
+      <h1>What's happening<br>at <em>iSkool.</em></h1>
+      <div class="news-meta-row">
+        <span class="news-count">Product launches, pilot stories, and platform updates.</span>
+      </div>
+    </div>
+    <div class="filter-pills">
+      <button class="pill active" data-filter="all">All</button>
+      <button class="pill" data-filter="product">Product</button>
+      <button class="pill" data-filter="pilot">Pilot Stories</button>
+      <button class="pill" data-filter="company">Company</button>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<div class="featured-wrap sr">
+  <div class="featured-label">Latest update</div>
+  <div class="featured-card">
+    <div class="featured-card-content">
+      <div>
+        <div class="featured-tag">🚀 Product Launch</div>
+        <h2>iSkool Version 1 is now live for South African schools</h2>
+        <p class="featured-card-desc">After months of piloting with schools across Gauteng and the Western Cape, iSkool Version 1 is officially open to applications. Schools can now apply for a free pilot and get fully set up within 5–7 working days.</p>
+      </div>
+      <div class="featured-card-footer">
+        <span class="featured-date">April 2026</span>
+        <a href="iskool.html" class="featured-link">Read more →</a>
+      </div>
+    </div>
+    <div class="featured-visual">
+      <div class="featured-visual-icon">🎓</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWS GRID -->
+<section class="news-grid-section">
+  <div class="news-grid-header sr">
+    <div class="news-grid-title">All updates</div>
+  </div>
+  <div class="news-grid" id="newsGrid">
+
+    <div class="news-card sr" data-category="product">
+      <div class="news-card-visual gold">📝</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Product</div>
+        <h3>AI Invigilator: how it works and why it matters</h3>
+        <p class="news-card-desc">Our AI Invigilator monitors learner behaviour during live assessments — detecting tab switches, focus loss, and browser exits in real time. Here's a deep dive into how it works.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">March 2026</span>
+          <a href="#" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="news-card sr sr-d1" data-category="pilot">
+      <div class="news-card-visual teal">🏫</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Pilot Story</div>
+        <h3>How Demo School reduced admin time by 60% in 30 days</h3>
+        <p class="news-card-desc">One of our early pilot schools tells the story of how iSkool changed their weekly workflow — from manual markbooks to automated gradebooks and instant parent reports.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">February 2026</span>
+          <a href="#" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="news-card sr sr-d2" data-category="product">
+      <div class="news-card-visual gold">📊</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Product</div>
+        <h3>Introducing the Analytics Dashboard — school-wide insights at a glance</h3>
+        <p class="news-card-desc">Principals and HODs can now view class-level performance, assessment completion rates, and subject averages across the entire school in a single view.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">February 2026</span>
+          <a href="#" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="news-card sr" data-category="company">
+      <div class="news-card-visual dark">✦</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Company</div>
+        <h3>iSkool is now a Sonnet product — what that means for schools</h3>
+        <p class="news-card-desc">iSkool has officially joined the Sonnet portfolio. We explain what this means for our roadmap, our data practices, and our long-term commitment to South African education.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">January 2026</span>
+          <a href="about-sonnet.html" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="news-card sr sr-d1" data-category="pilot">
+      <div class="news-card-visual teal">👩‍🏫</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Pilot Story</div>
+        <h3>Teachers told us what they actually needed. We listened.</h3>
+        <p class="news-card-desc">We interviewed 40 teachers across 8 pilot schools and made 23 product changes in 6 weeks. Here's what we heard and what we built in response.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">January 2026</span>
+          <a href="#" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="news-card sr sr-d2" data-category="product">
+      <div class="news-card-visual gold">📱</div>
+      <div class="news-card-body">
+        <div class="news-card-tag">Product</div>
+        <h3>Parent Portal is live — real-time visibility for families</h3>
+        <p class="news-card-desc">Parents now have their own secure login to view their child's grades, upcoming assessments, and messages from teachers — without needing a WhatsApp group.</p>
+        <div class="news-card-footer">
+          <span class="news-card-date">December 2025</span>
+          <a href="#" class="news-card-link">Read →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter-band sr">
+  <h2>Stay in the loop</h2>
+  <p>Get iSkool product updates, pilot stories, and SA education insights — delivered to your inbox. No spam, ever.</p>
+  <div class="newsletter-form">
+    <input type="email" class="newsletter-input" placeholder="your@school.co.za">
+    <button class="newsletter-btn">Subscribe →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-top">
+    <div>
+      <a href="iskool.html" class="footer-brand-logo">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 805" preserveAspectRatio="xMidYMid meet" style="width:26px;height:26px;"><g transform="translate(0,805) scale(0.1,-0.1)" fill="#d97706" stroke="none"><path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613 -662 -1031 -19 -91 -23 -133 -22 -310 0 -175 3 -220 23 -310 144 -668 664 -1198 1361 -1388 168 -46 276 -63 450 -69 460 -17 809 126 994 407 56 85 81 146 102 250 16 78 17 167 11 1157 l-5 1073 41 11 c156 41 276 181 309 358 19 106 -33 272 -113 360 -143 156 -416 188 -598 71 -181 -115 -248 -356 -156 -558 44 -97 160 -197 268 -232 l37 -12 0 -1101 0 -1102 -24 -66 c-26 -74 -86 -167 -143 -221 -178 -169 -506 -248 -848 -204 -295 38 -533 126 -772 286 -149 99 -270 204 -361 312 -84 100 -196 269 -185 278 4 4 225 100 491 214 l484 207 41 -42 c143 -143 399 -159 575 -36 181 126 239 356 141 555 -132 269 -520 327 -734 108 -90 -93 -132 -212 -121 -346 6 -75 5 -79 -17 -86 -22 -7 -543 -230 -802 -343 -76 -34 -142 -61 -145 -61 -12 0 -60 169 -81 285 -18 103 -20 144 -16 290 3 102 12 200 22 245 64 289 202 537 419 756 221 221 486 385 761 470 50 15 93 32 96 37 4 5 9 43 13 86 20 220 106 414 253 571 96 103 164 155 284 219 217 116 459 171 751 171 l179 0 57 53 c115 108 254 181 440 229 106 28 133 31 277 32 173 1 244 -12 300 -56 59 -46 55 86 55 -2077 l0 -1990 -50 -22 c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81 -136 -257 -255 -494 -333 -159 -53 -216 -76 -283 -117 -155 -94 -260 -224 -319 -393 -40 -117 -49 -212 -49 -500 l1 -274 25 -26 c35 -35 123 -36 157 -2 23 22 23 27 29 320 5 255 8 307 25 367 64 224 192 350 434 428 146 48 177 50 302 28 234 -41 371 -54 563 -55 460 -1 786 101 1025 321 l65 60 105 -9 c331 -27 708 55 938 205 200 131 331 300 387 502 25 91 31 291 11 400 -9 50 -18 99 -21 110 -5 16 9 31 64 73 92 70 244 230 305 321 101 152 159 291 196 471 132 646 -253 1267 -977 1578 -50 21 -52 24 -58 70 -65 488 -433 871 -976 1016 -156 41 -285 58 -470 59 l-171 2 -24 -28 c-33 -39 -31 -81 5 -118 l29 -29 150 0 c510 0 949 -224 1142 -582 76 -142 115 -283 119 -435 l1 -52 78 -30 c186 -71 327 -148 457 -248 353 -272 531 -627 512 -1017 -15 -290 -135 -538 -368 -761 -52 -50 -129 -115 -171 -145 -85 -60 -89 -70 -62 -136 23 -55 51 -198 53 -274 4 -143 -50 -304 -142 -426 -117 -154 -333 -272 -607 -330 -87 -18 -380 -27 -396 -12 -4 4 -2 13 4 20 27 34 66 201 76 328 2 19 4 380 5 803 1 738 2 767 19 767 11 0 47 14 81 31 205 102 298 328 222 543 -74 212 -302 333 -533 285 -77 -16 -180 -74 -233 -130 -82 -87 -135 -242 -120 -344 28 -181 140 -323 298 -376 l52 -18 0 -793 c0 -891 1 -871 -74 -1033 -84 -179 -226 -296 -461 -380 -152 -54 -403 -88 -585 -79 -141 7 -375 30 -383 39 -4 4 2 11 13 17 40 21 191 185 225 244 l35 62 57 5 c105 9 214 76 262 161 31 53 49 144 42 204 -15 111 -109 237 -197 264 l-39 11 -2 2026 -3 2026 -29 58 c-68 139 -240 208 -516 205 -69 0 -138 -3 -155 -5z"/></g></svg>
+        <span>iSkool</span>
+      </a>
+      <p class="footer-brand-desc">The only LMS built from the ground up for South African schools.</p>
+      <a href="about-sonnet.html" class="footer-sonnet-badge">
+        <svg viewBox="0 0 779 700" xmlns="http://www.w3.org/2000/svg"><path d="M5625 5520 c-11 -5 -132 -51 -270 -101 -255 -92 -636 -232 -667 -244 -10 -4 -18 -10 -18 -14 0 -4 51 -35 114 -70 63 -34 121 -68 130 -74 14 -11 5 -26 -75 -125 -50 -62 -94 -111 -98 -109 -30 16 -115 51 -192 80 -204 76 -409 116 -640 124 -474 16 -865 -114 -1131 -378 -166 -166 -268 -375 -299 -614 -37 -297 49 -563 246 -760 201 -202 472 -328 990 -459 510 -130 688 -217 767 -376 18 -36 22 -63 22 -135 1 -79 -3 -98 -28 -153 -63 -136 -221 -224 -450 -253 -289 -35 -649 52 -926 224 -84 53 -193 133 -274 202 l-65 55 -73 -88 c-115 -139 -352 -433 -368 -458 -13 -21 -12 -25 10 -50 14 -14 66 -59 115 -99 319 -257 697 -419 1124 -482 169 -25 486 -22 641 5 315 57 544 164 737 346 228 215 343 483 343 800 0 383 -155 652 -495 863 -160 100 -424 194 -860 308 -444 116 -597 191 -658 323 -32 69 -31 198 3 267 50 103 165 186 317 227 62 16 108 21 228 21 133 1 163 -2 260 -27 189 -48 324 -115 545 -269 l114 -80 21 28 c11 15 47 62 80 104 34 42 106 135 160 206 103 135 312 403 326 419 6 6 55 -36 124 -104 63 -62 117 -111 120 -108 3 2 16 128 30 279 14 151 36 383 48 517 25 261 25 256 -28 232z" transform="translate(0,700) scale(0.1,-0.1)"/></svg>
+        A Sonnet product
+      </a>
+    </div>
+    <div><p class="footer-col-title">Product</p><ul class="footer-links"><li><a href="iskool.html#features">Features</a></li><li><a href="iskool.html#pricing">Pricing</a></li><li><a href="iskool.html#faq">FAQ</a></li></ul></div>
+    <div><p class="footer-col-title">Company</p><ul class="footer-links"><li><a href="about-sonnet.html">About Sonnet</a></li><li><a href="news.html">News</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div><p class="footer-col-title">Legal</p><ul class="footer-links"><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="terms-of-service.html">Terms of Service</a></li><li><a href="popia-compliance.html">POPIA Compliance</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 iSkool by Sonnet. All rights reserved.</p>
+    <div class="footer-bottom-links"><a href="privacy-policy.html">Privacy</a><a href="terms-of-service.html">Terms</a><a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+
+<script>
+// Filter pills
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const filter = pill.dataset.filter;
+    document.querySelectorAll('.news-card').forEach(card => {
+      const match = filter === 'all' || card.dataset.category === filter;
+      card.style.display = match ? '' : 'none';
+    });
+  });
+});
+// SR
+const srObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('sr-visible');srObs.unobserve(e.target);} });
+},{threshold:0.1});
+document.querySelectorAll('.sr').forEach(el=>srObs.observe(el));
+</script>
+</body>
+</html>
