@@ -1356,12 +1356,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu();
   text-decoration: none;
   margin-bottom: 16px;
 }
-.footer-brand-logo svg { width: 28px; height: 28px; }
+.footer-brand-logo svg { width: 42px; height: 42px; }
 .footer-brand-logo span {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: #ede8df;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 .footer-brand-desc {
   font-size: 14px;
@@ -1373,20 +1373,20 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu();
 .footer-sonnet-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   margin-top: 20px;
-  padding: 6px 12px;
-  border: 1px solid rgba(237,232,223,0.1);
-  border-radius: 4px;
-  font-size: 12px;
-  color: #4a4740;
+  padding: 9px 16px;
+  border: 1px solid rgba(237,232,223,0.15);
+  border-radius: 6px;
+  font-size: 14px;
+  color: #6a6560;
   text-decoration: none;
   width: fit-content;
   transition: border-color 0.2s, color 0.2s;
   letter-spacing: 0.02em;
 }
-.footer-sonnet-badge:hover { border-color: rgba(237,232,223,0.25); color: #8a8478; }
-.footer-sonnet-badge svg { width: 14px; height: 14px; fill: #4a4740; }
+.footer-sonnet-badge:hover { border-color: rgba(237,232,223,0.3); color: #8a8478; }
+.footer-sonnet-badge svg { width: 22px; height: 22px; fill: #6a6560; }
 .footer-col-title {
   font-size: 12px;
   font-weight: 400;
@@ -1706,11 +1706,20 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu();
 <script>
 /* ── Cursor helper ── */
 function gsCursor(curEl, targetEl, offX, offY) {
+  // Use offsetLeft/offsetTop relative to the shared positioned parent (.hiw-mockup)
+  // This avoids viewport-dependent getBoundingClientRect which shifts on scroll
   const mock = curEl.parentElement;
-  const mR = mock.getBoundingClientRect();
-  const tR = targetEl.getBoundingClientRect();
-  curEl.style.left = (tR.left - mR.left + (offX !== undefined ? offX : tR.width / 2)) + 'px';
-  curEl.style.top  = (tR.top  - mR.top  + (offY !== undefined ? offY : tR.height / 2)) + 'px';
+  let el = targetEl;
+  let x = 0, y = 0;
+  while (el && el !== mock) {
+    x += el.offsetLeft;
+    y += el.offsetTop;
+    el = el.offsetParent;
+  }
+  const w = targetEl.offsetWidth;
+  const h = targetEl.offsetHeight;
+  curEl.style.left = (x + (offX !== undefined ? offX : w / 2)) + 'px';
+  curEl.style.top  = (y + (offY !== undefined ? offY : h / 2)) + 'px';
 }
 function gsType(el, text, speed, cb) {
   el.textContent = '';
