@@ -123,6 +123,7 @@
   .nav-logo {
     display: flex;
     align-items: center;
+    gap: 0px;
     text-decoration: none;
     height: 44px;
   }
@@ -132,9 +133,26 @@
     width: auto;
     fill: var(--text);
     transition: opacity 0.2s;
+    flex-shrink: 0;
   }
 
-  .nav-logo:hover svg { opacity: 0.7; }
+  .nav-logo-name {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-left: -14px;
+    transition: opacity 0.2s;
+  }
+
+  .nav-logo:hover svg,
+  .nav-logo:hover .nav-logo-name { opacity: 0.7; }
+
+  @media (max-width: 768px) {
+    .nav-logo-name { display: none; }
+  }
 
   .nav-links {
     display: flex;
@@ -1074,6 +1092,7 @@
     <svg viewBox="0 0 779 700" xmlns="http://www.w3.org/2000/svg">
       <path d="M5625 5520 c-11 -5 -132 -51 -270 -101 -255 -92 -636 -232 -667 -244 -10 -4 -18 -10 -18 -14 0 -4 51 -35 114 -70 63 -34 121 -68 130 -74 14 -11 5 -26 -75 -125 -50 -62 -94 -111 -98 -109 -30 16 -115 51 -192 80 -204 76 -409 116 -640 124 -474 16 -865 -114 -1131 -378 -166 -166 -268 -375 -299 -614 -37 -297 49 -563 246 -760 201 -202 472 -328 990 -459 510 -130 688 -217 767 -376 18 -36 22 -63 22 -135 1 -79 -3 -98 -28 -153 -63 -136 -221 -224 -450 -253 -289 -35 -649 52 -926 224 -84 53 -193 133 -274 202 l-65 55 -73 -88 c-115 -139 -352 -433 -368 -458 -13 -21 -12 -25 10 -50 14 -14 66 -59 115 -99 319 -257 697 -419 1124 -482 169 -25 486 -22 641 5 315 57 544 164 737 346 228 215 343 483 343 800 0 383 -155 652 -495 863 -160 100 -424 194 -860 308 -444 116 -597 191 -658 323 -32 69 -31 198 3 267 50 103 165 186 317 227 62 16 108 21 228 21 133 1 163 -2 260 -27 189 -48 324 -115 545 -269 l114 -80 21 28 c11 15 47 62 80 104 34 42 106 135 160 206 103 135 312 403 326 419 6 6 55 -36 124 -104 63 -62 117 -111 120 -108 3 2 16 128 30 279 14 151 36 383 48 517 25 261 25 256 -28 232z" transform="translate(0,700) scale(0.1,-0.1)"/>
     </svg>
+    <span class="nav-logo-name">onnet</span>
   </a>
   <ul class="nav-links">
     <li><a href="#portfolio">Portfolio</a></li>
@@ -1103,14 +1122,14 @@
   <div class="hero-inner">
     <!-- LEFT: text -->
     <div class="hero-left">
-      <p class="hero-tag">Building what's missing</p>
+      <p class="hero-tag">Software for the overlooked</p>
       <h1 class="hero-headline">
         Category-defining<br>
         software for<br>
         <em>underserved markets</em>
       </h1>
       <p class="hero-sub">
-        We find the blind spots. We build in blue oceans. We don't add noise to crowded markets — we create clarity where there was none.
+        The best markets aren't the busiest ones. We find the gaps others walk past — and we build exactly what should have existed years ago.
       </p>
       <div class="hero-actions">
         <a href="#portfolio" class="btn-primary">Our portfolio</a>
@@ -1131,7 +1150,7 @@
           <svg id="heroSvg" width="130" height="130" viewBox="0 0 130 130" style="overflow:visible"></svg>
         </div>
         <p class="anim-label" id="heroLabel">Amplify your ideas</p>
-        <p class="anim-sub" id="heroSub">Keep thinking with Claude</p>
+        <p class="anim-sub" id="heroSub">Keep thinking with Sonnet</p>
         <div class="anim-dots" id="heroDots">
           <div class="anim-dot active"></div>
           <div class="anim-dot"></div>
@@ -1159,7 +1178,7 @@
         </div>
         <h2 class="featured-story-title">iSkool<br>Version 1</h2>
         <p class="featured-story-desc">
-          The first purpose-built learning management system for South African high schools. Not a classroom tool repurposed for schools — built from the ground up for educators, learners, and administrators.
+          South Africa's first LMS designed entirely around its schools — not adapted, not repurposed. Built from scratch for educators, learners, and the administrators keeping it all together.
         </p>
       </div>
       <a href="#" class="featured-story-link">
@@ -1258,7 +1277,7 @@
 <!-- MISSION STATEMENT -->
 <section class="mission-statement reveal">
   <p class="mission-quote">
-    "A sonnet is fourteen lines of <em>constrained genius.</em> Within strict limits, it produces some of the most powerful writing ever created. Sonnet the company operates the same way."
+    The tightest constraints produce the most precise solutions. We don't build for everyone — we build <em>exactly right</em> for someone.
   </p>
 </section>
 
@@ -1314,36 +1333,36 @@
         We build in <em>blue oceans.</em>
       </h2>
       <p class="philosophy-body">
-        Sonnet identifies the blind spots in technology — the audiences being underserved, the problems being ignored — and builds exactly what's missing. Not generic tools adapted for specific audiences. Purpose-built from day one.
+        Every market has an audience that technology walked past. Sonnet finds them first. Then we build something that could never have been made by a company that didn't care about them specifically.
       </p>
     </div>
     <div class="philosophy-right reveal reveal-delay-2">
       <div class="value-item">
         <span class="value-number">01</span>
         <div>
-          <h3 class="value-title">Build for the forgotten audience</h3>
-          <p class="value-desc">Every Sonnet product starts with a question: who is technology not serving well enough? We find that person and we build for them specifically — not as an afterthought, but as the entire point.</p>
+          <h3 class="value-title">The overlooked market is the real opportunity</h3>
+          <p class="value-desc">We don't start with a solution and find an audience. We start with the audience nobody built for — and we don't stop until the product fits them perfectly.</p>
         </div>
       </div>
       <div class="value-item">
         <span class="value-number">02</span>
         <div>
-          <h3 class="value-title">Constraint is craft</h3>
-          <p class="value-desc">Emerging markets, limited infrastructure, tight budgets — these are our design parameters, not our excuses. The best solutions are born from the tightest constraints.</p>
+          <h3 class="value-title">Constraints are the brief</h3>
+          <p class="value-desc">Unreliable connectivity, entry-level devices, tight budgets — these aren't obstacles to work around. They're the design brief. The best products are built inside real limits.</p>
         </div>
       </div>
       <div class="value-item">
         <span class="value-number">03</span>
         <div>
-          <h3 class="value-title">Blue ocean thinking</h3>
-          <p class="value-desc">We study markets for what's missing, not what's popular. Every Sonnet product should feel inevitable — like it should have existed years ago.</p>
+          <h3 class="value-title">Look where nobody's looking</h3>
+          <p class="value-desc">We study markets for what's absent, not what's trending. When a Sonnet product launches, it shouldn't feel new — it should feel overdue.</p>
         </div>
       </div>
       <div class="value-item">
         <span class="value-number">04</span>
         <div>
-          <h3 class="value-title">Purpose-built, always</h3>
-          <p class="value-desc">Generic tools adapted for specific audiences are a compromise. Every Sonnet product is designed from the ground up for its audience. No repurposing. No duct tape.</p>
+          <h3 class="value-title">Made for one thing. Done properly.</h3>
+          <p class="value-desc">A tool built for everyone serves no one well. Every Sonnet product is designed entirely around a single audience — their workflow, their constraints, their reality. Nothing bolted on.</p>
         </div>
       </div>
     </div>
@@ -1355,7 +1374,7 @@
   <div class="portfolio-header reveal">
     <div>
       <p class="section-label">Our portfolio</p>
-      <h2 class="portfolio-headline">Two products.<br>One philosophy.</h2>
+      <h2 class="portfolio-headline">Built with intention.<br>Every one.</h2>
     </div>
   </div>
 
@@ -1375,7 +1394,7 @@
         </div>
       </div>
       <p class="portfolio-desc">
-        The learning management system built specifically for schools. Not a classroom tool. Not a collaboration platform with a gradebook bolted on. A purpose-built LMS for high school educators, learners, and administrators.
+        South Africa's first LMS that starts and ends with the school. Not a classroom tool stretched into an LMS. Not a collaboration platform with a gradebook attached. Built from zero, for one purpose.
       </p>
       <div class="portfolio-card-footer">
         <span class="tag-live">Live — Version 1</span>
@@ -1465,10 +1484,10 @@
         </div>
       </div>
       <p class="portfolio-desc">
-        A dedicated university community platform. Clean, focused, student-native. Societies, SRCs, faculties, and students — all in one noise-free space built exclusively for campus life.
+        Campus life has always been too fragmented to fit one platform — until now. Smarties brings societies, SRCs, faculties, and students into one clean, focused space built exclusively for university life.
       </p>
       <div class="portfolio-card-footer">
-        <span class="tag-soon">Project — Coming Soon</span>
+        <span class="tag-soon">In Development</span>
         <a href="#" class="portfolio-link">
           Learn more
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1491,7 +1510,7 @@
           <path d="M5625 5520 c-11 -5 -132 -51 -270 -101 -255 -92 -636 -232 -667 -244 -10 -4 -18 -10 -18 -14 0 -4 51 -35 114 -70 63 -34 121 -68 130 -74 14 -11 5 -26 -75 -125 -50 -62 -94 -111 -98 -109 -30 16 -115 51 -192 80 -204 76 -409 116 -640 124 -474 16 -865 -114 -1131 -378 -166 -166 -268 -375 -299 -614 -37 -297 49 -563 246 -760 201 -202 472 -328 990 -459 510 -130 688 -217 767 -376 18 -36 22 -63 22 -135 1 -79 -3 -98 -28 -153 -63 -136 -221 -224 -450 -253 -289 -35 -649 52 -926 224 -84 53 -193 133 -274 202 l-65 55 -73 -88 c-115 -139 -352 -433 -368 -458 -13 -21 -12 -25 10 -50 14 -14 66 -59 115 -99 319 -257 697 -419 1124 -482 169 -25 486 -22 641 5 315 57 544 164 737 346 228 215 343 483 343 800 0 383 -155 652 -495 863 -160 100 -424 194 -860 308 -444 116 -597 191 -658 323 -32 69 -31 198 3 267 50 103 165 186 317 227 62 16 108 21 228 21 133 1 163 -2 260 -27 189 -48 324 -115 545 -269 l114 -80 21 28 c11 15 47 62 80 104 34 42 106 135 160 206 103 135 312 403 326 419 6 6 55 -36 124 -104 63 -62 117 -111 120 -108 3 2 16 128 30 279 14 151 36 383 48 517 25 261 25 256 -28 232z" transform="translate(0,700) scale(0.1,-0.1)"/>
         </svg>
       </div>
-      <p class="footer-brand-desc">Building category-defining software for underserved markets — globally. We find the gaps, the blind spots, the audiences that technology forgot.</p>
+      <p class="footer-brand-desc">We build software for the markets others overlook. The gaps, the blind spots, the audiences that precision-built products never reach — that's exactly where we start.</p>
     </div>
     <div>
       <p class="footer-col-title">Portfolio</p>
@@ -1519,7 +1538,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p class="footer-copy">© 2025 Sonnet. All rights reserved.</p>
+    <p class="footer-copy">© 2026 Sonnet. All rights reserved.</p>
     <div class="footer-bottom-links">
       <a href="#">Privacy</a>
       <a href="#">Terms</a>
