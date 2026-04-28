@@ -1473,7 +1473,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         </div>
         <!-- LOGIN FORM -->
         <div class="form-box <?= isActiveForm('login', $activeForm); ?>" id="login-form">
-            <form action="login_register.php" method="post">
+            <form id="login-form-el" novalidate>
                 <!-- iSkool brand text -->
                 <div id="iskool-brand">
                    <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
@@ -1532,7 +1532,8 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
 </g>
 </svg>
                 </div>
-                <?= showError($errors['login']); ?>
+                <!-- AJAX error message box (hidden until an error occurs) -->
+                <div id="login-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
                 <input type="email" name="email" placeholder="Email" required><br>
                 <div class="password-wrapper">
                     <input type="password" name="password" id="login-password" placeholder="Password" required>
@@ -1542,20 +1543,21 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                   <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer;">
                   <label for="remember_me" style="font-size: 13px; color: #ccc; cursor: pointer; user-select: none;">Keep me logged in</label>
                 </div>
-                <button type="submit" name="login">Login</button>
+                <button type="submit" id="login-btn">Login</button>
                 <p>Don't have an account? 
                    <a href="#" onclick="showForm('register-form'); return false;">Register</a>
                 </p>
                 <p style="text-align:center; margin-top: 8px;">
                     <a href="#" onclick="showForm('forgot-form'); return false;" style="color:#00bfff;">Forgot your password?</a>
                 </p>
-            </form>
+            </form><!-- /#login-form-el -->
         </div>
         <!-- REGISTER FORM -->
         <div class="form-box <?= isActiveForm('register', $activeForm); ?>" id="register-form">
-            <form action="login_register.php" method="post">
+            <form id="register-form-el" novalidate>
                 <h2>Register</h2>
-                <?= showError($errors['register']); ?>
+                <!-- AJAX error message box (hidden until an error occurs) -->
+                <div id="register-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
                 <!-- NEW: Title + First Name + Surname -->
                 <div class="name-row">
@@ -1611,11 +1613,11 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     </label>
                 </div>
 
-                <button type="submit" name="register">Register</button>
+                <button type="submit" id="register-btn">Register</button>
                 <p>Already have an account? 
                    <a href="#" onclick="showForm('login-form'); return false;">Login</a>
                 </p>
-            </form>
+            </form><!-- /#register-form-el -->
         </div>
         <!-- FORGOT PASSWORD FORM -->
         <div class="form-box <?= ($activeForm === 'forgot-form') ? 'active' : '' ?>" id="forgot-form">
@@ -2148,6 +2150,106 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         }
     }
 
-    runPreview();</script>
+    <script>
+    // ── AJAX Login ─────────────────────────────────────────────────────────────
+    document.getElementById('login-form-el').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn      = document.getElementById('login-btn');
+        const errorBox = document.getElementById('login-error-box');
+
+        // Clear any previous error
+        errorBox.style.display = 'none';
+        errorBox.textContent   = '';
+
+        // Show loading state
+        btn.disabled    = true;
+        btn.textContent = 'Logging in…';
+
+        const formData = new FormData(this);
+        // Pass the remember_me checkbox value explicitly
+        if (!this.querySelector('[name="remember_me"]').checked) {
+            formData.delete('remember_me');
+        }
+
+        try {
+            const res  = await fetch('login_ajax.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                btn.textContent = 'Redirecting…';
+                window.location.href = data.redirect;
+            } else {
+                // Show error inline — no page reload
+                errorBox.textContent   = data.message || 'Something went wrong. Please try again.';
+                errorBox.style.display = 'block';
+                // Scroll error into view on mobile
+                errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                btn.disabled    = false;
+                btn.textContent = 'Login';
+            }
+        } catch (err) {
+            errorBox.textContent   = 'Network error. Please check your connection and try again.';
+            errorBox.style.display = 'block';
+            btn.disabled    = false;
+            btn.textContent = 'Login';
+        }
+    });
+
+    // ── AJAX Register ───────────────────────────────────────────────────────────
+    document.getElementById('register-form-el').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn      = document.getElementById('register-btn');
+        const errorBox = document.getElementById('register-error-box');
+
+        // Clear previous error
+        errorBox.style.display = 'none';
+        errorBox.textContent   = '';
+
+        // Client-side password checks before hitting the server
+        const pwd     = document.getElementById('register-password').value;
+        const confirm = document.getElementById('confirm-password').value;
+
+        if (pwd.length < 8) {
+            errorBox.textContent   = 'Password must be at least 8 characters long.';
+            errorBox.style.display = 'block';
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
+        if (pwd !== confirm) {
+            errorBox.textContent   = 'Passwords do not match. Please try again.';
+            errorBox.style.display = 'block';
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
+
+        btn.disabled    = true;
+        btn.textContent = 'Registering…';
+
+        const formData = new FormData(this);
+
+        try {
+            const res  = await fetch('register_ajax.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                btn.textContent = 'Success! Redirecting…';
+                window.location.href = 'registration_success.php';
+            } else {
+                errorBox.textContent   = data.message || 'Registration failed. Please try again.';
+                errorBox.style.display = 'block';
+                errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                btn.disabled    = false;
+                btn.textContent = 'Register';
+            }
+        } catch (err) {
+            errorBox.textContent   = 'Network error. Please check your connection and try again.';
+            errorBox.style.display = 'block';
+            btn.disabled    = false;
+            btn.textContent = 'Register';
+        }
+    });
+    </script>
 </body>
 </html>
