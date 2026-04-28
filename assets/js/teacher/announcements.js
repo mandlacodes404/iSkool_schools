@@ -459,7 +459,10 @@ window.submitCreateAnnouncement = async function() {
     const forceEmail = document.getElementById('annForceEmail').checked;
     const errorDiv   = document.getElementById('createAnnError');
     const submitBtn  = document.getElementById('createAnnSubmitBtn');
-    const loader     = document.getElementById('loaderOverlay');
+
+    // On desktop, scope the loader to the right panel only
+    const isDesktop = window.innerWidth >= 900;
+    const panel     = document.getElementById('an-main-panel');
 
     errorDiv.style.display = 'none';
 
@@ -476,7 +479,40 @@ window.submitCreateAnnouncement = async function() {
 
     submitBtn.disabled    = true;
     submitBtn.textContent = 'Sending...';
-    if (loader) loader.style.display = 'flex';
+
+    // Show panel-scoped loader on desktop, global overlay on mobile
+    let panelLoader = null;
+    if (isDesktop && panel) {
+        panelLoader = document.createElement('div');
+        panelLoader.id = 'an-panel-loader';
+        panelLoader.style.cssText = `
+            position:absolute;inset:0;
+            background:rgba(13,17,23,0.7);
+            backdrop-filter:blur(2px);
+            display:flex;align-items:center;justify-content:center;
+            border-radius:14px;z-index:10;
+        `;
+        panelLoader.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+                <div style="width:32px;height:32px;border:3px solid rgba(79,209,197,0.2);
+                            border-top-color:#4fd1c5;border-radius:50%;
+                            animation:an-spin 0.7s linear infinite;"></div>
+                <span style="font-size:13px;color:#8b949e;">Sending...</span>
+            </div>`;
+        // Inject keyframes once
+        if (!document.getElementById('an-spin-style')) {
+            const s = document.createElement('style');
+            s.id = 'an-spin-style';
+            s.textContent = '@keyframes an-spin{to{transform:rotate(360deg)}}';
+            document.head.appendChild(s);
+        }
+        // Panel must be position:relative for the absolute overlay to work
+        panel.style.position = 'relative';
+        panel.appendChild(panelLoader);
+    } else {
+        const globalLoader = document.getElementById('loaderOverlay');
+        if (globalLoader) globalLoader.style.display = 'flex';
+    }
 
     try {
         const res  = await fetch('api/teacher/create_announcement.php', { method: 'POST', body: fd });
@@ -497,6 +533,11 @@ window.submitCreateAnnouncement = async function() {
     } finally {
         submitBtn.disabled    = false;
         submitBtn.textContent = 'Send';
-        if (loader) loader.style.display = 'none';
+        if (panelLoader) {
+            panelLoader.remove();
+        } else {
+            const globalLoader = document.getElementById('loaderOverlay');
+            if (globalLoader) globalLoader.style.display = 'none';
+        }
     }
 };
