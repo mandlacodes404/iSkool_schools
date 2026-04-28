@@ -2150,6 +2150,8 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         }
     }
 
+    runPreview();</script>
+
     <script>
     // ── AJAX Login ─────────────────────────────────────────────────────────────
     document.getElementById('login-form-el').addEventListener('submit', async function (e) {
