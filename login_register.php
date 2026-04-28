@@ -1,4 +1,12 @@
 <?php
+// ── Secure session cookie settings (must be set BEFORE session_start) ──
+session_set_cookie_params([
+    'lifetime' => 0,        // Expires when browser closes (not a persistent cookie)
+    'path'     => '/',
+    'secure'   => true,     // Only transmitted over HTTPS
+    'httponly' => true,     // Inaccessible to JavaScript — prevents XSS cookie theft
+    'samesite' => 'Strict', // Blocks cookie from being sent in cross-site requests (CSRF protection)
+]);
 session_start();
 require_once 'config.php';
 require_once 'remember_me_functions.php'; // --- ADDED THIS ---
@@ -314,10 +322,15 @@ if (isset($_POST['login'])) {
         }
 
         if (password_verify($password, $hashed_password)) {
+            // Regenerate session ID on login to prevent session fixation attacks.
+            // true = delete the old session file from the server.
+            session_regenerate_id(true);
+
             $_SESSION['name']        = $name;
             $_SESSION['email']       = $email;
             $_SESSION['profile_pic'] = $profile_pic ?: 'uploads/default_profile.png';
             $_SESSION['role']        = $role;
+            $_SESSION['last_active'] = time(); // Used by protected pages to enforce 45-min idle timeout
 
             // --- REMEMBER ME LOGIC ---
             if (isset($_POST['remember_me'])) {
@@ -353,10 +366,13 @@ if (isset($_POST['login'])) {
             }
             exit();
         } else {
-            $_SESSION['login_error'] = 'Incorrect password.';
+            // Generic message — do not reveal whether the email or password was wrong.
+            // Separate messages allow attackers to enumerate valid email addresses.
+            $_SESSION['login_error'] = 'Invalid email or password.';
         }
     } else {
-        $_SESSION['login_error'] = 'Email not found.';
+        // Same generic message for unknown email — do not confirm account existence.
+        $_SESSION['login_error'] = 'Invalid email or password.';
     }
 
     $_SESSION['active_form'] = 'login';
