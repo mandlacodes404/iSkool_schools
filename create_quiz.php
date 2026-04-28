@@ -216,43 +216,50 @@ if ($checkSub->get_result()->num_rows > 0) {
               $mail->Body = '
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
-<tr><td align="center">
-  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
-    <tr><td style="padding:40px 44px 36px;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+<tr><td style="padding:48px 32px 40px;">
 
-      <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#0d0d0d;letter-spacing:-0.3px;">' . htmlspecialchars($schoolName) . '</p>
+  <!-- School name in red -->
+  <p style="margin:0 0 28px;font-size:13px;font-weight:700;color:#cc1f1f;letter-spacing:0.8px;text-transform:uppercase;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($schoolName) . '</p>
 
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">New quiz: ' . htmlspecialchars($quiz_title) . '</p>
+  <!-- Title -->
+  <p style="margin:0 0 20px;font-size:28px;font-weight:700;color:#0d0d0d;line-height:1.25;letter-spacing:-0.5px;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">New quiz: ' . htmlspecialchars($quiz_title) . '</p>
 
-      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">Hi ' . htmlspecialchars($learner['name']) . ', a new quiz has been posted in your class.</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
+  <!-- Divider -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
 
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:120px;vertical-align:top;">Status</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . htmlspecialchars($status) . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Duration</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . htmlspecialchars($duration) . ' minutes</td>
-        </tr>
-      </table>
+  <!-- Greeting -->
+  <p style="margin:0 0 28px;font-size:16px;color:#2d2d2d;line-height:1.8;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Hi <strong>' . htmlspecialchars($learner['name']) . '</strong>, a new quiz has been posted in your class.</p>
 
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
-
-      <p style="margin:0 0 36px;font-size:14px;color:#6a6a6a;line-height:1.6;">Posted by ' . htmlspecialchars($teacherDisplayName) . '</p>
-
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iSkool</a></p>
-        </td></tr>
-      </table>
-
-    </td></tr>
+  <!-- Meta rows -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#888888;width:120px;vertical-align:top;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Status</td>
+      <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:600;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($status) . '</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;font-size:14px;color:#888888;vertical-align:top;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Duration</td>
+      <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:600;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($duration) . ' minutes</td>
+    </tr>
   </table>
+
+  <!-- Posted by -->
+  <p style="margin:0 0 40px;font-size:14px;color:#888888;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Posted by <span style="color:#0d0d0d;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span></p>
+
+  <!-- Footer divider -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
+
+  <!-- Footer -->
+  <p style="margin:0;font-size:12px;color:#aaaaaa;line-height:1.6;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
+    ' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#aaaaaa;text-decoration:underline;">iSkool</a>
+  </p>
+
 </td></tr>
 </table>
 </body>

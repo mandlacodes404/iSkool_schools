@@ -128,107 +128,40 @@ while ($learner = $learnersResult->fetch_assoc()) {
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+<tr><td style="padding:48px 32px 40px;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 20px;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+  <!-- School name in red -->
+  <p style="margin:0 0 28px;font-size:13px;font-weight:700;color:#cc1f1f;letter-spacing:0.8px;text-transform:uppercase;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($schoolName) . '</p>
 
-  <!-- HEADER -->
-  <tr>
-    <td style="background:#0d1117;border-radius:12px 12px 0 0;padding:32px 40px;text-align:center;">
-      <img src="https://iskool.online/apple-touch-icon.png"
-           width="72" height="72" alt="iSkool"
-           style="display:block;margin:0 auto 12px;border-radius:14px;border:2px solid rgba(57,213,193,0.3);">
-      <p style="margin:0;font-size:12px;color:#8b949e;letter-spacing:2px;text-transform:uppercase;">
-        Learning Management System
-      </p>
-    </td>
-  </tr>
+  <!-- Title -->
+  <p style="margin:0 0 20px;font-size:28px;font-weight:700;color:#0d0d0d;line-height:1.25;letter-spacing:-0.5px;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">New evaluation: ' . htmlspecialchars($title) . '</p>
 
-  <!-- HERO -->
+  <!-- Divider -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
 
-  <!-- SCHOOL + TEACHER ROW -->
-  <tr>
-    <td style="background:#161b22;padding:14px 40px;text-align:center;border-bottom:1px solid #21262d;">
-      <p style="margin:0;font-size:13px;color:#8b949e;">
-        <span style="color:#39d5c1;">' . htmlspecialchars($schoolName) . '</span>
-      </p>
-    </td>
-  </tr>
+  <!-- Greeting -->
+  <p style="margin:0 0 16px;font-size:16px;color:#2d2d2d;line-height:1.8;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has released a new evaluation and needs your honest feedback.</p>
 
-  <!-- BODY -->
-  <tr>
-    <td style="background:#ffffff;padding:40px;">
+  <!-- Note -->
+  <p style="margin:0 0 36px;font-size:15px;color:#555555;line-height:1.75;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Your feedback helps your teacher improve their teaching style. All responses are <strong>anonymous</strong> and will not affect your grades. Please be honest and thoughtful.</p>
 
-      <p style="margin:0 0 24px;font-size:15px;color:#333;line-height:1.6;">
-        Hi <strong>' . htmlspecialchars($lName) . '</strong>, your teacher has released a new evaluation and needs your honest feedback.
-      </p>
+  <!-- Sent by -->
+  <p style="margin:0 0 40px;font-size:14px;color:#888888;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Released by <span style="color:#0d0d0d;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span></p>
 
-      <!-- EVALUATION TITLE BOX -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border:1px solid #e9ecef;border-left:4px solid #39d5c1;border-radius:4px;margin-bottom:24px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#39d5c1;margin-bottom:6px;">
-              Evaluation
-            </p>
-            <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-              ' . htmlspecialchars($title) . '
-            </p>
-          </td>
-        </tr>
-      </table>
+  <!-- Footer divider -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
 
-      <!-- INFO BOX -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3e5f5;border:1px solid #ce93d8;border-radius:8px;margin-bottom:28px;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <p style="margin:0;font-size:13px;color:#6a1b9a;line-height:1.7;">
-              Your feedback helps your teacher adjust their teaching style. 
-              All responses are <strong>anonymous</strong> and will not affect your grades.
-              Please be honest and thoughtful.
-            </p>
-          </td>
-        </tr>
-      </table>
+  <!-- Footer -->
+  <p style="margin:0;font-size:12px;color:#aaaaaa;line-height:1.6;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
+    ' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#aaaaaa;text-decoration:underline;">iSkool</a>
+  </p>
 
-      <!-- DIVIDER -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr>
-          <td style="border-top:1px solid #f0ede6;padding:0;"></td>
-        </tr>
-      </table>
-
-      <!-- FROM -->
-      <p style="margin:0;font-size:13px;color:#888;">
-        Released by
-        <strong style="color:#333;">' . htmlspecialchars($teacherDisplayName) . '</strong>
-      </p>
-
-    </td>
-  </tr>
-
-  <!-- FOOTER -->
-  <tr>
-    <td style="background:#0d1117;border-radius:0 0 12px 12px;padding:24px 40px;text-align:center;">
-      <p style="margin:0 0 4px;font-size:13px;color:#8b949e;">
-        iSkool LMS · Johannesburg, South Africa
-      </p>
-      <p style="margin:0;font-size:12px;color:#484f58;">
-        <a href="https://iskool.online" style="color:#39d5c1;text-decoration:none;">www.iskool.online</a>
-        &nbsp;·&nbsp;
-        <a href="mailto:support@iskool.online" style="color:#484f58;text-decoration:none;">support@iskool.online</a>
-      </p>
-      <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
-        &copy; ' . date("Y") . ' iSkool LMS. All rights reserved.
-      </p>
-    </td>
-  </tr>
-
-</table>
 </td></tr>
 </table>
 </body>
