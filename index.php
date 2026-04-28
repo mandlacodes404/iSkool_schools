@@ -1759,7 +1759,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
                     return;
                 }
             }
-            loader.classList.add("show");
+           
         });
     });
     if ("serviceWorker" in navigator) {
