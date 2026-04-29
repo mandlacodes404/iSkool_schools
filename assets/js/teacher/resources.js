@@ -344,9 +344,7 @@ function renderTeacherResources(data) {
                     <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes">
 
                     <label class="teacher-modal-label">Select Class</label>
-                    <select id="resourceClass" class="teacher-modal-input">
-                        <option value="">-- Choose Class --</option>
-                    </select>
+                    <div id="resourceClassPicker"></div>
 
                     <label class="teacher-modal-label">Resource Type</label>
                     <div style="display:flex;gap:8px;margin-bottom:16px;">
@@ -573,9 +571,7 @@ function openUploadResourcePanel(panel) {
             <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes">
 
             <label class="teacher-modal-label">Select Class</label>
-            <select id="resourceClass" class="teacher-modal-input">
-                <option value="">-- Choose Class --</option>
-            </select>
+            <div id="resourceClassPicker"></div>
 
             <label class="teacher-modal-label">Resource Type</label>
             <div style="display:flex;gap:8px;margin-bottom:16px;">
@@ -665,14 +661,7 @@ async function loadResourceClasses() {
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
-        const sel  = document.getElementById('resourceClass');
-        if (!sel) return;
-        data.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.name;
-            sel.appendChild(opt);
-        });
+        window.renderClassPicker('resourceClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
     }
@@ -687,7 +676,7 @@ window.closeUploadResourceModal = function() {
     const modal = document.getElementById('uploadResourceModal');
     if (modal) modal.style.display = 'none';
     const t  = document.getElementById('resourceTitle');      if (t)  t.value = '';
-    const c  = document.getElementById('resourceClass');      if (c)  c.value = '';
+    window.resetClassPicker('resourceClassPicker');
     const f  = document.getElementById('resourceFile');       if (f)  f.value = '';
     const fn = document.getElementById('resourceFileName');   if (fn) fn.textContent = '';
     const err = document.getElementById('uploadResourceError'); if (err) err.style.display = 'none';
@@ -744,7 +733,7 @@ window.openTeacherVideoPanel = function(item) {
 
 window.submitUploadResource = async function() {
     const title      = document.getElementById('resourceTitle')?.value.trim();
-    const classId    = document.getElementById('resourceClass')?.value;
+    const classId    = window.getClassPickerValue('resourceClassPicker');
     const forceEmail = document.getElementById('resourceForceEmail')?.checked;
     const errorDiv   = document.getElementById('uploadResourceError');
     const submitBtn  = document.getElementById('uploadResourceSubmitBtn');

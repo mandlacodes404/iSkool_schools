@@ -299,12 +299,7 @@ function renderTeacherAnnouncements(data) {
             </button>
         </div>
 
-        <select id="annClass" style="display:none;"></select>`;
-
-    apiArea.innerHTML = html;
-
-    // Pre-load classes into the hidden select for the create form
-    loadAnnouncementClasses();
+        <select id="annSendTo" style="display:none;"></select>`;
 }
 
 // ─────────────────────────────────────────────
@@ -350,15 +345,7 @@ async function loadAnnouncementClasses() {
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
-        const sel  = document.getElementById('annClass');
-        if (!sel) return;
-        sel.innerHTML = '<option value="">-- Choose Class --</option>';
-        data.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value       = c.id;
-            opt.textContent = c.name;
-            sel.appendChild(opt);
-        });
+        window.renderClassPicker('annClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
     }
@@ -400,9 +387,7 @@ function openCreateAnnouncementPanel(panel) {
                 style="resize:vertical;" placeholder="Type your announcement here..."></textarea>
 
             <label class="teacher-modal-label">Select Class</label>
-            <select id="annClass" class="teacher-modal-input">
-                <option value="">-- Choose Class --</option>
-            </select>
+            <div id="annClassPicker"></div>
 
             <label class="teacher-modal-label">Send To</label>
             <select id="annSendTo" class="teacher-modal-input">
@@ -445,7 +430,7 @@ window.closeCreateAnnouncementModal = function() {
     if (modal) modal.style.display = 'none';
     document.getElementById('annTitle').value   = '';
     document.getElementById('annMessage').value = '';
-    document.getElementById('annClass').value   = '';
+    window.resetClassPicker('annClassPicker');
     document.getElementById('annSendTo').value  = 'learners';
     document.getElementById('annForceEmail').checked = false;
     document.getElementById('createAnnError').style.display = 'none';
@@ -454,7 +439,7 @@ window.closeCreateAnnouncementModal = function() {
 window.submitCreateAnnouncement = async function() {
     const title      = document.getElementById('annTitle').value.trim();
     const message    = document.getElementById('annMessage').value.trim();
-    const classId    = document.getElementById('annClass').value;
+    const classId    = window.getClassPickerValue('annClassPicker');
     const sendTo     = document.getElementById('annSendTo').value;
     const forceEmail = document.getElementById('annForceEmail').checked;
     const errorDiv   = document.getElementById('createAnnError');

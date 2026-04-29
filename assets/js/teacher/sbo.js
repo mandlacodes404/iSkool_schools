@@ -543,9 +543,7 @@ async function openSBOPanel(panel) {
             </div>
 
             <label class="teacher-modal-label">Class</label>
-            <select id="sboClass" class="teacher-modal-input">
-                <option value="">Loading classes...</option>
-            </select>
+            <div id="sboClassPicker"></div>
 
             <label class="teacher-modal-label">Term</label>
             <select id="sboTerm" class="teacher-modal-input">
@@ -603,14 +601,9 @@ async function openSBOPanel(panel) {
     try {
         const res     = await fetch('api/teacher/get_classes.php');
         const classes = await res.json();
-        const sel     = document.getElementById('sboClass');
-        sel.innerHTML = '<option value="">-- Select Class --</option>';
-        classes.forEach(c => {
-            sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-        });
+        window.renderClassPicker('sboClassPicker', classes, function() {});
     } catch(e) {
-        const sel = document.getElementById('sboClass');
-        if (sel) sel.innerHTML = '<option value="">Failed to load</option>';
+        console.error('Failed to load classes for SBO panel', e);
     }
 
     addSBOTopic();
@@ -644,9 +637,7 @@ window.openSBODrawer = async function() {
             <!-- Class -->
             <div>
                 <label class="teacher-modal-label">Class</label>
-                <select id="sboClass" class="teacher-modal-input">
-                    <option value="">Loading classes...</option>
-                </select>
+                <div id="sboClassPicker"></div>
             </div>
 
             <!-- Term -->
@@ -719,13 +710,9 @@ window.openSBODrawer = async function() {
     try {
         const res     = await fetch('api/teacher/get_classes.php');
         const classes = await res.json();
-        const sel     = document.getElementById('sboClass');
-        sel.innerHTML = '<option value="">-- Select Class --</option>';
-        classes.forEach(c => {
-            sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-        });
+        window.renderClassPicker('sboClassPicker', classes, function() {});
     } catch(e) {
-        document.getElementById('sboClass').innerHTML = '<option value="">Failed to load</option>';
+        console.error('Failed to load classes for SBO drawer', e);
     }
 
     addSBOTopic();
@@ -792,7 +779,7 @@ window.saveSBO = async function() {
     const err = document.getElementById('sboError');
     err.style.display = 'none';
 
-    const class_id = parseInt(document.getElementById('sboClass').value);
+    const class_id = parseInt(window.getClassPickerValue('sboClassPicker'));
     const term     = parseInt(document.getElementById('sboTerm').value);
     const subject  = document.getElementById('sboSubject').value.trim();
     const notes    = document.getElementById('sboNotes').value.trim();

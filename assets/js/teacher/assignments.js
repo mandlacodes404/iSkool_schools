@@ -578,11 +578,6 @@ window.openCreateAssignment = async function() {
         const quizData = await termRes.json();
         const currentTerm = quizData.current_term || 1;
 
-        let classOptions = '<option value="">-- Select Class --</option>';
-        classes.forEach(c => {
-            classOptions += `<option value="${c.id}">${c.name}</option>`;
-        });
-
         // Clear sidebar active state on desktop
         if (isDesktop) {
             document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -621,9 +616,7 @@ window.openCreateAssignment = async function() {
                     <input type="datetime-local" name="due_date" class="teacher-modal-input" required>
 
                     <label class="teacher-modal-label">Assign to Class *</label>
-                    <select name="class_id" class="teacher-modal-input" required>
-                        ${classOptions}
-                    </select>
+                    <div id="assignmentClassPicker"></div>
 
                     <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
                         <div style="font-size:18px;font-weight:800;color:#4fd1c5;">
@@ -660,6 +653,9 @@ window.openCreateAssignment = async function() {
                 </form>
             </div>`;
 
+        // Init class picker
+        window.renderClassPicker('assignmentClassPicker', classes, function() {});
+
         // Handle submit
         const form = document.getElementById('createAssignmentForm');
         form.addEventListener('submit', async function(e) {
@@ -673,6 +669,16 @@ window.openCreateAssignment = async function() {
             if (loader) loader.style.display = 'flex';
 
             const fd = new FormData(form);
+            const classId = window.getClassPickerValue('assignmentClassPicker');
+            if (!classId) {
+                errorDiv.textContent = 'Please select a class.';
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Assignment';
+                if (loader) loader.style.display = 'none';
+                return;
+            }
+            fd.set('class_id', classId);
             try {
                 const res  = await fetch('api/teacher/create_assignment.php', {
                     method: 'POST',
