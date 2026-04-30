@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#f0f0f0;font-size:15px;line-height:1.7;}
+:root{--gold:#c9a23f;--gold-light:#e0b94d;--dark:#0a0a0a;--card:#141414;--card2:#1a1a1a;--border:#2a2a2a;}
+
+header{background:#0a0a0a;border-bottom:1px solid var(--gold);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo-text{font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:0.5px;}
+nav{display:flex;gap:1.5rem;}
+nav a{color:#ccc;text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.3px;transition:color 0.2s;}
+nav a:hover{color:var(--gold);}
+
+.hero{padding:5rem 2rem 4rem;text-align:center;background:linear-gradient(160deg,#0f0f0f 0%,#141208 100%);}
+.badge{display:inline-block;background:rgba(201,162,63,0.12);border:1px solid rgba(201,162,63,0.3);color:var(--gold);font-size:0.75rem;font-weight:600;letter-spacing:1px;padding:0.35rem 1rem;border-radius:20px;margin-bottom:1.5rem;text-transform:uppercase;}
+.hero h1{font-size:3rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:1rem;}
+.hero h1 span{color:var(--gold);}
+.hero p{max-width:580px;margin:0 auto 2.5rem;color:#aaa;font-size:1.05rem;}
+.btn{display:inline-block;background:var(--gold);color:#000;padding:0.85rem 2rem;border-radius:6px;font-weight:700;font-size:0.95rem;text-decoration:none;border:none;cursor:pointer;transition:opacity 0.2s;}
+.btn:hover{opacity:0.88;}
+.btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold);margin-left:1rem;}
+.btn-outline:hover{background:rgba(201,162,63,0.08);}
+
+.stats{display:flex;justify-content:center;gap:3rem;padding:2.5rem 2rem;border-bottom:1px solid var(--border);}
+.stat{text-align:center;}
+.stat .num{font-size:1.8rem;font-weight:700;color:var(--gold);}
+.stat .label{font-size:0.8rem;color:#888;margin-top:0.2rem;}
+
+section{padding:4rem 2rem;max-width:1100px;margin:auto;}
+.section-label{font-size:0.75rem;font-weight:600;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
+section h2{font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:0.75rem;}
+.sub{color:#888;font-size:0.95rem;margin-bottom:3rem;max-width:560px;}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;margin-top:0.5rem;}
+th{background:var(--gold);color:#000;font-weight:700;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;padding:0.9rem 1.2rem;text-align:left;}
+td{padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);color:#ddd;font-size:0.9rem;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+.pill{display:inline-block;background:rgba(201,162,63,0.12);color:var(--gold);border-radius:20px;padding:0.2rem 0.7rem;font-size:0.78rem;font-weight:600;}
+
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.75rem;}
+.card-icon{width:40px;height:40px;background:rgba(201,162,63,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.card h3{font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.5rem;}
+.card p{font-size:0.88rem;color:#888;line-height:1.6;}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;}
+.step{background:var(--card);border-radius:10px;padding:1.5rem;position:relative;}
+.step-num{font-size:2.5rem;font-weight:700;color:rgba(201,162,63,0.18);line-height:1;margin-bottom:0.75rem;}
+.step h3{font-size:0.95rem;font-weight:600;color:#fff;margin-bottom:0.4rem;}
+.step p{font-size:0.85rem;color:#888;}
+
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-top:1.5rem;}
+.doc-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:#ccc;}
+.doc-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0;}
+
+.form-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2.5rem;max-width:700px;margin:0 auto;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.form-group{display:flex;flex-direction:column;gap:0.4rem;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:0.8rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{background:#0f0f0f;border:1px solid var(--border);border-radius:6px;padding:0.7rem 0.9rem;color:#f0f0f0;font-size:0.9rem;font-family:'Inter',sans-serif;width:100%;outline:none;transition:border-color 0.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);}
+select option{background:#1a1a1a;}
+textarea{resize:vertical;min-height:90px;}
+.form-submit{margin-top:1.5rem;text-align:center;}
+.form-note{font-size:0.78rem;color:#666;margin-top:0.75rem;}
+
+footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center;}
+.footer-brand{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;}
+.footer-links{display:flex;justify-content:center;gap:2rem;margin:1rem 0;}
+.footer-links a{color:#666;font-size:0.82rem;text-decoration:none;}
+.footer-links a:hover{color:var(--gold);}
+.footer-legal{font-size:0.78rem;color:#555;max-width:600px;margin:1.5rem auto 0;line-height:1.6;}
+
+@media(max-width:600px){
+  .hero h1{font-size:2rem;}
+  .form-grid{grid-template-columns:1fr;}
+  nav{display:none;}
+  .stats{flex-wrap:wrap;gap:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">Siiba M Loans</div>
+  <nav>
+    <a href="#products">Products</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#requirements">Requirements</a>
+    <a href="#about">About</a>
+    <a href="#apply">Apply Now</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="badge">Fast &bull; Transparent &bull; Reliable</div>
+  <h1>Financial help<br/>when you need it <span>most</span></h1>
+  <p>Simple micro-loans for South Africans. No unnecessary paperwork, no hidden fees — just quick access to the money you need.</p>
+  <a href="#apply" class="btn">Apply for a Loan</a>
+  <a href="#products" class="btn btn-outline">See Products</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">24hrs</div><div class="label">Average approval time</div></div>
+  <div class="stat"><div class="num">R500</div><div class="label">Minimum loan amount</div></div>
+  <div class="stat"><div class="num">R10,000</div><div class="label">Maximum loan amount</div></div>
+  <div class="stat"><div class="num">100%</div><div class="label">Transparent fees</div></div>
+</div>
+
+<section id="products">
+  <div class="section-label">Loan Products</div>
+  <h2>Find the right loan for you</h2>
+  <p class="sub">We offer three tiers of short-term credit, designed to match your specific financial situation.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Loan Amount</th><th>Repayment Term</th><th>Ideal For</th><th>Repayment Type</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:#fff;">R500 – R1,500</strong></td>
+          <td><span class="pill">Up to 30 days</span></td>
+          <td>Emergency expenses, unexpected bills</td>
+          <td>Single lump sum</td>
+        </tr>
+        <tr>
+          <td><strong style="color:#fff;">R2,000 – R5,000</strong></td>
+          <td><span class="pill">1 – 3 months</span></td>
+          <td>School fees, rent shortfall, car repairs</td>
+          <td>Monthly instalments</td>
+        </tr>
+        <tr>
+          <td><strong style="color:#fff;">R6,000 – R10,000</strong></td>
+          <td><span class="pill">3 – 6 months</span></td>
+          <td>Business cash flow, large personal expense</td>
+          <td>Monthly instalments</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div style="background:var(--card2);padding:0.5rem 0;">
+<section>
+  <div class="section-label">Why Choose Us</div>
+  <h2>Built around you</h2>
+  <p class="sub">We're a locally-run business that understands the real financial pressures South Africans face.</p>
+  <div class="features">
+    <div class="card">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Fast decisions</h3>
+      <p>We assess applications quickly. Most applicants receive feedback within 24 hours of submission.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>No hidden costs</h3>
+      <p>You see the full repayment amount before you sign. What we quote is what you pay — nothing more.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <h3>Flexible repayment</h3>
+      <p>We structure repayments to align with your income cycle — salary day, week-end, or monthly.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Personal service</h3>
+      <p>A real person reviews your application — no automated rejection system. We consider your full situation.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<section id="how-it-works">
+  <div class="section-label">Process</div>
+  <h2>How it works</h2>
+  <p class="sub">Four simple steps from application to money in your account.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3>Apply online</h3><p>Fill in the application form below with your personal and employment details.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>We review</h3><p>Our team assesses your application and contacts you to confirm details if needed.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>Sign &amp; approve</h3><p>We send you a loan agreement. Once signed and returned, we proceed to payout.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Money paid out</h3><p>Funds are transferred directly to your bank account. Repay via EFT or debit order.</p></div>
+  </div>
+</section>
+
+<div style="background:var(--card2);padding:0.5rem 0;">
+<section id="requirements">
+  <div class="section-label">Requirements</div>
+  <h2>What you'll need to apply</h2>
+  <p class="sub">We keep the requirements simple. Make sure you have these documents ready before applying.</p>
+  <div class="docs-grid">
+    <div class="doc-item"><div class="doc-dot"></div>South African ID or Smart Card</div>
+    <div class="doc-item"><div class="doc-dot"></div>3 months recent bank statements</div>
+    <div class="doc-item"><div class="doc-dot"></div>Latest 3 payslips</div>
+    <div class="doc-item"><div class="doc-dot"></div>Proof of residence (not older than 3 months)</div>
+    <div class="doc-item"><div class="doc-dot"></div>Active South African bank account</div>
+    <div class="doc-item"><div class="doc-dot"></div>Valid cellphone number &amp; email address</div>
+  </div>
+</section>
+</div>
+
+<section id="about">
+  <div class="section-label">About Us</div>
+  <h2>Who we are</h2>
+  <p style="color:#aaa;max-width:700px;font-size:0.97rem;">Siiba M Loans is a South African micro-lending business committed to responsible, short-term credit. We believe that access to fair financial help should be straightforward — not buried in red tape or confusing contracts. Our focus is on affordability, honesty, and treating every client with dignity and respect.</p>
+  <p style="color:#888;max-width:700px;font-size:0.88rem;margin-top:1rem;">We operate within the guidelines of the National Credit Act (NCA) and are committed to responsible lending practices. Loans are subject to affordability assessment and credit checks.</p>
+</section>
+
+<section id="apply">
+  <div style="text-align:center;margin-bottom:2.5rem;">
+    <div class="section-label" style="text-align:center;">Application</div>
+    <h2>Apply for a loan</h2>
+    <p class="sub" style="margin:0.5rem auto 0;text-align:center;">Complete the form below and we'll be in touch within 24 hours.</p>
+  </div>
+  <div class="form-wrap">
+    <form action="https://formspree.io/f/mpqbzlpd" method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>First name</label>
+          <input type="text" name="first_name" placeholder="Thabo" required/>
+        </div>
+        <div class="form-group">
+          <label>Last name</label>
+          <input type="text" name="last_name" placeholder="Nkosi" required/>
+        </div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" name="email" placeholder="you@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Phone number</label>
+          <input type="tel" name="phone" placeholder="071 234 5678" required/>
+        </div>
+        <div class="form-group">
+          <label>ID number</label>
+          <input type="text" name="id_number" placeholder="South African ID number" required/>
+        </div>
+        <div class="form-group">
+          <label>Employer / Occupation</label>
+          <input type="text" name="employer" placeholder="Company or self-employed"/>
+        </div>
+        <div class="form-group">
+          <label>Monthly net income (R)</label>
+          <input type="number" name="monthly_income" placeholder="e.g. 8500" required/>
+        </div>
+        <div class="form-group">
+          <label>Loan amount requested (R)</label>
+          <select name="loan_amount" required>
+            <option value="" disabled selected>Select amount</option>
+            <option>R500 – R1,500</option>
+            <option>R2,000 – R5,000</option>
+            <option>R6,000 – R10,000</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Reason for loan</label>
+          <textarea name="loan_reason" placeholder="Briefly describe what the loan is for..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.82rem;cursor:pointer;">
+            <input type="checkbox" name="consent" required style="width:auto;accent-color:var(--gold)"/>
+            I consent to Siiba M Loans processing my personal information for loan assessment purposes, and confirm that all information provided is true and accurate.
+          </label>
+        </div>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="btn" style="padding:0.9rem 3rem;font-size:1rem;">Submit Application</button>
+        <p class="form-note">Your information is kept private and never sold to third parties. A credit check will be conducted as part of our assessment process.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Siiba M Loans</div>
+  <div class="footer-links">
+    <a href="#products">Products</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#requirements">Requirements</a>
+    <a href="#about">About</a>
+  </div>
+  <div class="footer-legal">
+    &copy; 2026 Siiba M Loans. All rights reserved. Siiba M Loans is a registered micro-lender operating in compliance with the National Credit Act No. 34 of 2005 (NCA). All loans are subject to affordability assessment, credit checks, and terms &amp; conditions. Responsible lending. Registered with the National Credit Regulator (NCR).
+  </div>
+</footer>
+
+</body>
+</html>
