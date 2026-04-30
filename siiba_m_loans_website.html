@@ -4,204 +4,255 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1254 1254'%3E%3Crect width='1254' height='1254' fill='%230a0a0a'/%3E%3Cg transform='translate(0,1254) scale(0.1,-0.1)' fill='%23c9a23f' stroke='none'%3E%3Cpath d='M7535 10197 c-79 -58 -676 -515 -717 -550 l-48 -39 0 -1805 0 -1806 118 -125 c64 -69 142 -152 172 -185 l55 -59 196 213 c108 118 211 232 230 253 l34 39 0 2044 c0 1124 -2 2043 -5 2043 -3 0 -18 -11 -35 -23z'/%3E%3Cpath d='M6192 8638 l-351 -263 0 -695 0 -695 335 -355 c184 -195 346 -366 359 -380 l25 -25 0 1338 c0 745 -4 1337 -9 1337 -4 0 -166 -118 -359 -262z'/%3E%3Cpath d='M3785 8350 c-257 -21 -515 -89 -708 -186 -222 -112 -414 -299 -517 -504 -146 -290 -154 -670 -21 -956 125 -266 344 -476 706 -677 110 -61 213 -109 750 -349 570 -255 913 -470 1074 -672 117 -147 170 -289 178 -481 17 -399 -206 -710 -602 -838 -160 -52 -234 -62 -455 -61 -227 0 -327 15 -505 76 -362 122 -670 404 -883 808 -109 204 -182 418 -236 689 -26 126 -35 156 -49 159 -48 9 -47 22 -47 -653 l0 -633 77 -72 c141 -132 385 -279 610 -369 508 -202 1173 -242 1662 -100 489 142 828 480 933 929 29 127 36 414 13 550 -65 391 -276 681 -680 935 -127 80 -466 248 -843 419 -652 295 -872 422 -1047 602 -84 87 -136 171 -172 279 -23 68 -27 97 -27 200 0 141 16 212 73 330 111 225 332 371 635 420 105 17 312 19 406 5 473 -76 843 -470 990 -1057 10 -38 14 -43 39 -43 17 0 31 7 35 16 3 9 6 208 6 443 l0 428 -22 20 c-114 103 -423 236 -688 297 -183 41 -492 62 -685 46z'/%3E%3Cpath d='M9740 7965 c-162 -33 -320 -120 -469 -260 -81 -75 -452 -470 -1276 -1355 -181 -195 -425 -456 -541 -580 -116 -124 -239 -258 -274 -297 -35 -40 -66 -73 -69 -73 -9 0 -155 150 -351 360 -90 96 -234 249 -319 340 -504 534 -940 999 -1026 1093 -54 59 -102 107 -106 107 -5 0 -9 -296 -9 -658 l0 -658 68 -49 c110 -81 281 -259 350 -364 l62 -95 0 360 0 359 43 -45 c23 -25 128 -140 232 -255 105 -115 238 -261 296 -325 58 -63 209 -227 334 -365 267 -292 399 -434 660 -714 l190 -203 3 467 c2 346 -1 471 -10 482 -9 11 -3 22 29 56 22 23 175 186 339 363 165 176 502 536 749 799 l450 479 3 -1439 c2 -990 -1 -1466 -8 -1523 -26 -197 -92 -273 -260 -298 -54 -8 -70 -19 -70 -49 0 -21 5 -22 98 -29 122 -8 1381 -8 1423 1 27 5 30 9 27 36 l-3 31 -104 13 c-243 31 -327 124 -351 388 -12 128 -12 3460 -1 3581 17 174 52 232 153 254 31 7 59 19 62 26 9 24 -4 42 -36 48 -51 10 -219 5 -288 -9z'/%3E%3C/g%3E%3C/svg%3E"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#f0f0f0;font-size:15px;line-height:1.7;}
-:root{--gold:#c9a23f;--gold-light:#e0b94d;--dark:#0a0a0a;--card:#141414;--card2:#1a1a1a;--border:#2a2a2a;}
+:root{--gold:#c9a23f;--gold-light:#e0b94d;--dark:#0a0a0a;--card:#141414;--card2:#111111;--border:#222;}
 
-header{background:#0a0a0a;border-bottom:1px solid var(--gold);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo-text{font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:0.5px;}
-nav{display:flex;gap:1.5rem;}
-nav a{color:#ccc;text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.3px;transition:color 0.2s;}
-nav a:hover{color:var(--gold);}
+header{background:#0a0a0a;padding:0 1.25rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo-wrap{display:flex;align-items:center;gap:0.6rem;}
+.logo-svg{width:32px;height:32px;flex-shrink:0;}
+.logo-text{font-size:1.15rem;font-weight:700;color:var(--gold);letter-spacing:0.3px;}
+.hero-logo{width:72px;height:72px;margin:0 auto 1.25rem;display:block;}
+.footer-logo{width:40px;height:40px;margin:0 auto 0.5rem;display:block;}
 
-.hero{padding:5rem 2rem 4rem;text-align:center;background:linear-gradient(160deg,#0f0f0f 0%,#141208 100%);}
-.badge{display:inline-block;background:rgba(201,162,63,0.12);border:1px solid rgba(201,162,63,0.3);color:var(--gold);font-size:0.75rem;font-weight:600;letter-spacing:1px;padding:0.35rem 1rem;border-radius:20px;margin-bottom:1.5rem;text-transform:uppercase;}
-.hero h1{font-size:3rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:1rem;}
+nav.desktop{display:flex;gap:1.5rem;}
+nav.desktop a{color:#ccc;text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s;}
+nav.desktop a:hover{color:var(--gold);}
+
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none;outline:none;}
+.hamburger span{display:block;width:24px;height:2px;background:#ccc;border-radius:2px;transition:all 0.3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+.mobile-menu{display:none;flex-direction:column;background:#0f0f0f;border-bottom:1px solid var(--border);padding:0.5rem 0;}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{color:#ccc;text-decoration:none;font-size:0.95rem;font-weight:500;padding:0.9rem 1.5rem;border-bottom:1px solid var(--border);transition:color 0.2s,background 0.2s;}
+.mobile-menu a:last-child{border-bottom:none;}
+.mobile-menu a:hover{color:var(--gold);background:rgba(201,162,63,0.05);}
+.mobile-menu .apply-link{color:var(--gold);font-weight:700;}
+
+.hero{padding:4rem 1.5rem 3.5rem;text-align:center;background:#0f0f0f;}
+.badge{display:inline-block;background:rgba(201,162,63,0.12);border:1px solid rgba(201,162,63,0.3);color:var(--gold);font-size:0.72rem;font-weight:600;letter-spacing:1px;padding:0.3rem 0.9rem;border-radius:20px;margin-bottom:1.25rem;text-transform:uppercase;}
+.hero h1{font-size:2.4rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:0.9rem;}
 .hero h1 span{color:var(--gold);}
-.hero p{max-width:580px;margin:0 auto 2.5rem;color:#aaa;font-size:1.05rem;}
-.btn{display:inline-block;background:var(--gold);color:#000;padding:0.85rem 2rem;border-radius:6px;font-weight:700;font-size:0.95rem;text-decoration:none;border:none;cursor:pointer;transition:opacity 0.2s;}
+.hero p{max-width:560px;margin:0 auto 2rem;color:#aaa;font-size:1rem;}
+.hero-btns{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;}
+.btn{display:inline-block;background:var(--gold);color:#000;padding:0.8rem 1.75rem;border-radius:6px;font-weight:700;font-size:0.9rem;text-decoration:none;border:none;cursor:pointer;transition:opacity 0.2s;white-space:nowrap;}
 .btn:hover{opacity:0.88;}
-.btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold);margin-left:1rem;}
+.btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold);}
 .btn-outline:hover{background:rgba(201,162,63,0.08);}
 
-.stats{display:flex;justify-content:center;gap:3rem;padding:2.5rem 2rem;border-bottom:1px solid var(--border);}
-.stat{text-align:center;}
-.stat .num{font-size:1.8rem;font-weight:700;color:var(--gold);}
-.stat .label{font-size:0.8rem;color:#888;margin-top:0.2rem;}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stat{background:#0a0a0a;text-align:center;padding:1.25rem 0.75rem;}
+.stat .num{font-size:1.5rem;font-weight:700;color:var(--gold);}
+.stat .label{font-size:0.75rem;color:#777;margin-top:0.2rem;line-height:1.3;}
 
-section{padding:4rem 2rem;max-width:1100px;margin:auto;}
-.section-label{font-size:0.75rem;font-weight:600;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.75rem;}
-section h2{font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:0.75rem;}
-.sub{color:#888;font-size:0.95rem;margin-bottom:3rem;max-width:560px;}
+.section-wrap{padding:3rem 1.5rem;max-width:1100px;margin:auto;}
+.section-label{font-size:0.72rem;font-weight:600;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:0.5rem;}
+.section-wrap h2{font-size:1.7rem;font-weight:700;color:#fff;margin-bottom:0.6rem;}
+.sub{color:#888;font-size:0.9rem;margin-bottom:2rem;max-width:540px;}
 
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;margin-top:0.5rem;}
-th{background:var(--gold);color:#000;font-weight:700;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;padding:0.9rem 1.2rem;text-align:left;}
-td{padding:0.85rem 1.2rem;border-bottom:1px solid var(--border);color:#ddd;font-size:0.9rem;}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:480px;}
+th{background:var(--gold);color:#000;font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.4px;padding:0.85rem 1rem;text-align:left;}
+td{padding:0.8rem 1rem;border-bottom:1px solid var(--border);color:#ddd;font-size:0.88rem;}
 tr:last-child td{border-bottom:none;}
 tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
-.pill{display:inline-block;background:rgba(201,162,63,0.12);color:var(--gold);border-radius:20px;padding:0.2rem 0.7rem;font-size:0.78rem;font-weight:600;}
+.pill{display:inline-block;background:rgba(201,162,63,0.12);color:var(--gold);border-radius:20px;padding:0.15rem 0.65rem;font-size:0.75rem;font-weight:600;}
 
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.75rem;}
-.card-icon{width:40px;height:40px;background:rgba(201,162,63,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
-.card h3{font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.5rem;}
-.card p{font-size:0.88rem;color:#888;line-height:1.6;}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+.card-icon{width:38px;height:38px;background:rgba(201,162,63,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:0.9rem;}
+.card h3{font-size:0.95rem;font-weight:600;color:#fff;margin-bottom:0.4rem;}
+.card p{font-size:0.85rem;color:#888;line-height:1.6;}
 
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;}
-.step{background:var(--card);border-radius:10px;padding:1.5rem;position:relative;}
-.step-num{font-size:2.5rem;font-weight:700;color:rgba(201,162,63,0.18);line-height:1;margin-bottom:0.75rem;}
-.step h3{font-size:0.95rem;font-weight:600;color:#fff;margin-bottom:0.4rem;}
-.step p{font-size:0.85rem;color:#888;}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;}
+.step{background:var(--card);border-radius:10px;padding:1.4rem;}
+.step-num{font-size:2.2rem;font-weight:700;color:rgba(201,162,63,0.2);line-height:1;margin-bottom:0.65rem;}
+.step h3{font-size:0.92rem;font-weight:600;color:#fff;margin-bottom:0.35rem;}
+.step p{font-size:0.83rem;color:#888;}
 
-.docs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-top:1.5rem;}
-.doc-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;font-size:0.88rem;color:#ccc;}
-.doc-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0;}
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.65rem;margin-top:1.25rem;}
+.doc-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;display:flex;align-items:center;gap:0.7rem;font-size:0.86rem;color:#ccc;}
+.doc-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;flex-shrink:0;}
 
-.form-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2.5rem;max-width:700px;margin:0 auto;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
-.form-group{display:flex;flex-direction:column;gap:0.4rem;}
+.alt-bg{background:var(--card2);}
+
+.form-outer{padding:3rem 1.5rem;max-width:760px;margin:auto;}
+.form-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{display:flex;flex-direction:column;gap:0.35rem;}
 .form-group.full{grid-column:1/-1;}
-label{font-size:0.8rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;}
-input,select,textarea{background:#0f0f0f;border:1px solid var(--border);border-radius:6px;padding:0.7rem 0.9rem;color:#f0f0f0;font-size:0.9rem;font-family:'Inter',sans-serif;width:100%;outline:none;transition:border-color 0.2s;}
+label{font-size:0.75rem;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.4px;}
+input,select,textarea{background:#0f0f0f;border:1px solid var(--border);border-radius:6px;padding:0.7rem 0.85rem;color:#f0f0f0;font-size:0.9rem;font-family:'Inter',sans-serif;width:100%;outline:none;transition:border-color 0.2s;}
 input:focus,select:focus,textarea:focus{border-color:var(--gold);}
 select option{background:#1a1a1a;}
-textarea{resize:vertical;min-height:90px;}
+textarea{resize:vertical;min-height:80px;}
 .form-submit{margin-top:1.5rem;text-align:center;}
-.form-note{font-size:0.78rem;color:#666;margin-top:0.75rem;}
+.form-note{font-size:0.76rem;color:#555;margin-top:0.65rem;line-height:1.5;}
+.consent-row{display:flex;align-items:flex-start;gap:0.6rem;}
+.consent-row input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:3px;accent-color:var(--gold);}
+.consent-row span{font-size:0.8rem;color:#888;line-height:1.5;}
 
-footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center;}
-.footer-brand{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;}
-.footer-links{display:flex;justify-content:center;gap:2rem;margin:1rem 0;}
-.footer-links a{color:#666;font-size:0.82rem;text-decoration:none;}
+footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 1.5rem;text-align:center;}
+.footer-brand{font-size:1.05rem;font-weight:700;color:var(--gold);margin-bottom:0.4rem;}
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem 2rem;margin:1rem 0;}
+.footer-links a{color:#555;font-size:0.8rem;text-decoration:none;}
 .footer-links a:hover{color:var(--gold);}
-.footer-legal{font-size:0.78rem;color:#555;max-width:600px;margin:1.5rem auto 0;line-height:1.6;}
+.footer-legal{font-size:0.75rem;color:#444;max-width:600px;margin:1.25rem auto 0;line-height:1.6;}
 
-@media(max-width:600px){
-  .hero h1{font-size:2rem;}
+@media(max-width:768px){
+  nav.desktop{display:none;}
+  .hamburger{display:flex;}
+  .logo-text{display:none;}
+  .hero h1{font-size:1.9rem;}
+  .hero p{font-size:0.93rem;}
   .form-grid{grid-template-columns:1fr;}
-  nav{display:none;}
-  .stats{flex-wrap:wrap;gap:1.5rem;}
+  .form-group.full{grid-column:1;}
+  .form-wrap{padding:1.5rem;}
+  .section-wrap h2{font-size:1.45rem;}
+  .section-wrap{padding:2.5rem 1.25rem;}
+}
+@media(max-width:400px){
+  .hero h1{font-size:1.65rem;}
+  .hero{padding:3rem 1.25rem 2.5rem;}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-text">Siiba M Loans</div>
-  <nav>
+  <div class="logo-wrap">
+    <svg class="logo-svg" viewBox="0 0 1254 1254" xmlns="http://www.w3.org/2000/svg" aria-label="Siiba M Loans logo">
+      <g transform="translate(0,1254) scale(0.1,-0.1)" fill="#c9a23f" stroke="none">
+        <path d="M7535 10197 c-79 -58 -676 -515 -717 -550 l-48 -39 0 -1805 0 -1806 118 -125 c64 -69 142 -152 172 -185 l55 -59 196 213 c108 118 211 232 230 253 l34 39 0 2044 c0 1124 -2 2043 -5 2043 -3 0 -18 -11 -35 -23z"/>
+        <path d="M6192 8638 l-351 -263 0 -695 0 -695 335 -355 c184 -195 346 -366 359 -380 l25 -25 0 1338 c0 745 -4 1337 -9 1337 -4 0 -166 -118 -359 -262z"/>
+        <path d="M3785 8350 c-257 -21 -515 -89 -708 -186 -222 -112 -414 -299 -517 -504 -146 -290 -154 -670 -21 -956 125 -266 344 -476 706 -677 110 -61 213 -109 750 -349 570 -255 913 -470 1074 -672 117 -147 170 -289 178 -481 17 -399 -206 -710 -602 -838 -160 -52 -234 -62 -455 -61 -227 0 -327 15 -505 76 -362 122 -670 404 -883 808 -109 204 -182 418 -236 689 -26 126 -35 156 -49 159 -48 9 -47 22 -47 -653 l0 -633 77 -72 c141 -132 385 -279 610 -369 508 -202 1173 -242 1662 -100 489 142 828 480 933 929 29 127 36 414 13 550 -65 391 -276 681 -680 935 -127 80 -466 248 -843 419 -652 295 -872 422 -1047 602 -84 87 -136 171 -172 279 -23 68 -27 97 -27 200 0 141 16 212 73 330 111 225 332 371 635 420 105 17 312 19 406 5 473 -76 843 -470 990 -1057 10 -38 14 -43 39 -43 17 0 31 7 35 16 3 9 6 208 6 443 l0 428 -22 20 c-114 103 -423 236 -688 297 -183 41 -492 62 -685 46z"/>
+        <path d="M9740 7965 c-162 -33 -320 -120 -469 -260 -81 -75 -452 -470 -1276 -1355 -181 -195 -425 -456 -541 -580 -116 -124 -239 -258 -274 -297 -35 -40 -66 -73 -69 -73 -9 0 -155 150 -351 360 -90 96 -234 249 -319 340 -504 534 -940 999 -1026 1093 -54 59 -102 107 -106 107 -5 0 -9 -296 -9 -658 l0 -658 68 -49 c110 -81 281 -259 350 -364 l62 -95 0 360 0 359 43 -45 c23 -25 128 -140 232 -255 105 -115 238 -261 296 -325 58 -63 209 -227 334 -365 267 -292 399 -434 660 -714 l190 -203 3 467 c2 346 -1 471 -10 482 -9 11 -3 22 29 56 22 23 175 186 339 363 165 176 502 536 749 799 l450 479 3 -1439 c2 -990 -1 -1466 -8 -1523 -26 -197 -92 -273 -260 -298 -54 -8 -70 -19 -70 -49 0 -21 5 -22 98 -29 122 -8 1381 -8 1423 1 27 5 30 9 27 36 l-3 31 -104 13 c-243 31 -327 124 -351 388 -12 128 -12 3460 -1 3581 17 174 52 232 153 254 31 7 59 19 62 26 9 24 -4 42 -36 48 -51 10 -219 5 -288 -9z"/>
+      </g>
+    </svg>
+    <span class="logo-text">Siiba M Loans</span>
+  </div>
+  <nav class="desktop">
     <a href="#products">Products</a>
     <a href="#how-it-works">How It Works</a>
     <a href="#requirements">Requirements</a>
     <a href="#about">About</a>
     <a href="#apply">Apply Now</a>
   </nav>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </header>
+
+<nav class="mobile-menu" id="mobileMenu">
+  <a href="#products" onclick="closeMenu()">Loan Products</a>
+  <a href="#how-it-works" onclick="closeMenu()">How It Works</a>
+  <a href="#requirements" onclick="closeMenu()">Requirements</a>
+  <a href="#about" onclick="closeMenu()">About Us</a>
+  <a href="#apply" class="apply-link" onclick="closeMenu()">Apply Now</a>
+</nav>
 
 <div class="hero">
   <div class="badge">Fast &bull; Transparent &bull; Reliable</div>
   <h1>Financial help<br/>when you need it <span>most</span></h1>
   <p>Simple micro-loans for South Africans. No unnecessary paperwork, no hidden fees — just quick access to the money you need.</p>
-  <a href="#apply" class="btn">Apply for a Loan</a>
-  <a href="#products" class="btn btn-outline">See Products</a>
+  <div class="hero-btns">
+    <a href="#apply" class="btn">Apply for a Loan</a>
+    <a href="#products" class="btn btn-outline">See Products</a>
+  </div>
 </div>
 
 <div class="stats">
   <div class="stat"><div class="num">24hrs</div><div class="label">Average approval time</div></div>
   <div class="stat"><div class="num">R500</div><div class="label">Minimum loan amount</div></div>
-  <div class="stat"><div class="num">R10,000</div><div class="label">Maximum loan amount</div></div>
-  <div class="stat"><div class="num">100%</div><div class="label">Transparent fees</div></div>
+  <div class="stat"><div class="num">R10K</div><div class="label">Maximum loan amount</div></div>
+  <div class="stat"><div class="num">0</div><div class="label">Hidden fees</div></div>
 </div>
 
-<section id="products">
+<div class="section-wrap" id="products">
   <div class="section-label">Loan Products</div>
   <h2>Find the right loan for you</h2>
-  <p class="sub">We offer three tiers of short-term credit, designed to match your specific financial situation.</p>
+  <p class="sub">Three tiers of short-term credit designed to match your specific financial situation.</p>
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Loan Amount</th><th>Repayment Term</th><th>Ideal For</th><th>Repayment Type</th></tr>
+        <tr><th>Loan Amount</th><th>Term</th><th>Ideal For</th><th>Repayment</th></tr>
       </thead>
       <tbody>
         <tr>
           <td><strong style="color:#fff;">R500 – R1,500</strong></td>
           <td><span class="pill">Up to 30 days</span></td>
-          <td>Emergency expenses, unexpected bills</td>
-          <td>Single lump sum</td>
+          <td>Emergency expenses</td>
+          <td>Lump sum</td>
         </tr>
         <tr>
           <td><strong style="color:#fff;">R2,000 – R5,000</strong></td>
           <td><span class="pill">1 – 3 months</span></td>
-          <td>School fees, rent shortfall, car repairs</td>
-          <td>Monthly instalments</td>
+          <td>School fees, rent, repairs</td>
+          <td>Monthly</td>
         </tr>
         <tr>
           <td><strong style="color:#fff;">R6,000 – R10,000</strong></td>
           <td><span class="pill">3 – 6 months</span></td>
-          <td>Business cash flow, large personal expense</td>
-          <td>Monthly instalments</td>
+          <td>Cash flow, large expenses</td>
+          <td>Monthly</td>
         </tr>
       </tbody>
     </table>
   </div>
-</section>
-
-<div style="background:var(--card2);padding:0.5rem 0;">
-<section>
-  <div class="section-label">Why Choose Us</div>
-  <h2>Built around you</h2>
-  <p class="sub">We're a locally-run business that understands the real financial pressures South Africans face.</p>
-  <div class="features">
-    <div class="card">
-      <div class="card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3>Fast decisions</h3>
-      <p>We assess applications quickly. Most applicants receive feedback within 24 hours of submission.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h3>No hidden costs</h3>
-      <p>You see the full repayment amount before you sign. What we quote is what you pay — nothing more.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <h3>Flexible repayment</h3>
-      <p>We structure repayments to align with your income cycle — salary day, week-end, or monthly.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <h3>Personal service</h3>
-      <p>A real person reviews your application — no automated rejection system. We consider your full situation.</p>
-    </div>
-  </div>
-</section>
 </div>
 
-<section id="how-it-works">
+<div class="alt-bg">
+<div class="section-wrap">
+  <div class="section-label">Why Choose Us</div>
+  <h2>Built around you</h2>
+  <p class="sub">A locally-run business that understands real South African financial pressures.</p>
+  <div class="features">
+    <div class="card">
+      <div class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <h3>Fast decisions</h3>
+      <p>Most applicants receive feedback within 24 hours of submitting their application.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3>No hidden costs</h3>
+      <p>You see the full repayment amount before you sign. What we quote is what you pay.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <h3>Flexible repayment</h3>
+      <p>Repayments structured to align with your income cycle — salary day or monthly.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a23f" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <h3>Personal service</h3>
+      <p>A real person reviews your application — no automated rejection system.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section-wrap" id="how-it-works">
   <div class="section-label">Process</div>
   <h2>How it works</h2>
   <p class="sub">Four simple steps from application to money in your account.</p>
   <div class="steps">
-    <div class="step"><div class="step-num">01</div><h3>Apply online</h3><p>Fill in the application form below with your personal and employment details.</p></div>
-    <div class="step"><div class="step-num">02</div><h3>We review</h3><p>Our team assesses your application and contacts you to confirm details if needed.</p></div>
+    <div class="step"><div class="step-num">01</div><h3>Apply online</h3><p>Fill in the form below with your personal and employment details.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>We review</h3><p>Our team assesses your application and contacts you if we need more details.</p></div>
     <div class="step"><div class="step-num">03</div><h3>Sign &amp; approve</h3><p>We send you a loan agreement. Once signed and returned, we proceed to payout.</p></div>
-    <div class="step"><div class="step-num">04</div><h3>Money paid out</h3><p>Funds are transferred directly to your bank account. Repay via EFT or debit order.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Money paid out</h3><p>Funds transferred directly to your bank account. Repay via EFT or debit order.</p></div>
   </div>
-</section>
+</div>
 
-<div style="background:var(--card2);padding:0.5rem 0;">
-<section id="requirements">
+<div class="alt-bg">
+<div class="section-wrap" id="requirements">
   <div class="section-label">Requirements</div>
   <h2>What you'll need to apply</h2>
-  <p class="sub">We keep the requirements simple. Make sure you have these documents ready before applying.</p>
+  <p class="sub">Have these documents ready before you start your application.</p>
   <div class="docs-grid">
     <div class="doc-item"><div class="doc-dot"></div>South African ID or Smart Card</div>
     <div class="doc-item"><div class="doc-dot"></div>3 months recent bank statements</div>
@@ -210,21 +261,22 @@ footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem
     <div class="doc-item"><div class="doc-dot"></div>Active South African bank account</div>
     <div class="doc-item"><div class="doc-dot"></div>Valid cellphone number &amp; email address</div>
   </div>
-</section>
+</div>
 </div>
 
-<section id="about">
+<div class="section-wrap" id="about">
   <div class="section-label">About Us</div>
   <h2>Who we are</h2>
-  <p style="color:#aaa;max-width:700px;font-size:0.97rem;">Siiba M Loans is a South African micro-lending business committed to responsible, short-term credit. We believe that access to fair financial help should be straightforward — not buried in red tape or confusing contracts. Our focus is on affordability, honesty, and treating every client with dignity and respect.</p>
-  <p style="color:#888;max-width:700px;font-size:0.88rem;margin-top:1rem;">We operate within the guidelines of the National Credit Act (NCA) and are committed to responsible lending practices. Loans are subject to affordability assessment and credit checks.</p>
-</section>
+  <p style="color:#aaa;max-width:680px;font-size:0.95rem;margin-bottom:1rem;">Siiba M Loans is a South African micro-lending business committed to responsible, short-term credit. We believe access to fair financial help should be straightforward — not buried in red tape or confusing contracts.</p>
+  <p style="color:#666;max-width:680px;font-size:0.85rem;">We operate within the guidelines of the National Credit Act (NCA). All loans are subject to affordability assessment and credit checks.</p>
+</div>
 
-<section id="apply">
-  <div style="text-align:center;margin-bottom:2.5rem;">
+<div class="alt-bg" id="apply">
+<div class="form-outer">
+  <div style="text-align:center;margin-bottom:2rem;">
     <div class="section-label" style="text-align:center;">Application</div>
-    <h2>Apply for a loan</h2>
-    <p class="sub" style="margin:0.5rem auto 0;text-align:center;">Complete the form below and we'll be in touch within 24 hours.</p>
+    <h2 style="color:#fff;font-size:1.7rem;font-weight:700;">Apply for a loan</h2>
+    <p style="color:#888;font-size:0.9rem;margin-top:0.4rem;">Complete the form and we'll be in touch within 24 hours.</p>
   </div>
   <div class="form-wrap">
     <form action="https://formspree.io/f/mpqbzlpd" method="POST">
@@ -247,7 +299,7 @@ footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem
         </div>
         <div class="form-group">
           <label>ID number</label>
-          <input type="text" name="id_number" placeholder="South African ID number" required/>
+          <input type="text" name="id_number" placeholder="SA ID number" required/>
         </div>
         <div class="form-group">
           <label>Employer / Occupation</label>
@@ -258,7 +310,7 @@ footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem
           <input type="number" name="monthly_income" placeholder="e.g. 8500" required/>
         </div>
         <div class="form-group">
-          <label>Loan amount requested (R)</label>
+          <label>Loan amount requested</label>
           <select name="loan_amount" required>
             <option value="" disabled selected>Select amount</option>
             <option>R500 – R1,500</option>
@@ -271,21 +323,30 @@ footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem
           <textarea name="loan_reason" placeholder="Briefly describe what the loan is for..."></textarea>
         </div>
         <div class="form-group full">
-          <label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.82rem;cursor:pointer;">
-            <input type="checkbox" name="consent" required style="width:auto;accent-color:var(--gold)"/>
-            I consent to Siiba M Loans processing my personal information for loan assessment purposes, and confirm that all information provided is true and accurate.
-          </label>
+          <div class="consent-row">
+            <input type="checkbox" name="consent" required/>
+            <span>I consent to Siiba M Loans processing my personal information for loan assessment purposes, and confirm that all information provided is true and accurate.</span>
+          </div>
         </div>
       </div>
       <div class="form-submit">
-        <button type="submit" class="btn" style="padding:0.9rem 3rem;font-size:1rem;">Submit Application</button>
-        <p class="form-note">Your information is kept private and never sold to third parties. A credit check will be conducted as part of our assessment process.</p>
+        <button type="submit" class="btn" style="padding:0.9rem 2.5rem;font-size:0.95rem;width:100%;max-width:320px;">Submit Application</button>
+        <p class="form-note">Your information is kept private and never sold to third parties.<br/>A credit check will be conducted as part of our assessment process.</p>
       </div>
     </form>
   </div>
-</section>
+</div>
+</div>
 
 <footer>
+  <svg class="footer-logo" viewBox="0 0 1254 1254" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g transform="translate(0,1254) scale(0.1,-0.1)" fill="#c9a23f" stroke="none">
+      <path d="M7535 10197 c-79 -58 -676 -515 -717 -550 l-48 -39 0 -1805 0 -1806 118 -125 c64 -69 142 -152 172 -185 l55 -59 196 213 c108 118 211 232 230 253 l34 39 0 2044 c0 1124 -2 2043 -5 2043 -3 0 -18 -11 -35 -23z"/>
+      <path d="M6192 8638 l-351 -263 0 -695 0 -695 335 -355 c184 -195 346 -366 359 -380 l25 -25 0 1338 c0 745 -4 1337 -9 1337 -4 0 -166 -118 -359 -262z"/>
+      <path d="M3785 8350 c-257 -21 -515 -89 -708 -186 -222 -112 -414 -299 -517 -504 -146 -290 -154 -670 -21 -956 125 -266 344 -476 706 -677 110 -61 213 -109 750 -349 570 -255 913 -470 1074 -672 117 -147 170 -289 178 -481 17 -399 -206 -710 -602 -838 -160 -52 -234 -62 -455 -61 -227 0 -327 15 -505 76 -362 122 -670 404 -883 808 -109 204 -182 418 -236 689 -26 126 -35 156 -49 159 -48 9 -47 22 -47 -653 l0 -633 77 -72 c141 -132 385 -279 610 -369 508 -202 1173 -242 1662 -100 489 142 828 480 933 929 29 127 36 414 13 550 -65 391 -276 681 -680 935 -127 80 -466 248 -843 419 -652 295 -872 422 -1047 602 -84 87 -136 171 -172 279 -23 68 -27 97 -27 200 0 141 16 212 73 330 111 225 332 371 635 420 105 17 312 19 406 5 473 -76 843 -470 990 -1057 10 -38 14 -43 39 -43 17 0 31 7 35 16 3 9 6 208 6 443 l0 428 -22 20 c-114 103 -423 236 -688 297 -183 41 -492 62 -685 46z"/>
+      <path d="M9740 7965 c-162 -33 -320 -120 -469 -260 -81 -75 -452 -470 -1276 -1355 -181 -195 -425 -456 -541 -580 -116 -124 -239 -258 -274 -297 -35 -40 -66 -73 -69 -73 -9 0 -155 150 -351 360 -90 96 -234 249 -319 340 -504 534 -940 999 -1026 1093 -54 59 -102 107 -106 107 -5 0 -9 -296 -9 -658 l0 -658 68 -49 c110 -81 281 -259 350 -364 l62 -95 0 360 0 359 43 -45 c23 -25 128 -140 232 -255 105 -115 238 -261 296 -325 58 -63 209 -227 334 -365 267 -292 399 -434 660 -714 l190 -203 3 467 c2 346 -1 471 -10 482 -9 11 -3 22 29 56 22 23 175 186 339 363 165 176 502 536 749 799 l450 479 3 -1439 c2 -990 -1 -1466 -8 -1523 -26 -197 -92 -273 -260 -298 -54 -8 -70 -19 -70 -49 0 -21 5 -22 98 -29 122 -8 1381 -8 1423 1 27 5 30 9 27 36 l-3 31 -104 13 c-243 31 -327 124 -351 388 -12 128 -12 3460 -1 3581 17 174 52 232 153 254 31 7 59 19 62 26 9 24 -4 42 -36 48 -51 10 -219 5 -288 -9z"/>
+    </g>
+  </svg>
   <div class="footer-brand">Siiba M Loans</div>
   <div class="footer-links">
     <a href="#products">Products</a>
@@ -294,9 +355,22 @@ footer{background:#060606;border-top:1px solid var(--border);padding:2.5rem 2rem
     <a href="#about">About</a>
   </div>
   <div class="footer-legal">
-    &copy; 2026 Siiba M Loans. All rights reserved. Siiba M Loans is a registered micro-lender operating in compliance with the National Credit Act No. 34 of 2005 (NCA). All loans are subject to affordability assessment, credit checks, and terms &amp; conditions. Responsible lending. Registered with the National Credit Regulator (NCR).
+    &copy; 2026 Siiba M Loans. All rights reserved. Operating in compliance with the National Credit Act No. 34 of 2005 (NCA). All loans subject to affordability assessment, credit checks, and terms &amp; conditions. Registered with the National Credit Regulator (NCR).
   </div>
 </footer>
+
+<script>
+const btn = document.getElementById('hamburger');
+const menu = document.getElementById('mobileMenu');
+btn.addEventListener('click', () => {
+  btn.classList.toggle('open');
+  menu.classList.toggle('open');
+});
+function closeMenu() {
+  btn.classList.remove('open');
+  menu.classList.remove('open');
+}
+</script>
 
 </body>
 </html>
