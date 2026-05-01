@@ -218,15 +218,8 @@ if (!empty($joinedClassIds)) {
  <style>
 :root {
     --bg-color: #0d1117;
-    --sidebar-bg: #1a202c;
     --text-color: #e2e8f0;
-    --accent-color765: #4fd1c5;
-    --secondary-accent: #f6877a;
-    --card-bg: #1a202c;
-    --button-bg: #f7fafc;
-    --button-hover-bg: #edf2f7;
-    --warning-color: #c0392b;
-    --shadow-glow: rgba(79, 209, 197, 0.3);
+    --accent-color: #4fd1c5;
     --card-radius: 16px;
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 80px;
@@ -250,27 +243,23 @@ body {
     flex-direction: column;
     padding: 20px;
     box-sizing: border-box;
-    transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
     position: fixed;
     top: 0;
-    left: 0;
+    left: -240px;
+    visibility: hidden;
+    opacity: 0;
     height: 100vh;
     z-index: 5000;
-    
-    /* FIX STARTS HERE */
-    overflow-y: auto;   /* Keep vertical scrolling for long menus */
-    overflow-x: hidden; /* Prevents horizontal scroll entirely */
-    scrollbar-width: none; /* Hides scrollbar track in Firefox */
-    
-   border-right: 1px solid rgba(255, 255, 255, 0.08);
-    font-weight: 100;
-
-    /* THE CURVES: Only top-right and bottom-right */
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    
-    /* THE BORDER: A subtle "rim" makes the curve look premium */
-    border-right: 1px solid rgba(190, 188, 188, 0.08);
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
+                visibility var(--transition-speed), opacity var(--transition-speed);
+}
+.sidebar.desktop-open,
+.sidebar.active {
+    left: 0;
+    visibility: visible;
+    opacity: 1;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -299,17 +288,16 @@ body {
 }
 
 .sidebar a,
-.sidebar button,
-.sidebar .footer,
-.sidebar .logout {
-    color: #b2b5b9ff;;             /* sidebar text colour*/
+.sidebar button.sidebar-nav-btn,
+.sidebar .footer {
+    color: #b2b5b9;
     text-decoration: none;
-    padding: 10px 12px;
+    padding: 7px 12px;
     margin-bottom: 0px;
     border-radius: var(--card-radius);
     display: flex;
     align-items: center;
-    transition: background var(--transition-speed) ease, transform 0.15s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
     overflow: hidden;
     font-weight: 100;
@@ -318,16 +306,28 @@ body {
     cursor: pointer;
     width: 100%;
     text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
 }
 
 .sidebar a:hover,
-.sidebar button:hover,
-.sidebar .footer:hover,
-.sidebar .logout:hover {
-    background: rgba(79, 209, 197, 0.08);
-    color: #ffffff;
-    transform: translateX(2px);
+.sidebar button.sidebar-nav-btn:hover {
+    background: rgba(79,209,197,0.08);
+    transform: translateX(3px);
 }
+
+.sidebar a.active { background: rgba(79,209,197,0.2); border-left: 4px solid var(--accent-color); }
+.sidebar a i, .sidebar button.sidebar-nav-btn i { font-size: 16px; margin-right: 10px; }
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 10px;
+    width: calc(100% - 40px);
+    text-align: left;
+    padding: 0;
+    border-top: none;
+}
+.sidebar-footer span { font-size: 15px; font-weight: 700; color: #777; }
 
 .sidebar.collapsed a,
 .sidebar.collapsed button,
@@ -481,112 +481,197 @@ body {
     }
 }
 
+/* ── MAIN CONTENT ── */
 .main-content {
     flex: 1;
-    background-color: var(--bg-color);
-    padding: 0;
-    overflow: hidden;
+    margin-left: 0;
+    transition: margin-left var(--transition-speed) ease;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     position: relative;
 }
 
-/*.sidebar.collapsed ~ .main-content {
-    margin-left: var(--sidebar-collapsed-width);
-}*/
+/* ── TOP NAV WRAPPER ── */
+.top-nav-wrapper {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    flex-shrink: 0;
+}
+
+/* ROW 1 */
+.top-nav-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    gap: 12px;
+}
+
+.top-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#desktopMenuToggle {
+    display: none;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #e2e8f0;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+#desktopMenuToggle:hover { background: #30363d; }
+
+#mobileToggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.top-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+}
+.top-nav-brand img {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #30363d;
+}
+.top-nav-school-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+/* Avatar */
+.top-nav-avatar-btn {
+    position: relative;
+    flex-shrink: 0;
+}
+.top-nav-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid #30363d;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #21262d;
+    transition: border-color 0.2s ease;
+}
+.top-nav-avatar:hover { border-color: #4fd1c5; }
+.top-nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.top-nav-avatar .initials-sm {
+    font-size: 13px; font-weight: 800;
+    color: #8b949e; text-transform: uppercase;
+}
+
+/* Avatar dropdown */
+.avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 6000;
+    overflow: hidden;
+}
+.avatar-dropdown.open { display: block; }
+
+.avatar-dropdown-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #21262d;
+}
+.avatar-dropdown-name { font-size: 14px; font-weight: 800; color: #e2e8f0; }
+.avatar-dropdown-email { font-size: 12px; color: #8b949e; margin-top: 2px; }
+
+.avatar-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #c9d1d9;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+}
+.avatar-dropdown-item:hover { background: #21262d; color: #e2e8f0; }
+.avatar-dropdown-item.danger { color: #f85149; }
+.avatar-dropdown-item.danger:hover { background: rgba(248,81,73,0.08); }
+
+/* ROW 2: tab bar — desktop only */
+.top-nav-row2 {
+    display: none;
+    align-items: center;
+    padding: 0 20px;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.top-nav-row2::-webkit-scrollbar { display: none; }
+
+.top-nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b949e;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'Nunito', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+.top-nav-tab:hover { color: #e2e8f0; border-bottom-color: #30363d; }
+.top-nav-tab.active { color: #e2e8f0; border-bottom-color: #f97316; }
+
+/* ── CONTENT AREA ── */
+#api-content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    padding-bottom: 100px;
+}
+#api-content-area::-webkit-scrollbar { width: 6px; }
+#api-content-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+#api-content-area::-webkit-scrollbar-thumb:hover { background: rgba(79,209,197,0.5); }
+#api-content-area::-webkit-scrollbar-track { background: transparent; }
 
 iframe {
     border: none;
     width: 100%;
     flex: 1;
-    overflow: auto;
-    background: var(--card-bg);
-}
-
-.main-header {
-    padding: 10px 18px;
-    border-bottom: 1px solid var(--border-color);          /* faint rim like sidebar */
-    background: rgba(26, 25, 25, 0.92);                    /* almost exact sidebar bg #1a1919 with slight transparency */
-    backdrop-filter: blur(10px);                           /* glass effect – premium dim look */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.main-header .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.main-header .school-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-color);           /* soft white #e2e8f0 */
-    display: none;                      /* hidden on mobile – already good */
-}
-
-@media (min-width: 769px) {
-    .main-header .school-name {
-        display: inline;
-    }
-}
-
-.main-header .logout {
-    background: var(--warning-color);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.main-header .logout:hover {
-    background: #a93226;
-    transform: scale(1.02);
-}
-
-.toggle-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 24px;
-    color: #e2dadaff;
-    transition: color 0.3s ease;
-}
-
-.toggle-btn:hover {
-    color: var(--secondary-accent);
-}
-
-.toggle-btn::before {
-    content: 'Menu';
-}
-
-.main-header #settingsBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 15px;
-    color: var(--text-color);
-    transition: color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    padding: 8px;
-}
-
-.main-header #settingsBtn:hover {
-    color: var(--secondary-accent);
-    transform: scale(1.02);
-}
-
-.main-header #settingsBtn i {
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    margin-right: 4px;
+    background: #0d1117;
 }
 
 .my-class-content {
@@ -682,193 +767,65 @@ iframe {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Show row 2 and desktop toggle on desktop */
+@media (min-width: 769px) {
+    .top-nav-row2   { display: flex; }
+    #desktopMenuToggle { display: flex; }
+    #mobileToggle   { display: none; }
+    .top-nav-school-name { display: inline; }
+}
+
+/* ── MOBILE OVERLAY ── */
+#mobileOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4999;
+    transition: opacity var(--transition-speed) ease;
+}
+.sidebar.active ~ #mobileOverlay,
+.sidebar.desktop-open ~ #mobileOverlay {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── MOBILE LAYOUT ── */
 @media (max-width: 768px) {
-    body {
-        flex-direction: column;
+    #mobileToggle { display: block; }
+    .top-nav-school-name { display: none; }
+    #learnerSearchWrapper { display: none !important; }
+    .sidebar { left: -100%; width: 300px; }
+    .sidebar.active { left: 0; width: 300px; }
+    .main-content { margin-left: 0 !important; }
+    .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
+    .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
+    iframe { height: calc(100vh - 120px) !important; }
+    #mobileBottomNav { display: flex !important; }
+    #mobileBottomNav {
+        padding-bottom: env(safe-area-inset-bottom);
+        height: calc(82px + env(safe-area-inset-bottom));
     }
-
-    .sidebar {
-        left: -100%;
-        width: 300px; /* Increased from 240px to 300px */
-        transition: left var(--transition-speed) ease;
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    .sidebar.collapsed {
-        left: -100%;
-        width: var(--sidebar-width);
-    }
-
-    .sidebar h2, .sidebar .footer, .sidebar .logout {
-        font-size: 14px;
-    }
-
-    .main-content {
-        margin-left: 0 !important;
-        transition: transform var(--transition-speed) ease, filter var(--transition-speed) ease;
-    }
-
-    .sidebar.active ~ .main-content {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-       transform: translateX(300px);
-        filter: blur(2px);
-    }
-
-    .main-header {
-        justify-content: space-between;
-        padding: 10px 12px;
-    }
-
-    .main-header h1 {
-        font-size: 20px;
-    }
-
-    .main-header .school-logo {
-        width: 32px;
-        height: 32px;
-    }
-
-    .main-header .toggle-btn {
-        font-size: 14px;
-    }
-
-    .main-header #settingsBtn {
-        font-size: 14px;
-        padding: 6px;
-    }
-
-    .main-header #settingsBtn i {
-        font-size: 16px;
-    }
-
-    .main-header .logout {
-        display: none;
-    }
-
-    .desktop-toggle-btn {
-        display: none;
-    }
-
-    .sidebar.active .desktop-toggle-btn {
-        display: none;
-    }
-
-    iframe {
-        height: calc(100vh - 60px);
-    }
-
-    .my-class-content {
-        margin: 12px;
-        padding: 16px;
-    }
-
-    .sidebar.collapsed a span,
-    .sidebar.collapsed button span,
-    .sidebar.collapsed .footer span,
-    .sidebar.collapsed .logout span {
-        display: inline !important;
-    }
+    .sidebar a.desktop-only { display: none; }
 }
 
 @media (max-width: 480px) {
-    .sidebar a, .sidebar button {
-        width: auto !important; /* Changed from 100% to auto */
-       
-        box-sizing: border-box !important;
-
-        font-size: 17px !important; 
-        font-weight: 700 !important; /* Bold like teacher side */
-        padding: 18px 15px !important; /* Tall touch targets */
-        margin-bottom: 10px !important;
-        background: rgba(255, 255, 255, 0.03); /* Subtle button background */
-        border-radius: 14px !important;
-    }
-
-    .sidebar a i, .sidebar button i {
-        font-size: 20px !important;
-        margin-right: 15px !important;
-        width: 25px;
-        text-align: center;
-    }
-
-    .sidebar-links {
-        margin-top: 30px !important;
-    }
-    /* 1. Make the Profile Area "Pop" */
-    .profile-picture-wrapper img.learner-avatar {
-        width: 70px !important;   
-        height: 70px !important;  
-        border: 4px solid #757272ff !important;
-        margin-bottom: 12px;
-    }
-    .sidebar h2 {
-        font-size: 16px;
-    }
-
-    .main-header h1 {
-        font-size: 18px;
-    }
-
-    .main-header #settingsBtn {
-        font-size: 20px;
-    }
-
-    .main-header #settingsBtn i {
-        font-size: 14px;
-    }
-
-    .my-class-content ul {
-        padding-left: 0;
-        list-style: none;
-        text-align: center;
-    }
-
-    .my-class-content h3 {
-        font-size: 18px;
-    }
-
-    .learner-name { 
-        font-size: 23px !important; 
-        max-height: none !important; 
-        font-weight: 800 !important; 
-        margin-top: 8px;
-        color: #ffffff;
-    }
-
-    .learner-email { 
-        font-size: 16px !important; 
-        margin-bottom: 30px !important; 
-        max-height: none !important; 
-        opacity: 0.7;
-    }
-    .sidebar .footer {
-        bottom: 40px !important; /* Lifts it higher on mobile */
-        font-size: 16px !important;
-        opacity: 0.8 !important; /* Makes it a bit easier to see */
-    }
+    .sidebar { width: 80% !important; }
+    .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
+    .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
+    .sidebar-footer { margin-bottom: 30px !important; }
+    .profile-picture-wrapper { width: 70px !important; height: 70px !important; border-width: 4px !important; }
+    .learner-name  { font-size: 24px !important; font-weight: 800 !important; }
+    .learner-email { font-size: 14px !important; margin-bottom: 20px; }
+    .sidebar a { font-size: 17px !important; font-weight: 700 !important; padding: 16px 15px !important; margin-bottom: 8px !important; }
+    .sidebar a i { font-size: 20px !important; margin-right: 15px !important; }
+    .sidebar-header { flex-direction: column; align-items: flex-start; margin-bottom: 25px; }
+    .sidebar-links { margin-top: 20px; }
 }
 
-@media (min-width: 769px) {
-    #mobileToggle {
-        display: none;
-    }
-}
-
-/* Update this block to use an INSET shadow instead of a BORDER */
-.sidebar a.active,
-.sidebar button.active {
-    background: rgba(79, 209, 197, 0.15);
-    /* This creates the line inside the button so width doesn't change */
-    box-shadow: inset 4px 0 0 0 #8b949e; /* Grey active line instead of Teal */
-    border-left: none; /* Remove the old border */
-}
 
 .sidebar span {
     opacity: 1;
@@ -1037,26 +994,15 @@ iframe {
     .sidebar a.desktop-only { display: none; }
 }
 
-#mobileToggle {
-    display: none;
-    background: none;
-    border: none;
-    color: #e0e6f0;
-    font-size: 26px;
-    cursor: pointer;
-    padding: 8px;
-    transition: color 0.3s ease;
+.round-toggle {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #000; border: 2px solid #333; color: #e2e8f0;
+    font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
 }
-
-#mobileToggle:hover {
-    color: var(--accent-color);
-}
-
-@media (max-width: 768px) {
-    #mobileToggle {
-        display: block;
-    }
-}
+.round-toggle:hover { background: #111; }
+@media (max-width: 768px) { .round-toggle { display: none !important; } }
 
 /* World Class Initials Avatar */
 .initials-avatar {
@@ -1249,15 +1195,15 @@ iframe {
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
 <div class="sidebar">
-    
-    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-        
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
+
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer; width:40px; height:40px; border-radius:50%; overflow:hidden; border:3px solid #757272ff;" onclick="document.getElementById('profileInput').click();">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
-                <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
-                     alt="Profile Picture" 
+                <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>"
+                     alt="Profile Picture"
                      class="learner-avatar"
-                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
+                     style="width:100%; height:100%; object-fit:cover;">
             <?php else: ?>
                 <div class="initials-avatar">
                     <?= htmlspecialchars($initials) ?>
@@ -1266,19 +1212,19 @@ iframe {
             <input type="file" id="profileInput" accept="image/*" style="display:none;">
         </div>
 
-        <button type="button" class="desktop-close-btn" onclick="toggleSidebar(true)" aria-label="Close Menu">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-        <line x1="7" y1="3" x2="7" y2="21"></line>
-    </svg>
-</button>
+        <button type="button" class="round-toggle" onclick="toggleDesktopSidebar()" aria-label="Close Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="7" y1="3" x2="7" y2="21"></line>
+            </svg>
+        </button>
     </div>
 
-    <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
+    <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
-    <div class="sidebar-links">
+    <div class="sidebar-links" style="margin-top:20px;">
       <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -1360,54 +1306,164 @@ iframe {
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:15px;"><span><strong>iSkool v.1.0.0</strong></span></div>
+    <div class="sidebar-footer">
+        <span>iSkool v.1.0.0</span>
+    </div>
 </div>
 
 <div class="main-content">
-  
-    <div class="main-header">
-    
-    <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
-        <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
 
-       <button id="desktopMenuToggle" type="button" aria-label="Open Desktop Menu">
-    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-    </svg>
-</button>
+    <!-- ── GITHUB-STYLE TOP NAV ── -->
+    <div class="top-nav-wrapper">
 
-        <button id="headerBackBtn" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="handleHeaderBack()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-        </button>
+        <!-- ROW 1: hamburger | logo + name | search + avatar -->
+        <div class="top-nav-row1">
+
+            <div class="top-nav-left">
+                <!-- Mobile hamburger -->
+                <button id="mobileToggle" onclick="toggleSidebar()">
+                    <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor"
+                         stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6"  x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <!-- Desktop hamburger -->
+                <button id="desktopMenuToggle" onclick="toggleDesktopSidebar()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor"
+                         stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6"  x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Centre: school logo + name -->
+            <div class="top-nav-brand">
+                <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo">
+                <span class="top-nav-school-name"><?= htmlspecialchars($schoolName) ?></span>
+            </div>
+
+            <!-- Right: search + avatar -->
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+
+                <!-- SEARCH BAR -->
+                <div style="position:relative;" id="learnerSearchWrapper">
+                    <div style="display:flex;align-items:center;gap:8px;
+                                background:#21262d;border:1px solid #30363d;
+                                border-radius:6px;padding:6px 12px;
+                                transition:border-color 0.2s ease;width:220px;"
+                         id="learnerSearchBox">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#8b949e"
+                             stroke-width="2" fill="none">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="learnerSearchInput"
+                               placeholder="Search..."
+                               autocomplete="off"
+                               style="background:none;border:none;outline:none;
+                                      color:#e2e8f0;font-size:13px;font-weight:600;
+                                      font-family:'Nunito',sans-serif;width:100%;"/>
+                        <span style="font-size:11px;color:#555e6a;
+                                     border:1px solid #30363d;border-radius:4px;
+                                     padding:1px 5px;font-family:'Nunito',sans-serif;">/</span>
+                    </div>
+                    <div id="learnerSearchSuggestions"
+                         style="display:none;position:absolute;top:calc(100% + 6px);
+                                left:0;right:0;background:#161b22;
+                                border:1px solid #30363d;border-radius:8px;
+                                overflow:hidden;z-index:9000;
+                                box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+                    </div>
+                </div>
+
+                <!-- AVATAR -->
+                <div class="top-nav-avatar-btn">
+                    <div class="top-nav-avatar" onclick="toggleLearnerAvatarDropdown()" id="topNavAvatar">
+                        <?php if (!empty($learnerProfilePicture) && $learnerProfilePicture !== 'default.png'): ?>
+                            <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>"
+                                 alt="Profile" id="topNavAvatarImg">
+                        <?php else: ?>
+                            <span class="initials-sm" id="topNavAvatarInitials">
+                                <?= htmlspecialchars($initials) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Dropdown -->
+                    <div class="avatar-dropdown" id="learnerAvatarDropdown">
+                        <div class="avatar-dropdown-header">
+                            <div class="avatar-dropdown-name"><?= htmlspecialchars($learnerFullName) ?></div>
+                            <div class="avatar-dropdown-email"><?= htmlspecialchars($learnerEmail) ?></div>
+                        </div>
+                        <button class="avatar-dropdown-item" onclick="document.getElementById('profileInput').click(); closeLearnerAvatarDropdown();">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                                 stroke-width="2" fill="none">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Upload Photo
+                        </button>
+                        <button class="avatar-dropdown-item danger"
+                                onclick="window.location.href='logout.php'">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                                 stroke-width="2" fill="none">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROW 2: secondary tabs — desktop only -->
+        <nav class="top-nav-row2" id="topNavRow2">
+
+            <button class="top-nav-tab" id="tab-syllabus"
+                    onclick="fetchSyllabus(); setLearnerTopNavTab('tab-syllabus')">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <line x1="12" y1="6"  x2="16" y2="6"/>
+                    <line x1="12" y1="10" x2="16" y2="10"/>
+                    <line x1="12" y1="14" x2="16" y2="14"/>
+                </svg>
+                Syllabus
+            </button>
+
+            <button class="top-nav-tab" id="tab-evaluations"
+                    onclick="fetchEvaluations(); setLearnerTopNavTab('tab-evaluations')">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                Evaluations
+            </button>
+
+            <button class="top-nav-tab" id="tab-calendar"
+                    onclick="fetchLearnerCalendar(); setLearnerTopNavTab('tab-calendar')">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
+                     stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8"  y1="2" x2="8"  y2="6"/>
+                    <line x1="3"  y1="10" x2="21" y2="10"/>
+                </svg>
+                Calendar
+            </button>
+
+        </nav>
     </div>
-
-    <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
-        <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>" 
-             alt="School Logo" 
-             style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:3px solid #757272ff;">
-        <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
-    </div>
-
-    <div id="headerRight" style="flex: 1; display: flex; justify-content: flex-end;">
-        <button id="settingsBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-        </button>
-    </div>
-</div>
+    <!-- ── END TOP NAV ── -->
     
    
 
@@ -2309,8 +2365,7 @@ window.loadHome = function() {
 };
 </script>
 
-<div id="desktopBackdrop" class="desktop-backdrop"></div>
-<div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
+<div id="mobileOverlay"></div>
 
 <nav id="mobileBottomNav">
 
@@ -2437,6 +2492,108 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+</script>
+
+<script>
+// ── TOP NAV TAB ACTIVE STATE ──
+window.setLearnerTopNavTab = function(tabId) {
+    document.querySelectorAll('.top-nav-tab').forEach(t => t.classList.remove('active'));
+    const el = document.getElementById(tabId);
+    if (el) el.classList.add('active');
+};
+
+// ── DESKTOP SIDEBAR TOGGLE ──
+window.toggleDesktopSidebar = function() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('desktop-open');
+};
+
+// ── AVATAR DROPDOWN ──
+window.toggleLearnerAvatarDropdown = function() {
+    document.getElementById('learnerAvatarDropdown').classList.toggle('open');
+};
+window.closeLearnerAvatarDropdown = function() {
+    document.getElementById('learnerAvatarDropdown').classList.remove('open');
+};
+document.addEventListener('click', function(e) {
+    const btn  = document.querySelector('.top-nav-avatar-btn');
+    const drop = document.getElementById('learnerAvatarDropdown');
+    if (btn && drop && !btn.contains(e.target)) drop.classList.remove('open');
+});
+
+// ── LEARNER NAV SEARCH ──
+(function() {
+    const navLinks = [
+        { label: 'Home',          keywords: ['home','manual'],           action: () => { loadManual(); } },
+        { label: 'Quiz',          keywords: ['quiz','quizzes'],          action: () => { fetchQuizzes(); } },
+        { label: 'Assignments',   keywords: ['assign','assignments'],    action: () => { fetchAssignments(); } },
+        { label: 'Resources',     keywords: ['resource','resources'],    action: () => { fetchResources(); } },
+        { label: 'Grades',        keywords: ['grade','grades','marks'],  action: () => { fetchGrades(); } },
+        { label: 'Announcements', keywords: ['announce','announcements'],action: () => { fetchAnnouncements(); } },
+        { label: 'Discussions',   keywords: ['discuss','discussions'],   action: () => { fetchDiscussions(); } },
+        { label: 'Syllabus',      keywords: ['syllab','syllabus'],       action: () => { fetchSyllabus(); setLearnerTopNavTab('tab-syllabus'); } },
+        { label: 'Evaluations',   keywords: ['eval','evaluations'],      action: () => { fetchEvaluations(); setLearnerTopNavTab('tab-evaluations'); } },
+        { label: 'Calendar',      keywords: ['calendar','remind'],       action: () => { fetchLearnerCalendar(); setLearnerTopNavTab('tab-calendar'); } },
+    ];
+
+    const input       = document.getElementById('learnerSearchInput');
+    const suggestions = document.getElementById('learnerSearchSuggestions');
+    const searchBox   = document.getElementById('learnerSearchBox');
+
+    if (!input) return;
+
+    input.addEventListener('focus', () => { searchBox.style.borderColor = '#4fd1c5'; });
+    input.addEventListener('blur',  () => { searchBox.style.borderColor = '#30363d'; });
+
+    input.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        if (!query) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
+
+        const matches = navLinks.filter(link =>
+            link.keywords.some(k => k.startsWith(query)) ||
+            link.label.toLowerCase().startsWith(query)
+        );
+
+        if (!matches.length) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
+
+        suggestions.innerHTML = matches.map((m, i) => `
+            <div class="learner-search-suggestion" data-index="${i}"
+                 style="display:flex;align-items:center;gap:10px;
+                        padding:10px 14px;cursor:pointer;
+                        font-size:13px;font-weight:700;
+                        color:#c9d1d9;font-family:'Nunito',sans-serif;
+                        transition:background 0.15s ease;">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="#8b949e" stroke-width="2" fill="none">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                ${m.label}
+            </div>`).join('');
+
+        suggestions.querySelectorAll('.learner-search-suggestion').forEach((el, i) => {
+            el.addEventListener('mouseenter', () => { el.style.background = '#21262d'; el.style.color = '#e2e8f0'; });
+            el.addEventListener('mouseleave', () => { el.style.background = ''; el.style.color = '#c9d1d9'; });
+            el.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                matches[i].action();
+                input.value = '';
+                suggestions.style.display = 'none';
+                suggestions.innerHTML = '';
+            });
+        });
+        suggestions.style.display = 'block';
+    });
+
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('learnerSearchWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            suggestions.style.display = 'none';
+            suggestions.innerHTML = '';
+            input.value = '';
+            searchBox.style.borderColor = '#30363d';
+        }
+    });
+})();
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
