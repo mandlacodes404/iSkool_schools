@@ -173,7 +173,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 
         /* ── TOP NAV WRAPPER (not fixed, scrolls with content) ── */
         .top-nav-wrapper {
-            background: #161b22;
+            background: #1a1919;
             border-bottom: 1px solid #30363d;
             flex-shrink: 0;
         }
