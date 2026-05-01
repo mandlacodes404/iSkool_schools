@@ -1935,10 +1935,6 @@ if (fullPage &&
             </div>
         </div>`;
 };
-document.getElementById("settingsBtn")?.addEventListener('click', function() {
-    loadLearnerSettings();
-    if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
-});
 
 window.removeLearnerProfilePicture = function() {
     if (!confirm('Remove your profile picture?')) return;
@@ -2115,7 +2111,11 @@ window.toggleSidebar = function (forceClose = false) {
         return div;
     }
 
-    mobileOverlay.addEventListener("click", toggleSidebar);
+    mobileOverlay.addEventListener("click", function() {
+        sidebar.classList.remove('active');
+        sidebar.classList.remove('desktop-open');
+        if (window.innerWidth <= 768) mobileOverlay.style.display = "none";
+    });
 
     
     // Init UI Highlighter
@@ -2143,32 +2143,19 @@ window.toggleSidebar = function (forceClose = false) {
         window.setActive("<?= $currentPage ?>");
     }
 
-    // Desktop slide-in with backdrop
-const desktopToggle = document.getElementById('desktopMenuToggle');
-const desktopBackdrop = document.getElementById('desktopBackdrop');
-
-if (desktopToggle) {
-    desktopToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('desktop-open'); 
+    // ── DESKTOP SIDEBAR TOGGLE ──
+    window.toggleDesktopSidebar = function() {
+        sidebar.classList.toggle('desktop-open');
         sidebar.classList.remove('active');
-    });
+    };
 
-    // Click backdrop to close
-    if (desktopBackdrop) {
-        desktopBackdrop.addEventListener('click', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('desktop-open');
-            }
-        });
-    }
-
-    // Esc key to close
+    // Esc key closes desktop sidebar
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && sidebar.classList.contains('desktop-open')) {
             sidebar.classList.remove('desktop-open');
         }
     });
-}
+
     loader.style.display = "none";
 });
 
@@ -2180,63 +2167,40 @@ function toggleJoinClassForm() {
 // --- DYNAMIC UI COMMAND CENTER ---
 window.configureHeader = function(config) {
     let { title, mode } = config;
-    
-    // Select our UI elements
-    const mobileBottomNav = document.getElementById('mobileBottomNav');
-    const titleEl = document.getElementById('headerTitle');
-    const logoEl = document.getElementById('headerLogo');
-    const mobileBtn = document.getElementById('mobileToggle');
-    const desktopBtn = document.getElementById('desktopMenuToggle');
-    const backBtn = document.getElementById('headerBackBtn');
-    const rightSide = document.getElementById('headerRight');
 
-    // Handle School Name Logic
-    const schoolName = "<?= htmlspecialchars($schoolName) ?>"; 
-   // Update this to include the folder path if that's what you're saving
-if (!title || title === 'Home' || title === 'partials/manual.html' || title === 'learner_manual.php') {
-    title = schoolName;
-}
-    if (titleEl) titleEl.innerText = title;
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    const mobileBtn       = document.getElementById('mobileToggle');
+    const desktopBtn      = document.getElementById('desktopMenuToggle');
+    // These IDs no longer exist in the new top nav — skip gracefully
+    const backBtn         = document.getElementById('headerBackBtn');
+    const rightSide       = document.getElementById('headerRight');
+    const titleEl         = document.getElementById('headerTitle');
+    const logoEl          = document.getElementById('headerLogo');
 
     if (mode === 'detail') {
-    if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
-    if (mobileBtn) mobileBtn.style.display = 'none';             
-    if (desktopBtn) desktopBtn.style.display = 'none';
-    if (backBtn) backBtn.style.display = 'flex';
-
-    if (window.innerWidth <= 768) {
-        // MOBILE: Hide logo but show the title text to fill the space
-        if (logoEl) logoEl.style.display = 'none';
-        if (titleEl) titleEl.style.display = 'block';  // ← SHOW TEXT
-        if (rightSide) rightSide.style.visibility = 'visible';
+        if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important');
+        if (mobileBtn)   mobileBtn.style.display   = 'none';
+        if (desktopBtn)  desktopBtn.style.display  = 'none';
+        if (backBtn)     backBtn.style.display      = 'flex';
+        if (rightSide)   rightSide.style.visibility = 'visible';
+        if (logoEl)      logoEl.style.display       = 'none';
+        if (titleEl)     titleEl.style.display      = 'block';
     } else {
-        // DESKTOP: Immersive — hide both logo and right side
-        if (logoEl) logoEl.style.display = 'none';
-        if (rightSide) rightSide.style.visibility = 'hidden'; 
-    }
-} else {
-        // --- STANDARD MODE: EXPLORATION ---
-        // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
+        // STANDARD mode
         if (mobileBottomNav) {
-            if (window.innerWidth <= 768) {
-                mobileBottomNav.style.display = 'flex';
-            } else {
-                mobileBottomNav.style.display = 'none';
-            }
+            mobileBottomNav.style.display = (window.innerWidth <= 768) ? 'flex' : 'none';
         }
-        
-        if (backBtn) backBtn.style.display = 'none';
-        if (logoEl) logoEl.style.display = 'block';
-if (window.innerWidth <= 768 && titleEl) titleEl.style.display = 'none'; // ← HIDE TEXT on mobile in standard mode
+        if (backBtn)  backBtn.style.display      = 'none';
+        if (logoEl)   logoEl.style.display       = 'block';
         if (rightSide) rightSide.style.visibility = 'visible';
+        if (titleEl && window.innerWidth <= 768) titleEl.style.display = 'none';
 
-        // Decide which menu button to show based on screen size
         if (window.innerWidth <= 768) {
-            if (mobileBtn) mobileBtn.style.display = 'block';
+            if (mobileBtn)  mobileBtn.style.display  = 'block';
             if (desktopBtn) desktopBtn.style.display = 'none';
         } else {
-            if (mobileBtn) mobileBtn.style.display = 'none';
-            if (desktopBtn) desktopBtn.style.display = 'block';
+            if (mobileBtn)  mobileBtn.style.display  = 'none';
+            if (desktopBtn) desktopBtn.style.display = 'flex';
         }
     }
 };
@@ -2500,12 +2464,6 @@ window.setLearnerTopNavTab = function(tabId) {
     document.querySelectorAll('.top-nav-tab').forEach(t => t.classList.remove('active'));
     const el = document.getElementById(tabId);
     if (el) el.classList.add('active');
-};
-
-// ── DESKTOP SIDEBAR TOGGLE ──
-window.toggleDesktopSidebar = function() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('desktop-open');
 };
 
 // ── AVATAR DROPDOWN ──
