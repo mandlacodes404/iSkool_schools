@@ -298,6 +298,8 @@ function renderTeacherAnnouncements(data) {
                 + New Announcement
             </button>
         </div>`;
+
+    apiArea.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
