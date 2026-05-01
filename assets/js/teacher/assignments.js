@@ -588,16 +588,7 @@ window.openCreateAssignment = async function() {
         const formPad   = isDesktop ? 'padding:0 32px 32px;' : '';
 
         target.innerHTML = `
-            <div class="teacher-resources-header" style="${headerPad}">
-                <button class="teacher-back-btn" onclick="${isDesktop ? 'fetchTeacherAssignments()' : 'fetchTeacherAssignments()'}">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                    ${isDesktop ? 'Back' : 'Back to Assignments'}
-                </button>
-            </div>
-
-            <div style="max-width:560px;margin:0 auto;${formPad}">
+            <div style="max-width:560px;margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
                 <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:${isDesktop ? '0 0 20px' : '0 0 24px'};font-weight:800;">
                     Create New Assignment
                 </h2>

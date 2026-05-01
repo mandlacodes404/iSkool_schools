@@ -245,6 +245,17 @@ function renderTeacherAnnouncements(data) {
         </style>
 
         <!-- DESKTOP -->
+        <div class="teacher-resources-header">
+            <h2 class="teacher-resources-title">Announcements</h2>
+            <button class="teacher-upload-btn" onclick="openCreateAnnouncementForm()">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Announcement
+            </button>
+        </div>
+
         <div class="an-desktop-layout">
 
             <div class="an-sidebar">
@@ -289,14 +300,6 @@ function renderTeacherAnnouncements(data) {
     }
 
     html += `
-        </div>
-
-        <!-- NEW ANNOUNCEMENT (desktop panel / mobile modal trigger) -->
-        <div style="margin-top:16px;display:flex;justify-content:flex-end;">
-            <button onclick="openCreateAnnouncementForm()"
-                class="teacher-modal-submit" style="padding:10px 20px;font-size:13px;">
-                + New Announcement
-            </button>
         </div>`;
 
     apiArea.innerHTML = html;

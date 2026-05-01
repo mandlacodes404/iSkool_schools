@@ -989,16 +989,7 @@ window.openCreateQuiz = async function() {
         const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
 
         target.innerHTML = `
-            <div class="teacher-resources-header" style="${headerPad}">
-                <button class="teacher-back-btn" onclick="fetchTeacherQuizzes()">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                    ${isDesktop ? 'Back' : 'Back to Quizzes'}
-                </button>
-            </div>
-
-            <div style="max-width:${isDesktop ? '560px' : '700px'};margin:0 auto;${formPad}">
+            <div style="max-width:${isDesktop ? '560px' : '700px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
                 <h2 style="color:#4fd1c5;font-size:${titleSize};margin:${titleMargin};font-weight:800;">Create a New Quiz</h2>
 
                 <form id="createQuizForm" enctype="multipart/form-data">

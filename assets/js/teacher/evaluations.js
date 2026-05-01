@@ -315,9 +315,7 @@ function renderTeacherEvaluations(data) {
                         style="resize:vertical;" placeholder="Optional description..."></textarea>
 
                     <label class="teacher-modal-label">Select Class *</label>
-                    <select id="evalClass" class="teacher-modal-input">
-                        <option value="">-- Choose Class --</option>
-                    </select>
+                    <div id="evalClassPicker"></div>
 
                     <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
                         <input type="checkbox" id="evalUseDefault" checked>
@@ -517,9 +515,7 @@ function openReleaseEvaluationPanel(panel) {
                 style="resize:vertical;" placeholder="Optional description..."></textarea>
 
             <label class="teacher-modal-label">Select Class *</label>
-            <select id="evalClass" class="teacher-modal-input">
-                <option value="">-- Choose Class --</option>
-            </select>
+            <div id="evalClassPicker"></div>
 
             <label class="teacher-modal-label"
                 style="display:flex;align-items:center;gap:8px;margin-top:16px;">
@@ -577,10 +573,11 @@ window.closeReleaseEvaluationModal = function() {
     const modal = document.getElementById('releaseEvalModal');
     if (modal) modal.style.display = 'none';
     // Reset fields wherever they live (panel or modal)
-    ['evalTitle','evalDescription','evalClass'].forEach(id => {
+    ['evalTitle','evalDescription'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
+    window.resetClassPicker('evalClassPicker');
     const useDefault = document.getElementById('evalUseDefault');
     if (useDefault) useDefault.checked = true;
     const forceEmail = document.getElementById('evalForceEmail');
@@ -597,14 +594,7 @@ async function loadEvalClasses() {
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
-        const sel  = document.getElementById('evalClass');
-        if (!sel) return;
-        data.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.name;
-            sel.appendChild(opt);
-        });
+        window.renderClassPicker('evalClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
     }
@@ -647,7 +637,7 @@ window.addCustomStatement = function() {
 window.submitReleaseEvaluation = async function() {
     const title      = document.getElementById('evalTitle').value.trim();
     const desc       = document.getElementById('evalDescription').value.trim();
-    const classId    = document.getElementById('evalClass').value;
+    const classId    = window.getClassPickerValue('evalClassPicker');
     const useDefault = document.getElementById('evalUseDefault').checked;
     const forceEmail = document.getElementById('evalForceEmail').checked;
     const errorDiv   = document.getElementById('releaseEvalError');
