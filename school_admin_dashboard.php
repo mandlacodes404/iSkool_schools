@@ -1195,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSection('overview');
 });
 </script>
-<script src="assets/js/school/classes.js?v=1.2"></script>
+<script src="assets/js/school/classes.js?v=1.3"></script>
 <script src="assets/js/school/learners.js?v=1.4"></script>
 <script src="assets/js/school/teachers.js?v=1.4"></script>
 <script src="assets/js/school/analytics.js?v=1.3"></script>

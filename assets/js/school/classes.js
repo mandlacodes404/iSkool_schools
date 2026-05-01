@@ -3,18 +3,18 @@
 // Simple control-panel style class management
 // ═══════════════════════════════════════════════════════
 
+window._sdClassesCache = null;
+
 (function injectClassStyles() {
     if (document.getElementById('sd-class-styles')) return;
     const s = document.createElement('style');
     s.id = 'sd-class-styles';
     s.textContent = `
-        /* ── CLASSES WRAPPER ── */
         .cls-wrapper {
             padding: 24px;
             max-width: 860px;
         }
 
-        /* ── HEADER ROW ── */
         .cls-header {
             display: flex;
             align-items: center;
@@ -36,7 +36,6 @@
             margin-top: 2px;
         }
 
-        /* ── ADD BUTTON ── */
         .cls-add-btn {
             display: inline-flex;
             align-items: center;
@@ -53,7 +52,6 @@
         }
         .cls-add-btn:hover { opacity: 0.85; }
 
-        /* ── INLINE ADD FORM ── */
         .cls-add-form {
             display: none;
             align-items: center;
@@ -107,7 +105,6 @@
         }
         .cls-form-cancel:hover { border-color: var(--red); color: var(--red); }
 
-        /* ── TABLE ── */
         .cls-table-wrap {
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
@@ -149,7 +146,6 @@
             vertical-align: middle;
         }
 
-        /* class name badge */
         .cls-name-badge {
             display: inline-flex;
             align-items: center;
@@ -172,7 +168,6 @@
             font-weight: 400;
         }
 
-        /* delete button */
         .cls-del-btn {
             display: inline-flex;
             align-items: center;
@@ -193,7 +188,6 @@
             background: var(--red-dim);
         }
 
-        /* ── EMPTY STATE ── */
         .cls-empty {
             padding: 48px 24px;
             text-align: center;
@@ -205,10 +199,8 @@
             font-size: 24px;
             margin-bottom: 10px;
             display: block;
-            color: var(--text-dim);
         }
 
-        /* ── TOAST ── */
         .cls-toast {
             position: fixed;
             bottom: 24px;
@@ -228,7 +220,6 @@
         .cls-toast.success { background: var(--teal); }
         .cls-toast.error   { background: var(--red); color: #fff; }
 
-        /* ── CONFIRM OVERLAY ── */
         .cls-confirm-overlay {
             display: none;
             position: fixed;
@@ -265,7 +256,7 @@
             gap: 8px;
             justify-content: flex-end;
         }
-        .cls-confirm-cancel {
+        .cls-confirm-cancel-btn {
             padding: 6px 14px;
             background: transparent;
             border: 1px solid var(--border-hover);
@@ -274,8 +265,8 @@
             font-size: 12px;
             cursor: pointer;
         }
-        .cls-confirm-cancel:hover { border-color: var(--text-muted); }
-        .cls-confirm-delete {
+        .cls-confirm-cancel-btn:hover { border-color: var(--text-muted); }
+        .cls-confirm-delete-btn {
             padding: 6px 14px;
             background: var(--red);
             border: none;
@@ -286,37 +277,38 @@
             cursor: pointer;
             transition: opacity 0.15s;
         }
-        .cls-confirm-delete:hover { opacity: 0.85; }
+        .cls-confirm-delete-btn:hover { opacity: 0.85; }
     `;
     document.head.appendChild(s);
 })();
 
 // ── STATE ──
-let _classesCache = [];
 let _pendingDeleteId = null;
 
-// ── RENDER ──
-function renderClasses(container) {
-    container.innerHTML = `
+// ═══════════════════════════════════════
+// MAIN ENTRY — matches what loadSection('classes') calls
+// ═══════════════════════════════════════
+window.loadSdClasses = async function () {
+    const content = document.getElementById('sd-content');
+
+    content.innerHTML = `
         <div class="cls-wrapper">
             <div class="cls-header">
                 <div>
                     <div class="cls-title">Classes</div>
-                    <div class="cls-count" id="cls-count-label"></div>
+                    <div class="cls-count" id="cls-count-label">Loading…</div>
                 </div>
                 <button class="cls-add-btn" id="cls-open-form-btn">
                     <i class="fas fa-plus"></i> Add Class
                 </button>
             </div>
 
-            <!-- inline add form -->
             <div class="cls-add-form" id="cls-add-form">
-                <input type="text" id="cls-name-input" placeholder="e.g. Grade 8A, Room 10, 10B..." maxlength="100" />
+                <input type="text" id="cls-name-input" placeholder="e.g. Grade 8A, Room 10, 10B…" maxlength="100" />
                 <button class="cls-form-save" id="cls-save-btn">Save</button>
                 <button class="cls-form-cancel" id="cls-cancel-btn">Cancel</button>
             </div>
 
-            <!-- table -->
             <div class="cls-table-wrap">
                 <table class="cls-table">
                     <thead>
@@ -326,7 +318,13 @@ function renderClasses(container) {
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody id="cls-tbody"></tbody>
+                    <tbody id="cls-tbody">
+                        <tr>
+                            <td colspan="3" style="padding:32px;text-align:center;color:var(--text-dim);font-size:12px;">
+                                Loading classes…
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
                 <div class="cls-empty" id="cls-empty" style="display:none;">
                     <i class="fas fa-layer-group"></i>
@@ -335,103 +333,100 @@ function renderClasses(container) {
             </div>
         </div>
 
-        <!-- confirm dialog -->
         <div class="cls-confirm-overlay" id="cls-confirm-overlay">
             <div class="cls-confirm-box">
                 <h4>Delete Class</h4>
                 <p>Are you sure you want to delete this class? This cannot be undone.</p>
                 <div class="cls-confirm-actions">
-                    <button class="cls-confirm-cancel" id="cls-confirm-cancel">Cancel</button>
-                    <button class="cls-confirm-delete" id="cls-confirm-delete">Delete</button>
+                    <button class="cls-confirm-cancel-btn" id="cls-confirm-cancel">Cancel</button>
+                    <button class="cls-confirm-delete-btn" id="cls-confirm-delete">Delete</button>
                 </div>
             </div>
         </div>
 
-        <!-- toast -->
         <div class="cls-toast" id="cls-toast"></div>
     `;
 
-    bindEvents();
-    loadClasses();
-}
+    _bindEvents();
+
+    if (window._sdClassesCache) {
+        _renderTable(window._sdClassesCache);
+        return;
+    }
+
+    try {
+        const res  = await fetch('api/school/get_classes.php');
+        const data = await res.json();
+        window._sdClassesCache = data.classes || [];
+        _renderTable(window._sdClassesCache);
+    } catch (e) {
+        document.getElementById('cls-tbody').innerHTML = `
+            <tr><td colspan="3" style="padding:32px;text-align:center;color:var(--red);font-size:12px;">
+                Failed to load classes.
+            </td></tr>`;
+    }
+};
 
 // ── BIND EVENTS ──
-function bindEvents() {
-    // open/close form
+function _bindEvents() {
     document.getElementById('cls-open-form-btn').addEventListener('click', () => {
         document.getElementById('cls-add-form').classList.add('visible');
         document.getElementById('cls-name-input').focus();
     });
 
-    document.getElementById('cls-cancel-btn').addEventListener('click', closeForm);
-
-    // save on button click or Enter
-    document.getElementById('cls-save-btn').addEventListener('click', saveClass);
+    document.getElementById('cls-cancel-btn').addEventListener('click', _closeForm);
+    document.getElementById('cls-save-btn').addEventListener('click', _saveClass);
     document.getElementById('cls-name-input').addEventListener('keydown', e => {
-        if (e.key === 'Enter') saveClass();
-        if (e.key === 'Escape') closeForm();
+        if (e.key === 'Enter')  _saveClass();
+        if (e.key === 'Escape') _closeForm();
     });
 
-    // confirm dialog
     document.getElementById('cls-confirm-cancel').addEventListener('click', () => {
         document.getElementById('cls-confirm-overlay').classList.remove('show');
         _pendingDeleteId = null;
     });
-    document.getElementById('cls-confirm-delete').addEventListener('click', confirmDelete);
+    document.getElementById('cls-confirm-delete').addEventListener('click', _confirmDelete);
 }
 
-function closeForm() {
+function _closeForm() {
     document.getElementById('cls-add-form').classList.remove('visible');
     document.getElementById('cls-name-input').value = '';
 }
 
-// ── LOAD ──
-async function loadClasses() {
-    try {
-        const res  = await fetch('api/school/get_classes.php');
-        const data = await res.json();
-        _classesCache = data.classes || [];
-        renderTable();
-    } catch (err) {
-        showToast('Failed to load classes', 'error');
-    }
-}
-
 // ── RENDER TABLE ──
-function renderTable() {
+function _renderTable(classes) {
     const tbody = document.getElementById('cls-tbody');
     const empty = document.getElementById('cls-empty');
     const label = document.getElementById('cls-count-label');
 
-    label.textContent = `${_classesCache.length} class${_classesCache.length !== 1 ? 'es' : ''}`;
+    label.textContent = `${classes.length} class${classes.length !== 1 ? 'es' : ''}`;
 
-    if (_classesCache.length === 0) {
+    if (!classes.length) {
         tbody.innerHTML = '';
         empty.style.display = 'block';
         return;
     }
 
     empty.style.display = 'none';
-    tbody.innerHTML = _classesCache.map(cls => `
+    tbody.innerHTML = classes.map(cls => `
         <tr data-id="${cls.id}">
             <td>
                 <span class="cls-name-badge">
                     <span class="cls-dot"></span>
-                    ${escHtml(cls.name)}
+                    ${_esc(cls.name)}
                 </span>
             </td>
             <td>
-                <span class="cls-created-by">${escHtml(cls.created_by || '—')}</span>
+                <span class="cls-created-by">${_esc(cls.created_by || '—')}</span>
             </td>
             <td style="text-align:right;">
-                <button class="cls-del-btn" data-id="${cls.id}" data-name="${escHtml(cls.name)}">
+                <button class="cls-del-btn" data-id="${cls.id}">
                     <i class="fas fa-trash-can"></i> Delete
                 </button>
             </td>
         </tr>
     `).join('');
 
-    // bind delete buttons
     tbody.querySelectorAll('.cls-del-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             _pendingDeleteId = parseInt(btn.dataset.id);
@@ -441,18 +436,14 @@ function renderTable() {
 }
 
 // ── SAVE ──
-async function saveClass() {
+async function _saveClass() {
     const input = document.getElementById('cls-name-input');
     const name  = input.value.trim();
+    if (!name) { input.focus(); return; }
 
-    if (!name) {
-        input.focus();
-        return;
-    }
-
-    const saveBtn = document.getElementById('cls-save-btn');
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    const saveBtn       = document.getElementById('cls-save-btn');
+    saveBtn.disabled    = true;
+    saveBtn.textContent = 'Saving…';
 
     try {
         const res  = await fetch('api/school/create_class.php', {
@@ -463,30 +454,30 @@ async function saveClass() {
         const data = await res.json();
 
         if (data.success) {
-            _classesCache.push(data.class);
-            _classesCache.sort((a, b) => a.name.localeCompare(b.name));
-            renderTable();
-            closeForm();
-            showToast(`"${name}" added`, 'success');
+            window._sdClassesCache = window._sdClassesCache || [];
+            window._sdClassesCache.push(data.class);
+            window._sdClassesCache.sort((a, b) => a.name.localeCompare(b.name));
+            _renderTable(window._sdClassesCache);
+            _closeForm();
+            _toast(`"${name}" added`, 'success');
         } else {
-            showToast(data.error || 'Failed to add class', 'error');
+            _toast(data.error || 'Failed to add class', 'error');
         }
-    } catch (err) {
-        showToast('Network error', 'error');
+    } catch (e) {
+        _toast('Network error', 'error');
     } finally {
-        saveBtn.disabled = false;
+        saveBtn.disabled    = false;
         saveBtn.textContent = 'Save';
     }
 }
 
 // ── DELETE ──
-async function confirmDelete() {
+async function _confirmDelete() {
     if (!_pendingDeleteId) return;
 
-    const overlay   = document.getElementById('cls-confirm-overlay');
-    const deleteBtn = document.getElementById('cls-confirm-delete');
-    deleteBtn.disabled = true;
-    deleteBtn.textContent = 'Deleting...';
+    const deleteBtn         = document.getElementById('cls-confirm-delete');
+    deleteBtn.disabled      = true;
+    deleteBtn.textContent   = 'Deleting…';
 
     try {
         const res  = await fetch('api/school/delete_class.php', {
@@ -497,25 +488,24 @@ async function confirmDelete() {
         const data = await res.json();
 
         if (data.success) {
-            _classesCache = _classesCache.filter(c => c.id !== _pendingDeleteId);
-            renderTable();
-            overlay.classList.remove('show');
-            showToast('Class deleted', 'success');
+            window._sdClassesCache = (window._sdClassesCache || []).filter(c => c.id !== _pendingDeleteId);
+            _renderTable(window._sdClassesCache);
+            _toast('Class deleted', 'success');
         } else {
-            showToast(data.error || 'Failed to delete', 'error');
+            _toast(data.error || 'Failed to delete', 'error');
         }
-    } catch (err) {
-        showToast('Network error', 'error');
+    } catch (e) {
+        _toast('Network error', 'error');
     } finally {
-        _pendingDeleteId = null;
-        deleteBtn.disabled = false;
+        _pendingDeleteId      = null;
+        deleteBtn.disabled    = false;
         deleteBtn.textContent = 'Delete';
-        overlay.classList.remove('show');
+        document.getElementById('cls-confirm-overlay').classList.remove('show');
     }
 }
 
 // ── TOAST ──
-function showToast(msg, type = 'success') {
+function _toast(msg, type = 'success') {
     const t = document.getElementById('cls-toast');
     if (!t) return;
     t.textContent = msg;
@@ -524,11 +514,10 @@ function showToast(msg, type = 'success') {
 }
 
 // ── UTIL ──
-function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function _esc(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
-
-// ── EXPORT (matches how school_admin_dashboard.php calls sections) ──
-window.loadClassesSection = function(container) {
-    renderClasses(container);
-};
