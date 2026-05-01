@@ -978,11 +978,6 @@ window.openCreateQuiz = async function() {
         const quizData = await termRes.json();
         const currentTerm = quizData.current_term || 1;
 
-        let classOptions = '<option value="">-- Select Class --</option>';
-        classes.forEach(c => {
-            classOptions += `<option value="${c.id}">${c.name}</option>`;
-        });
-
         // Clear sidebar active state on desktop
         if (isDesktop) {
             document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -1013,9 +1008,7 @@ window.openCreateQuiz = async function() {
                         placeholder="e.g. Chapter 3 Test" required>
 
                     <label class="teacher-modal-label">Assign to Class *</label>
-                    <select name="class_id" class="teacher-modal-input" required>
-                        ${classOptions}
-                    </select>
+                    <div id="quizClassPicker"></div>
 
                     <label class="teacher-modal-label">Duration (minutes) *</label>
                     <input type="number" name="duration" class="teacher-modal-input"
@@ -1135,6 +1128,9 @@ window.openCreateQuiz = async function() {
                 </form>
             </div>`;
 
+        // Init class picker
+        window.renderClassPicker('quizClassPicker', classes, function() {});
+
         // Add first question
         window.cqQuestionIndex = 0;
         addCqQuestion();
@@ -1152,6 +1148,16 @@ window.openCreateQuiz = async function() {
             if (loader) loader.style.display = 'flex';
 
             const fd = new FormData(form);
+            const classId = window.getClassPickerValue('quizClassPicker');
+            if (!classId) {
+                errorDiv.textContent = 'Please select a class.';
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Quiz';
+                if (loader) loader.style.display = 'none';
+                return;
+            }
+            fd.set('class_id', classId);
             try {
                 const res  = await fetch('../../../create_quiz.php', {
                     method: 'POST',
