@@ -297,9 +297,7 @@ function renderTeacherAnnouncements(data) {
                 class="teacher-modal-submit" style="padding:10px 20px;font-size:13px;">
                 + New Announcement
             </button>
-        </div>
-
-        <select id="annSendTo" style="display:none;"></select>`;
+        </div>`;
 }
 
 // ─────────────────────────────────────────────
@@ -423,24 +421,25 @@ function openCreateAnnouncementPanel(panel) {
 window.openCreateAnnouncementModal = function() {
     const modal = document.getElementById('createAnnouncementModal');
     if (modal) modal.style.display = 'flex';
+    loadAnnouncementClasses();
 };
 
 window.closeCreateAnnouncementModal = function() {
     const modal = document.getElementById('createAnnouncementModal');
     if (modal) modal.style.display = 'none';
-    document.getElementById('annTitle').value   = '';
-    document.getElementById('annMessage').value = '';
+    const t = document.getElementById('annTitle');       if (t) t.value = '';
+    const m = document.getElementById('annMessage');     if (m) m.value = '';
+    const s = document.getElementById('annSendTo');      if (s) s.value = 'learners';
+    const f = document.getElementById('annForceEmail');  if (f) f.checked = false;
+    const er = document.getElementById('createAnnError'); if (er) er.style.display = 'none';
     window.resetClassPicker('annClassPicker');
-    document.getElementById('annSendTo').value  = 'learners';
-    document.getElementById('annForceEmail').checked = false;
-    document.getElementById('createAnnError').style.display = 'none';
 };
 
 window.submitCreateAnnouncement = async function() {
     const title      = document.getElementById('annTitle').value.trim();
     const message    = document.getElementById('annMessage').value.trim();
     const classId    = window.getClassPickerValue('annClassPicker');
-    const sendTo     = document.getElementById('annSendTo').value;
+    const sendTo     = (document.getElementById('annSendTo') || {}).value || 'learners';
     const forceEmail = document.getElementById('annForceEmail').checked;
     const errorDiv   = document.getElementById('createAnnError');
     const submitBtn  = document.getElementById('createAnnSubmitBtn');
