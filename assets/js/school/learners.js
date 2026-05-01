@@ -28,32 +28,32 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         padding: 10px 16px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        color: #e2e8f0;
+        border-radius: var(--radius);
+        color: var(--text);
         font-size: 13px;
-        font-family: 'Nunito', sans-serif;
+        font-family: var(--font);
         transition: border-color 0.2s;
     }
-    .sdl-search:focus { outline: none; border-color: #4fd1c5; }
-    .sdl-search::placeholder { color: #4a5568; }
+    .sdl-search:focus { outline: none; border-color: var(--teal); }
+    .sdl-search::placeholder { color: var(--text-dim); }
 
     .sdl-filter {
         padding: 10px 14px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        color: #e2e8f0;
+        border-radius: var(--radius);
+        color: var(--text);
         font-size: 13px;
-        font-family: 'Nunito', sans-serif;
+        font-family: var(--font);
         cursor: pointer;
     }
-    .sdl-filter:focus { outline: none; border-color: #4fd1c5; }
+    .sdl-filter:focus { outline: none; border-color: var(--teal); }
 
     .sdl-count {
         margin-left: auto;
         font-size: 12px;
-        font-weight: 700;
-        color: #4a5568;
+        font-weight: 400;
+        color: var(--text-dim);
     }
 
     /* ── TABLE ── */
@@ -70,23 +70,23 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         padding: 10px 14px;
         text-align: left;
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 500;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #4a5568;
+        color: var(--text-dim);
         border-bottom: 1px solid rgba(255,255,255,0.06);
         white-space: nowrap;
         background: rgba(255,255,255,0.02);
         cursor: pointer;
         user-select: none;
     }
-    .sdl-table th:hover { color: #8b949e; }
-    .sdl-table th.sort-active { color: #4fd1c5; }
+    .sdl-table th:hover { color: var(--text-muted); }
+    .sdl-table th.sort-active { color: var(--teal); }
 
     .sdl-table td {
         padding: 12px 14px;
         border-bottom: 1px solid rgba(255,255,255,0.04);
-        color: #c9d1d9;
+        color: var(--text-muted);
         vertical-align: middle;
     }
     .sdl-table tr:last-child td { border-bottom: none; }
@@ -111,76 +111,76 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         border-radius: 50%;
         background: rgba(79,209,197,0.12);
         border: 1px solid rgba(79,209,197,0.2);
-        color: #4fd1c5;
+        color: var(--teal);
         font-size: 12px;
-        font-weight: 900;
+        font-weight: 400;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
     .sdl-name {
-        font-weight: 700;
-        color: #e2e8f0;
+        font-weight: 400;
+        color: var(--text);
         font-size: 13px;
     }
-    .sdl-name:hover { color: #4fd1c5; }
+    .sdl-name:hover { color: var(--teal); }
     .sdl-email-sub {
         font-size: 11px;
-        color: #4a5568;
+        color: var(--text-dim);
         margin-top: 1px;
     }
 
     .sdl-class-chip {
         display: inline-block;
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 400;
         padding: 3px 10px;
         border-radius: 20px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.08);
-        color: #8b949e;
+        color: var(--text-muted);
         white-space: nowrap;
     }
 
     .sdl-gender {
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 500;
         padding: 3px 10px;
         border-radius: 20px;
     }
     .sdl-gender.male   { background: rgba(78,121,167,0.12); color: #4e79a7; }
     .sdl-gender.female { background: rgba(225,87,89,0.12);  color: #e15759; }
-    .sdl-gender.other  { background: rgba(255,255,255,0.05); color: #8b949e; }
+    .sdl-gender.other  { background: rgba(255,255,255,0.05); color: var(--text-muted); }
 
     .sdl-avg {
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 500;
     }
-    .sdl-avg.green  { color: #22c55e; }
-    .sdl-avg.orange { color: #f59e0b; }
-    .sdl-avg.red    { color: #f85149; }
-    .sdl-avg.gray   { color: #4a5568; }
+    .sdl-avg.green  { color: var(--green); }
+    .sdl-avg.orange { color: var(--orange); }
+    .sdl-avg.red    { color: var(--red); }
+    .sdl-avg.gray   { color: var(--text-dim); }
 
     /* Profile status badge */
     .sdl-profile-badge {
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 500;
         padding: 3px 10px;
         border-radius: 20px;
         white-space: nowrap;
         letter-spacing: 0.3px;
     }
-    .sdl-profile-badge.complete   { background: rgba(34,197,94,0.1);   color: #22c55e; }
-    .sdl-profile-badge.incomplete { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+    .sdl-profile-badge.complete   { background: rgba(34,197,94,0.1);   color: var(--green); }
+    .sdl-profile-badge.incomplete { background: rgba(245,158,11,0.1);  color: var(--orange); }
 
     .sdl-delete-btn {
         background: none;
         border: 1px solid rgba(248,81,73,0.2);
-        color: #f85149;
-        border-radius: 8px;
+        color: var(--red);
+        border-radius: var(--radius);
         padding: 5px 12px;
         font-size: 11px;
-        font-weight: 800;
-        font-family: 'Nunito', sans-serif;
+        font-weight: 500;
+        font-family: var(--font);
         cursor: pointer;
         opacity: 0.5;
         transition: all 0.2s;
@@ -200,9 +200,9 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdl-confirm-overlay.show { display: flex; }
     .sdl-confirm-box {
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         padding: 28px;
         max-width: 380px;
         width: 90%;
@@ -223,19 +223,19 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdl-confirm-title {
         font-size: 16px;
-        font-weight: 800;
-        color: #e2e8f0;
+        font-weight: 500;
+        color: var(--text);
         margin-bottom: 8px;
     }
     .sdl-confirm-sub {
         font-size: 13px;
-        color: #8b949e;
+        color: var(--text-muted);
         margin-bottom: 24px;
         line-height: 1.5;
     }
     .sdl-confirm-name {
-        color: #e2e8f0;
-        font-weight: 700;
+        color: var(--text);
+        font-weight: 400;
     }
     .sdl-confirm-btns { display: flex; gap: 10px; }
     .sdl-confirm-cancel {
@@ -243,11 +243,11 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         padding: 11px;
         background: rgba(255,255,255,0.05);
         border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        color: #e2e8f0;
+        border-radius: var(--radius);
+        color: var(--text);
         font-size: 13px;
-        font-weight: 700;
-        font-family: 'Nunito', sans-serif;
+        font-weight: 400;
+        font-family: var(--font);
         cursor: pointer;
         transition: background 0.2s;
     }
@@ -257,11 +257,11 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         padding: 11px;
         background: rgba(248,81,73,0.15);
         border: 1px solid rgba(248,81,73,0.3);
-        border-radius: 10px;
-        color: #f85149;
+        border-radius: var(--radius);
+        color: var(--red);
         font-size: 13px;
-        font-weight: 800;
-        font-family: 'Nunito', sans-serif;
+        font-weight: 500;
+        font-family: var(--font);
         cursor: pointer;
         transition: background 0.2s;
     }
@@ -275,23 +275,23 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         align-items: center;
         gap: 8px;
         font-size: 13px;
-        font-weight: 700;
-        color: #8b949e;
+        font-weight: 400;
+        color: var(--text-muted);
         cursor: pointer;
         margin-bottom: 24px;
         background: none;
         border: none;
-        font-family: 'Nunito', sans-serif;
+        font-family: var(--font);
         padding: 0;
         transition: color 0.2s;
     }
-    .sdp-back:hover { color: #e2e8f0; }
+    .sdp-back:hover { color: var(--text); }
 
     /* ── HERO ── */
     .sdp-hero {
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         padding: 24px;
         display: flex;
         align-items: center;
@@ -321,38 +321,38 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         border: 2px solid rgba(79,209,197,0.3);
         display: flex; align-items: center; justify-content: center;
         font-size: 24px;
-        font-weight: 900;
-        color: #4fd1c5;
+        font-weight: 400;
+        color: var(--teal);
         flex-shrink: 0;
     }
     .sdp-hero-info { flex: 1; }
     .sdp-hero-name {
         font-size: 22px;
-        font-weight: 900;
-        color: #e2e8f0;
+        font-weight: 400;
+        color: var(--text);
         margin-bottom: 4px;
     }
     .sdp-hero-meta {
         font-size: 13px;
-        color: #8b949e;
+        color: var(--text-muted);
         line-height: 1.6;
     }
-    .sdp-hero-meta span { color: #c9d1d9; font-weight: 600; }
+    .sdp-hero-meta span { color: var(--text-muted); font-weight: 400; }
 
     /* ── PERSONAL DETAILS CARD ── */
     .sdp-details-card {
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 14px;
+        border-radius: var(--radius-lg);
         padding: 20px;
         margin-bottom: 20px;
     }
     .sdp-details-section-title {
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 500;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #4fd1c5;
+        color: var(--teal);
         margin-bottom: 14px;
         padding-bottom: 8px;
         border-bottom: 1px solid rgba(79,209,197,0.15);
@@ -367,19 +367,19 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     .sdp-detail-item {}
     .sdp-detail-label {
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 500;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #4a5568;
+        color: var(--text-dim);
         margin-bottom: 4px;
     }
     .sdp-detail-value {
         font-size: 14px;
-        font-weight: 700;
-        color: #e2e8f0;
+        font-weight: 400;
+        color: var(--text);
     }
     .sdp-detail-value.missing {
-        color: #4a5568;
+        color: var(--text-dim);
         font-style: italic;
         font-weight: 400;
         font-size: 13px;
@@ -391,11 +391,11 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         padding: 12px 14px;
         background: rgba(245,158,11,0.06);
         border: 1px solid rgba(245,158,11,0.2);
-        border-radius: 10px;
+        border-radius: var(--radius);
         margin-bottom: 20px;
         font-size: 13px;
-        color: #f59e0b;
-        font-weight: 700;
+        color: var(--orange);
+        font-weight: 400;
     }
     .sdp-incomplete-notice svg { flex-shrink: 0; }
 
@@ -413,42 +413,42 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdp-overall-pct {
         font-size: 20px;
-        font-weight: 900;
+        font-weight: 400;
         line-height: 1;
     }
     .sdp-overall-lbl {
         font-size: 9px;
-        font-weight: 800;
+        font-weight: 500;
         letter-spacing: 1px;
         text-transform: uppercase;
-        color: #8b949e;
+        color: var(--text-muted);
     }
-    .sdp-overall-sub { font-size: 11px; color: #8b949e; }
+    .sdp-overall-sub { font-size: 11px; color: var(--text-muted); }
 
     /* ── PROFILE TABS ── */
     .sdp-profile-tabs {
         display: flex; gap: 4px;
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 12px;
+        border-radius: var(--radius-lg);
         padding: 4px;
         margin-bottom: 20px;
         width: fit-content;
     }
     .sdp-profile-tab {
-        font-size: 13px; font-weight: 800;
+        font-size: 13px; font-weight: 500;
         padding: 8px 20px; border-radius: 9px;
         border: none; background: none;
-        color: #4a5568; cursor: pointer;
-        font-family: 'Nunito', sans-serif;
+        color: var(--text-dim); cursor: pointer;
+        font-family: var(--font);
         transition: all 0.18s;
         display: flex; align-items: center; gap: 7px;
     }
-    .sdp-profile-tab:hover { color: #8b949e; }
+    .sdp-profile-tab:hover { color: var(--text-muted); }
     .sdp-profile-tab.active {
         background: rgba(79,209,197,0.12);
         border: 1px solid rgba(79,209,197,0.3);
-        color: #4fd1c5;
+        color: var(--teal);
     }
     .sdp-profile-tab svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -456,27 +456,27 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     .sdp-profile-tabs {
         display: flex;
         gap: 4px;
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 12px;
+        border-radius: var(--radius-lg);
         padding: 4px;
         margin-bottom: 24px;
         width: fit-content;
     }
     .sdp-profile-tab {
-        font-size: 13px; font-weight: 800;
+        font-size: 13px; font-weight: 500;
         padding: 8px 20px; border-radius: 9px;
         border: none; background: none;
-        color: #4a5568; cursor: pointer;
-        font-family: 'Nunito', sans-serif;
+        color: var(--text-dim); cursor: pointer;
+        font-family: var(--font);
         transition: all 0.18s;
         display: flex; align-items: center; gap: 7px;
     }
-    .sdp-profile-tab:hover { color: #8b949e; }
+    .sdp-profile-tab:hover { color: var(--text-muted); }
     .sdp-profile-tab.active {
         background: rgba(79,209,197,0.12);
         border: 1px solid rgba(79,209,197,0.3);
-        color: #4fd1c5;
+        color: var(--teal);
     }
     .sdp-profile-tab svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
@@ -490,9 +490,9 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         flex: 1;
         padding: 10px 8px;
         text-align: center;
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 10px;
+        border-radius: var(--radius);
         cursor: pointer;
         transition: all 0.2s;
     }
@@ -503,22 +503,22 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdp-term-tab-label {
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 500;
         letter-spacing: 1px;
         text-transform: uppercase;
-        color: #8b949e;
+        color: var(--text-muted);
         margin-bottom: 3px;
     }
-    .sdp-term-tab.active .sdp-term-tab-label { color: #4fd1c5; }
+    .sdp-term-tab.active .sdp-term-tab-label { color: var(--teal); }
     .sdp-term-tab-avg {
         font-size: 17px;
-        font-weight: 900;
-        color: #e2e8f0;
+        font-weight: 400;
+        color: var(--text);
     }
-    .sdp-term-tab.active .sdp-term-tab-avg { color: #4fd1c5; }
+    .sdp-term-tab.active .sdp-term-tab-avg { color: var(--teal); }
     .sdp-term-tab-sub {
         font-size: 10px;
-        color: #4a5568;
+        color: var(--text-dim);
         margin-top: 2px;
     }
 
@@ -529,9 +529,9 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         gap: 14px;
     }
     .sdp-subject-card {
-        background: #161b22;
+        background: var(--surface);
         border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 12px;
+        border-radius: var(--radius-lg);
         padding: 18px 18px 18px 20px;
         position: relative;
         overflow: hidden;
@@ -551,8 +551,8 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdp-subject-name {
         font-size: 13px;
-        font-weight: 800;
-        color: #e2e8f0;
+        font-weight: 500;
+        color: var(--text);
         margin-bottom: 16px;
         padding-right: 70px;
         line-height: 1.3;
@@ -560,8 +560,8 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
     }
     .sdp-subject-class {
         font-size: 10px;
-        color: #4a5568;
-        font-weight: 700;
+        color: var(--text-dim);
+        font-weight: 400;
         margin-bottom: 6px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -570,7 +570,7 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         position: absolute;
         top: 16px; right: 16px;
         font-size: 24px;
-        font-weight: 900;
+        font-weight: 400;
         line-height: 1;
     }
     .sdp-subject-bar-track {
@@ -585,10 +585,10 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         border-radius: 100px;
         transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
     }
-    .sdp-subject-meta { font-size: 11px; color: #4a5568; }
+    .sdp-subject-meta { font-size: 11px; color: var(--text-dim); }
     .sdp-subject-no-data {
         font-size: 12px;
-        color: #4a5568;
+        color: var(--text-dim);
         font-style: italic;
         padding: 10px 0 4px;
     }
@@ -600,11 +600,11 @@ window._sdpActiveTab = 'profile'; // 'profile' | 'academic'
         align-items: center;
         justify-content: center;
         padding: 80px 20px;
-        color: #4a5568;
+        color: var(--text-dim);
         text-align: center;
         gap: 12px;
     }
-    .sdl-empty h3 { color: #8b949e; font-size: 16px; }
+    .sdl-empty h3 { color: var(--text-muted); font-size: 16px; }
 
     @media (max-width: 600px) {
         .sdl-toolbar     { padding: 16px 16px 0; }
@@ -694,8 +694,8 @@ function renderLearnersTable(data) {
 
     content.innerHTML = `
         <div style="padding:28px 28px 8px;">
-            <div style="font-size:22px;font-weight:900;color:#e2e8f0;margin-bottom:4px;">Learners</div>
-            <div style="font-size:13px;color:#8b949e;" id="sdl-count-header">${learners.length} learner${learners.length !== 1 ? 's' : ''}</div>
+            <div style="font-size:15px;font-weight:400;color:var(--text);margin-bottom:4px;">Learners</div>
+            <div style="font-size:13px;color:var(--text-muted);" id="sdl-count-header">${learners.length} learner${learners.length !== 1 ? 's' : ''}</div>
         </div>
 
         <div class="sdl-toolbar">
@@ -748,7 +748,7 @@ function renderLearnersTable(data) {
 
 function buildLearnerRows(learners) {
     if (!learners.length) {
-        return `<tr><td colspan="3" style="text-align:center;padding:40px;color:#4a5568;font-style:italic;">No learners found.</td></tr>`;
+        return `<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--text-dim);font-style:italic;">No learners found.</td></tr>`;
     }
 
     return learners.map(l => {
@@ -764,7 +764,7 @@ function buildLearnerRows(learners) {
 
         const classDisplay = l.classes !== '—'
             ? l.classes.split(', ').map(cn => `<span class="sdl-class-chip">${sdlEsc(cn)}</span>`).join(' ')
-            : '<span style="color:#4a5568;font-size:12px;">—</span>';
+            : '<span style="color:var(--text-dim);font-size:12px;">—</span>';
 
         const profileStatus  = l.profile_status || 'incomplete';
         const profileBadge   = profileStatus === 'complete'
@@ -895,7 +895,7 @@ window.loadSdLearnerProfile = async function(email, name) {
     content.innerHTML = `
         <div class="sdp-shell">
             <div class="sd-skeleton" style="height:16px;width:80px;margin-bottom:24px;border-radius:6px;"></div>
-            <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;display:flex;gap:20px;margin-bottom:20px;">
+            <div style="background:var(--surface);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;display:flex;gap:20px;margin-bottom:20px;">
                 <div class="sd-skeleton" style="width:72px;height:72px;border-radius:50%;flex-shrink:0;"></div>
                 <div style="flex:1;">
                     <div class="sd-skeleton" style="height:22px;width:200px;margin-bottom:8px;"></div>
@@ -962,7 +962,7 @@ function renderLearnerProfile(data) {
 
     function buildSubjectCards(termNum) {
         if (!subjects.length) {
-            return `<div style="grid-column:1/-1;text-align:center;color:#4a5568;padding:40px;font-style:italic;">No assessments found.</div>`;
+            return `<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:40px;font-style:italic;">No assessments found.</div>`;
         }
         return subjects.map(s => {
             const td  = s.terms[termNum] || {};
