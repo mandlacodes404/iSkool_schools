@@ -1,589 +1,534 @@
 // ═══════════════════════════════════════════════════════
-// CLASSES SECTION
+// CLASSES SECTION — iSkool School Admin
+// Simple control-panel style class management
 // ═══════════════════════════════════════════════════════
 
-window._sdClassesCache    = null;
-window._sdClassDetailCache = {};
-
-// ── INJECT STYLES ──
 (function injectClassStyles() {
     if (document.getElementById('sd-class-styles')) return;
     const s = document.createElement('style');
     s.id = 'sd-class-styles';
     s.textContent = `
-        /* ── CLASS GRID ── */
-        .sd-class-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 12px;
+        /* ── CLASSES WRAPPER ── */
+        .cls-wrapper {
             padding: 24px;
+            max-width: 860px;
         }
 
-        .sd-class-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            cursor: pointer;
-            transition: border-color 0.15s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Left accent bar — replaces top color bar */
-        .sd-class-card::before {
-            content: '';
-            position: absolute;
-            top: 10px; bottom: 10px;
-            left: 0;
-            width: 2px;
-            border-radius: 0 2px 2px 0;
-        }
-        .sd-class-card.avg-green::before  { background: var(--green); }
-        .sd-class-card.avg-orange::before { background: var(--orange); }
-        .sd-class-card.avg-red::before    { background: var(--red); }
-        .sd-class-card.avg-gray::before   { background: var(--text-dim); }
-
-        .sd-class-card:hover {
-            border-color: var(--border-hover);
-            transform: none;
-            box-shadow: none;
-        }
-
-        .sd-class-card-header {
+        /* ── HEADER ROW ── */
+        .cls-header {
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .sd-class-card-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text);
-            line-height: 1;
-        }
-
-        .sd-class-card-avg {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-        }
-        .sd-class-card-avg.green  { background: var(--green-dim);  color: var(--green);  }
-        .sd-class-card-avg.orange { background: var(--orange-dim); color: var(--orange); }
-        .sd-class-card-avg.red    { background: var(--red-dim);    color: var(--red);    }
-        .sd-class-card-avg.gray   { background: var(--surface2);   color: var(--text-muted); }
-
-        .sd-class-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 6px;
-            margin-bottom: 14px;
-        }
-
-        .sd-class-stat {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 8px 6px;
-            text-align: center;
-        }
-        .sd-class-stat-val {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            line-height: 1;
-            margin-bottom: 3px;
-            font-family: var(--font-mono);
-            font-variant-numeric: tabular-nums;
-        }
-        .sd-class-stat-label {
-            font-size: 10px;
-            color: var(--text-dim);
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        .sd-class-teachers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .sd-class-teacher-chip {
-            font-size: 11px;
-            font-weight: 500;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: var(--teal-dim);
-            border: 1px solid var(--teal-border);
-            color: var(--teal);
-            font-family: var(--font-mono);
-        }
-        .sd-class-no-teachers {
-            font-size: 11px;
-            color: var(--text-dim);
-        }
-
-        .sd-class-arrow {
-            position: absolute;
-            bottom: 14px;
-            right: 14px;
-            color: var(--border-hover);
-            transition: color 0.15s;
-        }
-        .sd-class-card:hover .sd-class-arrow { color: var(--teal); }
-
-        /* ── DETAIL VIEW ── */
-        .sd-detail-shell { padding: 24px; }
-
-        .sd-detail-back {
-            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .cls-title {
             font-size: 13px;
             font-weight: 500;
             color: var(--text-muted);
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: color 0.15s;
-            background: none;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .cls-count {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        /* ── ADD BUTTON ── */
+        .cls-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--teal);
+            color: #0d1117;
             border: none;
-            font-family: var(--font);
-            padding: 0;
-        }
-        .sd-detail-back:hover { color: var(--text); }
-        .sd-detail-back svg   { width: 14px; height: 14px; stroke: currentColor; }
-
-        .sd-detail-header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .sd-detail-class-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 3px;
-        }
-        .sd-detail-meta {
+            border-radius: var(--radius);
             font-size: 12px;
-            color: var(--text-muted);
-            font-family: var(--font-mono);
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
         }
+        .cls-add-btn:hover { opacity: 0.85; }
 
-        /* ── SUBJECT BLOCK ── */
-        .sd-subject-block {
+        /* ── INLINE ADD FORM ── */
+        .cls-add-form {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 12px;
-            overflow: hidden;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+        }
+        .cls-add-form.visible { display: flex; }
+
+        .cls-add-form input {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 400;
+            padding: 6px 10px;
+            outline: none;
             transition: border-color 0.15s;
         }
-        .sd-subject-block:hover { border-color: var(--border-hover); }
+        .cls-add-form input::placeholder { color: var(--text-dim); }
+        .cls-add-form input:focus { border-color: var(--teal); }
 
-        .sd-subject-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .sd-subject-header:hover { background: var(--surface2); }
-
-        .sd-subject-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-        }
-        .sd-subject-name span {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--teal);
-            margin-left: 8px;
-            font-family: var(--font-mono);
-        }
-
-        .sd-subject-avg-badge {
+        .cls-form-save {
+            padding: 6px 14px;
+            background: var(--teal);
+            color: #0d1117;
+            border: none;
+            border-radius: var(--radius);
             font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-family: var(--font-mono);
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
         }
-        .sd-subject-avg-badge.green  { background: var(--green-dim);  color: var(--green);  }
-        .sd-subject-avg-badge.orange { background: var(--orange-dim); color: var(--orange); }
-        .sd-subject-avg-badge.red    { background: var(--red-dim);    color: var(--red);    }
-        .sd-subject-avg-badge.gray   { background: var(--surface2);   color: var(--text-muted); }
+        .cls-form-save:hover { opacity: 0.85; }
 
-        /* ── LEARNER TABLE ── */
-        .sd-learner-table-wrap { overflow-x: auto; }
+        .cls-form-cancel {
+            padding: 6px 10px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            font-size: 12px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .cls-form-cancel:hover { border-color: var(--red); color: var(--red); }
 
-        .sd-learner-table {
+        /* ── TABLE ── */
+        .cls-table-wrap {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .cls-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
 
-        .sd-learner-table th {
-            padding: 8px 14px;
+        .cls-table thead tr {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cls-table thead th {
+            padding: 9px 16px;
             text-align: left;
             font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-            font-family: var(--font);
-        }
-
-        .sd-learner-table td {
-            padding: 8px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-
-        .sd-learner-table tr:last-child td { border-bottom: none; }
-        .sd-learner-table tr:hover td      { background: var(--surface2); }
-
-        .sd-learner-rank {
-            font-size: 11px;
             font-weight: 500;
             color: var(--text-dim);
-            width: 22px;
-            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
         }
 
-        .sd-learner-name-cell {
+        .cls-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+        }
+        .cls-table tbody tr:last-child { border-bottom: none; }
+        .cls-table tbody tr:hover { background: var(--surface2); }
+
+        .cls-table td {
+            padding: 10px 16px;
+            color: var(--text);
+            font-weight: 400;
+            vertical-align: middle;
+        }
+
+        /* class name badge */
+        .cls-name-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text);
-            min-width: 160px;
+        }
+        .cls-name-badge .cls-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--teal);
+            flex-shrink: 0;
         }
 
-        .sd-learner-gender {
+        .cls-created-by {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* delete button */
+        .cls-del-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            color: var(--text-muted);
             font-size: 11px;
-            padding: 2px 7px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-family: var(--font-mono);
+            font-weight: 400;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
         }
-        .sd-learner-gender.male   { background: var(--blue-dim);         color: var(--blue);   }
-        .sd-learner-gender.female { background: rgba(225,87,89,0.1);     color: #e15759;       }
-        .sd-learner-gender.other  { background: var(--surface2);         color: var(--text-muted); }
-
-        .sd-quiz-score {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 20px;
-            text-align: center;
-            min-width: 48px;
-            display: inline-block;
-            font-family: var(--font-mono);
+        .cls-del-btn:hover {
+            border-color: var(--red);
+            color: var(--red);
+            background: var(--red-dim);
         }
-        .sd-quiz-score.green  { background: var(--green-dim);  color: var(--green);  }
-        .sd-quiz-score.orange { background: var(--orange-dim); color: var(--orange); }
-        .sd-quiz-score.red    { background: var(--red-dim);    color: var(--red);    }
-        .sd-quiz-score.none   { background: var(--surface2);   color: var(--text-dim); font-size: 11px; }
-
-        .sd-learner-avg {
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--font-mono);
-            font-variant-numeric: tabular-nums;
-        }
-        .sd-learner-avg.green  { color: var(--green);  }
-        .sd-learner-avg.orange { color: var(--orange); }
-        .sd-learner-avg.red    { color: var(--red);    }
-        .sd-learner-avg.gray   { color: var(--text-dim); }
 
         /* ── EMPTY STATE ── */
-        .sd-classes-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            color: var(--text-dim);
-            text-align: center;
-            gap: 10px;
-        }
-        .sd-classes-empty svg { opacity: 0.2; }
-        .sd-classes-empty h3  { color: var(--text-muted); font-size: 14px; font-weight: 600; }
-
-        /* ── NO ASSESSMENTS ── */
-        .sd-no-assessments {
-            padding: 28px 16px;
+        .cls-empty {
+            padding: 48px 24px;
             text-align: center;
             color: var(--text-dim);
             font-size: 13px;
+            font-weight: 400;
+        }
+        .cls-empty i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+            color: var(--text-dim);
         }
 
-        @media (max-width: 600px) {
-            .sd-class-grid   { grid-template-columns: 1fr; padding: 14px; }
-            .sd-detail-shell { padding: 14px; }
+        /* ── TOAST ── */
+        .cls-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            font-weight: 500;
+            color: #0d1117;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
         }
+        .cls-toast.show { opacity: 1; transform: translateY(0); }
+        .cls-toast.success { background: var(--teal); }
+        .cls-toast.error   { background: var(--red); color: #fff; }
+
+        /* ── CONFIRM OVERLAY ── */
+        .cls-confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+        }
+        .cls-confirm-overlay.show { display: flex; }
+
+        .cls-confirm-box {
+            background: var(--surface);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 320px;
+        }
+        .cls-confirm-box h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .cls-confirm-box p {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .cls-confirm-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .cls-confirm-cancel {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius);
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .cls-confirm-cancel:hover { border-color: var(--text-muted); }
+        .cls-confirm-delete {
+            padding: 6px 14px;
+            background: var(--red);
+            border: none;
+            border-radius: var(--radius);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .cls-confirm-delete:hover { opacity: 0.85; }
     `;
     document.head.appendChild(s);
 })();
 
-// ── COLOR HELPER ──
-function sdAvgColor(v) {
-    if (v === null || v === undefined) return 'gray';
-    if (v >= 60) return 'green';
-    if (v >= 40) return 'orange';
-    return 'red';
+// ── STATE ──
+let _classesCache = [];
+let _pendingDeleteId = null;
+
+// ── RENDER ──
+function renderClasses(container) {
+    container.innerHTML = `
+        <div class="cls-wrapper">
+            <div class="cls-header">
+                <div>
+                    <div class="cls-title">Classes</div>
+                    <div class="cls-count" id="cls-count-label"></div>
+                </div>
+                <button class="cls-add-btn" id="cls-open-form-btn">
+                    <i class="fas fa-plus"></i> Add Class
+                </button>
+            </div>
+
+            <!-- inline add form -->
+            <div class="cls-add-form" id="cls-add-form">
+                <input type="text" id="cls-name-input" placeholder="e.g. Grade 8A, Room 10, 10B..." maxlength="100" />
+                <button class="cls-form-save" id="cls-save-btn">Save</button>
+                <button class="cls-form-cancel" id="cls-cancel-btn">Cancel</button>
+            </div>
+
+            <!-- table -->
+            <div class="cls-table-wrap">
+                <table class="cls-table">
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Created By</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cls-tbody"></tbody>
+                </table>
+                <div class="cls-empty" id="cls-empty" style="display:none;">
+                    <i class="fas fa-layer-group"></i>
+                    No classes yet. Add one to get started.
+                </div>
+            </div>
+        </div>
+
+        <!-- confirm dialog -->
+        <div class="cls-confirm-overlay" id="cls-confirm-overlay">
+            <div class="cls-confirm-box">
+                <h4>Delete Class</h4>
+                <p>Are you sure you want to delete this class? This cannot be undone.</p>
+                <div class="cls-confirm-actions">
+                    <button class="cls-confirm-cancel" id="cls-confirm-cancel">Cancel</button>
+                    <button class="cls-confirm-delete" id="cls-confirm-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- toast -->
+        <div class="cls-toast" id="cls-toast"></div>
+    `;
+
+    bindEvents();
+    loadClasses();
 }
 
-// ═══════════════════════════════════════
-// LOAD CLASSES GRID
-// ═══════════════════════════════════════
-window.loadSdClasses = async function() {
-    const content = document.getElementById('sd-content');
+// ── BIND EVENTS ──
+function bindEvents() {
+    // open/close form
+    document.getElementById('cls-open-form-btn').addEventListener('click', () => {
+        document.getElementById('cls-add-form').classList.add('visible');
+        document.getElementById('cls-name-input').focus();
+    });
 
-    if (window._sdClassesCache) {
-        renderClassesGrid(window._sdClassesCache);
-        return;
-    }
+    document.getElementById('cls-cancel-btn').addEventListener('click', closeForm);
 
-    // Skeleton
-    content.innerHTML = `
-        <div class="sd-class-grid">
-            ${[1,2,3,4].map(() => `
-                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;">
-                    <div class="sd-skeleton" style="height:20px;width:60px;margin-bottom:14px;"></div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
-                        ${[1,2,3].map(() => `<div class="sd-skeleton" style="height:50px;border-radius:var(--radius);"></div>`).join('')}
-                    </div>
-                    <div class="sd-skeleton" style="height:22px;width:70%;border-radius:20px;"></div>
-                </div>`).join('')}
-        </div>`;
+    // save on button click or Enter
+    document.getElementById('cls-save-btn').addEventListener('click', saveClass);
+    document.getElementById('cls-name-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') saveClass();
+        if (e.key === 'Escape') closeForm();
+    });
 
+    // confirm dialog
+    document.getElementById('cls-confirm-cancel').addEventListener('click', () => {
+        document.getElementById('cls-confirm-overlay').classList.remove('show');
+        _pendingDeleteId = null;
+    });
+    document.getElementById('cls-confirm-delete').addEventListener('click', confirmDelete);
+}
+
+function closeForm() {
+    document.getElementById('cls-add-form').classList.remove('visible');
+    document.getElementById('cls-name-input').value = '';
+}
+
+// ── LOAD ──
+async function loadClasses() {
     try {
         const res  = await fetch('api/school/get_classes.php');
         const data = await res.json();
-        window._sdClassesCache = data;
-        renderClassesGrid(data);
-    } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load classes.</p>`;
+        _classesCache = data.classes || [];
+        renderTable();
+    } catch (err) {
+        showToast('Failed to load classes', 'error');
     }
-};
-
-function renderClassesGrid(data) {
-    const content = document.getElementById('sd-content');
-    const classes = data.classes || [];
-
-    if (!classes.length) {
-        content.innerHTML = `
-            <div class="sd-classes-empty">
-                <svg viewBox="0 0 24 24" width="48" height="48" stroke="var(--teal)" stroke-width="1.5" fill="none">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                <h3>No classes yet</h3>
-                <p style="font-size:12px;">Classes will appear here once created.</p>
-            </div>`;
-        return;
-    }
-
-    content.innerHTML = `
-        <div style="padding:24px 24px 8px;">
-            <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:3px;">Classes</div>
-            <div style="font-size:12px;color:var(--text-muted);">${classes.length} class${classes.length !== 1 ? 'es' : ''} · Click a class to drill into learner performance</div>
-        </div>
-        <div class="sd-class-grid">
-            ${classes.map(cls => {
-                const col = sdAvgColor(cls.avg_pct);
-                const teacherChips = cls.teachers.length
-                    ? cls.teachers.map(t =>
-                        `<span class="sd-class-teacher-chip">${t.subject_name || t.name}</span>`
-                      ).join('')
-                    : `<span class="sd-class-no-teachers">No content posted yet</span>`;
-
-                return `
-                    <div class="sd-class-card avg-${col}" onclick="loadSdClassDetail(${cls.id}, '${cls.name.replace(/'/g,"\\'")}')">
-                        <div class="sd-class-card-header">
-                            <div class="sd-class-card-name">${cls.name}</div>
-                            <div class="sd-class-card-avg ${col}">${cls.avg_pct !== null ? cls.avg_pct + '%' : '—'}</div>
-                        </div>
-                        <div class="sd-class-stats">
-                            <div class="sd-class-stat">
-                                <div class="sd-class-stat-val">${cls.learner_count}</div>
-                                <div class="sd-class-stat-label">Learners</div>
-                            </div>
-                            <div class="sd-class-stat">
-                                <div class="sd-class-stat-val">${cls.quiz_count}</div>
-                                <div class="sd-class-stat-label">Quizzes</div>
-                            </div>
-                            <div class="sd-class-stat">
-                                <div class="sd-class-stat-val">${cls.assignment_count}</div>
-                                <div class="sd-class-stat-label">Assignments</div>
-                            </div>
-                        </div>
-                        <div class="sd-class-teachers">${teacherChips}</div>
-                        <div class="sd-class-arrow">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                                <polyline points="12 5 19 12 12 19"/>
-                            </svg>
-                        </div>
-                    </div>`;
-            }).join('')}
-        </div>`;
 }
 
-// ═══════════════════════════════════════
-// LOAD CLASS DETAIL (DRILL DOWN)
-// ═══════════════════════════════════════
-window.loadSdClassDetail = async function(classId, className) {
-    const content = document.getElementById('sd-content');
+// ── RENDER TABLE ──
+function renderTable() {
+    const tbody = document.getElementById('cls-tbody');
+    const empty = document.getElementById('cls-empty');
+    const label = document.getElementById('cls-count-label');
 
-    // Skeleton
-    content.innerHTML = `
-        <div class="sd-detail-shell">
-            <div class="sd-skeleton" style="height:14px;width:100px;margin-bottom:20px;border-radius:var(--radius);"></div>
-            <div class="sd-skeleton" style="height:20px;width:200px;margin-bottom:6px;"></div>
-            <div class="sd-skeleton" style="height:12px;width:160px;margin-bottom:20px;"></div>
-            ${[1,2].map(() => `
-                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;">
-                    <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
-                        <div class="sd-skeleton" style="height:14px;width:160px;"></div>
-                    </div>
-                    <div style="padding:14px;">
-                        <div class="sd-skeleton" style="height:160px;border-radius:var(--radius);"></div>
-                    </div>
-                </div>`).join('')}
-        </div>`;
+    label.textContent = `${_classesCache.length} class${_classesCache.length !== 1 ? 'es' : ''}`;
 
-    if (window._sdClassDetailCache[classId]) {
-        renderClassDetail(window._sdClassDetailCache[classId]);
+    if (_classesCache.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
         return;
     }
+
+    empty.style.display = 'none';
+    tbody.innerHTML = _classesCache.map(cls => `
+        <tr data-id="${cls.id}">
+            <td>
+                <span class="cls-name-badge">
+                    <span class="cls-dot"></span>
+                    ${escHtml(cls.name)}
+                </span>
+            </td>
+            <td>
+                <span class="cls-created-by">${escHtml(cls.created_by || '—')}</span>
+            </td>
+            <td style="text-align:right;">
+                <button class="cls-del-btn" data-id="${cls.id}" data-name="${escHtml(cls.name)}">
+                    <i class="fas fa-trash-can"></i> Delete
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    // bind delete buttons
+    tbody.querySelectorAll('.cls-del-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            _pendingDeleteId = parseInt(btn.dataset.id);
+            document.getElementById('cls-confirm-overlay').classList.add('show');
+        });
+    });
+}
+
+// ── SAVE ──
+async function saveClass() {
+    const input = document.getElementById('cls-name-input');
+    const name  = input.value.trim();
+
+    if (!name) {
+        input.focus();
+        return;
+    }
+
+    const saveBtn = document.getElementById('cls-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
 
     try {
-        const res  = await fetch('api/school/get_class_detail.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `class_id=${classId}`
+        const res  = await fetch('api/school/create_class.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ name })
         });
         const data = await res.json();
-        window._sdClassDetailCache[classId] = data;
-        renderClassDetail(data);
-    } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load class detail.</p>`;
+
+        if (data.success) {
+            _classesCache.push(data.class);
+            _classesCache.sort((a, b) => a.name.localeCompare(b.name));
+            renderTable();
+            closeForm();
+            showToast(`"${name}" added`, 'success');
+        } else {
+            showToast(data.error || 'Failed to add class', 'error');
+        }
+    } catch (err) {
+        showToast('Network error', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
     }
-};
-
-function renderClassDetail(data) {
-    const content  = document.getElementById('sd-content');
-    const subjects = data.subjects || [];
-
-    let subjectsHTML = '';
-
-    if (!subjects.length) {
-        subjectsHTML = `
-            <div class="sd-no-assessments">
-                No summative assessments have been posted to this class yet.
-            </div>`;
-    } else {
-        subjectsHTML = subjects.map((sub, si) => {
-            const col = sdAvgColor(sub.subject_avg);
-
-            const quizHeaders = sub.quizzes.map(q =>
-                `<th title="${q.title}">T${q.term_number} · ${q.title.length > 12 ? q.title.substring(0,12)+'…' : q.title}</th>`
-            ).join('');
-
-            const learnerRows = sub.learner_perf.map((l, li) => {
-                const avgCol      = sdAvgColor(l.avg);
-                const genderLabel = l.gender === 'male' ? 'Boy' : l.gender === 'female' ? 'Girl' : '—';
-
-                const quizCells = sub.quizzes.map(q => {
-                    const score = l.scores[q.id];
-                    if (score === null || score === undefined) {
-                        return `<td><span class="sd-quiz-score none">—</span></td>`;
-                    }
-                    const sc = sdAvgColor(score);
-                    return `<td><span class="sd-quiz-score ${sc}">${score}%</span></td>`;
-                }).join('');
-
-                return `
-                    <tr>
-                        <td class="sd-learner-rank">${li + 1}</td>
-                        <td class="sd-learner-name-cell">${l.name}</td>
-                        <td><span class="sd-learner-gender ${l.gender || 'other'}">${genderLabel}</span></td>
-                        ${quizCells}
-                        <td><span class="sd-learner-avg ${avgCol}">${l.avg !== null ? l.avg + '%' : '—'}</span></td>
-                    </tr>`;
-            }).join('');
-
-            return `
-                <div class="sd-subject-block">
-                    <div class="sd-subject-header" onclick="toggleSubjectBlock(${si})">
-                        <div class="sd-subject-name">
-                            ${sub.subject_name}
-                            <span>${sub.quizzes.length} assessment${sub.quizzes.length !== 1 ? 's' : ''}</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span class="sd-subject-avg-badge ${col}">${sub.subject_avg !== null ? sub.subject_avg + '%' : '—'}</span>
-                            <svg id="sd-chevron-${si}" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--text-muted)" stroke-width="2.5" style="transition:transform 0.2s;">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div id="sd-subject-body-${si}" class="sd-learner-table-wrap">
-                        <table class="sd-learner-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Learner</th>
-                                    <th>Gender</th>
-                                    ${quizHeaders}
-                                    <th>Avg</th>
-                                </tr>
-                            </thead>
-                            <tbody>${learnerRows}</tbody>
-                        </table>
-                    </div>
-                </div>`;
-        }).join('');
-    }
-
-    content.innerHTML = `
-        <div class="sd-detail-shell">
-            <button class="sd-detail-back" onclick="loadSdClasses()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="19" y1="12" x2="5" y2="12"/>
-                    <polyline points="12 19 5 12 12 5"/>
-                </svg>
-                All classes
-            </button>
-
-            <div class="sd-detail-header">
-                <div>
-                    <div class="sd-detail-class-name">${data.class_name}</div>
-                    <div class="sd-detail-meta">${data.learner_count} learner${data.learner_count !== 1 ? 's' : ''} · ${subjects.length} subject${subjects.length !== 1 ? 's' : ''} with assessments</div>
-                </div>
-            </div>
-
-            ${subjectsHTML}
-        </div>`;
 }
 
-// ── TOGGLE SUBJECT BLOCK (accordion) ──
-window.toggleSubjectBlock = function(idx) {
-    const body    = document.getElementById(`sd-subject-body-${idx}`);
-    const chevron = document.getElementById(`sd-chevron-${idx}`);
-    if (!body) return;
-    const isHidden        = body.style.display === 'none';
-    body.style.display    = isHidden ? '' : 'none';
-    chevron.style.transform = isHidden ? '' : 'rotate(-90deg)';
+// ── DELETE ──
+async function confirmDelete() {
+    if (!_pendingDeleteId) return;
+
+    const overlay   = document.getElementById('cls-confirm-overlay');
+    const deleteBtn = document.getElementById('cls-confirm-delete');
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+
+    try {
+        const res  = await fetch('api/school/delete_class.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ id: _pendingDeleteId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            _classesCache = _classesCache.filter(c => c.id !== _pendingDeleteId);
+            renderTable();
+            overlay.classList.remove('show');
+            showToast('Class deleted', 'success');
+        } else {
+            showToast(data.error || 'Failed to delete', 'error');
+        }
+    } catch (err) {
+        showToast('Network error', 'error');
+    } finally {
+        _pendingDeleteId = null;
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = 'Delete';
+        overlay.classList.remove('show');
+    }
+}
+
+// ── TOAST ──
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('cls-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className   = `cls-toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── UTIL ──
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── EXPORT (matches how school_admin_dashboard.php calls sections) ──
+window.loadClassesSection = function(container) {
+    renderClasses(container);
 };
