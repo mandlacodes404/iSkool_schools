@@ -1,842 +1,656 @@
 // ══════════════════════════════════════════════════════════
-// ANALYTICS SECTION — assets/js/school/analytics.js
+// ANALYTICS — iSkool School Admin  |  Desktop Control Center
 // ══════════════════════════════════════════════════════════
 
-window._sdAnalyticsCache = null;
+window._sdAnalyticsCache  = null;
 window._sdAnalyticsCharts = [];
-window._sdAnalyticsTerm   = 0;
 
-// ── INJECT STYLES ──
+// ── STYLES ──────────────────────────────────────────────
 (function injectAnalyticsStyles() {
     if (document.getElementById('sd-analytics-styles')) return;
     const s = document.createElement('style');
     s.id = 'sd-analytics-styles';
     s.textContent = `
+        .sda-shell { padding: 24px 28px 80px; max-width: 1600px; }
 
-        .sda-shell { padding: 24px 24px 80px; max-width: 1400px; }
-
-        /* ── Page header + term tabs ── */
+        /* ── Page header ── */
         .sda-header {
             display: flex; align-items: flex-end;
             justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
+            margin-bottom: 24px; padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
-            flex-wrap: wrap; gap: 10px;
         }
-        .sda-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-        .sda-sub   { font-size: 12px; color: var(--text-muted); }
-
-        /* Term tabs — GitHub subnav style */
-        .sda-term-tabs {
-            display: flex;
-            gap: 0;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: -17px; /* align with header border */
-        }
-        .sda-term-tab {
-            font-size: 13px;
-            font-weight: 400;
-            padding: 6px 12px;
-            border: none;
-            border-bottom: 2px solid transparent;
-            background: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-family: var(--font);
-            transition: color 0.15s, border-color 0.15s;
-            position: relative;
-            top: 1px;
-            white-space: nowrap;
-        }
-        .sda-term-tab:hover { color: var(--text); }
-        .sda-term-tab.active {
-            color: var(--text);
-            font-weight: 600;
-            border-bottom-color: #f78166;
+        .sda-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+        .sda-sub   { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+        .sda-year-badge {
+            font-size: 11px; font-weight: 500; font-family: var(--font-mono);
+            padding: 3px 10px; border-radius: 20px;
+            background: var(--teal-dim); border: 1px solid var(--teal-border); color: var(--teal);
         }
 
-        /* ── KPI row ── */
+        /* ── KPI row (4 cards) ── */
         .sda-kpi-row {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 12px; margin-bottom: 16px;
         }
         .sda-kpi {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 14px;
-            position: relative;
-            overflow: hidden;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 16px;
+            position: relative; overflow: hidden;
             transition: border-color 0.15s;
         }
         .sda-kpi:hover { border-color: var(--border-hover); }
         .sda-kpi::before {
-            content: ''; position: absolute;
-            top: 10px; bottom: 10px;
-            left: 0; width: 2px;
-            border-radius: 0 2px 2px 0;
+            content:''; position:absolute; top:12px; bottom:12px;
+            left:0; width:2px; border-radius:0 2px 2px 0;
         }
-        .sda-kpi.c-teal::before   { background: var(--teal);   }
-        .sda-kpi.c-blue::before   { background: var(--blue);   }
+        .sda-kpi.c-teal::before   { background: var(--teal); }
+        .sda-kpi.c-green::before  { background: var(--green); }
         .sda-kpi.c-orange::before { background: var(--orange); }
-        .sda-kpi.c-green::before  { background: var(--green);  }
-        .sda-kpi.c-purple::before { background: var(--purple); }
-        .sda-kpi.c-pink::before   { background: #e15759; }
-
-        .sda-kpi-val {
-            font-size: 22px;
-            font-weight: 600;
-            line-height: 1;
-            margin-bottom: 5px;
-            font-family: var(--font-mono);
-            font-variant-numeric: tabular-nums;
-        }
-        .sda-kpi.c-teal   .sda-kpi-val { color: var(--teal);   }
-        .sda-kpi.c-blue   .sda-kpi-val { color: var(--blue);   }
-        .sda-kpi.c-orange .sda-kpi-val { color: var(--orange); }
-        .sda-kpi.c-green  .sda-kpi-val { color: var(--green);  }
-        .sda-kpi.c-purple .sda-kpi-val { color: var(--purple); }
-        .sda-kpi.c-pink   .sda-kpi-val { color: #e15759; }
+        .sda-kpi.c-red::before    { background: var(--red); }
 
         .sda-kpi-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-            color: var(--text-dim);
+            font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+            text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
         }
+        .sda-kpi-val {
+            font-size: 28px; font-weight: 500; line-height: 1;
+            font-variant-numeric: tabular-nums; margin-bottom: 4px;
+        }
+        .sda-kpi.c-teal   .sda-kpi-val { color: var(--teal); }
+        .sda-kpi.c-green  .sda-kpi-val { color: var(--green); }
+        .sda-kpi.c-orange .sda-kpi-val { color: var(--orange); }
+        .sda-kpi.c-red    .sda-kpi-val { color: var(--red); }
+        .sda-kpi-sub { font-size: 11px; color: var(--text-dim); font-weight: 400; }
 
         /* ── Grid layouts ── */
         .sda-row { display: grid; gap: 12px; margin-bottom: 12px; }
         .sda-row.col-2   { grid-template-columns: 1fr 1fr; }
+        .sda-row.col-3   { grid-template-columns: 1fr 1fr 1fr; }
         .sda-row.col-3-2 { grid-template-columns: 3fr 2fr; }
-        .sda-row.col-2-3 { grid-template-columns: 2fr 3fr; }
+        .sda-row.col-2-1 { grid-template-columns: 2fr 1fr; }
         .sda-row.col-1   { grid-template-columns: 1fr; }
 
-        /* ── Chart cards ── */
+        /* ── Cards ── */
         .sda-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 16px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 16px;
             transition: border-color 0.15s;
         }
         .sda-card:hover { border-color: var(--border-hover); }
-
         .sda-card-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 500; color: var(--text-muted);
+            margin-bottom: 14px; display: flex; align-items: center;
+            justify-content: space-between; gap: 6px;
+            text-transform: uppercase; letter-spacing: 0.05em;
         }
-        .sda-card-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--teal);
-            flex-shrink: 0;
-        }
-        .sda-chart-wrap { position: relative; }
-        .sda-chart-wrap.h200 { height: 200px; }
-        .sda-chart-wrap.h240 { height: 240px; }
-        .sda-chart-wrap.h280 { height: 280px; }
+        .sda-card-title-left { display: flex; align-items: center; gap: 6px; }
+        .sda-card-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+        .sda-chart-wrap { position:relative; }
+        .sda-chart-wrap.h180 { height:180px; }
+        .sda-chart-wrap.h220 { height:220px; }
+        .sda-chart-wrap.h260 { height:260px; }
         .sda-no-data {
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: var(--text-dim);
-            height: 100%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:12px; color:var(--text-dim); height:100%; font-weight:400;
         }
 
-        /* ── Gender comparison ── */
-        .sda-gender-row {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 12px;
+        /* ── Tables ── */
+        .sda-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .sda-table thead th {
+            padding: 7px 10px; text-align:left;
+            font-size:10px; font-weight:500; color:var(--text-dim);
+            text-transform:uppercase; letter-spacing:0.05em;
+            border-bottom:1px solid var(--border); background:var(--surface);
         }
-        .sda-gender-label {
-            font-size: 12px;
-            font-weight: 500;
-            width: 48px; flex-shrink: 0;
-        }
-        .sda-gender-label.male   { color: var(--blue); }
-        .sda-gender-label.female { color: #e15759; }
-        .sda-gender-bar-wrap {
-            flex: 1; height: 6px;
-            background: var(--surface2);
-            border-radius: 3px; overflow: hidden;
-        }
-        .sda-gender-bar { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
-        .sda-gender-bar.male   { background: var(--blue); }
-        .sda-gender-bar.female { background: #e15759; }
-        .sda-gender-val {
-            font-size: 12px;
-            font-weight: 600;
-            width: 40px; text-align: right; flex-shrink: 0;
-            font-family: var(--font-mono);
-        }
-        .sda-gender-val.male   { color: var(--blue); }
-        .sda-gender-val.female { color: #e15759; }
-        .sda-gender-count {
-            font-size: 11px; color: var(--text-dim);
-            width: 64px; flex-shrink: 0;
-            font-family: var(--font-mono);
-        }
+        .sda-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+        .sda-table tbody tr:last-child { border-bottom:none; }
+        .sda-table tbody tr:hover { background:var(--surface2); }
+        .sda-table td { padding:8px 10px; color:var(--text); font-weight:400; vertical-align:middle; }
 
-        /* ── Top learners table ── */
-        .sda-top-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .sda-top-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-        .sda-top-table tr:last-child td { border-bottom: none; }
-        .sda-top-table tr:hover td { background: var(--surface2); }
+        /* rank badges */
+        .sda-rank { font-size:10px; font-weight:500; color:var(--text-dim); font-family:var(--font-mono); width:20px; }
+        .sda-rank.gold   { color:var(--orange); }
+        .sda-rank.silver { color:var(--text-muted); }
+        .sda-rank.bronze { color:#b45309; }
 
-        .sda-rank {
-            font-size: 11px; font-weight: 600;
-            color: var(--text-dim); width: 20px;
-            font-family: var(--font-mono);
+        /* inline badges */
+        .sda-badge {
+            display:inline-block; padding:2px 8px; border-radius:20px;
+            font-size:10px; font-weight:500; font-family:var(--font-mono);
         }
-        .sda-rank.gold   { color: var(--orange); }
-        .sda-rank.silver { color: var(--text-muted); }
-        .sda-rank.bronze { color: #b45309; }
+        .sda-badge.green  { background:var(--green-dim);  color:var(--green); }
+        .sda-badge.orange { background:var(--orange-dim); color:var(--orange); }
+        .sda-badge.red    { background:var(--red-dim);    color:var(--red); }
+        .sda-badge.blue   { background:var(--blue-dim, rgba(88,166,255,0.1)); color:var(--blue); }
+        .sda-badge.gray   { background:var(--surface2);   color:var(--text-muted); }
 
-        .sda-learner-name  { font-weight: 500; color: var(--text); }
-        .sda-learner-class { font-size: 11px; color: var(--text-dim); margin-top: 1px; font-family: var(--font-mono); }
+        /* trend arrow */
+        .sda-trend { font-size:11px; font-weight:500; font-family:var(--font-mono); }
+        .sda-trend.up   { color:var(--green); }
+        .sda-trend.down { color:var(--red); }
+        .sda-trend.flat { color:var(--text-dim); }
 
-        .sda-gender-dot {
-            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-            display: inline-block; margin-right: 4px;
-        }
-        .sda-gender-dot.male   { background: var(--blue); }
-        .sda-gender-dot.female { background: #e15759; }
+        /* ── Class health table specifics ── */
+        .sda-health-bar-wrap { width:80px; height:4px; background:var(--surface2); border-radius:100px; overflow:hidden; display:inline-block; vertical-align:middle; }
+        .sda-health-bar-fill { height:100%; border-radius:100px; }
 
-        .sda-avg-pill {
-            font-size: 12px; font-weight: 600;
-            padding: 2px 8px; border-radius: 20px;
-            font-family: var(--font-mono);
-        }
-        .sda-avg-pill.green  { background: var(--green-dim);  color: var(--green);  }
-        .sda-avg-pill.orange { background: var(--orange-dim); color: var(--orange); }
-        .sda-avg-pill.red    { background: var(--red-dim);    color: var(--red);    }
-        .sda-avg-pill.gray   { background: var(--surface2);   color: var(--text-dim); }
+        /* ── Gender bars ── */
+        .sda-gender-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .sda-gender-label { font-size:11px; font-weight:500; width:44px; flex-shrink:0; }
+        .sda-gender-label.male   { color:var(--blue); }
+        .sda-gender-label.female { color:#e15759; }
+        .sda-gender-bar-wrap { flex:1; height:5px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+        .sda-gender-bar { height:100%; border-radius:3px; transition:width 0.7s ease; }
+        .sda-gender-bar.male   { background:var(--blue); }
+        .sda-gender-bar.female { background:#e15759; }
+        .sda-gender-val { font-size:11px; font-weight:500; width:38px; text-align:right; flex-shrink:0; font-family:var(--font-mono); }
+        .sda-gender-val.male   { color:var(--blue); }
+        .sda-gender-val.female { color:#e15759; }
 
-        /* ── Most improved ── */
-        .sda-improved-row {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
+        /* ── Risk score pill ── */
+        .sda-risk-pill {
+            display:inline-block; padding:2px 8px; border-radius:20px;
+            font-size:10px; font-weight:500; font-family:var(--font-mono);
         }
-        .sda-improved-row:last-child { border-bottom: none; }
-        .sda-improved-name  { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-muted); }
-        .sda-improved-from  { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
-        .sda-improved-arrow { color: var(--green); font-size: 13px; }
-        .sda-improved-to    { font-size: 12px; font-weight: 600; color: var(--text); font-family: var(--font-mono); }
-        .sda-improved-badge {
-            font-size: 12px; font-weight: 600;
-            padding: 2px 8px; border-radius: 20px;
-            background: var(--green-dim); color: var(--green);
-            white-space: nowrap; font-family: var(--font-mono);
-        }
+        .sda-risk-pill.high   { background:rgba(248,81,73,0.12); color:var(--red); }
+        .sda-risk-pill.medium { background:var(--orange-dim); color:var(--orange); }
+        .sda-risk-pill.low    { background:var(--surface2); color:var(--text-muted); }
 
-        /* ── Completion bars ── */
-        .sda-completion-row {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 8px;
-        }
-        .sda-completion-name {
-            font-size: 12px; font-weight: 500;
-            color: var(--text-muted);
-            width: 56px; flex-shrink: 0;
-            font-family: var(--font-mono);
-        }
-        .sda-completion-bar-wrap {
-            flex: 1; height: 4px;
-            background: var(--surface2);
-            border-radius: 2px; overflow: hidden;
-        }
-        .sda-completion-bar { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
-        .sda-completion-val {
-            font-size: 11px; font-weight: 600;
-            width: 40px; text-align: right; flex-shrink: 0;
-            color: var(--text-muted); font-family: var(--font-mono);
-        }
-        .sda-completion-count {
-            font-size: 10px; color: var(--text-dim);
-            width: 56px; flex-shrink: 0;
-            font-family: var(--font-mono);
-        }
+        /* ── Teacher status dots ── */
+        .sda-status-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; }
+        .sda-status-dot.full    { background:var(--green); }
+        .sda-status-dot.partial { background:var(--orange); }
+        .sda-status-dot.inactive{ background:var(--red); }
 
-        /* ── No data states ── */
-        .sda-no-improved {
-            text-align: center; padding: 28px 20px;
-            color: var(--text-dim); font-size: 13px;
-        }
+        /* ── Subject trend ── */
+        .sda-subject-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+        .sda-subject-row:last-child { border-bottom:none; }
+        .sda-subject-name { flex:1; font-size:12px; color:var(--text); font-weight:400; }
+        .sda-subject-learners { font-size:11px; color:var(--text-dim); font-family:var(--font-mono); width:60px; text-align:right; }
 
-        @media (max-width: 1100px) {
-            .sda-kpi-row { grid-template-columns: repeat(3, 1fr); }
-            .sda-row.col-3-2, .sda-row.col-2-3 { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 700px) {
-            .sda-kpi-row { grid-template-columns: repeat(2, 1fr); }
-            .sda-row.col-2 { grid-template-columns: 1fr; }
-            .sda-shell { padding: 14px 12px 80px; }
-            .sda-term-tabs { overflow-x: auto; }
-        }
+        /* ── Difficulty card ── */
+        .sda-diff-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+        .sda-diff-row:last-child { border-bottom:none; }
+        .sda-diff-name { flex:1; font-size:12px; color:var(--text); font-weight:400; }
+        .sda-diff-meta { font-size:10px; color:var(--text-dim); font-family:var(--font-mono); }
+        .sda-diff-range { font-size:10px; color:var(--text-dim); font-family:var(--font-mono); white-space:nowrap; }
+
+        /* ── Peak hours ── */
+        .sda-peak-wrap { display:flex; align-items:flex-end; gap:3px; height:80px; }
+        .sda-peak-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+        .sda-peak-bar { width:100%; border-radius:2px 2px 0 0; transition:height 0.5s ease; min-height:2px; }
+        .sda-peak-label { font-size:8px; color:var(--text-dim); font-family:var(--font-mono); white-space:nowrap; }
+
+        /* scrollable table body */
+        .sda-scroll-body { max-height:280px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border-hover) transparent; }
+        .sda-scroll-body::-webkit-scrollbar { width:3px; }
+        .sda-scroll-body::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:3px; }
     `;
     document.head.appendChild(s);
 })();
 
-// ── Helpers ──
-function sdaAvgColor(v) {
-    if (v === null || v === undefined) return 'gray';
-    if (v >= 60) return 'green';
-    if (v >= 40) return 'orange';
+// ── CHART DEFAULTS ───────────────────────────────────────
+const sdaTickColor = 'rgba(139,148,158,0.8)';
+const sdaGridColor = 'rgba(255,255,255,0.04)';
+const sdaTooltip   = {
+    backgroundColor: '#1c2128', borderColor: '#30363d', borderWidth: 1,
+    titleColor: '#e6edf3', bodyColor: '#8b949e', padding: 10,
+};
+const sdaChartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 600 },
+    plugins: { legend: { display: false } },
+};
+
+// ── HELPERS ──────────────────────────────────────────────
+function sdaAvgColor(avg) {
+    if (avg === null) return 'gray';
+    if (avg >= 60)   return 'green';
+    if (avg >= 40)   return 'orange';
     return 'red';
 }
-
-function sdaCompletionColor(v) {
-    if (v >= 75) return 'var(--green)';
-    if (v >= 50) return 'var(--orange)';
+function sdaHealthColor(score) {
+    if (score >= 70) return 'var(--green)';
+    if (score >= 40) return 'var(--orange)';
     return 'var(--red)';
 }
-
+function sdaRiskLevel(score) {
+    if (score >= 70) return 'high';
+    if (score >= 40) return 'medium';
+    return 'low';
+}
+function sdaTimeAgo(dt) {
+    if (!dt) return '—';
+    const diff = Math.floor((Date.now() - new Date(dt)) / 1000);
+    if (diff < 60)   return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400)return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
+}
+function sdaEsc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 function sdaDestroyCharts() {
     window._sdAnalyticsCharts.forEach(c => { try { c.destroy(); } catch(e){} });
     window._sdAnalyticsCharts = [];
 }
 
 // ══════════════════════════════════════════════════════════
-// LOAD ANALYTICS
+// MAIN ENTRY
 // ══════════════════════════════════════════════════════════
-window.loadSdAnalytics = async function() {
+window.loadSdAnalytics = async function () {
     const content = document.getElementById('sd-content');
-
-    if (window._sdAnalyticsCache) {
-        renderAnalytics(window._sdAnalyticsCache, window._sdAnalyticsTerm);
-        return;
-    }
-
-    content.innerHTML = `
-        <div class="sda-shell">
-            <div class="sda-header">
-                <div>
-                    <div class="sd-skeleton" style="height:20px;width:200px;margin-bottom:6px;"></div>
-                    <div class="sd-skeleton" style="height:12px;width:240px;"></div>
-                </div>
-                <div class="sd-skeleton" style="height:32px;width:260px;border-radius:var(--radius);"></div>
-            </div>
-            <div class="sda-kpi-row">
-                ${[1,2,3,4,5,6].map(() => `<div class="sd-skeleton" style="height:64px;border-radius:var(--radius-lg);"></div>`).join('')}
-            </div>
-            <div class="sda-row col-2" style="margin-bottom:12px;">
-                <div class="sd-skeleton" style="height:240px;border-radius:var(--radius-lg);"></div>
-                <div class="sd-skeleton" style="height:240px;border-radius:var(--radius-lg);"></div>
-            </div>
-            <div class="sda-row col-2">
-                <div class="sd-skeleton" style="height:280px;border-radius:var(--radius-lg);"></div>
-                <div class="sd-skeleton" style="height:280px;border-radius:var(--radius-lg);"></div>
-            </div>
-        </div>`;
-
-    try {
-        const res  = await fetch('api/school/get_analytics.php');
-        const data = await res.json();
-        window._sdAnalyticsCache = data;
-        window._sdAnalyticsTerm  = 0;
-        renderAnalytics(data, 0);
-    } catch(e) {
-        content.innerHTML = `<p style="color:var(--red);text-align:center;margin-top:60px;font-size:13px;">Failed to load analytics.</p>`;
-    }
-};
-
-window.sdaSwitchTerm = function(term) {
-    window._sdAnalyticsTerm = term;
-    if (window._sdAnalyticsCache) renderAnalytics(window._sdAnalyticsCache, term);
-};
-
-// ══════════════════════════════════════════════════════════
-// RENDER ANALYTICS
-// ══════════════════════════════════════════════════════════
-function renderAnalytics(d, activeTerm) {
     sdaDestroyCharts();
-    const content = document.getElementById('sd-content');
-
-    const termLabels = ['All Terms', 'Term 1', 'Term 2', 'Term 3', 'Term 4'];
-    const termTabs = termLabels.map((label, i) => `
-        <button class="sda-term-tab${activeTerm === i ? ' active' : ''}" onclick="sdaSwitchTerm(${i})">
-            ${label}
-        </button>`).join('');
-
-    const classData = (d.class_performance || []).map(cls => {
-        const avg = activeTerm === 0
-            ? cls.overall
-            : (cls.terms ? cls.terms[activeTerm] : null);
-        return { ...cls, display_avg: avg };
-    }).sort((a, b) => (b.display_avg ?? -1) - (a.display_avg ?? -1));
-
-    const displaySchoolAvg = activeTerm === 0
-        ? d.school_overall_avg
-        : (d.term_averages && d.term_averages[activeTerm - 1]?.avg) ?? null;
-
-    const latestTerm = (d.term_averages || []).reduce((last, t) => t.avg !== null ? t.term : last, 1);
-
-    const displayLearners = activeTerm === 0
-        ? Math.max(...(d.term_averages || []).map(t => t.learners || 0))
-        : (d.term_averages && d.term_averages[activeTerm - 1]?.learners) ?? 0;
-
-    const maleAvg   = activeTerm === 0
-        ? d.gender_breakdown?.male?.overall
-        : d.gender_breakdown?.male?.terms?.[activeTerm] ?? null;
-    const femaleAvg = activeTerm === 0
-        ? d.gender_breakdown?.female?.overall
-        : d.gender_breakdown?.female?.terms?.[activeTerm] ?? null;
-    const maleLearners   = 0;
-    const femaleLearners = 0;
-
-    const completionRows = (d.completion || []).map(c => {
-        const col = sdaCompletionColor(c.rate);
-        return `
-            <div class="sda-completion-row">
-                <div class="sda-completion-name">Term ${c.term}</div>
-                <div class="sda-completion-bar-wrap">
-                    <div class="sda-completion-bar" style="width:${c.rate}%;background:${col};"></div>
-                </div>
-                <div class="sda-completion-val">${c.rate}%</div>
-                <div class="sda-completion-count">${c.submitted}/${c.enrolled}</div>
-            </div>`;
-    }).join('') || `<div class="sda-no-data" style="height:80px;">No data yet</div>`;
-
-    const rankClass = (i) => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const topRows = (d.top_performers || []).map((l, i) => {
-        const col = sdaAvgColor(l.avg);
-        return `
-            <tr>
-                <td><span class="sda-rank ${rankClass(i)}">${i + 1}</span></td>
-                <td>
-                    <div class="sda-learner-name">
-                        <span class="sda-gender-dot ${l.gender || 'other'}"></span>
-                        ${l.name}
-                    </div>
-                    <div class="sda-learner-class">${l.classes}</div>
-                </td>
-                <td><span class="sda-avg-pill ${col}">${l.avg}%</span></td>
-                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${l.submissions} quizzes</td>
-            </tr>`;
-    }).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px;font-size:13px;">No data yet</td></tr>`;
-
-    const improvedRows = (d.most_improved || []).length
-        ? d.most_improved.map(l => `
-            <div class="sda-improved-row">
-                <div>
-                    <div class="sda-improved-name">${l.name}</div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-                        <span class="sda-improved-from">T${l.from_term}: ${l.from_avg}%</span>
-                        <span class="sda-improved-arrow">→</span>
-                        <span class="sda-improved-to">T${l.to_term}: ${l.to_avg}%</span>
-                    </div>
-                </div>
-                <span class="sda-improved-badge">+${l.jump}%</span>
-            </div>`).join('')
-        : `<div class="sda-no-improved">Need data in at least 2 terms to show improvement</div>`;
 
     content.innerHTML = `
         <div class="sda-shell">
-
             <div class="sda-header">
                 <div>
-                    <div class="sda-title">School Analytics</div>
-                    <div class="sda-sub">${d.year_name} · Data from summative assessments</div>
+                    <div class="sda-title">Analytics</div>
+                    <div class="sda-sub" id="sda-sub-text">Loading data…</div>
                 </div>
-                <div class="sda-term-tabs">${termTabs}</div>
+                <div class="sda-year-badge" id="sda-year-badge">—</div>
             </div>
 
-            <div class="sda-kpi-row">
-                <div class="sda-kpi c-teal">
-                    <div class="sda-kpi-val">${displaySchoolAvg !== null ? displaySchoolAvg + '%' : '—'}</div>
-                    <div class="sda-kpi-label">School avg</div>
-                </div>
-                <div class="sda-kpi c-blue">
-                    <div class="sda-kpi-val">${displayLearners}</div>
-                    <div class="sda-kpi-label">Active learners</div>
-                </div>
-                <div class="sda-kpi c-orange">
-                    <div class="sda-kpi-val">${d.total_classes}</div>
-                    <div class="sda-kpi-label">Classes</div>
-                </div>
-                <div class="sda-kpi c-green">
-                    <div class="sda-kpi-val">${d.total_teachers}</div>
-                    <div class="sda-kpi-label">Teachers</div>
-                </div>
-                <div class="sda-kpi c-purple">
-                    <div class="sda-kpi-val">${(d.class_performance||[]).reduce((s,c)=>s+(c.terms?Object.values(c.terms).filter(v=>v!==null).length:0),0)}</div>
-                    <div class="sda-kpi-label">Assessments</div>
-                </div>
-                <div class="sda-kpi c-pink">
-                    <div class="sda-kpi-val">${d.total_learners}</div>
-                    <div class="sda-kpi-label">Total learners</div>
-                </div>
+            <!-- KPI ROW -->
+            <div class="sda-kpi-row" id="sda-kpi-row">
+                ${[1,2,3,4].map(()=>`<div class="sda-kpi" style="height:88px;"><div class="sd-skeleton" style="height:100%;border-radius:var(--radius-lg);"></div></div>`).join('')}
             </div>
 
-            <div class="sda-row col-2">
-                <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:var(--teal);"></span>
-                        School average by term
-                    </div>
-                    <div class="sda-chart-wrap h200">
-                        ${(d.term_averages||[]).some(v => v.avg !== null)
-                            ? `<canvas id="sda-trend-chart"></canvas>`
-                            : `<div class="sda-no-data">No assessment data yet</div>`}
-                    </div>
-                </div>
-                <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:var(--blue);"></span>
-                        Class performance ${activeTerm ? '— Term ' + activeTerm : '— All terms'}
-                    </div>
-                    <div class="sda-chart-wrap h200">
-                        ${classData.some(c => c.display_avg !== null)
-                            ? `<canvas id="sda-class-chart"></canvas>`
-                            : `<div class="sda-no-data">No data for this term yet</div>`}
-                    </div>
-                </div>
-            </div>
-
+            <!-- ROW 1: Term trend + Gender -->
             <div class="sda-row col-3-2">
                 <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:var(--purple);"></span>
-                        Subject performance
-                    </div>
-                    <div class="sda-chart-wrap h240">
-                        ${d.subject_performance.length
-                            ? `<canvas id="sda-subject-chart"></canvas>`
-                            : `<div class="sda-no-data">No subject data yet</div>`}
-                    </div>
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--teal);"></span>School Average — Term Trend</div></div>
+                    <div class="sda-chart-wrap h220"><canvas id="sda-trend-chart"></canvas><div class="sda-no-data" id="sda-trend-empty" style="display:none;">No summative data yet</div></div>
                 </div>
                 <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:#e15759;"></span>
-                        Gender breakdown ${activeTerm ? '— Term ' + activeTerm : ''}
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <div class="sda-gender-row">
-                            <div class="sda-gender-label male">Boys</div>
-                            <div class="sda-gender-bar-wrap">
-                                <div class="sda-gender-bar male" style="width:${maleAvg !== null ? maleAvg : 0}%;"></div>
-                            </div>
-                            <div class="sda-gender-val male">${maleAvg !== null ? maleAvg + '%' : '—'}</div>
-                            <div class="sda-gender-count">${maleLearners} learners</div>
-                        </div>
-                        <div class="sda-gender-row">
-                            <div class="sda-gender-label female">Girls</div>
-                            <div class="sda-gender-bar-wrap">
-                                <div class="sda-gender-bar female" style="width:${femaleAvg !== null ? femaleAvg : 0}%;"></div>
-                            </div>
-                            <div class="sda-gender-val female">${femaleAvg !== null ? femaleAvg + '%' : '—'}</div>
-                            <div class="sda-gender-count">${femaleLearners} learners</div>
-                        </div>
-                    </div>
-                    ${(maleAvg !== null && femaleAvg !== null) ? `
-                    <div class="sda-chart-wrap h160" style="--h:160px;">
-                        <canvas id="sda-gender-chart"></canvas>
-                    </div>` : ''}
-
-                    <div class="sda-card-title" style="margin-top:16px;">
-                        <span class="sda-card-dot" style="background:var(--green);"></span>
-                        Completion rate by class
-                    </div>
-                    ${completionRows}
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--blue);"></span>Gender Performance</div></div>
+                    <div id="sda-gender-content" style="margin-top:8px;"><div class="sda-no-data" style="height:120px;">Loading…</div></div>
                 </div>
             </div>
 
+            <!-- ROW 2: Top performers + Most improved -->
             <div class="sda-row col-2">
                 <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:var(--orange);"></span>
-                        Top 10 learners (school-wide)
-                    </div>
-                    <table class="sda-top-table">
-                        <tbody>${topRows}</tbody>
-                    </table>
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--orange);"></span>Top Performers</div></div>
+                    <div id="sda-top-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
                 </div>
                 <div class="sda-card">
-                    <div class="sda-card-title">
-                        <span class="sda-card-dot" style="background:var(--green);"></span>
-                        Most improved (Term 1 → Term ${latestTerm})
-                    </div>
-                    ${improvedRows}
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--green);"></span>Most Improved</div></div>
+                    <div id="sda-improved-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
                 </div>
             </div>
 
-        </div>`;
+            <!-- ROW 3: Class Health Index (full width) -->
+            <div class="sda-row col-1">
+                <div class="sda-card">
+                    <div class="sda-card-title">
+                        <div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--purple);"></span>Class Health Index</div>
+                        <span style="font-size:10px;color:var(--text-dim);font-weight:400;text-transform:none;">Score = avg (40%) + submission rate (30%) + teacher activity (20%) + has summative (10%)</span>
+                    </div>
+                    <div id="sda-health-content"><div class="sda-no-data" style="height:120px;">Loading…</div></div>
+                </div>
+            </div>
 
-    requestAnimationFrame(() => {
-        sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg);
-    });
-}
+            <!-- ROW 4: At-Risk + Teacher Participation -->
+            <div class="sda-row col-2">
+                <div class="sda-card">
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--red);"></span>At-Risk Learners</div><span id="sda-risk-count" style="font-size:10px;color:var(--text-dim);font-weight:400;text-transform:none;"></span></div>
+                    <div id="sda-risk-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
+                </div>
+                <div class="sda-card">
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--blue);"></span>Teacher Participation</div></div>
+                    <div id="sda-teacher-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
+                </div>
+            </div>
 
-// ══════════════════════════════════════════════════════════
-// CHARTS
-// ══════════════════════════════════════════════════════════
-function sdaRenderCharts(d, classData, activeTerm, maleAvg, femaleAvg) {
-    const chartDefaults = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-    };
-    const gridColor = 'rgba(255,255,255,0.04)';
-    const tickColor = '#8b949e';
+            <!-- ROW 5: Difficulty Index + Subject Performance -->
+            <div class="sda-row col-2">
+                <div class="sda-card">
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--red);"></span>Assessment Difficulty Index</div></div>
+                    <div id="sda-diff-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
+                </div>
+                <div class="sda-card">
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--purple);"></span>Subject Performance</div></div>
+                    <div id="sda-subject-content"><div class="sda-no-data" style="height:180px;">Loading…</div></div>
+                </div>
+            </div>
 
-    // ── 1. Term Trend (line) ──
-    const trendCtx = document.getElementById('sda-trend-chart')?.getContext('2d');
-    if (trendCtx) {
-        const trendAvgs = (d.term_averages || []).map(t => t.avg);
-        const chart = new Chart(trendCtx, {
+            <!-- ROW 6: Peak Activity Hours (full width) -->
+            <div class="sda-row col-1">
+                <div class="sda-card">
+                    <div class="sda-card-title"><div class="sda-card-title-left"><span class="sda-card-dot" style="background:var(--teal);"></span>Peak Activity Hours — When Are Learners Most Active?</div></div>
+                    <div class="sda-chart-wrap h180"><canvas id="sda-peak-chart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Use cache or fetch
+    let d = window._sdAnalyticsCache;
+    if (!d) {
+        try {
+            const res = await fetch('api/school/get_analytics.php');
+            d = await res.json();
+            window._sdAnalyticsCache = d;
+        } catch (e) {
+            content.innerHTML = `<div style="padding:48px;text-align:center;color:var(--red);font-size:13px;">Failed to load analytics data.</div>`;
+            return;
+        }
+    }
+
+    // Update header
+    document.getElementById('sda-year-badge').textContent = d.year_name || '—';
+    document.getElementById('sda-sub-text').textContent = `${d.total_learners} learners · ${d.total_teachers} teachers · ${d.total_classes} classes`;
+
+    // ── KPIs ──
+    const kpis = [
+        { label: 'School Average',     val: d.school_overall_avg !== null ? d.school_overall_avg + '%' : '—', sub: 'Summative assessments', color: 'c-teal' },
+        { label: 'Pass Rate',          val: d.pass_rate !== null ? d.pass_rate + '%' : '—',          sub: 'Learners scoring ≥ 50%',  color: 'c-green' },
+        { label: 'Assessed Learners',  val: d.assessed_learners,  sub: 'With ≥1 summative result',   color: 'c-orange' },
+        { label: 'At-Risk Learners',   val: d.at_risk_count,      sub: 'Low marks + low activity',   color: 'c-red' },
+    ];
+    document.getElementById('sda-kpi-row').innerHTML = kpis.map(k => `
+        <div class="sda-kpi ${k.color}">
+            <div class="sda-kpi-label">${k.label}</div>
+            <div class="sda-kpi-val">${k.val}</div>
+            <div class="sda-kpi-sub">${k.sub}</div>
+        </div>
+    `).join('');
+
+    // ── Chart: Term trend ──
+    const termCtx = document.getElementById('sda-trend-chart')?.getContext('2d');
+    if (termCtx && d.term_averages?.length) {
+        const chart = new Chart(termCtx, {
             type: 'line',
             data: {
-                labels: (d.term_averages || []).map(t => `Term ${t.term}`),
+                labels: d.term_averages.map(t => 'Term ' + t.term),
                 datasets: [{
-                    label: 'School Avg %',
-                    data: trendAvgs,
-                    borderColor: '#39d5c1',
-                    backgroundColor: 'rgba(57,213,193,0.06)',
+                    data: d.term_averages.map(t => t.avg),
+                    borderColor: 'var(--teal)',
+                    backgroundColor: 'rgba(31,190,169,0.08)',
                     borderWidth: 2,
-                    pointBackgroundColor: trendAvgs.map(v =>
-                        v === null ? 'transparent' :
-                        v >= 60 ? '#3fb950' : v >= 40 ? '#d29922' : '#f85149'
-                    ),
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: 0.35,
-                    fill: true,
-                    spanGaps: false,
+                    pointRadius: 5, pointHoverRadius: 7,
+                    pointBackgroundColor: 'var(--teal)',
+                    pointBorderColor: '#0d1117',
+                    pointBorderWidth: 2,
+                    tension: 0.35, fill: true,
                 }]
             },
             options: {
-                ...chartDefaults,
+                ...sdaChartDefaults,
                 plugins: {
-                    legend: { display: false },
+                    ...sdaChartDefaults.plugins,
                     tooltip: {
-                        backgroundColor: '#1c2128',
-                        borderColor: '#30363d',
-                        borderWidth: 1,
-                        titleColor: '#e6edf3',
-                        bodyColor: '#8b949e',
+                        ...sdaTooltip,
                         callbacks: {
-                            label: ctx => ctx.parsed.y !== null ? ` ${ctx.parsed.y}%` : ' No data',
+                            label: ctx => ` School avg: ${ctx.parsed.y}%`,
                             afterLabel: ctx => {
-                                const t = (d.term_averages || [])[ctx.dataIndex];
-                                return t ? `${t.learners} learners · ${t.submissions} submissions` : '';
+                                const t = d.term_averages[ctx.dataIndex];
+                                return t ? ` ${t.learners} learners · ${t.submissions} submissions` : '';
                             }
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true, max: 100,
-                        ticks: { color: tickColor, callback: v => v + '%', stepSize: 20, font: { size: 11 } },
-                        grid: { color: gridColor },
-                        border: { color: gridColor }
-                    },
-                    x: {
-                        ticks: { color: tickColor, font: { size: 11 } },
-                        grid: { color: gridColor },
-                        border: { color: gridColor }
-                    }
+                    y: { beginAtZero:true, max:100, ticks:{color:sdaTickColor,callback:v=>v+'%',stepSize:25,font:{size:11}}, grid:{color:sdaGridColor}, border:{color:sdaGridColor} },
+                    x: { ticks:{color:sdaTickColor,font:{size:11}}, grid:{display:false} }
                 }
             }
         });
         window._sdAnalyticsCharts.push(chart);
+    } else if (!d.term_averages?.length) {
+        document.getElementById('sda-trend-empty').style.display = 'flex';
+        if (termCtx) termCtx.canvas.style.display = 'none';
     }
 
-    // ── 2. Class comparison (horizontal bar) ──
-    const classCtx = document.getElementById('sda-class-chart')?.getContext('2d');
-    if (classCtx) {
-        const filtered = classData.filter(c => c.display_avg !== null);
-        const chart = new Chart(classCtx, {
+    // ── Gender breakdown ──
+    const male   = d.gender_breakdown?.male;
+    const female = d.gender_breakdown?.female;
+    const maleAvg   = male?.overall;
+    const femaleAvg = female?.overall;
+    const maxAvg    = Math.max(maleAvg || 0, femaleAvg || 0, 1);
+
+    document.getElementById('sda-gender-content').innerHTML = (maleAvg !== null || femaleAvg !== null) ? `
+        <div style="margin-bottom:20px;">
+            <div class="sda-gender-row">
+                <span class="sda-gender-label male">Boys</span>
+                <div class="sda-gender-bar-wrap"><div class="sda-gender-bar male" style="width:${Math.round((maleAvg||0)/maxAvg*100)}%"></div></div>
+                <span class="sda-gender-val male">${maleAvg !== null ? maleAvg+'%' : '—'}</span>
+            </div>
+            <div class="sda-gender-row">
+                <span class="sda-gender-label female">Girls</span>
+                <div class="sda-gender-bar-wrap"><div class="sda-gender-bar female" style="width:${Math.round((femaleAvg||0)/maxAvg*100)}%"></div></div>
+                <span class="sda-gender-val female">${femaleAvg !== null ? femaleAvg+'%' : '—'}</span>
+            </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px;">
+            ${[1,2,3,4].map(t => {
+                const mT = male?.terms?.[t]?.avg;
+                const fT = female?.terms?.[t]?.avg;
+                if (mT === undefined && fT === undefined) return '';
+                return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    <span style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);width:46px;">Term ${t}</span>
+                    <span style="font-size:11px;color:var(--blue);font-family:var(--font-mono);width:36px;">${mT !== undefined ? mT+'%' : '—'}</span>
+                    <span style="font-size:11px;color:#e15759;font-family:var(--font-mono);width:36px;">${fT !== undefined ? fT+'%' : '—'}</span>
+                </div>`;
+            }).join('')}
+        </div>
+    ` : `<div class="sda-no-data" style="height:120px;">No gender data yet</div>`;
+
+    // ── Top performers ──
+    document.getElementById('sda-top-content').innerHTML = d.top_performers?.length ? `
+        <div class="sda-scroll-body">
+        <table class="sda-table">
+            <thead><tr><th>#</th><th>Learner</th><th>Class</th><th>Avg</th><th>Tests</th></tr></thead>
+            <tbody>
+            ${d.top_performers.map((l,i) => {
+                const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+                const col = sdaAvgColor(l.avg);
+                return `<tr>
+                    <td><span class="sda-rank ${rankClass}">${i+1}</span></td>
+                    <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${sdaEsc(l.classes)}</td>
+                    <td><span class="sda-badge ${col}">${l.avg}%</span></td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${l.submissions}</td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+        </div>
+    ` : `<div class="sda-no-data" style="height:180px;">No assessment data yet</div>`;
+
+    // ── Most improved ──
+    document.getElementById('sda-improved-content').innerHTML = d.most_improved?.length ? `
+        <div class="sda-scroll-body">
+        <table class="sda-table">
+            <thead><tr><th>#</th><th>Learner</th><th>From</th><th>To</th><th>Jump</th></tr></thead>
+            <tbody>
+            ${d.most_improved.map((l,i) => `<tr>
+                <td><span class="sda-rank">${i+1}</span></td>
+                <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">T${l.from_term} ${l.from_avg}%</td>
+                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">T${l.to_term} ${l.to_avg}%</td>
+                <td><span class="sda-trend up">+${l.jump}%</span></td>
+            </tr>`).join('')}
+            </tbody>
+        </table>
+        </div>
+    ` : `<div class="sda-no-data" style="height:180px;">Need data across 2+ terms</div>`;
+
+    // ── Class Health Index ──
+    document.getElementById('sda-health-content').innerHTML = d.class_health?.length ? `
+        <div class="sda-scroll-body">
+        <table class="sda-table">
+            <thead><tr>
+                <th>#</th><th>Class</th><th>Enrolled</th>
+                <th>Overall Avg</th><th>Submission Rate</th>
+                <th>Teacher Activity</th><th>Summatives</th>
+                <th>Health Score</th>
+            </tr></thead>
+            <tbody>
+            ${d.class_health.map((cls,i) => {
+                const col = sdaAvgColor(cls.overall_avg);
+                const hColor = sdaHealthColor(cls.health_score);
+                return `<tr>
+                    <td><span class="sda-rank">${i+1}</span></td>
+                    <td style="font-weight:400;color:var(--text);">${sdaEsc(cls.class_name)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.enrolled}</td>
+                    <td><span class="sda-badge ${col}">${cls.overall_avg !== null ? cls.overall_avg+'%' : '—'}</span></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div class="sda-health-bar-wrap"><div class="sda-health-bar-fill" style="width:${cls.submission_rate}%;background:${cls.submission_rate>=60?'var(--green)':cls.submission_rate>=30?'var(--orange)':'var(--red)'};"></div></div>
+                            <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);">${cls.submission_rate}%</span>
+                        </div>
+                    </td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.teacher_activity} items</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.summative_count}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div class="sda-health-bar-wrap" style="width:60px;"><div class="sda-health-bar-fill" style="width:${cls.health_score}%;background:${hColor};"></div></div>
+                            <span style="font-size:11px;font-weight:500;color:${hColor};font-family:var(--font-mono);">${cls.health_score}</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+        </div>
+    ` : `<div class="sda-no-data" style="height:120px;">No classes yet</div>`;
+
+    // ── At-Risk Learners ──
+    document.getElementById('sda-risk-count').textContent = `${d.at_risk_count} learner${d.at_risk_count !== 1 ? 's' : ''} flagged`;
+    document.getElementById('sda-risk-content').innerHTML = d.at_risk_learners?.length ? `
+        <div class="sda-scroll-body">
+        <table class="sda-table">
+            <thead><tr><th>Learner</th><th>Class</th><th>Avg</th><th>Tests</th><th>Last Active</th><th>Risk</th></tr></thead>
+            <tbody>
+            ${d.at_risk_learners.map(l => {
+                const level = sdaRiskLevel(l.risk_score);
+                return `<tr>
+                    <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${sdaEsc(l.classes)}</td>
+                    <td><span class="sda-badge red">${l.avg_pct}%</span></td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${l.submissions}</td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${sdaTimeAgo(l.last_submission)}</td>
+                    <td><span class="sda-risk-pill ${level}">${l.risk_score}</span></td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+        </div>
+    ` : `<div class="sda-no-data" style="height:180px;">No at-risk learners — great sign! ✓</div>`;
+
+    // ── Teacher Participation ──
+    const full    = d.teacher_participation?.filter(t=>t.status==='full').length    || 0;
+    const partial = d.teacher_participation?.filter(t=>t.status==='partial').length || 0;
+    const inactive= d.teacher_participation?.filter(t=>t.status==='inactive').length|| 0;
+    document.getElementById('sda-teacher-content').innerHTML = `
+        <div style="display:flex;gap:16px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+            <div style="text-align:center;">
+                <div style="font-size:20px;font-weight:500;color:var(--green);">${full}</div>
+                <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;">Fully Active</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:20px;font-weight:500;color:var(--orange);">${partial}</div>
+                <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;">Partial</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:20px;font-weight:500;color:var(--red);">${inactive}</div>
+                <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;">Inactive</div>
+            </div>
+            <div style="text-align:center;margin-left:auto;">
+                <div style="font-size:20px;font-weight:500;color:var(--teal);">${d.teacher_participation_rate}%</div>
+                <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;">Full Rate</div>
+            </div>
+        </div>
+        <div class="sda-scroll-body">
+        <table class="sda-table">
+            <thead><tr><th>Teacher</th><th>Quizzes</th><th>Assignments</th><th>Resources</th><th>Status</th></tr></thead>
+            <tbody>
+            ${(d.teacher_participation||[]).map(t=>`<tr>
+                <td style="font-weight:400;color:var(--text);">${sdaEsc(t.name)}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.quizzes}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.assignments}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.resources}</td>
+                <td><span class="sda-status-dot ${t.status}"></span><span style="font-size:11px;color:var(--text-muted);">${t.status==='full'?'Active':t.status==='partial'?'Partial':'Inactive'}</span></td>
+            </tr>`).join('')}
+            </tbody>
+        </table>
+        </div>
+    `;
+
+    // ── Assessment Difficulty Index ──
+    document.getElementById('sda-diff-content').innerHTML = d.difficulty_index?.length ? `
+        ${d.difficulty_index.map(q=>`
+            <div class="sda-diff-row">
+                <div style="flex:1;">
+                    <div class="sda-diff-name">${sdaEsc(q.title)}</div>
+                    <div class="sda-diff-meta">${sdaEsc(q.class)} · Term ${q.term} · ${q.submissions} submissions</div>
+                </div>
+                <div style="text-align:right;">
+                    <span class="sda-badge red">${q.avg_pct}% avg</span>
+                    <div class="sda-diff-range">Range: ${q.lowest}%–${q.highest}%</div>
+                </div>
+            </div>
+        `).join('')}
+    ` : `<div class="sda-no-data" style="height:180px;">No consistently difficult assessments — great!</div>`;
+
+    // ── Subject Performance ──
+    document.getElementById('sda-subject-content').innerHTML = d.subject_performance?.length ? `
+        <div class="sda-scroll-body">
+        ${d.subject_performance.map(s => {
+            const col   = sdaAvgColor(s.avg);
+            const trend = s.trend === null ? '' : s.trend > 0
+                ? `<span class="sda-trend up">↑+${s.trend}%</span>`
+                : s.trend < 0
+                ? `<span class="sda-trend down">↓${s.trend}%</span>`
+                : `<span class="sda-trend flat">→</span>`;
+            return `<div class="sda-subject-row">
+                <span class="sda-subject-name">${sdaEsc(s.subject)}</span>
+                <span class="sda-subject-learners">${s.learners} learners</span>
+                ${trend}
+                <span class="sda-badge ${col}">${s.avg !== null ? s.avg+'%' : '—'}</span>
+            </div>`;
+        }).join('')}
+        </div>
+    ` : `<div class="sda-no-data" style="height:180px;">No subject data — assign subjects in teacher settings</div>`;
+
+    // ── Peak Activity Hours chart ──
+    const peakCtx = document.getElementById('sda-peak-chart')?.getContext('2d');
+    if (peakCtx && d.peak_hours?.length) {
+        const maxCount = Math.max(...d.peak_hours.map(h=>h.count), 1);
+        const chart = new Chart(peakCtx, {
             type: 'bar',
             data: {
-                labels: filtered.map(c => c.class_name),
+                labels: d.peak_hours.map(h => h.label),
                 datasets: [{
-                    data: filtered.map(c => c.display_avg),
-                    backgroundColor: filtered.map(c =>
-                        c.display_avg >= 60 ? 'rgba(63,185,80,0.5)'  :
-                        c.display_avg >= 40 ? 'rgba(210,153,34,0.5)' :
-                        'rgba(248,81,73,0.5)'
-                    ),
-                    borderColor: filtered.map(c =>
-                        c.display_avg >= 60 ? '#3fb950' :
-                        c.display_avg >= 40 ? '#d29922' : '#f85149'
-                    ),
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    borderSkipped: false,
+                    data: d.peak_hours.map(h => h.count),
+                    backgroundColor: d.peak_hours.map(h => {
+                        const intensity = h.count / maxCount;
+                        return `rgba(31,190,169,${0.15 + intensity * 0.75})`;
+                    }),
+                    borderColor: 'transparent',
+                    borderRadius: 3, borderSkipped: false,
                 }]
             },
             options: {
-                ...chartDefaults,
-                indexAxis: 'y',
+                ...sdaChartDefaults,
                 plugins: {
-                    legend: { display: false },
+                    ...sdaChartDefaults.plugins,
                     tooltip: {
-                        backgroundColor: '#1c2128',
-                        borderColor: '#30363d',
-                        borderWidth: 1,
-                        titleColor: '#e6edf3',
-                        bodyColor: '#8b949e',
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.x}%`,
-                            afterLabel: ctx => {
-                                const cls = filtered[ctx.dataIndex];
-                                return cls ? `${cls.learner_count} learners` : '';
-                            }
-                        }
+                        ...sdaTooltip,
+                        callbacks: { label: ctx => ` ${ctx.parsed.y} submission${ctx.parsed.y !== 1 ? 's' : ''}` }
                     }
                 },
                 scales: {
-                    x: {
-                        beginAtZero: true, max: 100,
-                        ticks: { color: tickColor, callback: v => v + '%', font: { size: 11 } },
-                        grid: { color: gridColor },
-                        border: { color: gridColor }
-                    },
-                    y: {
-                        ticks: { color: tickColor, font: { size: 11 } },
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero:true, ticks:{color:sdaTickColor,font:{size:10},stepSize:Math.ceil(maxCount/4)}, grid:{color:sdaGridColor}, border:{color:sdaGridColor} },
+                    x: { ticks:{color:sdaTickColor,font:{size:10},maxRotation:0}, grid:{display:false} }
                 }
             }
         });
         window._sdAnalyticsCharts.push(chart);
     }
-
-    // ── 3. Subject performance (horizontal bar) ──
-    const subjectCtx = document.getElementById('sda-subject-chart')?.getContext('2d');
-    if (subjectCtx) {
-        const subjs = d.subject_performance.slice(0, 10);
-        const chart = new Chart(subjectCtx, {
-            type: 'bar',
-            data: {
-                labels: subjs.map(s => s.subject.length > 18 ? s.subject.slice(0, 18) + '…' : s.subject),
-                datasets: [{
-                    data: subjs.map(s => s.avg),
-                    backgroundColor: subjs.map(s =>
-                        s.avg >= 60 ? 'rgba(188,140,255,0.5)' :
-                        s.avg >= 40 ? 'rgba(210,153,34,0.5)'  :
-                        'rgba(248,81,73,0.5)'
-                    ),
-                    borderColor: subjs.map(s =>
-                        s.avg >= 60 ? '#bc8cff' :
-                        s.avg >= 40 ? '#d29922' : '#f85149'
-                    ),
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                ...chartDefaults,
-                indexAxis: 'y',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1c2128',
-                        borderColor: '#30363d',
-                        borderWidth: 1,
-                        titleColor: '#e6edf3',
-                        bodyColor: '#8b949e',
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.x}%`,
-                            afterLabel: ctx => {
-                                const s = subjs[ctx.dataIndex];
-                                return s ? `${s.learners} results · ${s.classes} class${s.classes !== 1 ? 'es' : ''}` : '';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true, max: 100,
-                        ticks: { color: tickColor, callback: v => v + '%', font: { size: 11 } },
-                        grid: { color: gridColor },
-                        border: { color: gridColor }
-                    },
-                    y: {
-                        ticks: { color: tickColor, font: { size: 11 } },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-        window._sdAnalyticsCharts.push(chart);
-    }
-
-    // ── 4. Gender term-by-term (grouped bar) ──
-    const genderCtx = document.getElementById('sda-gender-chart')?.getContext('2d');
-    if (genderCtx && maleAvg !== null && femaleAvg !== null) {
-        const chart = new Chart(genderCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
-                datasets: [
-                    {
-                        label: 'Boys',
-                        data: [1,2,3,4].map(t => d.gender_breakdown?.male?.terms?.[t] ?? null),
-                        backgroundColor: 'rgba(88,166,255,0.5)',
-                        borderColor: '#58a6ff',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        borderSkipped: false,
-                    },
-                    {
-                        label: 'Girls',
-                        data: [1,2,3,4].map(t => d.gender_breakdown?.female?.terms?.[t] ?? null),
-                        backgroundColor: 'rgba(225,87,89,0.5)',
-                        borderColor: '#e15759',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        borderSkipped: false,
-                    }
-                ]
-            },
-            options: {
-                ...chartDefaults,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: tickColor,
-                            font: { size: 11 },
-                            boxWidth: 10,
-                            padding: 12,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#1c2128',
-                        borderColor: '#30363d',
-                        borderWidth: 1,
-                        titleColor: '#e6edf3',
-                        bodyColor: '#8b949e',
-                        callbacks: {
-                            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true, max: 100,
-                        ticks: { color: tickColor, callback: v => v + '%', stepSize: 25, font: { size: 11 } },
-                        grid: { color: gridColor },
-                        border: { color: gridColor }
-                    },
-                    x: {
-                        ticks: { color: tickColor, font: { size: 11 } },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-        window._sdAnalyticsCharts.push(chart);
-    }
-}
+};

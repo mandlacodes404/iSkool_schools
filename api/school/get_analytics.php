@@ -1,8 +1,7 @@
 <?php
 /**
  * iSkool School Dashboard — Analytics API
- * School-wide performance data: trends, class comparison,
- * subject breakdown, gender, top performers, most improved, completion
+ * World-class data center: trends, health, risk, difficulty, engagement
  */
 ob_start();
 error_reporting(E_ALL);
@@ -23,11 +22,11 @@ $yearId   = 0;
 $yearName = 'Current Year';
 $res = $conn->query("SELECT id, name FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($row = $res->fetch_assoc()) { $yearId = $row['id']; $yearName = $row['name']; }
-$yearCond = $yearId ? "AND qr.academic_year_id = $yearId" : "";
-$yearCondNoAlias = $yearId ? "AND academic_year_id = $yearId" : "";
+$yearCond      = $yearId ? "AND qr.academic_year_id = $yearId" : "";
+$yearCondPlain = $yearId ? "AND academic_year_id = $yearId" : "";
 
 // ══════════════════════════════════════════════════════════
-// 1. TERM AVERAGES — school average per term (trend line)
+// 1. TERM AVERAGES — only terms that have data
 // ══════════════════════════════════════════════════════════
 $termAverages = [];
 for ($t = 1; $t <= 4; $t++) {
@@ -37,307 +36,373 @@ for ($t = 1; $t <= 4; $t++) {
                COUNT(*) submissions
         FROM quiz_results qr
         JOIN quizzes q ON qr.quiz_id = q.id
-        WHERE q.is_summative = 1 AND q.term_number = $t
-        $yearCond
+        WHERE q.is_summative = 1 AND q.term_number = $t $yearCond
     ")->fetch_assoc();
-    $termAverages[] = [
-        'term'        => $t,
-        'avg'         => $r['avg'],
-        'learners'    => (int)$r['learners'],
-        'submissions' => (int)$r['submissions'],
-    ];
+    if ((int)$r['submissions'] > 0) {
+        $termAverages[] = [
+            'term'        => $t,
+            'avg'         => $r['avg'],
+            'learners'    => (int)$r['learners'],
+            'submissions' => (int)$r['submissions'],
+        ];
+    }
 }
 
 // ══════════════════════════════════════════════════════════
-// 2. CLASS PERFORMANCE — avg per class, per term
+// 2. SUMMARY KPIs
 // ══════════════════════════════════════════════════════════
-$classPerf = [];
-$classRes = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
+$totalLearners    = (int)$conn->query("SELECT COUNT(*) c FROM users WHERE role='learner' AND is_deleted=0")->fetch_assoc()['c'];
+$totalTeachers    = (int)$conn->query("SELECT COUNT(*) c FROM users WHERE role='teacher' AND is_deleted=0")->fetch_assoc()['c'];
+$totalClasses     = (int)$conn->query("SELECT COUNT(*) c FROM classes")->fetch_assoc()['c'];
+$schoolOverallAvg = $conn->query("
+    SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
+    FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+    WHERE q.is_summative = 1 $yearCond
+")->fetch_assoc()['avg'];
+
+// Pass rate
+$prRes = $conn->query("
+    SELECT COUNT(DISTINCT CASE WHEN learner_avg >= 50 THEN user_email END) passed,
+           COUNT(DISTINCT user_email) total
+    FROM (
+        SELECT qr.user_email, ROUND(AVG(qr.score / qr.total * 100), 1) learner_avg
+        FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+        WHERE q.is_summative = 1 $yearCond GROUP BY qr.user_email
+    ) sub
+")->fetch_assoc();
+$passRate         = ($prRes['total'] > 0) ? round($prRes['passed'] / $prRes['total'] * 100, 1) : null;
+$assessedLearners = (int)$prRes['total'];
+
+// ══════════════════════════════════════════════════════════
+// 3. AT-RISK LEARNERS — composite risk score
+// ══════════════════════════════════════════════════════════
+$threeWeeksAgo  = date('Y-m-d H:i:s', strtotime('-21 days'));
+$atRiskRes = $conn->query("
+    SELECT u.email, u.name, u.surname,
+           ROUND(AVG(qr.score / qr.total * 100), 1) avg_pct,
+           COUNT(qr.id) submissions,
+           MAX(qr.submitted_at) last_submission,
+           GROUP_CONCAT(DISTINCT c.name ORDER BY c.name SEPARATOR ', ') class_names
+    FROM users u
+    JOIN quiz_results qr ON qr.user_email = u.email
+    JOIN quizzes q ON qr.quiz_id = q.id
+    LEFT JOIN class_students cs ON cs.student_email = u.email " . ($yearId ? "AND cs.academic_year_id = $yearId" : "") . "
+    LEFT JOIN classes c ON c.id = cs.class_id
+    WHERE u.role = 'learner' AND u.is_deleted = 0 AND q.is_summative = 1 $yearCond
+    GROUP BY u.email, u.name, u.surname
+    HAVING avg_pct < 50 AND (MAX(qr.submitted_at) < '$threeWeeksAgo' OR COUNT(qr.id) < 2)
+    ORDER BY avg_pct ASC LIMIT 20
+");
+$atRiskLearners = [];
+while ($r = $atRiskRes->fetch_assoc()) {
+    $markScore    = max(0, 100 - ($r['avg_pct'] * 2));
+    $daysSince    = $r['last_submission'] ? floor((time() - strtotime($r['last_submission'])) / 86400) : 60;
+    $recencyScore = min(100, $daysSince * 2);
+    $riskScore    = round(($markScore * 0.6) + ($recencyScore * 0.4));
+    $atRiskLearners[] = [
+        'name'            => trim($r['name'] . ' ' . $r['surname']),
+        'email'           => $r['email'],
+        'avg_pct'         => $r['avg_pct'],
+        'submissions'     => (int)$r['submissions'],
+        'last_submission' => $r['last_submission'],
+        'classes'         => $r['class_names'] ?: '—',
+        'risk_score'      => $riskScore,
+    ];
+}
+usort($atRiskLearners, fn($a, $b) => $b['risk_score'] <=> $a['risk_score']);
+$atRiskCount = count($atRiskLearners);
+
+// ══════════════════════════════════════════════════════════
+// 4. CLASS HEALTH INDEX
+// ══════════════════════════════════════════════════════════
+$classHealth = [];
+$classRes    = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
 while ($cls = $classRes->fetch_assoc()) {
-    $cid   = (int)$cls['id'];
-    $terms = [];
-    $allAvgs = [];
-
-    for ($t = 1; $t <= 4; $t++) {
-        $r = $conn->query("
-            SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
-            FROM quiz_results qr
-            JOIN quizzes q ON qr.quiz_id = q.id
-            WHERE q.class_id = $cid AND q.is_summative = 1 AND q.term_number = $t
-            $yearCond
-        ")->fetch_assoc();
-        $avg = $r['avg'];
-        $terms[$t] = $avg;
-        if ($avg !== null) $allAvgs[] = $avg;
-    }
-
-    $overall = count($allAvgs) ? round(array_sum($allAvgs) / count($allAvgs), 1) : null;
-
-    // Learner count
-    $lc = (int)$conn->query("
+    $cid      = (int)$cls['id'];
+    $enrolled = (int)$conn->query("
         SELECT COUNT(DISTINCT student_email) c FROM class_students
         WHERE class_id = $cid " . ($yearId ? "AND academic_year_id = $yearId" : "") . "
     ")->fetch_assoc()['c'];
 
-    $classPerf[] = [
-        'class_id'      => $cid,
-        'class_name'    => $cls['name'],
-        'learner_count' => $lc,
-        'terms'         => $terms,
-        'overall'       => $overall,
-    ];
-}
-
-// Sort by overall desc
-usort($classPerf, function($a, $b) {
-    if ($a['overall'] === null && $b['overall'] === null) return 0;
-    if ($a['overall'] === null) return 1;
-    if ($b['overall'] === null) return -1;
-    return $b['overall'] <=> $a['overall'];
-});
-
-// ══════════════════════════════════════════════════════════
-// 3. SUBJECT PERFORMANCE — avg per subject across school
-// ══════════════════════════════════════════════════════════
-$subjectPerf = [];
-
-// Get all teacher+class combos that have summative quizzes
-$tcRes = $conn->query("
-    SELECT DISTINCT q.created_by, q.class_id
-    FROM quizzes q
-    WHERE q.is_summative = 1
-");
-
-$subjectMap = []; // key = subject_name, accumulate avgs
-
-while ($tc = $tcRes->fetch_assoc()) {
-    $teacherEmail = $conn->real_escape_string($tc['created_by']);
-    $classId      = (int)$tc['class_id'];
-
-    // Subject name or teacher name fallback
-    $subjectName = null;
-    $tsRes = $conn->query("SELECT subject_name FROM teacher_subjects WHERE teacher_email = '$teacherEmail' AND class_id = $classId LIMIT 1");
-    if ($tsRow = $tsRes->fetch_assoc()) $subjectName = $tsRow['subject_name'];
-    if (!$subjectName) {
-        $uRes = $conn->query("SELECT name, surname FROM users WHERE email = '$teacherEmail' LIMIT 1");
-        if ($uRow = $uRes->fetch_assoc()) $subjectName = trim($uRow['name'] . ' ' . $uRow['surname']);
-        else $subjectName = $teacherEmail;
-    }
-
-    $avgRes = $conn->query("
-        SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg,
-               COUNT(DISTINCT qr.user_email) learners
-        FROM quiz_results qr
-        JOIN quizzes q ON qr.quiz_id = q.id
-        WHERE q.created_by = '$teacherEmail' AND q.class_id = $classId AND q.is_summative = 1
-        $yearCond
-    ")->fetch_assoc();
-
-    if ($avgRes['avg'] === null) continue;
-
-    if (!isset($subjectMap[$subjectName])) {
-        $subjectMap[$subjectName] = ['avgs' => [], 'learners' => 0];
-    }
-    $subjectMap[$subjectName]['avgs'][]   = floatval($avgRes['avg']);
-    $subjectMap[$subjectName]['learners'] += (int)$avgRes['learners'];
-}
-
-foreach ($subjectMap as $name => $data) {
-    $avg = count($data['avgs']) ? round(array_sum($data['avgs']) / count($data['avgs']), 1) : null;
-    $subjectPerf[] = ['subject' => $name, 'avg' => $avg, 'learners' => $data['learners']];
-}
-usort($subjectPerf, fn($a, $b) => ($b['avg'] ?? -1) <=> ($a['avg'] ?? -1));
-
-// ══════════════════════════════════════════════════════════
-// 4. GENDER BREAKDOWN — avg per term per gender
-// ══════════════════════════════════════════════════════════
-$genderBreakdown = [];
-foreach (['male', 'female'] as $gender) {
-    $gSafe = $conn->real_escape_string($gender);
-    $termData = [];
+    $allAvgs = [];
+    $terms   = [];
     for ($t = 1; $t <= 4; $t++) {
         $r = $conn->query("
             SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
-            FROM quiz_results qr
-            JOIN quizzes q ON qr.quiz_id = q.id
-            JOIN users u ON u.email = qr.user_email
-            WHERE q.is_summative = 1 AND q.term_number = $t
-            AND u.gender = '$gSafe'
-            $yearCond
+            FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+            WHERE q.class_id = $cid AND q.is_summative = 1 AND q.term_number = $t $yearCond
         ")->fetch_assoc();
-        $termData[$t] = $r['avg'];
+        $terms[$t] = $r['avg'];
+        if ($r['avg'] !== null) $allAvgs[] = floatval($r['avg']);
     }
-    // Overall
-    $overall = $conn->query("
-        SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
-        FROM quiz_results qr
-        JOIN quizzes q ON qr.quiz_id = q.id
-        JOIN users u ON u.email = qr.user_email
-        WHERE q.is_summative = 1 AND u.gender = '$gSafe'
-        $yearCond
-    ")->fetch_assoc()['avg'];
+    $overallAvg = count($allAvgs) ? round(array_sum($allAvgs) / count($allAvgs), 1) : null;
 
-    $genderBreakdown[$gender] = ['terms' => $termData, 'overall' => $overall];
+    $submitted = (int)$conn->query("
+        SELECT COUNT(DISTINCT qr.user_email) c
+        FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+        WHERE q.class_id = $cid AND q.is_summative = 1 $yearCond
+    ")->fetch_assoc()['c'];
+    $submissionRate = ($enrolled > 0) ? round($submitted / $enrolled * 100, 1) : 0;
+
+    $teacherActivity = (int)$conn->query("
+        SELECT (
+            (SELECT COUNT(*) FROM quizzes WHERE class_id=$cid $yearCondPlain) +
+            (SELECT COUNT(*) FROM assignments WHERE class_id=$cid $yearCondPlain) +
+            (SELECT COUNT(*) FROM resources WHERE class_id=$cid $yearCondPlain) +
+            (SELECT COUNT(*) FROM announcements WHERE class_id=$cid $yearCondPlain)
+        ) total
+    ")->fetch_assoc()['total'];
+
+    $summativeCount = (int)$conn->query("
+        SELECT COUNT(*) c FROM quizzes WHERE class_id=$cid AND is_summative=1 $yearCondPlain
+    ")->fetch_assoc()['c'];
+
+    $healthScore = round(
+        ($overallAvg !== null ? $overallAvg * 0.4 : 0) +
+        ($submissionRate * 0.3) +
+        (min(100, $teacherActivity * 10) * 0.2) +
+        ($summativeCount > 0 ? 10 : 0)
+    );
+
+    $classHealth[] = [
+        'class_id'        => $cid,
+        'class_name'      => $cls['name'],
+        'enrolled'        => $enrolled,
+        'overall_avg'     => $overallAvg,
+        'terms'           => $terms,
+        'submission_rate' => $submissionRate,
+        'submitted'       => $submitted,
+        'teacher_activity'=> $teacherActivity,
+        'summative_count' => $summativeCount,
+        'health_score'    => $healthScore,
+    ];
+}
+usort($classHealth, fn($a, $b) => $b['health_score'] <=> $a['health_score']);
+
+$classesWithSummative = count(array_filter($classHealth, fn($c) => $c['summative_count'] > 0));
+$assessmentCoverage   = $totalClasses > 0 ? round($classesWithSummative / $totalClasses * 100, 1) : 0;
+
+// ══════════════════════════════════════════════════════════
+// 5. ASSESSMENT DIFFICULTY INDEX
+// ══════════════════════════════════════════════════════════
+$diffRes = $conn->query("
+    SELECT q.id, q.title, q.term_number, c.name class_name,
+           ROUND(AVG(qr.score / qr.total * 100), 1) avg_pct,
+           COUNT(DISTINCT qr.user_email) submissions,
+           ROUND(MIN(qr.score / qr.total * 100), 1) lowest,
+           ROUND(MAX(qr.score / qr.total * 100), 1) highest
+    FROM quizzes q
+    JOIN quiz_results qr ON qr.quiz_id = q.id
+    JOIN classes c ON c.id = q.class_id
+    WHERE q.is_summative = 1 $yearCond
+    GROUP BY q.id, q.title, q.term_number, c.name
+    HAVING avg_pct < 50 AND COUNT(DISTINCT qr.user_email) >= 3
+    ORDER BY avg_pct ASC LIMIT 10
+");
+$difficultyIndex = [];
+while ($r = $diffRes->fetch_assoc()) {
+    $difficultyIndex[] = [
+        'quiz_id'     => (int)$r['id'],
+        'title'       => $r['title'],
+        'term'        => (int)$r['term_number'],
+        'class'       => $r['class_name'],
+        'avg_pct'     => $r['avg_pct'],
+        'submissions' => (int)$r['submissions'],
+        'lowest'      => $r['lowest'],
+        'highest'     => $r['highest'],
+    ];
 }
 
 // ══════════════════════════════════════════════════════════
-// 5. TOP PERFORMERS — top 10 learners by overall avg
+// 6. SUBJECT PERFORMANCE — only properly named subjects
+// ══════════════════════════════════════════════════════════
+$subjectMap = [];
+$subRes = $conn->query("
+    SELECT ts.subject_name, ts.class_id, ts.teacher_email
+    FROM teacher_subjects ts
+    WHERE ts.subject_name IS NOT NULL AND ts.subject_name != ''
+");
+while ($ts = $subRes->fetch_assoc()) {
+    $name    = $ts['subject_name'];
+    $classId = (int)$ts['class_id'];
+    $email   = $conn->real_escape_string($ts['teacher_email']);
+
+    $avgRes = $conn->query("
+        SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg,
+               COUNT(DISTINCT qr.user_email) learners, COUNT(*) submissions
+        FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+        WHERE q.created_by = '$email' AND q.class_id = $classId AND q.is_summative = 1 $yearCond
+    ")->fetch_assoc();
+    if ($avgRes['avg'] === null || $avgRes['submissions'] == 0) continue;
+
+    $termData = [];
+    for ($t = 1; $t <= 4; $t++) {
+        $tr = $conn->query("
+            SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
+            FROM quiz_results qr JOIN quizzes q ON qr.quiz_id = q.id
+            WHERE q.created_by='$email' AND q.class_id=$classId
+            AND q.is_summative=1 AND q.term_number=$t $yearCond
+        ")->fetch_assoc();
+        if ($tr['avg'] !== null) $termData[$t] = floatval($tr['avg']);
+    }
+
+    if (!isset($subjectMap[$name])) $subjectMap[$name] = ['avgs'=>[],'learners'=>0,'submissions'=>0,'terms'=>[]];
+    $subjectMap[$name]['avgs'][]       = floatval($avgRes['avg']);
+    $subjectMap[$name]['learners']    += (int)$avgRes['learners'];
+    $subjectMap[$name]['submissions'] += (int)$avgRes['submissions'];
+    foreach ($termData as $t => $v) $subjectMap[$name]['terms'][$t][] = $v;
+}
+
+$subjectPerf = [];
+foreach ($subjectMap as $name => $data) {
+    $avg      = count($data['avgs']) ? round(array_sum($data['avgs']) / count($data['avgs']), 1) : null;
+    $termAvgs = [];
+    foreach ($data['terms'] as $t => $vals) $termAvgs[$t] = round(array_sum($vals) / count($vals), 1);
+    ksort($termAvgs);
+    $keys  = array_keys($termAvgs);
+    $trend = count($keys) >= 2 ? round($termAvgs[end($keys)] - $termAvgs[$keys[count($keys)-2]], 1) : null;
+    $subjectPerf[] = ['subject'=>$name,'avg'=>$avg,'learners'=>$data['learners'],'submissions'=>$data['submissions'],'term_avgs'=>$termAvgs,'trend'=>$trend];
+}
+usort($subjectPerf, fn($a,$b) => ($b['avg']??-1)<=>($a['avg']??-1));
+
+// ══════════════════════════════════════════════════════════
+// 7. GENDER BREAKDOWN
+// ══════════════════════════════════════════════════════════
+$genderBreakdown = [];
+foreach (['male','female'] as $gender) {
+    $g = $conn->real_escape_string($gender);
+    $termData = [];
+    for ($t = 1; $t <= 4; $t++) {
+        $r = $conn->query("
+            SELECT ROUND(AVG(qr.score/qr.total*100),1) avg, COUNT(DISTINCT qr.user_email) learners
+            FROM quiz_results qr JOIN quizzes q ON qr.quiz_id=q.id JOIN users u ON u.email=qr.user_email
+            WHERE q.is_summative=1 AND q.term_number=$t AND u.gender='$g' $yearCond
+        ")->fetch_assoc();
+        if ($r['avg'] !== null) $termData[$t] = ['avg'=>$r['avg'],'learners'=>(int)$r['learners']];
+    }
+    $overall = $conn->query("
+        SELECT ROUND(AVG(qr.score/qr.total*100),1) avg, COUNT(DISTINCT qr.user_email) learners
+        FROM quiz_results qr JOIN quizzes q ON qr.quiz_id=q.id JOIN users u ON u.email=qr.user_email
+        WHERE q.is_summative=1 AND u.gender='$g' $yearCond
+    ")->fetch_assoc();
+    $genderBreakdown[$gender] = ['terms'=>$termData,'overall'=>$overall['avg'],'learners'=>(int)$overall['learners']];
+}
+
+// ══════════════════════════════════════════════════════════
+// 8. TOP PERFORMERS
 // ══════════════════════════════════════════════════════════
 $topPerformers = [];
 $topRes = $conn->query("
-    SELECT qr.user_email,
-           u.name, u.surname, u.gender,
+    SELECT qr.user_email, u.name, u.surname, u.gender,
            GROUP_CONCAT(DISTINCT c.name ORDER BY c.name SEPARATOR ', ') class_names,
-           ROUND(AVG(qr.score / qr.total * 100), 1) avg_pct,
-           COUNT(*) submissions
-    FROM quiz_results qr
-    JOIN quizzes q ON qr.quiz_id = q.id
-    JOIN users u ON u.email = qr.user_email
-    LEFT JOIN class_students cs ON cs.student_email = qr.user_email
-        " . ($yearId ? "AND cs.academic_year_id = $yearId" : "") . "
-    LEFT JOIN classes c ON c.id = cs.class_id
-    WHERE q.is_summative = 1 AND u.role = 'learner'
-    $yearCond
-    GROUP BY qr.user_email
-    HAVING COUNT(*) >= 1
-    ORDER BY avg_pct DESC
-    LIMIT 10
+           ROUND(AVG(qr.score/qr.total*100),1) avg_pct, COUNT(*) submissions
+    FROM quiz_results qr JOIN quizzes q ON qr.quiz_id=q.id JOIN users u ON u.email=qr.user_email
+    LEFT JOIN class_students cs ON cs.student_email=qr.user_email " . ($yearId?"AND cs.academic_year_id=$yearId":"") . "
+    LEFT JOIN classes c ON c.id=cs.class_id
+    WHERE q.is_summative=1 AND u.role='learner' $yearCond
+    GROUP BY qr.user_email HAVING COUNT(*)>=1 ORDER BY avg_pct DESC LIMIT 10
 ");
 while ($r = $topRes->fetch_assoc()) {
-    $topPerformers[] = [
-        'name'        => trim($r['name'] . ' ' . $r['surname']),
-        'email'       => $r['user_email'],
-        'gender'      => $r['gender'],
-        'classes'     => $r['class_names'] ?: '—',
-        'avg'         => $r['avg_pct'],
-        'submissions' => (int)$r['submissions'],
-    ];
+    $topPerformers[] = ['name'=>trim($r['name'].' '.$r['surname']),'email'=>$r['user_email'],'gender'=>$r['gender'],'classes'=>$r['class_names']?:'—','avg'=>$r['avg_pct'],'submissions'=>(int)$r['submissions']];
 }
 
 // ══════════════════════════════════════════════════════════
-// 6. MOST IMPROVED — biggest jump from Term 1→2, 2→3, or 3→4
+// 9. MOST IMPROVED
 // ══════════════════════════════════════════════════════════
 $mostImproved = [];
-
-// Get per-learner per-term averages
 $miRes = $conn->query("
-    SELECT qr.user_email,
-           u.name, u.surname,
-           q.term_number,
-           ROUND(AVG(qr.score / qr.total * 100), 1) avg_pct
-    FROM quiz_results qr
-    JOIN quizzes q ON qr.quiz_id = q.id
-    JOIN users u ON u.email = qr.user_email
-    WHERE q.is_summative = 1 AND u.role = 'learner'
-    $yearCond
-    GROUP BY qr.user_email, q.term_number
-    ORDER BY qr.user_email, q.term_number
+    SELECT qr.user_email, u.name, u.surname, q.term_number,
+           ROUND(AVG(qr.score/qr.total*100),1) avg_pct
+    FROM quiz_results qr JOIN quizzes q ON qr.quiz_id=q.id JOIN users u ON u.email=qr.user_email
+    WHERE q.is_summative=1 AND u.role='learner' $yearCond
+    GROUP BY qr.user_email, q.term_number ORDER BY qr.user_email, q.term_number
 ");
-
-$learnerTerms = [];
+$lt = [];
 while ($r = $miRes->fetch_assoc()) {
-    $email = $r['user_email'];
-    if (!isset($learnerTerms[$email])) {
-        $learnerTerms[$email] = [
-            'name'  => trim($r['name'] . ' ' . $r['surname']),
-            'terms' => []
-        ];
-    }
-    $learnerTerms[$email]['terms'][$r['term_number']] = floatval($r['avg_pct']);
+    $e = $r['user_email'];
+    if (!isset($lt[$e])) $lt[$e] = ['name'=>trim($r['name'].' '.$r['surname']),'terms'=>[]];
+    $lt[$e]['terms'][$r['term_number']] = floatval($r['avg_pct']);
 }
-
-// Find biggest improvement between consecutive terms
-foreach ($learnerTerms as $email => $data) {
-    $terms = $data['terms'];
-    $maxJump = null;
-    $fromTerm = null;
-    $toTerm   = null;
-
-    for ($t = 1; $t <= 3; $t++) {
-        if (isset($terms[$t]) && isset($terms[$t + 1])) {
-            $jump = $terms[$t + 1] - $terms[$t];
-            if ($maxJump === null || $jump > $maxJump) {
-                $maxJump  = $jump;
-                $fromTerm = $t;
-                $toTerm   = $t + 1;
-            }
+foreach ($lt as $email => $data) {
+    $terms=$data['terms']; $maxJump=null; $from=null; $to=null;
+    for ($t=1;$t<=3;$t++) {
+        if (isset($terms[$t]) && isset($terms[$t+1])) {
+            $jump=$terms[$t+1]-$terms[$t];
+            if ($maxJump===null||$jump>$maxJump) { $maxJump=$jump; $from=$t; $to=$t+1; }
         }
     }
-
-    if ($maxJump !== null && $maxJump > 0) {
-        $mostImproved[] = [
-            'name'      => $data['name'],
-            'email'     => $email,
-            'from_term' => $fromTerm,
-            'to_term'   => $toTerm,
-            'from_avg'  => $terms[$fromTerm],
-            'to_avg'    => $terms[$toTerm],
-            'jump'      => round($maxJump, 1),
-        ];
+    if ($maxJump!==null && $maxJump>0) {
+        $mostImproved[]=['name'=>$data['name'],'email'=>$email,'from_term'=>$from,'to_term'=>$to,'from_avg'=>$terms[$from],'to_avg'=>$terms[$to],'jump'=>round($maxJump,1)];
     }
 }
-
-// Sort by jump desc, take top 10
-usort($mostImproved, fn($a, $b) => $b['jump'] <=> $a['jump']);
-$mostImproved = array_slice($mostImproved, 0, 10);
+usort($mostImproved,fn($a,$b)=>$b['jump']<=>$a['jump']);
+$mostImproved=array_slice($mostImproved,0,10);
 
 // ══════════════════════════════════════════════════════════
-// 7. COMPLETION RATE — per term: enrolled vs submitted
+// 10. PEAK ACTIVITY HOURS
 // ══════════════════════════════════════════════════════════
-$enrolled = (int)$conn->query("
-    SELECT COUNT(DISTINCT student_email) c FROM class_students
-    " . ($yearId ? "WHERE academic_year_id = $yearId" : "") . "
-")->fetch_assoc()['c'];
+$peakHours = array_fill(0,24,0);
+$hrRes = $conn->query("
+    SELECT HOUR(qr.submitted_at) hr, COUNT(*) c
+    FROM quiz_results qr JOIN quizzes q ON qr.quiz_id=q.id
+    WHERE q.is_summative=1 $yearCond GROUP BY HOUR(qr.submitted_at)
+");
+while ($r=$hrRes->fetch_assoc()) $peakHours[(int)$r['hr']]+=(int)$r['c'];
+$subHrRes=$conn->query("SELECT HOUR(submitted_at) hr, COUNT(*) c FROM submissions GROUP BY HOUR(submitted_at)");
+while ($r=$subHrRes->fetch_assoc()) $peakHours[(int)$r['hr']]+=(int)$r['c'];
 
-$completionByTerm = [];
-for ($t = 1; $t <= 4; $t++) {
-    $submitted = (int)$conn->query("
-        SELECT COUNT(DISTINCT qr.user_email) c
-        FROM quiz_results qr
-        JOIN quizzes q ON qr.quiz_id = q.id
-        WHERE q.is_summative = 1 AND q.term_number = $t
-        $yearCond
-    ")->fetch_assoc()['c'];
-
-    $rate = $enrolled > 0 ? round($submitted / $enrolled * 100, 1) : 0;
-    $completionByTerm[] = [
-        'term'      => $t,
-        'enrolled'  => $enrolled,
-        'submitted' => $submitted,
-        'rate'      => $rate,
-    ];
+$peakHoursFormatted=[];
+for ($h=0;$h<24;$h++) {
+    $label=$h===0?'12am':($h<12?$h.'am':($h===12?'12pm':($h-12).'pm'));
+    $peakHoursFormatted[]=['hour'=>$h,'label'=>$label,'count'=>$peakHours[$h]];
 }
 
 // ══════════════════════════════════════════════════════════
-// 8. SUMMARY KPIs
+// 11. TEACHER PARTICIPATION
 // ══════════════════════════════════════════════════════════
-$totalLearners  = (int)$conn->query("SELECT COUNT(*) c FROM users WHERE role='learner' AND is_deleted=0")->fetch_assoc()['c'];
-$totalTeachers  = (int)$conn->query("SELECT COUNT(*) c FROM users WHERE role='teacher' AND is_deleted=0")->fetch_assoc()['c'];
-$totalClasses   = (int)$conn->query("SELECT COUNT(*) c FROM classes")->fetch_assoc()['c'];
-
-$schoolOverallAvg = $conn->query("
-    SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
-    FROM quiz_results qr
-    JOIN quizzes q ON qr.quiz_id = q.id
-    WHERE q.is_summative = 1
-    $yearCond
-")->fetch_assoc()['avg'];
+$teacherParticipation=[];
+$fullyActive=$partlyActive=$inactive=0;
+$tpRes=$conn->query("
+    SELECT u.email, u.name, u.surname,
+        (SELECT COUNT(*) FROM quizzes WHERE created_by=u.email $yearCondPlain) quizzes,
+        (SELECT COUNT(*) FROM assignments WHERE created_by=u.email $yearCondPlain) assignments,
+        (SELECT COUNT(*) FROM resources WHERE uploaded_by=u.email $yearCondPlain) resources,
+        (SELECT COUNT(*) FROM announcements WHERE created_by=u.email $yearCondPlain) announcements
+    FROM users u WHERE u.role='teacher' AND u.is_deleted=0
+");
+while ($r=$tpRes->fetch_assoc()) {
+    $total=$r['quizzes']+$r['assignments']+$r['resources']+$r['announcements'];
+    if ($r['quizzes']>0&&$r['assignments']>0&&$r['resources']>0) { $status='full'; $fullyActive++; }
+    elseif ($total>0) { $status='partial'; $partlyActive++; }
+    else { $status='inactive'; $inactive++; }
+    $teacherParticipation[]=['name'=>trim($r['name'].' '.$r['surname']),'email'=>$r['email'],'quizzes'=>(int)$r['quizzes'],'assignments'=>(int)$r['assignments'],'resources'=>(int)$r['resources'],'announcements'=>(int)$r['announcements'],'total'=>$total,'status'=>$status];
+}
+usort($teacherParticipation,fn($a,$b)=>$b['total']<=>$a['total']);
+$teacherParticipationRate=$totalTeachers>0?round($fullyActive/$totalTeachers*100,1):0;
 
 // ══════════════════════════════════════════════════════════
 // RESPOND
 // ══════════════════════════════════════════════════════════
 echo json_encode([
-    'year_name'          => $yearName,
-    'total_learners'     => $totalLearners,
-    'total_teachers'     => $totalTeachers,
-    'total_classes'      => $totalClasses,
-    'school_overall_avg' => $schoolOverallAvg,
-    'term_averages'      => $termAverages,
-    'class_performance'  => $classPerf,
-    'subject_performance'=> $subjectPerf,
-    'gender_breakdown'   => $genderBreakdown,
-    'top_performers'     => $topPerformers,
-    'most_improved'      => $mostImproved,
-    'completion'         => $completionByTerm,
-    'enrolled'           => $enrolled,
+    'year_name'                  => $yearName,
+    'total_learners'             => $totalLearners,
+    'total_teachers'             => $totalTeachers,
+    'total_classes'              => $totalClasses,
+    'school_overall_avg'         => $schoolOverallAvg,
+    'pass_rate'                  => $passRate,
+    'assessed_learners'          => $assessedLearners,
+    'at_risk_count'              => $atRiskCount,
+    'at_risk_learners'           => $atRiskLearners,
+    'assessment_coverage'        => $assessmentCoverage,
+    'teacher_participation_rate' => $teacherParticipationRate,
+    'teacher_participation'      => $teacherParticipation,
+    'term_averages'              => $termAverages,
+    'class_health'               => $classHealth,
+    'subject_performance'        => $subjectPerf,
+    'gender_breakdown'           => $genderBreakdown,
+    'top_performers'             => $topPerformers,
+    'most_improved'              => $mostImproved,
+    'difficulty_index'           => $difficultyIndex,
+    'peak_hours'                 => $peakHoursFormatted,
+    'teacher_participation_list' => $teacherParticipation,
 ]);
