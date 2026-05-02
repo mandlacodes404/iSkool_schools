@@ -232,7 +232,7 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
   <tr>
     <td style="background:#39d5c1;padding:24px 40px;text-align:center;">
       <p style="margin:0;font-size:18px;font-weight:700;color:#0d1117;">
-        🎉 Your school platform is live!
+         Your school platform is live!
       </p>
     </td>
   </tr>
@@ -382,7 +382,7 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
         We are here to help you get the most out of iSkool.
       </p>
       <p style="margin:0;font-size:14px;color:#555;">
-        Welcome aboard! 🎉
+        Welcome aboard! 
       </p>
 
     </td>

@@ -39,6 +39,12 @@ $templates = [
         'description' => 'Sent when a user requests a password reset link.',
         'roles'       => [],
     ],
+    [
+        'file'        => 'test_school_admin.php',
+        'label'       => 'School Admin Onboarding',
+        'description' => 'Sent to a school admin when their school platform is created.',
+        'roles'       => [],
+    ],
 ];
 
 $sent = $_GET['sent'] ?? null;
