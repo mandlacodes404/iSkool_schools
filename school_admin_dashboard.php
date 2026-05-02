@@ -555,7 +555,66 @@ $schoolLogo = 'uploads/schools/default_school.png';
         .sd-feed-time  { font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 2px; font-family: var(--font-mono); white-space: nowrap; }
         .sd-feed-class { font-size: 11px; font-weight: 500; color: var(--text-dim); margin-top: 2px; font-family: var(--font-mono); }
 
-        /* ALERT */
+        /* TOP / BOTTOM CLASSES */
+        .sd-tb-section-label {
+            font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 8px; padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sd-tb-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .sd-tb-item:last-child { border-bottom: none; }
+        .sd-tb-rank {
+            font-size: 11px; color: var(--text-dim);
+            font-family: var(--font-mono); width: 16px; flex-shrink: 0;
+        }
+        .sd-tb-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 400; }
+        .sd-tb-learners { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+        .sd-tb-avg {
+            font-size: 11px; font-weight: 500;
+            padding: 2px 8px; border-radius: 20px;
+            font-family: var(--font-mono); flex-shrink: 0;
+        }
+        .sd-tb-avg.green  { background: var(--green-dim);  color: var(--green); }
+        .sd-tb-avg.orange { background: var(--orange-dim); color: var(--orange); }
+        .sd-tb-avg.red    { background: var(--red-dim);    color: var(--red); }
+        .sd-tb-avg.gray   { background: var(--surface2);   color: var(--text-muted); }
+        .sd-tb-divider { margin: 12px 0; border: none; border-top: 1px dashed var(--border-hover); }
+
+        /* PROGRESS STAT CARD */
+        .sd-stat-bar-wrap { margin-top: 10px; }
+        .sd-stat-bar-row  { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .sd-stat-bar-label { font-size: 11px; color: var(--text-muted); flex: 1; }
+        .sd-stat-bar-val   { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
+        .sd-stat-bar-track {
+            height: 4px; background: var(--surface2);
+            border-radius: 100px; overflow: hidden;
+        }
+        .sd-stat-bar-fill  { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+
+        /* ENGAGEMENT / PROFILE CARDS */
+        .sd-mini-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .sd-mini-stat {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 14px 16px;
+            transition: border-color var(--transition);
+        }
+        .sd-mini-stat:hover { border-color: var(--border-hover); }
+        .sd-mini-stat-label {
+            font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .sd-mini-stat-value {
+            font-size: 24px; font-weight: 500; color: var(--text);
+            line-height: 1; margin-bottom: 4px; font-variant-numeric: tabular-nums;
+        }
+        .sd-mini-stat-sub { font-size: 11px; color: var(--text-dim); }
+        .sd-mini-stat.warn .sd-mini-stat-value { color: var(--orange); }
+        .sd-mini-stat.good .sd-mini-stat-value { color: var(--green); }
         .sd-alert { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius); background: var(--red-dim); border: 1px solid rgba(248,81,73,0.18); margin-bottom: 6px; }
         .sd-alert svg      { width: 14px; height: 14px; stroke: var(--red); flex-shrink: 0; opacity: 0.8; }
         .sd-alert-text     { font-size: 13px; color: var(--text-muted); }
@@ -1041,17 +1100,49 @@ function renderOverview(d) {
             </div>
         </div>
 
+        <div class="sd-mini-stat-row">
+            <div class="sd-mini-stat ${d.incomplete_profiles > 0 ? 'warn' : 'good'}">
+                <div class="sd-mini-stat-label">Incomplete Profiles</div>
+                <div class="sd-mini-stat-value">${d.incomplete_profiles}</div>
+                <div class="sd-mini-stat-sub">${d.incomplete_profiles === 0 ? 'All profiles complete ✓' : 'Learners missing details'}</div>
+            </div>
+            <div class="sd-mini-stat ${d.engagement_rate >= 50 ? 'good' : 'warn'}">
+                <div class="sd-mini-stat-label">Weekly Engagement</div>
+                <div class="sd-mini-stat-value">${d.engagement_rate}%</div>
+                <div class="sd-mini-stat-sub">${d.engaged_learners} of ${d.total_learners} learners active</div>
+            </div>
+        </div>
+
         <div class="sd-row col-3-1">
             <div class="sd-card">
                 <div class="sd-card-title">
                     <span class="sd-card-title-dot"></span>
-                    Class Performance
+                    Class Performance Snapshot
                 </div>
-                <div class="sd-chart-wrap">
-                    ${d.class_performance.length
-                        ? `<canvas id="sd-chart-classes"></canvas>`
-                        : `<div class="sd-no-data">No summative assessment data yet</div>`}
-                </div>
+                ${(() => {
+                    const top    = d.top3_classes    || [];
+                    const bottom = d.bottom3_classes || [];
+                    if (!top.length && !bottom.length) {
+                        return `<div class="sd-no-data" style="height:180px;">No assessment data yet</div>`;
+                    }
+                    const renderItem = (cls, i, colorFn) => {
+                        const col = colorFn(cls.avg_pct);
+                        return `
+                            <div class="sd-tb-item">
+                                <span class="sd-tb-rank">${i + 1}</span>
+                                <span class="sd-tb-name">${cls.class_name}</span>
+                                <span class="sd-tb-learners">${cls.learner_count} learners</span>
+                                <span class="sd-tb-avg ${col}">${cls.avg_pct}%</span>
+                            </div>`;
+                    };
+                    return `
+                        <div class="sd-tb-section-label">Top performing</div>
+                        ${top.map((c, i) => renderItem(c, i, avgColorClass)).join('')}
+                        <hr class="sd-tb-divider">
+                        <div class="sd-tb-section-label">Needs attention</div>
+                        ${bottom.map((c, i) => renderItem(c, i, avgColorClass)).join('')}
+                    `;
+                })()}
             </div>
             <div class="sd-card">
                 <div class="sd-card-title">
@@ -1075,22 +1166,6 @@ function renderOverview(d) {
         <div class="sd-row col-2">
             <div class="sd-card">
                 <div class="sd-card-title">
-                    <span class="sd-card-title-dot" style="background:var(--green);"></span>
-                    Classes by Average
-                </div>
-                ${d.class_performance.map(cls => {
-                    const col = avgColorClass(cls.avg_pct);
-                    return `
-                        <div class="sd-class-perf-item">
-                            <span class="sd-class-dot ${col}"></span>
-                            <span class="sd-class-name">${cls.class_name}</span>
-                            <span class="sd-class-learners">${cls.learner_count} learners</span>
-                            <span class="sd-class-avg ${col}">${cls.avg_pct !== null ? cls.avg_pct + '%' : '—'}</span>
-                        </div>`;
-                }).join('') || `<div class="sd-no-data" style="height:120px;">No classes yet</div>`}
-            </div>
-            <div class="sd-card">
-                <div class="sd-card-title">
                     <span class="sd-card-title-dot" style="background:var(--blue);"></span>
                     Most Active Teachers
                 </div>
@@ -1106,6 +1181,39 @@ function renderOverview(d) {
                             <div class="sd-teacher-score">${t.total}</div>
                         </div>`;
                 }).join('') || `<div class="sd-no-data" style="height:120px;">No teacher activity yet</div>`}
+            </div>
+            <div class="sd-card">
+                <div class="sd-card-title">
+                    <span class="sd-card-title-dot" style="background:var(--teal);"></span>
+                    Platform Activity This Week
+                </div>
+                <div class="sd-stat-bar-wrap">
+                    ${[
+                        { label: 'Quizzes posted',       val: d.this_week.quizzes,       color: 'var(--teal)',   max: Math.max(d.this_week.quizzes, d.this_week.assignments, d.this_week.resources, d.this_week.announcements, 1) },
+                        { label: 'Assignments posted',   val: d.this_week.assignments,   color: 'var(--blue)',   max: Math.max(d.this_week.quizzes, d.this_week.assignments, d.this_week.resources, d.this_week.announcements, 1) },
+                        { label: 'Resources uploaded',   val: d.this_week.resources,     color: 'var(--purple)', max: Math.max(d.this_week.quizzes, d.this_week.assignments, d.this_week.resources, d.this_week.announcements, 1) },
+                        { label: 'Announcements sent',   val: d.this_week.announcements, color: 'var(--orange)', max: Math.max(d.this_week.quizzes, d.this_week.assignments, d.this_week.resources, d.this_week.announcements, 1) },
+                    ].map(item => `
+                        <div style="margin-bottom:14px;">
+                            <div class="sd-stat-bar-row">
+                                <span class="sd-stat-bar-label">${item.label}</span>
+                                <span class="sd-stat-bar-val">${item.val}</span>
+                            </div>
+                            <div class="sd-stat-bar-track">
+                                <div class="sd-stat-bar-fill" style="width:${Math.round(item.val/item.max*100)}%;background:${item.color};"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+                        <div class="sd-stat-bar-row">
+                            <span class="sd-stat-bar-label">Assessment completion rate</span>
+                            <span class="sd-stat-bar-val">${d.completion_rate}%</span>
+                        </div>
+                        <div class="sd-stat-bar-track">
+                            <div class="sd-stat-bar-fill" style="width:${d.completion_rate}%;background:var(--green);"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1130,62 +1238,6 @@ function renderOverview(d) {
 
     </div>`;
 
-    if (d.class_performance.length) {
-        const ctx = document.getElementById('sd-chart-classes')?.getContext('2d');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: d.class_performance.map(c => c.class_name),
-                    datasets: [{
-                        label: 'Average %',
-                        data: d.class_performance.map(c => c.avg_pct),
-                        backgroundColor: d.class_performance.map(c =>
-                            c.avg_pct >= 60 ? 'rgba(63,185,80,0.5)'  :
-                            c.avg_pct >= 40 ? 'rgba(210,153,34,0.5)' :
-                            c.avg_pct !== null ? 'rgba(248,81,73,0.5)' : 'rgba(255,255,255,0.06)'
-                        ),
-                        borderColor: d.class_performance.map(c =>
-                            c.avg_pct >= 60 ? '#3fb950' :
-                            c.avg_pct >= 40 ? '#d29922' :
-                            c.avg_pct !== null ? '#f85149' : 'rgba(255,255,255,0.15)'
-                        ),
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        borderSkipped: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1c2128',
-                            borderColor: '#30363d',
-                            borderWidth: 1,
-                            titleColor: '#e6edf3',
-                            bodyColor: '#8b949e',
-                            callbacks: { label: ctx => ` ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}` }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true, max: 100,
-                            ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20, font: { size: 11 } },
-                            grid: { color: 'rgba(255,255,255,0.04)' },
-                            border: { color: 'rgba(255,255,255,0.04)' }
-                        },
-                        x: {
-                            ticks: { color: '#8b949e', font: { size: 11 } },
-                            grid: { display: false },
-                            border: { color: 'rgba(255,255,255,0.04)' }
-                        }
-                    }
-                }
-            });
-        }
-    }
 }
 
 // ═══════════════════════════════════

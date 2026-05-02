@@ -159,6 +159,36 @@ $recentActivity = array_slice($recentActivity, 0, 6);
 // ── Classes needing attention (avg < 50%) ──
 $needAttention = array_filter($classPerf, fn($c) => $c['avg_pct'] !== null && $c['avg_pct'] < 50);
 
+// ── Top 3 / Bottom 3 classes ──
+$classesWithAvg = array_values(array_filter($classPerf, fn($c) => $c['avg_pct'] !== null));
+$top3    = array_slice($classesWithAvg, 0, 3);
+$bottom3 = array_reverse(array_slice($classesWithAvg, -3));
+
+// ── Incomplete learner profiles ──
+$incompleteProfiles = $conn->query("
+    SELECT COUNT(*) c FROM users
+    WHERE role = 'learner' AND is_deleted = 0
+    AND (
+        date_of_birth IS NULL OR date_of_birth = '' OR
+        gender IS NULL OR gender = '' OR
+        id_number IS NULL OR id_number = '' OR
+        guardian_name IS NULL OR guardian_name = ''
+    )
+")->fetch_assoc()['c'];
+
+// ── Platform engagement: learners active this week ──
+$engagedLearners = $conn->query("
+    SELECT COUNT(DISTINCT u.email) c
+    FROM users u
+    JOIN user_tokens ut ON ut.user_email = u.email
+    WHERE u.role = 'learner' AND u.is_deleted = 0
+    AND ut.created_at >= '$weekAgo'
+")->fetch_assoc()['c'];
+
+$engagementRate = ($totalLearners > 0)
+    ? round($engagedLearners / $totalLearners * 100, 1)
+    : 0;
+
 echo json_encode([
     'year_name'              => $yearName,
     'total_learners'         => (int)$totalLearners,
@@ -173,7 +203,12 @@ echo json_encode([
         'resources'     => (int)$resourcesThisWeek,
     ],
     'class_performance'      => $classPerf,
+    'top3_classes'           => $top3,
+    'bottom3_classes'        => $bottom3,
     'active_teachers'        => $activeTeachers,
     'recent_activity'        => $recentActivity,
     'classes_need_attention' => array_values($needAttention),
+    'incomplete_profiles'    => (int)$incompleteProfiles,
+    'engagement_rate'        => $engagementRate,
+    'engaged_learners'       => (int)$engagedLearners,
 ]);
