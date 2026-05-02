@@ -187,6 +187,57 @@ window._sdAnalyticsCharts = [];
         .sda-scroll-body { max-height:280px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border-hover) transparent; }
         .sda-scroll-body::-webkit-scrollbar { width:3px; }
         .sda-scroll-body::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:3px; }
+
+        /* ── Drillable card ── */
+        .sda-card.drillable { cursor:pointer; }
+        .sda-card.drillable:hover { border-color:var(--teal); }
+        .sda-drill-hint { font-size:10px; color:var(--text-dim); font-weight:400; text-transform:none; letter-spacing:0; opacity:0; transition:opacity 0.15s; }
+        .sda-card.drillable:hover .sda-drill-hint { opacity:1; }
+
+        /* ── Slide-in panel overlay ── */
+        .sda-panel-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.45);
+            backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+            z-index:8000; opacity:0; pointer-events:none; transition:opacity 0.25s ease;
+        }
+        .sda-panel-overlay.open { opacity:1; pointer-events:all; }
+
+        /* ── Slide-in panel ── */
+        .sda-panel {
+            position:fixed; top:0; right:0; bottom:0;
+            width:62%; max-width:1000px;
+            background:var(--bg); border-left:1px solid var(--border);
+            z-index:8001; display:flex; flex-direction:column;
+            transform:translateX(100%);
+            transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+            box-shadow:-20px 0 60px rgba(0,0,0,0.4);
+        }
+        .sda-panel.open { transform:translateX(0); }
+
+        .sda-panel-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:16px 24px; border-bottom:1px solid var(--border); flex-shrink:0;
+        }
+        .sda-panel-title { font-size:13px; font-weight:500; color:var(--text); margin-bottom:3px; }
+        .sda-panel-sub   { font-size:11px; color:var(--text-muted); font-weight:400; }
+        .sda-panel-close {
+            width:28px; height:28px; border-radius:var(--radius);
+            background:transparent; border:1px solid var(--border-hover);
+            color:var(--text-muted); cursor:pointer; font-size:14px;
+            display:flex; align-items:center; justify-content:center;
+            transition:border-color 0.15s, color 0.15s; flex-shrink:0;
+        }
+        .sda-panel-close:hover { border-color:var(--red); color:var(--red); }
+
+        .sda-panel-body {
+            flex:1; overflow-y:auto; padding:24px;
+            scrollbar-width:thin; scrollbar-color:var(--border-hover) transparent;
+        }
+        .sda-panel-body::-webkit-scrollbar { width:4px; }
+        .sda-panel-body::-webkit-scrollbar-thumb { background:var(--border-hover); border-radius:4px; }
+        .sda-panel-body .sda-scroll-body { max-height:none; overflow-y:visible; }
+        .sda-panel-body .sda-table td,
+        .sda-panel-body .sda-table th { padding:10px 12px; }
     `;
     document.head.appendChild(s);
 })();
@@ -235,6 +286,53 @@ function sdaEsc(s) {
 function sdaDestroyCharts() {
     window._sdAnalyticsCharts.forEach(c => { try { c.destroy(); } catch(e){} });
     window._sdAnalyticsCharts = [];
+}
+
+// ══════════════════════════════════════════════════════════
+// SLIDE-IN PANEL ENGINE
+// ══════════════════════════════════════════════════════════
+function sdaEnsurePanel() {
+    if (document.getElementById('sda-panel')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'sda-panel-overlay';
+    overlay.id = 'sda-panel-overlay';
+    overlay.addEventListener('click', sdaClosePanel);
+
+    const panel = document.createElement('div');
+    panel.className = 'sda-panel';
+    panel.id = 'sda-panel';
+    panel.innerHTML = `
+        <div class="sda-panel-header">
+            <div>
+                <div class="sda-panel-title" id="sda-panel-title">—</div>
+                <div class="sda-panel-sub"  id="sda-panel-sub"></div>
+            </div>
+            <button class="sda-panel-close" id="sda-panel-close">✕</button>
+        </div>
+        <div class="sda-panel-body" id="sda-panel-body"></div>
+    `;
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+    document.getElementById('sda-panel-close').addEventListener('click', sdaClosePanel);
+
+    // Close on Escape
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') sdaClosePanel(); });
+}
+
+function sdaOpenPanel(title, sub, html) {
+    sdaEnsurePanel();
+    document.getElementById('sda-panel-title').textContent = title;
+    document.getElementById('sda-panel-sub').textContent   = sub || '';
+    document.getElementById('sda-panel-body').innerHTML    = html;
+    requestAnimationFrame(() => {
+        document.getElementById('sda-panel-overlay').classList.add('open');
+        document.getElementById('sda-panel').classList.add('open');
+    });
+}
+
+function sdaClosePanel() {
+    document.getElementById('sda-panel-overlay')?.classList.remove('open');
+    document.getElementById('sda-panel')?.classList.remove('open');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -653,4 +751,126 @@ window.loadSdAnalytics = async function () {
         });
         window._sdAnalyticsCharts.push(chart);
     }
+
+    // ══════════════════════════════════════════════════════
+    // DRILL-DOWN — add drillable class + click handlers
+    // ══════════════════════════════════════════════════════
+
+    // 1. At-Risk Learners
+    _sdaDrillable('sda-risk-content', 'At-Risk Learners', `${d.at_risk_count} learners flagged — low marks + low activity`, () => `
+        <table class="sda-table">
+            <thead><tr><th>Learner</th><th>Class</th><th>Avg</th><th>Tests</th><th>Last Active</th><th>Risk Score</th></tr></thead>
+            <tbody>
+            ${d.at_risk_learners.map(l => {
+                const level = sdaRiskLevel(l.risk_score);
+                return `<tr>
+                    <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${sdaEsc(l.classes)}</td>
+                    <td><span class="sda-badge red">${l.avg_pct}%</span></td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${l.submissions}</td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${sdaTimeAgo(l.last_submission)}</td>
+                    <td><span class="sda-risk-pill ${level}">${l.risk_score}</span></td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+    `);
+
+    // 2. Class Health Index
+    _sdaDrillable('sda-health-content', 'Class Health Index', `${d.class_health.length} classes · scored out of 100`, () => `
+        <table class="sda-table">
+            <thead><tr><th>#</th><th>Class</th><th>Enrolled</th><th>Avg</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>Sub Rate</th><th>Activity</th><th>Summatives</th><th>Health</th></tr></thead>
+            <tbody>
+            ${d.class_health.map((cls,i) => {
+                const col = sdaAvgColor(cls.overall_avg);
+                const hColor = sdaHealthColor(cls.health_score);
+                return `<tr>
+                    <td><span class="sda-rank">${i+1}</span></td>
+                    <td style="font-weight:400;color:var(--text);white-space:nowrap;">${sdaEsc(cls.class_name)}</td>
+                    <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">${cls.enrolled}</td>
+                    <td><span class="sda-badge ${col}">${cls.overall_avg !== null ? cls.overall_avg+'%' : '—'}</span></td>
+                    ${[1,2,3,4].map(t => `<td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${cls.terms[t] !== null && cls.terms[t] !== undefined ? cls.terms[t]+'%' : '—'}</td>`).join('')}
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.submission_rate}%</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.teacher_activity}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.summative_count}</td>
+                    <td><span style="font-size:12px;font-weight:500;color:${hColor};font-family:var(--font-mono);">${cls.health_score}</span></td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+    `);
+
+    // 3. Top Performers
+    _sdaDrillable('sda-top-content', 'Top Performers', `Top ${d.top_performers.length} learners by summative average`, () => `
+        <table class="sda-table">
+            <thead><tr><th>#</th><th>Learner</th><th>Class</th><th>Gender</th><th>Avg</th><th>Tests Taken</th></tr></thead>
+            <tbody>
+            ${d.top_performers.map((l,i) => {
+                const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+                return `<tr>
+                    <td><span class="sda-rank ${rankClass}">${i+1}</span></td>
+                    <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${sdaEsc(l.classes)}</td>
+                    <td style="font-size:11px;color:var(--text-muted);">${l.gender || '—'}</td>
+                    <td><span class="sda-badge ${sdaAvgColor(l.avg)}">${l.avg}%</span></td>
+                    <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">${l.submissions}</td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table>
+    `);
+
+    // 4. Most Improved
+    _sdaDrillable('sda-improved-content', 'Most Improved Learners', 'Biggest positive jump between consecutive terms', () => `
+        <table class="sda-table">
+            <thead><tr><th>#</th><th>Learner</th><th>From</th><th>To</th><th>Jump</th></tr></thead>
+            <tbody>
+            ${d.most_improved.map((l,i) => `<tr>
+                <td><span class="sda-rank">${i+1}</span></td>
+                <td style="font-weight:400;color:var(--text);">${sdaEsc(l.name)}</td>
+                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">Term ${l.from_term} · ${l.from_avg}%</td>
+                <td style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);">Term ${l.to_term} · ${l.to_avg}%</td>
+                <td><span class="sda-trend up">+${l.jump}%</span></td>
+            </tr>`).join('')}
+            </tbody>
+        </table>
+    `);
+
+    // 5. Teacher Participation
+    _sdaDrillable('sda-teacher-content', 'Teacher Participation', `${d.teacher_participation_rate}% fully active this year`, () => `
+        <table class="sda-table">
+            <thead><tr><th>Teacher</th><th>Quizzes</th><th>Assignments</th><th>Resources</th><th>Announcements</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+            ${(d.teacher_participation||[]).map(t=>`<tr>
+                <td style="font-weight:400;color:var(--text);">${sdaEsc(t.name)}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.quizzes}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.assignments}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.resources}</td>
+                <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.announcements}</td>
+                <td style="font-size:11px;font-weight:500;color:var(--text);font-family:var(--font-mono);">${t.total}</td>
+                <td><span class="sda-status-dot ${t.status}"></span><span style="font-size:11px;color:var(--text-muted);">${t.status==='full'?'Fully Active':t.status==='partial'?'Partial':'Inactive'}</span></td>
+            </tr>`).join('')}
+            </tbody>
+        </table>
+    `);
 };
+
+// ── Helper: make a card's parent drillable ──
+function _sdaDrillable(contentId, title, sub, htmlFn) {
+    const el   = document.getElementById(contentId);
+    if (!el) return;
+    const card = el.closest('.sda-card');
+    if (!card) return;
+    card.classList.add('drillable');
+
+    // Add hint to card title
+    const titleEl = card.querySelector('.sda-card-title');
+    if (titleEl && !titleEl.querySelector('.sda-drill-hint')) {
+        const hint = document.createElement('span');
+        hint.className = 'sda-drill-hint';
+        hint.textContent = 'Click to expand →';
+        titleEl.appendChild(hint);
+    }
+
+    card.addEventListener('click', () => sdaOpenPanel(title, sub, htmlFn()));
+}
