@@ -15,7 +15,7 @@ use PHPMailer\PHPMailer\Exception;
 // ── Config — change these to test different roles ──
 $first_name = 'Mandla';
 $email      = 'mandlasimphiwe99@gmail.com';
-$role       = 'learner'; // change to: teacher | parent | school_admin
+$role       = 'teacher'; // change to: teacher | parent | school_admin
 
 // ── Role content ──
 $roleLabel = ucfirst($role);
