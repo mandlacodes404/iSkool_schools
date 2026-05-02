@@ -164,25 +164,20 @@ $classesWithAvg = array_values(array_filter($classPerf, fn($c) => $c['avg_pct'] 
 $top3    = array_slice($classesWithAvg, 0, 3);
 $bottom3 = array_reverse(array_slice($classesWithAvg, -3));
 
-// ── Incomplete learner profiles ──
+// ── Incomplete learner profiles (uses profile_status column) ──
 $incompleteProfiles = $conn->query("
     SELECT COUNT(*) c FROM users
     WHERE role = 'learner' AND is_deleted = 0
-    AND (
-        date_of_birth IS NULL OR date_of_birth = '' OR
-        gender IS NULL OR gender = '' OR
-        id_number IS NULL OR id_number = '' OR
-        guardian_name IS NULL OR guardian_name = ''
-    )
+    AND profile_status = 'incomplete'
 ")->fetch_assoc()['c'];
 
-// ── Platform engagement: learners active this week ──
+// ── Platform engagement: learners with a valid (non-expired) token ──
 $engagedLearners = $conn->query("
     SELECT COUNT(DISTINCT u.email) c
     FROM users u
     JOIN user_tokens ut ON ut.user_email = u.email
     WHERE u.role = 'learner' AND u.is_deleted = 0
-    AND ut.created_at >= '$weekAgo'
+    AND ut.expiry >= NOW()
 ")->fetch_assoc()['c'];
 
 $engagementRate = ($totalLearners > 0)
