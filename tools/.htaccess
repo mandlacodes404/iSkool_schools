@@ -2,5 +2,5 @@
 # Block all public access to this directory.
 # Remove or comment out the lines below ONLY when testing locally.
 
-# Order deny,allow
-# Deny from all
+Order deny,allow
+Deny from all

@@ -193,66 +193,74 @@ try {
     $mail->addAddress($email, $first_name);
     $mail->isHTML(true);
     $mail->Subject = 'Welcome to iSkool, ' . $first_name . '!';
-    $mail->Body    = '<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#eeece8;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeece8;padding:40px 20px;">
-<tr><td align="center">
-  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:20px;border:1px solid #e2e0dc;">
-    <tr><td style="padding:40px 44px 36px;">
-      <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
-        <tr>
-          <td style="vertical-align:middle;padding-right:8px;">
-            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
-          </td>
-          <td style="vertical-align:middle;">
-            <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
-          </td>
-        </tr>
-      </table>
-      <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">Welcome to iSkool, ' . htmlspecialchars($first_name) . '.</p>
-      <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
-        Your account has been successfully created at
-        <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . htmlspecialchars($schoolName) . '</a>.
-        Here are your account details.
-      </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;width:100px;vertical-align:top;">School</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . htmlspecialchars($schoolName) . '</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Platform</td>
-          <td style="padding:8px 0;font-size:14px;"><a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . $schoolUrl . '</a></td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Role</td>
-          <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . $roleLabel . '</td>
-        </tr>
-      </table>
-      <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">Here is how to get started:</p>
-      ' . $roleTips . '
-      <p style="margin:24px 0 32px;font-size:16px;line-height:1.6;">
-        <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;font-weight:500;">Log in to iSkool</a>
-      </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
-      <p style="margin:0 0 24px;font-size:14px;color:#6a6a6a;line-height:1.7;">
-        If you did not register for this account, contact us immediately at
-        <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
-      </p>
-      <p style="margin:0 0 36px;font-size:14px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Support</p>
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">
-            iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
-            <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
-            <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
-          </p>
-          <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
-        </td></tr>
-      </table>
-    </td></tr>
+    $mail->Body    = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="margin:0;padding:0;width:100%;background:#ffffff;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <style type="text/css">
+    html, body { margin:0 !important;padding:0 !important;width:100% !important;background:#ffffff !important; }
+    div[style*="margin: 16px 0"] { margin:0 !important; }
+    @media only screen and (max-width:600px) { .outer-td { padding:32px 20px 40px !important; } }
+  </style>
+</head>
+<body style="margin:0 !important;padding:0 !important;Margin:0;background:#ffffff;width:100%;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#ffffff;">
+<tr><td align="center" style="padding:0;margin:0;background:#ffffff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;max-width:600px;width:100%;background:#ffffff;">
+    <tr>
+      <td class="outer-td" style="padding:40px 44px 48px;background:#ffffff;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:36px;">
+          <tr>
+            <td style="vertical-align:middle;padding-right:8px;">
+              <img src="https://iskool.online/apple-touch-icon.png" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
+            </td>
+            <td style="vertical-align:middle;">
+              <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">iSkool</span>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Welcome to iSkool, ' . htmlspecialchars($first_name) . '.</p>
+        <p style="margin:0 0 28px;font-size:16px;color:#4a4a4a;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+          Your account has been successfully created at
+          <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . htmlspecialchars($schoolName) . '</a>.
+          Here are your account details.
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:32px;">
+          <tr>
+            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;width:100px;vertical-align:top;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">School</td>
+            <td style="padding:10px 0;font-size:14px;color:#0d0d0d;font-weight:500;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($schoolName) . '</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;vertical-align:top;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Platform</td>
+            <td style="padding:10px 0;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;"><a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . $schoolUrl . '</a></td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;vertical-align:top;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Role</td>
+            <td style="padding:10px 0;font-size:14px;color:#0d0d0d;font-weight:500;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">' . $roleLabel . '</td>
+          </tr>
+        </table>
+        <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Here is how to get started:</p>
+        ' . $roleTips . '
+        <p style="margin:28px 0 40px;font-size:16px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+          <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;font-weight:500;">Log in to iSkool →</a>
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
+        <p style="margin:0 0 24px;font-size:14px;color:#6a6a6a;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+          If you did not register for this account, contact us immediately at
+          <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
+        </p>
+        <p style="margin:0 0 40px;font-size:14px;color:#4a4a4a;line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Thanks,<br>iSkool Support</p>
+        <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+          iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
+          <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
+          <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
+        </p>
+        <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+      </td>
+    </tr>
   </table>
 </td></tr>
 </table>
