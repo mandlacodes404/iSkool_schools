@@ -620,6 +620,82 @@ $schoolLogo = 'uploads/schools/default_school.png';
         .sd-alert-text     { font-size: 13px; color: var(--text-muted); }
         .sd-alert-avg      { font-size: 12px; font-weight: 600; color: var(--red); flex-shrink: 0; font-family: var(--font-mono); background: rgba(248,81,73,0.08); border-radius: 20px; padding: 2px 8px; }
 
+        /* ── Drillable / navigable cards ── */
+        .sd-kpi-card.clickable  { cursor: pointer; }
+        .sd-kpi-card.clickable:hover { border-color: var(--teal); transform: translateY(-1px); }
+        .sd-mini-stat.clickable { cursor: pointer; }
+        .sd-mini-stat.clickable:hover { border-color: var(--teal); }
+        .sd-card.clickable      { cursor: pointer; }
+        .sd-card.clickable:hover { border-color: var(--teal); }
+        .sd-ov-drill-hint {
+            font-size: 10px; color: var(--text-dim); font-weight: 400;
+            opacity: 0; transition: opacity 0.15s; margin-left: auto;
+        }
+        .sd-kpi-card.clickable:hover  .sd-ov-drill-hint,
+        .sd-mini-stat.clickable:hover .sd-ov-drill-hint,
+        .sd-card.clickable:hover      .sd-ov-drill-hint { opacity: 1; }
+
+        /* ── Overview slide-in panel ── */
+        .sd-ov-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+            z-index: 8000; opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .sd-ov-overlay.open { opacity: 1; pointer-events: all; }
+        .sd-ov-panel {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: 58%; max-width: 920px;
+            background: var(--bg); border-left: 1px solid var(--border);
+            z-index: 8001; display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.4);
+        }
+        .sd-ov-panel.open { transform: translateX(0); }
+        .sd-ov-panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .sd-ov-panel-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+        .sd-ov-panel-sub   { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+        .sd-ov-panel-close {
+            width: 28px; height: 28px; border-radius: var(--radius);
+            background: transparent; border: 1px solid var(--border-hover);
+            color: var(--text-muted); cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .sd-ov-panel-close:hover { border-color: var(--red); color: var(--red); }
+        .sd-ov-panel-body {
+            flex: 1; overflow-y: auto; padding: 24px;
+            scrollbar-width: thin; scrollbar-color: var(--border-hover) transparent;
+        }
+        .sd-ov-panel-body::-webkit-scrollbar { width: 4px; }
+        .sd-ov-panel-body::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+
+        /* panel table */
+        .sd-ov-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .sd-ov-table thead th {
+            padding: 8px 12px; text-align: left;
+            font-size: 10px; font-weight: 500; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+        .sd-ov-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+        .sd-ov-table tbody tr:last-child { border-bottom: none; }
+        .sd-ov-table tbody tr:hover { background: var(--surface2); }
+        .sd-ov-table td { padding: 9px 12px; color: var(--text); font-weight: 400; vertical-align: middle; }
+        .sd-ov-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 20px;
+            font-size: 10px; font-weight: 500; font-family: var(--font-mono);
+        }
+        .sd-ov-badge.green  { background: var(--green-dim);  color: var(--green); }
+        .sd-ov-badge.orange { background: var(--orange-dim); color: var(--orange); }
+        .sd-ov-badge.red    { background: var(--red-dim);    color: var(--red); }
+        .sd-ov-badge.gray   { background: var(--surface2);   color: var(--text-muted); }
+
         /* SKELETON */
         .sd-skeleton {
             background: linear-gradient(90deg, var(--surface) 25%, var(--surface3) 50%, var(--surface) 75%);
@@ -1027,7 +1103,7 @@ function renderOverview(d) {
         </div>
 
         <div class="sd-kpi-row">
-            <div class="sd-kpi-card c-teal">
+            <div class="sd-kpi-card c-teal" id="sd-ov-kpi-learners">
                 <div class="sd-kpi-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
@@ -1035,7 +1111,7 @@ function renderOverview(d) {
                 <div class="sd-kpi-value">${d.total_learners}</div>
                 <div class="sd-kpi-sub">Enrolled on platform</div>
             </div>
-            <div class="sd-kpi-card c-blue">
+            <div class="sd-kpi-card c-blue" id="sd-ov-kpi-teachers">
                 <div class="sd-kpi-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
@@ -1043,7 +1119,7 @@ function renderOverview(d) {
                 <div class="sd-kpi-value">${d.total_teachers}</div>
                 <div class="sd-kpi-sub">Active educators</div>
             </div>
-            <div class="sd-kpi-card c-orange">
+            <div class="sd-kpi-card c-orange" id="sd-ov-kpi-classes">
                 <div class="sd-kpi-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
@@ -1101,12 +1177,12 @@ function renderOverview(d) {
         </div>
 
         <div class="sd-mini-stat-row">
-            <div class="sd-mini-stat ${d.incomplete_profiles > 0 ? 'warn' : 'good'}">
+            <div class="sd-mini-stat ${d.incomplete_profiles > 0 ? 'warn' : 'good'}" id="sd-ov-mini-profiles">
                 <div class="sd-mini-stat-label">Incomplete Profiles</div>
                 <div class="sd-mini-stat-value">${d.incomplete_profiles}</div>
                 <div class="sd-mini-stat-sub">${d.incomplete_profiles === 0 ? 'All profiles complete ✓' : 'Learners missing details'}</div>
             </div>
-            <div class="sd-mini-stat ${d.engagement_rate >= 50 ? 'good' : 'warn'}">
+            <div class="sd-mini-stat ${d.engagement_rate >= 50 ? 'good' : 'warn'}" id="sd-ov-mini-engagement">
                 <div class="sd-mini-stat-label">Weekly Engagement</div>
                 <div class="sd-mini-stat-value">${d.engagement_rate}%</div>
                 <div class="sd-mini-stat-sub">${d.engaged_learners} of ${d.total_learners} learners active</div>
@@ -1114,7 +1190,7 @@ function renderOverview(d) {
         </div>
 
         <div class="sd-row col-3-1">
-            <div class="sd-card">
+            <div class="sd-card" id="sd-ov-card-classperf">
                 <div class="sd-card-title">
                     <span class="sd-card-title-dot"></span>
                     Class Performance Snapshot
@@ -1164,7 +1240,7 @@ function renderOverview(d) {
         </div>
 
         <div class="sd-row col-2">
-            <div class="sd-card">
+            <div class="sd-card" id="sd-ov-card-teachers">
                 <div class="sd-card-title">
                     <span class="sd-card-title-dot" style="background:var(--blue);"></span>
                     Most Active Teachers
@@ -1219,7 +1295,7 @@ function renderOverview(d) {
 
         ${d.classes_need_attention.length ? `
         <div class="sd-row col-1">
-            <div class="sd-card">
+            <div class="sd-card" id="sd-ov-card-attention">
                 <div class="sd-card-title">
                     <span class="sd-card-title-dot" style="background:var(--red);"></span>
                     Classes Needing Attention (Below 50%)
@@ -1238,10 +1314,143 @@ function renderOverview(d) {
 
     </div>`;
 
+    // ── Wire up click handlers after render ──
+    _sdOvEnsurePanel();
+
+    // KPI cards → navigate to existing sections
+    _sdOvNavigable('sd-ov-kpi-learners', 'learners');
+    _sdOvNavigable('sd-ov-kpi-teachers', 'teachers');
+    _sdOvNavigable('sd-ov-kpi-classes',  'classes');
+
+    // Mini stats → slide-in panels
+    _sdOvPanelCard('sd-ov-mini-profiles', 'Incomplete Learner Profiles',
+        `${d.incomplete_profiles} learner${d.incomplete_profiles !== 1 ? 's' : ''} missing details`,
+        `<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+            These learners are missing one or more required profile fields. Contact them or their guardians to complete registration.
+         </p>
+         <p style="font-size:12px;color:var(--text-dim);">To view and edit individual learner profiles, go to the <strong style="color:var(--teal);cursor:pointer;" onclick="sdOvClosePanel();loadSection('learners')">Learners section →</strong></p>`
+    );
+
+    _sdOvPanelCard('sd-ov-mini-engagement', 'Weekly Platform Engagement',
+        `${d.engaged_learners} of ${d.total_learners} learners active`,
+        `<div style="margin-bottom:20px;">
+            <div style="font-size:28px;font-weight:500;color:${d.engagement_rate >= 50 ? 'var(--green)' : 'var(--orange)'};margin-bottom:4px;">${d.engagement_rate}%</div>
+            <div style="font-size:12px;color:var(--text-muted);">${d.engaged_learners} learners have an active session token right now out of ${d.total_learners} total.</div>
+         </div>
+         <div style="height:6px;background:var(--surface2);border-radius:100px;overflow:hidden;margin-bottom:20px;">
+             <div style="height:100%;width:${d.engagement_rate}%;background:${d.engagement_rate >= 50 ? 'var(--green)' : 'var(--orange)'};border-radius:100px;"></div>
+         </div>
+         <p style="font-size:12px;color:var(--text-dim);">Engagement is measured by active login tokens. A low rate means learners are not logging in regularly — consider sending an announcement to re-engage them.</p>`
+    );
+
+    // Class Performance Snapshot → panel with all classes
+    _sdOvPanelCard('sd-ov-card-classperf', 'All Classes — Performance Ranking',
+        `${d.class_performance.length} classes sorted by average`,
+        (() => {
+            const rows = d.class_performance.map((cls, i) => {
+                const col = avgColorClass(cls.avg_pct);
+                return `<tr>
+                    <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);">${i+1}</td>
+                    <td style="font-weight:400;color:var(--text);">${cls.class_name}</td>
+                    <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.learner_count}</td>
+                    <td><span class="sd-ov-badge ${col}">${cls.avg_pct !== null ? cls.avg_pct+'%' : '—'}</span></td>
+                </tr>`;
+            }).join('');
+            return `<table class="sd-ov-table">
+                <thead><tr><th>#</th><th>Class</th><th>Learners</th><th>Avg</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        })()
+    );
+
+    // Classes Needing Attention → panel
+    if (d.classes_need_attention.length) {
+        _sdOvPanelCard('sd-ov-card-attention', 'Classes Needing Attention',
+            `${d.classes_need_attention.length} class${d.classes_need_attention.length !== 1 ? 'es' : ''} below 50% average`,
+            (() => {
+                const rows = d.classes_need_attention.map(cls => {
+                    const col = avgColorClass(cls.avg_pct);
+                    return `<tr>
+                        <td style="font-weight:400;color:var(--text);">${cls.class_name}</td>
+                        <td style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${cls.learner_count} learners</td>
+                        <td><span class="sd-ov-badge ${col}">${cls.avg_pct}%</span></td>
+                        <td style="font-size:11px;color:var(--text-dim);">Review teacher content & quiz results</td>
+                    </tr>`;
+                }).join('');
+                return `<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">These classes have a summative average below 50%. Consider reviewing assessment difficulty, teacher activity, and learner engagement for each class.</p>
+                <table class="sd-ov-table">
+                    <thead><tr><th>Class</th><th>Learners</th><th>Avg</th><th>Suggested Action</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+            })()
+        );
+    }
+
+    // Most Active Teachers card → navigate to teachers
+    _sdOvNavigable('sd-ov-card-teachers', 'teachers');
 }
 
-// ═══════════════════════════════════
-// BOOT
+// ══════════════════════════════════════════════════════
+// OVERVIEW PANEL ENGINE
+// ══════════════════════════════════════════════════════
+function _sdOvEnsurePanel() {
+    if (document.getElementById('sd-ov-panel')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sd-ov-overlay';
+    overlay.id = 'sd-ov-overlay';
+    overlay.addEventListener('click', sdOvClosePanel);
+
+    const panel = document.createElement('div');
+    panel.className = 'sd-ov-panel';
+    panel.id = 'sd-ov-panel';
+    panel.innerHTML = `
+        <div class="sd-ov-panel-header">
+            <div>
+                <div class="sd-ov-panel-title" id="sd-ov-panel-title">—</div>
+                <div class="sd-ov-panel-sub"   id="sd-ov-panel-sub"></div>
+            </div>
+            <button class="sd-ov-panel-close" id="sd-ov-panel-close">✕</button>
+        </div>
+        <div class="sd-ov-panel-body" id="sd-ov-panel-body"></div>
+    `;
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+    document.getElementById('sd-ov-panel-close').addEventListener('click', sdOvClosePanel);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') sdOvClosePanel(); });
+}
+
+function sdOvOpenPanel(title, sub, html) {
+    _sdOvEnsurePanel();
+    document.getElementById('sd-ov-panel-title').textContent = title;
+    document.getElementById('sd-ov-panel-sub').textContent   = sub || '';
+    document.getElementById('sd-ov-panel-body').innerHTML    = html;
+    requestAnimationFrame(() => {
+        document.getElementById('sd-ov-overlay').classList.add('open');
+        document.getElementById('sd-ov-panel').classList.add('open');
+    });
+}
+
+function sdOvClosePanel() {
+    document.getElementById('sd-ov-overlay')?.classList.remove('open');
+    document.getElementById('sd-ov-panel')?.classList.remove('open');
+}
+
+// Make an element open a panel on click
+function _sdOvPanelCard(id, title, sub, html) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('clickable');
+    el.addEventListener('click', () => sdOvOpenPanel(title, sub, html));
+}
+
+// Make an element navigate to a section on click
+function _sdOvNavigable(id, section) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('clickable');
+    el.addEventListener('click', () => loadSection(section));
+}
 // ═══════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
     loadSection('overview');
