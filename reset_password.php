@@ -179,9 +179,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             </div>
             <button type="submit" class="btn-action">Update Password</button>
         </form>
-        <div style="margin-top: 25px;">
-            <a href="index.php" style="color: #888; text-decoration: none; font-size: 14px;">Cancel and return</a>
-        </div>
+        
     <?php endif; ?>
 </div>
 
