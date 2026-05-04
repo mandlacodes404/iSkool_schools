@@ -1624,23 +1624,14 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             <h2>Forgot password?</h2>
             <p style="color:#888; font-size:14px; margin-bottom:20px; text-align:center;">Enter your email and we'll send you a reset link.</p>
 
-            <?php if (!empty($resetMessage)): ?>
-                <div style="color:#00ff99; font-size:14px; background:rgba(0,255,153,0.1); padding:10px; border-radius:12px; margin-bottom:16px; text-align:center;">
-                    <?= htmlspecialchars($resetMessage) ?>
-                </div>
-            <?php endif; ?>
-            <?php if (!empty($resetError)): ?>
-                <div style="color:#ff4d4d; font-size:14px; background:rgba(255,77,77,0.1); padding:10px; border-radius:12px; margin-bottom:16px; text-align:center;">
-                    <?= htmlspecialchars($resetError) ?>
-                </div>
-            <?php endif; ?>
+            <div id="forgot-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
-            <form action="send_reset_link.php" method="POST">
-                <input type="email" name="email" placeholder="Email address" required>
-                <button type="submit">Send Reset Link</button>
+            <form id="forgot-form-el" novalidate>
+                <input type="email" name="email" id="forgot-email" placeholder="Email address" required>
+                <button type="submit" id="forgot-btn">Send Reset Link</button>
             </form>
             <p style="text-align:center; margin-top:20px;">
-                <a href="#" onclick="showForm('login-form'); return false;" style="color:#888; font-size:14px;">← Back to login</a>
+                <a href="#" onclick="showForm('login-form'); return false;" style="color:#888; font-size:14px;">&#8592; Back to login</a>
             </p>
         </div>
         </div><!-- /.form-panel -->
@@ -2153,6 +2144,102 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     runPreview();</script>
 
     <script>
+    // ── AJAX Forgot Password ───────────────────────────────────────────────────
+    document.getElementById('forgot-form-el').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn      = document.getElementById('forgot-btn');
+        const errorBox = document.getElementById('forgot-error-box');
+
+        errorBox.style.display = 'none';
+        errorBox.textContent   = '';
+
+        const email = document.getElementById('forgot-email').value.trim();
+        if (!email) {
+            errorBox.textContent   = 'Please enter your email address.';
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        btn.disabled    = true;
+        btn.textContent = 'Sending\u2026';
+
+        const formData = new FormData(this);
+
+        try {
+            const res  = await fetch('send_reset_link.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                showResetEmailSent();
+            } else {
+                errorBox.textContent   = data.message || 'Something went wrong. Please try again.';
+                errorBox.style.display = 'block';
+                btn.disabled    = false;
+                btn.textContent = 'Send Reset Link';
+            }
+        } catch (err) {
+            errorBox.textContent   = 'Network error. Please check your connection and try again.';
+            errorBox.style.display = 'block';
+            btn.disabled    = false;
+            btn.textContent = 'Send Reset Link';
+        }
+    });
+
+    function showResetEmailSent() {
+        const forgotBox = document.getElementById('forgot-form');
+        const formPanel = document.querySelector('.form-panel');
+
+        const sentBox = document.createElement('div');
+        sentBox.className = 'form-box';
+        sentBox.id        = 'reset-sent-form';
+        sentBox.style.cssText = 'opacity:0;transition:opacity 0.5s ease;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;';
+        sentBox.innerHTML = `
+            <i class="fas fa-paper-plane" style="font-size:3.2rem;color:#00ff99;margin-bottom:22px;filter:drop-shadow(0 0 10px rgba(0,255,153,0.35));"></i>
+            <h2 style="margin-bottom:10px;">Check your inbox</h2>
+            <p style="color:#888;font-size:15px;line-height:1.6;max-width:300px;margin:0 auto 32px;">
+                A reset link has been sent to your email. It expires in 1 hour.
+            </p>
+            <a href="#" onclick="backToLoginFromReset(); return false;"
+               style="display:inline-block;background:#ffffff;color:#131314;font-weight:700;font-size:15px;padding:14px 32px;border-radius:24px;text-decoration:none;">
+               \u2190 Back to Login
+            </a>
+        `;
+        formPanel.appendChild(sentBox);
+
+        forgotBox.style.transition    = 'opacity 0.4s ease';
+        forgotBox.style.opacity       = '0';
+        forgotBox.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            forgotBox.classList.remove('active');
+            sentBox.classList.add('active');
+            requestAnimationFrame(() => { sentBox.style.opacity = '1'; });
+        }, 400);
+    }
+
+    function backToLoginFromReset() {
+        const sentBox   = document.getElementById('reset-sent-form');
+        const forgotBox = document.getElementById('forgot-form');
+        const formPanel = document.querySelector('.form-panel');
+
+        if (sentBox) {
+            sentBox.style.opacity = '0';
+            setTimeout(() => {
+                sentBox.remove();
+                document.getElementById('forgot-form-el').reset();
+                document.getElementById('forgot-btn').disabled    = false;
+                document.getElementById('forgot-btn').textContent = 'Send Reset Link';
+                document.getElementById('forgot-error-box').style.display = 'none';
+                forgotBox.style.opacity       = '1';
+                forgotBox.style.pointerEvents = '';
+                forgotBox.style.transition    = '';
+            }, 400);
+        }
+        showForm('login-form');
+        if (formPanel) formPanel.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // ── AJAX Login ─────────────────────────────────────────────────────────────
     document.getElementById('login-form-el').addEventListener('submit', async function (e) {
         e.preventDefault();
