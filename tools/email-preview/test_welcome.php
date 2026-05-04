@@ -29,7 +29,10 @@ if ($role === 'learner') {
             <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Log in and join your class using the Learner Access Key from your teacher.</td></tr>
             <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Allow notifications so you never miss a quiz or announcement.</td></tr>
             <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Check your Grades section to track your performance across all subjects.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">Install iSkool on your phone — tap Add to Home Screen in your browser for the best experience.</td></tr>
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">
+                Install iSkool on your phone for the best experience. Follow our step-by-step install guide attached to this email, or visit
+                <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a> anytime.
+            </td></tr>
         </table>';
 } elseif ($role === 'teacher') {
     $roleLabel = 'Teacher';
@@ -194,6 +197,14 @@ try {
 
 </body>
 </html>';
+
+    // Attach the install guide (only for learner role)
+    if ($role === 'learner') {
+        $guidePath = dirname(__DIR__, 2) . '/install_guide.html';
+        if (file_exists($guidePath)) {
+            $mail->addAttachment($guidePath, 'iSkool Install Guide.html');
+        }
+    }
 
     $mail->send();
     header("Location: index.php?sent=Welcome&role=$role");
