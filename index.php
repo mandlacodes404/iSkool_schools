@@ -2236,8 +2236,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             const data = await res.json();
 
             if (data.success) {
-                btn.textContent = 'Success! Redirecting…';
-                window.location.href = 'registration_success.php';
+                showRegistrationSuccess();
             } else {
                 errorBox.textContent   = data.message || 'Registration failed. Please try again.';
                 errorBox.style.display = 'block';
@@ -2252,6 +2251,68 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
             btn.textContent = 'Register';
         }
     });
+
+    // ── Inline registration success (no page reload) ─────────────────────────
+    function showRegistrationSuccess() {
+        // Inject a hidden success form-box into the form panel
+        const formPanel = document.querySelector('.form-panel');
+
+        // Build the success card matching the app's style
+        const successBox = document.createElement('div');
+        successBox.className = 'form-box';
+        successBox.id        = 'success-form';
+        successBox.style.cssText = 'opacity:0;transition:opacity 0.5s ease;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;';
+        successBox.innerHTML = `
+            <i class="fas fa-check-circle" style="font-size:3.2rem;color:#00ff99;margin-bottom:22px;filter:drop-shadow(0 0 10px rgba(0,255,153,0.4));"></i>
+            <h2 style="margin-bottom:10px;">You're registered!</h2>
+            <p style="color:#888;font-size:15px;line-height:1.6;max-width:300px;margin:0 auto 30px;">
+                Your account has been created. Taking you to login…
+            </p>
+            <div style="width:100%;max-width:280px;background:#2a2a28;border-radius:99px;height:3px;overflow:hidden;">
+                <div id="success-progress-bar" style="height:100%;width:0%;background:#00ff99;border-radius:99px;transition:width 3s linear;"></div>
+            </div>
+        `;
+        formPanel.appendChild(successBox);
+
+        // Fade out the register form, fade in the success card
+        const registerBox = document.getElementById('register-form');
+        registerBox.style.transition = 'opacity 0.4s ease';
+        registerBox.style.opacity    = '0';
+        registerBox.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            registerBox.classList.remove('active');
+            successBox.classList.add('active');
+            // Kick off fade-in
+            requestAnimationFrame(() => {
+                successBox.style.opacity = '1';
+                // Start the progress bar after a tiny delay so CSS transition fires
+                setTimeout(() => {
+                    document.getElementById('success-progress-bar').style.width = '100%';
+                }, 60);
+            });
+        }, 400);
+
+        // After 3 seconds switch to login form, remove success card
+        setTimeout(() => {
+            successBox.style.opacity = '0';
+            setTimeout(() => {
+                successBox.remove();
+                // Reset register form opacity so it's usable if they ever come back
+                registerBox.style.opacity      = '1';
+                registerBox.style.pointerEvents = '';
+                registerBox.style.transition    = '';
+                // Also reset the register form fields and button
+                document.getElementById('register-form-el').reset();
+                document.getElementById('register-btn').disabled    = false;
+                document.getElementById('register-btn').textContent = 'Register';
+                // Show the login form
+                showForm('login-form');
+                // Scroll the panel back to the top
+                if (formPanel) formPanel.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }, 3500);
+    }
     </script>
 </body>
 </html>
