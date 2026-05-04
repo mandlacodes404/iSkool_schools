@@ -184,12 +184,19 @@ try {
         <p style="margin:0 0 40px;font-size:14px;color:#4a4a4a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Thanks,<br>iSkool Support</p>
 
         <!-- Footer -->
-        <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-          iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
-          <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
-          <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
-        </p>
-        <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:8px;">
+          <tr>
+            <td style="background:#f2f2f2;border-radius:8px;padding:24px 28px;">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">iSkool</p>
+              <p style="margin:0 0 8px;font-size:12px;color:#9a9a9a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
+                iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
+                <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
+                <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
+              </p>
+              <p style="margin:0;font-size:12px;color:#9a9a9a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+            </td>
+          </tr>
+        </table>
 
       </td>
     </tr>
