@@ -421,12 +421,19 @@ function renderThread(data) {
         : getDateKey(disc.created_at);
 
     const composeHtml = is_in_class ? buildCompose(disc.id) : '';
-    const threadHeight = isDesktop() ? '100%' : 'calc(100vh - 120px)';
+    const threadHeight = isDesktop() ? '100%' : '100%';
 
     target.innerHTML = `
         <style>
             /* ── LAYOUT ── */
             .disc-thread-wrap { display:flex; flex-direction:column; height:${threadHeight}; overflow:hidden; }
+
+            /* ── MOBILE: pin compose to bottom like WhatsApp ── */
+            @media (max-width: 767px) {
+                .disc-thread-wrap { position:fixed; inset:0; top:60px; display:flex; flex-direction:column; }
+                .disc-posts-scroll { flex:1; overflow-y:auto; padding-bottom:8px !important; }
+                .disc-compose { flex-shrink:0; }
+            }
             .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:#111; }
             .disc-thread-head-title { font-size:14px; font-weight:700; color:#e2e8f0; font-family:'Nunito',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
