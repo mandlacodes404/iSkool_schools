@@ -20,7 +20,9 @@
     #api-content-area {
         height: auto !important;
         overflow: visible !important;
+        /* Remove padding-bottom only — left/right/top are managed per-page or by .main-content scroll */
         padding: 0 !important;
+        padding-bottom: 100px !important; /* Space above the bottom nav bar */
     }
 }
 

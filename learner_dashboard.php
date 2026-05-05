@@ -207,7 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.0">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.6">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -711,6 +711,11 @@ iframe {
     .main-content {
         margin-left: 0 !important;
         transition: transform var(--transition-speed) ease, filter var(--transition-speed) ease;
+        /* ── FIX: Allow the content area to scroll vertically on mobile ── */
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100vh;
+        -webkit-overflow-scrolling: touch; /* Smooth momentum scroll on iOS */
     }
 
     .sidebar.active ~ .main-content {
