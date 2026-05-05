@@ -207,7 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.6">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -493,6 +493,19 @@ body {
     position: relative;
 }
 
+/* ── MOBILE SCROLL FIX: main-content must scroll on mobile ─────────────
+   On desktop, #api-content-area handles its own scroll (overflow-y: auto).
+   On mobile, #api-content-area is height:auto + overflow:visible, so the
+   parent (.main-content) must be the scroll container instead.
+──────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .main-content {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
 /*.sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed-width);
 }*/
@@ -711,11 +724,6 @@ iframe {
     .main-content {
         margin-left: 0 !important;
         transition: transform var(--transition-speed) ease, filter var(--transition-speed) ease;
-        /* ── FIX: Allow the content area to scroll vertically on mobile ── */
-        overflow-y: auto;
-        overflow-x: hidden;
-        height: 100vh;
-        -webkit-overflow-scrolling: touch; /* Smooth momentum scroll on iOS */
     }
 
     .sidebar.active ~ .main-content {
