@@ -48,7 +48,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.6">
     <title>Dashboard</title>
@@ -66,6 +66,10 @@ $schoolLogo = 'uploads/schools/default_school.png';
             --sidebar-collapsed-width: 80px;
             --transition-speed: 0.3s;
         }
+
+        html {
+  touch-action: manipulation;
+}
 
         body {
             margin: 0;
