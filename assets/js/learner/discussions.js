@@ -430,7 +430,7 @@ function renderThread(data) {
 
             /* ── MOBILE: pin compose to bottom like WhatsApp ── */
             @media (max-width: 767px) {
-                .disc-thread-wrap { position:fixed; top:60px; left:0; right:0; bottom:82px; display:flex; flex-direction:column; overflow:hidden; }
+                .disc-thread-wrap { position:fixed; top:60px; left:0; right:0; bottom:110px; display:flex; flex-direction:column; overflow:hidden; }
                 .disc-posts-scroll { flex:1; overflow-y:auto; padding-bottom:8px !important; }
                 .disc-compose { flex-shrink:0; }
             }
@@ -522,18 +522,6 @@ function renderThread(data) {
             .disc-tool-btn.anon-on { color:#4fd1c5; }
             .disc-post-btn { background:#4fd1c5; color:#0d1117; border:none; padding:8px 16px; border-radius:9px; font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px; margin-left:auto; transition:0.2s; }
             .disc-post-btn:hover { background:#38b2ac; }
-
-            /* ── MOBILE COMPOSE: ensure full width, no clipping ── */
-            @media (max-width: 767px) {
-                .disc-compose { padding:8px 8px 10px; box-sizing:border-box; width:100%; }
-                .disc-compose-box { width:100%; box-sizing:border-box; }
-                .disc-compose-box textarea { font-size:16px; } /* 16px stops iOS auto-zoom on focus */
-                .disc-toolbar { padding:4px 6px; gap:2px; flex-wrap:nowrap; }
-                .disc-tool-btn { padding:6px; font-size:11px; }
-                /* Hide the Anonymous label text on mobile, keep icon only */
-                .disc-tool-btn .anon-text { display:none; }
-                .disc-post-btn { padding:8px 12px; font-size:12px; white-space:nowrap; flex-shrink:0; }
-            }
 
             /* ── TYPING — uses visibility instead of display:none so it never shifts layout ── */
             .disc-typing { visibility:hidden; display:flex; align-items:center; gap:8px; padding:0; font-size:12px; color:#8b949e; font-weight:700; height:0; overflow:hidden; transition:height 0.15s ease; }
@@ -751,7 +739,7 @@ function buildCompose(discId) {
                     </button>
                     <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
                         <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
-                        <i class="fas fa-user-secret"></i> <span class="anon-text">Anonymous</span>
+                        <i class="fas fa-user-secret"></i> Anonymous
                     </label>
                     <button class="disc-post-btn" onclick="discSubmitReply(${discId})">
                         <i class="fas fa-paper-plane"></i> Post
