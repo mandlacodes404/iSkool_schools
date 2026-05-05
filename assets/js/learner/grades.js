@@ -234,7 +234,7 @@ function renderGrades(data) {
         transition: border-color 0.2s;
     }
     .grades-search:focus { outline: none; border-color: #4fd1c5; }
-    .grades-search::placeholder { color: #4a5568; }
+    .grades-search::placeholder { color: #555e6a; }
     .grades-report-btn {
         display: inline-flex;
         align-items: center;
@@ -257,7 +257,7 @@ function renderGrades(data) {
     .subject-header:hover { background: rgba(255,255,255,0.02); }
     .subject-name { flex: 1; font-size: 16px; font-weight: 800; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
     .subject-count { font-size: 12px; color: #8b949e; font-weight: 600; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px; }
-    .subject-chevron { transition: transform 0.3s ease; color: #4a5568; flex-shrink: 0; }
+    .subject-chevron { transition: transform 0.3s ease; color: #555e6a; flex-shrink: 0; }
     .subject-chevron.open { transform: rotate(90deg); }
     .view-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .view-toggle-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #8b949e; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.2s; }
@@ -278,8 +278,8 @@ function renderGrades(data) {
     .quiz-score-pill.high { background: rgba(34,197,94,0.15); color: #22c55e; }
     .quiz-score-pill.mid  { background: rgba(79,209,197,0.15); color: #4fd1c5; }
     .quiz-score-pill.low  { background: rgba(248,81,73,0.15); color: #f85149; }
-    .quiz-score-pill.hidden-score { background: rgba(255,255,255,0.05); color: #4a5568; }
-    .quiz-expand-btn { background: none; border: none; color: #4a5568; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
+    .quiz-score-pill.hidden-score { background: rgba(255,255,255,0.05); color: #555e6a; }
+    .quiz-expand-btn { background: none; border: none; color: #555e6a; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
     .quiz-expand-btn:hover { color: #4fd1c5; }
     .quiz-expand-btn svg { transition: transform 0.3s ease; }
     .quiz-expand-btn.open svg { transform: rotate(180deg); }
@@ -302,19 +302,19 @@ function renderGrades(data) {
     .term-table tr:hover td { background: rgba(255,255,255,0.01); }
     .term-table-total td { font-weight: 800; color: #4fd1c5; border-top: 2px solid rgba(79,209,197,0.3) !important; padding-top: 12px; }
     .term-total-result { color: #22c55e; font-size: 14px; }
-    .term-still-pending { text-align: center; font-size: 12px; color: #4a5568; padding: 10px 0 0; }
-    .no-summative { text-align: center; color: #4a5568; font-style: italic; font-size: 13px; padding: 20px; }
+    .term-still-pending { text-align: center; font-size: 12px; color: #555e6a; padding: 10px 0 0; }
+    .no-summative { text-align: center; color: #555e6a; font-style: italic; font-size: 13px; padding: 20px; }
     .review-link { color: #4fd1c5; font-size: 11px; text-decoration: none; margin-left: 6px; opacity: 0.7; }
     .review-link:hover { opacity: 1; }
     .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
-    .grades-empty { text-align: center; color: #4a5568; font-size: 15px; padding: 60px 20px; }
+    .grades-empty { text-align: center; color: #555e6a; font-size: 15px; padding: 60px 20px; }
 
     /* Performance modal */
     .g-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9100; align-items: center; justify-content: center; padding: 20px; }
     .g-modal-overlay.show { display: flex; }
     .g-modal-box { background: #161b22; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.5); animation: gmPop 0.25s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
     @keyframes gmPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
-    .g-modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #4a5568; font-size: 22px; cursor: pointer; line-height: 1; transition: color 0.2s; }
+    .g-modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #555e6a; font-size: 22px; cursor: pointer; line-height: 1; transition: color 0.2s; }
     .g-modal-close:hover { color: #e2e8f0; }
     .g-modal-title { font-size: 16px; font-weight: 800; color: #e2e8f0; margin-bottom: 20px; }
     .score-circle-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto 14px; }
@@ -325,12 +325,12 @@ function renderGrades(data) {
     .score-out-of { font-size: 13px; color: #8b949e; margin-bottom: 16px; }
     .dist-bar-wrap { position: relative; height: 10px; background: rgba(255,255,255,0.06); border-radius: 100px; margin: 24px 0 8px; }
     .dist-marker { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; transition: left 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
-    .dist-marker.me { background: #fff; border: 3px solid #60a5fa; }
+    .dist-marker.me { background: #fff; border: 3px solid #4fd1c5; }
     .dist-line { position: absolute; top: -8px; bottom: -4px; width: 2px; transform: translateX(-50%); }
     .dist-line.low  { background: #f85149; }
     .dist-line.avg  { background: #f59e0b; }
     .dist-line.high { background: #22c55e; }
-    .dist-labels { display: flex; justify-content: space-between; font-size: 11px; color: #4a5568; margin-bottom: 14px; }
+    .dist-labels { display: flex; justify-content: space-between; font-size: 11px; color: #555e6a; margin-bottom: 14px; }
     .dist-legend { text-align: left; font-size: 12px; color: #8b949e; line-height: 1.8; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 10px 14px; }
     .dist-legend span { font-weight: 700; }
 
@@ -531,7 +531,7 @@ function renderGrades(data) {
             </div>
             <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
             <div class="dist-legend">
-                <div><span style="color:#60a5fa">●</span> Blue dot — your score</div>
+                <div><span style="color:#4fd1c5">●</span> Blue dot — your score</div>
                 <div><span style="color:#f85149">|</span> Red line — lowest in class</div>
                 <div><span style="color:#f59e0b">|</span> Yellow line — class average</div>
                 <div><span style="color:#22c55e">|</span> Green line — highest in class</div>
@@ -675,7 +675,7 @@ function buildQuizList(quizzes, gi) {
                         </svg>
                         Class Performance
                     </button>
-                ` : `<p style="color:#4a5568;font-style:italic;">Marks not published yet.</p>`}
+                ` : `<p style="color:#555e6a;font-style:italic;">Marks not published yet.</p>`}
                 <p style="margin-top:8px;"><strong>Duration:</strong> ${duration} min</p>
                 <p><strong>Time Taken:</strong> ${timeTaken}</p>
                 <p><strong>Taken on:</strong> ${submittedAt}</p>
@@ -926,19 +926,19 @@ function renderProgressReport(data) {
             .pr-term-tab.active .pr-term-tab-label { color: #4fd1c5; }
             .pr-term-tab-avg { font-size: 18px; font-weight: 900; color: #e2e8f0; }
             .pr-term-tab.active .pr-term-tab-avg { color: #4fd1c5; }
-            .pr-term-tab-sub { font-size: 10px; color: #4a5568; margin-top: 2px; }
+            .pr-term-tab-sub { font-size: 10px; color: #555e6a; margin-top: 2px; }
             .pr-current-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; }
             .pr-subjects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
             .pr-subject-card { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px 18px 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
             .pr-subject-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
-            .pr-subject-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; background: var(--accent, #4a5568); }
+            .pr-subject-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; background: var(--accent, #555e6a); }
             .pr-subject-name { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 16px; padding-right: 70px; line-height: 1.3; min-height: 32px; }
             .pr-subject-pct { position: absolute; top: 16px; right: 16px; font-size: 24px; font-weight: 900; line-height: 1; }
             .pr-subject-bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; margin-bottom: 8px; }
             .pr-subject-bar-fill { height: 100%; border-radius: 100px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
-            .pr-subject-meta { font-size: 11px; color: #4a5568; }
-            .pr-subject-no-data { font-size: 12px; color: #4a5568; font-style: italic; padding: 10px 0 4px; }
-            .pr-empty { text-align: center; color: #4a5568; padding: 60px 20px; font-size: 15px; }
+            .pr-subject-meta { font-size: 11px; color: #555e6a; }
+            .pr-subject-no-data { font-size: 12px; color: #555e6a; font-style: italic; padding: 10px 0 4px; }
+            .pr-empty { text-align: center; color: #555e6a; padding: 60px 20px; font-size: 15px; }
             @media print {
                 .pr-topbar { display: none !important; }
                 .pr-term-tabs { display: none !important; }
@@ -962,7 +962,7 @@ function renderProgressReport(data) {
     const subjects    = data.subjects || [];
 
     function pctColor(v) {
-        if (v === null) return { text: '#4a5568', bg: 'rgba(74,85,104,0.15)', border: '#4a5568' };
+        if (v === null) return { text: '#555e6a', bg: 'rgba(74,85,104,0.15)', border: '#555e6a' };
         if (v >= 80)   return { text: '#22c55e', bg: 'rgba(34,197,94,0.15)',   border: '#22c55e' };
         if (v >= 60)   return { text: '#4fd1c5', bg: 'rgba(79,209,197,0.15)',  border: '#4fd1c5' };
         if (v >= 40)   return { text: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: '#f59e0b' };
@@ -987,7 +987,7 @@ function renderProgressReport(data) {
                  style="${!hasData ? 'opacity:0.35;pointer-events:none;' : ''}">
                 ${t === currentTerm ? '<div class="pr-current-dot"></div>' : ''}
                 <div class="pr-term-tab-label">Term ${t}</div>
-                <div class="pr-term-tab-avg" style="color:${hasData ? c.text : '#4a5568'};">
+                <div class="pr-term-tab-avg" style="color:${hasData ? c.text : '#555e6a'};">
                     ${avg !== null ? avg + '%' : '—'}
                 </div>
                 <div class="pr-term-tab-sub">${t === currentTerm ? 'Current' : (hasData ? 'Completed' : 'Upcoming')}</div>
