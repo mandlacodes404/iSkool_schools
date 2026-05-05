@@ -344,7 +344,7 @@ window.handleEvalSubmit = async function(e, id) {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/submit_evaluation.php', {
+        const response = await fetch('api/learner/submit_evaluation.php', {
             method: 'POST',
             body: new FormData(e.target)
         });
