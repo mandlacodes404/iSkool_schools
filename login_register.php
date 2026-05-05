@@ -341,7 +341,7 @@ if (isset($_POST['login'])) {
             switch ($role) {
                 case 'admin':
                     $_SESSION['admin'] = true;
-                    header("Location: admin_home.php");
+                    header("Location: school_admin_dashboard.php");
                     break;
                 case 'school_admin':
                     $_SESSION['school_admin'] = true;
