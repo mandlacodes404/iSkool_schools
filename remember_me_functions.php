@@ -14,14 +14,12 @@ function create_remember_me_token($conn, $user_email) {
     $stmt->close();
 
     // Set cookie: selector:validator
-    setcookie(
-        'remember_me',
-        $selector . ':' . $validator,
-        time() + (86400 * 30),
-        "/",
-        "",
-        false, // Set to true if your site uses HTTPS
-        true   // HTTPOnly - prevents JavaScript from stealing the cookie
-    );
+    setcookie('remember_me', $selector . ':' . $validator, [
+        'expires'  => time() + (86400 * 30),
+        'path'     => '/',
+        'secure'   => true,
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
 }
 ?>

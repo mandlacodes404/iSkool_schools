@@ -31,11 +31,14 @@ if (!isset($_SESSION['email']) && isset($_COOKIE['remember_me'])) {
                     $userResult = $userStmt->get_result();
 
                     if ($user = $userResult->fetch_assoc()) {
-                        // RE-ESTABLISH SESSION
+                        // Re-establish session with a fresh ID, same as normal login.
+                        session_regenerate_id(true);
+
                         $_SESSION['email'] = $userEmail;
                         $_SESSION['name'] = $user['name'];
                         $_SESSION['role'] = $user['role'];
                         $_SESSION['profile_pic'] = $user['profile_pic'] ?: 'uploads/default_profile.png';
+                        $_SESSION['last_active'] = time();
                         
                         // Set the role-specific session flag
                         $_SESSION[$user['role']] = true;

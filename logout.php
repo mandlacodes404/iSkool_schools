@@ -14,7 +14,13 @@ if (isset($_COOKIE['remember_me'])) {
     }
     
     // 2. Clear the cookie from the browser
-    setcookie('remember_me', '', time() - 3600, '/', '', false, true);
+    setcookie('remember_me', '', [
+        'expires'  => time() - 3600,
+        'path'     => '/',
+        'secure'   => true,
+        'httponly' => true,
+        'samesite' => 'Strict',
+    ]);
 }
 
 // 3. Standard session clear
