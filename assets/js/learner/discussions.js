@@ -430,7 +430,7 @@ function renderThread(data) {
 
             /* ── MOBILE: pin compose to bottom like WhatsApp ── */
             @media (max-width: 767px) {
-                .disc-thread-wrap { position:fixed; top:60px; left:0; right:0; bottom:110px; display:flex; flex-direction:column; overflow:hidden; }
+                .disc-thread-wrap { position:fixed; top:60px; left:0; right:0; bottom:200px; display:flex; flex-direction:column; overflow:hidden; }
                 .disc-posts-scroll { flex:1; overflow-y:auto; padding-bottom:8px !important; }
                 .disc-compose { flex-shrink:0; }
             }
