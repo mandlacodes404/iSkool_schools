@@ -306,7 +306,7 @@ function renderMobileList(data) {
     if (!data || data.length === 0) {
         html += `<p style="text-align:center;color:#8b949e;padding:40px;">No discussions yet. Be the first to start one!</p>`;
     } else {
-        html += `<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">`;
+        html += `<div style="padding:0;display:flex;flex-direction:column;gap:12px;">`;
         data.forEach(d => {
             html += `
                 <div onclick="loadDiscussionThread(${d.id})"

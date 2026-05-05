@@ -240,7 +240,7 @@ function renderSyllabusPage(data) {
             .syl-wrapper {
                 max-width: 900px;
                 margin: 0 auto;
-                padding: 24px 20px;
+                padding: 0 0 24px 0;
             }
             .syl-page-title {
                 font-size: 20px;

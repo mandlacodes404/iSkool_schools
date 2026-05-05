@@ -264,7 +264,7 @@ function renderAssignmentCards(groupedData) {
                 background: #1a1919;
                 border-radius: 12px;
                 overflow: hidden;
-                margin: 8px 0 16px;
+                margin: 0 0 16px;
             }
             .las-mobile-teacher-header {
                 padding: 16px 16px 6px;

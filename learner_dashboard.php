@@ -207,7 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.6">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2456,14 +2456,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
 <script src="assets/js/learner/manual.js?v=1.8"></script>
-<script src="assets/js/learner/quiz.js?v=3.4"></script>
-<script src="assets/js/learner/assignments.js?v=2.6"></script>
-<script src="assets/js/learner/resources.js?v=2.6"></script>
-<script src="assets/js/learner/announcements.js?v=1.8"></script>
+<script src="assets/js/learner/quiz.js?v=3.5"></script>
+<script src="assets/js/learner/assignments.js?v=2.7"></script>
+<script src="assets/js/learner/resources.js?v=2.8"></script>
+<script src="assets/js/learner/announcements.js?v=1.9"></script>
 <script src="assets/js/learner/grades.js?v=1.7"></script>
 <script src="assets/js/learner/evaluations.js?v=1.7"></script>
-<script src="assets/js/learner/discussions.js?v=3.3"></script>
-<script src="assets/js/learner/syllabus.js?v=1.2"></script>
+<script src="assets/js/learner/discussions.js?v=3.4"></script>
+<script src="assets/js/learner/syllabus.js?v=1.3"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

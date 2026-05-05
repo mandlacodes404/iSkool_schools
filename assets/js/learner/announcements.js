@@ -350,7 +350,7 @@ function renderAnnouncements(data) {
                 background: #1a1919;
                 border-radius: 12px;
                 overflow: hidden;
-                margin: 8px 0 16px;
+                margin: 0 0 16px;
             }
             .lan-mobile-section-header {
                 padding: 12px 16px 6px;
