@@ -204,7 +204,7 @@ if (!empty($joinedClassIds)) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=1.8">
@@ -232,7 +232,9 @@ if (!empty($joinedClassIds)) {
     --sidebar-collapsed-width: 80px;
     --transition-speed: 0.3s;
 }
-
+html {
+  touch-action: manipulation;
+}
 body {
     margin: 0;
     font-family: 'Nunito', sans-serif;
