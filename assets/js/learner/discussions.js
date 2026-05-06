@@ -57,6 +57,25 @@ function getThreadTarget() {
 // ─────────────────────────────────────────────
 // 1. DISCUSSION LIST
 // ─────────────────────────────────────────────
+function unlockMobileLayout() {
+    const mc = document.querySelector('.main-content');
+    if (mc) {
+        mc.style.overflow      = '';
+        mc.style.height        = '';
+        mc.style.display       = '';
+        mc.style.flexDirection = '';
+    }
+    const apiArea = document.getElementById('api-content-area');
+    if (apiArea) {
+        apiArea.style.flex          = '';
+        apiArea.style.overflow      = '';
+        apiArea.style.display       = '';
+        apiArea.style.flexDirection = '';
+        apiArea.style.padding       = '';
+        apiArea.style.height        = '';
+    }
+}
+
 window.fetchDiscussions = async function() {
     stopDiscPolling();
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -287,6 +306,7 @@ function renderSidebarList(data) {
 }
 
 function renderMobileList(data) {
+    if (!isDesktop()) unlockMobileLayout();
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
@@ -421,19 +441,31 @@ function renderThread(data) {
         : getDateKey(disc.created_at);
 
     const composeHtml = is_in_class ? buildCompose(disc.id) : '';
-    const threadHeight = isDesktop() ? '100%' : '100%';
+
+    /* MOBILE: lock .main-content so the thread fills it like WhatsApp */
+    if (!isDesktop()) {
+        const mc = document.querySelector('.main-content');
+        if (mc) {
+            mc.style.overflow      = 'hidden';
+            mc.style.height        = '100dvh';
+            mc.style.display       = 'flex';
+            mc.style.flexDirection = 'column';
+        }
+        const apiArea = document.getElementById('api-content-area');
+        if (apiArea) {
+            apiArea.style.flex          = '1';
+            apiArea.style.overflow      = 'hidden';
+            apiArea.style.display       = 'flex';
+            apiArea.style.flexDirection = 'column';
+            apiArea.style.padding       = '0';
+            apiArea.style.height        = '0';
+        }
+    }
 
     target.innerHTML = `
         <style>
-            /* ── LAYOUT ── */
-            .disc-thread-wrap { display:flex; flex-direction:column; height:${threadHeight}; overflow:hidden; }
-
-            /* ── MOBILE: pin compose to bottom like WhatsApp ── */
-            @media (max-width: 767px) {
-                .disc-thread-wrap { position:fixed; top:60px; left:0; right:0; bottom:82px; display:flex; flex-direction:column; overflow:hidden; }
-                .disc-posts-scroll { flex:1; overflow-y:auto; padding-bottom:8px !important; }
-                .disc-compose { flex-shrink:0; }
-            }
+            /* LAYOUT */
+            .disc-thread-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; height:100%; }
             .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:#111; }
             .disc-thread-head-title { font-size:14px; font-weight:700; color:#e2e8f0; font-family:'Nunito',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
@@ -1207,6 +1239,7 @@ window.loadCreateDiscussion = async function() {
         document.querySelectorAll('.dsk-item').forEach(el => el.classList.remove('active'));
     } else {
         if (window.configureHeader) window.configureHeader({ title: 'New Discussion', mode: 'detail' });
+        unlockMobileLayout();
     }
 
     const loader = document.getElementById('loaderOverlay');
