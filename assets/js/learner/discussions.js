@@ -72,6 +72,7 @@ function unlockMobileLayout() {
         apiArea.style.display       = '';
         apiArea.style.flexDirection = '';
         apiArea.style.padding       = '';
+        apiArea.style.paddingBottom = '';
         apiArea.style.height        = '';
     }
 }
@@ -458,6 +459,7 @@ function renderThread(data) {
             apiArea.style.display       = 'flex';
             apiArea.style.flexDirection = 'column';
             apiArea.style.padding       = '0';
+            apiArea.style.paddingBottom = '82px';
             apiArea.style.height        = '0';
         }
     }
@@ -465,17 +467,16 @@ function renderThread(data) {
     target.innerHTML = `
         <style>
             /* LAYOUT */
-            .disc-thread-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; height:100%; }
+            .disc-thread-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; height:100%; min-height:0; }
             .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:#111; }
             .disc-thread-head-title { font-size:14px; font-weight:700; color:#e2e8f0; font-family:'Nunito',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
 
-            /* ── SCROLL AREA — full width, comfortable padding ── */
-            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 8px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; }
+            /* ── SCROLL AREA — takes all remaining space, compose stays below ── */
+            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; }
 
-            /* ── MOBILE: reserve space so last post is never hidden behind fixed compose ── */
             @media (max-width: 767px) {
-                .disc-posts-scroll { padding-bottom: 160px; }
+                .disc-posts-scroll { padding-bottom: 16px; }
             }
 
             /* ── DATE CHIP ── */
@@ -542,22 +543,14 @@ function renderThread(data) {
             .disc-nested-time { font-size:10px; color:#8b949e; margin-left:auto; }
             .disc-nested-body { font-size:13px; color:#c9d1d9; line-height:1.55; word-wrap:break-word; white-space:pre-wrap; }
 
-            /* ── COMPOSE — stable, never jumps ── */
+            /* ── COMPOSE — always pinned to bottom of the flex column, never floats ── */
             .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:#111; }
 
-            /* ── MOBILE: pin compose above the bottom nav bar (82px) ── */
             @media (max-width: 767px) {
                 .disc-compose {
-                    position: fixed;
-                    bottom: 82px;
-                    left: 0;
-                    right: 0;
-                    z-index: 200;
                     padding: 10px 12px 12px;
                     border-top: 1px solid rgba(255,255,255,0.1);
                     box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-                    box-sizing: border-box;
-                    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
                 }
             }
             .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; align-items:center; gap:8px; }
