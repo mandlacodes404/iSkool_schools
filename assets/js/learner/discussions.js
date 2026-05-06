@@ -473,6 +473,11 @@ function renderThread(data) {
             /* ── SCROLL AREA — full width, comfortable padding ── */
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 8px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; }
 
+            /* ── MOBILE: reserve space so last post is never hidden behind fixed compose ── */
+            @media (max-width: 767px) {
+                .disc-posts-scroll { padding-bottom: 160px; }
+            }
+
             /* ── DATE CHIP ── */
             .disc-date-sep { display:flex; align-items:center; justify-content:center; margin:14px 0 10px; }
             .disc-date-sep span { font-size:10px; font-weight:700; color:#8b949e; background:#141414; border:1px solid rgba(255,255,255,0.07); padding:3px 12px; border-radius:20px; letter-spacing:0.06em; text-transform:uppercase; }
@@ -539,6 +544,22 @@ function renderThread(data) {
 
             /* ── COMPOSE — stable, never jumps ── */
             .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:#111; }
+
+            /* ── MOBILE: pin compose above the bottom nav bar (82px) ── */
+            @media (max-width: 767px) {
+                .disc-compose {
+                    position: fixed;
+                    bottom: 82px;
+                    left: 0;
+                    right: 0;
+                    z-index: 200;
+                    padding: 10px 12px 12px;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+                    box-sizing: border-box;
+                    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+                }
+            }
             .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; align-items:center; gap:8px; }
             .disc-reply-preview.show { display:flex; }
             .disc-file-preview { display:none; align-items:center; gap:8px; background:#1b1b1b; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; }
