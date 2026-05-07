@@ -83,9 +83,59 @@ function buildHomeLayout(data, manualHtml) {
     const todo   = data.todo   || [];
     const recent = data.recent || [];
 
-    // Cap to-do at 3 — earliest due / most urgent first
-    const todoSlice = todo.slice(0, 3);
+    // Cap both at 4
+    const todoSlice   = todo.slice(0, 4);
+    const recentSlice = recent.slice(0, 4);
 
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        // ── MOBILE: GitHub-style stacked layout ──
+        return `
+        <div class="lh-mobile-wrapper">
+
+            <!-- GREETING -->
+            <div class="lh-greeting">
+                <span class="lh-greeting-text">Good ${getTimeGreeting()}</span>
+            </div>
+
+            <!-- TO-DO SECTION -->
+            <div class="lh-section">
+                <div class="lh-section-header">
+                    <div class="lh-section-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                        To-Do
+                    </div>
+                    ${todoSlice.length > 0 ? `<span class="lh-badge">${todoSlice.length}</span>` : ''}
+                </div>
+                <div class="lh-card">
+                    ${buildMobileTodo(todoSlice)}
+                </div>
+            </div>
+
+            <!-- RECENTS SECTION -->
+            <div class="lh-section">
+                <div class="lh-section-header">
+                    <div class="lh-section-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Recent
+                    </div>
+                </div>
+                <div class="lh-card">
+                    ${buildMobileRecent(recentSlice)}
+                </div>
+            </div>
+
+        </div>`;
+    }
+
+    // ── DESKTOP: existing split layout ──
     return `
         <div class="learner-home-wrapper">
 
@@ -101,10 +151,10 @@ function buildHomeLayout(data, manualHtml) {
                         </svg>
                         Recent Activity
                     </div>
-                    ${buildRecentActivity(recent)}
+                    ${buildRecentActivity(recentSlice)}
                 </div>
 
-                <!-- TO-DO (capped at 3) -->
+                <!-- TO-DO (capped at 4) -->
                 <div class="learner-home-panel" style="margin-top:16px;">
                     <div class="learner-home-panel-title">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -140,6 +190,148 @@ function buildHomeLayout(data, manualHtml) {
             </div>
 
         </div>`;
+}
+
+// ─────────────────────────────────────────────
+// TIME GREETING HELPER
+// ─────────────────────────────────────────────
+function getTimeGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'morning';
+    if (h < 17) return 'afternoon';
+    return 'evening';
+}
+
+// ─────────────────────────────────────────────
+// MOBILE TO-DO
+// ─────────────────────────────────────────────
+function buildMobileTodo(todo) {
+    if (!todo.length) {
+        return `
+            <div class="lh-empty-state">
+                <div class="lh-empty-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <div class="lh-empty-title">You're all caught up</div>
+                <div class="lh-empty-desc">Quizzes and assignments that need your attention will appear here.</div>
+            </div>`;
+    }
+
+    const colorMap = {
+        quiz:       '#4fd1c5',
+        assignment: '#a78bfa',
+        evaluation: '#f28c38'
+    };
+    const labelMap = {
+        quiz:       'Quiz',
+        assignment: 'Assignment',
+        evaluation: 'Evaluation'
+    };
+    const actionMap = {
+        quiz:       'window.learnerQuizCache=null; fetchQuizzes()',
+        assignment: 'window.learnerAssignmentCache=null; fetchAssignments()',
+        evaluation: 'window.evaluationCache=null; fetchEvaluations()'
+    };
+    const iconMap = {
+        quiz: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+        assignment: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+        evaluation: `<polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/>`
+    };
+
+    return todo.map((item, i) => {
+        const color  = colorMap[item.type]  || '#4fd1c5';
+        const label  = labelMap[item.type]  || item.type;
+        const action = actionMap[item.type] || '';
+        const icon   = iconMap[item.type]   || iconMap.quiz;
+        const isLast = i === todo.length - 1;
+
+        return `
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
+                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                        ${icon}
+                    </svg>
+                </div>
+                <div class="lh-row-body">
+                    <div class="lh-row-title">${item.title}</div>
+                    <div class="lh-row-meta">
+                        <span class="lh-type-tag" style="color:${color}; background:${color}18;">${label}</span>
+                        <span>${item.meta}</span>
+                    </div>
+                </div>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4a5568" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>`;
+    }).join('');
+}
+
+// ─────────────────────────────────────────────
+// MOBILE RECENT
+// ─────────────────────────────────────────────
+function buildMobileRecent(recent) {
+    if (!recent.length) {
+        return `
+            <div class="lh-empty-state">
+                <div class="lh-empty-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="lh-empty-title">Nothing yet</div>
+                <div class="lh-empty-desc">Announcements, resources, and assignments posted to your class will show up here.</div>
+            </div>`;
+    }
+
+    const colorMap = {
+        announcement: '#4fd1c5',
+        resource:     '#f28c38',
+        assignment:   '#a78bfa',
+        quiz:         '#fdd663'
+    };
+    const actionMap = {
+        announcement: 'fetchAnnouncements()',
+        resource:     'fetchResources()',
+        assignment:   'fetchAssignments()',
+        quiz:         'window.learnerQuizCache=null; fetchQuizzes()'
+    };
+    const iconMap = {
+        announcement: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
+        resource:     `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`,
+        assignment:   `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+        quiz:         `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`
+    };
+
+    return recent.map((item, i) => {
+        const color  = colorMap[item.type]  || '#4fd1c5';
+        const action = actionMap[item.type] || '';
+        const icon   = iconMap[item.type]   || iconMap.announcement;
+        const isLast = i === recent.length - 1;
+
+        return `
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
+                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                        ${icon}
+                    </svg>
+                </div>
+                <div class="lh-row-body">
+                    <div class="lh-row-title">${item.title}</div>
+                    <div class="lh-row-meta">
+                        <span>${item.meta}</span>
+                        <span class="lh-dot-sep">·</span>
+                        <span>${item.time_ago}</span>
+                    </div>
+                </div>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4a5568" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>`;
+    }).join('');
 }
 
 // ─────────────────────────────────────────────

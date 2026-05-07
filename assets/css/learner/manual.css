@@ -408,3 +408,169 @@
     align-items: center;
     gap: 5px;
 }
+/* ─────────────────────────────────────────────
+   MOBILE HOME — GitHub-style
+   ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+
+.lh-mobile-wrapper {
+    padding: 16px 16px 110px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Greeting */
+.lh-greeting {
+    padding: 4px 0 18px;
+}
+.lh-greeting-text {
+    font-size: 22px;
+    font-weight: 800;
+    color: #e2e8f0;
+    letter-spacing: -0.5px;
+}
+
+/* Section wrapper */
+.lh-section {
+    margin-bottom: 24px;
+}
+
+/* Section header row */
+.lh-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 0 2px;
+}
+
+.lh-section-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #4fd1c5;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.lh-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #4fd1c5;
+    background: rgba(79, 209, 197, 0.12);
+    border: 1px solid rgba(79, 209, 197, 0.25);
+    border-radius: 20px;
+    padding: 1px 8px;
+    letter-spacing: 0;
+}
+
+/* Card container */
+.lh-card {
+    background: #1a1919;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+/* Individual row */
+.lh-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.lh-row:active {
+    background: rgba(255, 255, 255, 0.04);
+}
+.lh-row-last {
+    border-bottom: none;
+}
+
+/* Icon box */
+.lh-row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Text body */
+.lh-row-body {
+    flex: 1;
+    min-width: 0;
+}
+.lh-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lh-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #4a5568;
+    margin-top: 3px;
+    flex-wrap: wrap;
+}
+.lh-type-tag {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+.lh-dot-sep {
+    color: #2d3748;
+}
+
+/* Empty state */
+.lh-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px;
+    text-align: center;
+    gap: 8px;
+}
+.lh-empty-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(79, 209, 197, 0.08);
+    border: 1px solid rgba(79, 209, 197, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+.lh-empty-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+.lh-empty-desc {
+    font-size: 13px;
+    color: #4a5568;
+    line-height: 1.5;
+    max-width: 260px;
+}
+
+} /* end @media (max-width: 768px) */
