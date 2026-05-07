@@ -1739,159 +1739,193 @@ if (fullPage &&
         : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     apiArea.innerHTML = `
-        <div style="padding:20px;">
+        <div style="padding:20px 16px 40px;max-width:480px;margin:0 auto;">
 
-            <!-- CIRCULAR PROFILE -->
-            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
-                <div onclick="document.getElementById('profileInput').click()"
-                     style="position:relative;width:100px;height:100px;border-radius:50%;
-                            background:#1b1b1b;border:3px solid #30363d;
-                            overflow:hidden;cursor:pointer;flex-shrink:0;
-                            transition:border-color 0.2s ease;"
-                     onmouseover="this.style.borderColor='#4fd1c5'; this.querySelector('.cam-overlay').style.opacity='1';"
-                     onmouseout="this.style.borderColor='#30363d'; this.querySelector('.cam-overlay').style.opacity='0';">
+            <!-- ── PROFILE CARD (iOS-style account block at top) ── -->
+            <div onclick="document.getElementById('profileInput').click()"
+                 style="display:flex;align-items:center;gap:16px;
+                        background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;padding:16px;cursor:pointer;
+                        transition:background 0.2s ease;margin-bottom:28px;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='#1b1b1b'">
 
-                    <!-- Avatar (photo or initials) -->
-                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                <!-- Avatar -->
+                <div style="position:relative;width:64px;height:64px;border-radius:50%;
+                            background:#121212;border:2px solid #30363d;
+                            overflow:hidden;flex-shrink:0;">
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
                         ${avatarHTML}
                     </div>
+                </div>
 
-                    <!-- Camera hover overlay -->
-                    <div class="cam-overlay"
-                         style="position:absolute;top:0;left:0;width:100%;height:100%;
-                                background:rgba(0,0,0,0.55);border-radius:50%;
-                                display:flex;flex-direction:column;align-items:center;
-                                justify-content:center;opacity:0;
-                                transition:opacity 0.2s ease;pointer-events:none;">
-                        <svg viewBox="0 0 24 24" width="26" height="26" stroke="#ffffff" stroke-width="2" fill="none">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                        <span style="color:#fff;font-size:11px;font-weight:700;margin-top:4px;">Edit</span>
+                <!-- Name + subtitle -->
+                <div style="flex:1;min-width:0;">
+                    <div style="color:#e2e8f0;font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        <?= htmlspecialchars($learnerFullName) ?>
+                    </div>
+                    <div style="color:#8b949e;font-size:13px;margin-top:3px;">
+                        <?= htmlspecialchars($learnerEmail) ?>
                     </div>
                 </div>
-                <div style="margin-top:10px;font-size:13px;color:#8b949e;">Click to update photo</div>
+
+                <!-- Chevron -->
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </div>
 
-            <div style="max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: NOTIFICATIONS                     -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
+                Notifications
+            </div>
 
-                <!-- Notification Help Box -->
-                <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);
-                            border-left:4px solid #4fd1c5;border-radius:12px;padding:15px;margin-bottom:4px;">
-                    <div style="color:#4fd1c5;font-weight:800;font-size:14px;margin-bottom:8px;">
-                        💡 Notification Help
+            <!-- Grouped card -->
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
+
+                <!-- Notification Help row -->
+                <div style="padding:14px 16px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                        <div style="width:36px;height:36px;border-radius:9px;
+                                    background:rgba(79,209,197,0.12);
+                                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span style="font-size:18px;line-height:1;">💡</span>
+                        </div>
+                        <div style="color:#4fd1c5;font-weight:700;font-size:14px;">Notification Help</div>
                     </div>
-                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.7;">
+                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.8;">
                         <li><strong style="color:#c9d1d9;">iPhone Users:</strong> You must "Add to Home Screen" first.</li>
                         <li>Tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below if you aren't getting alerts.</li>
                         <li>If prompted, select <strong style="color:#c9d1d9;">"Allow"</strong> on the system popup.</li>
                     </ol>
                 </div>
 
+                <!-- Divider -->
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
+
+                <!-- Sync Notifications row -->
+                <div onclick="requestIphonePush()"
+                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='transparent'">
+                    <div style="width:36px;height:36px;border-radius:9px;
+                                background:rgba(79,209,197,0.12);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Sync Notifications</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: PROFILE                           -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
+                Profile
+            </div>
+
+            <!-- Grouped card -->
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
+
                 <!-- Update Profile Picture -->
                 <div onclick="document.getElementById('profileInput').click()"
-                     style="display:flex;align-items:center;gap:14px;
-                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                            border-radius:12px;padding:16px;cursor:pointer;
-                            transition:background 0.2s ease;"
+                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                      onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='#1b1b1b'">
-                    <div style="width:40px;height:40px;border-radius:10px;
-                                background:rgba(79,209,197,0.1);
+                     onmouseout="this.style.background='transparent'">
+                    <div style="width:36px;height:36px;border-radius:9px;
+                                background:rgba(79,209,197,0.12);
                                 display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                     </div>
                     <div style="flex:1;">
-                        <div style="color:#e2e8f0;font-weight:700;font-size:14px;">Update Profile Picture</div>
+                        <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Update Profile Picture</div>
                         <div style="color:#8b949e;font-size:12px;margin-top:2px;">Upload a new photo</div>
                     </div>
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </div>
 
+                <!-- Divider -->
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
+
                 <!-- Remove Profile Picture -->
                 <div onclick="removeLearnerProfilePicture()"
-                     style="display:flex;align-items:center;gap:14px;
-                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                            border-radius:12px;padding:16px;cursor:pointer;
-                            transition:background 0.2s ease;"
+                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                      onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='#1b1b1b'">
-                    <div style="width:40px;height:40px;border-radius:10px;
+                     onmouseout="this.style.background='transparent'">
+                    <div style="width:36px;height:36px;border-radius:9px;
                                 background:rgba(248,81,73,0.1);
                                 display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
                             <path d="M10 11v6M14 11v6"></path>
                         </svg>
                     </div>
                     <div style="flex:1;">
-                        <div style="color:#f85149;font-weight:700;font-size:14px;">Remove Profile Picture</div>
+                        <div style="color:#f85149;font-weight:600;font-size:14px;">Remove Profile Picture</div>
                         <div style="color:#8b949e;font-size:12px;margin-top:2px;">Revert to initials avatar</div>
                     </div>
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </div>
+            </div>
 
-                <!-- Sync Notifications -->
-                <div onclick="requestIphonePush()"
-                     style="display:flex;align-items:center;gap:14px;
-                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                            border-radius:12px;padding:16px;cursor:pointer;
-                            transition:background 0.2s ease;"
-                     onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='#1b1b1b'">
-                    <div style="width:40px;height:40px;border-radius:10px;
-                                background:rgba(79,209,197,0.1);
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="color:#e2e8f0;font-weight:700;font-size:14px;">Sync Notifications</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </div>
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: ACCOUNT                           -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
+                Account
+            </div>
 
-                <!-- Sign Out -->
+            <!-- Grouped card (single row) -->
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;">
                 <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
-                     style="display:flex;align-items:center;gap:14px;
-                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                            border-radius:12px;padding:16px;cursor:pointer;
-                            margin-top:8px;transition:background 0.2s ease;"
+                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                      onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='#1b1b1b'">
-                    <div style="width:40px;height:40px;border-radius:10px;
+                     onmouseout="this.style.background='transparent'">
+                    <div style="width:36px;height:36px;border-radius:9px;
                                 background:rgba(248,81,73,0.1);
                                 display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                             <polyline points="16 17 21 12 16 7"></polyline>
                             <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
                     </div>
                     <div style="flex:1;">
-                        <div style="color:#f85149;font-weight:700;font-size:14px;">Sign Out</div>
+                        <div style="color:#f85149;font-weight:600;font-size:14px;">Sign Out</div>
                         <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
                     </div>
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </div>
-
             </div>
+
         </div>`;
 };
 document.getElementById("settingsBtn")?.addEventListener('click', function() {
