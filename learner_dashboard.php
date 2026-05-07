@@ -1258,6 +1258,32 @@ iframe {
     }
 }
 
+/* ── COLLAPSING HEADER — mobile only ──────────────────────────────────────
+   On mobile the .main-header starts fully transparent so the page content
+   bleeds edge-to-edge. When the user scrolls down past ~10px the header
+   transitions to a solid glass background (same as desktop style).
+   Desktop is NEVER affected — every rule here is inside max-width:768px.
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Base state: transparent, no border */
+    .main-header {
+        background: transparent !important;
+        border-bottom-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transition: background 0.28s ease,
+                    border-color 0.28s ease,
+                    backdrop-filter 0.28s ease;
+    }
+
+    /* Scrolled state: glass effect locks in */
+    .main-header.header-scrolled {
+        background: rgba(26, 25, 25, 0.92) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -2163,6 +2189,28 @@ if (desktopToggle) {
     });
 }
     loader.style.display = "none";
+
+    // ── COLLAPSING HEADER: mobile scroll listener ─────────────────────────
+    // Watches .main-content (the mobile scroll container) and toggles
+    // .header-scrolled on .main-header. Only wired on mobile — no-op on desktop.
+    // Discussion threads set overflow:hidden on .main-content so this listener
+    // fires on nothing during a thread (safe).
+    if (window.innerWidth <= 768) {
+        const mainContent  = document.querySelector('.main-content');
+        const mainHeader   = document.querySelector('.main-header');
+        const SCROLL_THRESHOLD = 10; // px before header solidifies
+
+        if (mainContent && mainHeader) {
+            mainContent.addEventListener('scroll', function () {
+                if (mainContent.scrollTop > SCROLL_THRESHOLD) {
+                    mainHeader.classList.add('header-scrolled');
+                } else {
+                    mainHeader.classList.remove('header-scrolled');
+                }
+            }, { passive: true });
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────
 });
 
 function toggleJoinClassForm() {
