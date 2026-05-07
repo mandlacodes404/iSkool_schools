@@ -468,7 +468,8 @@ function renderThread(data) {
             apiArea.style.flexDirection = 'column';
             apiArea.style.padding       = '0';
             apiArea.style.paddingBottom = '0';
-            apiArea.style.height        = '0';
+            /* Use 100% not 0 — height:0 collapses the flex child and breaks scroll */
+            apiArea.style.height        = '100%';
         }
         /* Hide the bottom nav while inside a thread */
         const nav = document.getElementById('mobileBottomNav');
@@ -487,8 +488,8 @@ function renderThread(data) {
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; }
 
             @media (max-width: 767px) {
-                /* Extra room so last message isn't hidden behind the trigger bar */
-                .disc-posts-scroll { padding-bottom: 80px; }
+                /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
+                .disc-posts-scroll { padding-bottom: 100px; }
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
             }
@@ -860,36 +861,52 @@ function injectMobileComposer(discId) {
     overlay.addEventListener('click', discCloseMobileSheet);
     document.body.appendChild(overlay);
 
-    /* ── 2. Fixed trigger bar at bottom ── */
+    /* ── 2. Fixed trigger bar at bottom — lifted 16px off the very bottom ── */
     const trigger = document.createElement('div');
     trigger.id = 'discMobileTrigger';
     trigger.style.cssText = `
-        position:fixed;bottom:0;left:0;right:0;
+        position:fixed;bottom:16px;left:0;right:0;
         padding:10px 14px;
         padding-bottom:calc(10px + env(safe-area-inset-bottom));
         background:rgba(17,17,17,0.96);
         border-top:1px solid rgba(255,255,255,0.08);
+        border-radius:18px 18px 0 0;
         box-shadow:0 -4px 24px rgba(0,0,0,0.5);
         z-index:5000;
-        display:flex;align-items:center;gap:10px;
+        display:flex;flex-direction:column;gap:0;
         backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);`;
     trigger.innerHTML = `
-        <div onclick="discOpenMobileSheet(${discId})" style="
-            flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);
-            border-radius:22px;padding:10px 16px;
-            color:#8b949e;font-family:'Nunito',sans-serif;
-            font-size:14px;font-weight:600;cursor:text;
-            display:flex;align-items:center;gap:8px;">
-            <i class="fas fa-comment-dots" style="color:#4fd1c5;font-size:13px;"></i>
-            Write a reply…
+        <!-- Mobile typing indicator — shown above the trigger pill -->
+        <div id="discMobileTyping" style="
+            display:none;align-items:center;gap:8px;
+            padding:4px 4px 6px;font-size:12px;
+            color:#8b949e;font-weight:700;font-family:'Nunito',sans-serif;">
+            <div style="display:flex;align-items:center;gap:3px;">
+                <span style="width:6px;height:6px;border-radius:50%;background:#4fd1c5;animation:discTypeBounce 1.2s infinite ease-in-out;display:inline-block;"></span>
+                <span style="width:6px;height:6px;border-radius:50%;background:#4fd1c5;animation:discTypeBounce 1.2s 0.2s infinite ease-in-out;display:inline-block;"></span>
+                <span style="width:6px;height:6px;border-radius:50%;background:#4fd1c5;animation:discTypeBounce 1.2s 0.4s infinite ease-in-out;display:inline-block;"></span>
+            </div>
+            <span id="discMobileTypingText">Someone is typing...</span>
         </div>
-        <button onclick="discOpenMobileSheet(${discId},'attach')" style="
-            width:40px;height:40px;border-radius:50%;background:#1b1b1b;
-            border:1px solid rgba(255,255,255,0.08);color:#8b949e;
-            display:flex;align-items:center;justify-content:center;
-            cursor:pointer;flex-shrink:0;font-size:15px;">
-            <i class="fas fa-paperclip"></i>
-        </button>`;
+        <!-- Trigger row -->
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div onclick="discOpenMobileSheet(${discId})" style="
+                flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);
+                border-radius:22px;padding:10px 16px;
+                color:#8b949e;font-family:'Nunito',sans-serif;
+                font-size:14px;font-weight:600;cursor:text;
+                display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-comment-dots" style="color:#4fd1c5;font-size:13px;"></i>
+                Write a reply…
+            </div>
+            <button onclick="discOpenMobileSheet(${discId},'attach')" style="
+                width:40px;height:40px;border-radius:50%;background:#1b1b1b;
+                border:1px solid rgba(255,255,255,0.08);color:#8b949e;
+                display:flex;align-items:center;justify-content:center;
+                cursor:pointer;flex-shrink:0;font-size:15px;">
+                <i class="fas fa-paperclip"></i>
+            </button>
+        </div>`;
     document.body.appendChild(trigger);
 
     /* ── 3. Bottom sheet ── */
@@ -1269,14 +1286,29 @@ async function pollTyping(discId) {
     try {
         const res  = await fetch(`api/get_typing.php?discussion_id=${discId}`);
         const data = await res.json();
-        const el   = document.getElementById('discTypingIndicator');
-        const txt  = document.getElementById('discTypingText');
-        if (!el) return;
-        if (data.count > 0) {
-            txt.textContent = data.count === 1 ? 'Someone is typing...' : `${data.count} people are typing...`;
-            el.classList.add('show');
-        } else {
-            el.classList.remove('show');
+
+        /* ── Desktop indicator (inside .disc-compose) ── */
+        const el  = document.getElementById('discTypingIndicator');
+        const txt = document.getElementById('discTypingText');
+        if (el) {
+            if (data.count > 0) {
+                if (txt) txt.textContent = data.count === 1 ? 'Someone is typing...' : `${data.count} people are typing...`;
+                el.classList.add('show');
+            } else {
+                el.classList.remove('show');
+            }
+        }
+
+        /* ── Mobile indicator (above the trigger bar) ── */
+        const mob    = document.getElementById('discMobileTyping');
+        const mobTxt = document.getElementById('discMobileTypingText');
+        if (mob) {
+            if (data.count > 0) {
+                if (mobTxt) mobTxt.textContent = data.count === 1 ? 'Someone is typing...' : `${data.count} people are typing...`;
+                mob.style.display = 'flex';
+            } else {
+                mob.style.display = 'none';
+            }
         }
     } catch (e) {}
 }
