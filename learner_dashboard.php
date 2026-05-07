@@ -207,7 +207,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.3">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.6">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.7">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
