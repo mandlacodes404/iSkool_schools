@@ -75,6 +75,13 @@ function unlockMobileLayout() {
         apiArea.style.paddingBottom = '';
         apiArea.style.height        = '';
     }
+    /* Restore the bottom nav when leaving a thread */
+    const nav = document.getElementById('mobileBottomNav');
+    if (nav) nav.style.display = '';
+    /* Remove the mobile sheet elements if they exist */
+    document.getElementById('discMobileSheet')?.remove();
+    document.getElementById('discMobileTrigger')?.remove();
+    document.getElementById('discMobileOverlay')?.remove();
 }
 
 window.fetchDiscussions = async function() {
@@ -390,6 +397,7 @@ window.loadDiscussionThread = async function(discId) {
         renderThread(data);
         window.discussionThreadCache[discId] = data;
         currentDiscId          = discId;
+        window._currentDiscId  = discId;   /* used by mobile sheet reply */
         discPollInterval       = setInterval(() => pollNewReplies(discId), 4000);
         discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
 
@@ -448,7 +456,7 @@ function renderThread(data) {
         const mc = document.querySelector('.main-content');
         if (mc) {
             mc.style.overflow      = 'hidden';
-            mc.style.height        = '100dvh';
+            mc.style.height        = '100%';
             mc.style.display       = 'flex';
             mc.style.flexDirection = 'column';
         }
@@ -459,9 +467,12 @@ function renderThread(data) {
             apiArea.style.display       = 'flex';
             apiArea.style.flexDirection = 'column';
             apiArea.style.padding       = '0';
-            apiArea.style.paddingBottom = '82px';
+            apiArea.style.paddingBottom = '0';
             apiArea.style.height        = '0';
         }
+        /* Hide the bottom nav while inside a thread */
+        const nav = document.getElementById('mobileBottomNav');
+        if (nav) nav.style.display = 'none';
     }
 
     target.innerHTML = `
@@ -476,7 +487,10 @@ function renderThread(data) {
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; }
 
             @media (max-width: 767px) {
-                .disc-posts-scroll { padding-bottom: 16px; }
+                /* Extra room so last message isn't hidden behind the trigger bar */
+                .disc-posts-scroll { padding-bottom: 80px; }
+                /* Hide the desktop compose box on mobile — replaced by the floating sheet */
+                .disc-compose { display: none !important; }
             }
 
             /* ── DATE CHIP ── */
@@ -546,13 +560,7 @@ function renderThread(data) {
             /* ── COMPOSE — always pinned to bottom of the flex column, never floats ── */
             .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:#111; }
 
-            @media (max-width: 767px) {
-                .disc-compose {
-                    padding: 10px 12px 12px;
-                    border-top: 1px solid rgba(255,255,255,0.1);
-                    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-                }
-            }
+            /* disc-compose is desktop-only; mobile uses discMobileSheet instead */
             .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; align-items:center; gap:8px; }
             .disc-reply-preview.show { display:flex; }
             .disc-file-preview { display:none; align-items:center; gap:8px; background:#1b1b1b; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; }
@@ -625,6 +633,11 @@ function renderThread(data) {
     if (scroll) scroll.scrollTop = scroll.scrollHeight;
 
     wireCompose(disc.id);
+
+    /* ── MOBILE: inject the floating trigger bar + bottom sheet ── */
+    if (!isDesktop() && is_in_class) {
+        injectMobileComposer(disc.id);
+    }
 }
 
 function buildPostCard(r, user_role, is_in_class, discId) {
@@ -829,6 +842,419 @@ function wireCompose(discId) {
 }
 
 // ─────────────────────────────────────────────
+// MOBILE COMPOSER — floating trigger + bottom sheet
+// ─────────────────────────────────────────────
+function injectMobileComposer(discId) {
+    /* Clean up any stale instances */
+    document.getElementById('discMobileSheet')?.remove();
+    document.getElementById('discMobileTrigger')?.remove();
+    document.getElementById('discMobileOverlay')?.remove();
+
+    /* ── 1. Dimmer overlay (behind sheet, above posts) ── */
+    const overlay = document.createElement('div');
+    overlay.id = 'discMobileOverlay';
+    overlay.style.cssText = `
+        position:fixed;inset:0;background:rgba(0,0,0,0.55);
+        z-index:5500;display:none;backdrop-filter:blur(2px);
+        -webkit-backdrop-filter:blur(2px);transition:opacity 0.25s ease;opacity:0;`;
+    overlay.addEventListener('click', discCloseMobileSheet);
+    document.body.appendChild(overlay);
+
+    /* ── 2. Fixed trigger bar at bottom ── */
+    const trigger = document.createElement('div');
+    trigger.id = 'discMobileTrigger';
+    trigger.style.cssText = `
+        position:fixed;bottom:0;left:0;right:0;
+        padding:10px 14px;
+        padding-bottom:calc(10px + env(safe-area-inset-bottom));
+        background:rgba(17,17,17,0.96);
+        border-top:1px solid rgba(255,255,255,0.08);
+        box-shadow:0 -4px 24px rgba(0,0,0,0.5);
+        z-index:5000;
+        display:flex;align-items:center;gap:10px;
+        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);`;
+    trigger.innerHTML = `
+        <div onclick="discOpenMobileSheet(${discId})" style="
+            flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);
+            border-radius:22px;padding:10px 16px;
+            color:#8b949e;font-family:'Nunito',sans-serif;
+            font-size:14px;font-weight:600;cursor:text;
+            display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-comment-dots" style="color:#4fd1c5;font-size:13px;"></i>
+            Write a reply…
+        </div>
+        <button onclick="discOpenMobileSheet(${discId},'attach')" style="
+            width:40px;height:40px;border-radius:50%;background:#1b1b1b;
+            border:1px solid rgba(255,255,255,0.08);color:#8b949e;
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;flex-shrink:0;font-size:15px;">
+            <i class="fas fa-paperclip"></i>
+        </button>`;
+    document.body.appendChild(trigger);
+
+    /* ── 3. Bottom sheet ── */
+    const sheet = document.createElement('div');
+    sheet.id = 'discMobileSheet';
+    sheet.style.cssText = `
+        position:fixed;bottom:0;left:0;right:0;
+        background:#111;
+        border-top:1px solid rgba(255,255,255,0.1);
+        border-radius:20px 20px 0 0;
+        box-shadow:0 -8px 40px rgba(0,0,0,0.7);
+        z-index:6000;
+        transform:translateY(100%);
+        transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+        max-height:80vh;display:flex;flex-direction:column;`;
+    sheet.innerHTML = `
+        <!-- Drag handle -->
+        <div style="display:flex;justify-content:center;padding:10px 0 6px;" onclick="discCloseMobileSheet()">
+            <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);"></div>
+        </div>
+
+        <!-- Reply preview (hidden by default) -->
+        <div id="discSheetReplyPreview" style="
+            display:none;margin:0 12px 8px;
+            background:rgba(79,209,197,0.06);
+            border:1px solid rgba(79,209,197,0.2);
+            border-radius:10px;padding:8px 12px;
+            font-size:12px;color:#8b949e;
+            flex-direction:row;align-items:center;gap:8px;">
+            <i class="fas fa-reply" style="color:#4fd1c5;flex-shrink:0;"></i>
+            <span style="color:#4fd1c5;font-weight:700;flex-shrink:0;">Replying to:</span>
+            <span id="discSheetPreviewText" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button onclick="discSheetCancelReply()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;">✕</button>
+        </div>
+
+        <!-- File preview (hidden by default) -->
+        <div id="discSheetFilePreview" style="
+            display:none;margin:0 12px 8px;
+            background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);
+            border-radius:10px;padding:8px 12px;
+            font-size:12px;color:#8b949e;
+            flex-direction:row;align-items:center;gap:8px;">
+            <img id="discSheetPreviewImg" src="" style="display:none;width:30px;height:30px;object-fit:cover;border-radius:4px;">
+            <span id="discSheetFileName" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button onclick="discSheetClearFile()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;margin-left:auto;">✕</button>
+        </div>
+
+        <!-- Voice preview (hidden by default) -->
+        <div id="discSheetVoicePreview" style="
+            display:none;margin:0 12px 8px;
+            background:rgba(248,81,73,0.05);
+            border:1px solid rgba(248,81,73,0.2);
+            border-radius:10px;padding:10px 14px;
+            flex-direction:row;align-items:center;gap:10px;">
+            <span id="discSheetVoiceDot" class="disc-voice-rec-dot"></span>
+            <div class="disc-voice-rec-bars" id="discSheetVoiceRecBars" style="display:none;">
+                <div class="disc-voice-rec-bar" style="height:6px;"></div>
+                <div class="disc-voice-rec-bar"></div>
+                <div class="disc-voice-rec-bar"></div>
+                <div class="disc-voice-rec-bar"></div>
+                <div class="disc-voice-rec-bar"></div>
+            </div>
+            <span id="discSheetVoiceStatus" class="disc-voice-rec-status" style="color:#f85149;flex:1;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;">Ready to record</span>
+            <button onclick="discSheetStopRecording()" style="background:none;border:none;color:#4fd1c5;cursor:pointer;font-size:18px;padding:0 2px;">
+                <i class="fas fa-stop-circle"></i>
+            </button>
+            <button onclick="discSheetCancelRecording()" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:16px;padding:0 2px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+
+        <!-- Compose box -->
+        <div style="margin:0 12px;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;transition:border-color 0.2s;" id="discSheetBox">
+            <textarea id="discSheetTextarea"
+                placeholder="Add to the discussion…"
+                rows="1"
+                style="width:100%;background:transparent;border:none;color:#e2e8f0;
+                       font-family:'Nunito',sans-serif;font-size:15px;font-weight:600;
+                       padding:13px 14px 8px;resize:none;outline:none;
+                       min-height:48px;max-height:140px;line-height:1.5;
+                       box-sizing:border-box;"></textarea>
+
+            <!-- Toolbar -->
+            <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-top:1px solid rgba(255,255,255,0.07);">
+                <!-- Attach -->
+                <label style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
+                    <i class="fas fa-paperclip"></i>
+                    <input type="file" id="discSheetFileInput" accept="image/*,.pdf" style="display:none;">
+                </label>
+                <!-- Mic -->
+                <button id="discSheetMicBtn"
+                    onclick="discSheetToggleRecording(${discId})"
+                    style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <!-- Anon toggle -->
+                <label id="discSheetAnonLabel"
+                    style="background:none;border:none;color:#4fd1c5;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
+                    <input type="checkbox" id="discSheetAnon" checked
+                        onchange="document.getElementById('discSheetAnonLabel').style.color=this.checked?'#4fd1c5':'#8b949e';"
+                        style="display:none;">
+                    <i class="fas fa-user-secret"></i> Anon
+                </label>
+                <!-- Post button -->
+                <button id="discSheetPostBtn"
+                    onclick="discSheetSubmitReply(${discId})"
+                    style="background:#4fd1c5;color:#0d1117;border:none;padding:8px 18px;
+                           border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;
+                           font-weight:800;cursor:pointer;display:flex;align-items:center;
+                           gap:6px;margin-left:auto;transition:background 0.2s;">
+                    <i class="fas fa-paper-plane"></i> Post
+                </button>
+            </div>
+        </div>
+
+        <!-- Safe area spacer -->
+        <div style="height:calc(14px + env(safe-area-inset-bottom));flex-shrink:0;"></div>`;
+    document.body.appendChild(sheet);
+
+    /* Wire up sheet textarea auto-resize + typing signal */
+    const sheetTa = document.getElementById('discSheetTextarea');
+    if (sheetTa) {
+        sheetTa.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+            sendTypingSignal(discId);
+        });
+    }
+
+    /* Wire up sheet file input */
+    const sheetFi = document.getElementById('discSheetFileInput');
+    if (sheetFi) {
+        sheetFi.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const preview = document.getElementById('discSheetFilePreview');
+            const img     = document.getElementById('discSheetPreviewImg');
+            const name    = document.getElementById('discSheetFileName');
+            preview.style.display = 'flex';
+            name.textContent = file.name;
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+                reader.readAsDataURL(file);
+            } else {
+                img.style.display = 'none';
+            }
+        });
+    }
+
+    /* Focus sheet box border on focus */
+    const sheetBox = document.getElementById('discSheetBox');
+    if (sheetTa && sheetBox) {
+        sheetTa.addEventListener('focus',  () => sheetBox.style.borderColor = 'rgba(79,209,197,0.4)');
+        sheetTa.addEventListener('blur',   () => sheetBox.style.borderColor = 'rgba(255,255,255,0.08)');
+    }
+}
+
+/* Open the sheet */
+window.discOpenMobileSheet = function(discId, mode) {
+    const sheet   = document.getElementById('discMobileSheet');
+    const overlay = document.getElementById('discMobileOverlay');
+    const trigger = document.getElementById('discMobileTrigger');
+    if (!sheet) return;
+
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+    sheet.style.transform = 'translateY(0)';
+    if (trigger) trigger.style.display = 'none';
+
+    /* If triggered via attach button, immediately open file picker */
+    if (mode === 'attach') {
+        setTimeout(() => document.getElementById('discSheetFileInput')?.click(), 320);
+    } else {
+        setTimeout(() => document.getElementById('discSheetTextarea')?.focus(), 320);
+    }
+};
+
+/* Close the sheet */
+window.discCloseMobileSheet = function() {
+    const sheet   = document.getElementById('discMobileSheet');
+    const overlay = document.getElementById('discMobileOverlay');
+    const trigger = document.getElementById('discMobileTrigger');
+    if (!sheet) return;
+
+    sheet.style.transform = 'translateY(100%)';
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 280);
+    if (trigger) trigger.style.display = 'flex';
+
+    /* Blur textarea to dismiss keyboard */
+    document.getElementById('discSheetTextarea')?.blur();
+};
+
+/* Reply helpers for the sheet */
+window.discSheetCancelReply = function() {
+    window._discReplyTo = 0;
+    const p = document.getElementById('discSheetReplyPreview');
+    if (p) p.style.display = 'none';
+};
+
+window.discSheetClearFile = function() {
+    const fi = document.getElementById('discSheetFileInput');
+    if (fi) fi.value = '';
+    const preview = document.getElementById('discSheetFilePreview');
+    if (preview) preview.style.display = 'none';
+    const img = document.getElementById('discSheetPreviewImg');
+    if (img) img.style.display = 'none';
+};
+
+/* Submit reply from the sheet (mirrors discSubmitReply) */
+window.discSheetSubmitReply = async function(discId) {
+    const ta      = document.getElementById('discSheetTextarea');
+    const fi      = document.getElementById('discSheetFileInput');
+    const anon    = document.getElementById('discSheetAnon');
+    const replyTo = window._discReplyTo ?? 0;
+    const message = ta ? ta.value.trim() : '';
+
+    if (!message && (!fi || !fi.files[0]) && !_discVoiceBlob) return;
+
+    const fd = new FormData();
+    fd.append('discussion_id', discId);
+    fd.append('message', message);
+    fd.append('anonymous', anon?.checked ? '1' : '0');
+    fd.append('reply_to', replyTo);
+    if (_discVoiceBlob) {
+        const ext = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
+        fd.append('attachment', _discVoiceBlob, `voice_${Date.now()}.${ext}`);
+    } else if (fi?.files[0]) {
+        fd.append('attachment', fi.files[0]);
+    }
+
+    const btn = document.getElementById('discSheetPostBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
+    try {
+        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        /* Clear sheet */
+        if (ta) { ta.value = ''; ta.style.height = 'auto'; }
+        if (fi) fi.value = '';
+        discSheetCancelReply();
+        discSheetClearFile();
+        _discVoiceBlob = null;
+        _discAudioChunks = [];
+        document.getElementById('discSheetVoicePreview').style.display = 'none';
+
+        /* Close the sheet */
+        discCloseMobileSheet();
+
+        /* Append the new post card */
+        const scroll   = document.getElementById('discPostsScroll');
+        const bottomEl = document.getElementById('discBottom');
+        if (scroll && data.reply) {
+            const dk = getDateKey(data.reply.created_at);
+            if (dk !== lastSeenDateKey) {
+                const sep = document.createElement('div');
+                sep.className = 'disc-date-sep';
+                sep.innerHTML = `<span>${getDateLabel(data.reply.created_at)}</span>`;
+                scroll.insertBefore(sep, bottomEl);
+                lastSeenDateKey = dk;
+            }
+            const card = document.createElement('div');
+            card.innerHTML = buildPostCard(data.reply, 'learner', true, discId).trim();
+            scroll.insertBefore(card.firstChild, bottomEl);
+            lastReplyId = Math.max(lastReplyId, data.reply.id);
+            scroll.scrollTop = scroll.scrollHeight;
+        }
+
+        /* Update cache */
+        if (window.discussionCache) {
+            const disc = window.discussionCache.find(d => d.id == discId);
+            if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
+        }
+
+    } catch (e) {
+        alert(e.message || 'Failed to post reply');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Post'; }
+    }
+};
+
+/* ── Sheet voice recording (mirrors desktop recorder but targets sheet elements) ── */
+window.discSheetToggleRecording = async function(discId) {
+    if (_discMediaRecorder && _discMediaRecorder.state === 'recording') {
+        discSheetStopRecording();
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        _discAudioChunks   = [];
+        _discVoiceBlob     = null;
+        _discRecordSeconds = 0;
+
+        const mimeType     = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+        _discMediaRecorder = new MediaRecorder(stream, { mimeType });
+
+        _discMediaRecorder.ondataavailable = e => { if (e.data.size > 0) _discAudioChunks.push(e.data); };
+        _discMediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            _discVoiceBlob = new Blob(_discAudioChunks, { type: mimeType });
+            _discSheetShowVoiceReady(mimeType);
+        };
+
+        _discMediaRecorder.start(250);
+
+        const preview = document.getElementById('discSheetVoicePreview');
+        const dot     = document.getElementById('discSheetVoiceDot');
+        const status  = document.getElementById('discSheetVoiceStatus');
+        const micBtn  = document.getElementById('discSheetMicBtn');
+        const recBars = document.getElementById('discSheetVoiceRecBars');
+        if (preview) { preview.style.display = 'flex'; preview.classList.remove('ready'); }
+        if (dot)     { dot.className = 'disc-voice-rec-dot'; dot.style.display = 'block'; }
+        if (recBars) recBars.style.display = 'flex';
+        if (micBtn)  micBtn.style.color = '#f85149';
+        if (status)  { status.textContent = 'Recording… 0:00'; status.style.color = '#f85149'; }
+
+        _discRecordTimer = setInterval(() => {
+            _discRecordSeconds++;
+            const m = Math.floor(_discRecordSeconds / 60);
+            const s = String(_discRecordSeconds % 60).padStart(2, '0');
+            const st = document.getElementById('discSheetVoiceStatus');
+            if (st) st.textContent = `Recording… ${m}:${s}`;
+            if (_discRecordSeconds >= VOICE_MAX_SECONDS) discSheetStopRecording();
+        }, 1000);
+
+    } catch (err) {
+        alert('Microphone access denied. Please allow microphone permissions.');
+    }
+};
+
+window.discSheetStopRecording = function() {
+    if (_discMediaRecorder && _discMediaRecorder.state === 'recording') {
+        _discMediaRecorder.stop();
+    }
+    clearInterval(_discRecordTimer);
+    _discRecordTimer = null;
+    const micBtn = document.getElementById('discSheetMicBtn');
+    if (micBtn) micBtn.style.color = '#8b949e';
+};
+
+window.discSheetCancelRecording = function() {
+    discSheetStopRecording();
+    _discVoiceBlob = null;
+    _discAudioChunks = [];
+    const preview = document.getElementById('discSheetVoicePreview');
+    if (preview) preview.style.display = 'none';
+};
+
+function _discSheetShowVoiceReady(mimeType) {
+    const dot     = document.getElementById('discSheetVoiceDot');
+    const status  = document.getElementById('discSheetVoiceStatus');
+    const recBars = document.getElementById('discSheetVoiceRecBars');
+    const preview = document.getElementById('discSheetVoicePreview');
+    const m = Math.floor(_discRecordSeconds / 60);
+    const s = String(_discRecordSeconds % 60).padStart(2, '0');
+    if (dot)     dot.className = 'disc-voice-rec-done';
+    if (recBars) recBars.style.display = 'none';
+    if (preview) { preview.style.background = 'rgba(79,209,197,0.05)'; preview.style.borderColor = 'rgba(79,209,197,0.2)'; }
+    if (status)  { status.textContent = `Voice note ready · ${m}:${s}`; status.style.color = '#4fd1c5'; }
+}
+
+// ─────────────────────────────────────────────
 // TYPING
 // ─────────────────────────────────────────────
 function sendTypingSignal(discId) {
@@ -981,14 +1407,34 @@ window.discSubmitReply = async function(discId) {
 // ─────────────────────────────────────────────
 window.discSetReply = function(id, author, preview) {
     window._discReplyTo = id;
-    const p = document.getElementById('discPreviewText');
-    if (p) p.textContent = author + ': ' + preview;
-    document.getElementById('discReplyPreview')?.classList.add('show');
-    document.getElementById('discTextarea')?.focus();
+    const previewText = author + ': ' + preview;
+
+    if (!isDesktop()) {
+        /* ── Mobile: fill the sheet's reply preview and open the sheet ── */
+        const sheetPreview = document.getElementById('discSheetReplyPreview');
+        const sheetText    = document.getElementById('discSheetPreviewText');
+        if (sheetPreview && sheetText) {
+            sheetText.textContent = previewText;
+            sheetPreview.style.display = 'flex';
+        }
+        /* Open the sheet and focus the textarea */
+        const discId = window._currentDiscId;
+        discOpenMobileSheet(discId);
+    } else {
+        /* ── Desktop: fill the existing compose reply preview ── */
+        const p = document.getElementById('discPreviewText');
+        if (p) p.textContent = previewText;
+        document.getElementById('discReplyPreview')?.classList.add('show');
+        document.getElementById('discTextarea')?.focus();
+    }
 };
+
 window.discCancelReply = function() {
     window._discReplyTo = 0;
+    /* Clear both desktop and mobile previews */
     document.getElementById('discReplyPreview')?.classList.remove('show');
+    const sheetPreview = document.getElementById('discSheetReplyPreview');
+    if (sheetPreview) sheetPreview.style.display = 'none';
 };
 window.discClearFile = function() {
     const fi = document.getElementById('discFileInput');
