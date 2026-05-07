@@ -208,7 +208,7 @@ if (!empty($joinedClassIds)) {
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.3">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=1.7">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1284,6 +1284,36 @@ iframe {
         -webkit-backdrop-filter: blur(10px) !important;
     }
 }
+
+/* ── DYNAMIC BOTTOM NAV — mobile only ────────────────────────────────────
+   At rest (near bottom of page) the nav is transparent — content bleeds
+   through. As the user scrolls up away from the bottom the nav transitions
+   to its glass background. Mirrors the header behaviour but in reverse.
+   Desktop is NEVER affected — all rules are inside max-width:768px.
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Base state: transparent — blends with page background */
+    #mobileBottomNav {
+        background: transparent !important;
+        border-top-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        transition: background 0.28s ease,
+                    border-color 0.28s ease,
+                    box-shadow 0.28s ease,
+                    backdrop-filter 0.28s ease;
+    }
+
+    /* Scrolled-up state: glass locks in */
+    #mobileBottomNav.nav-scrolled {
+        background: rgba(27, 27, 27, 0.85) !important;
+        border-top-color: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -2190,22 +2220,40 @@ if (desktopToggle) {
 }
     loader.style.display = "none";
 
-    // ── COLLAPSING HEADER: mobile scroll listener ─────────────────────────
-    // Watches .main-content (the mobile scroll container) and toggles
-    // .header-scrolled on .main-header. Only wired on mobile — no-op on desktop.
-    // Discussion threads set overflow:hidden on .main-content so this listener
-    // fires on nothing during a thread (safe).
+    // ── COLLAPSING HEADER + DYNAMIC BOTTOM NAV: mobile scroll listener ──────
+    // Watches .main-content (the mobile scroll container).
+    // Header:   transparent at top  → glass when scrolled DOWN past threshold.
+    // Bottom nav: transparent at bottom → glass when scrolled UP (not at bottom).
+    // Only wired on mobile. Discussion threads set overflow:hidden on
+    // .main-content so scrollTop never changes — safe during threads.
     if (window.innerWidth <= 768) {
         const mainContent  = document.querySelector('.main-content');
         const mainHeader   = document.querySelector('.main-header');
+        const bottomNav    = document.getElementById('mobileBottomNav');
         const SCROLL_THRESHOLD = 10; // px before header solidifies
+        const BOTTOM_THRESHOLD = 10; // px from bottom before nav fades out
 
         if (mainContent && mainHeader) {
             mainContent.addEventListener('scroll', function () {
-                if (mainContent.scrollTop > SCROLL_THRESHOLD) {
+                const scrollTop    = mainContent.scrollTop;
+                const scrollHeight = mainContent.scrollHeight;
+                const clientHeight = mainContent.clientHeight;
+                const distFromBottom = scrollHeight - scrollTop - clientHeight;
+
+                // Header: solid when scrolled down, transparent at top
+                if (scrollTop > SCROLL_THRESHOLD) {
                     mainHeader.classList.add('header-scrolled');
                 } else {
                     mainHeader.classList.remove('header-scrolled');
+                }
+
+                // Bottom nav: transparent near bottom, glass when scrolled up
+                if (bottomNav) {
+                    if (distFromBottom <= BOTTOM_THRESHOLD) {
+                        bottomNav.classList.remove('nav-scrolled');
+                    } else {
+                        bottomNav.classList.add('nav-scrolled');
+                    }
                 }
             }, { passive: true });
         }
@@ -2537,7 +2585,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=2.0"></script>
+<script src="assets/js/learner/manual.js?v=1.9"></script>
 <script src="assets/js/learner/quiz.js?v=3.5"></script>
 <script src="assets/js/learner/assignments.js?v=2.7"></script>
 <script src="assets/js/learner/resources.js?v=2.9"></script>
