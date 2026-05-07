@@ -121,7 +121,7 @@ function buildHomeLayout(data, manualHtml) {
             <div class="lh-section">
                 <div class="lh-section-header">
                     <div class="lh-section-title">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#f28c38" stroke-width="2.5" fill="none" style="flex-shrink:0;">
                             <circle cx="12" cy="12" r="10"/>
                             <polyline points="12 6 12 12 16 14"/>
                         </svg>
@@ -146,7 +146,7 @@ function buildHomeLayout(data, manualHtml) {
                 <!-- RECENT ACTIVITY -->
                 <div class="learner-home-panel">
                     <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
@@ -202,7 +202,7 @@ function buildMobileClassCard(myClass) {
         return `
             <div class="lh-class-card lh-class-empty" onclick="window.showMyClass ? showMyClass() : null">
                 <div class="lh-class-icon">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#48bb78" stroke-width="2" fill="none">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="16"/>
                         <line x1="8" y1="12" x2="16" y2="12"/>
@@ -221,7 +221,7 @@ function buildMobileClassCard(myClass) {
     return `
         <div class="lh-class-card">
             <div class="lh-class-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#48bb78" stroke-width="2" fill="none">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                 </svg>
@@ -308,7 +308,7 @@ function buildMobileRecent(recent) {
         return `
             <div class="lh-empty-state">
                 <div class="lh-empty-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#f28c38" stroke-width="1.5" fill="none">
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                     </svg>
