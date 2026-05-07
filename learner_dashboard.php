@@ -1798,7 +1798,7 @@ if (fullPage &&
         <div style="padding:20px 16px 40px;max-width:480px;margin:0 auto;">
 
             <!-- ── PROFILE CARD (iOS-style account block at top) ── -->
-            <div onclick="document.getElementById('profileInput').click()"
+            <div onclick="loadLearnerPersonalInfo()"
                  style="display:flex;align-items:center;gap:16px;
                         background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
                         border-radius:14px;padding:16px;cursor:pointer;
@@ -1988,6 +1988,329 @@ document.getElementById("settingsBtn")?.addEventListener('click', function() {
     loadLearnerSettings();
     if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
 });
+
+// ────────────────────────────────────────────────────────────────────────
+// 4. PERSONAL INFORMATION (Detail view — iOS-style)
+// ────────────────────────────────────────────────────────────────────────
+window.loadLearnerPersonalInfo = async function() {
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+
+    if (iframe)  iframe.style.display  = 'none';
+    if (apiArea) apiArea.style.display = 'block';
+
+    window.configureHeader({ title: 'Personal Information', mode: 'detail' });
+
+    // Show skeleton while loading
+    apiArea.innerHTML = `
+        <div style="padding:24px 16px 40px;max-width:520px;margin:0 auto;">
+            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;gap:10px;">
+                <div style="width:80px;height:80px;border-radius:50%;background:#21262d;animation:pulse 1.5s infinite;"></div>
+                <div style="width:60px;height:13px;border-radius:6px;background:#21262d;animation:pulse 1.5s infinite;"></div>
+            </div>
+            ${[1,2,3].map(() => `
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;margin-bottom:28px;">
+                    <div style="height:12px;width:80px;border-radius:6px;background:#21262d;margin:16px;animation:pulse 1.5s infinite;"></div>
+                    ${[1,2].map(() => `
+                        <div style="padding:14px 16px;border-top:1px solid rgba(255,255,255,0.04);">
+                            <div style="height:11px;width:100px;border-radius:5px;background:#21262d;margin-bottom:8px;animation:pulse 1.5s infinite;"></div>
+                            <div style="height:14px;width:200px;border-radius:5px;background:#21262d;animation:pulse 1.5s infinite;"></div>
+                        </div>`).join('')}
+                </div>`).join('')}
+        </div>`;
+
+    // Fetch current profile data
+    let profile = {};
+    try {
+        const res  = await fetch('api/learner/get_learner_profile.php');
+        const data = await res.json();
+        if (data.success) profile = data.profile;
+    } catch(e) {
+        console.warn('Profile fetch failed, showing empty form');
+    }
+
+    const avatarImg = document.querySelector('.profile-picture-wrapper img.learner-avatar');
+    const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
+    const avatarHTML = avatarImg
+        ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : `<span style="font-size:28px;font-weight:800;color:#8b949e;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+
+    // Calculate profile completeness
+    const fields = [
+        profile.date_of_birth, profile.id_number, profile.address,
+        profile.guardian_name, profile.guardian_relationship,
+        profile.guardian_phone, profile.guardian_email,
+        profile.emergency_contact_name, profile.emergency_contact_phone,
+        profile.medical_notes
+    ];
+    const filled   = fields.filter(f => f && f.trim() !== '').length;
+    const total    = fields.length;
+    const pct      = Math.round((filled / total) * 100);
+    const isComplete = filled === total;
+    const barColor  = isComplete ? '#4fd1c5' : (pct >= 50 ? '#f59e0b' : '#f85149');
+
+    function val(v) { return v || ''; }
+
+    apiArea.innerHTML = `
+        <div style="padding:24px 16px 60px;max-width:520px;margin:0 auto;">
+
+            <!-- ── AVATAR + EDIT ── -->
+            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
+                <div onclick="document.getElementById('profileInput').click()"
+                     style="position:relative;width:80px;height:80px;border-radius:50%;
+                            background:#1b1b1b;border:2px solid #30363d;
+                            overflow:hidden;cursor:pointer;flex-shrink:0;">
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                        ${avatarHTML}
+                    </div>
+                </div>
+                <div onclick="document.getElementById('profileInput').click()"
+                     style="margin-top:8px;font-size:14px;color:#4fd1c5;font-weight:600;cursor:pointer;">
+                    Edit
+                </div>
+            </div>
+
+            <!-- ── COMPLETENESS BAR ── -->
+            ${!isComplete ? `
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;padding:14px 16px;margin-bottom:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-size:13px;color:#c9d1d9;font-weight:600;">Profile Completeness</span>
+                    <span style="font-size:13px;color:${barColor};font-weight:700;">${pct}%</span>
+                </div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden;">
+                    <div style="height:100%;width:${pct}%;background:${barColor};border-radius:100px;transition:width 0.5s ease;"></div>
+                </div>
+                <div style="margin-top:8px;font-size:12px;color:#8b949e;">${filled} of ${total} fields complete — your school admin can see this profile</div>
+            </div>` : ''}
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: PERSONAL                          -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Personal</div>
+
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
+
+                <!-- Name — read only -->
+                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:14px;color:#8b949e;">Name</span>
+                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars($learnerFullName) ?></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <!-- Email — read only -->
+                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:14px;color:#8b949e;">Email</span>
+                    <span style="font-size:13px;color:#c9d1d9;max-width:220px;text-align:right;word-break:break-all;"><?= htmlspecialchars($learnerEmail) ?></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <!-- Gender — read only (set at registration) -->
+                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:14px;color:#8b949e;">Gender</span>
+                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars(ucfirst($_SESSION['gender'] ?? '')) ?></span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <!-- Date of Birth — editable -->
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Date of Birth</label>
+                    <input type="date" id="pi_dob" value="${val(profile.date_of_birth)}"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;color-scheme:dark;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <!-- ID Number — editable -->
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">ID Number</label>
+                    <input type="text" id="pi_id" value="${val(profile.id_number)}"
+                           placeholder="13-digit South African ID"
+                           maxlength="13"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <!-- Address — editable -->
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Address</label>
+                    <input type="text" id="pi_address" value="${val(profile.address)}"
+                           placeholder="Street, Suburb, City"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: GUARDIAN / PARENT                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Guardian / Parent</div>
+
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Name</label>
+                    <input type="text" id="pi_gname" value="${val(profile.guardian_name)}"
+                           placeholder="Full name of guardian"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Relationship</label>
+                    <select id="pi_grel"
+                            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                   border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                   font-family:inherit;box-sizing:border-box;cursor:pointer;color-scheme:dark;">
+                        <option value="" style="background:#1b1b1b;">Select relationship</option>
+                        ${['Mother','Father','Grandmother','Grandfather','Aunt','Uncle','Sister','Brother','Legal Guardian','Other'].map(r =>
+                            `<option value="${r}" style="background:#1b1b1b;" ${val(profile.guardian_relationship) === r ? 'selected' : ''}>${r}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Phone</label>
+                    <input type="tel" id="pi_gphone" value="${val(profile.guardian_phone)}"
+                           placeholder="e.g. 071 234 5678"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Email</label>
+                    <input type="email" id="pi_gemail" value="${val(profile.guardian_email)}"
+                           placeholder="guardian@example.com"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SECTION: EMERGENCY & MEDICAL               -->
+            <!-- ══════════════════════════════════════════ -->
+            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Emergency &amp; Medical</div>
+
+            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Name</label>
+                    <input type="text" id="pi_ename" value="${val(profile.emergency_contact_name)}"
+                           placeholder="Full name"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Phone</label>
+                    <input type="tel" id="pi_ephone" value="${val(profile.emergency_contact_phone)}"
+                           placeholder="e.g. 082 345 6789"
+                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                  font-family:inherit;box-sizing:border-box;">
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+
+                <div style="padding:14px 16px;">
+                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Medical Notes</label>
+                    <textarea id="pi_medical" rows="3"
+                              placeholder="Allergies, conditions, medication, etc."
+                              style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                     border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                     font-family:inherit;box-sizing:border-box;resize:vertical;min-height:80px;">${val(profile.medical_notes)}</textarea>
+                </div>
+            </div>
+
+            <!-- ── SAVE BUTTON ── -->
+            <button id="pi_save_btn" onclick="saveLearnerPersonalInfo()"
+                    style="width:100%;padding:16px;background:#4fd1c5;border:none;border-radius:14px;
+                           color:#0d1117;font-size:15px;font-weight:700;cursor:pointer;
+                           font-family:inherit;transition:opacity 0.2s ease;letter-spacing:0.02em;">
+                Save Changes
+            </button>
+
+            <!-- ── SAVE FEEDBACK ── -->
+            <div id="pi_feedback" style="display:none;margin-top:12px;text-align:center;
+                                         font-size:13px;font-weight:600;padding:12px;
+                                         border-radius:10px;"></div>
+
+        </div>`;
+};
+
+// ── SAVE HANDLER ─────────────────────────────────────────────────────────
+window.saveLearnerPersonalInfo = async function() {
+    const btn      = document.getElementById('pi_save_btn');
+    const feedback = document.getElementById('pi_feedback');
+
+    btn.disabled     = true;
+    btn.textContent  = 'Saving…';
+    btn.style.opacity = '0.6';
+
+    const payload = new URLSearchParams({
+        date_of_birth:           document.getElementById('pi_dob')?.value    || '',
+        id_number:               document.getElementById('pi_id')?.value     || '',
+        address:                 document.getElementById('pi_address')?.value || '',
+        guardian_name:           document.getElementById('pi_gname')?.value  || '',
+        guardian_relationship:   document.getElementById('pi_grel')?.value   || '',
+        guardian_phone:          document.getElementById('pi_gphone')?.value  || '',
+        guardian_email:          document.getElementById('pi_gemail')?.value  || '',
+        emergency_contact_name:  document.getElementById('pi_ename')?.value  || '',
+        emergency_contact_phone: document.getElementById('pi_ephone')?.value  || '',
+        medical_notes:           document.getElementById('pi_medical')?.value || '',
+    });
+
+    try {
+        const res  = await fetch('api/learner/save_learner_profile.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            feedback.style.display     = 'block';
+            feedback.style.background  = 'rgba(79,209,197,0.1)';
+            feedback.style.border      = '1px solid rgba(79,209,197,0.3)';
+            feedback.style.color       = '#4fd1c5';
+            feedback.textContent       = '✓ Profile saved successfully';
+            btn.textContent            = 'Save Changes';
+            btn.disabled               = false;
+            btn.style.opacity          = '1';
+
+            // Auto-hide feedback after 3s
+            setTimeout(() => { if (feedback) feedback.style.display = 'none'; }, 3000);
+        } else {
+            throw new Error(data.error || 'Save failed');
+        }
+    } catch(e) {
+        feedback.style.display    = 'block';
+        feedback.style.background = 'rgba(248,81,73,0.1)';
+        feedback.style.border     = '1px solid rgba(248,81,73,0.3)';
+        feedback.style.color      = '#f85149';
+        feedback.textContent      = '✗ ' + (e.message || 'Could not save. Try again.');
+        btn.textContent           = 'Save Changes';
+        btn.disabled              = false;
+        btn.style.opacity         = '1';
+    }
+};
 
 window.removeLearnerProfilePicture = function() {
     if (!confirm('Remove your profile picture?')) return;
@@ -2376,6 +2699,13 @@ if (currentTitle === 'Calendar') {
 if (currentTitle === 'Review') {
     if (typeof fetchGrades === 'function') {
         window.fetchGrades();
+        return;
+    }
+}
+
+if (currentTitle === 'Personal Information') {
+    if (typeof loadLearnerSettings === 'function') {
+        window.loadLearnerSettings();
         return;
     }
 }
