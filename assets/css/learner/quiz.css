@@ -16,8 +16,10 @@
 }
 
 /* ── MOBILE: Consistent 18px padding so all pages have breathing room ── */
+/* NOTE: .disc-thread-active is added by discussions.js when a thread is open,
+   so these !important overrides don't fight the thread's scroll layout.       */
 @media (max-width: 767px) {
-    #api-content-area {
+    #api-content-area:not(.disc-thread-active) {
         height: auto !important;
         overflow: visible !important;
         padding: 18px !important;

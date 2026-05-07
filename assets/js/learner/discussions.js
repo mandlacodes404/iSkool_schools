@@ -67,6 +67,7 @@ function unlockMobileLayout() {
     }
     const apiArea = document.getElementById('api-content-area');
     if (apiArea) {
+        apiArea.classList.remove('disc-thread-active');
         apiArea.style.flex          = '';
         apiArea.style.overflow      = '';
         apiArea.style.display       = '';
@@ -462,6 +463,7 @@ function renderThread(data) {
         }
         const apiArea = document.getElementById('api-content-area');
         if (apiArea) {
+            apiArea.classList.add('disc-thread-active');
             apiArea.style.flex          = '1';
             apiArea.style.overflow      = 'hidden';
             apiArea.style.display       = 'flex';
