@@ -248,7 +248,7 @@ body {
 
 .sidebar {
     width: var(--sidebar-width);
-    background: #1a1919ff;
+    background: #000000;
     display: flex;
     flex-direction: column;
     padding: 20px;
