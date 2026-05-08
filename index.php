@@ -85,7 +85,7 @@ if ($result && $row = $result->fetch_assoc()) {
     margin: 0;
     padding: 0;
     height: 100%;
-    background: #1a1919;
+    background: #000000;
     font-family: 'Inter', 'Nunito', sans-serif;
     color: #E3E3E3;
     overflow-x: hidden;
@@ -103,7 +103,7 @@ body {
         position: fixed;
         width: 100%;
         height: 100%;
-        background: #1a1919; /* CHANGE THIS from #0d1117 */;
+        background: #000000; /* CHANGE THIS from #0d1117 */;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1074,7 +1074,7 @@ button:hover {
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
 <g transform="translate(0.000000,805.000000) scale(0.100000,-0.100000)"
-fill="#a09d9dff" stroke="none">
+fill="#e53e3e" stroke="none">
 <path d="M4275 7173 c-274 -35 -556 -150 -692 -282 -31 -30 -35 -31 -125 -31
 -149 0 -352 -26 -498 -64 -507 -130 -844 -438 -956 -875 -13 -51 -24 -108 -24
 -125 0 -30 -3 -33 -77 -60 -185 -68 -397 -186 -563 -315 -353 -274 -571 -613
