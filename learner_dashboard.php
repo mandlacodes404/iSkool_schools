@@ -208,7 +208,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.6">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.7">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.0">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,12 +218,12 @@ if (!empty($joinedClassIds)) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
  <style>
 :root {
-    --bg-color: #0d1117;
+    --bg-color: #000000;
     --sidebar-bg: #1a202c;
     --text-color: #e2e8f0;
     --accent-color765: #4fd1c5;
     --secondary-accent: #f6877a;
-    --card-bg: #1a202c;
+    --card-bg: #0d1117;
     --button-bg: #f7fafc;
     --button-hover-bg: #edf2f7;
     --warning-color: #c0392b;
