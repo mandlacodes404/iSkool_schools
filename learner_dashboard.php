@@ -820,7 +820,7 @@ iframe {
     .profile-picture-wrapper img.learner-avatar {
         width: 70px !important;   
         height: 70px !important;  
-        border: 4px solid #757272ff !important;
+        border: 0.5px solid rgba(255,255,255,0.25) !important;
         margin-bottom: 12px;
     }
     .sidebar h2 {
@@ -1270,7 +1270,42 @@ iframe {
     }
 }
 
-/* ── COLLAPSING HEADER — mobile only ──────────────────────────────────────
+/* ── SIDEBAR MOBILE: coloured icon boxes — mobile only ───────────────────
+   Each .sidebar-links a/button gets a coloured pill box behind its SVG,
+   matching the bottom nav style. Desktop is unaffected (max-width:768px).
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sidebar-links a svg,
+    .sidebar-links button svg {
+        width: 16px !important;
+        height: 16px !important;
+        flex-shrink: 0;
+    }
+
+    /* Each link/button gets a box behind the SVG */
+    .sidebar-links a[data-nav],
+    .sidebar-links button[data-nav] {
+        gap: 12px;
+    }
+
+    .sidebar-links a[data-nav]::before,
+    .sidebar-links button[data-nav]::before {
+        content: '';
+        display: none; /* we use the svg wrapper approach instead */
+    }
+
+    /* Icon box wrapper — inserted via JS below */
+    .sidebar-nav-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background 0.2s;
+    }
+}
    On mobile the .main-header starts fully transparent so the page content
    bleeds edge-to-edge. When the user scrolls down past ~10px the header
    transitions to a solid glass background (same as desktop style).
@@ -1340,7 +1375,7 @@ iframe {
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
                      class="learner-avatar"
-                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:3px solid #757272ff;">
+                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:0.5px solid rgba(255,255,255,0.25);">
             <?php else: ?>
                 <div class="initials-avatar">
                     <?= htmlspecialchars($initials) ?>
@@ -1362,28 +1397,28 @@ iframe {
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links">
-      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();">
+      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
 </svg><span>Home</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only">
+        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only" id="nav-quiz-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only">
+        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only" id="nav-assignments-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
-       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" class="desktop-only">
+       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" class="desktop-only" id="nav-resources-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
         <a href="javascript:void(0)"
    onclick="fetchGrades(); updateHeaderTitle('My Grades')"
-   data-page="grades">
+   data-page="grades" id="nav-grades-sidebar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="20" x2="18" y2="10"/>
@@ -1393,15 +1428,15 @@ iframe {
     <span>Grades</span>
 </a>
 
-        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')">
+        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" id="nav-announcements-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')">
+        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" id="nav-evaluations-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Teacher Evaluations</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" >
+        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -1412,12 +1447,12 @@ iframe {
     </svg>
     <span>Syllabus</span>
 </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')">
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" id="nav-discussions-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
         <?php if (empty($joinedClassIds)): ?>
-            <button type="button" onclick="toggleJoinClassForm()" data-page="join-class"
+            <button type="button" onclick="toggleJoinClassForm()" data-page="join-class" id="nav-joinclass-sidebar"
                     class="<?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Join a Class</span>
             </button>
@@ -1436,7 +1471,7 @@ iframe {
                 </form>
             </div>
         <?php else: ?>
-            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn">
+            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn" id="nav-myclass-sidebar">
                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>My Class</span>
             </button>
             <div class="join-status"><i class="fas fa-check"></i><span>Joined Class</span></div>
@@ -1452,7 +1487,7 @@ iframe {
     
     <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
         <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -1478,7 +1513,7 @@ iframe {
     <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
         <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>" 
              alt="School Logo" 
-             style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:3px solid #757272ff;">
+             style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:0.5px solid rgba(255,255,255,0.2);">
         <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
     </div>
 
@@ -2555,7 +2590,40 @@ if (desktopToggle) {
 }
     loader.style.display = "none";
 
-    // ── COLLAPSING HEADER + DYNAMIC BOTTOM NAV: mobile scroll listener ──────
+    // ── SIDEBAR MOBILE: wrap each SVG in a coloured box ──────────────────
+    // Only runs on mobile. Maps each nav link to its colour, wraps the
+    // existing SVG in a .sidebar-nav-box div. Desktop sidebar untouched.
+    if (window.innerWidth <= 768) {
+        const sidebarNavConfig = [
+            { selector: '#nav-home-sidebar',          color: '#4fd1c5' },
+            { selector: '#nav-quiz-sidebar',          color: '#fdd663' },
+            { selector: '#nav-assignments-sidebar',   color: '#a78bfa' },
+            { selector: '#nav-resources-sidebar',     color: '#f28c38' },
+            { selector: '#nav-grades-sidebar',        color: '#68d391' },
+            { selector: '#nav-announcements-sidebar', color: '#f687b3' },
+            { selector: '#nav-evaluations-sidebar',   color: '#fc8181' },
+            { selector: '#nav-syllabus-sidebar',      color: '#63b3ed' },
+            { selector: '#nav-discussions-sidebar',   color: '#76e4f7' },
+            { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
+            { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
+        ];
+        sidebarNavConfig.forEach(({ selector, color }) => {
+            const el  = document.querySelector(selector);
+            if (!el) return;
+            const svg = el.querySelector('svg');
+            if (!svg) return;
+            // Colour the SVG stroke
+            svg.style.stroke = color;
+            // Wrap in a box
+            const box = document.createElement('div');
+            box.className = 'sidebar-nav-box';
+            box.style.background = color + '18';
+            box.style.border     = '1px solid ' + color + '30';
+            svg.parentNode.insertBefore(box, svg);
+            box.appendChild(svg);
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────────
     // Watches .main-content (the mobile scroll container).
     // Header:   transparent at top  → glass when scrolled DOWN past threshold.
     // Bottom nav: transparent at bottom → glass when scrolled UP (not at bottom).
