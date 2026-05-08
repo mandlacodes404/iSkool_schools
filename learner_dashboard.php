@@ -1308,6 +1308,7 @@ iframe {
         flex-shrink: 0;
         margin-right: 10px;
         transition: background 0.2s;
+        background: rgba(26, 25, 25, 0.92) !important;
     }
 }
    On mobile the .main-header starts fully transparent so the page content
