@@ -208,7 +208,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.0">
     <meta name="theme-color" content="#1a1919">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1329,7 +1329,7 @@ iframe {
 
     /* Scrolled state: glass effect locks in */
     .main-header.header-scrolled {
-        background: rgba(0, 0, 0, 0.85) !important;
+        background: rgba(26, 25, 25, 0.92) !important;
         border-bottom-color: rgba(255, 255, 255, 0.07) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
@@ -1358,7 +1358,7 @@ iframe {
 
     /* Scrolled-up state: glass locks in */
     #mobileBottomNav.nav-scrolled {
-        background: rgba(0, 0, 0, 0.85) !important;
+        background: rgba(27, 27, 27, 0.85) !important;
         border-top-color: rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
