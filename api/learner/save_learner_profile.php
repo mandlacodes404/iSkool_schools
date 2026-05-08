@@ -62,7 +62,7 @@ if (!empty($guardian_email) && !filter_var($guardian_email, FILTER_VALIDATE_EMAI
     exit();
 }
 
-// Nullify empty date (MySQL doesn't like empty string for DATE columns)
+// Nullify empty date (MySQL doesn't accept empty string for DATE columns)
 $dob = !empty($date_of_birth) ? $date_of_birth : null;
 
 // Calculate profile_status — complete if all 10 fields are filled
@@ -96,6 +96,7 @@ if (!$stmt) {
     exit();
 }
 
+// MySQLi bind_param with nullable date — assign null to variable first
 $stmt->bind_param(
     "ssssssssssss",
     $dob,

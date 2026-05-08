@@ -109,16 +109,17 @@ $learnerName           = $_SESSION['name'] ?? '';
 $learnerSurname        = '';
 $learnerProfilePicture = 'default.png';
 
-$stmt = $conn->prepare("SELECT name, surname, profile_picture FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT name, surname, profile_picture, gender FROM users WHERE email = ?");
 $stmt->bind_param("s", $learnerEmail);
 $stmt->execute();
 $res = $stmt->get_result();
 
+$learnerGender = '';
 if ($row = $res->fetch_assoc()) {
-    // 1. Update variables with real data from DB
     $learnerName           = $row['name'] ?: $learnerName;
     $learnerSurname        = $row['surname'] ?: '';
     $learnerProfilePicture = $row['profile_picture'] ?: 'default.png';
+    $learnerGender         = $row['gender'] ?: '';
 }
 $stmt->close();
 
@@ -2160,7 +2161,7 @@ window.loadLearnerPersonalInfo = async function() {
                 <!-- Gender — read only (set at registration) -->
                 <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
                     <span style="font-size:14px;color:#8b949e;">Gender</span>
-                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars(ucfirst($_SESSION['gender'] ?? '')) ?></span>
+                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?php if (!empty($learnerGender)): ?><?= htmlspecialchars(ucfirst($learnerGender)) ?><?php else: ?><span style="color:#8b949e;font-style:italic;">Not set</span><?php endif; ?></span>
                 </div>
                 <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
 
