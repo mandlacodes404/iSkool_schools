@@ -820,7 +820,9 @@ iframe {
     .profile-picture-wrapper img.learner-avatar {
         width: 70px !important;   
         height: 70px !important;  
-        border: 0.5px solid rgba(255,255,255,0.25) !important;
+        border: 0.5px solid rgba(255,255,255,0.18) !important;
+        outline: none !important;
+        box-shadow: none !important;
         margin-bottom: 12px;
     }
     .sidebar h2 {
@@ -1303,6 +1305,7 @@ iframe {
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        margin-right: 10px;
         transition: background 0.2s;
     }
 }
@@ -1375,7 +1378,7 @@ iframe {
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
                      class="learner-avatar"
-                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:0.5px solid rgba(255,255,255,0.25);">
+                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:0.5px solid rgba(255,255,255,0.18);">
             <?php else: ?>
                 <div class="initials-avatar">
                     <?= htmlspecialchars($initials) ?>
@@ -2600,10 +2603,10 @@ if (desktopToggle) {
             { selector: '#nav-assignments-sidebar',   color: '#a78bfa' },
             { selector: '#nav-resources-sidebar',     color: '#f28c38' },
             { selector: '#nav-grades-sidebar',        color: '#68d391' },
-            { selector: '#nav-announcements-sidebar', color: '#f687b3' },
+            { selector: '#nav-announcements-sidebar', color: '#f28c38' },
             { selector: '#nav-evaluations-sidebar',   color: '#fc8181' },
             { selector: '#nav-syllabus-sidebar',      color: '#63b3ed' },
-            { selector: '#nav-discussions-sidebar',   color: '#76e4f7' },
+            { selector: '#nav-discussions-sidebar',   color: '#f85149' },
             { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
             { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
         ];
