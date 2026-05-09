@@ -1311,6 +1311,8 @@ iframe {
         background: rgba(26, 25, 25, 0.92) !important;
     }
 }
+
+/* ── COLLAPSING HEADER — mobile only ──────────────────────────────────────
    On mobile the .main-header starts fully transparent so the page content
    bleeds edge-to-edge. When the user scrolls down past ~10px the header
    transitions to a solid glass background (same as desktop style).
