@@ -9,6 +9,12 @@ function redirect_to(string $path): void
     exit();
 }
 
+function load_dashboard(string $path): void
+{
+    require __DIR__ . '/' . $path;
+    exit();
+}
+
 $role = $_SESSION['role'] ?? null;
 
 if (!$role) {
@@ -17,20 +23,20 @@ if (!$role) {
 
 switch ($role) {
     case 'teacher':
-        redirect_to('teacher_dashboard.php');
+        load_dashboard('teacher_dashboard.php');
 
     case 'learner':
-        redirect_to('learner_dashboard.php');
+        load_dashboard('learner_dashboard.php');
 
     case 'school_admin':
         if (is_file(__DIR__ . '/school_admin_dashboard.php')) {
-            redirect_to('school_admin_dashboard.php');
+            load_dashboard('school_admin_dashboard.php');
         }
         redirect_to('index.php');
 
     case 'parent':
         if (is_file(__DIR__ . '/parent_dashboard.php')) {
-            redirect_to('parent_dashboard.php');
+            load_dashboard('parent_dashboard.php');
         }
         redirect_to('index.php');
 
