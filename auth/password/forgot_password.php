@@ -212,7 +212,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     }
     ?>
 
-    <a class="back-link" href="index.php">Back to login</a>
+    <a class="back-link" href="login">Back to login</a>
 </div>
 
 </body>

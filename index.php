@@ -1668,11 +1668,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
         <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
             // Logged in → go straight to dashboard
-            <?php if ($_SESSION['role'] === 'teacher'): ?>
-                window.location.href = 'teacher_dashboard.php';
-            <?php else: ?>
-                window.location.href = 'learner_dashboard.php';
-            <?php endif; ?>
+            window.location.href = 'dashboard';
         <?php else: ?>
             // Not logged in → show login form
             document.querySelector('.form-panel').style.opacity = '1';

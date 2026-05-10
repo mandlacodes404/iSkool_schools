@@ -166,7 +166,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         <i class="fas fa-check-circle success-icon"></i>
         <h2>Password Updated!</h2>
         <p class="subtitle">Your password has been successfully reset. You can now use your new credentials to access iSkool.</p>
-        <a href="index.php" class="btn-action">Back to Login</a>
+        <a href="login" class="btn-action">Back to Login</a>
 
     <?php else: ?>
         <h2>Reset Password</h2>

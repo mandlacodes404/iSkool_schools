@@ -29,14 +29,14 @@ if (isset($_POST['register'])) {
     if ($role === 'admin') {
         $_SESSION['register_error'] = 'Admin accounts can only be created by the system.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 
     if (empty($title) || empty($first_name) || empty($surname) || empty($email) || empty($role) || empty($access_key)) {
         $_SESSION['register_error'] = 'All fields are required.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 
@@ -46,14 +46,14 @@ if (isset($_POST['register'])) {
     if (strlen($raw_password) < 8) {
         $_SESSION['register_error'] = 'Password must be at least 8 characters long.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 
     if ($raw_password !== $confirm_password) {
         $_SESSION['register_error'] = 'Passwords do not match. Please try again.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 
@@ -67,7 +67,7 @@ if (isset($_POST['register'])) {
     if ($keyStmt->num_rows === 0) {
         $_SESSION['register_error'] = 'Invalid or already used access key.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
     $keyStmt->close();
@@ -80,7 +80,7 @@ if (isset($_POST['register'])) {
     if ($check->num_rows > 0) {
         $_SESSION['register_error'] = 'This email is already registered.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 
@@ -295,7 +295,7 @@ try {
     else {
         $_SESSION['register_error'] = 'Registration failed. Please try again.';
         $_SESSION['active_form'] = 'register';
-        header("Location: index.php");
+        header("Location: login");
         exit();
     }
 }
@@ -317,7 +317,7 @@ if (isset($_POST['login'])) {
         if ($is_deleted == 1) {
             $_SESSION['login_error'] = "Your account has been deleted.";
             $_SESSION['active_form'] = 'login';
-            header("Location: index.php");
+            header("Location: login");
             exit();
         }
 
@@ -361,7 +361,7 @@ if (isset($_POST['login'])) {
                     break;
                 default:
                     $_SESSION['login_error'] = 'Unknown role.';
-                    header("Location: index.php");
+                    header("Location: login");
                     exit();
             }
             exit();
@@ -376,7 +376,7 @@ if (isset($_POST['login'])) {
     }
 
     $_SESSION['active_form'] = 'login';
-    header("Location: index.php");
+    header("Location: login");
     exit();
 }
 ?>

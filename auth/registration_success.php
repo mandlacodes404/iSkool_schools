@@ -165,7 +165,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         <h2>Registration Successful!</h2>
         <p>Your account has been created. You can now log in and start your learning journey.</p>
         
-        <a href="index.php" class="btn-login">Go to Login</a>
+        <a href="login" class="btn-login">Go to Login</a>
     </div>
 
 </body>
