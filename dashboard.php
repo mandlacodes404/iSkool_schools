@@ -1,7 +1,7 @@
 <?php
-session_start();
-
-require_once 'config.php';
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 function redirect_to(string $path): void
 {
@@ -11,6 +11,8 @@ function redirect_to(string $path): void
 
 function load_dashboard(string $path): void
 {
+    $_SERVER['SCRIPT_NAME'] = '/dashboard.php';
+    $_SERVER['PHP_SELF'] = '/dashboard.php';
     require __DIR__ . '/' . $path;
     exit();
 }
@@ -28,6 +30,7 @@ switch ($role) {
     case 'learner':
         load_dashboard('learner_dashboard.php');
 
+    case 'admin':
     case 'school_admin':
         if (is_file(__DIR__ . '/school_admin_dashboard.php')) {
             load_dashboard('school_admin_dashboard.php');
