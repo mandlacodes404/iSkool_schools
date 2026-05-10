@@ -2089,7 +2089,6 @@ window.loadLearnerPersonalInfo = async function() {
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<span style="font-size:28px;font-weight:800;color:#8b949e;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
-    // Calculate profile completeness
     const fields = [
         profile.date_of_birth, profile.id_number, profile.address,
         profile.guardian_name, profile.guardian_relationship,
@@ -2097,11 +2096,7 @@ window.loadLearnerPersonalInfo = async function() {
         profile.emergency_contact_name, profile.emergency_contact_phone,
         profile.medical_notes
     ];
-    const filled   = fields.filter(f => f && f.trim() !== '').length;
-    const total    = fields.length;
-    const pct      = Math.round((filled / total) * 100);
-    const isComplete = filled === total;
-    const barColor  = isComplete ? '#4fd1c5' : (pct >= 50 ? '#f59e0b' : '#f85149');
+
 
     function val(v) { return v || ''; }
 
@@ -2124,19 +2119,7 @@ window.loadLearnerPersonalInfo = async function() {
                 </div>
             </div>
 
-            <!-- ── COMPLETENESS BAR ── -->
-            ${!isComplete ? `
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;padding:14px 16px;margin-bottom:24px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <span style="font-size:13px;color:#c9d1d9;font-weight:600;">Profile Completeness</span>
-                    <span style="font-size:13px;color:${barColor};font-weight:700;">${pct}%</span>
-                </div>
-                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden;">
-                    <div style="height:100%;width:${pct}%;background:${barColor};border-radius:100px;transition:width 0.5s ease;"></div>
-                </div>
-                <div style="margin-top:8px;font-size:12px;color:#8b949e;">${filled} of ${total} fields complete — your school admin can see this profile</div>
-            </div>` : ''}
+
 
             <!-- ══════════════════════════════════════════ -->
             <!-- SECTION: PERSONAL                          -->
