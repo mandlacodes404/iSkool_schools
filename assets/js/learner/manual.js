@@ -153,10 +153,10 @@ function buildHomeLayout(data, manualHtml) {
                         </div>
                         Upcoming Events
                     </div>
-                    \${eventsSlice.length > 0 ? \`<span class="lh-badge">\${eventsSlice.length}</span>\` : ''}
+                    ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
                 </div>
                 <div class="lh-card">
-                    \${buildMobileEvents(eventsSlice)}
+                    ${buildMobileEvents(eventsSlice)}
                 </div>
             </div>
 
