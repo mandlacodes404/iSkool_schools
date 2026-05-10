@@ -83,12 +83,14 @@ function afterHomeRender() {
 // BUILD LAYOUT
 // ─────────────────────────────────────────────
 function buildHomeLayout(data, manualHtml) {
-    const todo   = data.todo   || [];
-    const recent = data.recent || [];
+    const todo    = data.todo    || [];
+    const recent  = data.recent  || [];
+    const events  = data.events  || [];
 
     // Cap both at 4
     const todoSlice   = todo.slice(0, 4);
     const recentSlice = recent.slice(0, 4);
+    const eventsSlice = events.slice(0, 5);
 
     const isMobile = window.innerWidth <= 768;
 
@@ -134,6 +136,27 @@ function buildHomeLayout(data, manualHtml) {
                 </div>
                 <div class="lh-card">
                     ${buildMobileRecent(recentSlice)}
+                </div>
+            </div>
+
+            <!-- UPCOMING EVENTS SECTION -->
+            <div class="lh-section">
+                <div class="lh-section-header">
+                    <div class="lh-section-title">
+                        <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;border:1px solid #f472b630;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f472b6" stroke-width="2.5" fill="none">
+                                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        Upcoming Events
+                    </div>
+                    \${eventsSlice.length > 0 ? \`<span class="lh-badge">\${eventsSlice.length}</span>\` : ''}
+                </div>
+                <div class="lh-card">
+                    \${buildMobileEvents(eventsSlice)}
                 </div>
             </div>
 
@@ -365,6 +388,85 @@ function buildMobileRecent(recent) {
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4a5568" stroke-width="2" fill="none" style="flex-shrink:0;">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
+            </div>`;
+    }).join('');
+}
+
+// ─────────────────────────────────────────────
+// MOBILE UPCOMING EVENTS (academic_events)
+// ─────────────────────────────────────────────
+function buildMobileEvents(events) {
+    if (!events.length) {
+        return `
+            <div class="lh-empty-state">
+                <div class="lh-empty-icon" style="background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.15);">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#f472b6" stroke-width="1.5" fill="none">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div class="lh-empty-title">No upcoming events</div>
+                <div class="lh-empty-desc">Tests, exams, and school events added by your teacher will appear here.</div>
+            </div>`;
+    }
+
+    const typeColorMap = {
+        test:    '#fdd663',
+        exam:    '#f472b6',
+        holiday: '#4fd1c5',
+        event:   '#a78bfa',
+        other:   '#8b949e'
+    };
+    const typeLabelMap = {
+        test:    'Test',
+        exam:    'Exam',
+        holiday: 'Holiday',
+        event:   'Event',
+        other:   'Other'
+    };
+    const typeIconMap = {
+        test:    `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+        exam:    `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>`,
+        holiday: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>`,
+        event:   `<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
+        other:   `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`
+    };
+
+    return events.map((item, i) => {
+        const type   = item.event_type || 'other';
+        const color  = typeColorMap[type]  || '#8b949e';
+        const label  = typeLabelMap[type]  || 'Event';
+        const icon   = typeIconMap[type]   || typeIconMap.other;
+        const isLast = i === events.length - 1;
+
+        // Format the date nicely: "20 Mar" or "Mon, 20 Mar"
+        const d       = new Date(item.event_date + 'T00:00:00');
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const monNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const dateStr = `${dayNames[d.getDay()]}, ${d.getDate()} ${monNames[d.getMonth()]}`;
+
+        // Check if past
+        const today   = new Date(); today.setHours(0,0,0,0);
+        const isPast  = d < today;
+
+        return `
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:default;${isPast ? 'opacity:0.5;' : ''}">
+                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                        ${icon}
+                    </svg>
+                </div>
+                <div class="lh-row-body">
+                    <div class="lh-row-title">${item.title}</div>
+                    <div class="lh-row-meta">
+                        <span class="lh-type-tag" style="color:${color}; background:${color}18;">${label}</span>
+                        <span class="lh-dot-sep">·</span>
+                        <span>${dateStr}</span>
+                    </div>
+                </div>
+                ${isPast ? `<span style="font-size:10px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;">Done</span>` : `<svg viewBox="0 0 24 24" width="14" height="14" stroke="#4a5568" stroke-width="2" fill="none" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>`}
             </div>`;
     }).join('');
 }

@@ -25,7 +25,7 @@ $classId = $classStmt->get_result()->fetch_assoc()['class_id'] ?? null;
 $classStmt->close();
 
 if (!$classId) {
-    echo json_encode(['todo' => [], 'recent' => []]);
+    echo json_encode(['todo' => [], 'recent' => [], 'events' => []]);
     exit;
 }
 
@@ -253,4 +253,28 @@ foreach ($recent as &$item) {
 }
 unset($item);
 
-echo json_encode(['todo' => $todo, 'recent' => $recent]);
+$events = [];
+$today  = date('Y-m-d');
+
+$stmt = $conn->prepare("
+    SELECT ae.title, ae.event_date, ae.event_type
+    FROM academic_events ae
+    WHERE ae.class_id = ?
+      AND ae.academic_year_id = ?
+      AND ae.event_date >= ?
+    ORDER BY ae.event_date ASC
+    LIMIT 5
+");
+$stmt->bind_param("iis", $classId, $yearId, $today);
+$stmt->execute();
+$res = $stmt->get_result();
+while ($row = $res->fetch_assoc()) {
+    $events[] = [
+        'title'      => $row['title'],
+        'event_date' => $row['event_date'],
+        'event_type' => $row['event_type']
+    ];
+}
+$stmt->close();
+
+echo json_encode(['todo' => $todo, 'recent' => $recent, 'events' => $events]);
