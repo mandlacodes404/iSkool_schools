@@ -71,11 +71,11 @@ if ($stmt->num_rows === 1) {
 
         // Determine redirect URL based on role
         $redirectMap = [
-            'admin'        => 'school_admin_dashboard.php',
-            'school_admin' => 'school_admin_dashboard.php',
-            'teacher'      => 'teacher_dashboard.php',
-            'learner'      => 'learner_dashboard.php',
-            'parent'       => 'parent_dashboard.php',
+            'admin'        => 'dashboard',
+            'school_admin' => 'dashboard',
+            'teacher'      => 'dashboard',
+            'learner'      => 'dashboard',
+            'parent'       => 'dashboard',
         ];
 
         if (!isset($redirectMap[$role])) {
