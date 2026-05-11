@@ -1110,7 +1110,7 @@ iframe {
     color: #8b8989ff;            /* Muted Silver/Grey text */
     font-size: 14px;
     font-weight: 800;
-    border: 2px solid #8b8989ff;
+    border: 1px solid #8b8989ff;
     user-select: none;
     text-transform: uppercase;
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
@@ -1122,7 +1122,7 @@ iframe {
         width: 70px !important;
         height: 70px !important;
         font-size: 24px !important;
-        border: 1.5px solid #8b8989ff!important;
+        border: 0.75px solid #8b8989ff!important;
     }
 }
 /* SVG icons – consistent with platform style */
@@ -1878,7 +1878,7 @@ if (fullPage &&
              onmouseover="this.style.background='#21262d'"
              onmouseout="this.style.background='#1b1b1b'">
             <div style="position:relative;width:64px;height:64px;border-radius:50%;
-                        background:#121212;border:2px solid #30363d;
+                        background:#121212;border:1px solid #30363d;
                         overflow:hidden;flex-shrink:0;">
                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
                     ${avatarHTML}
@@ -2162,7 +2162,7 @@ window.loadLearnerPersonalInfo = async function() {
         <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
             <div onclick="document.getElementById('profileInput').click()"
                  style="position:relative;width:80px;height:80px;border-radius:50%;
-                        background:#1b1b1b;border:2px solid #30363d;
+                        background:#1b1b1b;border:1px solid #30363d;
                         overflow:hidden;cursor:pointer;flex-shrink:0;">
                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
                     ${avatarHTML}
@@ -2489,7 +2489,7 @@ window.updateAvatarUI = function(imageUrl) {
         const newImg = document.createElement('img');
         newImg.alt = "Profile Picture";
         newImg.className = "learner-avatar";
-        newImg.style.cssText = "width:40px;height:40px;border-radius:50%;object-fit:cover;border:3px solid #757272ff;";
+        newImg.style.cssText = "width:40px;height:40px;border-radius:50%;object-fit:cover;border:0.5px solid rgba(255,255,255,0.18);";
         newImg.src = imageUrl;
 
         // Insert BEFORE the file input so input stays in DOM

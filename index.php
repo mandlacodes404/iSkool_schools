@@ -120,8 +120,8 @@ body {
 
 /* Update your existing #loader-logo svg style */
 #loader-logo svg {
-        width: 120px; 
-        height: 120px;
+        width: 104px; 
+        height: 104px;
         /* Removed logo-spin: only keeping the initial reveal fade */
         animation: reveal 0.8s ease-out forwards;
         transform-origin: center;
@@ -171,6 +171,10 @@ body {
         #loader-logo {
             font-size: 4rem;
         }
+        #loader-logo svg {
+            width: 92px;
+            height: 92px;
+        }
         .branding {
             font-size: 13px;
             bottom: 50px;
@@ -187,6 +191,10 @@ body {
     @media (max-width: 360px) {
         #loader-logo {
             font-size: 3rem;
+        }
+        #loader-logo svg {
+            width: 82px;
+            height: 82px;
         }
         .branding {
             font-size: 12px;

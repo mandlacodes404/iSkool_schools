@@ -308,20 +308,18 @@ function renderGrades(data) {
     .review-link:hover { opacity: 1; }
     .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
     .grades-empty { text-align: center; color: #555e6a; font-size: 15px; padding: 60px 20px; }
+    .g-modal-overlay { display: none !important; }
 
-    /* Performance modal */
-    .g-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9100; align-items: center; justify-content: center; padding: 20px; }
-    .g-modal-overlay.show { display: flex; }
-    .g-modal-box { background: #161b22; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.5); animation: gmPop 0.25s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
-    @keyframes gmPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
-    .g-modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #555e6a; font-size: 22px; cursor: pointer; line-height: 1; transition: color 0.2s; }
-    .g-modal-close:hover { color: #e2e8f0; }
-    .g-modal-title { font-size: 16px; font-weight: 800; color: #e2e8f0; margin-bottom: 20px; }
-    .score-circle-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto 14px; }
-    .score-circle-wrap svg { transform: rotate(-90deg); display: block; }
+    /* Inline performance overview */
+    .grade-inline-stats { margin-top: 14px; padding: 14px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+    .grade-inline-stats.loading, .grade-inline-stats.error { color: #8b949e; font-size: 12px; text-align: center; }
+    .grade-inline-title { font-size: 12px; font-weight: 800; color: #e2e8f0; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
+    .grade-inline-grid { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; align-items: center; }
+    .score-circle-wrap { position: relative; width: 96px; height: 96px; margin: 0; }
+    .score-circle-wrap svg { transform: rotate(-90deg); display: block; width: 96px; height: 96px; }
     .sc-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 10; }
     .sc-fill { fill: none; stroke: #22c55e; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 314; stroke-dashoffset: 314; transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); }
-    .score-circle-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; font-weight: 800; color: #fff; }
+    .score-circle-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: 800; color: #fff; }
     .score-out-of { font-size: 13px; color: #8b949e; margin-bottom: 16px; }
     .dist-bar-wrap { position: relative; height: 10px; background: rgba(255,255,255,0.06); border-radius: 100px; margin: 24px 0 8px; }
     .dist-marker { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; transition: left 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
@@ -394,6 +392,14 @@ function renderGrades(data) {
         }
         .grades-mobile-layout .quiz-row-details {
             background: #151515;
+        }
+        .grade-inline-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
+            gap: 10px;
+        }
+        .grade-inline-stats {
+            padding: 13px;
         }
         .report-modal-box { width: 100vw; height: 100vh; border-radius: 0; }
     }
@@ -716,25 +722,18 @@ function buildQuizList(quizzes, gi) {
             <div class="quiz-row-details" id="qdetail-${gi}-${qi}">
                 ${published ? `
                     <p><strong>Score:</strong> ${q.score} / ${q.total} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
-                    <button class="view-details-btn" onclick="openGradeStats(${q.quiz_id})">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="16" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        Class Performance
-                    </button>
                 ` : `<p style="color:#555e6a;font-style:italic;">Marks not published yet.</p>`}
                 <p style="margin-top:8px;"><strong>Duration:</strong> ${duration} min</p>
                 <p><strong>Time Taken:</strong> ${timeTaken}</p>
                 <p><strong>Taken on:</strong> ${submittedAt}</p>
+                ${published ? `<div class="grade-inline-stats loading" id="gstats-${gi}-${qi}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
             </div>`;
 
         return `
         <div class="quiz-row ${published ? '' : 'quiz-unpublished'}"
              data-title="${escAttr(q.quiz_title)}"
              data-score="${published ? pct : 0}">
-            <div class="quiz-row-header" onclick="toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}')">
+            <div class="quiz-row-header" onclick="toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}', 'gstats-${gi}-${qi}')">
                 <div class="quiz-row-icon">${iconHtml}</div>
                 <div class="quiz-row-title">
                     ${titleHtml}
@@ -742,7 +741,7 @@ function buildQuizList(quizzes, gi) {
                 </div>
                 <span class="quiz-score-pill ${pillClass}">${pillText}</span>
                 <button class="quiz-expand-btn" id="qexp-${gi}-${qi}" type="button"
-                        onclick="event.stopPropagation(); toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}')">
+                        onclick="event.stopPropagation(); toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}', 'gstats-${gi}-${qi}')">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
                         <polyline points="6 9 12 15 18 9"/>
                     </svg>
@@ -834,13 +833,14 @@ window.toggleSubjectCard = function (gi) {
     chev.classList.toggle('open', !open);
 };
 
-window.toggleQuizRow = function (detailId, btnId) {
+window.toggleQuizRow = function (detailId, btnId, statsId) {
     const detail = document.getElementById(detailId);
     const btn    = document.getElementById(btnId);
     if (!detail) return;
     const isOpen = detail.style.display === 'block';
     detail.style.display = isOpen ? 'none' : 'block';
     if (btn) btn.classList.toggle('open', !isOpen);
+    if (!isOpen && statsId) loadGradeStatsInline(statsId);
 };
 
 // Works for both mobile (numeric gi) and desktop (string pfx like "dt0")
@@ -890,34 +890,66 @@ window.gradesSearch = function (val) {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PERFORMANCE OVERVIEW MODAL
+// INLINE PERFORMANCE OVERVIEW
 // ─────────────────────────────────────────────────────────────────────────────
-window.openGradeStats = async function (quizId) {
-    const loader = document.getElementById('loaderOverlay');
-    if (loader) loader.style.display = 'flex';
+async function loadGradeStatsInline(statsId) {
+    const box = document.getElementById(statsId);
+    if (!box || box.dataset.loaded === '1' || box.dataset.loading === '1') return;
+
+    const quizId = box.dataset.quizId;
+    if (!quizId) return;
+
+    box.dataset.loading = '1';
+    box.className = 'grade-inline-stats loading';
+    box.textContent = 'Loading performance overview...';
+
     try {
         const res  = await fetch(`get_quiz_stats.php?quiz_id=${quizId}`);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
-        if (loader) loader.style.display = 'none';
         const pct    = data.user_score || 0;
         const offset = 314 - (314 * (pct / 100));
-        document.getElementById('gsCircle').style.strokeDashoffset = offset;
-        document.getElementById('gsPercText').textContent  = pct + '%';
-        document.getElementById('gsOutOf').textContent     = `You scored ${data.score_out_of}`;
-        document.getElementById('gsMe').style.left         = pct + '%';
-        document.getElementById('gsLow').style.left        = (data.min || 0) + '%';
-        document.getElementById('gsAvg').style.left        = (data.avg || 0) + '%';
-        document.getElementById('gsHigh').style.left       = (data.max || 0) + '%';
-        document.getElementById('gradeStatsModal').classList.add('show');
-    } catch (e) {
-        if (loader) loader.style.display = 'none';
-        alert('Could not load class stats.');
-    }
-};
 
-window.closeGradeStatsModal = function () {
-    document.getElementById('gradeStatsModal').classList.remove('show');
+        box.className = 'grade-inline-stats';
+        box.dataset.loaded = '1';
+        box.innerHTML = `
+            <div class="grade-inline-title">Performance Overview</div>
+            <div class="grade-inline-grid">
+                <div class="score-circle-wrap">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="sc-track" cx="60" cy="60" r="50"/>
+                        <circle class="sc-fill" cx="60" cy="60" r="50" style="stroke-dashoffset:${offset};"/>
+                    </svg>
+                    <div class="score-circle-text">${pct}%</div>
+                </div>
+                <div style="width:100%;">
+                    <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
+                    <div class="dist-bar-wrap">
+                        <div class="dist-line low" style="left:${data.min || 0}%"></div>
+                        <div class="dist-line avg" style="left:${data.avg || 0}%"></div>
+                        <div class="dist-line high" style="left:${data.max || 0}%"></div>
+                        <div class="dist-marker me" style="left:${pct}%"></div>
+                    </div>
+                    <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
+                    <div class="dist-legend">
+                        <div><span style="color:#4fd1c5">●</span> Blue dot - your score</div>
+                        <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
+                        <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
+                        <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
+                    </div>
+                </div>
+            </div>`;
+    } catch (e) {
+        box.className = 'grade-inline-stats error';
+        box.textContent = 'Could not load class performance.';
+    } finally {
+        box.dataset.loading = '0';
+    }
+}
+
+window.openGradeStats = function (quizId) {
+    const box = document.querySelector(`.grade-inline-stats[data-quiz-id="${quizId}"]`);
+    if (box) loadGradeStatsInline(box.id);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
