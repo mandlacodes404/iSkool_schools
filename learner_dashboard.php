@@ -488,9 +488,58 @@ body {
     .sidebar.collapsed .footer {
         bottom: 20px;
     }
+    .sidebar-header {
+        margin-bottom: 24px !important;
+    }
+    .sidebar-links {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+    }
     .sidebar a,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
-        padding: 7px 12px;
+        padding: 8px 10px;
+        margin-bottom: 2px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 300;
+        letter-spacing: 0;
+        color: #9aa4b2;
+        min-height: 34px;
+    }
+    .sidebar a span,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) span {
+        font-weight: 300;
+    }
+    .sidebar a svg,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) svg {
+        width: 17px;
+        height: 17px;
+        margin-right: 9px;
+        opacity: 0.78;
+    }
+    .sidebar a:hover,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn):hover,
+    .sidebar a.active,
+    .sidebar button.active {
+        background: rgba(255,255,255,0.045);
+        color: #e2e8f0;
+        transform: none;
+    }
+    .sidebar a.active,
+    .sidebar button.active {
+        border-left: 2px solid #4fd1c5;
+        padding-left: 8px;
+    }
+    .learner-name {
+        font-size: 16px;
+        font-weight: 400;
+        margin-top: 8px;
+    }
+    .learner-email {
+        font-size: 11px;
+        color: #7d8794;
+        margin-bottom: 8px;
     }
 }
 
