@@ -1848,194 +1848,189 @@ if (fullPage &&
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
-    apiArea.innerHTML = `
-        <div style="padding:20px 16px 40px;max-width:480px;margin:0 auto;">
+    const isDesktop = window.innerWidth > 768;
 
-            <!-- ── PROFILE CARD (iOS-style account block at top) ── -->
-            <div onclick="loadLearnerPersonalInfo()"
-                 style="display:flex;align-items:center;gap:16px;
-                        background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;padding:16px;cursor:pointer;
-                        transition:background 0.2s ease;margin-bottom:28px;"
+    // ── SHARED BLOCKS (used in both layouts) ──────────────────────────────
+
+    const profileCardHTML = `
+        <!-- ── PROFILE CARD ── -->
+        <div onclick="loadLearnerPersonalInfo()"
+             style="display:flex;align-items:center;gap:16px;
+                    background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;padding:16px;cursor:pointer;
+                    transition:background 0.2s ease;margin-bottom:28px;"
+             onmouseover="this.style.background='#21262d'"
+             onmouseout="this.style.background='#1b1b1b'">
+            <div style="position:relative;width:64px;height:64px;border-radius:50%;
+                        background:#121212;border:2px solid #30363d;
+                        overflow:hidden;flex-shrink:0;">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    ${avatarHTML}
+                </div>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="color:#e2e8f0;font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    <?= htmlspecialchars($learnerFullName) ?>
+                </div>
+                <div style="color:#8b949e;font-size:13px;margin-top:3px;">
+                    <?= htmlspecialchars($learnerEmail) ?>
+                </div>
+            </div>
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </div>`;
+
+    const profilePicHTML = `
+        <!-- SECTION: PROFILE -->
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Profile</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:28px;">
+            <div onclick="document.getElementById('profileInput').click()"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                  onmouseover="this.style.background='#21262d'"
-                 onmouseout="this.style.background='#1b1b1b'">
-
-                <!-- Avatar -->
-                <div style="position:relative;width:64px;height:64px;border-radius:50%;
-                            background:#121212;border:2px solid #30363d;
-                            overflow:hidden;flex-shrink:0;">
-                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-                        ${avatarHTML}
-                    </div>
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
                 </div>
-
-                <!-- Name + subtitle -->
-                <div style="flex:1;min-width:0;">
-                    <div style="color:#e2e8f0;font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        <?= htmlspecialchars($learnerFullName) ?>
-                    </div>
-                    <div style="color:#8b949e;font-size:13px;margin-top:3px;">
-                        <?= htmlspecialchars($learnerEmail) ?>
-                    </div>
+                <div style="flex:1;">
+                    <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Update Profile Picture</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Upload a new photo</div>
                 </div>
-
-                <!-- Chevron -->
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </div>
-
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: NOTIFICATIONS                     -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
-                Notifications
-            </div>
-
-            <!-- Grouped card -->
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
-
-                <!-- Notification Help row -->
-                <div style="padding:14px 16px;">
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-                        <div style="width:36px;height:36px;border-radius:9px;
-                                    background:rgba(79,209,197,0.12);
-                                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <span style="font-size:18px;line-height:1;">💡</span>
-                        </div>
-                        <div style="color:#4fd1c5;font-weight:700;font-size:14px;">Notification Help</div>
-                    </div>
-                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.8;">
-                        <li><strong style="color:#c9d1d9;">iPhone Users:</strong> You must "Add to Home Screen" first.</li>
-                        <li>Tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below if you aren't getting alerts.</li>
-                        <li>If prompted, select <strong style="color:#c9d1d9;">"Allow"</strong> on the system popup.</li>
-                    </ol>
-                </div>
-
-                <!-- Divider -->
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
-
-                <!-- Sync Notifications row -->
-                <div onclick="requestIphonePush()"
-                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                     onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='transparent'">
-                    <div style="width:36px;height:36px;border-radius:9px;
-                                background:rgba(79,209,197,0.12);
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Sync Notifications</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
+            <div onclick="removeLearnerProfilePicture()"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6M14 11v6"></path>
                     </svg>
                 </div>
+                <div style="flex:1;">
+                    <div style="color:#f85149;font-weight:600;font-size:14px;">Remove Profile Picture</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Revert to initials avatar</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </div>
+        </div>`;
 
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: PROFILE                           -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
-                Profile
-            </div>
-
-            <!-- Grouped card -->
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
-
-                <!-- Update Profile Picture -->
-                <div onclick="document.getElementById('profileInput').click()"
-                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                     onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='transparent'">
-                    <div style="width:36px;height:36px;border-radius:9px;
-                                background:rgba(79,209,197,0.12);
+    const notificationsHTML = `
+        <!-- SECTION: NOTIFICATIONS -->
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Notifications</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:28px;">
+            <div style="padding:14px 16px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
                                 display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
+                        <span style="font-size:18px;line-height:1;">💡</span>
                     </div>
-                    <div style="flex:1;">
-                        <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Update Profile Picture</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Upload a new photo</div>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+                    <div style="color:#4fd1c5;font-weight:700;font-size:14px;">Notification Help</div>
+                </div>
+                <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.8;">
+                    <li><strong style="color:#c9d1d9;">iPhone Users:</strong> You must "Add to Home Screen" first.</li>
+                    <li>Tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below if you aren't getting alerts.</li>
+                    <li>If prompted, select <strong style="color:#c9d1d9;">"Allow"</strong> on the system popup.</li>
+                </ol>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
+            <div onclick="requestIphonePush()"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
                 </div>
+                <div style="flex:1;">
+                    <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Sync Notifications</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+        </div>`;
 
-                <!-- Divider -->
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
-
-                <!-- Remove Profile Picture -->
-                <div onclick="removeLearnerProfilePicture()"
-                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                     onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='transparent'">
-                    <div style="width:36px;height:36px;border-radius:9px;
-                                background:rgba(248,81,73,0.1);
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                            <path d="M10 11v6M14 11v6"></path>
-                        </svg>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="color:#f85149;font-weight:600;font-size:14px;">Remove Profile Picture</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Revert to initials avatar</div>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+    const accountHTML = `
+        <!-- SECTION: ACCOUNT -->
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Account</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;">
+            <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
                 </div>
-            </div>
-
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: ACCOUNT                           -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">
-                Account
-            </div>
-
-            <!-- Grouped card (single row) -->
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;">
-                <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
-                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                     onmouseover="this.style.background='#21262d'"
-                     onmouseout="this.style.background='transparent'">
-                    <div style="width:36px;height:36px;border-radius:9px;
-                                background:rgba(248,81,73,0.1);
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="color:#f85149;font-weight:600;font-size:14px;">Sign Out</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
+                <div style="flex:1;">
+                    <div style="color:#f85149;font-weight:600;font-size:14px;">Sign Out</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
                 </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none" style="flex-shrink:0;">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
             </div>
+        </div>`;
 
+    // ── DESKTOP: two-column layout ─────────────────────────────────────────
+    if (isDesktop) {
+        apiArea.innerHTML = `
+        <div style="padding:32px 32px 60px;max-width:1000px;margin:0 auto;">
+            <h2 style="color:#e2e8f0;font-size:20px;font-weight:700;margin:0 0 24px;">Settings</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+
+                <!-- LEFT COLUMN: Profile card + Profile picture -->
+                <div>
+                    ${profileCardHTML}
+                    ${profilePicHTML}
+                </div>
+
+                <!-- RIGHT COLUMN: Notifications + Account -->
+                <div>
+                    ${notificationsHTML}
+                    ${accountHTML}
+                </div>
+
+            </div>
+        </div>`;
+        return;
+    }
+
+    // ── MOBILE: original single-column layout ──────────────────────────────
+    apiArea.innerHTML = `
+        <div style="padding:20px 16px 40px;max-width:480px;margin:0 auto;">
+            ${profileCardHTML}
+            ${notificationsHTML}
+            ${profilePicHTML}
+            ${accountHTML}
         </div>`;
 };
 document.getElementById("settingsBtn")?.addEventListener('click', function() {
@@ -2100,195 +2095,196 @@ window.loadLearnerPersonalInfo = async function() {
 
     function val(v) { return v || ''; }
 
+    const isDesktop = window.innerWidth > 768;
+
+    // ── SHARED SECTION BLOCKS ─────────────────────────────────────────────
+
+    const avatarBlockHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
+            <div onclick="document.getElementById('profileInput').click()"
+                 style="position:relative;width:80px;height:80px;border-radius:50%;
+                        background:#1b1b1b;border:2px solid #30363d;
+                        overflow:hidden;cursor:pointer;flex-shrink:0;">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                    ${avatarHTML}
+                </div>
+            </div>
+            <div onclick="document.getElementById('profileInput').click()"
+                 style="margin-top:8px;font-size:14px;color:#4fd1c5;font-weight:600;cursor:pointer;">
+                Edit
+            </div>
+        </div>`;
+
+    const personalSectionHTML = `
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Personal</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:28px;">
+            <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:14px;color:#8b949e;">Name</span>
+                <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars($learnerFullName) ?></span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:14px;color:#8b949e;">Email</span>
+                <span style="font-size:13px;color:#c9d1d9;max-width:220px;text-align:right;word-break:break-all;"><?= htmlspecialchars($learnerEmail) ?></span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:14px;color:#8b949e;">Gender</span>
+                <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?php if (!empty($learnerGender)): ?><?= htmlspecialchars(ucfirst($learnerGender)) ?><?php else: ?><span style="color:#8b949e;font-style:italic;">Not set</span><?php endif; ?></span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Date of Birth</label>
+                <input type="date" id="pi_dob" value="${val(profile.date_of_birth)}"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;color-scheme:dark;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">ID Number</label>
+                <input type="text" id="pi_id" value="${val(profile.id_number)}"
+                       placeholder="13-digit South African ID" maxlength="13"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Address</label>
+                <input type="text" id="pi_address" value="${val(profile.address)}"
+                       placeholder="Street, City, Province"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+        </div>`;
+
+    const guardianSectionHTML = `
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Guardian / Parent</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:28px;">
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Name</label>
+                <input type="text" id="pi_gname" value="${val(profile.guardian_name)}"
+                       placeholder="Full name of guardian"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Relationship</label>
+                <select id="pi_grel"
+                        style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                               border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                               font-family:inherit;box-sizing:border-box;cursor:pointer;color-scheme:dark;">
+                    <option value="" style="background:#1b1b1b;">Select relationship</option>
+                    ${['Mother','Father','Grandmother','Grandfather','Aunt','Uncle','Sister','Brother','Legal Guardian','Other'].map(r =>
+                        `<option value="${r}" style="background:#1b1b1b;" ${val(profile.guardian_relationship) === r ? 'selected' : ''}>${r}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Phone</label>
+                <input type="tel" id="pi_gphone" value="${val(profile.guardian_phone)}"
+                       placeholder="e.g. 071 234 5678"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Email</label>
+                <input type="email" id="pi_gemail" value="${val(profile.guardian_email)}"
+                       placeholder="guardian@example.com"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+        </div>`;
+
+    const emergencySectionHTML = `
+        <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
+                    letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Emergency &amp; Medical</div>
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:28px;">
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Name</label>
+                <input type="text" id="pi_ename" value="${val(profile.emergency_contact_name)}"
+                       placeholder="Full name"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Phone</label>
+                <input type="tel" id="pi_ephone" value="${val(profile.emergency_contact_phone)}"
+                       placeholder="e.g. 082 345 6789"
+                       style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                              border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                              font-family:inherit;box-sizing:border-box;">
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
+            <div style="padding:14px 16px;">
+                <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Medical Notes</label>
+                <textarea id="pi_medical" rows="3"
+                          placeholder="Allergies, conditions, medication, etc."
+                          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                 border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
+                                 font-family:inherit;box-sizing:border-box;resize:vertical;min-height:80px;">${val(profile.medical_notes)}</textarea>
+            </div>
+        </div>`;
+
+    const saveBtnHTML = `
+        <button id="pi_save_btn" onclick="saveLearnerPersonalInfo()"
+                style="width:100%;padding:16px;background:#4fd1c5;border:none;border-radius:14px;
+                       color:#0d1117;font-size:15px;font-weight:700;cursor:pointer;
+                       font-family:inherit;transition:opacity 0.2s ease;letter-spacing:0.02em;">
+            Save Changes
+        </button>
+        <div id="pi_feedback" style="display:none;margin-top:12px;text-align:center;
+                                     font-size:13px;font-weight:600;padding:12px;
+                                     border-radius:10px;"></div>`;
+
+    // ── DESKTOP: two-column layout ─────────────────────────────────────────
+    if (isDesktop) {
+        apiArea.innerHTML = `
+        <div style="padding:32px 32px 60px;max-width:1000px;margin:0 auto;">
+            <h2 style="color:#e2e8f0;font-size:20px;font-weight:700;margin:0 0 24px;">Personal Information</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+
+                <!-- LEFT: Avatar + Personal details -->
+                <div>
+                    ${avatarBlockHTML}
+                    ${personalSectionHTML}
+                </div>
+
+                <!-- RIGHT: Guardian + Emergency + Save -->
+                <div>
+                    ${guardianSectionHTML}
+                    ${emergencySectionHTML}
+                    ${saveBtnHTML}
+                </div>
+
+            </div>
+        </div>`;
+        return;
+    }
+
+    // ── MOBILE: original single-column layout ──────────────────────────────
     apiArea.innerHTML = `
         <div style="padding:24px 16px 60px;max-width:520px;margin:0 auto;">
-
-            <!-- ── AVATAR + EDIT ── -->
-            <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
-                <div onclick="document.getElementById('profileInput').click()"
-                     style="position:relative;width:80px;height:80px;border-radius:50%;
-                            background:#1b1b1b;border:2px solid #30363d;
-                            overflow:hidden;cursor:pointer;flex-shrink:0;">
-                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
-                        ${avatarHTML}
-                    </div>
-                </div>
-                <div onclick="document.getElementById('profileInput').click()"
-                     style="margin-top:8px;font-size:14px;color:#4fd1c5;font-weight:600;cursor:pointer;">
-                    Edit
-                </div>
-            </div>
-
-
-
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: PERSONAL                          -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Personal</div>
-
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
-
-                <!-- Name — read only -->
-                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:14px;color:#8b949e;">Name</span>
-                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars($learnerFullName) ?></span>
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <!-- Email — read only -->
-                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:14px;color:#8b949e;">Email</span>
-                    <span style="font-size:13px;color:#c9d1d9;max-width:220px;text-align:right;word-break:break-all;"><?= htmlspecialchars($learnerEmail) ?></span>
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <!-- Gender — read only (set at registration) -->
-                <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:14px;color:#8b949e;">Gender</span>
-                    <span style="font-size:14px;color:#c9d1d9;font-weight:500;"><?php if (!empty($learnerGender)): ?><?= htmlspecialchars(ucfirst($learnerGender)) ?><?php else: ?><span style="color:#8b949e;font-style:italic;">Not set</span><?php endif; ?></span>
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <!-- Date of Birth — editable -->
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Date of Birth</label>
-                    <input type="date" id="pi_dob" value="${val(profile.date_of_birth)}"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;color-scheme:dark;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <!-- ID Number — editable -->
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">ID Number</label>
-                    <input type="text" id="pi_id" value="${val(profile.id_number)}"
-                           placeholder="13-digit South African ID"
-                           maxlength="13"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <!-- Address — editable -->
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Address</label>
-                    <input type="text" id="pi_address" value="${val(profile.address)}"
-                           placeholder="Street, Suburb, City"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-            </div>
-
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: GUARDIAN / PARENT                 -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Guardian / Parent</div>
-
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Name</label>
-                    <input type="text" id="pi_gname" value="${val(profile.guardian_name)}"
-                           placeholder="Full name of guardian"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Relationship</label>
-                    <select id="pi_grel"
-                            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                   border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                   font-family:inherit;box-sizing:border-box;cursor:pointer;color-scheme:dark;">
-                        <option value="" style="background:#1b1b1b;">Select relationship</option>
-                        ${['Mother','Father','Grandmother','Grandfather','Aunt','Uncle','Sister','Brother','Legal Guardian','Other'].map(r =>
-                            `<option value="${r}" style="background:#1b1b1b;" ${val(profile.guardian_relationship) === r ? 'selected' : ''}>${r}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Phone</label>
-                    <input type="tel" id="pi_gphone" value="${val(profile.guardian_phone)}"
-                           placeholder="e.g. 071 234 5678"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Guardian Email</label>
-                    <input type="email" id="pi_gemail" value="${val(profile.guardian_email)}"
-                           placeholder="guardian@example.com"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-            </div>
-
-            <!-- ══════════════════════════════════════════ -->
-            <!-- SECTION: EMERGENCY & MEDICAL               -->
-            <!-- ══════════════════════════════════════════ -->
-            <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
-                        letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Emergency &amp; Medical</div>
-
-            <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
-                        border-radius:14px;overflow:hidden;margin-bottom:28px;">
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Name</label>
-                    <input type="text" id="pi_ename" value="${val(profile.emergency_contact_name)}"
-                           placeholder="Full name"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Emergency Contact Phone</label>
-                    <input type="tel" id="pi_ephone" value="${val(profile.emergency_contact_phone)}"
-                           placeholder="e.g. 082 345 6789"
-                           style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                  border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                  font-family:inherit;box-sizing:border-box;">
-                </div>
-                <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:16px;"></div>
-
-                <div style="padding:14px 16px;">
-                    <label style="display:block;font-size:12px;color:#8b949e;margin-bottom:6px;font-weight:500;letter-spacing:0.03em;">Medical Notes</label>
-                    <textarea id="pi_medical" rows="3"
-                              placeholder="Allergies, conditions, medication, etc."
-                              style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-                                     border-radius:9px;padding:10px 12px;color:#e2e8f0;font-size:14px;
-                                     font-family:inherit;box-sizing:border-box;resize:vertical;min-height:80px;">${val(profile.medical_notes)}</textarea>
-                </div>
-            </div>
-
-            <!-- ── SAVE BUTTON ── -->
-            <button id="pi_save_btn" onclick="saveLearnerPersonalInfo()"
-                    style="width:100%;padding:16px;background:#4fd1c5;border:none;border-radius:14px;
-                           color:#0d1117;font-size:15px;font-weight:700;cursor:pointer;
-                           font-family:inherit;transition:opacity 0.2s ease;letter-spacing:0.02em;">
-                Save Changes
-            </button>
-
-            <!-- ── SAVE FEEDBACK ── -->
-            <div id="pi_feedback" style="display:none;margin-top:12px;text-align:center;
-                                         font-size:13px;font-weight:600;padding:12px;
-                                         border-radius:10px;"></div>
-
+            ${avatarBlockHTML}
+            ${personalSectionHTML}
+            ${guardianSectionHTML}
+            ${emergencySectionHTML}
+            ${saveBtnHTML}
         </div>`;
 };
 
