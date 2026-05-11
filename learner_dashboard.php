@@ -489,23 +489,23 @@ body {
         bottom: 20px;
     }
     .sidebar-header {
-        margin-bottom: 24px !important;
+        margin-bottom: 16px !important;
     }
     .sidebar-links {
-        margin-top: 18px;
-        padding-top: 14px;
+        margin-top: 8px;
+        padding-top: 10px;
         border-top: 1px solid rgba(255,255,255,0.06);
     }
     .sidebar a,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
-        padding: 8px 10px;
-        margin-bottom: 2px;
+        padding: 7px 12px;
+        margin-bottom: 0;
         border-radius: 9px;
         font-size: 13px;
         font-weight: 300;
         letter-spacing: 0;
         color: #9aa4b2;
-        min-height: 34px;
+        min-height: 0;
     }
     .sidebar a span,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) span {
@@ -535,11 +535,18 @@ body {
         font-size: 16px;
         font-weight: 400;
         margin-top: 8px;
+        max-height: none;
+        opacity: 1;
+        display: block;
+        color: #fff;
     }
     .learner-email {
         font-size: 11px;
         color: #7d8794;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        max-height: none;
+        opacity: 1;
+        display: block;
     }
 }
 
