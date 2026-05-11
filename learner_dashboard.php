@@ -1557,7 +1557,7 @@ iframe {
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:15px;"><span><strong>iSkool v.1.0.0</strong></span></div>
+    <div class="footer" style="font-size:15px;"><span><strong>iSkool v1.0.1</strong></span></div>
 </div>
 
 <div class="main-content">
