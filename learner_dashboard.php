@@ -413,6 +413,16 @@ body {
     font-size: 14px;
     padding: 10px 12px;
     opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar .join-status svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    flex-shrink: 0;
 }
 
 .sidebar.collapsed .join-class-form,
@@ -1117,6 +1127,7 @@ iframe {
 }
 /* SVG icons – consistent with platform style */
 .sidebar a svg,
+.sidebar button svg,
 #mobileBottomNav a svg,
 .main-header button svg {
     width: 20px;
@@ -1481,7 +1492,12 @@ iframe {
             <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn" id="nav-myclass-sidebar">
                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>My Class</span>
             </button>
-            <div class="join-status"><i class="fas fa-check"></i><span>Joined Class</span></div>
+            <div class="join-status">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5"></path>
+                </svg>
+                <span>Joined Class</span>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -2003,20 +2019,63 @@ if (fullPage &&
     // ── DESKTOP: two-column layout ─────────────────────────────────────────
     if (isDesktop) {
         apiArea.innerHTML = `
-        <div style="padding:32px 32px 60px;max-width:1000px;margin:0 auto;">
-            <h2 style="color:#e2e8f0;font-size:20px;font-weight:700;margin:0 0 24px;">Settings</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+        <style>
+            .learner-settings-desktop {
+                max-width: 1120px;
+                margin: 0 auto;
+                padding: 24px 28px 56px;
+                font-family: 'Nunito', sans-serif;
+            }
+            .learner-settings-shell {
+                display: grid;
+                grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+                gap: 0;
+                min-height: calc(100vh - 150px);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                background: #0d1117;
+            }
+            .learner-settings-rail {
+                padding: 22px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+            }
+            .learner-settings-main {
+                padding: 22px 24px 28px;
+                overflow-y: auto;
+            }
+            .learner-settings-heading {
+                margin: 0 0 16px;
+                color: #4fd1c5;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+            }
+            .learner-settings-main-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 20px;
+                align-items: start;
+            }
+        </style>
+        <div class="learner-settings-desktop">
+            <div class="learner-settings-shell">
 
                 <!-- LEFT COLUMN: Profile card + Profile picture -->
-                <div>
+                <div class="learner-settings-rail">
+                    <h2 class="learner-settings-heading">Settings</h2>
                     ${profileCardHTML}
                     ${profilePicHTML}
                 </div>
 
                 <!-- RIGHT COLUMN: Notifications + Account -->
-                <div>
-                    ${notificationsHTML}
-                    ${accountHTML}
+                <div class="learner-settings-main">
+                    <div class="learner-settings-main-grid">
+                        <div>${notificationsHTML}</div>
+                        <div>${accountHTML}</div>
+                    </div>
                 </div>
 
             </div>
@@ -2255,21 +2314,68 @@ window.loadLearnerPersonalInfo = async function() {
     // ── DESKTOP: two-column layout ─────────────────────────────────────────
     if (isDesktop) {
         apiArea.innerHTML = `
-        <div style="padding:32px 32px 60px;max-width:1000px;margin:0 auto;">
-            <h2 style="color:#e2e8f0;font-size:20px;font-weight:700;margin:0 0 24px;">Personal Information</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+        <style>
+            .learner-personal-desktop {
+                max-width: 1120px;
+                margin: 0 auto;
+                padding: 24px 28px 56px;
+                font-family: 'Nunito', sans-serif;
+            }
+            .learner-personal-shell {
+                display: grid;
+                grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+                gap: 0;
+                min-height: calc(100vh - 150px);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 14px;
+                overflow: hidden;
+                background: #0d1117;
+            }
+            .learner-personal-rail {
+                padding: 24px 22px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+            }
+            .learner-personal-main {
+                padding: 24px;
+                overflow-y: auto;
+            }
+            .learner-personal-heading {
+                margin: 0 0 18px;
+                color: #4fd1c5;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+            }
+            .learner-personal-main-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 20px;
+                align-items: start;
+            }
+            .learner-personal-save {
+                max-width: 460px;
+                margin-left: auto;
+            }
+        </style>
+        <div class="learner-personal-desktop">
+            <div class="learner-personal-shell">
 
                 <!-- LEFT: Avatar + Personal details -->
-                <div>
+                <div class="learner-personal-rail">
+                    <h2 class="learner-personal-heading">Personal Information</h2>
                     ${avatarBlockHTML}
                     ${personalSectionHTML}
                 </div>
 
                 <!-- RIGHT: Guardian + Emergency + Save -->
-                <div>
-                    ${guardianSectionHTML}
-                    ${emergencySectionHTML}
-                    ${saveBtnHTML}
+                <div class="learner-personal-main">
+                    <div class="learner-personal-main-grid">
+                        <div>${guardianSectionHTML}</div>
+                        <div>${emergencySectionHTML}</div>
+                    </div>
+                    <div class="learner-personal-save">${saveBtnHTML}</div>
                 </div>
 
             </div>

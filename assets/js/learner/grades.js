@@ -346,6 +346,55 @@ function renderGrades(data) {
 
     @media (max-width: 768px) {
         .grades-search { width: 140px; }
+        .grades-wrap {
+            max-width: none;
+            padding: 0 0 64px;
+        }
+        .grades-header {
+            margin: 0 0 12px;
+            padding: 0 2px;
+        }
+        .grades-header-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .grades-mobile-layout .subject-card {
+            background: #1a1919;
+            border-color: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin: 0 0 14px;
+        }
+        .grades-mobile-layout .subject-header {
+            background: #1a1919;
+            border-bottom-color: rgba(255,255,255,0.05);
+            padding: 16px;
+        }
+        .grades-mobile-layout .subject-header:hover {
+            background: #1a1919;
+        }
+        .grades-mobile-layout .view-toggle-bar {
+            background: #1a1919;
+            padding: 10px 16px 8px;
+        }
+        .grades-mobile-layout .quiz-list,
+        .grades-mobile-layout .term-marks-view {
+            background: #1a1919;
+            padding: 8px 16px 16px;
+        }
+        .grades-mobile-layout .quiz-row {
+            background: #1a1919;
+            border-color: rgba(255,255,255,0.05);
+            border-radius: 0;
+            border-left: 0;
+            border-right: 0;
+            margin-bottom: 0;
+        }
+        .grades-mobile-layout .quiz-row + .quiz-row {
+            border-top: 0;
+        }
+        .grades-mobile-layout .quiz-row-details {
+            background: #151515;
+        }
         .report-modal-box { width: 100vw; height: 100vh; border-radius: 0; }
     }
     </style>`;
