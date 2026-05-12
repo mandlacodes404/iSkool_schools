@@ -2839,6 +2839,7 @@ if (desktopToggle) {
         const mainContent  = document.querySelector('.main-content');
         const mainHeader   = document.querySelector('.main-header');
         const bottomNav    = document.getElementById('mobileBottomNav');
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         const SCROLL_THRESHOLD = 10; // px before header solidifies
         const DETAIL_TITLE_THRESHOLD = 28; // px before detail title collapses into header
         const BOTTOM_THRESHOLD = 10; // px from bottom before nav fades out
@@ -2853,8 +2854,10 @@ if (desktopToggle) {
                 // Header: solid when scrolled down, transparent at top
                 if (scrollTop > SCROLL_THRESHOLD) {
                     mainHeader.classList.add('header-scrolled');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
                 } else {
                     mainHeader.classList.remove('header-scrolled');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
                 }
 
                 if (mainHeader.classList.contains('mobile-detail-mode')) {
