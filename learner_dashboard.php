@@ -713,6 +713,10 @@ iframe {
         transition: opacity 0.22s ease, transform 0.22s ease;
     }
 
+    .main-header.mobile-detail-mode #headerBackBtn {
+        color: #4fd1c5 !important;
+    }
+
     .main-header.mobile-detail-mode.detail-title-collapsed #headerTitle {
         opacity: 1;
         transform: translateY(0);
