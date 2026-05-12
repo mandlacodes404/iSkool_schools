@@ -97,6 +97,14 @@ function buildHomeLayout(data, manualHtml) {
     if (isMobile) {
         // ── MOBILE: GitHub-style stacked layout ──
         return `
+        <style>
+            @media (max-width: 768px) {
+                .lh-mobile-wrapper,
+                .lh-mobile-wrapper * {
+                    font-weight: 300 !important;
+                }
+            }
+        </style>
         <div class="lh-mobile-wrapper">
 
             <!-- MY CLASS CARD -->
@@ -264,11 +272,13 @@ function buildMobileClassCard(myClass) {
 // MOBILE TO-DO
 // ─────────────────────────────────────────────
 function buildMobileTodo(todo) {
+    const sectionColor = '#4fd1c5';
+
     if (!todo.length) {
         return `
             <div class="lh-empty-state">
                 <div class="lh-empty-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <path d="M9 11l3 3L22 4"/>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                     </svg>
@@ -308,8 +318,8 @@ function buildMobileTodo(todo) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
-                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
                 </div>
@@ -331,11 +341,13 @@ function buildMobileTodo(todo) {
 // MOBILE RECENT
 // ─────────────────────────────────────────────
 function buildMobileRecent(recent) {
+    const sectionColor = '#f28c38';
+
     if (!recent.length) {
         return `
             <div class="lh-empty-state">
                 <div class="lh-empty-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#f28c38" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                     </svg>
@@ -372,8 +384,8 @@ function buildMobileRecent(recent) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
-                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
                 </div>
@@ -396,11 +408,13 @@ function buildMobileRecent(recent) {
 // MOBILE UPCOMING EVENTS (academic_events)
 // ─────────────────────────────────────────────
 function buildMobileEvents(events) {
+    const sectionColor = '#f472b6';
+
     if (!events.length) {
         return `
             <div class="lh-empty-state">
-                <div class="lh-empty-icon" style="background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.15);">
-                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#f472b6" stroke-width="1.5" fill="none">
+                <div class="lh-empty-icon" style="background:${sectionColor}14;border:1px solid ${sectionColor}26;">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <rect x="3" y="4" width="18" height="18" rx="2"/>
                         <line x1="16" y1="2" x2="16" y2="6"/>
                         <line x1="8" y1="2" x2="8" y2="6"/>
@@ -453,8 +467,8 @@ function buildMobileEvents(events) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:default;${isPast ? 'opacity:0.5;' : ''}">
-                <div class="lh-row-icon" style="background:${color}18; border-color:${color}30;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${color}" stroke-width="2" fill="none">
+                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
                 </div>
