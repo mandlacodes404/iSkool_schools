@@ -67,7 +67,7 @@ if ($result && $row = $result->fetch_assoc()) {
 
 <link rel="manifest" href="/manifest.json">
 
-<meta name="theme-color" content="#1a1919">
+<meta name="theme-color" content="#000000">
 
 <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
