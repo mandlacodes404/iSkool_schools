@@ -399,7 +399,7 @@ function renderAnnouncements(data) {
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
                 font-size: 14px;
-                font-weight: 600;
+                font-weight: 400;
                 color: #e2e8f0;
                 margin: 0 0 6px;
                 line-height: 1.4;
@@ -583,7 +583,6 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     apiArea.innerHTML = `
         <style>
             .lan-mobile-detail {
-                background: #1a1919;
                 min-height: calc(100vh - 74px);
                 padding: 18px 16px 96px;
             }

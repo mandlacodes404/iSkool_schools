@@ -423,7 +423,6 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     apiArea.innerHTML = `
         <style>
             .las-mobile-detail {
-                background: #1a1919;
                 min-height: calc(100vh - 74px);
                 padding: 18px 16px 96px;
             }
