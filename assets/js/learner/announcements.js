@@ -393,7 +393,7 @@ function renderAnnouncements(data) {
             }
             .lan-mobile-card {
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
                 gap: 14px;
                 padding: 14px 16px;
                 background: #1a1919;
@@ -404,38 +404,37 @@ function renderAnnouncements(data) {
                 border-left: 3px solid rgba(210,149,34,0.5);
             }
             .lan-mobile-card:last-child { border-bottom: none; }
-            .lan-mobile-card-icon { flex-shrink: 0; margin-top: 2px; opacity: 0.7; }
+            .lan-mobile-card-icon { flex-shrink: 0; opacity: 0.7; }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
                 font-size: 14px;
                 font-weight: 400;
                 color: #e2e8f0;
-                margin: 0 0 6px;
-                line-height: 1.4;
-            }
-            .lan-mobile-card-message {
-                font-size: 13px;
-                color: #8b949e;
-                line-height: 1.6;
-                margin: 0 0 8px;
-                display: block;
+                margin: 0;
+                line-height: 1.3;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
-            .lan-mobile-card-date { font-size: 11px; color: #555e6a; }
-            .lan-mobile-new-badge {
+            .lan-mobile-card-title-text {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .lan-mobile-status-dot {
                 display: inline-block;
-                background: rgba(79,209,197,0.1);
-                color: #4fd1c5;
-                border: 1px solid rgba(79,209,197,0.35);
-                font-size: 9px;
-                font-weight: 700;
-                padding: 2px 6px;
-                border-radius: 4px;
-                letter-spacing: 0.5px;
-                margin-left: 8px;
-                vertical-align: middle;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .lan-mobile-card-chevron {
+                flex-shrink: 0;
+                color: #30363d;
             }
 
         </style>
@@ -487,11 +486,14 @@ function renderAnnouncements(data) {
                     </div>
                     <div class="lan-mobile-card-body">
                         <div class="lan-mobile-card-title">
-                            ${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}
-                            ${isNew ? '<span class="lan-mobile-new-badge">NEW</span>' : ''}
+                            <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                            ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
                         </div>
-                        <div class="lan-mobile-card-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
-                        <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.sender || 'School Admin')} &bull; ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                    </div>
+                    <div class="lan-mobile-card-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>`;
             mobileFlatIdx++;
@@ -525,11 +527,14 @@ function renderAnnouncements(data) {
                         </div>
                         <div class="lan-mobile-card-body">
                             <div class="lan-mobile-card-title">
-                                ${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}
-                                ${isNew ? '<span class="lan-mobile-new-badge">NEW</span>' : ''}
+                                <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                                ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
                             </div>
-                            <div class="lan-mobile-card-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
-                            <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(teacher)} &bull; ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                        </div>
+                        <div class="lan-mobile-card-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
                         </div>
                     </div>`;
                 mobileFlatIdx++;
