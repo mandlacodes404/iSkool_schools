@@ -19,7 +19,7 @@ echo json_encode([
     "start_url"        => "/",
     "display"          => "standalone",
     "background_color" => "#0d1117",
-    "theme_color"      => "#1a1919",
+    "theme_color"      => "#000000",
     "orientation"      => "any",
     "icons"            => [
         [
