@@ -2917,6 +2917,13 @@ if (currentTitle === 'Discussion') {
     }
 }
 
+if (currentTitle === 'Announcement') {
+    if (typeof fetchAnnouncements === 'function') {
+        window.fetchAnnouncements();
+        return;
+    }
+}
+
 if (currentTitle === 'Calendar') {
     if (typeof loadManual === 'function') {
         window.loadManual();
@@ -3164,7 +3171,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/quiz.js?v=3.5"></script>
 <script src="assets/js/learner/assignments.js?v=2.7"></script>
 <script src="assets/js/learner/resources.js?v=2.9"></script>
-<script src="assets/js/learner/announcements.js?v=1.9"></script>
+<script src="assets/js/learner/announcements.js?v=2.0"></script>
 <script src="assets/js/learner/grades.js?v=1.8"></script>
 <script src="assets/js/learner/evaluations.js?v=1.7"></script>
 <script src="assets/js/learner/discussions.js?v=4.4"></script>
