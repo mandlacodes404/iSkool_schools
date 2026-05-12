@@ -1,6 +1,33 @@
 /* assets/js/assignments.js */
 window.learnerAssignmentCache = null;
 
+function showLearnerAssignmentMobileBottomNav() {
+    if (window.innerWidth > 899) return;
+
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    if (mobileBottomNav) {
+        mobileBottomNav.style.setProperty('display', 'flex', 'important');
+    }
+}
+
+window.openLearnerAssignmentSubmission = function(event, href) {
+    if (event) event.preventDefault();
+
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        const keepNavVisible = function() {
+            showLearnerAssignmentMobileBottomNav();
+            iframe.removeEventListener('load', keepNavVisible);
+        };
+        iframe.addEventListener('load', keepNavVisible);
+        iframe.style.display = 'block';
+        iframe.src = href;
+    }
+    showLearnerAssignmentMobileBottomNav();
+};
+
 window.fetchAssignments = async function() {
     // 1. Clear any existing timers
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -413,6 +440,7 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     if (window.configureHeader) {
         window.configureHeader({ title: 'Submission', mode: 'detail' });
     }
+    showLearnerAssignmentMobileBottomNav();
 
     const isDone = !!task.submission_file;
     const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
@@ -537,7 +565,7 @@ window.openMobileLearnerAssignment = function(flatIdx) {
             </div>
             ${task.is_past_due
                 ? `<span class="las-mobile-detail-action las-mobile-detail-action--locked">${actionLabel}</span>`
-                : `<a class="las-mobile-detail-action" href="${actionHref}" target="mainFrame" onclick="document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">${actionLabel}</a>`}
+                : `<a class="las-mobile-detail-action" href="${actionHref}" target="mainFrame" onclick="openLearnerAssignmentSubmission(event, '${actionHref}')">${actionLabel}</a>`}
         </article>`;
 
     const mainContent = document.querySelector('.main-content');

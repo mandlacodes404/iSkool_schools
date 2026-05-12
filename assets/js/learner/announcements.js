@@ -1,5 +1,14 @@
 window.announcementCache = null;
 
+function showLearnerAnnouncementMobileBottomNav() {
+    if (window.innerWidth > 899) return;
+
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    if (mobileBottomNav) {
+        mobileBottomNav.style.setProperty('display', 'flex', 'important');
+    }
+}
+
 window.fetchAnnouncements = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
@@ -567,6 +576,7 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (window.configureHeader) {
         window.configureHeader({ title: ann.title || 'Announcement', mode: 'detail', detailType: 'Announcement' });
     }
+    showLearnerAnnouncementMobileBottomNav();
 
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');

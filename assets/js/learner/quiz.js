@@ -1,6 +1,16 @@
 /* assets/js/quiz.js */
 window.learnerQuizCache = null; 
 window.quizInstructionsCache = {};
+
+function showLearnerQuizMobileBottomNav() {
+    if (window.innerWidth > 899) return;
+
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    if (mobileBottomNav) {
+        mobileBottomNav.style.setProperty('display', 'flex', 'important');
+    }
+}
+
 const formatQuizDate = (dateStr) => {
     if (!dateStr) return "TBD";
     const date = new Date(dateStr.replace(/-/g, "/"));
@@ -73,6 +83,7 @@ if (window.quizInstructionsCache[quizId]) {
     if (typeof window.configureHeader === 'function') {
         window.configureHeader({ title: 'Instructions', mode: 'detail' });
     }
+    showLearnerQuizMobileBottomNav();
     apiArea.innerHTML = window.quizInstructionsCache[quizId];
     if (loader) loader.style.display = 'none';
     return;
@@ -82,6 +93,7 @@ if (window.quizInstructionsCache[quizId]) {
 if (typeof window.configureHeader === 'function') {
     window.configureHeader({ title: 'Instructions', mode: 'detail' });
 }
+showLearnerQuizMobileBottomNav();
 if (loader) loader.style.display = 'flex';
 
     try {
@@ -101,6 +113,14 @@ if (loader) loader.style.display = 'flex';
                 .ai-box { background: rgba(79, 209, 197, 0.05); border: 1px solid rgba(79, 209, 197, 0.3); border-radius: 10px; padding: 15px; margin-top: 25px; }
                 .start-btn { background: rgba(79, 209, 197, 0.1); color: #e2e8f0; padding: 14px 30px; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; max-width: 320px; display: block; margin: 35px auto 0; transition: 0.3s; }
                 .start-btn:hover { border-color: #4fd1c5; background: rgba(79, 209, 197, 0.2); }
+                @media (max-width: 899px) {
+                    .inst-container {
+                        background-color: transparent;
+                        border: 0;
+                        border-radius: 0;
+                        padding: 18px 16px 110px;
+                    }
+                }
             </style>
             
             <div class="inst-container">
