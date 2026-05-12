@@ -409,11 +409,10 @@ function renderAnnouncements(data) {
                 color: #8b949e;
                 line-height: 1.6;
                 margin: 0 0 8px;
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-                max-height: 62px;
+                display: block;
+                white-space: nowrap;
                 overflow: hidden;
+                text-overflow: ellipsis;
             }
             .lan-mobile-card-date { font-size: 11px; color: #555e6a; }
             .lan-mobile-new-badge {
