@@ -554,16 +554,18 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
 
     if (!ann || !apiArea) return;
 
     if (iframe) iframe.style.display = 'none';
     if (apiArea) apiArea.style.display = 'block';
     if (myClassContent) myClassContent.classList.remove('active');
+    if (mainContent) mainContent.scrollTop = 0;
 
     sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Announcement', mode: 'detail' });
+        window.configureHeader({ title: ann.title || 'Announcement', mode: 'detail', detailType: 'Announcement' });
     }
 
     const isSchool = ann._type === 'school';
@@ -610,9 +612,10 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
             .lan-mobile-detail-title {
                 margin: 0 0 10px;
                 color: #e2e8f0;
-                font-size: 21px;
+                font-size: 28px;
                 line-height: 1.28;
                 font-weight: 800;
+                letter-spacing: 0;
             }
             .lan-mobile-detail-meta {
                 color: #8b949e;
@@ -638,12 +641,11 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
                 ${detailIcon}
                 ${isSchool ? 'School-wide' : 'Teacher'}
             </div>
-            <h1 class="lan-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
+            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
             <div class="lan-mobile-detail-meta">${escapeLearnerAnnouncementHtml(sender)} &bull; ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
             <div class="lan-mobile-detail-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
         </article>`;
 
-    const mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTop = 0;
 };
 

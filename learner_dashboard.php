@@ -671,6 +671,59 @@ iframe {
     margin-right: 4px;
 }
 
+@media (max-width: 768px) {
+    #headerBackBtn {
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        max-width: 126px;
+    }
+
+    #headerBackBtn svg {
+        flex-shrink: 0;
+    }
+
+    #headerBackLabel {
+        display: inline-block;
+        min-width: 0;
+        max-width: 92px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .main-header.mobile-detail-mode .logo-container {
+        min-width: 0;
+    }
+
+    .main-header.mobile-detail-mode #headerTitle {
+        display: block !important;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .main-header.mobile-detail-mode.detail-title-collapsed #headerTitle {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .main-header.mobile-detail-mode #headerLogo,
+    .main-header.mobile-detail-mode #settingsBtn {
+        display: none !important;
+    }
+}
+
 .my-class-content {
     display: none;
     padding: 24px;
@@ -1586,6 +1639,7 @@ iframe {
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
+            <span id="headerBackLabel"></span>
         </button>
     </div>
 
@@ -2782,6 +2836,7 @@ if (desktopToggle) {
         const mainHeader   = document.querySelector('.main-header');
         const bottomNav    = document.getElementById('mobileBottomNav');
         const SCROLL_THRESHOLD = 10; // px before header solidifies
+        const DETAIL_TITLE_THRESHOLD = 28; // px before detail title collapses into header
         const BOTTOM_THRESHOLD = 10; // px from bottom before nav fades out
 
         if (mainContent && mainHeader) {
@@ -2796,6 +2851,14 @@ if (desktopToggle) {
                     mainHeader.classList.add('header-scrolled');
                 } else {
                     mainHeader.classList.remove('header-scrolled');
+                }
+
+                if (mainHeader.classList.contains('mobile-detail-mode')) {
+                    if (scrollTop > DETAIL_TITLE_THRESHOLD) {
+                        mainHeader.classList.add('detail-title-collapsed');
+                    } else {
+                        mainHeader.classList.remove('detail-title-collapsed');
+                    }
                 }
 
                 // Bottom nav: transparent near bottom, glass when scrolled up
@@ -2822,12 +2885,15 @@ window.configureHeader = function(config) {
     let { title, mode } = config;
     
     // Select our UI elements
+    const mainHeader = document.querySelector('.main-header');
+    const mainContent = document.querySelector('.main-content');
     const mobileBottomNav = document.getElementById('mobileBottomNav');
     const titleEl = document.getElementById('headerTitle');
     const logoEl = document.getElementById('headerLogo');
     const mobileBtn = document.getElementById('mobileToggle');
     const desktopBtn = document.getElementById('desktopMenuToggle');
     const backBtn = document.getElementById('headerBackBtn');
+    const backLabelEl = document.getElementById('headerBackLabel');
     const rightSide = document.getElementById('headerRight');
 
     // Handle School Name Logic
@@ -2839,22 +2905,37 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
     if (titleEl) titleEl.innerText = title;
 
     if (mode === 'detail') {
+    window.learnerHeaderDetailType = config.detailType || title;
+    const backLabel = config.backLabel || window.learnerHeaderCurrentTitle || '';
+    if (backLabelEl) backLabelEl.innerText = backLabel;
+    if (mainHeader && window.innerWidth <= 768) {
+        mainHeader.classList.add('mobile-detail-mode');
+        if (mainContent && mainContent.scrollTop > 28) {
+            mainHeader.classList.add('detail-title-collapsed');
+        } else {
+            mainHeader.classList.remove('detail-title-collapsed');
+        }
+    }
     if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important'); 
     if (mobileBtn) mobileBtn.style.display = 'none';             
     if (desktopBtn) desktopBtn.style.display = 'none';
     if (backBtn) backBtn.style.display = 'flex';
 
     if (window.innerWidth <= 768) {
-        // MOBILE: Hide logo but show the title text to fill the space
+        // MOBILE: Body title stays large at top; header title fades in on scroll.
         if (logoEl) logoEl.style.display = 'none';
         if (titleEl) titleEl.style.display = 'block';  // ← SHOW TEXT
-        if (rightSide) rightSide.style.visibility = 'visible';
+        if (rightSide) rightSide.style.visibility = 'hidden';
     } else {
         // DESKTOP: Immersive — hide both logo and right side
         if (logoEl) logoEl.style.display = 'none';
         if (rightSide) rightSide.style.visibility = 'hidden'; 
     }
 } else {
+        window.learnerHeaderDetailType = null;
+        window.learnerHeaderCurrentTitle = title;
+        if (backLabelEl) backLabelEl.innerText = '';
+        if (mainHeader) mainHeader.classList.remove('mobile-detail-mode', 'detail-title-collapsed');
         // --- STANDARD MODE: EXPLORATION ---
         // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
         if (mobileBottomNav) {
@@ -2886,6 +2967,7 @@ window.handleHeaderBack = function() {
     const iframe = document.getElementById('mainFrame');
     const titleEl = document.getElementById('headerTitle');
     const currentTitle = titleEl ? titleEl.innerText : '';
+    const detailType = window.learnerHeaderDetailType || currentTitle;
 
     // 1. QUIZ PROTECTION: If taking a quiz, ask before leaving
     if (iframe && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
@@ -2917,7 +2999,7 @@ if (currentTitle === 'Discussion') {
     }
 }
 
-if (currentTitle === 'Announcement') {
+if (detailType === 'Announcement') {
     if (typeof fetchAnnouncements === 'function') {
         window.fetchAnnouncements();
         return;
@@ -3171,7 +3253,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/quiz.js?v=3.8"></script>
 <script src="assets/js/learner/assignments.js?v=3.1"></script>
 <script src="assets/js/learner/resources.js?v=3.1"></script>
-<script src="assets/js/learner/announcements.js?v=2.0"></script>
+<script src="assets/js/learner/announcements.js?v=2.2"></script>
 <script src="assets/js/learner/grades.js?v=1.8"></script>
 <script src="assets/js/learner/evaluations.js?v=1.7"></script>
 <script src="assets/js/learner/discussions.js?v=4.4"></script>
