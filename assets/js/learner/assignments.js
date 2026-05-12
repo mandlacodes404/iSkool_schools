@@ -282,6 +282,7 @@ function renderAssignmentCards(groupedData) {
                 padding: 14px 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
             }
             .las-mobile-row:last-child { border-bottom: none; }
             .las-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
@@ -301,31 +302,16 @@ function renderAssignmentCards(groupedData) {
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                flex-wrap: wrap;
-            }
-            .las-mobile-row-action {
-                flex-shrink: 0;
-                font-size: 13px;
-                font-weight: 600;
-                text-decoration: none;
-            }
-            .las-mobile-row-desc {
-                font-size: 13px;
-                color: #6b7280;
-                margin: 6px 0 0;
-                line-height: 1.5;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .las-mobile-attachment {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 11px;
-                color: #4fd1c5;
-                text-decoration: none;
-                margin-top: 6px;
+            .las-mobile-row-status-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
             }
         </style>
 
@@ -348,24 +334,23 @@ function renderAssignmentCards(groupedData) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST ═══ -->
         <div class="las-mobile-list">`;
 
+    let mobileFlatIdx = 0;
+
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<div class="las-mobile-teacher-header">${teacher}</div>`;
+        html += `<div class="las-mobile-teacher-header">${escapeLearnerAssignmentHtml(teacher)}</div>`;
 
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
-            const actionColor = task.is_past_due ? '#6b7280' : (isDone ? '#4fd1c5' : '#e67e22');
-            const actionLabel = task.is_past_due ? 'Locked' : (isDone ? 'Update' : 'Submit');
-            const actionHref = task.is_past_due
-                ? `javascript:void(0)`
-                : `submit_assignment.php?assignment_id=${task.id}`;
-
             const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
 
             html += `
-                <div class="las-mobile-row" style="${task.is_past_due ? 'opacity:0.65;' : ''}">
+                <div class="las-mobile-row" role="button" tabindex="0"
+                    onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }"
+                    style="${task.is_past_due ? 'opacity:0.65;' : ''}">
                     <div class="las-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -373,25 +358,14 @@ function renderAssignmentCards(groupedData) {
                         </svg>
                     </div>
                     <div class="las-mobile-row-body">
-                        <div class="las-mobile-row-title">${task.title}</div>
+                        <div class="las-mobile-row-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</div>
                         <div class="las-mobile-row-meta">
-                            <span>${task.class_name}</span>
-                            <span style="color:#333;">&bull;</span>
-                            <span>Due ${task.due_date}</span>
-                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${statusDotColor}; flex-shrink:0;"></span>
+                            <span>Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}</span>
+                            <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
                         </div>
-                        ${task.description ? `<div class="las-mobile-row-desc">${task.description}</div>` : ''}
-                        ${task.teacher_file ? `
-                            <a class="las-mobile-attachment" href="javascript:void(0)"
-                               onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')">
-                                <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                                Attachment
-                            </a>` : ''}
                     </div>
-                    <a class="las-mobile-row-action" href="${actionHref}" style="color:${actionColor};">
-                        ${actionLabel}
-                    </a>
                 </div>`;
+            mobileFlatIdx++;
         });
     }
 
@@ -399,6 +373,170 @@ function renderAssignmentCards(groupedData) {
 
     apiArea.innerHTML = html;
 }
+
+function escapeLearnerAssignmentHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
+}
+
+function escapeLearnerAssignmentJsString(value) {
+    return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
+}
+
+window.openMobileLearnerAssignment = function(flatIdx) {
+    if (window.innerWidth > 899) return;
+
+    const task = (window._allLearnerAssignmentsFlat || [])[flatIdx];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+
+    if (!task || !apiArea) return;
+
+    if (iframe) iframe.style.display = 'none';
+    if (apiArea) apiArea.style.display = 'block';
+    if (myClassContent) myClassContent.classList.remove('active');
+
+    sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Submission', mode: 'detail' });
+    }
+
+    const isDone = !!task.submission_file;
+    const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
+    const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
+    const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
+    const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
+
+    apiArea.innerHTML = `
+        <style>
+            .las-mobile-detail {
+                background: #1a1919;
+                min-height: calc(100vh - 74px);
+                padding: 18px 16px 96px;
+            }
+            .las-mobile-detail-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 4px 9px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-bottom: 12px;
+                color: #c9d1d9;
+                border: 1px solid rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.04);
+            }
+            .las-mobile-row-status-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .las-mobile-detail-title {
+                margin: 0 0 10px;
+                color: #e2e8f0;
+                font-size: 21px;
+                line-height: 1.28;
+                font-weight: 800;
+            }
+            .las-mobile-detail-meta {
+                color: #8b949e;
+                font-size: 12px;
+                line-height: 1.6;
+                padding-bottom: 18px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                margin-bottom: 18px;
+            }
+            .las-mobile-detail-desc {
+                color: #e2e8f0;
+                font-size: 15px;
+                line-height: 1.75;
+                overflow-wrap: anywhere;
+                margin-bottom: 20px;
+            }
+            .las-mobile-detail-links {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 22px;
+            }
+            .las-mobile-detail-link,
+            .las-mobile-detail-action {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 44px;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 800;
+                text-decoration: none;
+                box-sizing: border-box;
+            }
+            .las-mobile-detail-link {
+                color: #4fd1c5;
+                border: 1px solid rgba(79,209,197,0.35);
+                background: rgba(79,209,197,0.08);
+            }
+            .las-mobile-detail-action {
+                color: #0d1117;
+                background: #4fd1c5;
+                border: 1px solid #4fd1c5;
+                width: 100%;
+            }
+            .las-mobile-detail-action--locked {
+                color: #8b949e;
+                background: rgba(255,255,255,0.04);
+                border-color: rgba(255,255,255,0.1);
+            }
+            @media (min-width: 900px) {
+                .las-mobile-detail { display: none; }
+            }
+        </style>
+        <article class="las-mobile-detail">
+            <div class="las-mobile-detail-status">
+                <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
+                ${statusLabel}
+            </div>
+            <h1 class="las-mobile-detail-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</h1>
+            <div class="las-mobile-detail-meta">
+                ${escapeLearnerAssignmentHtml(task.teacher || 'Teacher')} &bull; Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}
+            </div>
+            <div class="las-mobile-detail-desc">
+                ${task.description ? escapeLearnerAssignmentHtml(task.description).replace(/\n/g, '<br>') : 'No description provided.'}
+            </div>
+            <div class="las-mobile-detail-links">
+                ${task.teacher_file ? `
+                    <a class="las-mobile-detail-link" href="javascript:void(0)"
+                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.teacher_file)}', 'Teacher Attachment: ${escapeLearnerAssignmentJsString(task.title)}')">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        Teacher Attachment
+                    </a>` : ''}
+                ${task.submission_file ? `
+                    <a class="las-mobile-detail-link" href="javascript:void(0)"
+                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.submission_file)}', 'My Submission: ${escapeLearnerAssignmentJsString(task.title)}')">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        View My Work
+                    </a>` : ''}
+            </div>
+            ${task.is_past_due
+                ? `<span class="las-mobile-detail-action las-mobile-detail-action--locked">${actionLabel}</span>`
+                : `<a class="las-mobile-detail-action" href="${actionHref}" target="mainFrame" onclick="document.getElementById('api-content-area').style.display='none'; document.getElementById('mainFrame').style.display='block';">${actionLabel}</a>`}
+        </article>`;
+
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTop = 0;
+};
 
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ASSIGNMENT
