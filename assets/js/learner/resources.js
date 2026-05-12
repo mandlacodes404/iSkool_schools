@@ -343,23 +343,12 @@ function renderResourceCards(data) {
             .lrs-mobile-row-body { flex: 1; min-width: 0; }
             .lrs-mobile-row-title {
                 font-size: 14px;
-                font-weight: 600;
+                font-weight: 400;
                 color: #ffffff;
-                margin: 0 0 4px;
+                margin: 0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-            }
-            .lrs-mobile-row-meta {
-                font-size: 12px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .lrs-mobile-row-chevron {
-                flex-shrink: 0;
-                color: #30363d;
             }
         </style>
 
@@ -421,18 +410,6 @@ function renderResourceCards(data) {
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
                             <div class="lrs-mobile-row-title">${file.title}</div>
-                            <div class="lrs-mobile-row-meta">
-                                <span>${file.ext ? file.ext.toUpperCase() : 'FILE'}</span>
-                                <span style="color:#30363d;">&bull;</span>
-                                <span>${file.size || 'N/A'}</span>
-                                <span style="color:#30363d;">&bull;</span>
-                                <span>${file.uploaded_at}</span>
-                            </div>
-                        </div>
-                        <div class="lrs-mobile-row-chevron">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
                         </div>
                     </div>`;
             }

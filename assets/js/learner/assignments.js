@@ -289,19 +289,9 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-row-body { flex: 1; min-width: 0; }
             .las-mobile-row-title {
                 font-size: 14px;
-                font-weight: 600;
+                font-weight: 400;
                 color: #e2e8f0;
-                margin: 0 0 4px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .las-mobile-row-meta {
-                font-size: 12px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 6px;
+                margin: 0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -312,10 +302,6 @@ function renderAssignmentCards(groupedData) {
                 height: 7px;
                 border-radius: 50%;
                 flex-shrink: 0;
-            }
-            .las-mobile-row-chevron {
-                flex-shrink: 0;
-                color: #30363d;
             }
         </style>
 
@@ -363,16 +349,8 @@ function renderAssignmentCards(groupedData) {
                     </div>
                     <div class="las-mobile-row-body">
                         <div class="las-mobile-row-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</div>
-                        <div class="las-mobile-row-meta">
-                            <span>Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}</span>
-                            <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
-                        </div>
                     </div>
-                    <div class="las-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
+                    <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
                 </div>`;
             mobileFlatIdx++;
         });

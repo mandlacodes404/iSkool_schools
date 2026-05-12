@@ -417,19 +417,12 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
                 font-size: 14px;
-                font-weight: 600;
+                font-weight: 400;
                 color: #e2e8f0;
-                margin: 0 0 4px;
+                margin: 0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .lqz-mobile-row-meta {
-                font-size: 12px;
-                color: #8b949e;
                 display: flex;
                 align-items: center;
                 gap: 6px;
@@ -440,9 +433,12 @@ function renderQuizCards(groupedData) {
                 font-weight: 600;
                 cursor: pointer;
             }
-            .lqz-mobile-row-chevron {
+            .lqz-mobile-row-status-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
                 flex-shrink: 0;
-                color: #30363d;
             }
             .lqz-summative-badge {
                 display: inline-flex;
@@ -536,22 +532,9 @@ function renderQuizCards(groupedData) {
                         </svg>
                     </div>
                     <div class="lqz-mobile-row-body">
-                        <div class="lqz-mobile-row-title">
-                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${quiz.title}</span>
-                            ${quiz.is_summative ? '<span class="lqz-summative-badge">TERM MARK</span>' : ''}
-                        </div>
-                        <div class="lqz-mobile-row-meta">
-                            <span>${quiz.duration} mins</span>
-                            <span style="color:#333;">&bull;</span>
-                            <span>${displayDate}</span>
-                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
-                        </div>
+                        <div class="lqz-mobile-row-title">${quiz.title}</div>
                     </div>
-                    <div class="lqz-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
+                    <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
                 </div>`;
         });
     }
