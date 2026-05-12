@@ -409,8 +409,10 @@ function renderQuizCards(groupedData) {
                 padding: 14px 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
             }
             .lqz-mobile-row:last-child { border-bottom: none; }
+            .lqz-mobile-row:active { background: rgba(255,255,255,0.04); }
             .lqz-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
@@ -437,6 +439,10 @@ function renderQuizCards(groupedData) {
                 font-size: 13px;
                 font-weight: 600;
                 cursor: pointer;
+            }
+            .lqz-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
             }
             .lqz-summative-badge {
                 display: inline-flex;
@@ -489,6 +495,8 @@ function renderQuizCards(groupedData) {
             const isClosed = quiz.status === 'Closed';
 
             let actionBtn = '';
+            let rowClick = '';
+            let rowKeydown = '';
             if (quiz.attempt_status === 'submitted') {
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
             } else if (isClosed) {
@@ -502,10 +510,15 @@ function renderQuizCards(groupedData) {
                                 Calculating...
                              </span>`;
             } else if (quiz.attempt_status === 'in_progress') {
+                rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
+                rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#e67e22;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
             } else {
+                rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
+                rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#4fd1c5;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
             }
+            const rowAttrs = rowClick ? `role="button" tabindex="0" ${rowClick} ${rowKeydown}` : '';
 
             const dotColor = quiz.attempt_status === 'submitted' ? '#22c55e'
                 : isClosed ? '#6b7280'
@@ -514,7 +527,7 @@ function renderQuizCards(groupedData) {
                 : '#4fd1c5';
 
             html += `
-                <div class="lqz-mobile-row">
+                <div class="lqz-mobile-row" ${rowAttrs}>
                     <div class="lqz-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -534,7 +547,11 @@ function renderQuizCards(groupedData) {
                             <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                         </div>
                     </div>
-                    ${actionBtn}
+                    <div class="lqz-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
                 </div>`;
         });
     }

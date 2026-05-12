@@ -313,6 +313,10 @@ function renderAssignmentCards(groupedData) {
                 border-radius: 50%;
                 flex-shrink: 0;
             }
+            .las-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -363,6 +367,11 @@ function renderAssignmentCards(groupedData) {
                             <span>Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}</span>
                             <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
                         </div>
+                    </div>
+                    <div class="las-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>`;
             mobileFlatIdx++;
