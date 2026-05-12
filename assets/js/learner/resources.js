@@ -350,6 +350,10 @@ function renderResourceCards(data) {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            .lrs-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -410,6 +414,11 @@ function renderResourceCards(data) {
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
                             <div class="lrs-mobile-row-title">${file.title}</div>
+                        </div>
+                        <div class="lrs-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
                         </div>
                     </div>`;
             }

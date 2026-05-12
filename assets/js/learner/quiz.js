@@ -425,7 +425,7 @@ function renderQuizCards(groupedData) {
                 text-overflow: ellipsis;
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 8px;
             }
             .lqz-mobile-row-action {
                 flex-shrink: 0;
@@ -439,6 +439,16 @@ function renderQuizCards(groupedData) {
                 height: 7px;
                 border-radius: 50%;
                 flex-shrink: 0;
+            }
+            .lqz-mobile-row-title-text {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .lqz-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
             }
             .lqz-summative-badge {
                 display: inline-flex;
@@ -532,9 +542,16 @@ function renderQuizCards(groupedData) {
                         </svg>
                     </div>
                     <div class="lqz-mobile-row-body">
-                        <div class="lqz-mobile-row-title">${quiz.title}</div>
+                        <div class="lqz-mobile-row-title">
+                            <span class="lqz-mobile-row-title-text">${quiz.title}</span>
+                            <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
+                        </div>
                     </div>
-                    <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
+                    <div class="lqz-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
                 </div>`;
         });
     }

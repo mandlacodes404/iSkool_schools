@@ -295,6 +295,9 @@ function renderAssignmentCards(groupedData) {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
             .las-mobile-row-status-dot {
                 display: inline-block;
@@ -302,6 +305,16 @@ function renderAssignmentCards(groupedData) {
                 height: 7px;
                 border-radius: 50%;
                 flex-shrink: 0;
+            }
+            .las-mobile-row-title-text {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .las-mobile-row-chevron {
+                flex-shrink: 0;
+                color: #30363d;
             }
         </style>
 
@@ -348,9 +361,16 @@ function renderAssignmentCards(groupedData) {
                         </svg>
                     </div>
                     <div class="las-mobile-row-body">
-                        <div class="las-mobile-row-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</div>
+                        <div class="las-mobile-row-title">
+                            <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
+                            <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
+                        </div>
                     </div>
-                    <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
+                    <div class="las-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
                 </div>`;
             mobileFlatIdx++;
         });
