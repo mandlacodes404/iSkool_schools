@@ -9,6 +9,7 @@ let discTypingTimeout        = null;
 let currentDiscId            = null;
 let lastReplyId              = 0;
 let lastSeenDateKey          = null;
+let discMobileThreadDepths   = {};
 
 // ─────────────────────────────────────────────
 // HELPERS
@@ -90,6 +91,19 @@ function discRelativeTime(dateStr) {
 
 function discSafeParam(str) {
     return encodeURIComponent(str ?? '').replace(/'/g, '%27');
+}
+
+function discResolveMobileDepth(reply) {
+    if (reply?.is_op) return 0;
+    if (reply?._threadDepth !== undefined) return Math.min(Math.max(parseInt(reply._threadDepth, 10) || 0, 0), 2);
+
+    const parentId = reply?.parent_reply_id;
+    if (parentId !== null && parentId !== undefined && parentId !== '') {
+        const parentDepth = discMobileThreadDepths[parentId] ?? 1;
+        return Math.min(parentDepth + 1, 2);
+    }
+
+    return 1;
 }
 
 window.discCloseThreadMenus = function() {
@@ -533,6 +547,8 @@ function renderThread(data) {
         return `<div class="disc-date-sep"><span>${label}</span></div>`;
     }
 
+    discMobileThreadDepths = { 0: 0 };
+
     let postsHtml = maybeDate(disc.created_at);
     postsHtml += buildPostCard({
         id: 0,
@@ -546,9 +562,12 @@ function renderThread(data) {
         quote_author: null,
         quote_text: null,
         is_op: true,
+        _threadDepth: 0,
     }, user_role, is_in_class, disc.id);
 
     replies.forEach(r => {
+        r._threadDepth = discResolveMobileDepth(r);
+        if (r.id !== undefined && r.id !== null) discMobileThreadDepths[r.id] = r._threadDepth;
         postsHtml += maybeDate(r.created_at);
         postsHtml += buildPostCard(r, user_role, is_in_class, disc.id);
     });
@@ -605,13 +624,14 @@ function renderThread(data) {
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
                 .disc-date-sep { display:none; }
-                .yt-thread-post { display:grid; grid-template-columns:36px 1fr; column-gap:20px; padding:0 24px 30px; color:#f1f1f1; position:relative; background:transparent; }
-                .yt-thread-post.is-child { grid-template-columns:32px 1fr; padding-left:96px; }
-                .yt-thread-post.is-child::before { content:''; position:absolute; left:42px; top:-30px; bottom:24px; width:1px; background:#3a3a3a; }
-                .yt-thread-post.is-child::after { content:''; position:absolute; left:42px; top:13px; width:40px; height:20px; border-left:1px solid #3a3a3a; border-bottom:1px solid #3a3a3a; border-bottom-left-radius:18px; }
+                .yt-thread-post { --indent-left:24px; --parent-rail-x:38px; --branch-width:0px; display:grid; grid-template-columns:28px minmax(0,1fr); column-gap:16px; padding:0 20px 28px var(--indent-left); color:#f1f1f1; position:relative; background:transparent; }
+                .yt-thread-post.depth-1 { --indent-left:70px; --parent-rail-x:38px; --branch-width:46px; }
+                .yt-thread-post.depth-2 { --indent-left:116px; --parent-rail-x:84px; --branch-width:46px; }
+                .yt-thread-post.is-child::before { content:''; position:absolute; left:var(--parent-rail-x); top:-28px; bottom:26px; width:1px; background:#3a3a3a; }
+                .yt-thread-post.is-child::after { content:''; position:absolute; left:var(--parent-rail-x); top:13px; width:var(--branch-width); height:18px; border-left:1px solid #3a3a3a; border-bottom:1px solid #3a3a3a; border-bottom-left-radius:18px; background:transparent; }
                 .yt-thread-rail { display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
-                .yt-thread-avatar { width:32px; height:32px; font-size:13px; }
-                .yt-thread-line { width:1px; flex:1; min-height:52px; background:#3a3a3a; margin-top:9px; position:relative; }
+                .yt-thread-avatar { width:28px !important; height:28px !important; border-radius:50% !important; overflow:hidden; object-fit:cover; font-size:12px !important; line-height:1; border:0; }
+                .yt-thread-line { width:1px; flex:1; min-height:52px; background:#3a3a3a; margin-top:8px; position:relative; }
                 .yt-thread-post:last-of-type .yt-thread-line { display:none; }
                 .yt-thread-body { min-width:0; position:relative; display:grid; grid-template-columns:1fr 24px; column-gap:10px; background:transparent; }
                 .yt-thread-main { min-width:0; }
@@ -626,6 +646,11 @@ function renderThread(data) {
                 .yt-thread-menu.show { display:block; }
                 .yt-thread-menu button { width:100%; background:transparent; border:0; color:#f1f1f1; display:flex; align-items:center; gap:14px; padding:13px 18px; font:800 15px 'Nunito',sans-serif; text-align:left; }
                 .yt-thread-menu i { width:20px; text-align:center; }
+                @media (max-width: 390px) {
+                    .yt-thread-post { --indent-left:18px; padding-right:14px; column-gap:14px; }
+                    .yt-thread-post.depth-1 { --indent-left:58px; --parent-rail-x:32px; --branch-width:40px; }
+                    .yt-thread-post.depth-2 { --indent-left:98px; --parent-rail-x:72px; --branch-width:40px; }
+                }
             }
 
             /* ── DATE CHIP ── */
@@ -784,7 +809,9 @@ function buildMobilePostCard(r, user_role, is_in_class, discId) {
     const replyText = discSafeParam((r.message || '').substring(0, 80));
     const canReply = is_in_class && r.id !== undefined;
     const canReport = user_role === 'learner' && !isMe && r.id;
-    const indentClass = r.parent_reply_id !== null && r.parent_reply_id !== undefined ? ' is-child' : '';
+    const depth = discResolveMobileDepth(r);
+    if (r.id !== undefined && r.id !== null) discMobileThreadDepths[r.id] = depth;
+    const indentClass = depth > 0 ? ` is-child depth-${depth}` : ' depth-0';
 
     const quoteHtml = r.quote_author
         ? `<div class="yt-thread-quote">
@@ -829,7 +856,7 @@ function buildMobilePostCard(r, user_role, is_in_class, discId) {
     ].filter(Boolean).join('');
 
     return `
-        <article class="yt-thread-post${indentClass}" data-id="${id}">
+        <article class="yt-thread-post${indentClass}" data-id="${id}" data-depth="${depth}">
             <div class="yt-thread-rail">
                 ${discAvatarMarkup({ name: displayName, profile_picture: r.profile_picture }, 'yt-thread-avatar')}
                 <div class="yt-thread-line"></div>
