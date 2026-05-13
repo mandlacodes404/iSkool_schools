@@ -1195,32 +1195,20 @@ iframe {
     display: none;
     background: none;
     border: none;
+    color: #e0e6f0;
+    font-size: 26px;
     cursor: pointer;
-    padding: 4px;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 5px;
+    padding: 8px;
+    transition: color 0.3s ease;
 }
 
-#mobileToggle .bar {
-    display: block;
-    height: 1.5px;
-    background: #e0e6f0;
-    border-radius: 2px;
-    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, width 0.35s ease;
-}
-
-#mobileToggle .bar:nth-child(1) { width: 22px; }
-#mobileToggle .bar:nth-child(2) { width: 22px; }
-#mobileToggle .bar:nth-child(3) { width: 14px; }
-
-#mobileToggle:hover .bar {
-    background: var(--accent-color);
+#mobileToggle:hover {
+    color: var(--accent-color);
 }
 
 @media (max-width: 768px) {
     #mobileToggle {
-        display: flex;
+        display: block;
     }
 }
 
@@ -1636,9 +1624,11 @@ iframe {
     
     <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
         <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
         </button>
 
        <button id="desktopMenuToggle" type="button" aria-label="Open Desktop Menu">
