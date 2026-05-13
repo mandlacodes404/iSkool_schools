@@ -32,13 +32,11 @@ if (!$is_in_class && !$is_tagged_teacher) { echo json_encode(['error' => 'Access
 $creator_row      = $conn->query("SELECT profile_picture, name, surname FROM users WHERE email = '{$disc['creator_email']}'")->fetch_assoc();
 $creator_pic      = $creator_row['profile_picture'] ?? 'default.png';
 $creator_fullname = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
-$creator_display  = ($disc['creator_anonymous'] && $user_role === 'learner')
-    ? 'Anonymous'
-    : ($creator_fullname ?: ($disc['creator_name'] ?: 'Learner'));
+$creator_display  = $creator_fullname ?: ($disc['creator_name'] ?: 'Learner');
 
 $stmt = $conn->prepare("
     SELECT r.id, r.message, r.attachment, r.created_at,
-           r.parent_reply_id, r.replier_anonymous, r.replier_email,
+           r.parent_reply_id, r.replier_email,
            u.profile_picture,
            TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS replier_display,
            (r.replier_email = ?) AS is_me
@@ -53,9 +51,6 @@ $replies = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 foreach ($replies as &$row) {
-    if ($row['replier_anonymous'] == 1 && $user_role === 'learner') {
-        $row['replier_display'] = 'Anonymous';
-    }
     if (empty(trim($row['replier_display']))) $row['replier_display'] = 'Learner';
 
     $row['quote_author'] = null;
@@ -68,7 +63,7 @@ foreach ($replies as &$row) {
             $row['quote_text']   = substr($disc['initial_message'], 0, 100);
         } else {
             $pstmt = $conn->prepare("
-                SELECT r.message, r.replier_anonymous,
+                SELECT r.message,
                        TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS replier_display
                 FROM discussion_replies r
                 LEFT JOIN users u ON r.replier_email = u.email
@@ -79,7 +74,7 @@ foreach ($replies as &$row) {
             $parent = $pstmt->get_result()->fetch_assoc();
             $pstmt->close();
             if ($parent) {
-                $row['quote_author'] = ($parent['replier_anonymous'] && $user_role === 'learner') ? 'Anonymous' : ($parent['replier_display'] ?: 'Learner');
+                $row['quote_author'] = $parent['replier_display'] ?: 'Learner';
                 $row['quote_text']   = substr($parent['message'] ?? '', 0, 100);
             }
         }

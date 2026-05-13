@@ -54,6 +54,20 @@ function getThreadTarget() {
     return document.getElementById('api-content-area');
 }
 
+function discAvatarColor(seed) {
+    const text = String(seed || 'Learner');
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash |= 0;
+    }
+    const hue = Math.abs(hash) % 360;
+    return {
+        bg: `hsl(${hue} 68% 38%)`,
+        color: '#ffffff',
+    };
+}
+
 // ─────────────────────────────────────────────
 // 1. DISCUSSION LIST
 // ─────────────────────────────────────────────
@@ -339,10 +353,10 @@ function renderMobileList(data) {
         data.forEach(d => {
             html += `
                 <div onclick="loadDiscussionThread(${d.id})"
-                     style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                     style="background:transparent;border:1px solid rgba(255,255,255,0.09);
                             padding:18px;border-radius:12px;cursor:pointer;transition:border-color 0.2s;"
                      onmouseover="this.style.borderColor='rgba(79,209,197,0.3)'"
-                     onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+                     onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
                     <h3 style="margin:0 0 8px 0;color:#e2e8f0;font-size:16px;">${escHtml(d.title)}</h3>
                     <div style="font-size:12px;color:#8b949e;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                         <span>By ${escHtml(d.creator_display)}</span>
@@ -434,7 +448,6 @@ function renderThread(data) {
         replier_display: disc.creator_display,
         profile_picture: disc.creator_pic,
         is_me: disc.is_op_me ? 1 : 0,
-        replier_anonymous: false,
         quote_author: null,
         quote_text: null,
         is_op: true,
@@ -521,10 +534,8 @@ function renderThread(data) {
             .disc-author { font-size:14px; font-weight:700; color:#e2e8f0; }
             .disc-time { font-size:11px; color:#8b949e; margin-left:auto; white-space:nowrap; }
             .disc-tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em; }
-            .disc-tag.op { background:rgba(79,209,197,0.12); color:#4fd1c5; border:1px solid rgba(79,209,197,0.25); }
             .disc-tag.me { background:rgba(79,209,197,0.12); color:#4fd1c5; border:1px solid rgba(79,209,197,0.25); }
             .disc-tag.teacher { background:rgba(56,178,172,0.12); color:#38b2ac; border:1px solid rgba(56,178,172,0.25); }
-            .disc-tag.anon { background:rgba(255,255,255,0.05); color:#8b949e; border:1px solid rgba(255,255,255,0.1); }
 
             /* ── BUBBLE ── */
             .disc-body-wrap { background:#1a1919; border:1px solid rgba(255,255,255,0.07); border-radius:0 12px 12px 12px; padding:11px 14px; }
@@ -576,7 +587,6 @@ function renderThread(data) {
             .disc-toolbar { display:flex; align-items:center; gap:4px; padding:6px 10px; border-top:1px solid rgba(255,255,255,0.07); }
             .disc-tool-btn { background:none; border:none; color:#8b949e; cursor:pointer; padding:6px 8px; border-radius:6px; transition:0.15s; display:flex; align-items:center; gap:5px; font-family:'Nunito',sans-serif; font-size:12px; font-weight:700; }
             .disc-tool-btn:hover { background:rgba(255,255,255,0.06); color:#e2e8f0; }
-            .disc-tool-btn.anon-on { color:#4fd1c5; }
             .disc-post-btn { background:#4fd1c5; color:#0d1117; border:none; padding:8px 16px; border-radius:9px; font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px; margin-left:auto; transition:0.2s; }
             .disc-post-btn:hover { background:#38b2ac; }
 
@@ -646,41 +656,26 @@ function renderThread(data) {
 function buildPostCard(r, user_role, is_in_class, discId) {
     const isOp    = r.is_op || false;
     const isMe    = r.is_me == 1;
-    const isAnon  = r.replier_anonymous && user_role === 'learner';
     const initial = (r.replier_display || '?').charAt(0).toUpperCase();
     const picFolder = 'uploads/learners/';
 
     const dotClass = isOp ? 'is-op-dot' : (isMe ? '' : 'muted');
 
-    // Pick a consistent color per initial so the same person always gets the same colour
-    const avatarColors = [
-        { bg:'rgba(79,209,197,0.15)',  color:'#4fd1c5' },  // teal
-        { bg:'rgba(99,153,250,0.15)',  color:'#63a0fa' },  // blue
-        { bg:'rgba(246,173,85,0.15)', color:'#f6ad55' },  // amber
-        { bg:'rgba(154,117,242,0.15)',color:'#9a75f2' },  // purple
-        { bg:'rgba(72,199,142,0.15)', color:'#48c78e' },  // green
-        { bg:'rgba(241,101,101,0.15)',color:'#f16565' },  // coral
-    ];
-    const colorIdx   = initial.charCodeAt(0) % avatarColors.length;
-    const avatarColor = avatarColors[colorIdx];
+    const avatarColor = discAvatarColor(r.replier_email || r.replier_display || initial);
 
     // Always render the initials circle. If a real (non-default) profile pic exists,
     // swap it in on successful load — this avoids the grey default.png problem.
     const hasPic = r.profile_picture && r.profile_picture !== 'default.png' && r.profile_picture !== '';
-    const avatarHtml = isAnon
-        ? `<div class="disc-avatar-ph" style="background:rgba(255,255,255,0.06);color:#8b949e;">?</div>`
-        : (hasPic
+    const avatarHtml = hasPic
             ? `<img src="${picFolder}${escHtml(r.profile_picture)}" class="disc-avatar"
                    onload="this.style.display='block';this.nextElementSibling.style.display='none';"
                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                    style="display:none;">
                <div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`
-            : `<div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`);
+            : `<div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`;
 
-    const opTag      = isOp   ? `<span class="disc-tag op">OP</span>`    : '';
     const meTag      = isMe   ? `<span class="disc-tag me">You</span>`   : '';
-    const anonTag    = isAnon ? `<span class="disc-tag anon">Anon</span>`: '';
-    const displayName = isAnon ? 'Anonymous' : escHtml(r.replier_display);
+    const displayName = escHtml(r.replier_display || 'Learner');
 
     const quoteHtml = r.quote_author
         ? `<div class="disc-quote">
@@ -746,7 +741,7 @@ function buildPostCard(r, user_role, is_in_class, discId) {
                 <div class="disc-post-header">
                     ${avatarHtml}
                     <span class="disc-author">${displayName}</span>
-                    ${opTag}${meTag}${anonTag}
+                    ${meTag}
                     <span class="disc-time">${formatTime(r.created_at)}</span>
                 </div>
                 <div class="${bodyWrapClass}">
@@ -799,10 +794,6 @@ function buildCompose(discId) {
                     <button class="disc-tool-btn" id="discMicBtn" title="Record voice note (max 2 min)" onclick="discToggleRecording(${discId})">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
-                        <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
-                        <i class="fas fa-user-secret"></i> Anonymous
-                    </label>
                     <button class="disc-post-btn" onclick="discSubmitReply(${discId})">
                         <i class="fas fa-paper-plane"></i> Post
                     </button>
@@ -1004,14 +995,6 @@ function injectMobileComposer(discId) {
                     style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
                     <i class="fas fa-microphone"></i>
                 </button>
-                <!-- Anon toggle -->
-                <label id="discSheetAnonLabel"
-                    style="background:none;border:none;color:#4fd1c5;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
-                    <input type="checkbox" id="discSheetAnon" checked
-                        onchange="document.getElementById('discSheetAnonLabel').style.color=this.checked?'#4fd1c5':'#8b949e';"
-                        style="display:none;">
-                    <i class="fas fa-user-secret"></i> Anon
-                </label>
                 <!-- Post button -->
                 <button id="discSheetPostBtn"
                     onclick="discSheetSubmitReply(${discId})"
@@ -1123,7 +1106,6 @@ window.discSheetClearFile = function() {
 window.discSheetSubmitReply = async function(discId) {
     const ta      = document.getElementById('discSheetTextarea');
     const fi      = document.getElementById('discSheetFileInput');
-    const anon    = document.getElementById('discSheetAnon');
     const replyTo = window._discReplyTo ?? 0;
     const message = ta ? ta.value.trim() : '';
 
@@ -1132,7 +1114,6 @@ window.discSheetSubmitReply = async function(discId) {
     const fd = new FormData();
     fd.append('discussion_id', discId);
     fd.append('message', message);
-    fd.append('anonymous', anon?.checked ? '1' : '0');
     fd.append('reply_to', replyTo);
     if (_discVoiceBlob) {
         const ext = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
@@ -1365,7 +1346,6 @@ async function pollNewReplies(discId) {
 window.discSubmitReply = async function(discId) {
     const ta      = document.getElementById('discTextarea');
     const fi      = document.getElementById('discFileInput');
-    const anon    = document.getElementById('discAnon');
     const replyTo = window._discReplyTo ?? 0;
     const message = ta ? ta.value.trim() : '';
 
@@ -1374,7 +1354,6 @@ window.discSubmitReply = async function(discId) {
     const fd = new FormData();
     fd.append('discussion_id', discId);
     fd.append('message', message);
-    fd.append('anonymous', anon?.checked ? '1' : '0');
     fd.append('reply_to', replyTo);
     if (_discVoiceBlob) {
         const ext  = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
@@ -1777,9 +1756,6 @@ function renderCreateForm(teachers) {
             .disc-teacher-option { padding:10px 12px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; color:#c9d1d9; transition:0.15s; }
             .disc-teacher-option:hover { background:rgba(255,255,255,0.06); }
             .disc-teacher-option.selected { background:rgba(79,209,197,0.1); color:#4fd1c5; border:1px solid rgba(79,209,197,0.2); }
-            .disc-anon-toggle { display:flex; align-items:center; gap:10px; padding:14px; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; cursor:pointer; }
-            .disc-anon-toggle input { width:16px; height:16px; cursor:pointer; accent-color:#4fd1c5; }
-            .disc-anon-toggle span { font-size:14px; font-weight:600; color:#c9d1d9; }
             .disc-attach-area { background:#1b1b1b; border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:14px; text-align:center; cursor:pointer; }
             .disc-attach-area:hover { border-color:rgba(79,209,197,0.3); }
             .disc-submit-btn { width:100%; background:#4fd1c5; color:#0d1117; border:none; padding:14px; border-radius:12px; font-family:'Nunito',sans-serif; font-size:16px; font-weight:800; cursor:pointer; margin-top:8px; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -1804,12 +1780,6 @@ function renderCreateForm(teachers) {
                 <div class="disc-teachers-list">${teacherOptions}</div>
             </div>
             <div class="disc-field">
-                <label class="disc-anon-toggle">
-                    <input type="checkbox" id="discCreateAnon" checked>
-                    <span>Post anonymously (classmates won't see your name)</span>
-                </label>
-            </div>
-            <div class="disc-field">
                 <label>Attachment <span style="color:#8b949e;font-weight:600;">(optional)</span></label>
                 <div class="disc-attach-area" onclick="document.getElementById('discCreateFile').click()">
                     <i class="fas fa-paperclip" style="color:#8b949e;margin-right:6px;"></i>
@@ -1831,7 +1801,6 @@ window.discToggleTeacher = function(el) {
 window.discSubmitCreate = async function() {
     const title     = document.getElementById('discTitle')?.value.trim();
     const message   = document.getElementById('discMessage')?.value.trim();
-    const anon      = document.getElementById('discCreateAnon')?.checked;
     const fileInput = document.getElementById('discCreateFile');
     const errorEl   = document.getElementById('discFormError');
     const btn       = document.getElementById('discSubmitBtn');
@@ -1849,7 +1818,6 @@ window.discSubmitCreate = async function() {
     const fd = new FormData();
     fd.append('title', title);
     fd.append('message', message);
-    fd.append('anonymous', anon ? '1' : '0');
     selectedTeachers.forEach(e => fd.append('teachers[]', e));
     if (fileInput?.files[0]) fd.append('attachment', fileInput.files[0]);
 

@@ -26,7 +26,6 @@ if (!$class_id) { echo json_encode(['error' => 'Not enrolled in a class']); exit
 
 $title           = trim($_POST['title'] ?? '');
 $message_text    = trim($_POST['message'] ?? '');
-$anonymous       = !empty($_POST['anonymous']);
 $tagged_teachers = $_POST['teachers'] ?? [];
 
 if (empty($title) || empty($message_text) || empty($tagged_teachers)) {
@@ -53,15 +52,16 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ER
 $name_row         = $conn->query("SELECT name, surname FROM users WHERE email = '$learner_email'")->fetch_assoc();
 $learner_name     = $name_row['name'] ?? '';
 $learner_surname  = $name_row['surname'] ?? '';
-$creator_fullname = $anonymous ? null : trim($learner_name . ' ' . $learner_surname);
-$creator_display  = $anonymous ? 'Anonymous Learner' : trim($learner_name . ' ' . $learner_surname);
+$creator_fullname = trim($learner_name . ' ' . $learner_surname);
+$creator_display  = $creator_fullname ?: 'Learner';
+$show_creator_name = 0;
 
 $stmt = $conn->prepare("
     INSERT INTO class_discussions 
     (title, initial_message, class_id, creator_email, creator_anonymous, creator_name, attachment, academic_year_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ");
-$stmt->bind_param("ssisissi", $title, $message_text, $class_id, $learner_email, $anonymous, $creator_fullname, $attachment_name, $current_year_id);
+$stmt->bind_param("ssisissi", $title, $message_text, $class_id, $learner_email, $show_creator_name, $creator_fullname, $attachment_name, $current_year_id);
 $stmt->execute();
 $disc_id = $stmt->insert_id;
 $stmt->close();

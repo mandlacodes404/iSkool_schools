@@ -34,7 +34,7 @@ $stmt = $conn->prepare("
         d.title, 
         d.initial_message, 
         d.created_at,
-        CASE WHEN d.creator_anonymous = 1 THEN 'A classmate' ELSE COALESCE(u.name, 'Learner') END AS creator_display,
+        COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display,
         (SELECT COUNT(*) FROM discussion_replies WHERE discussion_id = d.id) AS reply_count
     FROM class_discussions d
     LEFT JOIN users u ON d.creator_email = u.email

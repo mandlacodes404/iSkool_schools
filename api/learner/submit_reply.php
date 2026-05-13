@@ -21,7 +21,6 @@ $in_class = $conn->query("SELECT 1 FROM class_students WHERE class_id = $class_i
 if (!$in_class) { echo json_encode(['error' => 'Access denied']); exit(); }
 
 $message         = trim($_POST['message'] ?? '');
-$anonymous       = !empty($_POST['anonymous']);
 $parent_reply_id = !empty($_POST['reply_to']) ? (int)$_POST['reply_to'] : null;
 $attachment      = null;
 
@@ -50,14 +49,16 @@ if (empty($message) && !$attachment) {
 }
 
 $name_row      = $conn->query("SELECT name, surname FROM users WHERE email = '$user_email'")->fetch_assoc();
-$replier_name  = $anonymous ? null : trim(($name_row['name'] ?? '') . ' ' . ($name_row['surname'] ?? ''));
+$replier_name  = trim(($name_row['name'] ?? '') . ' ' . ($name_row['surname'] ?? ''));
+if ($replier_name === '') $replier_name = 'Learner';
+$show_replier_name = 0;
 
 $stmt = $conn->prepare("
     INSERT INTO discussion_replies 
     (discussion_id, parent_reply_id, message, replier_email, replier_anonymous, replier_name, attachment)
     VALUES (?, ?, ?, ?, ?, ?, ?)
 ");
-$stmt->bind_param("iississ", $disc_id, $parent_reply_id, $message, $user_email, $anonymous, $replier_name, $attachment);
+$stmt->bind_param("iississ", $disc_id, $parent_reply_id, $message, $user_email, $show_replier_name, $replier_name, $attachment);
 $stmt->execute();
 $new_id = $stmt->insert_id;
 $stmt->close();
@@ -65,7 +66,7 @@ $stmt->close();
 // Return the new reply so JS can render it instantly
 $new_reply = $conn->query("
     SELECT r.id, r.message, r.attachment, r.created_at,
-           r.parent_reply_id, r.replier_anonymous,
+           r.parent_reply_id, r.replier_email,
            u.profile_picture,
            TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS replier_display,
            1 AS is_me
@@ -74,29 +75,33 @@ $new_reply = $conn->query("
     WHERE r.id = $new_id
 ")->fetch_assoc();
 
-if ($anonymous) $new_reply['replier_display'] = 'Anonymous';
-
 // Resolve quote if replying to someone
 $new_reply['quote_author'] = null;
 $new_reply['quote_text']   = null;
 
 if ($parent_reply_id !== null) {
     if ($parent_reply_id === 0) {
-        $op = $conn->query("SELECT initial_message, creator_name, creator_anonymous FROM class_discussions WHERE id = $disc_id")->fetch_assoc();
+        $op = $conn->query("
+            SELECT d.initial_message,
+                   COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display
+            FROM class_discussions d
+            LEFT JOIN users u ON d.creator_email = u.email
+            WHERE d.id = $disc_id
+        ")->fetch_assoc();
         if ($op) {
-            $new_reply['quote_author'] = $op['creator_anonymous'] ? 'Anonymous' : ($op['creator_name'] ?: 'Learner');
+            $new_reply['quote_author'] = $op['creator_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($op['initial_message'], 0, 100);
         }
     } else {
         $p = $conn->query("
-            SELECT r.message, r.replier_anonymous,
+            SELECT r.message,
                    TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS replier_display
             FROM discussion_replies r
             LEFT JOIN users u ON r.replier_email = u.email
             WHERE r.id = $parent_reply_id
         ")->fetch_assoc();
         if ($p) {
-            $new_reply['quote_author'] = $p['replier_anonymous'] ? 'Anonymous' : ($p['replier_display'] ?: 'Learner');
+            $new_reply['quote_author'] = $p['replier_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($p['message'] ?? '', 0, 100);
         }
     }
