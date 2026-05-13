@@ -1,6 +1,12 @@
 self.addEventListener("push", event => {
   // Default values
-  let data = { title: "iSkool", body: "New update available!", url: "/" };
+  let data = {
+    title: "iSkool",
+    body: "New update available!",
+    url: "/",
+    icon: "/icons/icon-192.png",
+    tag: `iskool-${Date.now()}`
+  };
   
   try {
     if (event.data) {
@@ -9,6 +15,8 @@ self.addEventListener("push", event => {
       // Update: Check for the URL inside the 'data' object OR at the root
       data.title = jsonData.title || data.title;
       data.body = jsonData.body || data.body;
+      data.icon = jsonData.icon || (jsonData.data && jsonData.data.icon) || data.icon;
+      data.tag = jsonData.tag || (jsonData.data && jsonData.data.tag) || data.tag;
       
       // This line ensures we grab the Deep Link we sent from PHP
       data.url = (jsonData.data && jsonData.data.url) ? jsonData.data.url : (jsonData.url || "/");
@@ -19,10 +27,10 @@ self.addEventListener("push", event => {
 
   const options = {
     body: data.body,
-    icon: "/icons/icon-192.png", // Ensure this path is correct for your site
+    icon: data.icon,
     badge: "/icons/icon-192.png",
     data: { url: data.url }, // This stores the URL for the click event below
-    tag: "iSkool-notification",
+    tag: data.tag,
     renotify: true,
     vibrate: [200, 100, 200],
     actions: [

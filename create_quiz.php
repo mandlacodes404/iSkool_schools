@@ -161,7 +161,7 @@ if (!$stmt->execute()) {
 
     // 1. Define the link
 $cleanBaseUrl = rtrim(BASE_URL, '/');
-$quizLink = $cleanBaseUrl . "/learner_dashboard.php?page=quiz_list.php";
+$quizLink = $cleanBaseUrl . "/learner_dashboard.php?page=quiz_detail&id=" . $quiz_id;
 
     $learnersQuery = $conn->prepare("
     SELECT DISTINCT u.email, u.name 

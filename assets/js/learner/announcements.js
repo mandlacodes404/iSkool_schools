@@ -663,6 +663,14 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (mainContent) mainContent.scrollTop = 0;
 };
 
+window.openMobileLearnerAnnouncementById = function(announcementId) {
+    const targetId = String(announcementId || '');
+    const flatIdx = (window._allLearnerAnnouncementsFlat || []).findIndex(ann => String(ann.id) === targetId);
+    if (flatIdx >= 0) {
+        window.openMobileLearnerAnnouncement(flatIdx);
+    }
+};
+
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ANNOUNCEMENT
 // ─────────────────────────────────────────────

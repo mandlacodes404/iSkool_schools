@@ -572,6 +572,14 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     if (mainContent) mainContent.scrollTop = 0;
 };
 
+window.openMobileLearnerAssignmentById = function(assignmentId) {
+    const targetId = String(assignmentId || '');
+    const flatIdx = (window._allLearnerAssignmentsFlat || []).findIndex(task => String(task.id) === targetId);
+    if (flatIdx >= 0) {
+        window.openMobileLearnerAssignment(flatIdx);
+    }
+};
+
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ASSIGNMENT
 // ─────────────────────────────────────────────

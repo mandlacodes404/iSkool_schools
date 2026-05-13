@@ -70,6 +70,7 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("issssis", $class_id, $title, $msg, $email, $current_year_id, $current_term, $send_to);
 $stmt->execute();
+$announcement_id = $stmt->insert_id;
 $stmt->close();
 
 // Get recipients
@@ -93,7 +94,7 @@ $recipientStmt->execute();
 $recipients = $recipientStmt->get_result();
 
 $cleanBaseUrl       = rtrim(BASE_URL, '/');
-$announcementLink = $cleanBaseUrl . "/learner_dashboard.php?page=announcement_list.php";
+$announcementLink = $cleanBaseUrl . "/learner_dashboard.php?page=announcement_detail&id=" . $announcement_id;
 $fullPushTitle      = $teacherDisplayName . ": " . $title;
 
 while ($recipient = $recipients->fetch_assoc()) {

@@ -830,6 +830,7 @@ iframe {
         left: -100%;
         width: 300px; /* Increased from 240px to 300px */
         transition: left var(--transition-speed) ease;
+        border-right: 1px solid #ffffff;
     }
 
     .sidebar.active {
@@ -1766,7 +1767,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 100);
     }
 }
-     else if (targetPage === 'announcement_list.php') {
+     else if (targetPage === 'announcement_detail') {
+        const annId = urlParams.get('id');
+        window.fetchAnnouncements().then(() => {
+            if (annId && typeof window.openMobileLearnerAnnouncementById === 'function') {
+                window.openMobileLearnerAnnouncementById(annId);
+            }
+        });
+    } else if (targetPage === 'assignment_detail') {
+        const assignmentId = urlParams.get('id');
+        window.fetchAssignments().then(() => {
+            if (assignmentId && typeof window.openMobileLearnerAssignmentById === 'function') {
+                window.openMobileLearnerAssignmentById(assignmentId);
+            }
+        });
+    } else if (targetPage === 'quiz_detail') {
+        const quizId = urlParams.get('id');
+        if (apiArea) apiArea.style.display = 'block';
+        if (iframe) iframe.style.display = 'none';
+        if (quizId && typeof window.loadQuizInstructions === 'function') {
+            window.loadQuizInstructions(quizId);
+        } else {
+            window.fetchQuizzes();
+        }
+     } else if (targetPage === 'announcement_list.php') {
         window.fetchAnnouncements();
     } else if (targetPage === 'quiz_list.php') {
         window.fetchQuizzes();
@@ -3258,9 +3282,9 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/main.js?v=1.0"></script>
 <script src="assets/js/learner/manual.js?v=2.5"></script>
 <script src="assets/js/learner/quiz.js?v=3.9"></script>
-<script src="assets/js/learner/assignments.js?v=3.3"></script>
+<script src="assets/js/learner/assignments.js?v=3.5"></script>
 <script src="assets/js/learner/resources.js?v=3.1"></script>
-<script src="assets/js/learner/announcements.js?v=2.5"></script>
+<script src="assets/js/learner/announcements.js?v=2.7"></script>
 <script src="assets/js/learner/grades.js?v=1.8"></script>
 <script src="assets/js/learner/evaluations.js?v=1.7"></script>
 <script src="assets/js/learner/discussions.js?v=4.4"></script>

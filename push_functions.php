@@ -1,58 +1,93 @@
 <?php
 require_once __DIR__ . '/config.php';
 require __DIR__ . '/vendor/autoload.php';
-use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
 
-// Added $targetUrl as a 5th parameter and $schoolName as a 6th parameter
+use Minishlink\WebPush\Subscription;
+use Minishlink\WebPush\WebPush;
+
 function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool', $icon = 'https://iskool.online/uploads/schools/default_school.png') {
-    // 1. Get all device subscriptions for this email
     $stmt = $conn->prepare("SELECT endpoint, p256dh, auth FROM user_subscriptions WHERE user_email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows === 0) return false;
+    if ($result->num_rows === 0) {
+        $stmt->close();
+        return false;
+    }
 
-    // 2. Setup WebPush with your VAPID keys
     $auth = [
         'VAPID' => [
             'subject' => 'mailto:mandlasimphiwe99@gmail.com',
             'publicKey' => 'BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w',
-            'privateKey' => 'hsxomVfHuz9W86G9R6B9AnEVI6EUcRT3QUsQcJAlJ38', 
+            'privateKey' => 'hsxomVfHuz9W86G9R6B9AnEVI6EUcRT3QUsQcJAlJ38',
         ],
     ];
 
-    $webPush = new WebPush($auth);
+    $pushOptions = [
+        'TTL' => 2419200, // Keep delivery available for offline devices for up to 4 weeks.
+        'urgency' => 'high',
+    ];
 
-    // 3. Queue notifications for every device this user has
+    $webPush = new WebPush($auth, $pushOptions);
+    $queued = 0;
+    $sent = false;
+    $tag = 'iskool-' . substr(hash('sha256', $email . '|' . $title . '|' . ($targetUrl ?? '') . '|' . microtime(true)), 0, 16);
+
+    $payload = json_encode([
+        'title' => $schoolName,
+        'body' => $title . "\n" . $message,
+        'icon' => $icon,
+        'tag' => $tag,
+        'data' => [
+            'url' => $targetUrl,
+            'tag' => $tag,
+            'icon' => $icon,
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
     while ($row = $result->fetch_assoc()) {
-        $subscription = Subscription::create([
-            'endpoint' => $row['endpoint'],
-            'keys' => [
-                'p256dh' => $row['p256dh'],
-                'auth'   => $row['auth']
-            ]
-        ]);
+        try {
+            $subscription = Subscription::create([
+                'endpoint' => $row['endpoint'],
+                'keys' => [
+                    'p256dh' => $row['p256dh'],
+                    'auth' => $row['auth'],
+                ],
+            ]);
 
-        $webPush->queueNotification(
-            $subscription,
-            json_encode([
-                'title' => $schoolName,          // short, bold — e.g. "Greenwood High"
-                 'body'  => $title . "\n" . $message,  // the actual content, shown in normal weight
-                'icon'  => $icon,
-                // --- NEW: This is the payload the Service Worker reads ---
-                'data'  => [
-                    'url' => $targetUrl 
-                ]
-            ])
-        );
+            $webPush->queueNotification($subscription, $payload, $pushOptions);
+            $queued++;
+        } catch (Throwable $e) {
+            error_log("Push subscription could not be queued for {$email}: " . $e->getMessage());
+        }
     }
 
-    // 4. Send them all at once
+    $stmt->close();
+
+    if ($queued === 0) {
+        return false;
+    }
+
     foreach ($webPush->flush() as $report) {
-        // Logging can be added here if needed
+        if ($report->isSuccess()) {
+            $sent = true;
+            continue;
+        }
+
+        $endpoint = $report->getEndpoint();
+
+        if ($report->isSubscriptionExpired()) {
+            $deleteStmt = $conn->prepare("DELETE FROM user_subscriptions WHERE endpoint = ?");
+            if ($deleteStmt) {
+                $deleteStmt->bind_param("s", $endpoint);
+                $deleteStmt->execute();
+                $deleteStmt->close();
+            }
+        }
+
+        error_log("Push failed for {$email} at {$endpoint}: " . $report->getReason());
     }
-    
-    return true;
+
+    return $sent;
 }
