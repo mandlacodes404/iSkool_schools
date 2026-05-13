@@ -82,7 +82,7 @@ $schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
 
 $cleanBaseUrl            = rtrim(BASE_URL, '/');
 $learnerDiscussionLink = $cleanBaseUrl . '/learner_dashboard.php?page=discussion&id=' . $disc_id;
-$teacherDiscussionLink   = $cleanBaseUrl . '/teacher_dashboard.php?page=discussions.php';
+$teacherDiscussionLink = $cleanBaseUrl . '/view_discussion.php?id=' . $disc_id;
 
 $emailTemplate = function($recipientName, $recipientRole) use ($title, $message_text, $creator_display, $learnerDiscussionLink, $teacherDiscussionLink, $schoolName) {
     $viewLink  = $recipientRole === 'teacher' ? $teacherDiscussionLink : $learnerDiscussionLink;
