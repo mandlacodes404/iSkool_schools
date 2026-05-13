@@ -1208,7 +1208,7 @@ iframe {
 
 @media (max-width: 768px) {
     #mobileToggle {
-        display: block;
+        display: flex;
     }
 }
 
@@ -1493,6 +1493,53 @@ iframe {
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
     }
 }
+
+/* ── SLICK HAMBURGER — mobile only (#mobileToggle) ────────────────────────
+   3-bar icon (3rd bar shorter, Anthropic-style). Morphs to X when sidebar
+   is open. Desktop is NEVER affected — hidden via existing rule above.
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    #mobileToggle {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 4px 4px;
+        align-items: flex-start;
+        justify-content: center;
+        z-index: 1100;
+        position: relative;
+    }
+
+    #mobileToggle .hbr-bar {
+        display: block;
+        height: 1.5px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.25s ease,
+                    width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #mobileToggle .hbr-bar-1 { width: 22px; }
+    #mobileToggle .hbr-bar-2 { width: 22px; }
+    #mobileToggle .hbr-bar-3 { width: 14px; }
+
+    /* Morph to X when sidebar is open */
+    #mobileToggle.is-open .hbr-bar-1 {
+        transform: translateY(6.5px) rotate(45deg);
+        width: 22px;
+    }
+    #mobileToggle.is-open .hbr-bar-2 {
+        opacity: 0;
+    }
+    #mobileToggle.is-open .hbr-bar-3 {
+        transform: translateY(-6.5px) rotate(-45deg);
+        width: 22px;
+    }
+}
 </style>
 </head>
 <body>
@@ -1624,11 +1671,9 @@ iframe {
     
     <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
         <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+            <span class="hbr-bar hbr-bar-1"></span>
+            <span class="hbr-bar hbr-bar-2"></span>
+            <span class="hbr-bar hbr-bar-3"></span>
         </button>
 
        <button id="desktopMenuToggle" type="button" aria-label="Open Desktop Menu">
@@ -2692,6 +2737,7 @@ if (avatarWrapper && profileInput) {
 
 window.toggleSidebar = function (forceClose = false) {
     const isCurrentlyOpen = sidebar.classList.contains("active");
+    const mobileToggleBtn = document.getElementById("mobileToggle");
 
     // If forceClose is true (from the X button) or it's already open, close it
     if (forceClose || isCurrentlyOpen) {
@@ -2700,11 +2746,15 @@ window.toggleSidebar = function (forceClose = false) {
         if (mobileOverlay) {
             mobileOverlay.style.display = "none";
         }
+        // Reset hamburger to closed state
+        if (mobileToggleBtn) mobileToggleBtn.classList.remove("is-open");
     } else {
         // Only allow open on mobile
         if (window.innerWidth <= 768) {
             sidebar.classList.add("active");
             mobileOverlay.style.display = "block";
+            // Morph hamburger to X
+            if (mobileToggleBtn) mobileToggleBtn.classList.add("is-open");
         }
         // Desktop open is handled by desktopToggle listener — do nothing here
     }
