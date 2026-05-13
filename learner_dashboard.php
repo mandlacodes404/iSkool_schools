@@ -1197,23 +1197,12 @@ iframe {
     border: none;
     cursor: pointer;
     padding: 4px;
-    transition: color 0.3s ease;
-}
-
-.mobile-hamburger {
-    display: flex;
+    align-items: flex-start;
     flex-direction: column;
     gap: 5px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 4px;
-    align-items: flex-start;
-    z-index: 1100;
-    position: relative;
 }
 
-.mobile-hamburger .bar {
+#mobileToggle .bar {
     display: block;
     height: 1.5px;
     background: #e0e6f0;
@@ -1221,12 +1210,12 @@ iframe {
     transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, width 0.35s ease;
 }
 
-.mobile-hamburger .bar:nth-child(1) { width: 22px; }
-.mobile-hamburger .bar:nth-child(2) { width: 22px; }
-.mobile-hamburger .bar:nth-child(3) { width: 14px; }
+#mobileToggle .bar:nth-child(1) { width: 22px; }
+#mobileToggle .bar:nth-child(2) { width: 22px; }
+#mobileToggle .bar:nth-child(3) { width: 14px; }
 
-#mobileToggle:hover {
-    color: var(--accent-color);
+#mobileToggle:hover .bar {
+    background: var(--accent-color);
 }
 
 @media (max-width: 768px) {
@@ -1646,7 +1635,7 @@ iframe {
     <div class="main-header">
     
     <div id="headerLeft" style="flex: 1; display: flex; align-items: center;">
-        <button id="mobileToggle" class="mobile-hamburger" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+        <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
             <span class="bar"></span>
             <span class="bar"></span>
             <span class="bar"></span>
