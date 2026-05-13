@@ -54,6 +54,68 @@ function getThreadTarget() {
     return document.getElementById('api-content-area');
 }
 
+function discAvatarMarkup(person, className = '') {
+    const name = person?.name || person?.replier_display || person?.creator_display || 'Learner';
+    const pic = person?.profile_picture || person?.creator_pic || '';
+    const initial = name.trim().charAt(0).toUpperCase() || '?';
+    const colors = [
+        { bg:'#0f766e', color:'#ffffff' },
+        { bg:'#64748b', color:'#ffffff' },
+        { bg:'#7c3aed', color:'#ffffff' },
+        { bg:'#db2777', color:'#ffffff' },
+        { bg:'#ea580c', color:'#ffffff' },
+        { bg:'#2563eb', color:'#ffffff' },
+    ];
+    const color = colors[initial.charCodeAt(0) % colors.length];
+    const extraClass = className ? ` ${className}` : '';
+    const hasPic = pic && pic !== 'default.png';
+
+    return hasPic
+        ? `<img src="uploads/learners/${escHtml(pic)}" class="yt-disc-avatar${extraClass}"
+                onload="this.style.display='block';this.nextElementSibling.style.display='none';"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                style="display:none;">
+           <div class="yt-disc-avatar${extraClass}" style="background:${color.bg};color:${color.color};">${initial}</div>`
+        : `<div class="yt-disc-avatar${extraClass}" style="background:${color.bg};color:${color.color};">${initial}</div>`;
+}
+
+function discRelativeTime(dateStr) {
+    const then = new Date(String(dateStr).replace(' ', 'T')).getTime();
+    const diff = Math.max(0, Date.now() - then);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return `${weeks}w ago`;
+    return new Date(String(dateStr).replace(' ', 'T')).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+function discSafeParam(str) {
+    return encodeURIComponent(str ?? '').replace(/'/g, '%27');
+}
+
+window.discCloseThreadMenus = function() {
+    document.querySelectorAll('.yt-thread-menu.show').forEach(menu => menu.classList.remove('show'));
+};
+
+window.discToggleThreadMenu = function(event, button) {
+    event.stopPropagation();
+    const menu = button?.nextElementSibling;
+    const isOpen = menu?.classList.contains('show');
+    window.discCloseThreadMenus();
+    if (menu && !isOpen) menu.classList.add('show');
+};
+
+document.addEventListener('click', event => {
+    if (!event.target.closest?.('.yt-thread-menu') && !event.target.closest?.('.yt-thread-menu-btn')) {
+        window.discCloseThreadMenus();
+    }
+});
+
 // ─────────────────────────────────────────────
 // 1. DISCUSSION LIST
 // ─────────────────────────────────────────────
@@ -314,7 +376,7 @@ function renderSidebarList(data) {
     ).join('');
 }
 
-function renderMobileList(data) {
+function renderLegacyMobileList(data) {
     if (!isDesktop()) unlockMobileLayout();
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -359,6 +421,56 @@ function renderMobileList(data) {
         html += `</div>`;
     }
 
+    apiArea.innerHTML = html;
+}
+
+function renderMobileList(data) {
+    if (!isDesktop()) unlockMobileLayout();
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    let html = `
+        <style>
+            .yt-disc-list { padding:12px 0 96px; background:#0f0f0f; min-height:100%; }
+            .yt-disc-list-top { padding:6px 24px 18px; display:flex; justify-content:flex-end; }
+            .yt-disc-new { border:0; background:#f1f1f1; color:#111; border-radius:18px; padding:8px 15px; font:800 13px 'Nunito',sans-serif; }
+            .yt-disc-list-item { display:grid; grid-template-columns:48px 1fr; column-gap:24px; padding:0 24px 30px; cursor:pointer; color:#f1f1f1; }
+            .yt-disc-list-rail { display:flex; flex-direction:column; align-items:center; }
+            .yt-disc-avatar { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; object-fit:cover; flex-shrink:0; font:800 20px 'Nunito',sans-serif; text-transform:uppercase; }
+            .yt-disc-list-line { width:1px; flex:1; min-height:78px; background:#3a3a3a; margin-top:9px; }
+            .yt-disc-list-body { min-width:0; padding-top:2px; }
+            .yt-disc-list-meta { color:#aaa; font:700 14px 'Nunito',sans-serif; line-height:1.25; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+            .yt-disc-list-text { color:#f1f1f1; font:600 16px/1.35 'Nunito',sans-serif; margin:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+            .yt-disc-list-replies { margin-top:18px; display:inline-flex; align-items:center; gap:8px; color:#f1f1f1; font:900 15px 'Nunito',sans-serif; }
+            .yt-disc-list-replies i { font-size:13px; }
+            .yt-disc-empty { color:#8b949e; text-align:center; padding:48px 24px; font:700 14px 'Nunito',sans-serif; }
+        </style>
+        <div class="yt-disc-list">
+            <div class="yt-disc-list-top">
+                <button class="yt-disc-new" onclick="loadCreateDiscussion()"><i class="fas fa-plus"></i> Start</button>
+            </div>`;
+
+    if (!data || data.length === 0) {
+        html += `<p class="yt-disc-empty">No discussions yet. Be the first to start one!</p>`;
+    } else {
+        data.forEach(d => {
+            const replies = parseInt(d.reply_count, 10) || 0;
+            html += `
+                <article class="yt-disc-list-item" onclick="loadDiscussionThread(${d.id})">
+                    <div class="yt-disc-list-rail">
+                        ${discAvatarMarkup({ name: d.creator_display, profile_picture: d.profile_picture })}
+                        <div class="yt-disc-list-line"></div>
+                    </div>
+                    <div class="yt-disc-list-body">
+                        <div class="yt-disc-list-meta">@${escHtml(d.creator_display)} &middot; ${escHtml(discRelativeTime(d.created_at))}</div>
+                        <p class="yt-disc-list-text">${escHtml(d.initial_message || d.preview || d.title || '')}</p>
+                        <div class="yt-disc-list-replies">${replies} ${replies === 1 ? 'reply' : 'replies'} <i class="fas fa-chevron-right"></i></div>
+                    </div>
+                </article>`;
+        });
+    }
+
+    html += `</div>`;
     apiArea.innerHTML = html;
 }
 
@@ -491,9 +603,29 @@ function renderThread(data) {
 
             @media (max-width: 767px) {
                 /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
-                .disc-posts-scroll { padding-bottom: 100px; }
+                .disc-posts-scroll { padding:18px 0 112px; background:#0f0f0f; }
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
+                .disc-date-sep { display:none; }
+                .yt-thread-post { display:grid; grid-template-columns:48px 1fr; column-gap:24px; padding:0 24px 28px; color:#f1f1f1; position:relative; }
+                .yt-thread-post.is-child { grid-template-columns:48px 1fr; padding-left:88px; }
+                .yt-thread-rail { display:flex; flex-direction:column; align-items:center; }
+                .yt-thread-avatar { width:36px; height:36px; font-size:15px; }
+                .yt-thread-line { width:1px; flex:1; min-height:46px; background:#3a3a3a; margin-top:9px; }
+                .yt-thread-post:last-of-type .yt-thread-line { display:none; }
+                .yt-thread-body { min-width:0; position:relative; display:grid; grid-template-columns:1fr 24px; column-gap:10px; }
+                .yt-thread-main { min-width:0; }
+                .yt-thread-meta { display:flex; align-items:center; gap:5px; color:#aaa; font:700 14px/1.25 'Nunito',sans-serif; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                .yt-thread-meta span:first-child { overflow:hidden; text-overflow:ellipsis; }
+                .yt-thread-op { color:#4fd1c5; font-size:11px; font-weight:900; margin-left:3px; }
+                .yt-thread-text { margin:0; color:#f1f1f1; font:600 16px/1.42 'Nunito',sans-serif; white-space:pre-wrap; overflow-wrap:anywhere; }
+                .yt-thread-quote { margin:10px 0 0; color:#b7b7b7; font:600 14px/1.35 'Nunito',sans-serif; border-left:2px solid #3a3a3a; padding-left:10px; }
+                .yt-thread-quote span { color:#3ea6ff; margin-right:4px; }
+                .yt-thread-menu-btn { align-self:start; justify-self:end; width:24px; height:32px; border:0; background:transparent; color:#f1f1f1; font-size:18px; display:flex; align-items:center; justify-content:center; padding:0; }
+                .yt-thread-menu { display:none; position:absolute; right:10px; top:30px; z-index:30; min-width:170px; background:#262626; border-radius:16px; padding:10px 0; box-shadow:0 18px 35px rgba(0,0,0,0.45); }
+                .yt-thread-menu.show { display:block; }
+                .yt-thread-menu button { width:100%; background:transparent; border:0; color:#f1f1f1; display:flex; align-items:center; gap:14px; padding:13px 18px; font:800 15px 'Nunito',sans-serif; text-align:left; }
+                .yt-thread-menu i { width:20px; text-align:center; }
             }
 
             /* ── DATE CHIP ── */
@@ -643,10 +775,93 @@ function renderThread(data) {
     }
 }
 
+function buildMobilePostCard(r, user_role, is_in_class, discId) {
+    const isOp = r.is_op || false;
+    const isMe = r.is_me == 1;
+    const id = r.id || 0;
+    const displayName = r.replier_display || 'Learner';
+    const replyName = discSafeParam(displayName);
+    const replyText = discSafeParam((r.message || '').substring(0, 80));
+    const canReply = is_in_class && r.id !== undefined;
+    const canReport = user_role === 'learner' && !isMe && r.id;
+    const indentClass = r.parent_reply_id !== null && r.parent_reply_id !== undefined ? ' is-child' : '';
+
+    const quoteHtml = r.quote_author
+        ? `<div class="yt-thread-quote">
+               <span>@${escHtml(r.quote_author)}</span>
+               ${escHtml(r.quote_text || '')}${(r.quote_text || '').length >= 100 ? '...' : ''}
+           </div>` : '';
+
+    let attachHtml = '';
+    if (r.attachment) {
+        const ext = r.attachment.split('.').pop().toLowerCase();
+        const path = 'uploads/discussions/' + r.attachment;
+        const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
+        const isVoice = ['webm','ogg','m4a','mp3'].includes(ext);
+        if (isVoice) {
+            const uid = 'mvp_' + (r.id || Math.random().toString(36).slice(2));
+            attachHtml = `
+                <div class="disc-voice-player">
+                    <button class="disc-voice-play-btn" id="btn_${uid}" onclick="discVoiceToggle('${uid}','${path}')">
+                        <i class="fas fa-play" id="icon_${uid}"></i>
+                    </button>
+                    <div class="disc-voice-info">
+                        <div class="disc-voice-waveform" id="wave_${uid}" data-bars="1">
+                            <div class="disc-voice-waveform-bar" style="height:70%;"></div>
+                        </div>
+                        <div class="disc-voice-bottom">
+                            <span class="disc-voice-time" id="time_${uid}">0:00</span>
+                            <span class="disc-voice-label">Voice note</span>
+                        </div>
+                    </div>
+                </div>`;
+        } else {
+            attachHtml = `<div class="disc-attachment">` + (isImg
+                ? `<img src="${path}" onclick="discOpenMedia('${path}','image')">`
+                : `<div class="disc-pdf-link" onclick="discOpenMedia('${path}','pdf')"><i class="fas fa-file-pdf"></i> Open PDF</div>`)
+                + `</div>`;
+        }
+    }
+
+    const menuItems = [
+        canReply ? `<button onclick="discSetReply(${id},decodeURIComponent('${replyName}'),decodeURIComponent('${replyText}')); discCloseThreadMenus();"><i class="fas fa-reply"></i> Reply</button>` : '',
+        canReport ? `<button onclick="discShowReport(${id},${discId}); discCloseThreadMenus();"><i class="fas fa-flag"></i> Report</button>` : '',
+    ].filter(Boolean).join('');
+
+    return `
+        <article class="yt-thread-post${indentClass}" data-id="${id}">
+            <div class="yt-thread-rail">
+                ${discAvatarMarkup({ name: displayName, profile_picture: r.profile_picture }, 'yt-thread-avatar')}
+                <div class="yt-thread-line"></div>
+            </div>
+            <div class="yt-thread-body">
+                <div class="yt-thread-main">
+                    <div class="yt-thread-meta">
+                        <span>@${escHtml(displayName)}</span>
+                        <span>&middot;</span>
+                        <span>${escHtml(discRelativeTime(r.created_at))}</span>
+                        ${isOp ? `<span class="yt-thread-op">OP</span>` : ''}
+                        ${isMe ? `<span class="yt-thread-op">You</span>` : ''}
+                    </div>
+                    <p class="yt-thread-text">${escHtml(r.message || '')}</p>
+                    ${quoteHtml}
+                    ${attachHtml}
+                </div>
+                ${menuItems ? `
+                    <button class="yt-thread-menu-btn" onclick="discToggleThreadMenu(event,this)" aria-label="Discussion actions">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="yt-thread-menu">${menuItems}</div>
+                ` : ''}
+            </div>
+        </article>`;
+}
+
 function buildPostCard(r, user_role, is_in_class, discId) {
+    if (!isDesktop()) return buildMobilePostCard(r, user_role, is_in_class, discId);
     const isOp    = r.is_op || false;
     const isMe    = r.is_me == 1;
-    const isAnon  = r.replier_anonymous && user_role === 'learner';
+    const isAnon  = false;
     const initial = (r.replier_display || '?').charAt(0).toUpperCase();
     const picFolder = 'uploads/learners/';
 
@@ -799,10 +1014,6 @@ function buildCompose(discId) {
                     <button class="disc-tool-btn" id="discMicBtn" title="Record voice note (max 2 min)" onclick="discToggleRecording(${discId})">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <label class="disc-tool-btn anon-on" id="discAnonLabel" title="Post anonymously">
-                        <input type="checkbox" id="discAnon" checked onchange="document.getElementById('discAnonLabel').classList.toggle('anon-on',this.checked);" style="display:none;">
-                        <i class="fas fa-user-secret"></i> Anonymous
-                    </label>
                     <button class="disc-post-btn" onclick="discSubmitReply(${discId})">
                         <i class="fas fa-paper-plane"></i> Post
                     </button>
@@ -1004,14 +1215,6 @@ function injectMobileComposer(discId) {
                     style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
                     <i class="fas fa-microphone"></i>
                 </button>
-                <!-- Anon toggle -->
-                <label id="discSheetAnonLabel"
-                    style="background:none;border:none;color:#4fd1c5;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
-                    <input type="checkbox" id="discSheetAnon" checked
-                        onchange="document.getElementById('discSheetAnonLabel').style.color=this.checked?'#4fd1c5':'#8b949e';"
-                        style="display:none;">
-                    <i class="fas fa-user-secret"></i> Anon
-                </label>
                 <!-- Post button -->
                 <button id="discSheetPostBtn"
                     onclick="discSheetSubmitReply(${discId})"
@@ -1123,7 +1326,6 @@ window.discSheetClearFile = function() {
 window.discSheetSubmitReply = async function(discId) {
     const ta      = document.getElementById('discSheetTextarea');
     const fi      = document.getElementById('discSheetFileInput');
-    const anon    = document.getElementById('discSheetAnon');
     const replyTo = window._discReplyTo ?? 0;
     const message = ta ? ta.value.trim() : '';
 
@@ -1132,7 +1334,7 @@ window.discSheetSubmitReply = async function(discId) {
     const fd = new FormData();
     fd.append('discussion_id', discId);
     fd.append('message', message);
-    fd.append('anonymous', anon?.checked ? '1' : '0');
+    fd.append('anonymous', '0');
     fd.append('reply_to', replyTo);
     if (_discVoiceBlob) {
         const ext = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
@@ -1365,7 +1567,6 @@ async function pollNewReplies(discId) {
 window.discSubmitReply = async function(discId) {
     const ta      = document.getElementById('discTextarea');
     const fi      = document.getElementById('discFileInput');
-    const anon    = document.getElementById('discAnon');
     const replyTo = window._discReplyTo ?? 0;
     const message = ta ? ta.value.trim() : '';
 
@@ -1374,7 +1575,7 @@ window.discSubmitReply = async function(discId) {
     const fd = new FormData();
     fd.append('discussion_id', discId);
     fd.append('message', message);
-    fd.append('anonymous', anon?.checked ? '1' : '0');
+    fd.append('anonymous', '0');
     fd.append('reply_to', replyTo);
     if (_discVoiceBlob) {
         const ext  = _discVoiceBlob.type.includes('ogg') ? 'ogg' : 'webm';
@@ -1804,12 +2005,6 @@ function renderCreateForm(teachers) {
                 <div class="disc-teachers-list">${teacherOptions}</div>
             </div>
             <div class="disc-field">
-                <label class="disc-anon-toggle">
-                    <input type="checkbox" id="discCreateAnon" checked>
-                    <span>Post anonymously (classmates won't see your name)</span>
-                </label>
-            </div>
-            <div class="disc-field">
                 <label>Attachment <span style="color:#8b949e;font-weight:600;">(optional)</span></label>
                 <div class="disc-attach-area" onclick="document.getElementById('discCreateFile').click()">
                     <i class="fas fa-paperclip" style="color:#8b949e;margin-right:6px;"></i>
@@ -1831,7 +2026,6 @@ window.discToggleTeacher = function(el) {
 window.discSubmitCreate = async function() {
     const title     = document.getElementById('discTitle')?.value.trim();
     const message   = document.getElementById('discMessage')?.value.trim();
-    const anon      = document.getElementById('discCreateAnon')?.checked;
     const fileInput = document.getElementById('discCreateFile');
     const errorEl   = document.getElementById('discFormError');
     const btn       = document.getElementById('discSubmitBtn');
@@ -1849,7 +2043,7 @@ window.discSubmitCreate = async function() {
     const fd = new FormData();
     fd.append('title', title);
     fd.append('message', message);
-    fd.append('anonymous', anon ? '1' : '0');
+    fd.append('anonymous', '0');
     selectedTeachers.forEach(e => fd.append('teachers[]', e));
     if (fileInput?.files[0]) fd.append('attachment', fileInput.files[0]);
 

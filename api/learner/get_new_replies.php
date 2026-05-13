@@ -50,10 +50,6 @@ $stmt->close();
 
 // For each reply, resolve the quoted parent text so the front-end can render it
 foreach ($rows as &$row) {
-    // Mask anonymous names for learners
-    if ($row['replier_anonymous'] == 1 && $user_role === 'learner') {
-        $row['replier_display'] = 'Anonymous';
-    }
     if (empty(trim($row['replier_display']))) {
         $row['replier_display'] = 'Learner';
     }
@@ -65,9 +61,15 @@ foreach ($rows as &$row) {
         $pid = (int)$row['parent_reply_id'];
         if ($pid === 0) {
             // Quoting the original post
-            $op = $conn->query("SELECT initial_message, creator_name, creator_anonymous FROM class_discussions WHERE id = $disc_id")->fetch_assoc();
+            $op = $conn->query("
+                SELECT d.initial_message,
+                       COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display
+                FROM class_discussions d
+                LEFT JOIN users u ON d.creator_email = u.email
+                WHERE d.id = $disc_id
+            ")->fetch_assoc();
             if ($op) {
-                $row['quote_author'] = ($op['creator_anonymous'] && $user_role === 'learner') ? 'Anonymous' : ($op['creator_name'] ?: 'Learner');
+                $row['quote_author'] = $op['creator_display'] ?: 'Learner';
                 $row['quote_text']   = substr($op['initial_message'], 0, 100);
             }
         } else {
@@ -84,7 +86,7 @@ foreach ($rows as &$row) {
             $parent = $pstmt->get_result()->fetch_assoc();
             $pstmt->close();
             if ($parent) {
-                $row['quote_author'] = ($parent['replier_anonymous'] && $user_role === 'learner') ? 'Anonymous' : ($parent['replier_display'] ?: 'Learner');
+                $row['quote_author'] = $parent['replier_display'] ?: 'Learner';
                 $row['quote_text']   = substr($parent['message'] ?? '', 0, 100);
             }
         }

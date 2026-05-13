@@ -21,7 +21,7 @@ $in_class = $conn->query("SELECT 1 FROM class_students WHERE class_id = $class_i
 if (!$in_class) { echo json_encode(['error' => 'Access denied']); exit(); }
 
 $message         = trim($_POST['message'] ?? '');
-$anonymous       = !empty($_POST['anonymous']);
+$anonymous       = 0;
 $parent_reply_id = !empty($_POST['reply_to']) ? (int)$_POST['reply_to'] : null;
 $attachment      = null;
 
@@ -50,7 +50,7 @@ if (empty($message) && !$attachment) {
 }
 
 $name_row      = $conn->query("SELECT name, surname FROM users WHERE email = '$user_email'")->fetch_assoc();
-$replier_name  = $anonymous ? null : trim(($name_row['name'] ?? '') . ' ' . ($name_row['surname'] ?? ''));
+$replier_name  = trim(($name_row['name'] ?? '') . ' ' . ($name_row['surname'] ?? ''));
 
 $stmt = $conn->prepare("
     INSERT INTO discussion_replies 
@@ -74,17 +74,21 @@ $new_reply = $conn->query("
     WHERE r.id = $new_id
 ")->fetch_assoc();
 
-if ($anonymous) $new_reply['replier_display'] = 'Anonymous';
-
 // Resolve quote if replying to someone
 $new_reply['quote_author'] = null;
 $new_reply['quote_text']   = null;
 
 if ($parent_reply_id !== null) {
     if ($parent_reply_id === 0) {
-        $op = $conn->query("SELECT initial_message, creator_name, creator_anonymous FROM class_discussions WHERE id = $disc_id")->fetch_assoc();
+        $op = $conn->query("
+            SELECT d.initial_message,
+                   COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display
+            FROM class_discussions d
+            LEFT JOIN users u ON d.creator_email = u.email
+            WHERE d.id = $disc_id
+        ")->fetch_assoc();
         if ($op) {
-            $new_reply['quote_author'] = $op['creator_anonymous'] ? 'Anonymous' : ($op['creator_name'] ?: 'Learner');
+            $new_reply['quote_author'] = $op['creator_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($op['initial_message'], 0, 100);
         }
     } else {
@@ -96,7 +100,7 @@ if ($parent_reply_id !== null) {
             WHERE r.id = $parent_reply_id
         ")->fetch_assoc();
         if ($p) {
-            $new_reply['quote_author'] = $p['replier_anonymous'] ? 'Anonymous' : ($p['replier_display'] ?: 'Learner');
+            $new_reply['quote_author'] = $p['replier_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($p['message'] ?? '', 0, 100);
         }
     }

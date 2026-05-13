@@ -34,7 +34,8 @@ $stmt = $conn->prepare("
         d.title, 
         d.initial_message, 
         d.created_at,
-        CASE WHEN d.creator_anonymous = 1 THEN 'A classmate' ELSE COALESCE(u.name, 'Learner') END AS creator_display,
+        u.profile_picture,
+        TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS creator_display,
         (SELECT COUNT(*) FROM discussion_replies WHERE discussion_id = d.id) AS reply_count
     FROM class_discussions d
     LEFT JOIN users u ON d.creator_email = u.email
@@ -49,6 +50,9 @@ $result = $stmt->get_result();
 
 $discussions = [];
 while ($row = $result->fetch_assoc()) {
+    if (empty(trim($row['creator_display'] ?? ''))) {
+        $row['creator_display'] = 'Learner';
+    }
     $row['display_date'] = date('M j, Y', strtotime($row['created_at']));
     // Snip message for preview
     $row['preview'] = (strlen($row['initial_message']) > 150) 
