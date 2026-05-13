@@ -58,15 +58,9 @@ function discAvatarMarkup(person, className = '') {
     const name = person?.name || person?.replier_display || person?.creator_display || 'Learner';
     const pic = person?.profile_picture || person?.creator_pic || '';
     const initial = name.trim().charAt(0).toUpperCase() || '?';
-    const colors = [
-        { bg:'#0f766e', color:'#ffffff' },
-        { bg:'#64748b', color:'#ffffff' },
-        { bg:'#7c3aed', color:'#ffffff' },
-        { bg:'#db2777', color:'#ffffff' },
-        { bg:'#ea580c', color:'#ffffff' },
-        { bg:'#2563eb', color:'#ffffff' },
-    ];
-    const color = colors[initial.charCodeAt(0) % colors.length];
+    const hash = Array.from(name).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const hue = hash % 360;
+    const color = { bg:`hsl(${hue} 72% 38%)`, color:'#ffffff' };
     const extraClass = className ? ` ${className}` : '';
     const hasPic = pic && pic !== 'default.png';
 
@@ -428,20 +422,22 @@ function renderMobileList(data) {
     if (!isDesktop()) unlockMobileLayout();
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
+    apiArea.style.background = '#000';
 
     let html = `
         <style>
-            .yt-disc-list { padding:12px 0 96px; background:#0f0f0f; min-height:100%; }
+            .yt-disc-list { padding:12px 0 96px; background:#000; min-height:100%; }
             .yt-disc-list-top { padding:6px 24px 18px; display:flex; justify-content:flex-end; }
             .yt-disc-new { border:0; background:#f1f1f1; color:#111; border-radius:18px; padding:8px 15px; font:800 13px 'Nunito',sans-serif; }
-            .yt-disc-list-item { display:grid; grid-template-columns:48px 1fr; column-gap:24px; padding:0 24px 30px; cursor:pointer; color:#f1f1f1; }
-            .yt-disc-list-rail { display:flex; flex-direction:column; align-items:center; }
-            .yt-disc-avatar { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; object-fit:cover; flex-shrink:0; font:800 20px 'Nunito',sans-serif; text-transform:uppercase; }
-            .yt-disc-list-line { width:1px; flex:1; min-height:78px; background:#3a3a3a; margin-top:9px; }
+            .yt-disc-list-item { display:grid; grid-template-columns:40px 1fr; column-gap:24px; padding:0 24px 30px; cursor:pointer; color:#f1f1f1; background:transparent; }
+            .yt-disc-list-rail { display:flex; flex-direction:column; align-items:center; position:relative; }
+            .yt-disc-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; object-fit:cover; flex-shrink:0; font:700 18px 'Nunito',sans-serif; text-transform:uppercase; }
+            .yt-disc-list-line { width:1px; flex:1; min-height:82px; background:#3a3a3a; margin-top:9px; position:relative; }
+            .yt-disc-list-line::after { content:''; position:absolute; left:0; bottom:-1px; width:38px; height:26px; border-left:1px solid #3a3a3a; border-bottom:1px solid #3a3a3a; border-bottom-left-radius:22px; background:transparent; }
             .yt-disc-list-body { min-width:0; padding-top:2px; }
             .yt-disc-list-meta { color:#aaa; font:700 14px 'Nunito',sans-serif; line-height:1.25; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .yt-disc-list-text { color:#f1f1f1; font:600 16px/1.35 'Nunito',sans-serif; margin:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
-            .yt-disc-list-replies { margin-top:18px; display:inline-flex; align-items:center; gap:8px; color:#f1f1f1; font:900 15px 'Nunito',sans-serif; }
+            .yt-disc-list-replies { margin-top:18px; display:inline-flex; align-items:center; gap:8px; color:#f1f1f1; font:900 15px 'Nunito',sans-serif; position:relative; z-index:1; }
             .yt-disc-list-replies i { font-size:13px; }
             .yt-disc-empty { color:#8b949e; text-align:center; padding:48px 24px; font:700 14px 'Nunito',sans-serif; }
         </style>
@@ -462,7 +458,7 @@ function renderMobileList(data) {
                         <div class="yt-disc-list-line"></div>
                     </div>
                     <div class="yt-disc-list-body">
-                        <div class="yt-disc-list-meta">@${escHtml(d.creator_display)} &middot; ${escHtml(discRelativeTime(d.created_at))}</div>
+                        <div class="yt-disc-list-meta">${escHtml(d.creator_display)} &middot; ${escHtml(discRelativeTime(d.created_at))}</div>
                         <p class="yt-disc-list-text">${escHtml(d.initial_message || d.preview || d.title || '')}</p>
                         <div class="yt-disc-list-replies">${replies} ${replies === 1 ? 'reply' : 'replies'} <i class="fas fa-chevron-right"></i></div>
                     </div>
@@ -576,6 +572,7 @@ function renderThread(data) {
         const apiArea = document.getElementById('api-content-area');
         if (apiArea) {
             apiArea.classList.add('disc-thread-active');
+            apiArea.style.background    = '#000';
             apiArea.style.flex          = '1';
             apiArea.style.overflow      = 'hidden';
             apiArea.style.display       = 'flex';
@@ -603,17 +600,20 @@ function renderThread(data) {
 
             @media (max-width: 767px) {
                 /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
-                .disc-posts-scroll { padding:18px 0 112px; background:#0f0f0f; }
+                .disc-thread-wrap { background:#000; }
+                .disc-posts-scroll { padding:18px 0 112px; background:#000; }
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
                 .disc-date-sep { display:none; }
-                .yt-thread-post { display:grid; grid-template-columns:48px 1fr; column-gap:24px; padding:0 24px 28px; color:#f1f1f1; position:relative; }
-                .yt-thread-post.is-child { grid-template-columns:48px 1fr; padding-left:88px; }
-                .yt-thread-rail { display:flex; flex-direction:column; align-items:center; }
-                .yt-thread-avatar { width:36px; height:36px; font-size:15px; }
-                .yt-thread-line { width:1px; flex:1; min-height:46px; background:#3a3a3a; margin-top:9px; }
+                .yt-thread-post { display:grid; grid-template-columns:36px 1fr; column-gap:20px; padding:0 24px 30px; color:#f1f1f1; position:relative; background:transparent; }
+                .yt-thread-post.is-child { grid-template-columns:32px 1fr; padding-left:96px; }
+                .yt-thread-post.is-child::before { content:''; position:absolute; left:42px; top:-30px; bottom:24px; width:1px; background:#3a3a3a; }
+                .yt-thread-post.is-child::after { content:''; position:absolute; left:42px; top:13px; width:40px; height:20px; border-left:1px solid #3a3a3a; border-bottom:1px solid #3a3a3a; border-bottom-left-radius:18px; }
+                .yt-thread-rail { display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
+                .yt-thread-avatar { width:32px; height:32px; font-size:13px; }
+                .yt-thread-line { width:1px; flex:1; min-height:52px; background:#3a3a3a; margin-top:9px; position:relative; }
                 .yt-thread-post:last-of-type .yt-thread-line { display:none; }
-                .yt-thread-body { min-width:0; position:relative; display:grid; grid-template-columns:1fr 24px; column-gap:10px; }
+                .yt-thread-body { min-width:0; position:relative; display:grid; grid-template-columns:1fr 24px; column-gap:10px; background:transparent; }
                 .yt-thread-main { min-width:0; }
                 .yt-thread-meta { display:flex; align-items:center; gap:5px; color:#aaa; font:700 14px/1.25 'Nunito',sans-serif; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
                 .yt-thread-meta span:first-child { overflow:hidden; text-overflow:ellipsis; }
@@ -788,7 +788,7 @@ function buildMobilePostCard(r, user_role, is_in_class, discId) {
 
     const quoteHtml = r.quote_author
         ? `<div class="yt-thread-quote">
-               <span>@${escHtml(r.quote_author)}</span>
+               <span>${escHtml(r.quote_author)}</span>
                ${escHtml(r.quote_text || '')}${(r.quote_text || '').length >= 100 ? '...' : ''}
            </div>` : '';
 
@@ -837,7 +837,7 @@ function buildMobilePostCard(r, user_role, is_in_class, discId) {
             <div class="yt-thread-body">
                 <div class="yt-thread-main">
                     <div class="yt-thread-meta">
-                        <span>@${escHtml(displayName)}</span>
+                        <span>${escHtml(displayName)}</span>
                         <span>&middot;</span>
                         <span>${escHtml(discRelativeTime(r.created_at))}</span>
                         ${isOp ? `<span class="yt-thread-op">OP</span>` : ''}
