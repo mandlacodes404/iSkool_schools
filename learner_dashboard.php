@@ -830,7 +830,7 @@ iframe {
         left: -100%;
         width: 300px; /* Increased from 240px to 300px */
         transition: left var(--transition-speed) ease;
-        border-right: 1px solid #30363d;
+        border-right: 1px solid #555555;
     }
 
     .sidebar.active {
