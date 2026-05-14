@@ -21,7 +21,10 @@ window.fetchTeacherQuizzes = async function() {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
+        : null;
+    if (!hideInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/get_quizzes.php');
@@ -1134,21 +1137,20 @@ window.openCreateQuiz = async function() {
             const submitBtn = document.getElementById('cqSubmitBtn');
             errorDiv.style.display = 'none';
 
-            submitBtn.disabled    = true;
-            submitBtn.textContent = 'Creating...';
-            if (loader) loader.style.display = 'flex';
-
             const fd = new FormData(form);
             const classId = window.getClassPickerValue('quizClassPicker');
             if (!classId) {
                 errorDiv.textContent = 'Please select a class.';
                 errorDiv.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Quiz';
-                if (loader) loader.style.display = 'none';
                 return;
             }
             fd.set('class_id', classId);
+            submitBtn.disabled    = true;
+            submitBtn.textContent = 'Creating...';
+            const hideSubmitLoader = window.showTeacherScopedLoader
+                ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Creating...')
+                : null;
+            if (!hideSubmitLoader && loader) loader.style.display = 'flex';
             try {
                 const res  = await fetch('../../../create_quiz.php', {
                     method: 'POST',
@@ -1169,7 +1171,8 @@ window.openCreateQuiz = async function() {
             } finally {
                 submitBtn.disabled    = false;
                 submitBtn.textContent = 'Create Quiz';
-                if (loader) loader.style.display = 'none';
+                if (hideSubmitLoader) hideSubmitLoader();
+                else if (loader) loader.style.display = 'none';
             }
         });
 
@@ -1180,7 +1183,8 @@ window.openCreateQuiz = async function() {
                 Error loading create quiz form.
             </p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideInitialLoader) hideInitialLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 

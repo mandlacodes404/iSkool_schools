@@ -1666,8 +1666,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const iskoolBrand = document.getElementById('iskool-brand');
-        // Set to 2.0 seconds (2500ms)
-         const timeout = 2500;
+        const timeout = 2300;
         setTimeout(() => {
     animationWrapper.style.opacity = '0';
     setTimeout(() => {

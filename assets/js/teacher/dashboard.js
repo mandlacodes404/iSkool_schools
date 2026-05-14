@@ -1,3 +1,45 @@
+window.showTeacherScopedLoader = function(panel, message = 'Working...') {
+    const isDesktop = window.innerWidth >= 900 && panel;
+
+    if (!isDesktop) {
+        const globalLoader = document.getElementById('loaderOverlay');
+        if (globalLoader) globalLoader.style.display = 'flex';
+        return function hideGlobalLoader() {
+            if (globalLoader) globalLoader.style.display = 'none';
+        };
+    }
+
+    if (!document.getElementById('teacher-scoped-loader-style')) {
+        const style = document.createElement('style');
+        style.id = 'teacher-scoped-loader-style';
+        style.textContent = '@keyframes teacher-scoped-spin{to{transform:rotate(360deg)}}';
+        document.head.appendChild(style);
+    }
+
+    panel.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.className = 'teacher-scoped-loader';
+    overlay.style.cssText = `
+        position:absolute;inset:0;
+        background:rgba(13,17,23,0.7);
+        backdrop-filter:blur(2px);
+        display:flex;align-items:center;justify-content:center;
+        border-radius:14px;z-index:10;
+    `;
+    overlay.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="width:32px;height:32px;border:3px solid rgba(79,209,197,0.2);
+                        border-top-color:#4fd1c5;border-radius:50%;
+                        animation:teacher-scoped-spin 0.7s linear infinite;"></div>
+            <span style="font-size:13px;color:#8b949e;">${message}</span>
+        </div>`;
+    panel.appendChild(overlay);
+
+    return function hidePanelLoader() {
+        overlay.remove();
+    };
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     const sidebar  = document.querySelector('.sidebar');
     const overlay  = document.getElementById('mobileOverlay');

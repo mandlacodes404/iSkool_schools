@@ -598,12 +598,17 @@ async function openSBOPanel(panel) {
         </div>`;
 
     // Load classes
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(panel, 'Loading...')
+        : null;
     try {
         const res     = await fetch('api/teacher/get_classes.php');
         const classes = await res.json();
         window.renderClassPicker('sboClassPicker', classes, function() {});
     } catch(e) {
         console.error('Failed to load classes for SBO panel', e);
+    } finally {
+        if (hideInitialLoader) hideInitialLoader();
     }
 
     addSBOTopic();
@@ -805,6 +810,11 @@ window.saveSBO = async function() {
     const btn = document.querySelector('#sbo-main-panel .teacher-modal-submit')
              || document.querySelector('#sboDrawer .teacher-modal-submit');
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    const panel = document.getElementById('sbo-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel && document.querySelector('#sbo-main-panel .teacher-modal-submit');
+    const hideSubmitLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
+        : null;
 
     try {
         const res  = await fetch('api/teacher/save_sbo.php', {
@@ -826,10 +836,12 @@ window.saveSBO = async function() {
             err.textContent   = data.error || 'Failed to save.';
             err.style.display = 'block';
             if (btn) { btn.textContent = 'Post & Notify'; btn.disabled = false; }
+            if (hideSubmitLoader) hideSubmitLoader();
         }
     } catch(e) {
         err.textContent   = 'Connection error. Please try again.';
         err.style.display = 'block';
         if (btn) { btn.textContent = 'Post & Notify'; btn.disabled = false; }
+        if (hideSubmitLoader) hideSubmitLoader();
     }
 };

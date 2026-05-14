@@ -643,6 +643,8 @@ window.submitReleaseEvaluation = async function() {
     const errorDiv   = document.getElementById('releaseEvalError');
     const submitBtn  = document.getElementById('releaseEvalSubmitBtn');
     const loader     = document.getElementById('loaderOverlay');
+    const panel      = document.getElementById('ev-main-panel');
+    const isDesktop  = window.innerWidth >= 900 && panel;
 
     errorDiv.style.display = 'none';
 
@@ -663,7 +665,10 @@ window.submitReleaseEvaluation = async function() {
 
     submitBtn.disabled    = true;
     submitBtn.textContent = 'Releasing...';
-    if (loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Releasing...')
+        : null;
+    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/create_evaluation.php', { method: 'POST', body: fd });
@@ -683,6 +688,7 @@ window.submitReleaseEvaluation = async function() {
     } finally {
         submitBtn.disabled    = false;
         submitBtn.textContent = 'Release';
-        if (loader) loader.style.display = 'none';
+        if (hideSubmitLoader) hideSubmitLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };

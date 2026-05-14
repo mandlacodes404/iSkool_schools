@@ -20,7 +20,10 @@ window.fetchTeacherAssignments = async function() {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
+        : null;
+    if (!hideInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/get_assignments.php');
@@ -655,21 +658,20 @@ window.openCreateAssignment = async function() {
             const submitBtn = document.getElementById('caSubmitBtn');
             errorDiv.style.display = 'none';
 
-            submitBtn.disabled    = true;
-            submitBtn.textContent = 'Creating...';
-            if (loader) loader.style.display = 'flex';
-
             const fd = new FormData(form);
             const classId = window.getClassPickerValue('assignmentClassPicker');
             if (!classId) {
                 errorDiv.textContent = 'Please select a class.';
                 errorDiv.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Assignment';
-                if (loader) loader.style.display = 'none';
                 return;
             }
             fd.set('class_id', classId);
+            submitBtn.disabled    = true;
+            submitBtn.textContent = 'Creating...';
+            const hideSubmitLoader = window.showTeacherScopedLoader
+                ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Creating...')
+                : null;
+            if (!hideSubmitLoader && loader) loader.style.display = 'flex';
             try {
                 const res  = await fetch('api/teacher/create_assignment.php', {
                     method: 'POST',
@@ -690,7 +692,8 @@ window.openCreateAssignment = async function() {
             } finally {
                 submitBtn.disabled    = false;
                 submitBtn.textContent = 'Create Assignment';
-                if (loader) loader.style.display = 'none';
+                if (hideSubmitLoader) hideSubmitLoader();
+                else if (loader) loader.style.display = 'none';
             }
         });
 
@@ -701,6 +704,7 @@ window.openCreateAssignment = async function() {
                 Error loading create assignment form.
             </p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideInitialLoader) hideInitialLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };

@@ -739,6 +739,8 @@ window.submitUploadResource = async function() {
     const submitBtn  = document.getElementById('uploadResourceSubmitBtn');
     const loader     = document.getElementById('loaderOverlay');
     const type       = window._rsCurrentType || 'file';
+    const panel      = document.getElementById('rs-main-panel');
+    const isDesktop  = window.innerWidth >= 900 && panel;
 
     if (errorDiv) errorDiv.style.display = 'none';
 
@@ -762,8 +764,12 @@ window.submitUploadResource = async function() {
         fd.append('resource', file);
     }
 
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = type === 'video' ? 'Saving...' : 'Uploading...'; }
-    if (loader) loader.style.display = 'flex';
+    const loadingText = type === 'video' ? 'Saving...' : 'Uploading...';
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = loadingText; }
+    const hideSubmitLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, loadingText)
+        : null;
+    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/upload_resource.php', { method: 'POST', body: fd });
@@ -782,7 +788,8 @@ window.submitUploadResource = async function() {
         if (errorDiv) { errorDiv.textContent = 'Connection error. Please try again.'; errorDiv.style.display = 'block'; }
     } finally {
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Upload Resource'; }
-        if (loader) loader.style.display = 'none';
+        if (hideSubmitLoader) hideSubmitLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 
