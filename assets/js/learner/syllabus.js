@@ -297,7 +297,7 @@ function renderSyllabusPage(data) {
 
             /* Brief card */
             .syl-card {
-                background: #161b22;
+                background: #1a1919;
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 16px;
                 padding: 20px;

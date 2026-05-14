@@ -209,7 +209,7 @@ if (!empty($joinedClassIds)) {
     <title>dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.9">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.2">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -2017,7 +2017,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=2.5"></script>
+<script src="assets/js/learner/manual.js?v=2.6"></script>
 <script src="assets/js/learner/quiz.js?v=3.9"></script>
 <script src="assets/js/learner/assignments.js?v=3.5"></script>
 <script src="assets/js/learner/resources.js?v=3.1"></script>

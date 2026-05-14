@@ -43,11 +43,15 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        if (!document.getElementById('manual-style')) {
+        const manualStyleHref = 'assets/css/learner/manual.css?v=2.2';
+        const existingManualStyle = document.getElementById('manual-style');
+        if (existingManualStyle) {
+            existingManualStyle.href = manualStyleHref;
+        } else {
             const link  = document.createElement('link');
             link.id     = 'manual-style';
             link.rel    = 'stylesheet';
-            link.href   = 'assets/css/manual.css';
+            link.href   = manualStyleHref;
             document.head.appendChild(link);
         }
 
@@ -178,39 +182,13 @@ function buildHomeLayout(data, manualHtml) {
             <!-- LEFT COLUMN -->
             <div class="learner-home-left">
 
-                <!-- RECENT ACTIVITY -->
-                <div class="learner-home-panel">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        Recent Activity
-                    </div>
-                    ${buildRecentActivity(recentSlice)}
-                </div>
+                ${buildDesktopRecentCards(recentSlice)}
 
-                <!-- TO-DO (capped at 4) -->
-                <div class="learner-home-panel" style="margin-top:16px;">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M9 11l3 3L22 4"></path>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        To-Do
-                    </div>
-                    ${buildTodoList(todoSlice)}
-                </div>
+                ${buildDesktopTodoCards(todoSlice)}
 
                 <!-- CALENDAR (desktop only — populated by loadLearnerCalendar) -->
-                <div class="learner-home-panel learner-cal-panel" style="margin-top:16px; display:none;">
-                    <div class="learner-home-panel-title">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
+                <div class="learner-cal-panel" style="margin-top:20px; display:none;">
+                    <div class="learner-snap-panel-title">
                         My Calendar
                     </div>
                     <div id="learner-cal-container">
@@ -231,6 +209,127 @@ function buildHomeLayout(data, manualHtml) {
 // ─────────────────────────────────────────────
 // MOBILE CLASS CARD
 // ─────────────────────────────────────────────
+function buildLearnerSnapCard(card) {
+    if (!card.data) {
+        return `
+            <div class="learner-snap-card learner-snap-card-empty">
+                <div class="learner-snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+                <div class="learner-snap-empty-text">${card.empty}</div>
+            </div>`;
+    }
+
+    return `
+        <div class="learner-snap-card" onclick="${card.onclick}">
+            <div class="learner-snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+            <div class="learner-snap-card-title">${card.data.title}</div>
+            <div class="learner-snap-card-meta">
+                ${card.meta}
+                ${card.badge || ''}
+            </div>
+        </div>`;
+}
+
+function buildDesktopTodoCards(todo) {
+    const colorMap = {
+        quiz: '#4fd1c5',
+        assignment: '#a78bfa',
+        evaluation: '#f28c38'
+    };
+    const iconMap = {
+        quiz: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+        assignment: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+        evaluation: `<polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/>`
+    };
+    const actionMap = {
+        quiz: 'window.learnerQuizCache=null; fetchQuizzes()',
+        assignment: 'window.learnerAssignmentCache=null; fetchAssignments()',
+        evaluation: 'window.evaluationCache=null; fetchEvaluations()'
+    };
+
+    let html = `<div class="learner-snap-panel-title" style="margin-top:20px;">To-Do</div>`;
+
+    if (!todo.length) {
+        return html + buildLearnerSnapCard({
+            data: null,
+            icon: `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>`,
+            label: 'All Caught Up',
+            color: '#4fd1c5',
+            empty: "You're all caught up"
+        });
+    }
+
+    todo.forEach(item => {
+        const color = colorMap[item.type] || '#4fd1c5';
+        const icon = iconMap[item.type] || iconMap.quiz;
+        html += buildLearnerSnapCard({
+            data: item,
+            icon: `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none">${icon}</svg>`,
+            label: item.label || 'To-Do',
+            color,
+            onclick: actionMap[item.type] || '',
+            meta: item.meta || '',
+            badge: `<span class="learner-snap-status-badge" style="background:${color}26;color:${color};">${item.type || 'Task'}</span>`
+        });
+    });
+
+    return html;
+}
+
+function buildDesktopRecentCards(recent) {
+    const colorMap = {
+        announcement: '#f59e0b',
+        resource: '#f28c38',
+        assignment: '#a78bfa',
+        quiz: '#4fd1c5'
+    };
+    const labelMap = {
+        announcement: 'Latest Announcement',
+        resource: 'Latest Resource',
+        assignment: 'Latest Assignment',
+        quiz: 'Latest Quiz'
+    };
+    const actionMap = {
+        announcement: 'fetchAnnouncements()',
+        resource: 'fetchResources()',
+        assignment: 'fetchAssignments()',
+        quiz: 'window.learnerQuizCache=null; fetchQuizzes()'
+    };
+    const iconMap = {
+        announcement: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
+        resource: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`,
+        assignment: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
+        quiz: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`
+    };
+
+    let html = `<div class="learner-snap-panel-title">Recent Activity</div>`;
+
+    if (!recent.length) {
+        return html + buildLearnerSnapCard({
+            data: null,
+            icon: `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#f28c38" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+            label: 'Nothing New',
+            color: '#f28c38',
+            empty: 'Nothing new in the last 7 days'
+        });
+    }
+
+    recent.forEach(item => {
+        const color = colorMap[item.type] || '#4fd1c5';
+        const icon = iconMap[item.type] || iconMap.announcement;
+        html += buildLearnerSnapCard({
+            data: item,
+            icon: `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none">${icon}</svg>`,
+            label: labelMap[item.type] || 'Recent Activity',
+            color,
+            onclick: actionMap[item.type] || '',
+            meta: `${item.meta || ''}${item.time_ago ? ` &bull; ${item.time_ago}` : ''}`,
+            badge: ''
+        });
+    });
+
+    return html;
+}
+
 function buildMobileClassCard(myClass) {
     if (!myClass || !myClass.name) {
         // Not joined yet — show a prompt card
