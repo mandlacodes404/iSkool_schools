@@ -15,6 +15,13 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 }
 
 $teacher_email = $_SESSION['email'];
+
+$stmtUser = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
+$stmtUser->bind_param("s", $teacher_email);
+$stmtUser->execute();
+$userData = $stmtUser->get_result()->fetch_assoc();
+$stmtUser->close();
+
 $teacherDisplayName = 'Teacher';
 if ($userData) {
     $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
@@ -80,7 +87,7 @@ if (isset($_POST['statements']) && is_array($_POST['statements'])) {
 
 // Notify learners
 $cleanBaseUrl = rtrim(BASE_URL, '/');
-$evalLink = $cleanBaseUrl . "/learner_dashboard.php?page=evaluation_list.php";
+$evalLink = $cleanBaseUrl . "/learner_dashboard.php?page=evaluation_detail&id=" . $eval_id;
 $learnersQuery = $conn->prepare("
     SELECT DISTINCT u.email, COALESCE(u.name, u.email) AS name
     FROM users u

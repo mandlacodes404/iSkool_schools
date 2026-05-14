@@ -397,6 +397,20 @@ window.openMobileLearnerEvaluation = function(idx) {
     if (mainContent) mainContent.scrollTop = 0;
 };
 
+window.openMobileLearnerEvaluationById = function(evaluationId) {
+    const targetId = String(evaluationId || '');
+    const flatIdx = (window._allLearnerEvaluationsFlat || []).findIndex(evaluation => String(evaluation.id) === targetId);
+
+    if (flatIdx < 0) return;
+
+    if (window.innerWidth > 899) {
+        window.selectDesktopLearnerEvaluation(flatIdx);
+        return;
+    }
+
+    window.openMobileLearnerEvaluation(flatIdx);
+};
+
 window.selectDesktopLearnerEvaluation = function(idx) {
     document.querySelectorAll('.lev-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lev-sidebar-${idx}`);
