@@ -163,8 +163,56 @@
 
 .eval-submit-btn:hover { background: #3ab8ae; }
 
+.lev-comments-field {
+    margin-top: 35px;
+}
+
+.lev-comments-field label {
+    display: block;
+    margin-bottom: 10px;
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.lev-comments-field textarea {
+    width: 100%;
+    min-height: 120px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    color: white;
+    padding: 15px;
+    font-family: 'Nunito', sans-serif;
+    resize: vertical;
+}
+
+.lev-completed-state {
+    text-align: center;
+    padding: 56px 20px;
+}
+
+.lev-completed-state svg {
+    margin-bottom: 16px;
+}
+
+.lev-completed-title {
+    color: #22c55e;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.lev-completed-copy {
+    color: #8b949e;
+    font-size: 14px;
+}
+
+.lev-mobile-detail {
+    display: none;
+}
+
 /* ── MOBILE ── */
-@media (max-width: 600px) {
+@media (max-width: 899px) {
     .eval-container {
         padding: 0;
     }
@@ -208,5 +256,62 @@
         border-radius: 10px;
         margin: 20px 16px 0;
         width: calc(100% - 32px);
+    }
+
+    .lev-mobile-detail {
+        display: block;
+        min-height: calc(100vh - 74px);
+        padding: 18px 16px 96px;
+    }
+
+    .lev-mobile-detail-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px;
+        border-radius: 6px;
+        color: #4fd1c5;
+        border: 1px solid rgba(79,209,197,0.35);
+        background: rgba(79,209,197,0.1);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .lev-mobile-detail-title {
+        margin: 0 0 10px;
+        color: #e2e8f0;
+        font-size: 28px;
+        line-height: 1.28;
+        font-weight: 800;
+        letter-spacing: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .lev-mobile-detail-meta {
+        color: #8b949e;
+        font-size: 12px;
+        line-height: 1.5;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        margin-bottom: 18px;
+    }
+
+    .lev-mobile-detail .eval-description {
+        margin-bottom: 20px;
+    }
+
+    .lev-mobile-detail .question-box {
+        margin-bottom: 22px;
+    }
+
+    .lev-comments-field {
+        margin-top: 30px;
+    }
+
+    .lev-comments-field textarea {
+        border-radius: 10px;
     }
 }

@@ -20,9 +20,13 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    if (!document.getElementById('eval-style')) {
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.3';
+    const existingEvalStyle = document.getElementById('eval-style');
+    if (existingEvalStyle) {
+        existingEvalStyle.href = evalStyleHref;
+    } else {
         const link = document.createElement('link');
-        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = 'assets/css/learner/evaluations.css?v=2.2';
+        link.id = 'eval-style'; link.rel = 'stylesheet'; link.href = evalStyleHref;
         document.head.appendChild(link);
     }
 
@@ -54,7 +58,7 @@ function renderEvaluationsUI(data) {
     if (!apiArea) return;
 
     // ── Handle special / empty states ──
-    if (data.status === 'no_class') {
+    if (data && data.status === 'no_class') {
         apiArea.innerHTML = '<p style="text-align:center;">You are not enrolled in a class yet.</p>';
         return;
     }
@@ -79,8 +83,8 @@ function renderEvaluationsUI(data) {
                     </svg>
                 </div>
                 <div class="lev-sidebar-item-info">
-                    <div class="lev-sidebar-item-title">${evaluation.title}</div>
-                    <div class="lev-sidebar-item-meta">by ${evaluation.teacher}</div>
+                    <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
+                    <div class="lev-sidebar-item-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
                 </div>
                 ${evaluation.submitted
                     ? '<span class="lev-sidebar-done-badge">Done</span>'
@@ -88,46 +92,27 @@ function renderEvaluationsUI(data) {
             </div>`;
     });
 
-    // ── Build mobile HTML (original loop, unchanged) ──
+    // ── Build mobile preview list ──
     let mobileHtml = '';
-    data.forEach(evaluation => {
+    data.forEach((evaluation, idx) => {
         mobileHtml += `
-            <div class="eval-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <div class="eval-title">${evaluation.title}</div>
-                        <div class="teacher-name">by ${evaluation.teacher}</div>
-                    </div>
-                    ${evaluation.submitted ? '<div class="completed-badge"><i class="fas fa-check-circle"></i> Completed</div>' : ''}
-                </div>`;
-
-        if (!evaluation.submitted) {
-            mobileHtml += `
-                <div class="eval-description">${evaluation.description || ''}</div>
-                <form onsubmit="handleEvalSubmit(event, ${evaluation.id})">
-                    <input type="hidden" name="eval_id" value="${evaluation.id}">
-                    ${evaluation.statements.map(s => `
-                        <div class="question-box">
-                            <div class="question-text">${s.statement}</div>
-                            <div class="eval-options">
-                                ${['strongly_agree', 'agree', 'neutral', 'disagree', 'strongly_disagree'].map(val => `
-                                    <label class="option-label">
-                                        <input type="radio" name="answer[${s.id}]" value="${val}" required>
-                                        <span>${val.replace('_', ' ').toUpperCase()}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                    <div style="margin-top:35px;">
-                        <label style="font-weight:600; display:block; margin-bottom:10px;">Additional Comments (Optional)</label>
-                        <textarea name="comments" style="width:100%; min-height:120px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; color:white; padding:15px;"></textarea>
-                    </div>
-                    <button type="submit" class="eval-submit-btn"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
-                </form>`;
-        }
-
-        mobileHtml += `</div>`;
+            <div class="lev-mobile-card" role="button" tabindex="0"
+                onclick="openMobileLearnerEvaluation(${idx})"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${idx}); }">
+                <div class="lev-mobile-card-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <div class="lev-mobile-card-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
+                ${evaluation.submitted ? '<span class="lev-mobile-done-dot"></span>' : '<span class="lev-mobile-pending-dot"></span>'}
+                <div class="lev-mobile-card-chevron">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>`;
     });
 
     // ── Assemble full HTML ──
@@ -250,6 +235,54 @@ function renderEvaluationsUI(data) {
             .lev-panel-empty p { font-size: 14px; margin: 0; }
 
             .lev-panel-content { padding: 28px 32px; overflow-y: auto; }
+
+            .lev-mobile-list {
+                background: #1a1919;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 0 0 16px;
+            }
+            .lev-mobile-card {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                min-height: 54px;
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
+            }
+            .lev-mobile-card:last-child { border-bottom: none; }
+            .lev-mobile-card-icon {
+                display: flex;
+                flex-shrink: 0;
+                opacity: 0.78;
+            }
+            .lev-mobile-card-title {
+                flex: 1;
+                min-width: 0;
+                color: #e2e8f0;
+                font-size: 14px;
+                font-weight: 500;
+                line-height: 1.3;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .lev-mobile-done-dot,
+            .lev-mobile-pending-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .lev-mobile-done-dot { background: #22c55e; }
+            .lev-mobile-pending-dot { background: #e67e22; }
+            .lev-mobile-card-chevron {
+                color: #30363d;
+                display: flex;
+                flex-shrink: 0;
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -269,7 +302,7 @@ function renderEvaluationsUI(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE PREVIEW LIST ═══ -->
         <div class="lev-mobile-list">
             ${mobileHtml}
         </div>`;
@@ -278,6 +311,92 @@ function renderEvaluationsUI(data) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT EVALUATION
 // ─────────────────────────────────────────────
+function escapeLearnerEvaluationHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
+}
+
+function getLearnerEvaluationFormHtml(evaluation) {
+    if (evaluation.submitted) {
+        return `
+            <div class="lev-completed-state">
+                <svg viewBox="0 0 24 24" width="52" height="52" stroke="#22c55e" stroke-width="1.5" fill="none">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <div class="lev-completed-title">Completed</div>
+                <div class="lev-completed-copy">You have already submitted this evaluation.</div>
+            </div>`;
+    }
+
+    return `
+        <div class="eval-description">${escapeLearnerEvaluationHtml(evaluation.description || '')}</div>
+        <form onsubmit="handleEvalSubmit(event, ${evaluation.id})">
+            <input type="hidden" name="eval_id" value="${evaluation.id}">
+            ${(evaluation.statements || []).map(s => `
+                <div class="question-box">
+                    <div class="question-text">${escapeLearnerEvaluationHtml(s.statement || '')}</div>
+                    <div class="eval-options">
+                        ${['strongly_agree', 'agree', 'neutral', 'disagree', 'strongly_disagree'].map(val => `
+                            <label class="option-label">
+                                <input type="radio" name="answer[${s.id}]" value="${val}" required>
+                                <span>${val.replace('_', ' ').toUpperCase()}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('')}
+            <div class="lev-comments-field">
+                <label>Additional Comments (Optional)</label>
+                <textarea name="comments"></textarea>
+            </div>
+            <button type="submit" class="eval-submit-btn"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+        </form>`;
+}
+
+window.openMobileLearnerEvaluation = function(idx) {
+    if (window.innerWidth > 899) return;
+
+    const evaluation = (window._allLearnerEvaluationsFlat || [])[idx];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
+
+    if (!evaluation || !apiArea) return;
+
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+    if (myClassContent) myClassContent.classList.remove('active');
+    if (mainContent) mainContent.scrollTop = 0;
+
+    sessionStorage.setItem("lastLearnerPage", "evaluation_list.php");
+    if (window.configureHeader) {
+        window.configureHeader({ title: evaluation.title || 'Evaluation', mode: 'detail', detailType: 'Evaluation' });
+    }
+
+    apiArea.innerHTML = `
+        <article class="lev-mobile-detail">
+            <div class="lev-mobile-detail-badge">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                Evaluation
+            </div>
+            <h1 class="lev-mobile-detail-title learner-mobile-detail-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</h1>
+            <div class="lev-mobile-detail-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
+            ${getLearnerEvaluationFormHtml(evaluation)}
+        </article>`;
+
+    if (mainContent) mainContent.scrollTop = 0;
+};
+
 window.selectDesktopLearnerEvaluation = function(idx) {
     document.querySelectorAll('.lev-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lev-sidebar-${idx}`);

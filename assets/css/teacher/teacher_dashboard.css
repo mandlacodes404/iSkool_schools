@@ -1,0 +1,471 @@
+/* assets/css/teacher/teacher_dashboard.css */
+
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #e2e8f0;
+            --accent-color765: #4fd1c5;
+            --card-radius: 16px;
+            --sidebar-width: 240px;
+            --sidebar-collapsed-width: 80px;
+            --transition-speed: 0.3s;
+        }
+
+        html {
+  touch-action: manipulation;
+}
+
+        body {
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            display: flex;
+            height: 100vh;
+            background: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1a1919ff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: -240px;
+            visibility: hidden;
+            opacity: 0;
+            height: 100vh;
+            z-index: 5000;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+            transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
+                        visibility var(--transition-speed), opacity var(--transition-speed);
+        }
+        .sidebar.desktop-open,
+        .sidebar.active {
+            left: 0;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .profile-picture-wrapper {
+            width: 40px; height: 40px; border-radius: 50%;
+            overflow: hidden; border: 3px solid #757272ff; cursor: pointer;
+        }
+        .profile-picture-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .round-toggle {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #000; border: 2px solid #333; color: #e2e8f0;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .round-toggle:hover { background: #111; }
+
+        @media (max-width: 768px) {
+            .round-toggle { display: none !important; }
+        }
+
+        .teacher-name  { margin-top: 8px; font-size: 18px; color: #fff; }
+        .teacher-email { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+        .sidebar a, .sidebar .footer {
+            color: #b2b5b9;
+            text-decoration: none;
+            padding: 7px 12px;
+            margin-bottom: 0px;
+            border-radius: var(--card-radius);
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            font-weight: 100;
+        }
+        .sidebar-footer {
+            position: absolute;
+            bottom: 10px;
+            width: calc(100% - 40px);
+            text-align: left;
+            padding: 0;
+            border-top: none;
+        }
+        .sidebar-footer span { font-size: 15px; font-weight: 700; color: #777; }
+        .sidebar a:hover { background: rgba(79,209,197,0.08); transform: translateX(3px); }
+        .sidebar a.active { background: rgba(79,209,197,0.2); border-left: 4px solid var(--accent-color); }
+        .sidebar a i { font-size: 16px; margin-right: 10px; }
+        .sidebar .footer { position: absolute; bottom: 15px; width: calc(100% - 40px); font-size: 12px; opacity: 0.7; text-align: center; }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            transition: margin-left var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── TOP NAV WRAPPER (not fixed, scrolls with content) ── */
+        .top-nav-wrapper {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        /* ── ROW 1: brand bar ── */
+        .top-nav-row1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            gap: 12px;
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Hamburger — desktop only */
+        #desktopMenuToggle {
+            display: none;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #e2e8f0;
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        #desktopMenuToggle:hover { background: #30363d; }
+
+        /* Mobile hamburger */
+        #mobileToggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e2e8f0;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .top-nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+        }
+        .top-nav-brand img {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #30363d;
+        }
+        .top-nav-school-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        /* Avatar button — top right */
+        .top-nav-avatar-btn {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .top-nav-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2px solid #30363d;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background: #21262d;
+            transition: border-color 0.2s ease;
+        }
+        .top-nav-avatar:hover { border-color: #4fd1c5; }
+        .top-nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .top-nav-avatar .initials-sm {
+            font-size: 13px; font-weight: 800;
+            color: #8b949e; text-transform: uppercase;
+        }
+
+        /* Avatar dropdown */
+        .avatar-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 6000;
+            overflow: hidden;
+        }
+        .avatar-dropdown.open { display: block; }
+
+        .avatar-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #21262d;
+        }
+        .avatar-dropdown-name {
+            font-size: 14px; font-weight: 800; color: #e2e8f0;
+        }
+        .avatar-dropdown-email {
+            font-size: 12px; color: #8b949e; margin-top: 2px;
+        }
+        .avatar-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #c9d1d9;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Nunito', sans-serif;
+        }
+        .avatar-dropdown-item:hover { background: #21262d; color: #e2e8f0; }
+        .avatar-dropdown-item.danger { color: #f85149; }
+        .avatar-dropdown-item.danger:hover { background: rgba(248,81,73,0.08); }
+
+        /* Hidden file input for avatar upload */
+        #topNavProfileInput { display: none; }
+
+        /* ── ROW 2: tab bar (desktop only) ── */
+        .top-nav-row2 {
+            display: none; /* hidden on mobile */
+            align-items: center;
+            padding: 0 20px;
+            gap: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .top-nav-row2::-webkit-scrollbar { display: none; }
+
+        .top-nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #8b949e;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: 'Nunito', sans-serif;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px; /* sits on the border */
+            white-space: nowrap;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            text-decoration: none;
+        }
+        .top-nav-tab:hover {
+            color: #e2e8f0;
+            border-bottom-color: #30363d;
+        }
+        .top-nav-tab.active {
+            color: #e2e8f0;
+            border-bottom-color: #f97316; /* orange underline — iSkool accent, GitHub-style */
+        }
+        .top-nav-tab svg {
+            flex-shrink: 0;
+        }
+
+        /* Show row 2 on desktop */
+        @media (min-width: 769px) {
+            .top-nav-row2   { display: flex; }
+            #desktopMenuToggle { display: flex; }
+            #mobileToggle   { display: none; }
+            .top-nav-school-name { display: inline; }
+        }
+
+        /* ── CONTENT AREA ── */
+        #api-content-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+        iframe {
+            border: none;
+            width: 100%;
+            flex: 1;
+            background: #1a202c;
+        }
+
+        /* ── MOBILE OVERLAY ── */
+        #mobileOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 4999;
+            transition: opacity var(--transition-speed) ease;
+        }
+        .sidebar.active ~ #mobileOverlay,
+        .sidebar.desktop-open ~ #mobileOverlay {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ── LOADER ── */
+        /* ── SCOPED LOADER ── */
+        #loaderOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(13, 17, 23, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 800;
+            pointer-events: all;
+        }
+
+        /* Orbital dots container */
+        .loader {
+            width: 48px;
+            height: 48px;
+            position: relative;
+            animation: none;
+            border: none;
+            border-radius: 0;
+            background: none;
+            margin: 0;
+        }
+
+        .loader::before,
+        .loader::after,
+        .loader-dot3,
+        .loader-dot4 {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4fd1c5;
+            top: 50%;
+            left: 50%;
+            margin: -4px 0 0 -4px;
+            transform-origin: 0 0;
+        }
+
+        .loader::before  { animation: orbit 1.2s linear infinite 0s;    opacity: 1;    background: #4fd1c5; }
+        .loader::after   { animation: orbit 1.2s linear infinite -0.3s; opacity: 0.75; background: #4fd1c5; }
+        .loader-dot3     { animation: orbit 1.2s linear infinite -0.6s; opacity: 0.5;  background: #4fd1c5; }
+        .loader-dot4     { animation: orbit 1.2s linear infinite -0.9s; opacity: 0.25; background: #4fd1c5; }
+
+        @keyframes orbit {
+            0%   { transform: rotate(0deg)   translateX(18px) rotate(0deg);   }
+            100% { transform: rotate(360deg) translateX(18px) rotate(-360deg); }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── MOBILE BOTTOM NAV ── */
+        #mobileBottomNav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%;
+            height: 82px;
+            background: rgba(66,65,65,0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            z-index: 4000;
+            justify-content: space-around;
+            align-items: flex-start;
+            box-sizing: border-box;
+        }
+        #mobileBottomNav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 5px;
+            transition: all 0.2s;
+        }
+        #mobileBottomNav a i { font-size: 20px; margin-bottom: 4px; }
+        #mobileBottomNav a.active,
+        #mobileBottomNav a:hover { color: var(--accent-color); transform: translateY(-3px); }
+
+        /* ── MOBILE LAYOUT ── */
+        @media (max-width: 768px) {
+            #mobileToggle { display: block; }
+            .top-nav-school-name { display: none; }
+            .sidebar-footer { width: calc(100% - 40px); }
+            .sidebar { left: -100%; width: 300px; }
+            .sidebar.active { left: 0; width: 300px; }
+            .main-content { margin-left: 0 !important; }
+            .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
+            .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
+            iframe { height: calc(100vh - 120px) !important; }
+            #mobileBottomNav { display: flex !important; }
+            #mobileBottomNav {
+                padding-bottom: env(safe-area-inset-bottom);
+                height: calc(82px + env(safe-area-inset-bottom));
+            }
+            .sidebar a.desktop-only { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { width: 80% !important; }
+            .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
+            .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
+            .sidebar-footer { margin-bottom: 30px !important; }
+            .profile-picture-wrapper { width: 70px !important; height: 70px !important; border-width: 4px !important; }
+            .teacher-name  { font-size: 24px !important; font-weight: 800 !important; }
+            .teacher-email { font-size: 14px !important; margin-bottom: 20px; }
+            .sidebar a { font-size: 17px !important; font-weight: 700 !important; padding: 16px 15px !important; margin-bottom: 8px !important; }
+            .sidebar a i { font-size: 20px !important; margin-right: 15px !important; }
+            .sidebar-header { flex-direction: column; align-items: flex-start; margin-bottom: 25px; }
+            .sidebar-links { margin-top: 20px; }
+        }
+
+        .initials-avatar {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #2d2d2d; color: #a0a0a0;
+            font-size: 16px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: -1px;
+        }
+        @media (max-width: 480px) { .initials-avatar { font-size: 24px; } }
+
+        .drawer-icon svg { transition: transform 0.3s ease; display: block; }
+    
