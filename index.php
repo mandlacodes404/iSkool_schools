@@ -86,7 +86,7 @@ if ($result && $row = $result->fetch_assoc()) {
     
     <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="180.000000pt" height="180.000000pt" viewBox="0 0 880.000000 805.000000"
- preserveAspectRatio="xMidYMid meet">
+ preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(0 0 18px rgba(229,62,62,0.65)) drop-shadow(0 0 40px rgba(229,62,62,0.3));">
 <metadata>
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
@@ -675,7 +675,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const iskoolBrand = document.getElementById('iskool-brand');
-        const timeout = 2300;
+        const timeout = 1800;
         setTimeout(() => {
     animationWrapper.style.opacity = '0';
     setTimeout(() => {
@@ -1123,7 +1123,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     }
 
     async function runPreview() {
-        await pvDelay(600);
+        await pvDelay(1500);
         // Play intro once, then loop cards
         await pvCard0();
         await pvDelay(350);
