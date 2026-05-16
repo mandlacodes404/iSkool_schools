@@ -56,7 +56,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.1">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -140,7 +140,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
         </a>
 
         <!-- Resources -->
-        <a href="javascript:void(0)" data-page="teacher_resources" class="desktop-only" onclick="fetchTeacherResources()">
+        <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -485,14 +485,27 @@ function updateAllAvatars(url) {
     }
 }
 
-window.toggleSidebar = function() {
+window.closeMobileSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
-    
-    if (sidebar.classList.contains('active')) {
+
+    if (sidebar) {
         sidebar.classList.remove('active');
-        if (overlay) overlay.style.opacity = '0';
-        if (overlay) overlay.style.pointerEvents = 'none';
+    }
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+    }
+};
+
+window.toggleSidebar = function(forceClose = false) {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+
+    if (!sidebar) return;
+
+    if (forceClose || sidebar.classList.contains('active')) {
+        closeMobileSidebar();
     } else {
         sidebar.classList.add('active');
         if (overlay) overlay.style.opacity = '1';
@@ -749,14 +762,14 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=4.5"></script>
+<script src="assets/js/teacher/dashboard.js?v=4.6"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.0"></script>
-<script src="assets/js/teacher/quizzes.js?v=2.3"></script>
+<script src="assets/js/teacher/quizzes.js?v=2.4"></script>
 <script src="assets/js/teacher/announcements.js?v=2.4"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.8"></script>
 <script src="assets/js/teacher/resources.js?v=1.6"></script>
 <script src="assets/js/teacher/grades.js?v=1.2"></script>
-<script src="assets/js/teacher/assignments.js?v=1.5"></script>
+<script src="assets/js/teacher/assignments.js?v=1.6"></script>
 <script src="assets/js/teacher/discussions.js?v=1.0"></script>
 <script src="assets/js/teacher/sbo.js?v=1.7"></script>
 <script src="assets/js/teacher/analytics.js?v=1.1"></script>

@@ -20,6 +20,8 @@ window.fetchTeacherAssignments = async function() {
         return;
     }
 
+    const panel = document.getElementById('as-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
     const hideInitialLoader = window.showTeacherScopedLoader
         ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
         : null;

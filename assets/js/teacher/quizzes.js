@@ -21,6 +21,8 @@ window.fetchTeacherQuizzes = async function() {
         return;
     }
 
+    const panel = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
     const hideInitialLoader = window.showTeacherScopedLoader
         ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
         : null;

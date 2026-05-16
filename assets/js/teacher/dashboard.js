@@ -257,12 +257,21 @@ function renderSnapshotPanel(data) {
     // ─────────────────────────────────────────────
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                if (typeof window.closeMobileSidebar === 'function') {
+                    window.closeMobileSidebar();
+                } else {
+                    sidebar.classList.remove('active');
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        overlay.style.pointerEvents = 'none';
+                    }
+                }
+                return;
+            }
 
-            if (sidebar.classList.contains('active') ||
-                sidebar.classList.contains('desktop-open')) {
-                sidebar.classList.remove('active');
+            if (sidebar.classList.contains('desktop-open')) {
                 sidebar.classList.remove('desktop-open');
-                
             }
         });
     });
