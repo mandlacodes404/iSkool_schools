@@ -77,6 +77,20 @@ if ($result && $row = $result->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css?v=1.0">
+    <style>
+    #loader-logo svg {
+        filter: drop-shadow(0 0 18px rgba(229,62,62,0.65)) drop-shadow(0 0 40px rgba(229,62,62,0.3));
+    }
+    @media (max-width: 768px) {
+        #loader-logo svg {
+            filter:
+                drop-shadow(0 0 10px rgba(229,62,62,0.95))
+                drop-shadow(0 0 28px rgba(229,62,62,0.85))
+                drop-shadow(0 0 55px rgba(229,62,62,0.55))
+                drop-shadow(0 0 90px rgba(229,62,62,0.3));
+        }
+    }
+    </style>
     
 </head>
 <body>
@@ -86,7 +100,7 @@ if ($result && $row = $result->fetch_assoc()) {
     
     <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="180.000000pt" height="180.000000pt" viewBox="0 0 880.000000 805.000000"
- preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(0 0 18px rgba(229,62,62,0.65)) drop-shadow(0 0 40px rgba(229,62,62,0.3));">
+ preserveAspectRatio="xMidYMid meet">
 <metadata>
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
@@ -675,7 +689,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const iskoolBrand = document.getElementById('iskool-brand');
-        const timeout = 1800;
+        const timeout = 1400;
         setTimeout(() => {
     animationWrapper.style.opacity = '0';
     setTimeout(() => {
@@ -1123,7 +1137,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     }
 
     async function runPreview() {
-        await pvDelay(1500);
+        await pvDelay(2500);
         // Play intro once, then loop cards
         await pvCard0();
         await pvDelay(350);
