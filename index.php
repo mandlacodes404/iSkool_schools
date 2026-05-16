@@ -83,11 +83,7 @@ if ($result && $row = $result->fetch_assoc()) {
     }
     @media (max-width: 768px) {
         #loader-logo svg {
-            filter:
-                drop-shadow(0 0 10px rgba(229,62,62,0.95))
-                drop-shadow(0 0 28px rgba(229,62,62,0.85))
-                drop-shadow(0 0 55px rgba(229,62,62,0.55))
-                drop-shadow(0 0 90px rgba(229,62,62,0.3));
+            filter: drop-shadow(0 0 90px rgba(229,62,62,0.3));
         }
     }
     </style>
