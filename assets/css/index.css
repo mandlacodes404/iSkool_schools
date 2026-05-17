@@ -42,7 +42,7 @@ body {
 #loader-logo svg {
         width: 104px; 
         height: 104px;
-        animation: reveal 0.6s ease-out forwards, wheelSpin 4s linear 0.6s infinite;
+        animation: reveal 0.6s ease-out forwards, wheelSpin 10s linear 0.6s infinite;
         transform-origin: center;
     }
 
