@@ -42,14 +42,18 @@ body {
 #loader-logo svg {
         width: 104px; 
         height: 104px;
-        /* Removed logo-spin: only keeping the initial reveal fade */
-        animation: reveal 0.8s ease-out forwards;
+        animation: reveal 0.6s ease-out forwards, wheelSpin 4s linear 0.6s infinite;
         transform-origin: center;
     }
 
 @keyframes reveal {
-        from { opacity: 0; transform: scale(0.9); }
-        to { opacity: 1; transform: scale(1); }
+        from { opacity: 0; transform: scale(0.85) rotate(0deg); }
+        to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+@keyframes wheelSpin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
     }
 
     /* Branding Styles */
@@ -988,4 +992,3 @@ button:hover {
             padding: 1rem;
         }
     }
-    
