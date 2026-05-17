@@ -147,7 +147,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
             <div class="bp-intro">
                 <div class="bp-intro-eyebrow">
                     <span class="bp-live-dot"></span>
-                    <span>Live preview</span>
+                    <span>iSkool</span>
                 </div>
             </div>
 
