@@ -60,7 +60,7 @@ try {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:36px;">
           <tr>
             <td style="vertical-align:middle;padding-right:8px;">
-              <img src="https://iskool.online/apple-touch-icon.png" width="34" height="34" alt="iSkool" style="display:block;border-radius:7px;">
+              <img src="https://iskool.online/apple-touch-icon.png?v=1.0" width="34" height="34" alt="iSkool" style="display:block;border-radius:7px;">
             </td>
             <td style="vertical-align:middle;">
               <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">iSkool</span>
