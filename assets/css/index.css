@@ -56,6 +56,13 @@ body {
         to   { transform: rotate(360deg); }
     }
 
+/* Desktop: no spin on splash screen */
+@media (min-width: 769px) {
+    #loader-logo svg {
+        animation: reveal 0.6s ease-out forwards;
+    }
+}
+
     /* Branding Styles */
     .branding {
         position: absolute;
