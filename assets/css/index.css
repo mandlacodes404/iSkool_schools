@@ -720,6 +720,20 @@ body {
         display: block;
         width: 54px;
         height: 54px;
+        animation: brandSpin 9s ease-in-out infinite;
+        transform-origin: center;
+    }
+
+    @keyframes brandSpin {
+        /* 0s–2s: clockwise 360° */
+        0%      { transform: rotate(0deg); }
+        22.22%  { transform: rotate(360deg); }
+        /* 2s–4s: pause at 360° */
+        44.44%  { transform: rotate(360deg); }
+        /* 4s–7s: anticlockwise back to 0° */
+        77.78%  { transform: rotate(0deg); }
+        /* 7s–9s: pause at 0° */
+        100%    { transform: rotate(0deg); }
     }
 
     #form-school-badge {
