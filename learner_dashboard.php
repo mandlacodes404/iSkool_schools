@@ -54,7 +54,7 @@ $result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key 
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
 }
-$schoolLogo = 'uploads/schools/default_school.png';
+$schoolLogo = 'uploads/schools/default_school.png?v=1.1';
 
 //──────────────────────────────────────────────────────────────────────────────
 //        Get current active academic year (no school_id needed) 
