@@ -11,6 +11,7 @@
  * - Full-screen processing overlay
  * - PWA support with service worker and push notification subscription
  * - Dynamic school name display from database
+ * Security: Input validation, prepared statements, secure password hashing, session management, and remember me functionality.
  *
  * @package     iSkool
  * @subpackage  Authentication
