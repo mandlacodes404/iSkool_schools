@@ -720,21 +720,21 @@ body {
         display: block;
         width: 54px;
         height: 54px;
-        animation: brandSpin 17s ease-in-out infinite;
+        animation: brandSpin 26s ease-in-out infinite;
         transform-origin: center;
     }
 
     @keyframes brandSpin {
         /* 0s–4s: initial wait at 0° */
         0%      { transform: rotate(0deg); }
-        23.53%  { transform: rotate(0deg); }
-        /* 4s–6s: clockwise 360° */
-        35.29%  { transform: rotate(360deg); }
-        /* 6s–10s: wait at 360° */
-        58.82%  { transform: rotate(360deg); }
-        /* 10s–13s: anticlockwise back to 0° */
-        76.47%  { transform: rotate(0deg); }
-        /* 13s–17s: wait at 0° */
+        15.38%  { transform: rotate(0deg); }
+        /* 4s–11s: clockwise 360° (7s spin) */
+        42.31%  { transform: rotate(360deg); }
+        /* 11s–15s: wait at 360° */
+        57.69%  { transform: rotate(360deg); }
+        /* 15s–22s: anticlockwise back to 0° (7s spin) */
+        84.62%  { transform: rotate(0deg); }
+        /* 22s–26s: wait at 0° */
         100%    { transform: rotate(0deg); }
     }
 

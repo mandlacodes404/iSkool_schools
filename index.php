@@ -76,7 +76,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/index.css?v=1.6">
     <style>
     #loader-logo svg {
         filter: drop-shadow(0 0 18px rgba(229,62,62,0.65)) drop-shadow(0 0 40px rgba(229,62,62,0.3));
