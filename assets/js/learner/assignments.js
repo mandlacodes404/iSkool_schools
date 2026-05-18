@@ -1,5 +1,19 @@
 /* assets/js/assignments.js */
-window.learnerAssignmentCache = null;
+window.learnerAssignmentCache          = null;
+window.learnerAssignmentPrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchAssignments = function () {
+    if (window.learnerAssignmentCache) return;
+    if (window.learnerAssignmentPrefetchPromise) return;
+    window.learnerAssignmentPrefetchPromise = fetch('api/learner/get_assignments.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.learnerAssignmentCache = data; })
+        .catch(() => {})
+        .finally(() => { window.learnerAssignmentPrefetchPromise = null; });
+};
 
 function showLearnerAssignmentMobileBottomNav() {
     if (window.innerWidth > 899) return;
@@ -38,8 +52,8 @@ window.fetchAssignments = async function() {
 
     // 3. Elements
     const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    const loader = document.getElementById("loaderOverlay");
+    const iframe  = document.getElementById('mainFrame');
+    const loader  = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
     // 4. Update Header (Safely)
@@ -49,14 +63,21 @@ window.fetchAssignments = async function() {
 
     // 5. Immediate UI Swap
     if (apiArea) apiArea.style.display = 'block';
-    if (iframe) iframe.style.display = 'none';
+    if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 6. CACHE LOGIC: Ensure loader hides here too!
+    // 6a. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.learnerAssignmentPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.learnerAssignmentPrefetchPromise;
+    }
+
+    // 6b. CACHE LOGIC
     if (window.learnerAssignmentCache) {
         renderAssignmentCards(window.learnerAssignmentCache);
-        if (loader) loader.style.display = 'none'; // Critical: Stop loader for cached data
-        return; 
+        if (loader) loader.style.display = 'none';
+        restoreAssignmentPageState();
+        return;
     }
 
     // 7. FETCH LOGIC
@@ -69,6 +90,7 @@ window.fetchAssignments = async function() {
         const groupedData = await response.json();
         window.learnerAssignmentCache = groupedData;
         renderAssignmentCards(groupedData);
+        restoreAssignmentPageState();
     } catch (error) {
         console.error("Assignment Fetch Error:", error);
         if (apiArea) {
@@ -85,6 +107,33 @@ window.fetchAssignments = async function() {
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveAssignmentPageState() {
+    const sidebar = document.querySelector('.las-sidebar-scroll');
+    const state = {
+        selectedIdx:   window._learnerAssignmentSelectedIdx ?? null,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+    };
+    sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
+}
+
+function restoreAssignmentPageState() {
+    const raw = sessionStorage.getItem('assignmentPageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
+            requestAnimationFrame(() => {
+                window.selectDesktopLearnerAssignment(state.selectedIdx);
+                const sidebar = document.querySelector('.las-sidebar-scroll');
+                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
 
 function renderAssignmentCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
@@ -584,6 +633,8 @@ window.openMobileLearnerAssignmentById = function(assignmentId) {
 // DESKTOP PANEL: SELECT ASSIGNMENT
 // ─────────────────────────────────────────────
 window.selectDesktopLearnerAssignment = function(flatIdx) {
+    window._learnerAssignmentSelectedIdx = flatIdx;
+    saveAssignmentPageState();
     document.querySelectorAll('.las-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`las-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');

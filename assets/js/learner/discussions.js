@@ -3,6 +3,7 @@
 window.discussionCache       = null;
 window.discussionThreadCache = {};
 window.teacherListCache      = null;
+window.discussionPrefetchPromise = null;
 let discPollInterval         = null;
 let discTypingPollInterval   = null;
 let discTypingTimeout        = null;
@@ -99,6 +100,21 @@ function unlockMobileLayout() {
     document.getElementById('discMobileOverlay')?.remove();
 }
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// Only prefetches the discussion list (not threads — those stay on-demand).
+// Safe to call while polling may be running: prefetch doesn't start polling.
+// ─────────────────────────────────────────────
+window.prefetchDiscussions = function () {
+    if (window.discussionCache) return;
+    if (window.discussionPrefetchPromise) return;
+    window.discussionPrefetchPromise = fetch('api/learner/get_discussions.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.discussionCache = data; })
+        .catch(() => {})
+        .finally(() => { window.discussionPrefetchPromise = null; });
+};
+
 window.fetchDiscussions = async function() {
     stopDiscPolling();
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -117,6 +133,12 @@ window.fetchDiscussions = async function() {
     // On desktop: inject the split shell once
     if (isDesktop() && !document.getElementById('disc-split-wrap')) {
         injectDesktopShell(apiArea);
+    }
+
+    // If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.discussionPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.discussionPrefetchPromise;
     }
 
     if (window.discussionCache) {

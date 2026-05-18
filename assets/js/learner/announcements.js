@@ -1,4 +1,18 @@
-window.announcementCache = null;
+window.announcementCache          = null;
+window.announcementPrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchAnnouncements = function () {
+    if (window.announcementCache) return;
+    if (window.announcementPrefetchPromise) return;
+    window.announcementPrefetchPromise = fetch('api/learner/get_announcements.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.announcementCache = data; })
+        .catch(() => {})
+        .finally(() => { window.announcementPrefetchPromise = null; });
+};
 
 function showLearnerAnnouncementMobileBottomNav() {
     if (window.innerWidth > 899) return;
@@ -22,19 +36,26 @@ window.fetchAnnouncements = async function() {
     }
 
     const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    const loader = document.getElementById("loaderOverlay");
+    const iframe  = document.getElementById('mainFrame');
+    const loader  = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
     // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
-    if (iframe) iframe.style.display = 'none';
+    if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 4. CACHE CHECK (Instant Load)
+    // 4a. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.announcementPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.announcementPrefetchPromise;
+    }
+
+    // 4b. CACHE CHECK (Instant Load)
     if (window.announcementCache) {
         renderAnnouncements(window.announcementCache);
         if (loader) loader.style.display = 'none';
+        restoreAnnouncementPageState();
         return;
     }
 
@@ -46,6 +67,7 @@ window.fetchAnnouncements = async function() {
         const data = await response.json();
         window.announcementCache = data;
         renderAnnouncements(data);
+        restoreAnnouncementPageState();
     } catch (error) {
         console.error("Fetch Error:", error);
         if (apiArea) {
@@ -56,6 +78,33 @@ window.fetchAnnouncements = async function() {
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveAnnouncementPageState() {
+    const sidebar = document.querySelector('.lan-sidebar-scroll');
+    const state = {
+        selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+    };
+    sessionStorage.setItem('announcementPageState', JSON.stringify(state));
+}
+
+function restoreAnnouncementPageState() {
+    const raw = sessionStorage.getItem('announcementPageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
+            requestAnimationFrame(() => {
+                window.selectDesktopLearnerAnnouncement(state.selectedIdx);
+                const sidebar = document.querySelector('.lan-sidebar-scroll');
+                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
 
 function renderAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
@@ -675,6 +724,8 @@ window.openMobileLearnerAnnouncementById = function(announcementId) {
 // DESKTOP PANEL: SELECT ANNOUNCEMENT
 // ─────────────────────────────────────────────
 window.selectDesktopLearnerAnnouncement = function(flatIdx) {
+    window._learnerAnnouncementSelectedIdx = flatIdx;
+    saveAnnouncementPageState();
     document.querySelectorAll('.lan-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lan-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');

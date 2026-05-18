@@ -71,7 +71,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
     }
 };
 
-// Called after home HTML is injected — loads calendar on desktop only
+// Called after home HTML is injected — loads calendar on desktop only, then kicks off prefetches
 function afterHomeRender() {
     if (window.innerWidth > 768) {
         window.loadLearnerCalendar(
@@ -81,6 +81,22 @@ function afterHomeRender() {
           if (typeof window.showLearnerCalIcon === 'function') window.showLearnerCalIcon();
 
     }
+
+    // ── Silent background prefetch for all other pages ──
+    // Stagger them so they don't compete with the home render network traffic.
+    setTimeout(() => {
+        if (typeof window.prefetchQuizzes        === 'function') window.prefetchQuizzes();
+        if (typeof window.prefetchAssignments    === 'function') window.prefetchAssignments();
+    }, 1500);
+    setTimeout(() => {
+        if (typeof window.prefetchResources      === 'function') window.prefetchResources();
+        if (typeof window.prefetchAnnouncements  === 'function') window.prefetchAnnouncements();
+    }, 3000);
+    setTimeout(() => {
+        if (typeof window.prefetchSyllabus       === 'function') window.prefetchSyllabus();
+        if (typeof window.prefetchEvaluations    === 'function') window.prefetchEvaluations();
+        if (typeof window.prefetchDiscussions    === 'function') window.prefetchDiscussions();
+    }, 5000);
 }
 
 // ─────────────────────────────────────────────

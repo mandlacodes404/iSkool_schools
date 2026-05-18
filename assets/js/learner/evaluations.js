@@ -1,4 +1,47 @@
 /* assets/js/evaluations.js */
+window.evaluationCache          = null;
+window.evaluationPrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchEvaluations = function () {
+    if (window.evaluationCache) return;
+    if (window.evaluationPrefetchPromise) return;
+    window.evaluationPrefetchPromise = fetch('api/learner/get_evaluations.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.evaluationCache = data; })
+        .catch(() => {})
+        .finally(() => { window.evaluationPrefetchPromise = null; });
+};
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveEvaluationPageState() {
+    const sidebar = document.querySelector('.lev-sidebar-scroll');
+    const state = {
+        selectedIdx:   window._learnerEvaluationSelectedIdx ?? null,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+    };
+    sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
+}
+
+function restoreEvaluationPageState() {
+    const raw = sessionStorage.getItem('evaluationPageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
+            requestAnimationFrame(() => {
+                window.selectDesktopLearnerEvaluation(state.selectedIdx);
+                const sidebar = document.querySelector('.lev-sidebar-scroll');
+                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
+
 window.fetchEvaluations = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     
@@ -30,10 +73,17 @@ window.fetchEvaluations = async function() {
         document.head.appendChild(link);
     }
 
+    // 4. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.evaluationPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.evaluationPrefetchPromise;
+    }
+
     // 4. FIXED CACHE CHECK
     if (window.evaluationCache) {
         renderEvaluationsUI(window.evaluationCache); // Call the correct internal function
         if (loader) loader.style.display = 'none';
+        restoreEvaluationPageState();
         return;
     }
 
@@ -44,6 +94,7 @@ window.fetchEvaluations = async function() {
         const data = await response.json();
         window.evaluationCache = data; 
         renderEvaluationsUI(data); // Call the helper function here too
+        restoreEvaluationPageState();
     } catch (e) {
         apiArea.innerHTML = "<p style='text-align:center; color:red;'>Error loading evaluations.</p>";
     } finally {
@@ -412,6 +463,8 @@ window.openMobileLearnerEvaluationById = function(evaluationId) {
 };
 
 window.selectDesktopLearnerEvaluation = function(idx) {
+    window._learnerEvaluationSelectedIdx = idx;
+    saveEvaluationPageState();
     document.querySelectorAll('.lev-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lev-sidebar-${idx}`);
     if (sidebarItem) sidebarItem.classList.add('active');

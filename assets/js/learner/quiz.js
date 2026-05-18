@@ -1,6 +1,22 @@
 /* assets/js/quiz.js */
-window.learnerQuizCache = null; 
-window.quizInstructionsCache = {};
+window.learnerQuizCache          = null;
+window.quizInstructionsCache     = {};
+window.learnerQuizPrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// Called from the dashboard ~1 500 ms after home loads.
+// Populates learnerQuizCache so the first click is instant.
+// ─────────────────────────────────────────────
+window.prefetchQuizzes = function () {
+    if (window.learnerQuizCache) return;           // already cached
+    if (window.learnerQuizPrefetchPromise) return; // already in-flight
+    window.learnerQuizPrefetchPromise = fetch('api/learner/get_quizzes.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.learnerQuizCache = data; })
+        .catch(() => { /* silent – user will retry on click */ })
+        .finally(() => { window.learnerQuizPrefetchPromise = null; });
+};
 
 function showLearnerQuizMobileBottomNav() {
     if (window.innerWidth > 899) return;
@@ -32,18 +48,25 @@ window.fetchQuizzes = async function() {
     if (typeof window.setActive === 'function') window.setActive("quiz_list.php");
     
     const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    const loader = document.getElementById("loaderOverlay");
+    const iframe  = document.getElementById('mainFrame');
+    const loader  = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
     if (apiArea) apiArea.style.display = 'block';
-    if (iframe) iframe.style.display = 'none';
+    if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 3. Cache Check
+    // 3a. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.learnerQuizPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.learnerQuizPrefetchPromise;
+    }
+
+    // 3b. Cache Check – serve instantly
     if (window.learnerQuizCache) {
         renderQuizCards(window.learnerQuizCache);
         if (loader) loader.style.display = 'none';
+        restoreQuizPageState();
         return;
     }
 
@@ -56,6 +79,7 @@ window.fetchQuizzes = async function() {
         const groupedData = await response.json();
         window.learnerQuizCache = groupedData; 
         renderQuizCards(groupedData);
+        restoreQuizPageState();
     } catch (error) {
         console.error("Quiz Fetch Error:", error);
         if (apiArea) {
@@ -73,6 +97,33 @@ window.fetchQuizzes = async function() {
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveQuizPageState() {
+    const sidebar = document.querySelector('.lqz-sidebar-scroll');
+    const state = {
+        selectedIdx:  window._learnerQuizSelectedIdx ?? null,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+    };
+    sessionStorage.setItem('quizPageState', JSON.stringify(state));
+}
+
+function restoreQuizPageState() {
+    const raw = sessionStorage.getItem('quizPageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
+            requestAnimationFrame(() => {
+                window.selectDesktopLearnerQuiz(state.selectedIdx);
+                const sidebar = document.querySelector('.lqz-sidebar-scroll');
+                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
 
 window.loadQuizInstructions = async function(quizId) {
     const apiArea = document.getElementById('api-content-area');
@@ -586,6 +637,8 @@ function renderQuizCards(groupedData) {
 // DESKTOP PANEL: SELECT QUIZ
 // ─────────────────────────────────────────────
 window.selectDesktopLearnerQuiz = function(flatIdx) {
+    window._learnerQuizSelectedIdx = flatIdx;
+    saveQuizPageState();
     document.querySelectorAll('.lqz-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lqz-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');

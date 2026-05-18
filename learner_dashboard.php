@@ -629,14 +629,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Inside your Main Script's link click listener:
 const isCached = (onClick.includes('loadManual') && window.manualCache) ||
-                 (onClick.includes('fetchQuizzes') && window.learnerQuizCache) ||
-                 (onClick.includes('fetchAssignments') && window.learnerAssignmentCache) ||
-                 (onClick.includes('fetchAnnouncements') && window.announcementCache) ||
-                 (onClick.includes('fetchResources') && window.resourceCache) ||
-                 (onClick.includes('fetchEvaluations') && window.evaluationCache) ||
+                 (onClick.includes('fetchQuizzes') && (window.learnerQuizCache || window.learnerQuizPrefetchPromise)) ||
+                 (onClick.includes('fetchAssignments') && (window.learnerAssignmentCache || window.learnerAssignmentPrefetchPromise)) ||
+                 (onClick.includes('fetchAnnouncements') && (window.announcementCache || window.announcementPrefetchPromise)) ||
+                 (onClick.includes('fetchResources') && (window.resourceCache || window.resourcePrefetchPromise)) ||
+                 (onClick.includes('fetchEvaluations') && (window.evaluationCache || window.evaluationPrefetchPromise)) ||
                  (onClick.includes('fetchGrades') && window.learnerGradesCache) ||
-                 (onClick.includes('fetchSyllabus') && window.syllabusCache) ||
-                 (onClick.includes('fetchDiscussions') && window.discussionCache); // <-- ADD THIS
+                 (onClick.includes('fetchSyllabus') && (window.syllabusCache || window.syllabusPrefetchPromise)) ||
+                 (onClick.includes('fetchDiscussions') && (window.discussionCache || window.discussionPrefetchPromise)); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
         if (sidebar.classList.contains("active") || sidebar.classList.contains("desktop-open")) {
@@ -1867,6 +1867,28 @@ window.loadHome = function() {
     window.configureHeader({ title: 'Home', mode: 'standard' });
 
 };
+
+// ─────────────────────────────────────────────
+// REUSABLE LEARNER PAGE STATE HELPER
+// Mirrors the pattern from grades.js.
+// Each page calls learnerPageState.get/set with its own key.
+// ─────────────────────────────────────────────
+window.learnerPageState = {
+    get(key) {
+        try {
+            const raw = sessionStorage.getItem(key);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    },
+    set(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        } catch (e) { /* storage full — ignore */ }
+    },
+    clear(key) {
+        try { sessionStorage.removeItem(key); } catch (e) {}
+    }
+};
 </script>
 
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
@@ -2017,15 +2039,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=2.6"></script>
-<script src="assets/js/learner/quiz.js?v=3.9"></script>
-<script src="assets/js/learner/assignments.js?v=3.5"></script>
-<script src="assets/js/learner/resources.js?v=3.1"></script>
-<script src="assets/js/learner/announcements.js?v=2.7"></script>
+<script src="assets/js/learner/manual.js?v=2.7"></script>
+<script src="assets/js/learner/quiz.js?v=4.0"></script>
+<script src="assets/js/learner/assignments.js?v=3.6"></script>
+<script src="assets/js/learner/resources.js?v=3.2"></script>
+<script src="assets/js/learner/announcements.js?v=2.8"></script>
 <script src="assets/js/learner/grades.js?v=1.9"></script>
-<script src="assets/js/learner/evaluations.js?v=1.9"></script>
-<script src="assets/js/learner/discussions.js?v=5.0"></script>
-<script src="assets/js/learner/syllabus.js?v=1.3"></script>
+<script src="assets/js/learner/evaluations.js?v=2.0"></script>
+<script src="assets/js/learner/discussions.js?v=5.1"></script>
+<script src="assets/js/learner/syllabus.js?v=1.4"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

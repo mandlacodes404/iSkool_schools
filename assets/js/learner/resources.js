@@ -1,5 +1,19 @@
 /* assets/js/resources.js */
-window.resourceCache = null;
+window.resourceCache          = null;
+window.resourcePrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchResources = function () {
+    if (window.resourceCache) return;
+    if (window.resourcePrefetchPromise) return;
+    window.resourcePrefetchPromise = fetch('api/learner/get_resources.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { window.resourceCache = data; })
+        .catch(() => {})
+        .finally(() => { window.resourcePrefetchPromise = null; });
+};
 
 window.fetchResources = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -23,10 +37,17 @@ window.fetchResources = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 4. CACHE CHECK (Instant Load)
+    // 4a. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.resourcePrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.resourcePrefetchPromise;
+    }
+
+    // 4b. CACHE CHECK (Instant Load)
     if (window.resourceCache) {
         renderResourceCards(window.resourceCache);
         if (loader) loader.style.display = 'none';
+        restoreResourcePageState();
         return;
     }
 
@@ -38,6 +59,7 @@ window.fetchResources = async function() {
         const data = await response.json();
         window.resourceCache = data;
         renderResourceCards(data);
+        restoreResourcePageState();
     } catch (error) {
         console.error("Resource Fetch Error:", error);
         if (apiArea) {
@@ -48,6 +70,33 @@ window.fetchResources = async function() {
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveResourcePageState() {
+    const sidebar = document.querySelector('.lrs-sidebar-scroll');
+    const state = {
+        selectedIdx:   window._learnerResourceSelectedIdx ?? null,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+    };
+    sessionStorage.setItem('resourcePageState', JSON.stringify(state));
+}
+
+function restoreResourcePageState() {
+    const raw = sessionStorage.getItem('resourcePageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
+            requestAnimationFrame(() => {
+                window.selectDesktopLearnerResource(state.selectedIdx);
+                const sidebar = document.querySelector('.lrs-sidebar-scroll');
+                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
 
 function renderResourceCards(data) {
     const apiArea = document.getElementById('api-content-area');
@@ -434,6 +483,8 @@ function renderResourceCards(data) {
 // DESKTOP PANEL: SELECT RESOURCE (inline preview)
 // ─────────────────────────────────────────────
 window.selectDesktopLearnerResource = function(flatIdx) {
+    window._learnerResourceSelectedIdx = flatIdx;
+    saveResourcePageState();
     document.querySelectorAll('.lrs-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lrs-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');

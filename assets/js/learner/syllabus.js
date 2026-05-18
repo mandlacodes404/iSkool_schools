@@ -1,4 +1,18 @@
-window.syllabusCache = null;
+window.syllabusCache          = null;
+window.syllabusPrefetchPromise = null;
+
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchSyllabus = function () {
+    if (window.syllabusCache) return;
+    if (window.syllabusPrefetchPromise) return;
+    window.syllabusPrefetchPromise = fetch('api/learner/get_sbo.php')
+        .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
+        .then(data => { if (!data.error) window.syllabusCache = data; })
+        .catch(() => {})
+        .finally(() => { window.syllabusPrefetchPromise = null; });
+};
 
 window.fetchSyllabus = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -18,10 +32,17 @@ window.fetchSyllabus = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove('active');
 
+    // If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.syllabusPrefetchPromise) {
+        if (loader) loader.style.display = 'flex';
+        await window.syllabusPrefetchPromise;
+    }
+
     // Serve from cache instantly
     if (window.syllabusCache) {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
         if (loader) loader.style.display = 'none';
+        restoreSyllabusPageState();
         return;
     }
 
@@ -35,6 +56,7 @@ window.fetchSyllabus = async function() {
 
         window.syllabusCache = data;
         apiArea.innerHTML = renderSyllabusPage(data);
+        restoreSyllabusPageState();
 
     } catch (err) {
         console.error('Syllabus fetch error:', err);
@@ -54,6 +76,34 @@ window.fetchSyllabus = async function() {
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// ─────────────────────────────────────────────
+// STATE PERSISTENCE (sessionStorage)
+// ─────────────────────────────────────────────
+function saveSyllabusPageState() {
+    const mainContent = document.querySelector('.main-content');
+    const state = {
+        activeTerm:  window._syllabusActiveTerm ?? null,
+        scrollTop:   mainContent ? mainContent.scrollTop : 0,
+    };
+    sessionStorage.setItem('syllabusPageState', JSON.stringify(state));
+}
+
+function restoreSyllabusPageState() {
+    const raw = sessionStorage.getItem('syllabusPageState');
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (state.activeTerm !== null && state.activeTerm !== undefined) {
+            requestAnimationFrame(() => {
+                const tab = document.querySelector(`.syl-tab[data-term="${state.activeTerm}"]`);
+                if (tab) tab.click();
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) mainContent.scrollTop = state.scrollTop || 0;
+            });
+        }
+    } catch (e) { /* ignore bad state */ }
+}
 
 // ─────────────────────────────────────────────
 // RENDER FULL PAGE
@@ -493,6 +543,8 @@ function renderBriefCard(brief) {
 // TAB SWITCHER — works for both desktop & mobile
 // ─────────────────────────────────────────────
 window.switchSylTab = function(term) {
+    window._syllabusActiveTerm = term;
+    saveSyllabusPageState();
     // ── Desktop panels ──
     document.querySelectorAll('.syl-dt-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.syl-dt-term-item').forEach(t => t.classList.remove('active'));
