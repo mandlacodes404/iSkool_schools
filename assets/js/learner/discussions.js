@@ -282,8 +282,8 @@ function injectDesktopShell(apiArea) {
                 overflow: hidden;
                 background-color: #0f0f12;
                 background-image:
-                    linear-gradient(rgba(79,209,197,0.04) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(248,81,73,0.06) 1px, transparent 1px);
+                    linear-gradient(rgba(79,209,197,0.13) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(248,81,73,0.18) 1px, transparent 1px);
                 background-size: 100% 28px, 38px 100%;
                 background-position: 0 12px, 36px 0;
             }
@@ -529,8 +529,8 @@ function renderThread(data) {
             /* ── SCROLL AREA — takes all remaining space, compose stays below ── */
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0;
                 background-image:
-                    linear-gradient(rgba(79,209,197,0.04) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(248,81,73,0.06) 1px, transparent 1px);
+                    linear-gradient(rgba(79,209,197,0.13) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(248,81,73,0.18) 1px, transparent 1px);
                 background-size: 100% 28px, 38px 100%;
                 background-position: 0 0, 36px 0;
             }
@@ -633,9 +633,9 @@ function renderThread(data) {
             @keyframes discTypeBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
 
             /* ── VOICE NOTE PLAYER — pill + dot trail ── */
-            .disc-voice-player { display:flex; align-items:center; gap:10px; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.18); border-radius:999px; padding:8px 16px 8px 8px; margin-top:8px; min-width:220px; max-width:300px; }
-            .disc-voice-play-btn { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#4fd1c5,#38b2ac); border:none; color:#0d1117; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:0.2s; box-shadow:0 0 0 5px rgba(79,209,197,0.12); }
-            .disc-voice-play-btn:hover { transform:scale(1.07); box-shadow:0 0 0 7px rgba(79,209,197,0.18); }
+            .disc-voice-player { display:flex; align-items:center; gap:8px; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.18); border-radius:999px; padding:5px 14px 5px 5px; margin-top:8px; min-width:200px; max-width:280px; }
+            .disc-voice-play-btn { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#4fd1c5,#38b2ac); border:none; color:#0d1117; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:0.2s; box-shadow:0 0 0 4px rgba(79,209,197,0.12); }
+            .disc-voice-play-btn:hover { transform:scale(1.07); box-shadow:0 0 0 6px rgba(79,209,197,0.18); }
             .disc-voice-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
             /* dot trail replaces waveform bars */
             .disc-voice-waveform { display:flex; align-items:center; gap:4px; cursor:pointer; }
