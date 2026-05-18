@@ -5,6 +5,75 @@
  */
 
 window.learnerGradesCache = null;
+window.learnerGradesCachePromise = null;
+window.learnerGradeStatsCache = window.learnerGradeStatsCache || {};
+window.learnerProgressReportCache = window.learnerProgressReportCache || {};
+
+// Shared learner-side state helper. Other learner pages can reuse this shape:
+// learnerPageState.get('page'), learnerPageState.update('page', patch).
+window.learnerPageState = window.learnerPageState || {
+    prefix: 'learnerPageState:',
+    get(page) {
+        try {
+            return JSON.parse(sessionStorage.getItem(this.prefix + page) || '{}');
+        } catch (e) {
+            return {};
+        }
+    },
+    set(page, state) {
+        try {
+            sessionStorage.setItem(this.prefix + page, JSON.stringify(state || {}));
+        } catch (e) {}
+    },
+    update(page, patch) {
+        this.set(page, Object.assign({}, this.get(page), patch || {}));
+    }
+};
+
+let gradesRestoringState = false;
+
+function getGradesState() {
+    const state = window.learnerPageState.get('grades');
+    state.openSubjects = Array.isArray(state.openSubjects) ? state.openSubjects : null;
+    state.openRows = Array.isArray(state.openRows) ? state.openRows : [];
+    state.views = state.views || {};
+    state.terms = state.terms || {};
+    state.search = state.search || {};
+    state.scroll = state.scroll || {};
+    return state;
+}
+
+function saveGradesState(patch) {
+    if (gradesRestoringState) return;
+    window.learnerPageState.update('grades', patch);
+}
+
+async function loadGradesData() {
+    if (window.learnerGradesCache) return window.learnerGradesCache;
+    if (!window.learnerGradesCachePromise) {
+        window.learnerGradesCachePromise = fetch('api/learner/get_grades.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                window.learnerGradesCache = data;
+                return data;
+            })
+            .finally(() => {
+                window.learnerGradesCachePromise = null;
+            });
+    }
+    return window.learnerGradesCachePromise;
+}
+
+window.prefetchLearnerGrades = function () {
+    loadGradesData().catch(() => {});
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(() => {
+        if (!window.learnerGradesCache) window.prefetchLearnerGrades();
+    }, 900);
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
@@ -32,10 +101,7 @@ window.fetchGrades = async function () {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/learner/get_grades.php');
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        window.learnerGradesCache = data;
+        const data = await loadGradesData();
         renderGrades(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
@@ -596,6 +662,8 @@ function renderGrades(data) {
 
     apiArea.innerHTML = html;
     apiArea._gradesData = data;
+    restoreGradesStateAfterRender();
+    wireGradesScrollState();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -608,6 +676,7 @@ window.selectDesktopGradeSubject = function (gi) {
     document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
     const item = document.getElementById(`grades-dt-item-${gi}`);
     if (item) item.classList.add('active');
+    saveGradesState({ desktopSubject: gi });
 
     const group       = apiArea._gradesData.groups[gi];
     const currentTerm = apiArea._gradesData.current_term || 1;
@@ -669,10 +738,13 @@ window.selectDesktopGradeSubject = function (gi) {
                 ${buildTermTable(quizzes, currentTerm)}
             </div>
         </div>`;
+    restoreDesktopGradePanelState(pfx);
 };
 
 // Desktop sidebar search
 window.gradesSearchDesktop = function (val) {
+    const state = getGradesState();
+    saveGradesState({ search: Object.assign({}, state.search, { desktop: val }) });
     const term = val.toLowerCase();
     document.querySelectorAll('.grades-dt-subject-item').forEach(item => {
         const name = item.querySelector('.grades-dt-subject-name').textContent.toLowerCase();
@@ -825,12 +897,141 @@ function buildTermTable(quizzes, selectedTerm) {
 // ─────────────────────────────────────────────────────────────────────────────
 // UI INTERACTIONS
 // ─────────────────────────────────────────────────────────────────────────────
+function restoreGradesStateAfterRender() {
+    const state = getGradesState();
+    const apiArea = document.getElementById('api-content-area');
+    gradesRestoringState = true;
+
+    try {
+        if (state.search.mobile) {
+            const input = document.getElementById('gradesSearch');
+            if (input) {
+                input.value = state.search.mobile;
+                window.gradesSearch(state.search.mobile);
+            }
+        }
+
+        if (state.search.desktop) {
+            const input = document.getElementById('gradesSearchDt');
+            if (input) {
+                input.value = state.search.desktop;
+                window.gradesSearchDesktop(state.search.desktop);
+            }
+        }
+
+        if (state.openSubjects) {
+            document.querySelectorAll('[id^="scard-body-"]').forEach(body => {
+                const gi = body.id.replace('scard-body-', '');
+                const open = state.openSubjects.includes(gi);
+                const chev = document.getElementById(`scard-chev-${gi}`);
+                body.style.display = open ? 'block' : 'none';
+                if (chev) chev.classList.toggle('open', open);
+            });
+        }
+
+        Object.keys(state.views).forEach(prefix => {
+            if (!String(prefix).startsWith('dt')) window.switchGradesView(prefix, state.views[prefix]);
+        });
+
+        Object.keys(state.terms).forEach(prefix => {
+            if (!String(prefix).startsWith('dt')) {
+                const selector = document.querySelector(`#view-term-${prefix} .term-selector`);
+                if (selector) selector.value = state.terms[prefix];
+                window.refreshTermTable(prefix, state.terms[prefix]);
+            }
+        });
+
+        (state.openRows || []).forEach(rowId => {
+            if (!String(rowId).startsWith('qdetail-dt')) openQuizRowByDetailId(rowId);
+        });
+
+        if (state.desktopSubject !== null && state.desktopSubject !== undefined && apiArea?._gradesData?.groups?.[state.desktopSubject]) {
+            window.selectDesktopGradeSubject(state.desktopSubject);
+        }
+
+        requestAnimationFrame(() => {
+            const mainContent = document.querySelector('.main-content');
+            const panel = document.getElementById('grades-dt-panel');
+            if (mainContent && Number.isFinite(state.scroll.main)) mainContent.scrollTop = state.scroll.main;
+            if (panel && Number.isFinite(state.scroll.panel)) panel.scrollTop = state.scroll.panel;
+        });
+    } finally {
+        gradesRestoringState = false;
+    }
+}
+
+function restoreDesktopGradePanelState(prefix) {
+    const state = getGradesState();
+    gradesRestoringState = true;
+    try {
+        if (state.views[prefix]) window.switchGradesView(prefix, state.views[prefix]);
+
+        if (state.terms[prefix]) {
+            const sourceGi = parseInt(String(prefix).replace('dt', ''), 10);
+            const selector = document.querySelector(`#view-term-${prefix} .term-selector`);
+            if (selector) selector.value = state.terms[prefix];
+            window.refreshTermTable(prefix, state.terms[prefix], sourceGi);
+        }
+
+        (state.openRows || []).forEach(rowId => {
+            if (String(rowId).startsWith(`qdetail-${prefix}-`)) openQuizRowByDetailId(rowId);
+        });
+
+        requestAnimationFrame(() => {
+            const panel = document.getElementById('grades-dt-panel');
+            if (panel && Number.isFinite(state.scroll.panel)) panel.scrollTop = state.scroll.panel;
+        });
+    } finally {
+        gradesRestoringState = false;
+    }
+}
+
+function openQuizRowByDetailId(detailId) {
+    const detail = document.getElementById(detailId);
+    if (!detail) return;
+    const suffix = detailId.replace('qdetail-', '');
+    const btn = document.getElementById(`qexp-${suffix}`);
+    const stats = document.getElementById(`gstats-${suffix}`);
+    detail.style.display = 'block';
+    if (btn) btn.classList.add('open');
+    if (stats) loadGradeStatsInline(stats.id);
+}
+
+function saveOpenQuizRows() {
+    const openRows = Array.from(document.querySelectorAll('.quiz-row-details'))
+        .filter(el => el.style.display === 'block')
+        .map(el => el.id);
+    saveGradesState({ openRows });
+}
+
+function wireGradesScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('grades-dt-panel');
+    if (mainContent && mainContent.dataset.gradesScrollState !== '1') {
+        mainContent.dataset.gradesScrollState = '1';
+        mainContent.addEventListener('scroll', () => {
+            const state = getGradesState();
+            saveGradesState({ scroll: Object.assign({}, state.scroll, { main: mainContent.scrollTop }) });
+        }, { passive: true });
+    }
+    if (panel && panel.dataset.gradesScrollState !== '1') {
+        panel.dataset.gradesScrollState = '1';
+        panel.addEventListener('scroll', () => {
+            const state = getGradesState();
+            saveGradesState({ scroll: Object.assign({}, state.scroll, { panel: panel.scrollTop }) });
+        }, { passive: true });
+    }
+}
+
 window.toggleSubjectCard = function (gi) {
     const body = document.getElementById(`scard-body-${gi}`);
     const chev = document.getElementById(`scard-chev-${gi}`);
     const open = chev.classList.contains('open');
     body.style.display = open ? 'none' : 'block';
     chev.classList.toggle('open', !open);
+    const openSubjects = Array.from(document.querySelectorAll('[id^="scard-chev-"].open'))
+        .map(el => el.id.replace('scard-chev-', ''));
+    saveGradesState({ openSubjects });
 };
 
 window.toggleQuizRow = function (detailId, btnId, statsId) {
@@ -841,6 +1042,7 @@ window.toggleQuizRow = function (detailId, btnId, statsId) {
     detail.style.display = isOpen ? 'none' : 'block';
     if (btn) btn.classList.toggle('open', !isOpen);
     if (!isOpen && statsId) loadGradeStatsInline(statsId);
+    saveOpenQuizRows();
 };
 
 // Works for both mobile (numeric gi) and desktop (string pfx like "dt0")
@@ -860,6 +1062,8 @@ window.switchGradesView = function (gi, view) {
         btnList.classList.remove('active-view');
         btnTerm.classList.add('active-view');
     }
+    const state = getGradesState();
+    saveGradesState({ views: Object.assign({}, state.views, { [gi]: view }) });
 };
 
 // gi = ID prefix, term = selected term value, sourceGi = numeric group index (desktop only)
@@ -870,10 +1074,14 @@ window.refreshTermTable = function (gi, term, sourceGi) {
     const group = apiArea._gradesData.groups[groupIndex];
     if (!group) return;
     document.getElementById(`term-table-wrap-${gi}`).innerHTML = buildTermTable(group.quizzes, term);
+    const state = getGradesState();
+    saveGradesState({ terms: Object.assign({}, state.terms, { [gi]: String(term) }) });
 };
 
 // Mobile search
 window.gradesSearch = function (val) {
+    const state = getGradesState();
+    saveGradesState({ search: Object.assign({}, state.search, { mobile: val }) });
     const term = val.toLowerCase();
     document.querySelectorAll('.subject-card').forEach(card => {
         const subjectName = card.querySelector('.subject-name').textContent.toLowerCase();
@@ -892,12 +1100,52 @@ window.gradesSearch = function (val) {
 // ─────────────────────────────────────────────────────────────────────────────
 // INLINE PERFORMANCE OVERVIEW
 // ─────────────────────────────────────────────────────────────────────────────
+function renderGradeStatsBox(box, data) {
+    const pct    = data.user_score || 0;
+    const offset = 314 - (314 * (pct / 100));
+
+    box.className = 'grade-inline-stats';
+    box.dataset.loaded = '1';
+    box.innerHTML = `
+        <div class="grade-inline-title">Performance Overview</div>
+        <div class="grade-inline-grid">
+            <div class="score-circle-wrap">
+                <svg viewBox="0 0 120 120">
+                    <circle class="sc-track" cx="60" cy="60" r="50"/>
+                    <circle class="sc-fill" cx="60" cy="60" r="50" style="stroke-dashoffset:${offset};"/>
+                </svg>
+                <div class="score-circle-text">${pct}%</div>
+            </div>
+            <div style="width:100%;">
+                <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
+                <div class="dist-bar-wrap">
+                    <div class="dist-line low" style="left:${data.min || 0}%"></div>
+                    <div class="dist-line avg" style="left:${data.avg || 0}%"></div>
+                    <div class="dist-line high" style="left:${data.max || 0}%"></div>
+                    <div class="dist-marker me" style="left:${pct}%"></div>
+                </div>
+                <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
+                <div class="dist-legend">
+                    <div><span style="color:#4fd1c5">●</span> Blue dot - your score</div>
+                    <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
+                    <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
+                    <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
+                </div>
+            </div>
+        </div>`;
+}
+
 async function loadGradeStatsInline(statsId) {
     const box = document.getElementById(statsId);
     if (!box || box.dataset.loaded === '1' || box.dataset.loading === '1') return;
 
     const quizId = box.dataset.quizId;
     if (!quizId) return;
+
+    if (window.learnerGradeStatsCache[quizId]) {
+        renderGradeStatsBox(box, window.learnerGradeStatsCache[quizId]);
+        return;
+    }
 
     box.dataset.loading = '1';
     box.className = 'grade-inline-stats loading';
@@ -907,6 +1155,8 @@ async function loadGradeStatsInline(statsId) {
         const res  = await fetch(`get_quiz_stats.php?quiz_id=${quizId}`);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
+        window.learnerGradeStatsCache[quizId] = data;
+        renderGradeStatsBox(box, data);
         const pct    = data.user_score || 0;
         const offset = 314 - (314 * (pct / 100));
 
@@ -959,11 +1209,17 @@ window.generateGradesReport = async function (targetEmail) {
     const apiArea = document.getElementById('api-content-area');
     const loader  = document.getElementById('loaderOverlay');
     if (!apiArea) return;
+    const cacheKey = targetEmail || 'self';
+    if (window.learnerProgressReportCache[cacheKey]) {
+        renderProgressReport(window.learnerProgressReportCache[cacheKey]);
+        return;
+    }
     if (loader) loader.style.display = 'flex';
     try {
         const res  = await fetch(`api/learner/get_progress_report.php?learner=${encodeURIComponent(targetEmail)}`);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
+        window.learnerProgressReportCache[cacheKey] = data;
         renderProgressReport(data);
     } catch (e) {
         if (loader) loader.style.display = 'none';
@@ -1155,7 +1411,6 @@ window.prSwitchTerm = function (term) {
 };
 
 window.prBackToGrades = function () {
-    window.learnerGradesCache = null;
     window.fetchGrades();
 };
 
