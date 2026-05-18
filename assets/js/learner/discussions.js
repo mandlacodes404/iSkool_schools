@@ -280,12 +280,8 @@ function injectDesktopShell(apiArea) {
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
-                background-color: #0f0f12;
-                background-image:
-                    linear-gradient(rgba(79,209,197,0.13) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(248,81,73,0.18) 1px, transparent 1px);
-                background-size: 100% 28px, 38px 100%;
-                background-position: 0 12px, 36px 0;
+                background: #0a0a0c;
+                position: relative;
             }
             .disc-empty-state {
                 flex: 1;
@@ -323,9 +319,115 @@ function injectDesktopShell(apiArea) {
                 </div>
             </div>
         </div>`;
+
+    _discInjectChromeCanvas();
 }
 
-// ── Route list rendering by device
+// ── Liquid chrome WebGL background for #disc-thread-panel
+function _discInjectChromeCanvas() {
+    // Only once
+    if (document.getElementById('disc-chrome-canvas')) return;
+    const panel = document.getElementById('disc-thread-panel');
+    if (!panel) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'disc-chrome-canvas';
+    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;';
+    panel.insertBefore(canvas, panel.firstChild);
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    const vert = `attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0,1);}`;
+    const frag = `
+precision highp float;
+uniform vec2 u_res;
+uniform float u_time;
+uniform vec2 u_mouse;
+float hash21(vec2 p){p=fract(p*vec2(234.34,435.345));p+=dot(p,p+34.23);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*f*(f*(f*6.-15.)+10.);float a=hash21(i),b=hash21(i+vec2(1,0)),c=hash21(i+vec2(0,1)),d=hash21(i+vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<6;i++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=.48;}return v;}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_res.xy;
+  uv=(uv*2.-1.)*vec2(u_res.x/u_res.y,1.);
+  float t=u_time*0.058;
+  vec2 mouse=(u_mouse-0.5)*0.18;
+  vec2 p=uv*1.4+mouse;
+  vec2 w1=vec2(fbm(p+vec2(0.,t*0.6)+vec2(1.7,9.2)),fbm(p+vec2(t*0.5,0.)+vec2(8.3,2.8)));
+  vec2 w2=vec2(fbm(p+1.8*w1+vec2(0.3,6.1)+t*0.4),fbm(p+1.8*w1+vec2(5.1,3.3)+t*0.35));
+  float f=fbm(p+1.4*w2+vec2(t*0.25));
+  float lum=pow(f,3.2)*0.28;
+  float ridge=smoothstep(0.52,0.60,f);
+  float soft=ridge*0.04;
+  float vein=smoothstep(0.62,0.70,f)*0.10;
+  vec3 base=vec3(0.015,0.016,0.020);
+  vec3 mid=vec3(0.055,0.056,0.062);
+  vec3 silver=vec3(0.22,0.24,0.28);
+  vec3 col=mix(base,mid,smoothstep(0.,0.18,lum+soft));
+  col=mix(col,silver,vein);
+  vec2 vig=uv/vec2(u_res.x/u_res.y,1.);
+  float v=1.-dot(vig*0.55,vig*0.55);
+  v=clamp(pow(v,2.2),0.,1.);
+  col*=mix(0.18,1.,v);
+  gl_FragColor=vec4(col,1.);
+}`;
+
+    function compile(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+    }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes   = gl.getUniformLocation(prog, 'u_res');
+    const uTime  = gl.getUniformLocation(prog, 'u_time');
+    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+    let mx=0.5, my=0.5, tx=0.5, ty=0.5;
+    panel.addEventListener('mousemove', e => {
+        const r = panel.getBoundingClientRect();
+        tx = (e.clientX - r.left) / r.width;
+        ty = 1 - (e.clientY - r.top) / r.height;
+    });
+
+    function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width  = panel.offsetWidth  * dpr;
+        canvas.height = panel.offsetHeight * dpr;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let start = null;
+    let _rafId = null;
+    function frame(ts) {
+        // Stop if canvas removed from DOM
+        if (!document.getElementById('disc-chrome-canvas')) return;
+        if (!start) start = ts;
+        const t = (ts - start) * 0.001;
+        mx += (tx - mx) * 0.018;
+        my += (ty - my) * 0.018;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, t);
+        gl.uniform2f(uMouse, mx, my);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        _rafId = requestAnimationFrame(frame);
+    }
+    _rafId = requestAnimationFrame(frame);
+}
 function renderDiscussions(data) {
     if (isDesktop()) {
         renderSidebarList(data);
@@ -521,19 +623,13 @@ function renderThread(data) {
     target.innerHTML = `
         <style>
             /* LAYOUT */
-            .disc-thread-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; height:100%; min-height:0; }
-            .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:#111; }
+            .disc-thread-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; height:100%; min-height:0; position:relative; z-index:1; }
+            .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:rgba(10,10,14,0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); position:relative; z-index:2; }
             .disc-thread-head-title { font-size:14px; font-weight:700; color:#e2e8f0; font-family:'Nunito',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
 
             /* ── SCROLL AREA — takes all remaining space, compose stays below ── */
-            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0;
-                background-image:
-                    linear-gradient(rgba(79,209,197,0.13) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(248,81,73,0.18) 1px, transparent 1px);
-                background-size: 100% 28px, 38px 100%;
-                background-position: 0 0, 36px 0;
-            }
+            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; background:transparent; position:relative; z-index:1; }
 
             @media (max-width: 767px) {
                 /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
@@ -571,8 +667,8 @@ function renderThread(data) {
             .disc-tag.teacher { background:rgba(56,178,172,0.12); color:#38b2ac; border:1px solid rgba(56,178,172,0.25); }
 
             /* ── BUBBLE ── */
-            .disc-body-wrap { background:#1a1919; border:1px solid rgba(255,255,255,0.07); border-radius:0 12px 12px 12px; padding:11px 14px; }
-            .disc-body-wrap.is-op { background:rgba(79,209,197,0.04); border-color:rgba(79,209,197,0.15); }
+            .disc-body-wrap { background:rgba(20,18,18,0.82); border:1px solid rgba(255,255,255,0.07); border-radius:0 12px 12px 12px; padding:11px 14px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+            .disc-body-wrap.is-op { background:rgba(79,209,197,0.06); border-color:rgba(79,209,197,0.15); }
             .disc-body-wrap.is-me { border-color:rgba(79,209,197,0.2); }
 
             /* ── QUOTE ── */
@@ -605,7 +701,7 @@ function renderThread(data) {
             .disc-nested-body { font-size:13px; color:#c9d1d9; line-height:1.55; word-wrap:break-word; white-space:pre-wrap; }
 
             /* ── COMPOSE — always pinned to bottom of the flex column, never floats ── */
-            .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:#111; }
+            .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(10,10,14,0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); position:relative; z-index:2; }
 
             /* disc-compose is desktop-only; mobile uses discMobileSheet instead */
             .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; align-items:center; gap:8px; }
