@@ -325,18 +325,20 @@ function injectDesktopShell(apiArea) {
 
 // ── Liquid chrome WebGL background for #disc-thread-panel
 function _discInjectChromeCanvas() {
-    // Only once
     if (document.getElementById('disc-chrome-canvas')) return;
     const panel = document.getElementById('disc-thread-panel');
     if (!panel) return;
 
+    // Ensure panel is positioned so absolute canvas fills it
+    panel.style.position = 'relative';
+
     const canvas = document.createElement('canvas');
     canvas.id = 'disc-chrome-canvas';
-    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;';
+    canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;';
     panel.insertBefore(canvas, panel.firstChild);
 
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) return;
+    if (!gl) { canvas.remove(); return; }
 
     const vert = `attribute vec2 a_pos;void main(){gl_Position=vec4(a_pos,0,1);}`;
     const frag = `
@@ -403,30 +405,34 @@ void main(){
     });
 
     function resizeCanvas() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width  = panel.offsetWidth  * dpr;
-        canvas.height = panel.offsetHeight * dpr;
+        const rect = panel.getBoundingClientRect();
+        const dpr  = Math.min(window.devicePixelRatio || 1, 2);
+        const w = rect.width  || panel.offsetWidth  || 800;
+        const h = rect.height || panel.offsetHeight || 600;
+        canvas.width  = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
         gl.viewport(0, 0, canvas.width, canvas.height);
     }
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
-    let start = null;
-    let _rafId = null;
-    function frame(ts) {
-        // Stop if canvas removed from DOM
-        if (!document.getElementById('disc-chrome-canvas')) return;
-        if (!start) start = ts;
-        const t = (ts - start) * 0.001;
-        mx += (tx - mx) * 0.018;
-        my += (ty - my) * 0.018;
-        gl.uniform2f(uRes, canvas.width, canvas.height);
-        gl.uniform1f(uTime, t);
-        gl.uniform2f(uMouse, mx, my);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        _rafId = requestAnimationFrame(frame);
-    }
-    _rafId = requestAnimationFrame(frame);
+    // Wait one frame for layout to settle before first resize
+    requestAnimationFrame(() => {
+        resizeCanvas();
+        let start = null;
+        function frame(ts) {
+            if (!document.getElementById('disc-chrome-canvas')) return;
+            if (!start) start = ts;
+            const t = (ts - start) * 0.001;
+            mx += (tx - mx) * 0.018;
+            my += (ty - my) * 0.018;
+            gl.uniform2f(uRes, canvas.width, canvas.height);
+            gl.uniform1f(uTime, t);
+            gl.uniform2f(uMouse, mx, my);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    });
 }
 function renderDiscussions(data) {
     if (isDesktop()) {
