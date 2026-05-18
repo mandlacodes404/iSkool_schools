@@ -280,7 +280,12 @@ function injectDesktopShell(apiArea) {
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
-                background: #0f0f0f;
+                background-color: #0f0f12;
+                background-image:
+                    linear-gradient(rgba(79,209,197,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(248,81,73,0.06) 1px, transparent 1px);
+                background-size: 100% 28px, 38px 100%;
+                background-position: 0 12px, 36px 0;
             }
             .disc-empty-state {
                 flex: 1;
@@ -522,7 +527,13 @@ function renderThread(data) {
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
 
             /* ── SCROLL AREA — takes all remaining space, compose stays below ── */
-            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; }
+            .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0;
+                background-image:
+                    linear-gradient(rgba(79,209,197,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(248,81,73,0.06) 1px, transparent 1px);
+                background-size: 100% 28px, 38px 100%;
+                background-position: 0 0, 36px 0;
+            }
 
             @media (max-width: 767px) {
                 /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
@@ -621,14 +632,16 @@ function renderThread(data) {
             .disc-typing-dots span:nth-child(3){animation-delay:0.4s}
             @keyframes discTypeBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
 
-            /* ── VOICE NOTE PLAYER ── */
-            .disc-voice-player { display:flex; align-items:center; gap:10px; background:rgba(79,209,197,0.05); border:1px solid rgba(79,209,197,0.15); border-radius:16px; padding:10px 14px; margin-top:8px; min-width:220px; max-width:300px; }
-            .disc-voice-play-btn { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#4fd1c5,#38b2ac); border:none; color:#0d1117; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; transition:0.2s; box-shadow:0 2px 8px rgba(79,209,197,0.25); }
-            .disc-voice-play-btn:hover { transform:scale(1.08); box-shadow:0 3px 12px rgba(79,209,197,0.4); }
-            .disc-voice-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
-            .disc-voice-waveform { display:flex; align-items:center; gap:2px; height:22px; cursor:pointer; }
-            .disc-voice-waveform-bar { flex:1; border-radius:2px; background:rgba(79,209,197,0.25); transition:background 0.15s; min-width:2px; }
+            /* ── VOICE NOTE PLAYER — pill + dot trail ── */
+            .disc-voice-player { display:flex; align-items:center; gap:10px; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.18); border-radius:999px; padding:8px 16px 8px 8px; margin-top:8px; min-width:220px; max-width:300px; }
+            .disc-voice-play-btn { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#4fd1c5,#38b2ac); border:none; color:#0d1117; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:0.2s; box-shadow:0 0 0 5px rgba(79,209,197,0.12); }
+            .disc-voice-play-btn:hover { transform:scale(1.07); box-shadow:0 0 0 7px rgba(79,209,197,0.18); }
+            .disc-voice-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+            /* dot trail replaces waveform bars */
+            .disc-voice-waveform { display:flex; align-items:center; gap:4px; cursor:pointer; }
+            .disc-voice-waveform-bar { width:8px; height:8px; border-radius:50%; background:rgba(79,209,197,0.2); transition:background 0.15s, transform 0.15s; flex-shrink:0; }
             .disc-voice-waveform-bar.played { background:#4fd1c5; }
+            .disc-voice-waveform-bar.active { background:#4fd1c5; transform:scale(1.45); }
             .disc-voice-bottom { display:flex; align-items:center; justify-content:space-between; }
             .disc-voice-time { font-size:10px; color:#8b949e; font-weight:700; font-family:'Nunito',sans-serif; }
             .disc-voice-label { font-size:9px; color:rgba(79,209,197,0.6); font-weight:700; font-family:'Nunito',sans-serif; text-transform:uppercase; letter-spacing:0.05em; }
@@ -713,13 +726,10 @@ function buildPostCard(r, user_role, is_in_class, discId) {
         const isVoice = ['webm','ogg','m4a','mp3'].includes(ext);
         if (isVoice) {
             const uid = 'vp_' + (r.id || Math.random().toString(36).slice(2));
-            // Generate pseudo-random bar heights for waveform visual
-            const bars = Array.from({length: 28}, (_, i) => {
-                const h = 20 + Math.abs(Math.sin(i * 1.7 + uid.charCodeAt(3)) * 60);
-                return Math.round(Math.min(Math.max(h, 15), 85));
-            });
-            const barsHtml = bars.map((h, i) =>
-                `<div class="disc-voice-waveform-bar" data-idx="${i}" style="height:${h}%;"></div>`
+            // Dot trail — 12 fixed dots, no heights needed
+            const bars = Array.from({length: 12}, (_, i) => i);
+            const barsHtml = bars.map((_, i) =>
+                `<div class="disc-voice-waveform-bar" data-idx="${i}"></div>`
             ).join('');
             attachHtml = `
                 <div class="disc-voice-player">
@@ -1620,12 +1630,14 @@ function _discVoiceProgress(uid) {
         const s = String(Math.floor(remaining % 60)).padStart(2, '0');
         time.textContent = `${m}:${s}`;
     }
-    // Colour waveform bars up to current position
+    // Dot trail: mark played dots and highlight the active (current) dot
     if (wave) {
-        const bars  = wave.querySelectorAll('.disc-voice-waveform-bar');
-        const total = bars.length;
-        bars.forEach((bar, i) => {
-            bar.classList.toggle('played', i / total <= pct);
+        const dots  = wave.querySelectorAll('.disc-voice-waveform-bar');
+        const total = dots.length;
+        const activeIdx = Math.floor(pct * total);
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('played', i < activeIdx);
+            dot.classList.toggle('active', i === activeIdx);
         });
     }
 }
@@ -1635,8 +1647,8 @@ function _discVoiceEnded(uid) {
     const time  = document.getElementById('time_' + uid);
     const wave  = document.getElementById('wave_' + uid);
     const icon  = document.getElementById('icon_' + uid);
-    // Reset waveform bars
-    if (wave) wave.querySelectorAll('.disc-voice-waveform-bar').forEach(b => b.classList.remove('played'));
+    // Reset dot trail
+    if (wave) wave.querySelectorAll('.disc-voice-waveform-bar').forEach(b => b.classList.remove('played', 'active'));
     // Show total duration again
     if (time && audio && audio.duration && isFinite(audio.duration)) {
         const m = Math.floor(audio.duration / 60);
