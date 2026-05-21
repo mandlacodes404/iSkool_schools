@@ -229,7 +229,7 @@ function renderTeacherGrades(data) {
 
         <div class="teacher-resources-header">
             <h2 class="teacher-resources-title">Grades</h2>
-            <button class="teacher-upload-btn" onclick="openAddQuizModal()">
+            <button class="teacher-upload-btn teacher-desktop-create" onclick="openAddQuizModal()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -270,7 +270,7 @@ function renderTeacherGrades(data) {
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                <span>Click any quiz to view learner grades. Use <strong>Add Quiz</strong> to manually record marks for schools without online quizzes.</span>
+                <span>Click any quiz to view learner grades.</span>
             </div>`;
 
     if (!data || data.length === 0) {

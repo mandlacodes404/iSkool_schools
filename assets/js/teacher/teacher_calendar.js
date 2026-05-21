@@ -92,7 +92,7 @@ function buildCalendarShell(month, year, events) {
                 ${legend}
             </div>
             <div class="full-cal-header-right">
-                <button class="full-cal-add-btn" onclick="openFullCalReminderModal()">
+                <button class="full-cal-add-btn teacher-desktop-create" onclick="openFullCalReminderModal()">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>

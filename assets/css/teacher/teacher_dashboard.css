@@ -443,6 +443,7 @@
             }
             .sidebar a.desktop-only,
             .sidebar a.mobile-bottom-link { display: none; }
+            .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
         }
 
