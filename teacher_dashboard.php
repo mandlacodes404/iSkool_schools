@@ -49,6 +49,9 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#161b22">
+    <meta name="msapplication-navbutton-color" content="#161b22">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.6">
     <title>Dashboard - iSkool</title>
@@ -823,11 +826,11 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/dashboard.js?v=4.6"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.0"></script>
 <script src="assets/js/teacher/quizzes.js?v=2.5"></script>
-<script src="assets/js/teacher/announcements.js?v=2.4"></script>
+<script src="assets/js/teacher/announcements.js?v=2.5"></script>
 <script src="assets/js/teacher/evaluations.js?v=1.9"></script>
 <script src="assets/js/teacher/resources.js?v=1.7"></script>
 <script src="assets/js/teacher/grades.js?v=1.3"></script>
-<script src="assets/js/teacher/assignments.js?v=1.6"></script>
+<script src="assets/js/teacher/assignments.js?v=1.7"></script>
 <script src="assets/js/teacher/discussions.js?v=1.0"></script>
 <script src="assets/js/teacher/sbo.js?v=1.8"></script>
 <script src="assets/js/teacher/analytics.js?v=1.1"></script>

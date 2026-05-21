@@ -484,7 +484,17 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-row:last-child { border-bottom: none; }
             .lqz-mobile-row:active { background: rgba(255,255,255,0.04); }
-            .lqz-mobile-row-icon { flex-shrink: 0; opacity: 0.75; }
+            .lqz-mobile-row-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: #4fd1c518;
+                border: 1px solid #4fd1c530;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
                 font-size: 14px;

@@ -459,6 +459,21 @@ function renderGrades(data) {
         .grades-mobile-layout .quiz-row-details {
             background: #151515;
         }
+        .grades-mobile-layout .quiz-row-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #4fd1c518;
+            border: 1px solid #4fd1c530;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .grades-mobile-layout .quiz-unpublished .quiz-row-icon {
+            background: #f8514914;
+            border-color: #f8514926;
+        }
         .grade-inline-grid {
             grid-template-columns: 1fr;
             justify-items: center;

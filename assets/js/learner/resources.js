@@ -388,7 +388,17 @@ function renderResourceCards(data) {
             }
             .lrs-mobile-row:last-child { border-bottom: none; }
             .lrs-mobile-row:active { background: rgba(255,255,255,0.04); }
-            .lrs-mobile-row-icon { flex-shrink: 0; opacity: 0.85; }
+            .lrs-mobile-row-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: #4fd1c518;
+                border: 1px solid #4fd1c530;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
             .lrs-mobile-row-body { flex: 1; min-width: 0; }
             .lrs-mobile-row-title {
                 font-size: 14px;

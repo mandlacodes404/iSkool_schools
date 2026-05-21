@@ -453,7 +453,21 @@ function renderAnnouncements(data) {
                 border-left: 3px solid rgba(210,149,34,0.5);
             }
             .lan-mobile-card:last-child { border-bottom: none; }
-            .lan-mobile-card-icon { flex-shrink: 0; opacity: 0.7; }
+            .lan-mobile-card-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: #4fd1c518;
+                border: 1px solid #4fd1c530;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .lan-mobile-card--school .lan-mobile-card-icon {
+                background: #d2952218;
+                border-color: #d2952230;
+            }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
                 font-size: 14px;
