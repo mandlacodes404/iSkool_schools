@@ -56,7 +56,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.2">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -99,7 +99,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Quizzes -->
-        <a href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
+        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -109,7 +109,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Assignments -->
-        <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
+        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -120,7 +120,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Announcements -->
-        <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
+        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -140,7 +140,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Resources -->
-        <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
+        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -154,6 +154,55 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
             <span>Discussions</span>
+        </a>
+
+        <!-- Syllabus -->
+        <a href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                <line x1="12" y1="6" x2="16" y2="6"></line>
+                <line x1="12" y1="10" x2="16" y2="10"></line>
+                <line x1="12" y1="14" x2="16" y2="14"></line>
+            </svg>
+            <span>Syllabus</span>
+        </a>
+
+        <!-- Evaluations -->
+        <a href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations(); setTopNavTab('tab-evaluations')">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Evaluations</span>
+        </a>
+
+        <!-- Analytics -->
+        <a href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics(); setTopNavTab('tab-analytics')">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+            <span>Analytics</span>
+        </a>
+
+        <!-- Calendar -->
+        <a href="javascript:void(0)" data-page="teacher_calendar" onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Calendar</span>
+        </a>
+
+        <!-- Settings -->
+        <a href="javascript:void(0)" data-page="teacher_settings" onclick="loadTeacherSettings(); setTopNavTab('tab-settings')">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
         </a>
     </div>
 
@@ -512,6 +561,15 @@ window.toggleSidebar = function(forceClose = false) {
         if (overlay) overlay.style.pointerEvents = 'all';
     }
 };
+
+document.querySelectorAll('.sidebar-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            closeMobileSidebar();
+        }
+    });
+});
+
 // ── SETTINGS LOADER ──
 window.loadTeacherSettings = function() {
     const apiArea = document.getElementById('api-content-area');

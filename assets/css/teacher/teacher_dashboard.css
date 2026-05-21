@@ -441,7 +441,9 @@
                 padding-bottom: env(safe-area-inset-bottom);
                 height: calc(82px + env(safe-area-inset-bottom));
             }
-            .sidebar a.desktop-only { display: none; }
+            .sidebar a.desktop-only,
+            .sidebar a.mobile-bottom-link { display: none; }
+            .sidebar-footer { position: static; margin-top: auto; }
         }
 
         @media (max-width: 480px) {
