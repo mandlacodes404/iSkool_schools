@@ -50,6 +50,9 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#161b22">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="iSkool">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="msapplication-navbutton-color" content="#161b22">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
@@ -59,7 +62,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.4">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -93,7 +96,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
 
     <div class="sidebar-links" style="margin-top:20px;">
         <!-- Home -->
-        <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
+        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -102,7 +105,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Quizzes -->
-        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
+        <a class="desktop-bottom-link" href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -160,7 +163,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Syllabus -->
-        <a href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
+        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -172,7 +175,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Evaluations -->
-        <a href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations(); setTopNavTab('tab-evaluations')">
+        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations(); setTopNavTab('tab-evaluations')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
@@ -180,7 +183,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Analytics -->
-        <a class="desktop-only" href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics(); setTopNavTab('tab-analytics')">
+        <a class="desktop-only desktop-top-row-link" href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics(); setTopNavTab('tab-analytics')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
@@ -189,7 +192,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Calendar -->
-        <a href="javascript:void(0)" data-page="teacher_calendar" onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
+        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_calendar" onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -200,7 +203,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
         </a>
 
         <!-- Settings -->
-        <a href="javascript:void(0)" data-page="teacher_settings" onclick="loadTeacherSettings(); setTopNavTab('tab-settings')">
+        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_settings" onclick="loadTeacherSettings(); setTopNavTab('tab-settings')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -210,7 +213,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     </div>
 
     <div class="sidebar-footer">
-        <span>iSkool v.1.0.0</span>
+        <span>iSkool v1.1.2</span>
     </div>
 </div>
 
@@ -420,18 +423,18 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
             <div class="loader-dot3"></div>
             <div class="loader-dot4"></div>
         </div>
+        <div class="loader-version">iSkool v1.1.2</div>
     </div>
 </div>
 
 <!-- Mobile Bottom Nav — UNCHANGED -->
 <nav id="mobileBottomNav">
-     <a href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
+     <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8"  y1="12" x2="16" y2="12"></line>
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
-        <span>Quiz</span>
+        <span>Home</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
@@ -463,6 +466,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
 // ── TOP NAV TAB ACTIVE STATE ──
 window.setTopNavTab = function(tabId) {
     document.querySelectorAll('.top-nav-tab').forEach(t => t.classList.remove('active'));
+    if (!tabId) return;
     const el = document.getElementById(tabId);
     if (el) el.classList.add('active');
 };
@@ -588,7 +592,7 @@ window.loadTeacherSettings = function() {
     const initialsEl = document.querySelector('.sidebar .profile-picture-wrapper .initials-avatar');
     const avatarHTML = avatarImg
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+        : `<span style="font-size:32px;font-weight:800;color:#f4e4e4;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     apiArea.innerHTML = `
         <div style="padding:20px;">
@@ -597,11 +601,11 @@ window.loadTeacherSettings = function() {
             <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
                 <div onclick="triggerTopNavUpload()"
                      style="position:relative;width:100px;height:100px;border-radius:50%;
-                            background:#1b1b1b;border:3px solid #30363d;
+                            background:#6f1d1b;border:none;
                             overflow:hidden;cursor:pointer;flex-shrink:0;
                             transition:border-color 0.2s ease;"
-                     onmouseover="this.style.borderColor='#4fd1c5'; this.querySelector('.cam-overlay').style.opacity='1';"
-                     onmouseout="this.style.borderColor='#30363d'; this.querySelector('.cam-overlay').style.opacity='0';">
+                     onmouseover="this.querySelector('.cam-overlay').style.opacity='1';"
+                     onmouseout="this.querySelector('.cam-overlay').style.opacity='0';">
 
                     <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
                         ${avatarHTML}
@@ -725,8 +729,8 @@ window.removeTeacherProfilePicture = function() {
         { label: 'Evaluations',    keywords: ['eval','evaluations'],     action: () => { fetchTeacherEvaluations(); setTopNavTab('tab-evaluations'); } },
         { label: 'Analytics',      keywords: ['analyt','analytics'],     action: () => { fetchTeacherAnalytics(); setTopNavTab('tab-analytics'); } },
         { label: 'Settings',       keywords: ['setting','settings'],     action: () => { loadTeacherSettings(); setTopNavTab('tab-settings'); } },
-        { label: 'Syllabus',       keywords: ['syllab','syllabus'],      action: () => { openSBODrawer(); setTopNavTab('tab-syllabus'); } },
-        { label: 'Calendar',       keywords: ['calendar','remind'],      action: () => { loadTeacherManual(); setTopNavTab('tab-calendar'); } },
+        { label: 'Syllabus',       keywords: ['syllab','syllabus'],      action: () => { fetchTeacherSyllabus(); setTopNavTab('tab-syllabus'); } },
+        { label: 'Calendar',       keywords: ['calendar','remind'],      action: () => { fetchTeacherCalendar(); setTopNavTab('tab-calendar'); } },
     ];
 
     const input       = document.getElementById('teacherSearchInput');
@@ -823,7 +827,7 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=4.6"></script>
+<script src="assets/js/teacher/dashboard.js?v=4.7"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.0"></script>
 <script src="assets/js/teacher/quizzes.js?v=2.5"></script>
 <script src="assets/js/teacher/announcements.js?v=2.5"></script>

@@ -687,20 +687,22 @@ function renderGrades(data) {
 window.selectDesktopGradeSubject = function (gi) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea || !apiArea._gradesData) return;
+    const groupIndex = parseInt(gi, 10);
+    if (!Number.isInteger(groupIndex) || !apiArea._gradesData.groups?.[groupIndex]) return;
 
     document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    const item = document.getElementById(`grades-dt-item-${gi}`);
+    const item = document.getElementById(`grades-dt-item-${groupIndex}`);
     if (item) item.classList.add('active');
-    saveGradesState({ desktopSubject: gi });
+    saveGradesState({ desktopSubject: groupIndex });
 
-    const group       = apiArea._gradesData.groups[gi];
+    const group       = apiArea._gradesData.groups[groupIndex];
     const currentTerm = apiArea._gradesData.current_term || 1;
     const quizzes     = group.quizzes;
     const panel       = document.getElementById('grades-dt-panel');
     if (!panel) return;
 
     // Use a prefixed ID to avoid any clash with mobile IDs
-    const pfx = `dt${gi}`;
+    const pfx = `dt${groupIndex}`;
 
     panel.innerHTML = `
         <div class="grades-dt-panel-header">
@@ -743,7 +745,7 @@ window.selectDesktopGradeSubject = function (gi) {
 
         <div class="term-marks-view" id="view-term-${pfx}" style="display:none;padding:0 0 16px;">
             <div class="term-selector-wrap">
-                <select class="term-selector" onchange="refreshTermTable('${pfx}', this.value, ${gi})">
+                <select class="term-selector" onchange="refreshTermTable('${pfx}', this.value, ${groupIndex})">
                     ${[1,2,3,4].map(t =>
                         `<option value="${t}" ${t === currentTerm ? 'selected' : ''}>Term ${t}</option>`
                     ).join('')}
@@ -779,7 +781,7 @@ function buildQuizList(quizzes, gi) {
         const pillClass  = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
         const pillText   = published ? `${pct}%` : 'Pending';
         const titleHtml  = published
-            ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="openQuizReview(${q.result_id})">${escHtml(q.quiz_title)}</span>`
+            ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="event.stopPropagation(); openQuizReview(${q.result_id})">${escHtml(q.quiz_title)}</span>`
             : escHtml(q.quiz_title);
 
         const summBadge = q.is_summative
@@ -1469,10 +1471,18 @@ function formatDate(dateStr) {
 window.openQuizReview = function(resultId) {
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    if (window.configureHeader) window.configureHeader({ title: 'Review', mode: 'detail' });
+    const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
+
+    sessionStorage.setItem('lastLearnerPage', 'grades');
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Review', mode: 'detail', detailType: 'Review', backLabel: 'Grades' });
+    }
+    if (myClassContent) myClassContent.classList.remove('active');
     if (apiArea) apiArea.style.display = 'none';
     if (iframe)  {
         iframe.style.display = 'block';
         iframe.src = `review_quiz.php?result_id=${resultId}`;
     }
+    if (mainContent) mainContent.scrollTop = 0;
 };

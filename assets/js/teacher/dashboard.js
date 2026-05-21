@@ -205,6 +205,16 @@ function renderSnapshotPanel(data) {
         document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-page') === page);
         });
+        const topNavTabs = {
+            teacher_syllabus: 'tab-syllabus',
+            teacher_evaluations: 'tab-evaluations',
+            teacher_analytics: 'tab-analytics',
+            teacher_calendar: 'tab-calendar',
+            teacher_settings: 'tab-settings'
+        };
+        if (typeof window.setTopNavTab === 'function') {
+            window.setTopNavTab(topNavTabs[page] || null);
+        }
     };
 
     // ─────────────────────────────────────────────

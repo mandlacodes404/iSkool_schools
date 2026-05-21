@@ -603,10 +603,19 @@ iframe {
     transform-origin: 0 0;
 }
 
-.loader::before  { animation: orbit 1.2s linear infinite 0s;    opacity: 1;    background: #4fd1c5; }
-.loader::after   { animation: orbit 1.2s linear infinite -0.3s; opacity: 0.75; background: #4fd1c5; }
-.loader-dot3     { animation: orbit 1.2s linear infinite -0.6s; opacity: 0.5;  background: #4fd1c5; }
-.loader-dot4     { animation: orbit 1.2s linear infinite -0.9s; opacity: 0.25; background: #4fd1c5; }
+.loader::before  { animation: orbit 1.55s linear infinite 0s;       opacity: 1;    background: #4fd1c5; }
+.loader::after   { animation: orbit 1.55s linear infinite -0.3875s; opacity: 0.75; background: #4fd1c5; }
+.loader-dot3     { animation: orbit 1.55s linear infinite -0.775s;  opacity: 0.5;  background: #4fd1c5; }
+.loader-dot4     { animation: orbit 1.55s linear infinite -1.1625s; opacity: 0.25; background: #4fd1c5; }
+
+.loader-version {
+    position: absolute;
+    bottom: 24px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #555;
+    font-family: 'Nunito', sans-serif;
+}
 
 @keyframes orbit {
     0%   { transform: rotate(0deg)   translateX(18px) rotate(0deg);   }
@@ -739,7 +748,7 @@ iframe {
     .profile-picture-wrapper img.learner-avatar {
         width: 70px !important;   
         height: 70px !important;  
-        border: 0.5px solid rgba(255,255,255,0.18) !important;
+        border: none !important;
         outline: none !important;
         box-shadow: none !important;
         margin-bottom: 12px;
@@ -1014,11 +1023,11 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #121212; /* Charcoal Background */
-    color: #8b8989ff;            /* Muted Silver/Grey text */
+    background-color: #6f1d1b;
+    color: #f4e4e4;
     font-size: 14px;
     font-weight: 800;
-    border: 1px solid #8b8989ff;
+    border: none;
     user-select: none;
     text-transform: uppercase;
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
@@ -1030,7 +1039,7 @@ iframe {
         width: 70px !important;
         height: 70px !important;
         font-size: 24px !important;
-        border: 0.75px solid #8b8989ff!important;
+        border: none !important;
     }
 }
 /* SVG icons – consistent with platform style */

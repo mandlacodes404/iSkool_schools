@@ -211,12 +211,15 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.2">
     <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="iSkool">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="msapplication-navbutton-color" content="#000000">
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.1">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -230,7 +233,7 @@ if (!empty($joinedClassIds)) {
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
                      class="learner-avatar"
-                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:0.5px solid rgba(255,255,255,0.18);">
+                     style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:none;">
             <?php else: ?>
                 <div class="initials-avatar">
                     <?= htmlspecialchars($initials) ?>
@@ -436,6 +439,7 @@ if (!empty($joinedClassIds)) {
         <div class="loader-dot3"></div>
         <div class="loader-dot4"></div>
     </div>
+    <div class="loader-version">iSkool v1.1.2</div>
 </div>
 </div>
 
@@ -730,7 +734,7 @@ if (fullPage &&
     const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
     const avatarHTML = avatarImg
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="font-size:32px;font-weight:800;color:#8b949e;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+        : `<span style="font-size:32px;font-weight:800;color:#f4e4e4;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     const isDesktop = window.innerWidth > 768;
 
@@ -746,7 +750,7 @@ if (fullPage &&
              onmouseover="this.style.background='#21262d'"
              onmouseout="this.style.background='#1b1b1b'">
             <div style="position:relative;width:64px;height:64px;border-radius:50%;
-                        background:#121212;border:1px solid #30363d;
+                        background:#6f1d1b;border:none;
                         overflow:hidden;flex-shrink:0;">
                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
                     ${avatarHTML}
@@ -1009,7 +1013,7 @@ window.loadLearnerPersonalInfo = async function() {
     const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
     const avatarHTML = avatarImg
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="font-size:28px;font-weight:800;color:#8b949e;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+        : `<span style="font-size:28px;font-weight:800;color:#f4e4e4;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     const fields = [
         profile.date_of_birth, profile.id_number, profile.address,
@@ -1030,9 +1034,9 @@ window.loadLearnerPersonalInfo = async function() {
         <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
             <div onclick="document.getElementById('profileInput').click()"
                  style="position:relative;width:80px;height:80px;border-radius:50%;
-                        background:#1b1b1b;border:1px solid #30363d;
+                        background:#6f1d1b;border:none;
                         overflow:hidden;cursor:pointer;flex-shrink:0;">
-                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#6f1d1b;">
                     ${avatarHTML}
                 </div>
             </div>
@@ -1357,7 +1361,7 @@ window.updateAvatarUI = function(imageUrl) {
         const newImg = document.createElement('img');
         newImg.alt = "Profile Picture";
         newImg.className = "learner-avatar";
-        newImg.style.cssText = "width:40px;height:40px;border-radius:50%;object-fit:cover;border:0.5px solid rgba(255,255,255,0.18);";
+        newImg.style.cssText = "width:40px;height:40px;border-radius:50%;object-fit:cover;border:none;";
         newImg.src = imageUrl;
 
         // Insert BEFORE the file input so input stays in DOM
@@ -2044,7 +2048,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=3.7"></script>
 <script src="assets/js/learner/resources.js?v=3.3"></script>
 <script src="assets/js/learner/announcements.js?v=2.9"></script>
-<script src="assets/js/learner/grades.js?v=2.0"></script>
+<script src="assets/js/learner/grades.js?v=2.1"></script>
 <script src="assets/js/learner/evaluations.js?v=2.0"></script>
 <script src="assets/js/learner/discussions.js?v=5.6"></script>
 <script src="assets/js/learner/syllabus.js?v=1.4"></script>
