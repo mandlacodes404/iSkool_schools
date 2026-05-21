@@ -679,6 +679,15 @@ function renderGrades(data) {
     apiArea._gradesData = data;
     restoreGradesStateAfterRender();
     wireGradesScrollState();
+    if (window.innerWidth >= 900 && groups.length > 0) {
+        const state = getGradesState();
+        const selected = Number.isInteger(parseInt(state.desktopSubject, 10))
+            ? parseInt(state.desktopSubject, 10)
+            : 0;
+        if (apiArea._gradesData.groups[selected]) {
+            window.selectDesktopGradeSubject(selected);
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -781,7 +790,7 @@ function buildQuizList(quizzes, gi) {
         const pillClass  = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
         const pillText   = published ? `${pct}%` : 'Pending';
         const titleHtml  = published
-            ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="event.stopPropagation(); openQuizReview(${q.result_id})">${escHtml(q.quiz_title)}</span>`
+            ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
             : escHtml(q.quiz_title);
 
         const summBadge = q.is_summative
@@ -1468,7 +1477,8 @@ function formatDate(dateStr) {
     });
 }
 
-window.openQuizReview = function(resultId) {
+window.openQuizReview = function(resultId, event) {
+    if (event) event.stopPropagation();
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
     const myClassContent = document.getElementById('myClassContent');
