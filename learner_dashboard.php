@@ -228,7 +228,7 @@ if (!empty($joinedClassIds)) {
     
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
         
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="document.getElementById('profileInput').click();">
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings();">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
@@ -339,14 +339,6 @@ if (!empty($joinedClassIds)) {
                 <span>Joined Class</span>
             </div>
         <?php endif; ?>
-        <a href="javascript:void(0)" onclick="loadLearnerSettings();" data-page="learner_settings" id="nav-settings-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-            <span>Settings</span>
-        </a>
     </div>
 
     <div class="footer" style="font-size:15px;"><span><strong>iSkool v1.1.2</strong></span></div>
@@ -776,7 +768,7 @@ if (fullPage &&
     const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
     const avatarHTML = avatarImg
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="font-size:32px;font-weight:800;color:#f4e4e4;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+        : `<span style="font-size:32px;font-weight:800;color:#f4e4e4;text-transform:uppercase;font-family:'Nunito',sans-serif;letter-spacing:1px;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     const isDesktop = window.innerWidth > 768;
 
@@ -1070,7 +1062,7 @@ window.loadLearnerPersonalInfo = async function() {
     const initialsEl = document.querySelector('.profile-picture-wrapper .initials-avatar');
     const avatarHTML = avatarImg
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : `<span style="font-size:28px;font-weight:800;color:#f4e4e4;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
+        : `<span style="font-size:28px;font-weight:800;color:#f4e4e4;font-family:'Nunito',sans-serif;letter-spacing:1px;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
     const fields = [
         profile.date_of_birth, profile.id_number, profile.address,
@@ -1637,7 +1629,6 @@ if (desktopToggle) {
             { selector: '#nav-discussions-sidebar',   color: '#f85149' },
             { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
             { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
-            { selector: '#nav-settings-sidebar',      color: '#8b949e' },
         ];
         sidebarNavConfig.forEach(({ selector, color }) => {
             const el  = document.querySelector(selector);
