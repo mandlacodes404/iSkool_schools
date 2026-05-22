@@ -219,7 +219,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.2">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -339,6 +339,14 @@ if (!empty($joinedClassIds)) {
                 <span>Joined Class</span>
             </div>
         <?php endif; ?>
+        <a href="javascript:void(0)" onclick="loadLearnerSettings();" data-page="learner_settings" id="nav-settings-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
+        </a>
     </div>
 
     <div class="footer" style="font-size:15px;"><span><strong>iSkool v1.1.2</strong></span></div>
@@ -382,12 +390,45 @@ if (!empty($joinedClassIds)) {
     </div>
 
     <div id="headerRight" style="flex: 1; display: flex; justify-content: flex-end;">
-        <button id="settingsBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px;">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-        </button>
+        <div class="top-nav-avatar-btn">
+            <button type="button" class="top-nav-avatar" onclick="toggleLearnerAvatarDropdown()" id="topNavAvatar" aria-label="Profile menu">
+                <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
+                    <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" alt="Profile" id="topNavAvatarImg">
+                <?php else: ?>
+                    <span class="initials-sm" id="topNavAvatarInitials"><?= htmlspecialchars($initials) ?></span>
+                <?php endif; ?>
+            </button>
+
+            <div class="avatar-dropdown" id="learnerAvatarDropdown">
+                <div class="avatar-dropdown-header">
+                    <div class="avatar-dropdown-name"><?= htmlspecialchars($learnerFullName) ?></div>
+                    <div class="avatar-dropdown-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
+                </div>
+                <button class="avatar-dropdown-item" onclick="loadLearnerPersonalInfo(); closeLearnerAvatarDropdown();">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Edit Profile
+                </button>
+                <button class="avatar-dropdown-item" onclick="triggerLearnerProfileUpload()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Upload Photo
+                </button>
+                <button class="avatar-dropdown-item danger" onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sign Out
+                </button>
+            </div>
+        </div>
     </div>
 </div>
     
@@ -728,6 +769,7 @@ if (fullPage &&
 
     sessionStorage.setItem("lastLearnerPage", "learner_settings");
     window.configureHeader({ title: 'Settings', mode: 'standard' });
+    if (typeof window.setActive === 'function') window.setActive("learner_settings");
 
     // Grab current avatar src or initials
     const avatarImg = document.querySelector('.profile-picture-wrapper img.learner-avatar');
@@ -964,9 +1006,24 @@ if (fullPage &&
             ${accountHTML}
         </div>`;
 };
-document.getElementById("settingsBtn")?.addEventListener('click', function() {
-    loadLearnerSettings();
-    if (window.innerWidth <= 768 && sidebar.classList.contains("active")) toggleSidebar();
+
+window.toggleLearnerAvatarDropdown = function() {
+    document.getElementById('learnerAvatarDropdown')?.classList.toggle('open');
+};
+
+window.closeLearnerAvatarDropdown = function() {
+    document.getElementById('learnerAvatarDropdown')?.classList.remove('open');
+};
+
+window.triggerLearnerProfileUpload = function() {
+    closeLearnerAvatarDropdown();
+    document.getElementById('profileInput')?.click();
+};
+
+document.addEventListener('click', function(e) {
+    const btn = document.querySelector('.top-nav-avatar-btn');
+    const drop = document.getElementById('learnerAvatarDropdown');
+    if (btn && drop && !btn.contains(e.target)) drop.classList.remove('open');
 });
 
 // ────────────────────────────────────────────────────────────────────────
@@ -1349,6 +1406,11 @@ const profileInput = document.getElementById("profileInput");
 
 // Shared function to update avatar instantly in the sidebar
 window.updateAvatarUI = function(imageUrl) {
+    const topNav = document.getElementById('topNavAvatar');
+    if (topNav) {
+        topNav.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width:100%;height:100%;object-fit:cover;">`;
+    }
+
     let img = avatarWrapper.querySelector('img.learner-avatar');
     if (img) {
         // Already has a photo — just swap the src
@@ -1371,6 +1433,9 @@ window.updateAvatarUI = function(imageUrl) {
 
 // Shared function to revert back to initials
 window.resetAvatarUI = function(initials) {
+    const topNav = document.getElementById('topNavAvatar');
+    if (topNav) topNav.innerHTML = `<span class="initials-sm">${initials}</span>`;
+
     const img = avatarWrapper.querySelector('img.learner-avatar');
     if (img) img.remove();
 
@@ -1521,6 +1586,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive('syllabus');
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
+} else if (lastSaved === "learner_settings") {
+    window.setActive("learner_settings");
 }
     else {
         window.setActive("<?= $currentPage ?>");
@@ -1570,6 +1637,7 @@ if (desktopToggle) {
             { selector: '#nav-discussions-sidebar',   color: '#f85149' },
             { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
             { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
+            { selector: '#nav-settings-sidebar',      color: '#8b949e' },
         ];
         sidebarNavConfig.forEach(({ selector, color }) => {
             const el  = document.querySelector(selector);

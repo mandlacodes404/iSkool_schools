@@ -110,10 +110,11 @@ body {
         #loader-logo svg {
             width: 92px;
             height: 92px;
+            animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
         }
         .branding {
             font-size: 13px;
-            bottom: 28px;
+            bottom: 40px;
         }
         .branding span:nth-child(1) {
             font-size: 13px;
@@ -131,10 +132,11 @@ body {
         #loader-logo svg {
             width: 82px;
             height: 82px;
+            animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
         }
         .branding {
             font-size: 12px;
-            bottom: 24px;
+            bottom: 36px;
         }
         .branding span:nth-child(1) {
             font-size: 12px;

@@ -465,6 +465,109 @@ iframe {
     margin-right: 4px;
 }
 
+.top-nav-avatar-btn {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.top-nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #6f1d1b;
+    padding: 0;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.top-nav-avatar:hover {
+    border-color: #4fd1c5;
+    transform: scale(1.02);
+}
+
+.top-nav-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.top-nav-avatar .initials-sm {
+    font-size: 13px;
+    font-weight: 800;
+    color: #f4e4e4;
+    text-transform: uppercase;
+}
+
+.avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 6000;
+    overflow: hidden;
+}
+
+.avatar-dropdown.open {
+    display: block;
+}
+
+.avatar-dropdown-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #21262d;
+}
+
+.avatar-dropdown-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #e2e8f0;
+}
+
+.avatar-dropdown-email {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 2px;
+}
+
+.avatar-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #c9d1d9;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+}
+
+.avatar-dropdown-item:hover {
+    background: #21262d;
+    color: #e2e8f0;
+}
+
+.avatar-dropdown-item.danger {
+    color: #f85149;
+}
+
+.avatar-dropdown-item.danger:hover {
+    background: rgba(248,81,73,0.08);
+}
+
 @media (max-width: 768px) {
     #headerBackBtn {
         align-items: center;
@@ -517,7 +620,8 @@ iframe {
     }
 
     .main-header.mobile-detail-mode #headerLogo,
-    .main-header.mobile-detail-mode #settingsBtn {
+    .main-header.mobile-detail-mode #settingsBtn,
+    .main-header.mobile-detail-mode .top-nav-avatar-btn {
         display: none !important;
     }
 }
@@ -1052,6 +1156,11 @@ iframe {
     stroke: currentColor;
     flex-shrink: 0;
     transition: stroke 0.3s ease;
+}
+
+.main-header .avatar-dropdown-item svg {
+    width: 16px;
+    height: 16px;
 }
 @media (max-width: 768px) {
     /* Perspective is key for the 3D 'pop' */
