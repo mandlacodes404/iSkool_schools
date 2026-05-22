@@ -77,7 +77,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/index.css?v=1.8">
     <style>
     #loader-logo svg {
         filter: none;
@@ -130,11 +130,9 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/>
 </g>
 </svg>
-</div>
-</div>
-</div>
-        <div class="branding">
-           
+        </div>
+        <div class="branding splash-version-footer">
+            iSkool v1.1.2
         </div>
     </div>
     <!-- Login/Register container -->
@@ -460,7 +458,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
                 </div>
 
             </div>
-            <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v.1.0.0</div>
+            <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v1.1.2</div>
         </div>
 
         <!-- RIGHT: Form panel -->

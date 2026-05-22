@@ -372,6 +372,13 @@ function renderGrades(data) {
     .no-summative { text-align: center; color: #555e6a; font-style: italic; font-size: 13px; padding: 20px; }
     .review-link { color: #4fd1c5; font-size: 11px; text-decoration: none; margin-left: 6px; opacity: 0.7; }
     .review-link:hover { opacity: 1; }
+    .grades-mobile-review-frame {
+        width: 100%;
+        min-height: calc(100vh - 72px);
+        border: 0;
+        background: #0d1117;
+        display: block;
+    }
     .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
     .grades-empty { text-align: center; color: #555e6a; font-size: 15px; padding: 60px 20px; }
     .g-modal-overlay { display: none !important; }
@@ -495,6 +502,7 @@ function renderGrades(data) {
             const quizzes = group.quizzes;
             sidebarItemsHtml += `
                 <div class="grades-dt-subject-item" id="grades-dt-item-${gi}"
+                     data-grade-subject-index="${gi}"
                      onclick="selectDesktopGradeSubject(${gi})">
                     <div class="grades-dt-subject-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -679,12 +687,13 @@ function renderGrades(data) {
     apiArea._gradesData = data;
     restoreGradesStateAfterRender();
     wireGradesScrollState();
+    wireDesktopGradeSubjectClicks();
     if (window.innerWidth >= 900 && groups.length > 0) {
         const state = getGradesState();
         const selected = Number.isInteger(parseInt(state.desktopSubject, 10))
             ? parseInt(state.desktopSubject, 10)
             : 0;
-        if (apiArea._gradesData.groups[selected]) {
+        if (typeof window.selectDesktopGradeSubject === 'function' && apiArea._gradesData.groups[selected]) {
             window.selectDesktopGradeSubject(selected);
         }
     }
@@ -1049,9 +1058,21 @@ function wireGradesScrollState() {
     }
 }
 
+function wireDesktopGradeSubjectClicks() {
+    const sidebar = document.querySelector('.grades-dt-sidebar-scroll');
+    if (!sidebar || sidebar.dataset.gradesSubjectClicks === '1') return;
+    sidebar.dataset.gradesSubjectClicks = '1';
+    sidebar.addEventListener('click', event => {
+        const item = event.target.closest('.grades-dt-subject-item');
+        if (!item || !sidebar.contains(item)) return;
+        window.selectDesktopGradeSubject(item.dataset.gradeSubjectIndex);
+    });
+}
+
 window.toggleSubjectCard = function (gi) {
     const body = document.getElementById(`scard-body-${gi}`);
     const chev = document.getElementById(`scard-chev-${gi}`);
+    if (!body || !chev) return;
     const open = chev.classList.contains('open');
     body.style.display = open ? 'none' : 'block';
     chev.classList.toggle('open', !open);
@@ -1077,6 +1098,7 @@ window.switchGradesView = function (gi, view) {
     const termEl  = document.getElementById(`view-term-${gi}`);
     const btnList = document.getElementById(`vt-list-${gi}`);
     const btnTerm = document.getElementById(`vt-term-${gi}`);
+    if (!listEl || !termEl || !btnList || !btnTerm) return;
     if (view === 'list') {
         listEl.style.display = 'block';
         termEl.style.display = 'none';
@@ -1099,7 +1121,9 @@ window.refreshTermTable = function (gi, term, sourceGi) {
     const groupIndex = sourceGi !== undefined ? sourceGi : gi;
     const group = apiArea._gradesData.groups[groupIndex];
     if (!group) return;
-    document.getElementById(`term-table-wrap-${gi}`).innerHTML = buildTermTable(group.quizzes, term);
+    const tableWrap = document.getElementById(`term-table-wrap-${gi}`);
+    if (!tableWrap) return;
+    tableWrap.innerHTML = buildTermTable(group.quizzes, term);
     const state = getGradesState();
     saveGradesState({ terms: Object.assign({}, state.terms, { [gi]: String(term) }) });
 };
@@ -1483,6 +1507,9 @@ window.openQuizReview = function(resultId, event) {
     const iframe  = document.getElementById('mainFrame');
     const myClassContent = document.getElementById('myClassContent');
     const mainContent = document.querySelector('.main-content');
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+    const isMobileGradesView = window.innerWidth <= 899;
+    const reviewUrl = `review_quiz.php?result_id=${encodeURIComponent(resultId)}`;
 
     sessionStorage.setItem('lastLearnerPage', 'grades');
     if (window.configureHeader) {
@@ -1492,7 +1519,16 @@ window.openQuizReview = function(resultId, event) {
     if (apiArea) apiArea.style.display = 'none';
     if (iframe)  {
         iframe.style.display = 'block';
-        iframe.src = `review_quiz.php?result_id=${resultId}`;
+        iframe.src = reviewUrl;
+        if (isMobileGradesView) {
+            iframe.classList.add('grades-mobile-review-frame');
+            iframe.setAttribute('title', 'Quiz review');
+        } else {
+            iframe.classList.remove('grades-mobile-review-frame');
+        }
+    }
+    if (isMobileGradesView && mobileBottomNav) {
+        mobileBottomNav.style.setProperty('display', 'none', 'important');
     }
     if (mainContent) mainContent.scrollTop = 0;
 };

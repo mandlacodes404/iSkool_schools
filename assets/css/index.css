@@ -66,20 +66,25 @@ body {
     /* Branding Styles */
     .branding {
         position: absolute;
-        bottom: 60px;
+        bottom: 32px;
         font-size: 14px;
-        color: #888;
+        color: #2f343b;
         font-family: 'Nunito', sans-serif;
         letter-spacing: 0.5px;
-        opacity: 0.7;
+        opacity: 0.92;
         transition: opacity 0.3s ease;
         text-align: center;
         display: flex;
         flex-direction: column;
+        width: 100%;
+        align-items: center;
+        pointer-events: none;
     }
 
-    .branding:hover {
-        opacity: 1;
+    .splash-version-footer {
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
     }
 
     .branding span {
@@ -108,7 +113,7 @@ body {
         }
         .branding {
             font-size: 13px;
-            bottom: 50px;
+            bottom: 28px;
         }
         .branding span:nth-child(1) {
             font-size: 13px;
@@ -129,7 +134,7 @@ body {
         }
         .branding {
             font-size: 12px;
-            bottom: 40px;
+            bottom: 24px;
         }
         .branding span:nth-child(1) {
             font-size: 12px;
