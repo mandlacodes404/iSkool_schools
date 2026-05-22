@@ -1557,6 +1557,42 @@ window.toggleSidebar = function (forceClose = false) {
 
     mobileOverlay.addEventListener("click", toggleSidebar);
 
+    // ------------------------------------------------------------------------
+    // MOBILE SWIPE GESTURES - open sidebar on swipe-right, close on swipe-left
+    // Rules:
+    //   - Open  : touch starts within 28px of left edge, swipes right >= 60px,
+    //             horizontal drag is dominant (more X movement than Y)
+    //   - Close : sidebar is open, swipes left >= 60px, horizontal dominant
+    //   - Only active on mobile (<= 768px). Does not block page scroll.
+    // ------------------------------------------------------------------------
+    if (window.innerWidth <= 768) {
+        let _swipeStartX  = 0;
+        let _swipeStartY  = 0;
+        let _swipeTracking = false;
+
+        document.addEventListener('touchstart', function(e) {
+            if (window.innerWidth > 768) return;
+            const t = e.touches[0];
+            _swipeStartX   = t.clientX;
+            _swipeStartY   = t.clientY;
+            // Track if sidebar is open (close gesture) OR touch near left edge (open gesture)
+            _swipeTracking = sidebar.classList.contains('active') || _swipeStartX <= 28;
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            if (!_swipeTracking || window.innerWidth > 768) return;
+            _swipeTracking = false;
+            const t      = e.changedTouches[0];
+            const deltaX = t.clientX - _swipeStartX;
+            const deltaY = t.clientY - _swipeStartY;
+            // Must travel at least 60px and be more horizontal than vertical
+            if (Math.abs(deltaX) < 60 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            const isOpen = sidebar.classList.contains('active');
+            if (deltaX > 0 && !isOpen) { toggleSidebar();       } // swipe right -> open
+            if (deltaX < 0 &&  isOpen) { toggleSidebar(true);  } // swipe left  -> close
+        }, { passive: true });
+    }
+
     
     // Init UI Highlighter
     const lastSaved = sessionStorage.getItem("lastLearnerPage");
