@@ -1,4 +1,4 @@
-   /* assets/css/learner/learner_dashboard.css - Styles for the Learner Dashboard */
+/* assets/css/learner/learner_dashboard.css - Styles for the Learner Dashboard */
 
 /* ── LEARNER DASHBOARD CSS ───────────────────────────────────────────────
    Crafted with care by the iSkool Team, this stylesheet defines the visual
@@ -364,6 +364,12 @@ body {
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    /* Chrome / Safari / Edge */
+    .main-content::-webkit-scrollbar {
+        display: none;
     }
 }
 
