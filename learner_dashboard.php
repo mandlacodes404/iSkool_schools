@@ -1878,19 +1878,27 @@ window.loadHome = function() {
 // Each page calls learnerPageState.get/set with its own key.
 // ─────────────────────────────────────────────
 window.learnerPageState = {
+    prefix: 'learnerPageState:',
     get(key) {
         try {
-            const raw = sessionStorage.getItem(key);
-            return raw ? JSON.parse(raw) : null;
-        } catch (e) { return null; }
+            const raw = sessionStorage.getItem(this.prefix + key) || sessionStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (e) { return {}; }
     },
     set(key, value) {
         try {
-            sessionStorage.setItem(key, JSON.stringify(value));
+            sessionStorage.setItem(this.prefix + key, JSON.stringify(value || {}));
         } catch (e) { /* storage full — ignore */ }
     },
+    update(key, patch) {
+        this.set(key, Object.assign({}, this.get(key), patch || {}));
+    },
     clear(key) {
-        try { sessionStorage.removeItem(key); } catch (e) {}
+        try {
+            sessionStorage.removeItem(this.prefix + key);
+            sessionStorage.removeItem(key);
+        } catch (e) {}
     }
 };
 </script>
@@ -2048,7 +2056,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=3.7"></script>
 <script src="assets/js/learner/resources.js?v=3.3"></script>
 <script src="assets/js/learner/announcements.js?v=2.9"></script>
-<script src="assets/js/learner/grades.js?v=2.2"></script>
+<script src="assets/js/learner/grades.js?v=2.3"></script>
 <script src="assets/js/learner/evaluations.js?v=2.0"></script>
 <script src="assets/js/learner/discussions.js?v=5.6"></script>
 <script src="assets/js/learner/syllabus.js?v=1.4"></script>

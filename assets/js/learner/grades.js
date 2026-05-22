@@ -9,31 +9,56 @@ window.learnerGradesCachePromise = null;
 window.learnerGradeStatsCache = window.learnerGradeStatsCache || {};
 window.learnerProgressReportCache = window.learnerProgressReportCache || {};
 
-// Shared learner-side state helper. Other learner pages can reuse this shape:
-// learnerPageState.get('page'), learnerPageState.update('page', patch).
-window.learnerPageState = window.learnerPageState || {
-    prefix: 'learnerPageState:',
-    get(page) {
-        try {
-            return JSON.parse(sessionStorage.getItem(this.prefix + page) || '{}');
-        } catch (e) {
-            return {};
+// Shared learner-side state helper. Normalize the helper because learner_dashboard
+// may define it before this file with a smaller API.
+(function ensureLearnerPageState() {
+    const existing = window.learnerPageState || {};
+    const prefix = existing.prefix || 'learnerPageState:';
+
+    window.learnerPageState = {
+        prefix,
+        get(page) {
+            if (typeof existing.get === 'function') {
+                const value = existing.get(page);
+                if (value && typeof value === 'object') return value;
+            }
+            try {
+                const raw = sessionStorage.getItem(prefix + page) || sessionStorage.getItem(page);
+                const parsed = raw ? JSON.parse(raw) : {};
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch (e) {
+                return {};
+            }
+        },
+        set(page, state) {
+            if (typeof existing.set === 'function') {
+                existing.set(page, state || {});
+                return;
+            }
+            try {
+                sessionStorage.setItem(prefix + page, JSON.stringify(state || {}));
+            } catch (e) {}
+        },
+        update(page, patch) {
+            this.set(page, Object.assign({}, this.get(page), patch || {}));
+        },
+        clear(page) {
+            if (typeof existing.clear === 'function') {
+                existing.clear(page);
+                return;
+            }
+            try {
+                sessionStorage.removeItem(prefix + page);
+                sessionStorage.removeItem(page);
+            } catch (e) {}
         }
-    },
-    set(page, state) {
-        try {
-            sessionStorage.setItem(this.prefix + page, JSON.stringify(state || {}));
-        } catch (e) {}
-    },
-    update(page, patch) {
-        this.set(page, Object.assign({}, this.get(page), patch || {}));
-    }
-};
+    };
+})();
 
 let gradesRestoringState = false;
 
 function getGradesState() {
-    const state = window.learnerPageState.get('grades');
+    const state = window.learnerPageState.get('grades') || {};
     state.openSubjects = Array.isArray(state.openSubjects) ? state.openSubjects : null;
     state.openRows = Array.isArray(state.openRows) ? state.openRows : [];
     state.views = state.views || {};
@@ -45,7 +70,9 @@ function getGradesState() {
 
 function saveGradesState(patch) {
     if (gradesRestoringState) return;
-    window.learnerPageState.update('grades', patch);
+    if (window.learnerPageState && typeof window.learnerPageState.update === 'function') {
+        window.learnerPageState.update('grades', patch);
+    }
 }
 
 async function loadGradesData() {
