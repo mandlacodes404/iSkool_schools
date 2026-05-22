@@ -922,74 +922,286 @@ if (fullPage &&
             </div>
         </div>`;
 
-    // ── DESKTOP: two-column layout ─────────────────────────────────────────
+    // ── DESKTOP: Claude-style centered settings layout ──────────
     if (isDesktop) {
         apiArea.innerHTML = `
         <style>
-            .learner-settings-desktop {
-                max-width: 1120px;
+            .ls-wrap {
+                max-width: 740px;
                 margin: 0 auto;
-                padding: 24px 28px 56px;
+                padding: 48px 32px 80px;
                 font-family: 'Nunito', sans-serif;
             }
-            .learner-settings-shell {
-                display: grid;
-                grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-                gap: 0;
-                min-height: calc(100vh - 150px);
+            .ls-page-title {
+                font-size: 28px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 32px;
+                letter-spacing: -0.3px;
+            }
+            /* Hero profile card */
+            .ls-hero {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                background: #161b22;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 16px;
+                padding: 24px 28px;
+                margin-bottom: 32px;
+                cursor: pointer;
+                transition: background 0.2s ease, border-color 0.2s ease;
+            }
+            .ls-hero:hover {
+                background: #1c2128;
+                border-color: rgba(255,255,255,0.12);
+            }
+            .ls-hero-avatar {
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                background: #6f1d1b;
+                overflow: hidden;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .ls-hero-info { flex: 1; min-width: 0; }
+            .ls-hero-name {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .ls-hero-email {
+                font-size: 13px;
+                color: #8b949e;
+                margin-top: 3px;
+            }
+            .ls-hero-cta {
+                font-size: 13px;
+                color: #4fd1c5;
+                font-weight: 600;
+                margin-top: 8px;
+            }
+            .ls-hero-chevron svg { opacity: 0.4; }
+            /* Section label */
+            .ls-section-label {
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin: 0 0 10px 4px;
+            }
+            /* Card group */
+            .ls-card {
+                background: #161b22;
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 14px;
                 overflow: hidden;
-                background: #0d1117;
+                margin-bottom: 32px;
             }
-            .learner-settings-rail {
-                padding: 22px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
+            /* Row inside a card */
+            .ls-row {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 16px 20px;
+                cursor: pointer;
+                transition: background 0.15s ease;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+                font-family: 'Nunito', sans-serif;
             }
-            .learner-settings-main {
-                padding: 22px 24px 28px;
-                overflow-y: auto;
+            .ls-row:hover { background: rgba(255,255,255,0.04); }
+            .ls-row + .ls-row { border-top: 1px solid rgba(255,255,255,0.05); }
+            /* Row icon box */
+            .ls-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
             }
-            .learner-settings-heading {
-                margin: 0 0 16px;
-                color: #4fd1c5;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                text-transform: uppercase;
+            /* Row text */
+            .ls-row-body { flex: 1; min-width: 0; }
+            .ls-row-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #e2e8f0;
             }
-            .learner-settings-main-grid {
+            .ls-row-sub {
+                font-size: 12px;
+                color: #8b949e;
+                margin-top: 2px;
+            }
+            .ls-row-title.danger { color: #f85149; }
+            /* Chevron */
+            .ls-chevron { opacity: 0.35; flex-shrink: 0; }
+            /* Two-column grid for bottom sections */
+            .ls-grid {
                 display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 20px;
-                align-items: start;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
             }
+            /* Notification tip box */
+            .ls-tip {
+                padding: 16px 20px 12px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .ls-tip-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .ls-tip-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: #4fd1c5;
+            }
+            .ls-tip ol {
+                margin: 0;
+                padding-left: 18px;
+                font-size: 12px;
+                color: #8b949e;
+                line-height: 1.9;
+            }
+            .ls-tip ol strong { color: #c9d1d9; }
         </style>
-        <div class="learner-settings-desktop">
-            <div class="learner-settings-shell">
 
-                <!-- LEFT COLUMN: Profile card + Profile picture -->
-                <div class="learner-settings-rail">
-                    <h2 class="learner-settings-heading">Settings</h2>
-                    ${profileCardHTML}
-                    ${profilePicHTML}
+        <div class="ls-wrap">
+            <h1 class="ls-page-title">Settings</h1>
+
+            <!-- HERO: Profile -->
+            <div class="ls-hero" onclick="loadLearnerPersonalInfo()">
+                <div class="ls-hero-avatar">
+                    \${avatarHTML}
                 </div>
+                <div class="ls-hero-info">
+                    <div class="ls-hero-name"><?= htmlspecialchars($learnerFullName) ?></div>
+                    <div class="ls-hero-email"><?= htmlspecialchars($learnerEmail) ?></div>
+                    <div class="ls-hero-cta">Edit personal information &rsaquo;</div>
+                </div>
+                <div class="ls-hero-chevron">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>
 
-                <!-- RIGHT COLUMN: Notifications + Account -->
-                <div class="learner-settings-main">
-                    <div class="learner-settings-main-grid">
-                        <div>${notificationsHTML}</div>
-                        <div>${accountHTML}</div>
+            <!-- PROFILE PICTURE SECTION -->
+            <div class="ls-section-label">Profile Picture</div>
+            <div class="ls-card" style="margin-bottom:32px;">
+                <button class="ls-row" onclick="document.getElementById('profileInput').click()">
+                    <div class="ls-icon" style="background:rgba(79,209,197,0.1);">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="ls-row-body">
+                        <div class="ls-row-title">Update Profile Picture</div>
+                        <div class="ls-row-sub">Upload a new photo</div>
+                    </div>
+                    <svg class="ls-chevron" viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <button class="ls-row" onclick="removeLearnerProfilePicture()">
+                    <div class="ls-icon" style="background:rgba(248,81,73,0.08);">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                        </svg>
+                    </div>
+                    <div class="ls-row-body">
+                        <div class="ls-row-title danger">Remove Profile Picture</div>
+                        <div class="ls-row-sub">Revert to initials avatar</div>
+                    </div>
+                    <svg class="ls-chevron" viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- BOTTOM GRID: Notifications + Account -->
+            <div class="ls-grid">
+
+                <!-- NOTIFICATIONS -->
+                <div>
+                    <div class="ls-section-label">Notifications</div>
+                    <div class="ls-card">
+                        <div class="ls-tip">
+                            <div class="ls-tip-header">
+                                <div class="ls-icon" style="background:rgba(79,209,197,0.1);width:34px;height:34px;border-radius:9px;">
+                                    <span style="font-size:16px;line-height:1;">&#128161;</span>
+                                </div>
+                                <div class="ls-tip-title">Notification Help</div>
+                            </div>
+                            <ol class="ls-tip">
+                                <li><strong>iPhone Users:</strong> You must &ldquo;Add to Home Screen&rdquo; first.</li>
+                                <li>Tap <strong>Sync Notifications</strong> below if you aren&rsquo;t getting alerts.</li>
+                                <li>If prompted, select <strong>&ldquo;Allow&rdquo;</strong> on the system popup.</li>
+                            </ol>
+                        </div>
+                        <button class="ls-row" onclick="requestIphonePush()">
+                            <div class="ls-icon" style="background:rgba(79,209,197,0.1);">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                            </div>
+                            <div class="ls-row-body">
+                                <div class="ls-row-title">Sync Notifications</div>
+                                <div class="ls-row-sub">Not receiving alerts? Tap to sync</div>
+                            </div>
+                            <svg class="ls-chevron" viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-            </div>
-        </div>`;
+                <!-- ACCOUNT -->
+                <div>
+                    <div class="ls-section-label">Account</div>
+                    <div class="ls-card">
+                        <button class="ls-row" onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';">
+                            <div class="ls-icon" style="background:rgba(248,81,73,0.08);">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                            </div>
+                            <div class="ls-row-body">
+                                <div class="ls-row-title danger">Sign Out</div>
+                                <div class="ls-row-sub">Log out of your account</div>
+                            </div>
+                            <svg class="ls-chevron" viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /.ls-grid -->
+        </div><!-- /.ls-wrap -->`;
         return;
     }
 
-    // ── MOBILE: original single-column layout ──────────────────────────────
+        // ── MOBILE: original single-column layout ──────────────────────────────
     apiArea.innerHTML = `
         <div style="padding:20px 16px 40px;max-width:480px;margin:0 auto;">
             ${profileCardHTML}
