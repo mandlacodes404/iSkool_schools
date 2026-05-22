@@ -501,6 +501,9 @@ iframe {
     font-weight: 800;
     color: #f4e4e4;
     text-transform: uppercase;
+    font-family: 'Nunito', sans-serif;
+    line-height: 1;
+    letter-spacing: 0;
 }
 
 .avatar-dropdown {

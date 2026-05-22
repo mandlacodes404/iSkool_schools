@@ -179,17 +179,198 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
         .back-btn:hover { background: var(--accent-color); color: var(--bg-color); }
 
         img.q-image { max-width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border); }
+
+        .review-badge { display: none; }
+        .review-title { font-size: 18px; opacity: 0.8; }
+        .review-meta { margin-top: 10px; font-size: 14px; }
+
+        @media (max-width: 768px) {
+            :root {
+                --bg-color: #0d1117;
+                --card-bg: transparent;
+                --text-color: #e2e8f0;
+                --correct: #22c55e;
+                --incorrect: #f85149;
+                --border: rgba(255,255,255,0.08);
+            }
+
+            html, body {
+                min-height: 100%;
+                background: var(--bg-color);
+            }
+
+            body {
+                display: block;
+                padding: 18px 16px 96px;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
+
+            .container {
+                max-width: 520px;
+                margin: 0 auto;
+            }
+
+            .score-card {
+                background: transparent;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+                text-align: left;
+                padding: 0 0 18px;
+                margin-bottom: 8px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+
+            .review-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 4px 9px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-bottom: 12px;
+                color: #c9d1d9;
+                border: 1px solid rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.04);
+            }
+
+            .perc-circle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 62px;
+                height: 34px;
+                padding: 0 12px;
+                border-radius: 10px;
+                background: rgba(79,209,197,0.08);
+                border: 1px solid rgba(79,209,197,0.28);
+                color: #4fd1c5;
+                font-size: 18px;
+                font-weight: 900;
+                margin-bottom: 14px;
+            }
+
+            .review-title {
+                margin: 0 0 10px;
+                color: #e2e8f0;
+                font-size: 21px;
+                line-height: 1.28;
+                font-weight: 800;
+                opacity: 1;
+            }
+
+            .review-meta {
+                margin-top: 0;
+                color: #8b949e;
+                font-size: 12px;
+                line-height: 1.6;
+            }
+
+            .question-box {
+                background: transparent;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 18px 0 20px;
+                margin: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+
+            .q-meta {
+                display: inline-flex;
+                align-items: center;
+                padding: 3px 8px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #8b949e;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                opacity: 1;
+                margin-bottom: 12px;
+            }
+
+            .question-text {
+                color: #e2e8f0;
+                font-size: 15px;
+                line-height: 1.75;
+                font-weight: 800;
+                margin-bottom: 14px;
+                overflow-wrap: anywhere;
+            }
+
+            img.q-image {
+                width: 100%;
+                border-radius: 10px;
+                margin: 0 0 14px;
+                border: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .choices-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .choice {
+                margin: 0;
+                min-height: 44px;
+                padding: 11px 13px;
+                border-radius: 10px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #c9d1d9;
+                font-size: 14px;
+                line-height: 1.45;
+            }
+
+            .choice.correct {
+                border-color: rgba(34,197,94,0.4);
+                background: rgba(34,197,94,0.09);
+                color: #e2e8f0;
+            }
+
+            .choice.incorrect {
+                border-color: rgba(248,81,73,0.42);
+                background: rgba(248,81,73,0.09);
+                color: #e2e8f0;
+            }
+
+            .choice i {
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+
+            .badge-user {
+                margin-left: auto;
+                color: #4fd1c5;
+                background: rgba(79,209,197,0.08);
+                border: 1px solid rgba(79,209,197,0.2);
+                opacity: 1;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="score-card">
+        <div class="review-badge">
+            <i class="fas fa-chart-simple"></i>
+            Quiz Review
+        </div>
         <div class="perc-circle"><?= $percentage ?>%</div>
-        <div style="font-size: 18px; opacity: 0.8;">
+        <div class="review-title">
             <?= htmlspecialchars($quizInfo['title']) ?>
         </div>
-        <div style="margin-top: 10px; font-size: 14px;">
+        <div class="review-meta">
             Points: <strong><?= $quizInfo['score'] ?> / <?= $quizInfo['total'] ?></strong> • 
             Date: <?= date("d M Y", strtotime($quizInfo['submitted_at'])) ?>
         </div>
