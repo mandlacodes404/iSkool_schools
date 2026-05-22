@@ -1566,18 +1566,32 @@ window.toggleSidebar = function (forceClose = false) {
     //   - Only active on mobile (<= 768px). Does not block page scroll.
     // ------------------------------------------------------------------------
     if (window.innerWidth <= 768) {
-        let _swipeStartX  = 0;
-        let _swipeStartY  = 0;
+        let _swipeStartX   = 0;
+        let _swipeStartY   = 0;
         let _swipeTracking = false;
+        let _swipeIsEdge   = false; // true when gesture started from left edge
 
         document.addEventListener('touchstart', function(e) {
             if (window.innerWidth > 768) return;
             const t = e.touches[0];
             _swipeStartX   = t.clientX;
             _swipeStartY   = t.clientY;
-            // Track if sidebar is open (close gesture) OR touch near left edge (open gesture)
-            _swipeTracking = sidebar.classList.contains('active') || _swipeStartX <= 28;
+            _swipeIsEdge   = _swipeStartX <= 28;                          // left-edge open gesture
+            _swipeTracking = _swipeIsEdge || sidebar.classList.contains('active');
         }, { passive: true });
+
+        // touchmove: non-passive so we can preventDefault on left-edge swipes,
+        // preventing the browser back-navigation gesture from stealing the event.
+        document.addEventListener('touchmove', function(e) {
+            if (!_swipeTracking || !_swipeIsEdge) return;                 // only block edge-open swipes
+            if (window.innerWidth > 768) return;
+            const deltaX = e.touches[0].clientX - _swipeStartX;
+            const deltaY = e.touches[0].clientY - _swipeStartY;
+            // Only cancel if the move is more horizontal than vertical
+            if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0) {
+                e.preventDefault();                                       // stops browser back-swipe
+            }
+        }, { passive: false });
 
         document.addEventListener('touchend', function(e) {
             if (!_swipeTracking || window.innerWidth > 768) return;
@@ -1585,11 +1599,12 @@ window.toggleSidebar = function (forceClose = false) {
             const t      = e.changedTouches[0];
             const deltaX = t.clientX - _swipeStartX;
             const deltaY = t.clientY - _swipeStartY;
-            // Must travel at least 60px and be more horizontal than vertical
-            if (Math.abs(deltaX) < 60 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+            // Must be horizontal-dominant; no minimum distance for edge-open swipes
+            if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
             const isOpen = sidebar.classList.contains('active');
-            if (deltaX > 0 && !isOpen) { toggleSidebar();       } // swipe right -> open
-            if (deltaX < 0 &&  isOpen) { toggleSidebar(true);  } // swipe left  -> close
+            if (deltaX > 0 && !isOpen && _swipeIsEdge) { toggleSidebar();      } // any right-swipe from edge -> open
+            if (deltaX < 0 &&  isOpen)                 { toggleSidebar(true);  } // swipe left -> close (keep 60px min)
+            _swipeIsEdge = false;
         }, { passive: true });
     }
 
