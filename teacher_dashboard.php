@@ -594,6 +594,270 @@ window.loadTeacherSettings = function() {
         ? `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
         : `<span style="font-size:32px;font-weight:800;color:#f4e4e4;text-transform:uppercase;">${initialsEl ? initialsEl.textContent.trim() : '??'}</span>`;
 
+    const isDesktop = window.innerWidth > 768;
+
+    // ── SHARED BLOCKS (used in both layouts) ─────────────────────────────
+
+    const profileCardHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
+            <div onclick="triggerTopNavUpload()"
+                 style="position:relative;width:100px;height:100px;border-radius:50%;
+                        background:#6f1d1b;overflow:hidden;cursor:pointer;flex-shrink:0;
+                        transition:border-color 0.2s ease;"
+                 onmouseover="this.querySelector('.cam-overlay').style.opacity='1';"
+                 onmouseout="this.querySelector('.cam-overlay').style.opacity='0';">
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
+                    ${avatarHTML}
+                </div>
+                <div class="cam-overlay"
+                     style="position:absolute;top:0;left:0;width:100%;height:100%;
+                            background:rgba(0,0,0,0.55);border-radius:50%;
+                            display:flex;flex-direction:column;align-items:center;
+                            justify-content:center;opacity:0;
+                            transition:opacity 0.2s ease;pointer-events:none;">
+                    <svg viewBox="0 0 24 24" width="26" height="26" stroke="#ffffff" stroke-width="2" fill="none">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span style="color:#fff;font-size:11px;font-weight:700;margin-top:4px;">Edit</span>
+                </div>
+            </div>
+            <div style="margin-top:10px;font-size:13px;color:#8b949e;">Click to update photo</div>
+        </div>`;
+
+    const profileActionsHTML = `
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;margin-bottom:20px;">
+            <div onclick="triggerTopNavUpload()"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <div style="flex:1;">
+                    <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Update Profile Picture</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Upload a new photo</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
+            <div onclick="removeTeacherProfilePicture()"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6M14 11v6"></path>
+                    </svg>
+                </div>
+                <div style="flex:1;">
+                    <div style="color:#f85149;font-weight:600;font-size:14px;">Remove Profile Picture</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Revert to initials avatar</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+        </div>`;
+
+    const notificationsHTML = `
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    border-radius:14px;overflow:hidden;margin-bottom:20px;">
+            <div style="padding:16px 18px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span style="font-size:18px;line-height:1;">💡</span>
+                    </div>
+                    <div style="color:#4fd1c5;font-weight:700;font-size:14px;">How to enable notifications</div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">🤖 Android Users</div>
+                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                        <li>Open iSkool in Chrome and tap the menu (⋮).</li>
+                        <li>Select <strong style="color:#c9d1d9;">Add to Home Screen</strong>.</li>
+                        <li>Open the app from your home screen, then tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                        <li>Select <strong style="color:#c9d1d9;">Allow</strong> when prompted.</li>
+                    </ol>
+                </div>
+
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">🍎 iPhone / iOS Users</div>
+                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                        <li>Open iSkool in <strong style="color:#c9d1d9;">Safari</strong> (notifications only work in Safari on iPhone).</li>
+                        <li>Tap the share icon and select <strong style="color:#c9d1d9;">Add to Home Screen</strong>.</li>
+                        <li>Open the app from your home screen, then tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                        <li>Select <strong style="color:#c9d1d9;">Allow</strong> on the popup.</li>
+                    </ol>
+                </div>
+
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+
+                <div>
+                    <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">🌐 Desktop / Browser Users</div>
+                    <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                        <li>Click <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                        <li>Click <strong style="color:#c9d1d9;">Allow</strong> when your browser asks for permission.</li>
+                        <li>If you previously blocked notifications, reset them in your browser's site settings.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div onclick="requestTeacherPush()"
+             style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;
+                    background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;
+                    transition:background 0.2s ease;"
+             onmouseover="this.style.background='#21262d'"
+             onmouseout="this.style.background='#1b1b1b'">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </div>
+            <div style="flex:1;">
+                <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Sync Notifications</div>
+                <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
+            </div>
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </div>`;
+
+    const accountHTML = `
+        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;">
+            <div onclick="window.location.href='logout.php'"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                 onmouseover="this.style.background='#21262d'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
+                <div style="flex:1;">
+                    <div style="color:#f85149;font-weight:600;font-size:14px;">Sign Out</div>
+                    <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+        </div>`;
+
+    // ── DESKTOP: Claude-style tabbed layout ──────────────────────────────
+    if (isDesktop) {
+        apiArea.innerHTML = `
+        <style>
+            .ts-desktop {
+                display: grid;
+                grid-template-columns: 200px minmax(0, 1fr);
+                min-height: calc(100vh - 62px);
+                font-family: 'Nunito', sans-serif;
+            }
+            .ts-rail {
+                padding: 28px 12px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .ts-nav-item {
+                display: flex;
+                align-items: center;
+                padding: 9px 14px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #8b949e;
+                cursor: pointer;
+                transition: background 0.15s ease, color 0.15s ease;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+                font-family: 'Nunito', sans-serif;
+                border-left: 2px solid transparent;
+            }
+            .ts-nav-item:hover {
+                background: rgba(255,255,255,0.04);
+                color: #e2e8f0;
+            }
+            .ts-nav-item.ts-active {
+                background: rgba(79,209,197,0.08);
+                color: #4fd1c5;
+                font-weight: 600;
+                border-left: 2px solid #4fd1c5;
+            }
+            .ts-panel {
+                padding: 32px 40px 56px;
+                overflow-y: auto;
+                max-height: calc(100vh - 62px);
+                background: #0a0e14;
+            }
+            .ts-panel-section {
+                display: none;
+                max-width: 600px;
+            }
+            .ts-panel-section.ts-panel-active {
+                display: block;
+            }
+        </style>
+        <div class="ts-desktop">
+
+            <!-- LEFT RAIL: nav items only -->
+            <nav class="ts-rail">
+                <button class="ts-nav-item ts-active" onclick="tsSwitch('profile', this)">Profile</button>
+                <button class="ts-nav-item" onclick="tsSwitch('notifications', this)">Notifications</button>
+                <button class="ts-nav-item" onclick="tsSwitch('account', this)">Account</button>
+            </nav>
+
+            <!-- RIGHT PANEL: content -->
+            <div class="ts-panel">
+                <div id="ts-section-profile" class="ts-panel-section ts-panel-active">
+                    ${profileCardHTML}
+                    ${profileActionsHTML}
+                </div>
+                <div id="ts-section-notifications" class="ts-panel-section">
+                    ${notificationsHTML}
+                </div>
+                <div id="ts-section-account" class="ts-panel-section">
+                    ${accountHTML}
+                </div>
+            </div>
+
+        </div>`;
+
+        // Tab switching function
+        window.tsSwitch = function(section, btn) {
+            document.querySelectorAll('.ts-nav-item').forEach(b => b.classList.remove('ts-active'));
+            document.querySelectorAll('.ts-panel-section').forEach(p => p.classList.remove('ts-panel-active'));
+            btn.classList.add('ts-active');
+            document.getElementById('ts-section-' + section).classList.add('ts-panel-active');
+        };
+
+        return;
+    }
+
+    // ── MOBILE: original single-column layout ────────────────────────────
     apiArea.innerHTML = `
         <div style="padding:20px;">
 
@@ -606,11 +870,9 @@ window.loadTeacherSettings = function() {
                             transition:border-color 0.2s ease;"
                      onmouseover="this.querySelector('.cam-overlay').style.opacity='1';"
                      onmouseout="this.querySelector('.cam-overlay').style.opacity='0';">
-
                     <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1b1b1b;">
                         ${avatarHTML}
                     </div>
-
                     <div class="cam-overlay"
                          style="position:absolute;top:0;left:0;width:100%;height:100%;
                                 background:rgba(0,0,0,0.55);border-radius:50%;
