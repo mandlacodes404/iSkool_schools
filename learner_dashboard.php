@@ -922,70 +922,375 @@ if (fullPage &&
             </div>
         </div>`;
 
-    // ── DESKTOP: two-column layout ─────────────────────────────────────────
+    // ── DESKTOP: Claude-style tabbed layout ───────────────────────────────
     if (isDesktop) {
-        apiArea.innerHTML = `
-        <style>
-            .learner-settings-desktop {
-                max-width: 1120px;
-                margin: 0 auto;
-                padding: 24px 28px 56px;
-                font-family: 'Nunito', sans-serif;
-            }
-            .learner-settings-shell {
-                display: grid;
-                grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-                gap: 0;
-                min-height: calc(100vh - 150px);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                background: #0d1117;
-            }
-            .learner-settings-rail {
-                padding: 22px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
-            }
-            .learner-settings-main {
-                padding: 22px 24px 28px;
-                overflow-y: auto;
-            }
-            .learner-settings-heading {
-                margin: 0 0 16px;
-                color: #4fd1c5;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                text-transform: uppercase;
-            }
-            .learner-settings-main-grid {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 20px;
-                align-items: start;
-            }
-        </style>
-        <div class="learner-settings-desktop">
-            <div class="learner-settings-shell">
 
-                <!-- LEFT COLUMN: Profile card + Profile picture -->
-                <div class="learner-settings-rail">
-                    <h2 class="learner-settings-heading">Settings</h2>
-                    ${profileCardHTML}
-                    ${profilePicHTML}
-                </div>
-
-                <!-- RIGHT COLUMN: Notifications + Account -->
-                <div class="learner-settings-main">
-                    <div class="learner-settings-main-grid">
-                        <div>${notificationsHTML}</div>
-                        <div>${accountHTML}</div>
+        // Profile panel content (personal info form — loaded async)
+        const profilePanelHTML = `
+            <div id="ls-profile-panel">
+                <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
+                    <div onclick="document.getElementById('profileInput').click()"
+                         style="position:relative;width:80px;height:80px;border-radius:50%;
+                                background:#6f1d1b;overflow:hidden;cursor:pointer;flex-shrink:0;">
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                            ${avatarHTML}
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:10px;">
+                        <button onclick="document.getElementById('profileInput').click()"
+                                style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.25);
+                                       color:#4fd1c5;font-size:12px;font-weight:600;padding:6px 14px;
+                                       border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif;transition:background 0.2s;"
+                                onmouseover="this.style.background='rgba(79,209,197,0.18)'"
+                                onmouseout="this.style.background='rgba(79,209,197,0.1)'">
+                            Upload Photo
+                        </button>
+                        <button onclick="removeLearnerProfilePicture()"
+                                style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);
+                                       color:#f85149;font-size:12px;font-weight:600;padding:6px 14px;
+                                       border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif;transition:background 0.2s;"
+                                onmouseover="this.style.background='rgba(248,81,73,0.15)'"
+                                onmouseout="this.style.background='rgba(248,81,73,0.08)'">
+                            Remove
+                        </button>
                     </div>
                 </div>
 
+                <!-- Personal -->
+                <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;
+                            letter-spacing:0.1em;margin-bottom:8px;">Personal</div>
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:14px;overflow:hidden;margin-bottom:24px;">
+                    <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:13px;color:#8b949e;">Name</span>
+                        <span style="font-size:13px;color:#c9d1d9;font-weight:500;"><?= htmlspecialchars($learnerFullName) ?></span>
+                    </div>
+                    <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:13px;color:#8b949e;">Email</span>
+                        <span style="font-size:13px;color:#c9d1d9;"><?= htmlspecialchars($learnerEmail) ?></span>
+                    </div>
+                    <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:13px;color:#8b949e;">Gender</span>
+                        <span style="font-size:13px;color:#c9d1d9;"><?php if (!empty($learnerGender)): ?><?= htmlspecialchars(ucfirst($learnerGender)) ?><?php else: ?><span style="color:#8b949e;font-style:italic;">Not set</span><?php endif; ?></span>
+                    </div>
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;letter-spacing:0.03em;">Date of Birth</label>
+                        <input type="date" id="pi_dob"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;color-scheme:dark;">
+                    </div>
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;letter-spacing:0.03em;">ID Number</label>
+                        <input type="text" id="pi_id" placeholder="13-digit South African ID" maxlength="13"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                    <div style="padding:13px 16px;">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;letter-spacing:0.03em;">Address</label>
+                        <input type="text" id="pi_address" placeholder="Street, City, Province"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <!-- Guardian -->
+                <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;
+                            letter-spacing:0.1em;margin-bottom:8px;">Guardian / Parent</div>
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:14px;overflow:hidden;margin-bottom:24px;">
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Guardian Name</label>
+                        <input type="text" id="pi_gname" placeholder="Full name of guardian"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Relationship</label>
+                        <select id="pi_grel"
+                                style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                       border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                       font-family:inherit;box-sizing:border-box;cursor:pointer;color-scheme:dark;">
+                            <option value="" style="background:#1b1b1b;">Select relationship</option>
+                            ${['Mother','Father','Grandmother','Grandfather','Aunt','Uncle','Sister','Brother','Legal Guardian','Other'].map(r =>
+                                `<option value="${r}" style="background:#1b1b1b;">${r}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Guardian Phone</label>
+                        <input type="tel" id="pi_gphone" placeholder="e.g. 071 234 5678"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                    <div style="padding:13px 16px;">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Guardian Email</label>
+                        <input type="email" id="pi_gemail" placeholder="guardian@example.com"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <!-- Emergency & Medical -->
+                <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;
+                            letter-spacing:0.1em;margin-bottom:8px;">Emergency &amp; Medical</div>
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:14px;overflow:hidden;margin-bottom:24px;">
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Emergency Contact Name</label>
+                        <input type="text" id="pi_ename" placeholder="Full name"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                    <div style="padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Emergency Contact Phone</label>
+                        <input type="tel" id="pi_ephone" placeholder="e.g. 082 345 6789"
+                               style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                      border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                      font-family:inherit;box-sizing:border-box;">
+                    </div>
+                    <div style="padding:13px 16px;">
+                        <label style="display:block;font-size:11px;color:#8b949e;margin-bottom:5px;font-weight:600;">Medical Notes</label>
+                        <textarea id="pi_medical" rows="3" placeholder="Allergies, conditions, medication, etc."
+                                  style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+                                         border-radius:9px;padding:9px 12px;color:#e2e8f0;font-size:13px;
+                                         font-family:inherit;box-sizing:border-box;resize:vertical;min-height:80px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Save -->
+                <button id="pi_save_btn" onclick="saveLearnerPersonalInfo()"
+                        style="width:100%;padding:14px;background:#4fd1c5;border:none;border-radius:12px;
+                               color:#0d1117;font-size:14px;font-weight:700;cursor:pointer;
+                               font-family:'Nunito',sans-serif;transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.88'"
+                        onmouseout="this.style.opacity='1'">
+                    Save Changes
+                </button>
+                <div id="pi_feedback" style="display:none;margin-top:12px;padding:12px 16px;
+                                             border-radius:10px;font-size:13px;font-weight:600;text-align:center;"></div>
+            </div>`;
+
+        // Notifications panel content
+        const notificationsPanelHTML = `
+            <div id="ls-notifications-panel">
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                            border-radius:14px;overflow:hidden;margin-bottom:20px;">
+                    <div style="padding:16px 18px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span style="font-size:18px;line-height:1;">💡</span>
+                            </div>
+                            <div style="color:#4fd1c5;font-weight:700;font-size:14px;">How to enable notifications</div>
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">
+                                🤖 Android Users
+                            </div>
+                            <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                                <li>Open iSkool in Chrome and tap the menu (⋮).</li>
+                                <li>Select <strong style="color:#c9d1d9;">Add to Home Screen</strong>.</li>
+                                <li>Open the app from your home screen, then tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                                <li>Select <strong style="color:#c9d1d9;">Allow</strong> when prompted.</li>
+                            </ol>
+                        </div>
+
+                        <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">
+                                🍎 iPhone / iOS Users
+                            </div>
+                            <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                                <li>Open iSkool in <strong style="color:#c9d1d9;">Safari</strong> (notifications only work in Safari on iPhone).</li>
+                                <li>Tap the share icon and select <strong style="color:#c9d1d9;">Add to Home Screen</strong>.</li>
+                                <li>Open the app from your home screen, then tap <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                                <li>Select <strong style="color:#c9d1d9;">Allow</strong> on the popup.</li>
+                            </ol>
+                        </div>
+
+                        <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+
+                        <div>
+                            <div style="font-size:12px;font-weight:700;color:#c9d1d9;margin-bottom:6px;">
+                                🌐 Desktop / Browser Users
+                            </div>
+                            <ol style="margin:0;padding-left:18px;font-size:13px;color:#8b949e;line-height:1.9;">
+                                <li>Click <strong style="color:#c9d1d9;">Sync Notifications</strong> below.</li>
+                                <li>Click <strong style="color:#c9d1d9;">Allow</strong> when your browser asks for permission.</li>
+                                <li>If you previously blocked notifications, reset them in your browser's site settings.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="requestIphonePush()"
+                     style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;
+                            background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;
+                            transition:background 0.2s ease;"
+                     onmouseover="this.style.background='#21262d'"
+                     onmouseout="this.style.background='#1b1b1b'">
+                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#e2e8f0;font-weight:600;font-size:14px;">Sync Notifications</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:2px;">Not receiving alerts? Tap to sync</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            </div>`;
+
+        // Account panel content
+        const accountPanelHTML = `
+            <div id="ls-account-panel">
+                <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;">
+                    <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
+                         style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
+                         onmouseover="this.style.background='#21262d'"
+                         onmouseout="this.style.background='transparent'">
+                        <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="color:#f85149;font-weight:600;font-size:14px;">Sign Out</div>
+                            <div style="color:#8b949e;font-size:12px;margin-top:2px;">Log out of your account</div>
+                        </div>
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="#8b949e" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>`;
+
+        apiArea.innerHTML = `
+        <style>
+            .ls-desktop {
+                display: grid;
+                grid-template-columns: 200px minmax(0, 1fr);
+                min-height: calc(100vh - 62px);
+                font-family: 'Nunito', sans-serif;
+            }
+            .ls-rail {
+                padding: 28px 12px;
+                background: #0d1117;
+                border-right: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .ls-nav-item {
+                display: flex;
+                align-items: center;
+                padding: 9px 14px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #8b949e;
+                cursor: pointer;
+                transition: background 0.15s ease, color 0.15s ease;
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+                font-family: 'Nunito', sans-serif;
+                border-left: 2px solid transparent;
+            }
+            .ls-nav-item:hover {
+                background: rgba(255,255,255,0.04);
+                color: #e2e8f0;
+            }
+            .ls-nav-item.ls-active {
+                background: rgba(79,209,197,0.08);
+                color: #4fd1c5;
+                font-weight: 600;
+                border-left: 2px solid #4fd1c5;
+            }
+            .ls-panel {
+                padding: 32px 40px 56px;
+                overflow-y: auto;
+                max-height: calc(100vh - 62px);
+                background: #0a0e14;
+            }
+            .ls-panel-section {
+                display: none;
+                max-width: 600px;
+            }
+            .ls-panel-section.ls-panel-active {
+                display: block;
+            }
+        </style>
+        <div class="ls-desktop">
+
+            <!-- LEFT RAIL: nav items only -->
+            <nav class="ls-rail">
+                <button class="ls-nav-item ls-active" onclick="lsSwitch('profile', this)">Profile</button>
+                <button class="ls-nav-item" onclick="lsSwitch('notifications', this)">Notifications</button>
+                <button class="ls-nav-item" onclick="lsSwitch('account', this)">Account</button>
+            </nav>
+
+            <!-- RIGHT PANEL: content -->
+            <div class="ls-panel">
+                <div id="ls-section-profile" class="ls-panel-section ls-panel-active">
+                    ${profilePanelHTML}
+                </div>
+                <div id="ls-section-notifications" class="ls-panel-section">
+                    ${notificationsPanelHTML}
+                </div>
+                <div id="ls-section-account" class="ls-panel-section">
+                    ${accountPanelHTML}
+                </div>
             </div>
+
         </div>`;
+
+        // Tab switching function (scoped to settings)
+        window.lsSwitch = function(section, btn) {
+            document.querySelectorAll('.ls-nav-item').forEach(b => b.classList.remove('ls-active'));
+            document.querySelectorAll('.ls-panel-section').forEach(p => p.classList.remove('ls-panel-active'));
+            btn.classList.add('ls-active');
+            document.getElementById('ls-section-' + section).classList.add('ls-panel-active');
+        };
+
+        // Load saved profile data into the form fields
+        fetch('api/learner/get_learner_profile.php')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+                const p = data.profile;
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+                set('pi_dob',     p.date_of_birth);
+                set('pi_id',      p.id_number);
+                set('pi_address', p.address);
+                set('pi_gname',   p.guardian_name);
+                set('pi_grel',    p.guardian_relationship);
+                set('pi_gphone',  p.guardian_phone);
+                set('pi_gemail',  p.guardian_email);
+                set('pi_ename',   p.emergency_contact_name);
+                set('pi_ephone',  p.emergency_contact_phone);
+                set('pi_medical', p.medical_notes);
+            })
+            .catch(() => { /* silently fail — form stays empty */ });
+
         return;
     }
 
