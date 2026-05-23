@@ -913,21 +913,22 @@ button:hover {
     color: #E3E3E3;
 }
 
-    /* NEW: Title + Name + Surname Row */
+    /* NEW: Title + Name + Second Name + Surname Row */
     .name-row {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
         margin: 8px 0;
     }
 
     .name-row select,
     .name-row input {
-        flex: 1;
+        flex: 1 1 110px;
         margin: 0;
     }
 
     .name-row select {
-        flex: 0.6;
+        flex: 0 1 82px;
     }
 
     #loaderOverlay {

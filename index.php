@@ -591,7 +591,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="register-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
-                <!-- NEW: Title + First Name + Surname -->
+                <!-- NEW: Title + First Name + Second Name + Surname -->
                 <div class="name-row">
                     <select name="title" required>
                         <option value="" disabled selected>Title</option>
@@ -603,6 +603,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
                         <option value="Rev">Rev</option>
                     </select>
                     <input type="text" name="name" placeholder="First Name" required>
+                    <input type="text" name="second_name" placeholder="Second Name">
                     <input type="text" name="surname" placeholder="Surname" required>
                 </div>
 

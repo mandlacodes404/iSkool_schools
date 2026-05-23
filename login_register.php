@@ -18,6 +18,7 @@ use PHPMailer\PHPMailer\Exception;
 if (isset($_POST['register'])) {
     $title      = trim($_POST['title'] ?? '');
     $first_name = trim($_POST['name'] ?? '');
+    $second_name = trim($_POST['second_name'] ?? '');
     $surname    = trim($_POST['surname'] ?? '');
     $email      = trim($_POST['email']);
     $role       = $_POST['role'];
@@ -86,10 +87,10 @@ if (isset($_POST['register'])) {
 
     $stmt = $conn->prepare("
         INSERT INTO users 
-        (title, name, surname, email, password, role, profile_pic, gender, age)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, name, second_name, surname, email, password, role, profile_pic, gender, age)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("ssssssssi", $title, $first_name, $surname, $email, $password, $role, $defaultPic, $gender, $age);
+    $stmt->bind_param("sssssssssi", $title, $first_name, $second_name, $surname, $email, $password, $role, $defaultPic, $gender, $age);
 
     if ($stmt->execute()) {
        // --- START WELCOME EMAIL ---
