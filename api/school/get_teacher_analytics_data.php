@@ -27,30 +27,36 @@ if (!$teacherEmail || !$classId || !$term) {
     exit();
 }
 
-$email = $conn->real_escape_string($teacherEmail);
-
 $yearResult      = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $current_year_id = (int)($yearResult->fetch_assoc()['id'] ?? 0);
-$yearCond        = $current_year_id ? "AND qr.academic_year_id = $current_year_id" : "";
-$yearCondQ       = $current_year_id ? "AND q.academic_year_id = $current_year_id" : "";
+$yearCond        = $current_year_id ? "AND qr.academic_year_id = ?" : "";
+$yearCondQ       = $current_year_id ? "AND q.academic_year_id = ?" : "";
 
 // ── Quiz averages (class avg per quiz) ──
 $quizAvgs = [];
-$qaRes = $conn->query("
+$qaStmt = $conn->prepare("
     SELECT q.id, q.title,
            ROUND(AVG(qr.score / qr.total * 100), 1) avg,
            COUNT(DISTINCT qr.user_email) submitted
     FROM quizzes q
     LEFT JOIN quiz_results qr ON qr.quiz_id = q.id
-    WHERE q.created_by = '$email'
-      AND q.class_id = $classId
-      AND q.term_number = $term
+    WHERE q.created_by = ?
+      AND q.class_id = ?
+      AND q.term_number = ?
       AND q.is_summative = 1
       AND q.publish_marks = 1
       $yearCondQ
     GROUP BY q.id
     ORDER BY q.created_at ASC
 ");
+$qaTypes = $current_year_id ? "siii" : "sii";
+if ($current_year_id) {
+    $qaStmt->bind_param($qaTypes, $teacherEmail, $classId, $term, $current_year_id);
+} else {
+    $qaStmt->bind_param($qaTypes, $teacherEmail, $classId, $term);
+}
+$qaStmt->execute();
+$qaRes = $qaStmt->get_result();
 while ($r = $qaRes->fetch_assoc()) {
     $quizAvgs[] = [
         'title'     => $r['title'],
@@ -58,25 +64,33 @@ while ($r = $qaRes->fetch_assoc()) {
         'submitted' => (int)$r['submitted'],
     ];
 }
+$qaStmt->close();
 
 // ── Boys vs Girls per quiz ──
 $genderData = [];
-$gRes = $conn->query("
+$gStmt = $conn->prepare("
     SELECT q.id, q.title,
            ROUND(AVG(CASE WHEN u.gender = 'male'   THEN qr.score / qr.total * 100 END), 1) boys,
            ROUND(AVG(CASE WHEN u.gender = 'female' THEN qr.score / qr.total * 100 END), 1) girls
     FROM quizzes q
     LEFT JOIN quiz_results qr ON qr.quiz_id = q.id
     LEFT JOIN users u ON u.email = qr.user_email
-    WHERE q.created_by = '$email'
-      AND q.class_id = $classId
-      AND q.term_number = $term
+    WHERE q.created_by = ?
+      AND q.class_id = ?
+      AND q.term_number = ?
       AND q.is_summative = 1
       AND q.publish_marks = 1
       $yearCondQ
     GROUP BY q.id
     ORDER BY q.created_at ASC
 ");
+if ($current_year_id) {
+    $gStmt->bind_param("siii", $teacherEmail, $classId, $term, $current_year_id);
+} else {
+    $gStmt->bind_param("sii", $teacherEmail, $classId, $term);
+}
+$gStmt->execute();
+$gRes = $gStmt->get_result();
 while ($r = $gRes->fetch_assoc()) {
     if ($r['boys'] !== null || $r['girls'] !== null) {
         $genderData[] = [
@@ -86,20 +100,29 @@ while ($r = $gRes->fetch_assoc()) {
         ];
     }
 }
+$gStmt->close();
 
 // ── Class performance by term (all 4 terms) ──
 $classByTerm = [];
 for ($t = 1; $t <= 4; $t++) {
-    $r = $conn->query("
+    $classTermStmt = $conn->prepare("
         SELECT ROUND(AVG(qr.score / qr.total * 100), 1) avg
         FROM quiz_results qr
         JOIN quizzes q ON qr.quiz_id = q.id
-        WHERE q.created_by = '$email'
-          AND q.class_id = $classId
-          AND q.term_number = $t
+        WHERE q.created_by = ?
+          AND q.class_id = ?
+          AND q.term_number = ?
           AND q.is_summative = 1
           $yearCond
-    ")->fetch_assoc();
+    ");
+    if ($current_year_id) {
+        $classTermStmt->bind_param("siii", $teacherEmail, $classId, $t, $current_year_id);
+    } else {
+        $classTermStmt->bind_param("sii", $teacherEmail, $classId, $t);
+    }
+    $classTermStmt->execute();
+    $r = $classTermStmt->get_result()->fetch_assoc();
+    $classTermStmt->close();
     $classByTerm[] = $r['avg'] !== null ? (float)$r['avg'] : null;
 }
 
@@ -107,19 +130,27 @@ for ($t = 1; $t <= 4; $t++) {
 $boysByTerm   = [];
 $girlsByTerm  = [];
 for ($t = 1; $t <= 4; $t++) {
-    $r = $conn->query("
+    $genderTermStmt = $conn->prepare("
         SELECT
             ROUND(AVG(CASE WHEN u.gender = 'male'   THEN qr.score / qr.total * 100 END), 1) boys,
             ROUND(AVG(CASE WHEN u.gender = 'female' THEN qr.score / qr.total * 100 END), 1) girls
         FROM quiz_results qr
         JOIN quizzes q ON qr.quiz_id = q.id
         JOIN users u ON u.email = qr.user_email
-        WHERE q.created_by = '$email'
-          AND q.class_id = $classId
-          AND q.term_number = $t
+        WHERE q.created_by = ?
+          AND q.class_id = ?
+          AND q.term_number = ?
           AND q.is_summative = 1
           $yearCond
-    ")->fetch_assoc();
+    ");
+    if ($current_year_id) {
+        $genderTermStmt->bind_param("siii", $teacherEmail, $classId, $t, $current_year_id);
+    } else {
+        $genderTermStmt->bind_param("sii", $teacherEmail, $classId, $t);
+    }
+    $genderTermStmt->execute();
+    $r = $genderTermStmt->get_result()->fetch_assoc();
+    $genderTermStmt->close();
     $boysByTerm[]  = $r['boys']  !== null ? (float)$r['boys']  : null;
     $girlsByTerm[] = $r['girls'] !== null ? (float)$r['girls'] : null;
 }
@@ -127,49 +158,65 @@ for ($t = 1; $t <= 4; $t++) {
 // ── Top girls / Top boys (this term) ──
 $topGirls = [];
 $topBoys  = [];
-$topRes = $conn->query("
+$topStmt = $conn->prepare("
     SELECT qr.user_email,
            u.name, u.surname, u.gender,
            ROUND(AVG(qr.score / qr.total * 100), 1) avg
     FROM quiz_results qr
     JOIN quizzes q ON qr.quiz_id = q.id
     JOIN users u ON u.email = qr.user_email
-    WHERE q.created_by = '$email'
-      AND q.class_id = $classId
-      AND q.term_number = $term
+    WHERE q.created_by = ?
+      AND q.class_id = ?
+      AND q.term_number = ?
       AND q.is_summative = 1
       $yearCond
     GROUP BY qr.user_email
     ORDER BY avg DESC
 ");
+if ($current_year_id) {
+    $topStmt->bind_param("siii", $teacherEmail, $classId, $term, $current_year_id);
+} else {
+    $topStmt->bind_param("sii", $teacherEmail, $classId, $term);
+}
+$topStmt->execute();
+$topRes = $topStmt->get_result();
 while ($r = $topRes->fetch_assoc()) {
     $entry = ['name' => trim($r['name'] . ' ' . $r['surname']), 'avg' => (float)$r['avg']];
     if ($r['gender'] === 'female' && count($topGirls) < 5) $topGirls[] = $entry;
     if ($r['gender'] === 'male'   && count($topBoys)  < 5) $topBoys[]  = $entry;
 }
+$topStmt->close();
 
 // ── Admin-only: top learners + needs support (all genders, this term) ──
 $allTop    = [];
 $allBottom = [];
-$perfRes   = $conn->query("
+$perfStmt = $conn->prepare("
     SELECT qr.user_email,
            u.name, u.surname,
            ROUND(AVG(qr.score / qr.total * 100), 1) avg
     FROM quiz_results qr
     JOIN quizzes q ON qr.quiz_id = q.id
     JOIN users u ON u.email = qr.user_email
-    WHERE q.created_by = '$email'
-      AND q.class_id = $classId
-      AND q.term_number = $term
+    WHERE q.created_by = ?
+      AND q.class_id = ?
+      AND q.term_number = ?
       AND q.is_summative = 1
       $yearCond
     GROUP BY qr.user_email
     ORDER BY avg DESC
 ");
+if ($current_year_id) {
+    $perfStmt->bind_param("siii", $teacherEmail, $classId, $term, $current_year_id);
+} else {
+    $perfStmt->bind_param("sii", $teacherEmail, $classId, $term);
+}
+$perfStmt->execute();
+$perfRes = $perfStmt->get_result();
 $perf = [];
 while ($r = $perfRes->fetch_assoc()) {
     $perf[] = ['name' => trim($r['name'] . ' ' . $r['surname']), 'avg' => (float)$r['avg']];
 }
+$perfStmt->close();
 $allTop    = array_slice($perf, 0, 5);
 $allBottom = array_slice(array_reverse($perf), 0, 5);
 

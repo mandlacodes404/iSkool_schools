@@ -49,7 +49,11 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ER
     }
 }
 
-$name_row         = $conn->query("SELECT name, surname FROM users WHERE email = '$learner_email'")->fetch_assoc();
+$nameStmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ?");
+$nameStmt->bind_param("s", $learner_email);
+$nameStmt->execute();
+$name_row = $nameStmt->get_result()->fetch_assoc();
+$nameStmt->close();
 $learner_name     = $name_row['name'] ?? '';
 $learner_surname  = $name_row['surname'] ?? '';
 $creator_fullname = trim($learner_name . ' ' . $learner_surname);
@@ -142,7 +146,10 @@ foreach ($classmates as $cm) {
 if (!empty($tagged_teachers)) {
     $placeholders = implode(',', array_fill(0, count($tagged_teachers), '?'));
     $types        = str_repeat('s', count($tagged_teachers));
-    $tStmt        = $conn->prepare("SELECT email, COALESCE(name,'Teacher') AS name FROM users WHERE email IN ($placeholders) AND role = 'teacher'");
+    $tSql         = "SELECT email, COALESCE(name,'Teacher') AS name FROM users WHERE email IN ("
+        . $placeholders .
+        ") AND role = 'teacher'";
+    $tStmt        = $conn->prepare($tSql);
     $tStmt->bind_param($types, ...$tagged_teachers);
     $tStmt->execute();
     $teachers = $tStmt->get_result()->fetch_all(MYSQLI_ASSOC);

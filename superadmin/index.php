@@ -142,10 +142,14 @@ function runTemplate(string $dbName, string $schoolName, string $adminEmail,
     $statements = array_filter(array_map('trim', explode(';', $sql)));
     foreach ($statements as $stmt) {
         if (empty($stmt) || strpos($stmt, '--') === 0) continue;
-        if (!$conn->query($stmt)) {
+        $prepared = $conn->prepare($stmt);
+        if (!$prepared || !$prepared->execute()) {
+            $err = $prepared ? $prepared->error : $conn->error;
+            if ($prepared) $prepared->close();
             $conn->close();
-            return ['ok' => false, 'msg' => 'SQL error: ' . $conn->error . ' → ' . substr($stmt, 0, 80)];
+            return ['ok' => false, 'msg' => 'SQL error: ' . $err . ' → ' . substr($stmt, 0, 80)];
         }
+        $prepared->close();
     }
     $conn->close();
     return ['ok' => true];

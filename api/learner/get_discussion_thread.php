@@ -14,22 +14,38 @@ $disc_id    = (int)($_GET['discussion_id'] ?? 0);
 
 if (!$disc_id) { echo json_encode(['error' => 'Missing discussion_id']); exit(); }
 
-$disc = $conn->query("
+$discStmt = $conn->prepare("
     SELECT d.*, c.name AS class_name
     FROM class_discussions d
     JOIN classes c ON d.class_id = c.id
-    WHERE d.id = $disc_id
-")->fetch_assoc();
+    WHERE d.id = ?
+");
+$discStmt->bind_param("i", $disc_id);
+$discStmt->execute();
+$disc = $discStmt->get_result()->fetch_assoc();
+$discStmt->close();
 
 if (!$disc) { echo json_encode(['error' => 'Discussion not found']); exit(); }
 
 $class_id          = (int)$disc['class_id'];
-$is_tagged_teacher = $user_role === 'teacher' && $conn->query("SELECT 1 FROM discussion_teachers WHERE discussion_id = $disc_id AND teacher_email = '$user_email'")->num_rows > 0;
-$is_in_class       = $user_role === 'learner'  && $conn->query("SELECT 1 FROM class_students WHERE class_id = $class_id AND student_email = '$user_email'")->num_rows > 0;
+$taggedStmt = $conn->prepare("SELECT 1 FROM discussion_teachers WHERE discussion_id = ? AND teacher_email = ?");
+$taggedStmt->bind_param("is", $disc_id, $user_email);
+$taggedStmt->execute();
+$is_tagged_teacher = $user_role === 'teacher' && $taggedStmt->get_result()->num_rows > 0;
+$taggedStmt->close();
+$classStmt = $conn->prepare("SELECT 1 FROM class_students WHERE class_id = ? AND student_email = ?");
+$classStmt->bind_param("is", $class_id, $user_email);
+$classStmt->execute();
+$is_in_class = $user_role === 'learner' && $classStmt->get_result()->num_rows > 0;
+$classStmt->close();
 
 if (!$is_in_class && !$is_tagged_teacher) { echo json_encode(['error' => 'Access denied']); exit(); }
 
-$creator_row      = $conn->query("SELECT profile_picture, name, surname FROM users WHERE email = '{$disc['creator_email']}'")->fetch_assoc();
+$creatorStmt = $conn->prepare("SELECT profile_picture, name, surname FROM users WHERE email = ?");
+$creatorStmt->bind_param("s", $disc['creator_email']);
+$creatorStmt->execute();
+$creator_row = $creatorStmt->get_result()->fetch_assoc();
+$creatorStmt->close();
 $creator_pic      = $creator_row['profile_picture'] ?? 'default.png';
 $creator_fullname = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
 $creator_display  = $creator_fullname ?: ($disc['creator_name'] ?: 'Learner');

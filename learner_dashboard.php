@@ -440,11 +440,19 @@ if (!empty($joinedClassIds)) {
         <h3>My Class</h3>
         <?php if (!empty($joinedClassIds)): ?>
             <?php 
-            $ids = implode(',', $joinedClassIds);
-            $res = $conn->query("SELECT name FROM classes WHERE id IN ($ids)");
+            $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
+            $types = str_repeat('i', count($joinedClassIds));
+            $classNamesSql = "SELECT name FROM classes WHERE id IN ("
+                . $placeholders .
+                ")";
+            $resStmt = $conn->prepare($classNamesSql);
+            $resStmt->bind_param($types, ...$joinedClassIds);
+            $resStmt->execute();
+            $res = $resStmt->get_result();
             while ($c = $res->fetch_assoc()): ?>
                 <p style="font-size:18px;color:#4fd1c5;font-weight:bold;"><?= htmlspecialchars($c['name']) ?></p>
             <?php endwhile; ?>
+            <?php $resStmt->close(); ?>
 
             <hr>
             <div class="parent-link-section">

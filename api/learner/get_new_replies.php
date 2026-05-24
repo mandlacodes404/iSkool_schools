@@ -20,13 +20,25 @@ $after_id    = (int)($_GET['after_id'] ?? 0);
 if ($disc_id === 0) { echo json_encode([]); exit(); }
 
 // Verify access
-$disc = $conn->query("SELECT class_id FROM class_discussions WHERE id = $disc_id")->fetch_assoc();
+$discStmt = $conn->prepare("SELECT class_id FROM class_discussions WHERE id = ?");
+$discStmt->bind_param("i", $disc_id);
+$discStmt->execute();
+$disc = $discStmt->get_result()->fetch_assoc();
+$discStmt->close();
 if (!$disc) { echo json_encode([]); exit(); }
 
 $class_id = (int)$disc['class_id'];
 
-$is_tagged_teacher = $user_role === 'teacher' && $conn->query("SELECT 1 FROM discussion_teachers WHERE discussion_id = $disc_id AND teacher_email = '$user_email'")->num_rows > 0;
-$is_in_class       = $user_role === 'learner' && $conn->query("SELECT 1 FROM class_students WHERE class_id = $class_id AND student_email = '$user_email'")->num_rows > 0;
+$taggedStmt = $conn->prepare("SELECT 1 FROM discussion_teachers WHERE discussion_id = ? AND teacher_email = ?");
+$taggedStmt->bind_param("is", $disc_id, $user_email);
+$taggedStmt->execute();
+$is_tagged_teacher = $user_role === 'teacher' && $taggedStmt->get_result()->num_rows > 0;
+$taggedStmt->close();
+$classStmt = $conn->prepare("SELECT 1 FROM class_students WHERE class_id = ? AND student_email = ?");
+$classStmt->bind_param("is", $class_id, $user_email);
+$classStmt->execute();
+$is_in_class = $user_role === 'learner' && $classStmt->get_result()->num_rows > 0;
+$classStmt->close();
 
 if (!$is_in_class && !$is_tagged_teacher) { echo json_encode([]); exit(); }
 
@@ -61,13 +73,17 @@ foreach ($rows as &$row) {
         $pid = (int)$row['parent_reply_id'];
         if ($pid === 0) {
             // Quoting the original post
-            $op = $conn->query("
+            $opStmt = $conn->prepare("
                 SELECT d.initial_message,
                        COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display
                 FROM class_discussions d
                 LEFT JOIN users u ON d.creator_email = u.email
-                WHERE d.id = $disc_id
-            ")->fetch_assoc();
+                WHERE d.id = ?
+            ");
+            $opStmt->bind_param("i", $disc_id);
+            $opStmt->execute();
+            $op = $opStmt->get_result()->fetch_assoc();
+            $opStmt->close();
             if ($op) {
                 $row['quote_author'] = $op['creator_display'] ?: 'Learner';
                 $row['quote_text']   = substr($op['initial_message'], 0, 100);

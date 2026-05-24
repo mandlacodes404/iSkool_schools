@@ -265,10 +265,19 @@ $classResult->data_seek(0); // Reset pointer for later use if needed ?>
             <ul>
                 <?php
                 $ids = implode(',', array_map('intval', $joinedClassIds));
-$joinedNames = $conn->query("SELECT name FROM classes WHERE id IN ($ids)");
+                $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
+                $types = str_repeat('i', count($joinedClassIds));
+                $joinedNamesSql = "SELECT name FROM classes WHERE id IN ("
+                    . $placeholders .
+                    ")";
+                $joinedStmt = $conn->prepare($joinedNamesSql);
+                $joinedStmt->bind_param($types, ...$joinedClassIds);
+                $joinedStmt->execute();
+                $joinedNames = $joinedStmt->get_result();
                 while ($cls = $joinedNames->fetch_assoc()): ?>
                     <li><?=htmlspecialchars($cls['name'])?></li>
                 <?php endwhile; ?>
+                <?php $joinedStmt->close(); ?>
             </ul>
         <?php else: ?>
             <p>You haven’t joined any classes yet.</p>

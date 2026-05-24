@@ -31,8 +31,9 @@ if ($action === 'update_name') {
         exit();
     }
 
-    $safe = $conn->real_escape_string($name);
-    $conn->query("UPDATE school_name SET setting_value = '$safe' WHERE setting_key = 'school_name'");
+    $stmt = $conn->prepare("UPDATE school_name SET setting_value = ? WHERE setting_key = 'school_name'");
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
 
     if ($conn->affected_rows >= 0) {
         echo json_encode(['success' => true, 'school_name' => $name]);
@@ -87,8 +88,9 @@ if ($action === 'upload_logo') {
     }
 
     // Update DB
-    $safePath = $conn->real_escape_string($dbPath);
-    $conn->query("UPDATE school_name SET school_logo = '$safePath' WHERE setting_key = 'school_name'");
+    $stmt = $conn->prepare("UPDATE school_name SET school_logo = ? WHERE setting_key = 'school_name'");
+    $stmt->bind_param("s", $dbPath);
+    $stmt->execute();
 
     echo json_encode(['success' => true, 'logo_path' => $dbPath]);
     exit();

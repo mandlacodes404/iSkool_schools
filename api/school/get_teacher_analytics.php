@@ -20,7 +20,6 @@ header('Content-Type: application/json');
 
 $teacherEmail = trim($_POST['teacher_email'] ?? '');
 if (!$teacherEmail) { echo json_encode(['error' => 'Missing teacher_email']); exit(); }
-$email = $conn->real_escape_string($teacherEmail);
 
 // Current academic year
 $yearResult      = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -45,17 +44,21 @@ $sql = "
     JOIN classes c ON q.class_id = c.id
     LEFT JOIN class_students cs ON cs.class_id = q.class_id
     LEFT JOIN users u ON cs.student_email = u.email AND u.role = 'learner'
-    WHERE q.created_by = '$email'
+    WHERE q.created_by = ?
       AND q.is_summative = 1
       AND q.publish_marks = 1
-      AND q.academic_year_id = $current_year_id
+      AND q.academic_year_id = ?
       AND (u.is_deleted = 0 OR u.is_deleted IS NULL)
     GROUP BY q.class_id, c.name, q.term_number
     ORDER BY q.term_number ASC, c.name ASC
 ";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("si", $teacherEmail, $current_year_id);
+$stmt->execute();
+$result = $stmt->get_result();
 $rows   = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+$stmt->close();
 
 $grouped   = [];
 $class_ids = [];
@@ -86,7 +89,10 @@ if (!empty($class_ids)) {
     $types        = 's' . str_repeat('i', count($class_ids));
     $params       = array_merge([$teacherEmail], $class_ids);
 
-    $stmt = $conn->prepare("SELECT class_id, subject_name FROM teacher_subjects WHERE teacher_email = ? AND class_id IN ($placeholders)");
+    $subjectSql = "SELECT class_id, subject_name FROM teacher_subjects WHERE teacher_email = ? AND class_id IN ("
+        . $placeholders .
+        ")";
+    $stmt = $conn->prepare($subjectSql);
     $refs = [];
     foreach ($params as $k => $v) $refs[$k] = &$params[$k];
     array_unshift($refs, $types);

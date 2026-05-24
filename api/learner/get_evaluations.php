@@ -40,8 +40,11 @@ $response = [];
 foreach ($evals as $eval) {
     $eval_id = $eval['id'];
     $hash = hash('sha256', $learner_email . $eval_id . 'salt123');
-    $check = $conn->query("SELECT 1 FROM evaluation_responses WHERE evaluation_id = $eval_id AND unique_hash = '$hash'");
-    $submitted = $check->num_rows > 0;
+    $check = $conn->prepare("SELECT 1 FROM evaluation_responses WHERE evaluation_id = ? AND unique_hash = ?");
+    $check->bind_param("is", $eval_id, $hash);
+    $check->execute();
+    $submitted = $check->get_result()->num_rows > 0;
+    $check->close();
 
     $statements = [];
     if (!$submitted) {

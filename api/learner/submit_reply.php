@@ -14,9 +14,17 @@ $disc_id    = (int)($_POST['discussion_id'] ?? 0);
 if (!$disc_id) { echo json_encode(['error' => 'Missing discussion_id']); exit(); }
 
 // Access check
-$disc     = $conn->query("SELECT class_id FROM class_discussions WHERE id = $disc_id")->fetch_assoc();
+$discStmt = $conn->prepare("SELECT class_id FROM class_discussions WHERE id = ?");
+$discStmt->bind_param("i", $disc_id);
+$discStmt->execute();
+$disc = $discStmt->get_result()->fetch_assoc();
+$discStmt->close();
 $class_id = (int)($disc['class_id'] ?? 0);
-$in_class = $conn->query("SELECT 1 FROM class_students WHERE class_id = $class_id AND student_email = '$user_email'")->num_rows > 0;
+$classStmt = $conn->prepare("SELECT 1 FROM class_students WHERE class_id = ? AND student_email = ?");
+$classStmt->bind_param("is", $class_id, $user_email);
+$classStmt->execute();
+$in_class = $classStmt->get_result()->num_rows > 0;
+$classStmt->close();
 
 if (!$in_class) { echo json_encode(['error' => 'Access denied']); exit(); }
 
@@ -48,7 +56,11 @@ if (empty($message) && !$attachment) {
     echo json_encode(['error' => 'Message or attachment required']); exit();
 }
 
-$name_row      = $conn->query("SELECT name, surname FROM users WHERE email = '$user_email'")->fetch_assoc();
+$nameStmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ?");
+$nameStmt->bind_param("s", $user_email);
+$nameStmt->execute();
+$name_row = $nameStmt->get_result()->fetch_assoc();
+$nameStmt->close();
 $replier_name  = trim(($name_row['name'] ?? '') . ' ' . ($name_row['surname'] ?? ''));
 if ($replier_name === '') $replier_name = 'Learner';
 $show_replier_name = 0;
@@ -64,7 +76,7 @@ $new_id = $stmt->insert_id;
 $stmt->close();
 
 // Return the new reply so JS can render it instantly
-$new_reply = $conn->query("
+$newReplyStmt = $conn->prepare("
     SELECT r.id, r.message, r.attachment, r.created_at,
            r.parent_reply_id, r.replier_email,
            u.profile_picture,
@@ -72,8 +84,12 @@ $new_reply = $conn->query("
            1 AS is_me
     FROM discussion_replies r
     LEFT JOIN users u ON r.replier_email = u.email
-    WHERE r.id = $new_id
-")->fetch_assoc();
+    WHERE r.id = ?
+");
+$newReplyStmt->bind_param("i", $new_id);
+$newReplyStmt->execute();
+$new_reply = $newReplyStmt->get_result()->fetch_assoc();
+$newReplyStmt->close();
 
 // Resolve quote if replying to someone
 $new_reply['quote_author'] = null;
@@ -81,25 +97,33 @@ $new_reply['quote_text']   = null;
 
 if ($parent_reply_id !== null) {
     if ($parent_reply_id === 0) {
-        $op = $conn->query("
+        $opStmt = $conn->prepare("
             SELECT d.initial_message,
                    COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display
             FROM class_discussions d
             LEFT JOIN users u ON d.creator_email = u.email
-            WHERE d.id = $disc_id
-        ")->fetch_assoc();
+            WHERE d.id = ?
+        ");
+        $opStmt->bind_param("i", $disc_id);
+        $opStmt->execute();
+        $op = $opStmt->get_result()->fetch_assoc();
+        $opStmt->close();
         if ($op) {
             $new_reply['quote_author'] = $op['creator_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($op['initial_message'], 0, 100);
         }
     } else {
-        $p = $conn->query("
+        $pStmt = $conn->prepare("
             SELECT r.message,
                    TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))) AS replier_display
             FROM discussion_replies r
             LEFT JOIN users u ON r.replier_email = u.email
-            WHERE r.id = $parent_reply_id
-        ")->fetch_assoc();
+            WHERE r.id = ?
+        ");
+        $pStmt->bind_param("i", $parent_reply_id);
+        $pStmt->execute();
+        $p = $pStmt->get_result()->fetch_assoc();
+        $pStmt->close();
         if ($p) {
             $new_reply['quote_author'] = $p['replier_display'] ?: 'Learner';
             $new_reply['quote_text']   = substr($p['message'] ?? '', 0, 100);
