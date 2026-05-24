@@ -17,16 +17,28 @@ if (isset($_POST['upload']) && isset($_FILES['logo'])) {
     $fileSize  = $file['size'];
     $fileError = $file['error'];
     $fileName  = $file['name'];
+    $safeName  = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($fileName));
 
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-    $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+    $allowedMimeTypes = [
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'webp' => ['image/webp']
+    ];
+    $fileExt = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo ? finfo_file($finfo, $fileTmp) : false;
+    if ($finfo) {
+        finfo_close($finfo);
+    }
 
-    if (!in_array($fileExt, $allowed)) {
+    if ($safeName === '' || !in_array($fileExt, $allowed, true) || !isset($allowedMimeTypes[$fileExt]) || !in_array($mimeType, $allowedMimeTypes[$fileExt], true)) {
         $message = "<p style='color:#f85149;'>Invalid file type. Only images allowed.</p>";
     } elseif ($fileError !== 0) {
         $message = "<p style='color:#f85149;'>Upload error occurred.</p>";
-    } elseif ($fileSize > 3 * 1024 * 1024) {
-        $message = "<p style='color:#f85149;'>File too large (max 3MB).</p>";
+    } elseif ($fileSize > 2 * 1024 * 1024) {
+        $message = "<p style='color:#f85149;'>File too large (max 2MB).</p>";
     } else {
         // ── CHANGED: school-scoped upload directory ──────────────────────────
         $uploadDir  = getSchoolUploadDir($conn, 'uploads/schools');

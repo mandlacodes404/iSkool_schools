@@ -12,7 +12,7 @@
  * "teachers" = class-level announcements grouped by teacher display name
  */
 
-session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');

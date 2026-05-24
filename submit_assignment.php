@@ -56,8 +56,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
     if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === 0) {
         $uploadDir = "assignment_submissions/";
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
-        
-        $filename = time() . "_" . basename($_FILES['submission_file']['name']);
+
+        $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($_FILES['submission_file']['name']));
+        $fileExt = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
+        $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
+        $blockedExtensions = ['php', 'phtml', 'phar', 'html', 'svg', 'js', 'asp', 'cgi', 'pl'];
+        $allowedMimeTypes = [
+            'pdf' => ['application/pdf'],
+            'doc' => ['application/msword', 'application/x-cfb'],
+            'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+            'ppt' => ['application/vnd.ms-powerpoint', 'application/x-cfb'],
+            'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
+            'jpg' => ['image/jpeg'],
+            'jpeg' => ['image/jpeg'],
+            'png' => ['image/png'],
+            'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip']
+        ];
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo ? finfo_file($finfo, $_FILES['submission_file']['tmp_name']) : false;
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+
+        if (
+            $safe_name === '' ||
+            $_FILES['submission_file']['size'] > 10 * 1024 * 1024 ||
+            in_array($fileExt, $blockedExtensions, true) ||
+            !in_array($fileExt, $allowedExtensions, true) ||
+            !isset($allowedMimeTypes[$fileExt]) ||
+            !in_array($mimeType, $allowedMimeTypes[$fileExt], true)
+        ) {
+            echo json_encode(['error' => 'File not allowed']);
+            exit();
+        }
+
+        $filename = time() . "_" . $safe_name;
         $fileUrl = $uploadDir . $filename;
         
         if (!move_uploaded_file($_FILES['submission_file']['tmp_name'], $fileUrl)) {

@@ -5,7 +5,7 @@
  * grouped by subject/teacher — identical logic to the old quiz_history.php
  */
 
-session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');

@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 ob_start();
 header('Content-Type: application/json');
 require_once dirname(__DIR__, 2) . '/config.php';

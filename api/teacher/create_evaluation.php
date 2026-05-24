@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 require dirname(__DIR__, 2) . '/vendor/autoload.php';

@@ -22,7 +22,7 @@
  * Other groups = the teacher's own class-level announcements, grouped by class.
  */
 
-session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');

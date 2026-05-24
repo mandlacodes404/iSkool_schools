@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-session_start();
+require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../config.php';
 
 // Auth guard
