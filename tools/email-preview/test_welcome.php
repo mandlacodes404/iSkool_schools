@@ -86,13 +86,14 @@ if ($role === 'learner') {
 try {
     $mail = new PHPMailer(true);
     $mail->isSMTP();
-    $mail->Host       = 'iskool.online';
+    $mail->Host       = getenv('SMTP_HOST');
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'support@iskool.online';
-    $mail->Password   = 'ogeQkRitRfdy';
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASSWORD');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port       = 465;
-    $mail->setFrom('support@iskool.online', 'iSkool Support');
+    $mail->Port       = getenv('SMTP_PORT');
+    $from_email       = getenv('SMTP_FROM');
+    $mail->setFrom($from_email, 'iSkool Support');
     $mail->addAddress($email, $first_name);
     $mail->isHTML(true);
     $mail->Subject = '[TEST] Welcome to iSkool, ' . $first_name . '!';

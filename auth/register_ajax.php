@@ -183,14 +183,15 @@ try {
         : $_SERVER['HTTP_HOST'];
 
     $mail->isSMTP();
-    $mail->Host       = 'iskool.online';
+    $mail->Host       = getenv('SMTP_HOST');
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'support@iskool.online';
-    $mail->Password   = 'ogeQkRitRfdy';
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASSWORD');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port       = 465;
+    $mail->Port       = getenv('SMTP_PORT');
 
-    $mail->setFrom('support@iskool.online', 'iSkool Support');
+    $from_email = getenv('SMTP_FROM');
+    $mail->setFrom($from_email, 'iSkool Support');
     $mail->addAddress($email, $first_name);
     $mail->isHTML(true);
     $mail->Subject = 'Welcome to iSkool, ' . $first_name . '!';

@@ -125,10 +125,11 @@ foreach ($classmates as $cm) {
     if (!$pushed) {
         try {
             $mail = new PHPMailer(true);
-            $mail->isSMTP(); $mail->Host = 'iskool.online'; $mail->SMTPAuth = true;
-            $mail->Username = 'noreply@iskool.online'; $mail->Password = 'ogeQkRitRfdy';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = 465;
-            $mail->setFrom('noreply@iskool.online', $schoolName);
+            $mail->isSMTP(); $mail->Host = getenv('SMTP_HOST'); $mail->SMTPAuth = true;
+            $mail->Username = getenv('SMTP_USER'); $mail->Password = getenv('SMTP_PASSWORD');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = getenv('SMTP_PORT');
+            $from_email = getenv('SMTP_FROM');
+            $mail->setFrom($from_email, $schoolName);
             $mail->addAddress($cm['email']); $mail->isHTML(true);
             $mail->Subject = "New Discussion: $title";
             $mail->Body = $emailTemplate($cm['name'], 'learner');
@@ -151,10 +152,11 @@ if (!empty($tagged_teachers)) {
         sendPushToUser($conn, $t['email'], "Tagged in Discussion", "$creator_display tagged you.", $teacherDiscussionLink, $schoolName);
         try {
             $mail = new PHPMailer(true);
-            $mail->isSMTP(); $mail->Host = 'iskool.online'; $mail->SMTPAuth = true;
-            $mail->Username = 'noreply@iskool.online'; $mail->Password = 'ogeQkRitRfdy';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = 465;
-            $mail->setFrom('noreply@iskool.online', $schoolName);
+            $mail->isSMTP(); $mail->Host = getenv('SMTP_HOST'); $mail->SMTPAuth = true;
+            $mail->Username = getenv('SMTP_USER'); $mail->Password = getenv('SMTP_PASSWORD');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = getenv('SMTP_PORT');
+            $from_email = getenv('SMTP_FROM');
+            $mail->setFrom($from_email, $schoolName);
             $mail->addAddress($t['email']); $mail->isHTML(true);
             $mail->Subject = "You've been tagged: $title";
             $mail->Body = $emailTemplate($t['name'], 'teacher');

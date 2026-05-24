@@ -1,4 +1,17 @@
 <?php
+$env_file = dirname(__DIR__) . '/.env';
+if (file_exists($env_file)) {
+    $lines = file($env_file, FILE_IGNORE_NEW_LINES |
+              FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (!empty($key)) putenv("$key=$value");
+    }
+}
 // ============================================================
 //  iSkool — Superadmin School Onboarding Panel
 //  File:    superadmin/index.php
@@ -14,20 +27,21 @@ date_default_timezone_set('Africa/Johannesburg');
 // ============================================================
 //  ⚙️  CONFIGURATION — Fill these before uploading
 // ============================================================
-define('SA_PASSWORD',      'SomeStrongPassword@2026');       // your private panel password
-define('CPANEL_USER',      'iskowdbw');
-define('CPANEL_API_TOKEN', 'CFMB6QZBHI5MDBQ1I90GW6DGYYEP9G5L');    // from cPanel → API Tokens
+define('SA_PASSWORD',      getenv('SUPERADMIN_PASSWORD'));       // your private panel password
+define('CPANEL_USER',      getenv('CPANEL_USER'));
+define('CPANEL_API_TOKEN', getenv('CPANEL_TOKEN'));    // from cPanel API Tokens
 define('CPANEL_HOST',      'https://iskool.online:2083');
-define('DB_HOST',          'localhost');
-define('DB_USER',          'iskowdbw');
-define('DB_PASS',          'ogeQkRitRfdy');            // your cPanel DB password
-define('DB_PREFIX',        'iskowdbw_');
+define('DB_HOST',          getenv('DB_HOST'));
+define('DB_USER',          getenv('DB_USER'));
+define('DB_PASS',          getenv('DB_PASSWORD'));            // your cPanel DB password
+define('DB_PREFIX',        getenv('DB_PREFIX'));
 define('MAIN_DOMAIN',      'iskool.online');
 define('TEMPLATE_PATH',    __DIR__ . '/iskool_new_school_template.sql');
-define('SMTP_HOST',        'iskool.online');
-define('SMTP_USER',        'support@iskool.online');
-define('SMTP_PASS',        'ogeQkRitRfdy');         // support@iskool.online password
-define('SMTP_PORT',        465);
+define('SMTP_HOST',        getenv('SMTP_HOST'));
+define('SMTP_USER',        getenv('SMTP_USER'));
+define('SMTP_PASS',        getenv('SMTP_PASSWORD'));         // support@iskool.online password
+define('SMTP_PORT',        getenv('SMTP_PORT'));
+define('SMTP_FROM',        getenv('SMTP_FROM'));
 
 // ============================================================
 //  MASTER DB CONNECTION (tracks all schools)
@@ -178,7 +192,7 @@ function sendWelcomeEmail(string $toEmail, string $toName, string $schoolName,
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = SMTP_PORT;
 
-        $mail->setFrom(SMTP_USER, 'iSkool Support');
+        $mail->setFrom(SMTP_FROM, 'iSkool Support');
         $mail->addAddress($toEmail, $toName);
         $mail->isHTML(true);
         $mail->Subject = 'Welcome to iSkool — Your School Platform is Ready';

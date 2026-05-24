@@ -43,14 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
+            $mail->Host       = getenv('SMTP_HOST');
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'mandlasimphiwe99@gmail.com';
-            $mail->Password   = 'qbfn gpyq gmuh fyyx'; // Consider using environment variables later
+            $mail->Username   = getenv('SMTP_USER');
+            $mail->Password   = getenv('SMTP_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Port       = getenv('SMTP_PORT');
 
-            $mail->setFrom('mandlasimphiwe99@gmail.com', "iSkool - {$parentName}");
+            $from_email = getenv('SMTP_FROM');
+            $mail->setFrom($from_email, "iSkool - {$parentName}");
             $mail->addAddress($teacherEmail, $teacherName);
             $mail->isHTML(true);
             $mail->Subject = 'New Message from Parent - iSkool';

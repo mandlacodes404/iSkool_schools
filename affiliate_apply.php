@@ -62,13 +62,14 @@ $path_label = ($preferred_path === 'direct') ? '⚡ Direct Subscription' : '🎯
 try {
     $mail = new PHPMailer(true);
     $mail->isSMTP();
-    $mail->Host       = 'iskool.online';
+    $mail->Host       = getenv('SMTP_HOST');
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'noreply@iskool.online';
-    $mail->Password   = 'ogeQkRitRfdy';
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASSWORD');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port       = 465;
-    $mail->setFrom('noreply@iskool.online', 'iSkool Website');
+    $mail->Port       = getenv('SMTP_PORT');
+    $from_email       = getenv('SMTP_FROM');
+    $mail->setFrom($from_email, 'iSkool Website');
     $mail->addAddress('info@iskool.online', 'iSkool Team');
     $mail->isHTML(true);
     $mail->Subject = 'New Affiliate Application — ' . $full_name . ' [' . $ref . ']';
@@ -138,13 +139,14 @@ try {
 try {
     $confirm = new PHPMailer(true);
     $confirm->isSMTP();
-    $confirm->Host       = 'iskool.online';
+    $confirm->Host       = getenv('SMTP_HOST');
     $confirm->SMTPAuth   = true;
-    $confirm->Username   = 'noreply@iskool.online';
-    $confirm->Password   = 'ogeQkRitRfdy';
+    $confirm->Username   = getenv('SMTP_USER');
+    $confirm->Password   = getenv('SMTP_PASSWORD');
     $confirm->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $confirm->Port       = 465;
-    $confirm->setFrom('noreply@iskool.online', 'iSkool');
+    $confirm->Port       = getenv('SMTP_PORT');
+    $from_email          = getenv('SMTP_FROM');
+    $confirm->setFrom($from_email, 'iSkool');
     $confirm->addAddress($email, $full_name);
     $confirm->isHTML(true);
     $confirm->Subject = 'Your iSkool Affiliate Application — ' . $ref;

@@ -121,13 +121,14 @@ while ($learner = $learnersResult->fetch_assoc()) {
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP();
-            $mail->Host       = 'iskool.online';
+            $mail->Host       = getenv('SMTP_HOST');
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'noreply@iskool.online';
-            $mail->Password   = 'ogeQkRitRfdy';
+            $mail->Username   = getenv('SMTP_USER');
+            $mail->Password   = getenv('SMTP_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = 465;
-            $mail->setFrom('noreply@iskool.online', $schoolName);
+            $mail->Port       = getenv('SMTP_PORT');
+            $from_email       = getenv('SMTP_FROM');
+            $mail->setFrom($from_email, $schoolName);
             $mail->addAddress($lEmail);
             $mail->isHTML(true);
             $mail->Subject = "New Evaluation: " . $title;

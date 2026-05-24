@@ -4,6 +4,20 @@
  * Fires the school admin onboarding email with dummy data.
  */
 
+$env_file = dirname(__DIR__, 2) . '/.env';
+if (file_exists($env_file)) {
+    $lines = file($env_file, FILE_IGNORE_NEW_LINES |
+              FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (!empty($key)) putenv("$key=$value");
+    }
+}
+
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -25,13 +39,14 @@ $keys       = [
 try {
     $mail = new PHPMailer(true);
     $mail->isSMTP();
-    $mail->Host       = 'iskool.online';
+    $mail->Host       = getenv('SMTP_HOST');
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'support@iskool.online';
-    $mail->Password   = 'ogeQkRitRfdy';
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASSWORD');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port       = 465;
-    $mail->setFrom('support@iskool.online', 'iSkool Support');
+    $mail->Port       = getenv('SMTP_PORT');
+    $from_email       = getenv('SMTP_FROM');
+    $mail->setFrom($from_email, 'iSkool Support');
     $mail->addAddress($email, $name);
     $mail->isHTML(true);
     $mail->Subject = '[TEST] Welcome to iSkool — Your School Platform is Ready';

@@ -16,11 +16,14 @@ function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $sch
         return false;
     }
 
+    $vapid_public  = getenv('VAPID_PUBLIC_KEY');
+    $vapid_private = getenv('VAPID_PRIVATE_KEY');
+
     $auth = [
         'VAPID' => [
             'subject' => 'mailto:mandlasimphiwe99@gmail.com',
-            'publicKey' => 'BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w',
-            'privateKey' => 'hsxomVfHuz9W86G9R6B9AnEVI6EUcRT3QUsQcJAlJ38',
+            'publicKey' => $vapid_public,
+            'privateKey' => $vapid_private,
         ],
     ];
 
