@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherGradesCache  = null;
 window.currentQuizData     = null;
 
@@ -667,7 +671,7 @@ window.saveMarks = async function(email, quizId) {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {
@@ -771,7 +775,7 @@ window.submitAddQuiz = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/add_manual_quiz.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/add_manual_quiz.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {

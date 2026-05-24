@@ -73,6 +73,9 @@ if ($currentYearResult->num_rows === 0) {
 //                     Handle class join 
 //──────────────────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
+    require_once __DIR__ . '/auth/csrf_helper.php';
+    verify_csrf_token();
+
     $classId = (int)$_POST['class_id'];
 
     // Prevent duplicate join
@@ -205,6 +208,7 @@ if (!empty($joinedClassIds)) {
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
@@ -220,7 +224,12 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.5">
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
@@ -329,6 +338,7 @@ if (!empty($joinedClassIds)) {
                     Warning: You can only choose your class *once*. Make sure you select the correct one.
                 </p>
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                     <select name="class_id" required>
                         <option value="">-- Select Class --</option>
                         <?php foreach ($classes as $c): ?>
@@ -1665,7 +1675,7 @@ window.saveLearnerPersonalInfo = async function() {
     try {
         const res  = await fetch('api/learner/save_learner_profile.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: payload
         });
         const data = await res.json();
@@ -1701,6 +1711,7 @@ window.removeLearnerProfilePicture = function() {
     if (!confirm('Remove your profile picture?')) return;
     fetch('upload_profile.php', {
         method: 'POST',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
         body: new URLSearchParams({ remove: '1' })
     })
     .then(r => r.json())
@@ -1776,7 +1787,7 @@ if (avatarWrapper && profileInput) {
         const fd = new FormData();
         fd.append("profile", file);
 
-        fetch("upload_profile.php", { method: "POST", body: fd })
+        fetch("upload_profile.php", { method: "POST", headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
@@ -1853,7 +1864,7 @@ window.toggleSidebar = function (forceClose = false) {
     
     fetch("link_parent.php", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" , 'X-CSRF-Token': getCsrfToken() },
         // Use encodeURIComponent for both to be safe
         body: "parent_email=" + encodeURIComponent(email) + "&class_id=" + classId
     })
@@ -2406,6 +2417,7 @@ function sendToCatcher(subscription) {
     console.log('Sending subscription to server...');
     fetch('subscribe_push.php', {
         method: 'POST',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
         body: JSON.stringify({
             subscription: subscription,
             email: '<?= addslashes($_SESSION['email']) ?>',

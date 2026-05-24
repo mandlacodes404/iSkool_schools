@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ═══════════════════════════════════════════════════════
 // LEARNERS SECTION — school_admin_dashboard
 // Updated: profile_status badge + expanded personal details card
@@ -867,7 +871,7 @@ window.sdlConfirmDelete = async function() {
     try {
         const res  = await fetch('api/school/delete_learner.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `learner_id=${id}`
         });
         const data = await res.json();
@@ -914,7 +918,7 @@ window.loadSdLearnerProfile = async function(email, name) {
     try {
         const res  = await fetch('api/school/get_learner_profile.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `email=${encodeURIComponent(email)}`
         });
         const data = await res.json();

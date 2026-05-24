@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ══════════════════════════════════════════════════════════
 // TEACHERS SECTION — assets/js/school/teachers.js
 // Updated: two-tab profile (Profile + Analytics)
@@ -641,7 +645,7 @@ window.loadSdTeacherProfile = async function(email) {
     try {
         const res  = await fetch('api/school/get_teacher_profile.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `email=${encodeURIComponent(email)}`
         });
         const data = await res.json();
@@ -887,7 +891,7 @@ window.sdtLoadTeacherAnalytics = async function(teacherEmail) {
     try {
         const res  = await fetch('api/school/get_teacher_analytics.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `teacher_email=${encodeURIComponent(teacherEmail)}`
         });
         const data = await res.json();
@@ -1018,7 +1022,7 @@ window.sdtAnSelectClass = async function(classId, term) {
     try {
         const res  = await fetch('api/school/get_teacher_analytics_data.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `teacher_email=${encodeURIComponent(window._sdtAnTeacherEmail)}&class_id=${classId}&term=${term}`
         });
         const data = await res.json();

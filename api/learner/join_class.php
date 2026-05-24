@@ -2,12 +2,15 @@
 header("Content-Type: application/json");
 
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__) . '/config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(["success" => false]);
     exit();
 }
+
+verify_csrf_token();
 
 $learnerEmail = $_SESSION['email'];
 $classId = (int)$_POST['class_id'] ?? 0;

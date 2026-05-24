@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ── TEACHER SYLLABUS PAGE ────────────────────────────────────────────────────
 
 window.teacherSBOCache = null;
@@ -819,7 +823,7 @@ window.saveSBO = async function() {
     try {
         const res  = await fetch('api/teacher/save_sbo.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({ class_id, term, subject, topics, assessments, notes })
         });
         const data = await res.json();

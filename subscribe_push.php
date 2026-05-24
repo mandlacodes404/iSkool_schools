@@ -1,8 +1,11 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 
 header('Content-Type: application/json');
+
+verify_csrf_token();
 
 // Get the JSON data sent from the dashboard
 $input = json_decode(file_get_contents('php://input'), true);

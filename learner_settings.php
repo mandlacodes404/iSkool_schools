@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
 require_once 'config.php';
 
 if (!isset($_SESSION['email'])) {
@@ -36,6 +36,7 @@ if (empty($initials)) { $initials = "??"; }
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Settings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -248,7 +249,12 @@ if (empty($initials)) { $initials = "??"; }
         }
     }
 </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
     <div class="container">
         <div class="header">
@@ -317,6 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
     fetch('upload_profile.php', {
         method: 'POST',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
         body: new URLSearchParams({ remove: '1' })
     })
     .then(res => res.json())

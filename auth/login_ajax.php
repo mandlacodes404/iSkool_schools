@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/session_guard.php';
+require_once __DIR__ . '/csrf_helper.php';
 /**
  * login_ajax.php
  *
@@ -12,22 +14,14 @@
 
 header('Content-Type: application/json');
 
-// ── Only accept POST requests ──
+// Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
     exit();
 }
 
-// ── Secure session cookie settings (must match login_register.php) ──
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path'     => '/',
-    'secure'   => true,
-    'httponly' => true,
-    'samesite' => 'Strict',
-]);
-session_start();
+verify_csrf_token();
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/remember_me_functions.php';

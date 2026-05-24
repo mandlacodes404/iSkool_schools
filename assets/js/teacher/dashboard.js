@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.showTeacherScopedLoader = function(panel, message = 'Working...') {
     const isDesktop = window.innerWidth >= 900 && panel;
 
@@ -340,7 +344,7 @@ function renderSnapshotPanel(data) {
         const fd = new FormData();
         fd.append('profile', file);
 
-        fetch('upload_teacher_profile.php', { method: 'POST', body: fd })
+        fetch('upload_teacher_profile.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .then(r => r.json())
             .then(d => {
                 if (d.success) {
@@ -608,7 +612,7 @@ window.saveReminder = async function() {
     try {
         const res  = await fetch('api/teacher/save_reminder.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body: JSON.stringify({ title, date })
         });
         const data = await res.json();
@@ -677,7 +681,7 @@ window.saveAcademicEvent = async function() {
     try {
         const res  = await fetch('api/teacher/save_academic_event.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({ title, event_date: date, event_type: eventType, class_id: parseInt(classId) })
         });
         const data = await res.json();

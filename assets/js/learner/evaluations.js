@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 /* assets/js/evaluations.js */
 window.evaluationCache          = null;
 window.evaluationPrefetchPromise = null;
@@ -532,6 +536,7 @@ window.handleEvalSubmit = async function(e, id) {
     try {
         const response = await fetch('api/learner/submit_evaluation.php', {
             method: 'POST',
+            headers: { 'X-CSRF-Token': getCsrfToken() },
             body: new FormData(e.target)
         });
         const res = await response.json();

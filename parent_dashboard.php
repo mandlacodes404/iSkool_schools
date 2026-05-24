@@ -43,6 +43,9 @@ $stmt->close();
 
 /* ---------- JOIN CLASS (safe & secure) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
+    require_once __DIR__ . '/auth/csrf_helper.php';
+    verify_csrf_token();
+
     $classId = (int)$_POST['class_id'];
 
     $check = $conn->prepare("SELECT 1 FROM parent_classes WHERE parent_email = ? AND class_id = ?");
@@ -81,6 +84,7 @@ $joinedStmt->close();
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Parent Dashboard</title>
     <style>
@@ -163,7 +167,12 @@ iframe{border:none;width:100%;flex:1;overflow:auto;background:var(--card-bg)}
 .parent-email{font-size:12px;color:#aaa;margin-top:1px;max-height:20px;opacity:1;overflow:hidden}
 .sidebar.collapsed .parent-name,.sidebar.collapsed .parent-email{max-height:0;opacity:0}
     </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
@@ -190,6 +199,7 @@ iframe{border:none;width:100%;flex:1;overflow:auto;background:var(--card-bg)}
                 Warning: You can only choose your class *once*. Make sure you select the correct one.
             </p>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <select name="class_id" required>
                     <option value="">-- Select Class --</option>
                    <?php while ($c = $classResult->fetch_assoc()): 
@@ -326,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
             avatar.src = URL.createObjectURL(file);
             const fd = new FormData();
             fd.append('profile', file);
-            fetch('upload_parent_profile.php', {method:'POST', body:fd})
+            fetch('upload_parent_profile.php', {method:'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body:fd})
                 .then(r=>r.json())
                 .then(d=>{ if(d.success) avatar.src='Uploads/parents/'+d.file+'?t='+Date.now(); else alert(d.error||'Upload failed'); });
         });

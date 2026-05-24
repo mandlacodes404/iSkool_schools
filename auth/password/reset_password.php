@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../session_guard.php';
+require_once __DIR__ . '/../csrf_helper.php';
 require __DIR__ . '/../../config.php';
 
 $token = $_GET['token'] ?? '';
@@ -21,6 +22,8 @@ if ($result->num_rows === 0 && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // 2. Handle Password Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $newPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $row = $result->fetch_assoc();
     $email = $row['email'];
@@ -173,6 +176,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
         <p class="subtitle">Secure your account by choosing a new password below.</p>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <div class="password-wrapper">
                 <input type="password" name="password" id="reset-password" placeholder="New password" required>
                 <i class="fas fa-eye toggle-password" onclick="togglePassword(this)"></i>

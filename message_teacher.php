@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 require 'vendor/autoload.php';
 
@@ -27,6 +28,8 @@ while ($row = $stmt->fetch_assoc()) {
 $stmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $teacherEmail = $_POST['teacher_email'] ?? '';
     $message      = trim($_POST['message'] ?? '');
 
@@ -123,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Message a Teacher</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -308,6 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" id="messageForm">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <div class="form-group">
                 <label for="teacher_email">Select Teacher</label>
                 <select name="teacher_email" id="teacher_email" required>

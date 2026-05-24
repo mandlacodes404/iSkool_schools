@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
@@ -48,6 +49,8 @@ $scoreStmt->close();
 // Handle form submission
 $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $score = floatval($_POST['score']);
     $total = floatval($_POST['total']);
 
@@ -76,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <meta charset="UTF-8" />
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit Marks - <?= htmlspecialchars($fullName) ?></title>
     <style>
@@ -144,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="subtitle">Student: <strong><?= htmlspecialchars($fullName) ?></strong><br>Quiz: <?= htmlspecialchars($quizTitle) ?></p>
     
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <label for="score">Score Received:</label>
         <input type="number" step="0.01" name="score" id="score" value="<?= htmlspecialchars($existingScore) ?>" placeholder="e.g. 15" required>
 

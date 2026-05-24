@@ -50,6 +50,7 @@ $schoolLogo = 'uploads/schools/default_school.png';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>School Dashboard — <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">

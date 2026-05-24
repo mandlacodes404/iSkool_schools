@@ -5,7 +5,8 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
 require 'vendor/autoload.php';
@@ -56,6 +57,8 @@ $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     : $_SERVER['HTTP_HOST'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    verify_csrf_token();
+
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
     $duration       = intval($_POST['duration'] ?? 0);
     $class_id       = intval($_POST['class_id'] ?? 0);
@@ -284,6 +287,7 @@ if ($checkSub->get_result()->num_rows > 0) {
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Create Quiz</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -550,7 +554,12 @@ input[type="radio"]:checked + .mode-card i {
     color: #4fd1c5 !important;
 }
 </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
   <h1><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="quiz-icon">
                                               <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -774,6 +783,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       fetch("create_quiz.php", {
         method: "POST",
+        headers: { 'X-CSRF-Token': getCsrfToken() },
         body: formData,
         redirect: 'manual'
       })

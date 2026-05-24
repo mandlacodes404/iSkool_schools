@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherQuizzesCache = null;
 window.currentQuizResultsData = null;
 
@@ -654,7 +658,7 @@ window.togglePublishMarks = async function(quizId) {
     try {
         const res  = await fetch('api/teacher/toggle_publish_marks.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body: JSON.stringify({ quiz_id: quizId })
         });
         const data = await res.json();
@@ -705,7 +709,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
     try {
         const res  = await fetch('api/teacher/toggle_quiz_status.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body: JSON.stringify({ quiz_id: quizId, status: newStatus })
         });
         const data = await res.json();
@@ -1156,6 +1160,7 @@ window.openCreateQuiz = async function() {
             try {
                 const res  = await fetch('../../../create_quiz.php', {
                     method: 'POST',
+                    headers: { 'X-CSRF-Token': getCsrfToken() },
                     body: fd
                 });
                 const data = await res.json();

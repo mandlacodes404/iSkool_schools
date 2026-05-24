@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherAnalyticsCache     = null;
 window.analyticsCharts            = {};
 window.analyticsCurrentClassId    = null;
@@ -720,7 +724,7 @@ window.selectAnalyticsClass = async function (classId, term) {
     try {
         const res  = await fetch('api/teacher/get_analytics_data.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `class_id=${classId}&term=${term}`
         });
         const data = await res.json();
@@ -1136,7 +1140,7 @@ window.saveSubject = async function () {
     try {
         const res  = await fetch('api/teacher/save_subject.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: `class_id=${window.analyticsCurrentClassId}&subject_name=${encodeURIComponent(subject)}`
         });
         const data = await res.json();

@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherAssignmentsCache = null;
 
 // ─────────────────────────────────────────────
@@ -680,6 +684,7 @@ window.openCreateAssignment = async function() {
             try {
                 const res  = await fetch('api/teacher/create_assignment.php', {
                     method: 'POST',
+                    headers: { 'X-CSRF-Token': getCsrfToken() },
                     body: fd
                 });
                 const data = await res.json();

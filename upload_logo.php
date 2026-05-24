@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 require_once 'school_upload_helper.php';  // ← NEW
 
@@ -8,10 +9,12 @@ if (!isset($_SESSION['school_admin'])) {
     exit();
 }
 
+
 $message = '';
 
 // Handle logo upload
 if (isset($_POST['upload']) && isset($_FILES['logo'])) {
+    verify_csrf_token();
     $file      = $_FILES['logo'];
     $fileTmp   = $file['tmp_name'];
     $fileSize  = $file['size'];

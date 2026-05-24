@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 require_once 'school_upload_helper.php';  // ← NEW
 
@@ -8,6 +9,8 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['teacher'])) {
     echo json_encode(['error' => 'Not logged in or not a teacher']);
     exit();
 }
+
+verify_csrf_token();
 
 $email      = $_SESSION['email'];
 $defaultPic = 'default.png';

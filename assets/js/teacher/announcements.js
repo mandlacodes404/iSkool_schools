@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 /**
  * iSkool — assets/js/teacher/announcements.js
  * Updated to handle school-wide announcements (is_school: true) from admin.
@@ -504,7 +508,7 @@ window.submitCreateAnnouncement = async function() {
     }
 
     try {
-        const res  = await fetch('api/teacher/create_announcement.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/create_announcement.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {

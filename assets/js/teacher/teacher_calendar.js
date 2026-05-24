@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ══════════════════════════════════════════════════════
 //  TEACHER CALENDAR — Full Page
 //  Drop this file in your JS includes on teacher_dashboard.php
@@ -824,7 +828,7 @@ window.saveFullCalReminder = async function () {
     try {
         const res  = await fetch('api/teacher/save_reminder.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({ title, date })
         });
         const data = await res.json();
@@ -860,7 +864,7 @@ window.saveFullCalAcademic = async function () {
     try {
         const res  = await fetch('api/teacher/save_academic_event.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({
                 title,
                 event_date: date,

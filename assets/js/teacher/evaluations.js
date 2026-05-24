@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherEvaluationCache = null;
 
 window.fetchTeacherEvaluations = async function() {
@@ -671,7 +675,7 @@ window.submitReleaseEvaluation = async function() {
     if (!hideSubmitLoader && loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/create_evaluation.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/create_evaluation.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {

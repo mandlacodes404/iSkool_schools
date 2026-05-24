@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/session_guard.php';
+require_once __DIR__ . '/csrf_helper.php';
 /**
  * register_ajax.php
  *
@@ -19,6 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
     exit();
 }
+
+verify_csrf_token();
 
 require_once __DIR__ . '/../config.php';
 

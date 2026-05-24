@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 
@@ -9,6 +10,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     echo json_encode(['error' => 'Unauthorized']);
     exit();
 }
+
+verify_csrf_token();
 
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';

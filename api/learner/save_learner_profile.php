@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once __DIR__ . '/../../config.php';
 
 // Auth guard
@@ -31,6 +32,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['success' => false, 'error' => 'Not authorised']);
     exit();
 }
+
+verify_csrf_token();
 
 $email = $_SESSION['email'];
 

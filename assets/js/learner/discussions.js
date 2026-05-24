@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 /* assets/js/learner/discussions.js */
 
 window.discussionCache       = null;
@@ -1260,7 +1264,7 @@ window.discSheetSubmitReply = async function(discId) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
 
     try {
-        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
@@ -1394,7 +1398,7 @@ function _discSheetShowVoiceReady(mimeType) {
 function sendTypingSignal(discId) {
     fetch('api/set_typing.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
         body: `discussion_id=${discId}`
     }).catch(() => {});
 }
@@ -1500,7 +1504,7 @@ window.discSubmitReply = async function(discId) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
 
     try {
-        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
@@ -1811,7 +1815,7 @@ window.discSubmitReport = async function(replyId, discId) {
     fd.append('comment', comment);
 
     try {
-        await fetch('view_discussion.php', { method: 'POST', body: fd });
+        await fetch('view_discussion.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         document.getElementById('discReportModal')?.remove();
     } catch (e) {}
 };
@@ -1961,7 +1965,7 @@ window.discSubmitCreate = async function() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
 
     try {
-        const res  = await fetch('api/learner/create_discussion.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/learner/create_discussion.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 

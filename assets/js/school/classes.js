@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ═══════════════════════════════════════════════════════
 // CLASSES SECTION — iSkool School Admin
 // Simple control-panel style class management
@@ -448,7 +452,7 @@ async function _saveClass() {
     try {
         const res  = await fetch('api/school/create_class.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({ name })
         });
         const data = await res.json();
@@ -482,7 +486,7 @@ async function _confirmDelete() {
     try {
         const res  = await fetch('api/school/delete_class.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' , 'X-CSRF-Token': getCsrfToken() },
             body:    JSON.stringify({ id: _pendingDeleteId })
         });
         const data = await res.json();

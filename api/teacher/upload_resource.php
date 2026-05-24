@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 require_once dirname(__DIR__, 2) . '/push_functions.php';
@@ -14,6 +15,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit();
 }
+
+verify_csrf_token();
 
 $email       = $_SESSION['email'];
 $maxFileSize = 10 * 1024 * 1024;

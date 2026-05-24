@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
@@ -48,6 +49,7 @@ $subStmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
     header('Content-Type: application/json'); // Ensure the browser knows this is JSON
+    verify_csrf_token();
     
     $submission_text = $_POST['submission_text'] ?? null;
     $fileUrl = $submission['file_url'] ?? null;
@@ -137,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Submit Assignment</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -476,7 +479,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
     .container { margin-top: 40px; }
 }
     </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
     <div class="container">
         <h1><i class="fas fa-clipboard-list"></i> Submit Assignment</h1>
@@ -502,6 +510,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
             <p class="error">Sorry, the due date for this assignment has passed. You cannot submit anymore.</p>
         <?php else: ?>
             <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <label for="submission_text">Submission Text (optional):</label>
                 <textarea name="submission_text" rows="6"><?= htmlspecialchars($submission['text_answer'] ?? '') ?></textarea>
 
@@ -558,6 +567,7 @@ if (form) {
     try {
         const response = await fetch(window.location.href, {
             method: "POST",
+            headers: { 'X-CSRF-Token': getCsrfToken() },
             body: formData
         });
 

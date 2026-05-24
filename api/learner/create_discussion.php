@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 
@@ -8,6 +9,8 @@ header('Content-Type: application/json');
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['error' => 'Unauthorized']); exit();
 }
+
+verify_csrf_token();
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;

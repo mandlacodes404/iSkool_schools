@@ -13,6 +13,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 
@@ -24,6 +25,8 @@ if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 
     ob_end_flush();
     exit;
 }
+
+verify_csrf_token();
 
 $adminEmail = $_SESSION['email'];
 

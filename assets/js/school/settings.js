@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ══════════════════════════════════════════════════════════
 // SETTINGS SECTION — assets/js/school/settings.js
 // ══════════════════════════════════════════════════════════
@@ -211,6 +215,7 @@ window.loadSdSettings = async function() {
     try {
         const res  = await fetch('api/school/save_settings.php', {
             method: 'POST',
+            headers: { 'X-CSRF-Token': getCsrfToken() },
             body: new URLSearchParams({ action: 'get' })
         });
         const data = await res.json();
@@ -347,7 +352,7 @@ function sdsetUploadLogo(file) {
     formData.append('action', 'upload_logo');
     formData.append('logo', file);
 
-    fetch('api/school/save_settings.php', { method: 'POST', body: formData })
+    fetch('api/school/save_settings.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: formData })
         .then(r => r.json())
         .then(data => {
             uploading.style.display = 'none';
@@ -391,6 +396,7 @@ window.sdsetSaveName = function() {
 
     fetch('api/school/save_settings.php', {
         method: 'POST',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
         body: new URLSearchParams({ action: 'update_name', school_name: name })
     })
     .then(r => r.json())

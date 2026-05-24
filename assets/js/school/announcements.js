@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 // ══════════════════════════════════════════════════════════
 // ANNOUNCEMENTS SECTION — assets/js/school/announcements.js
 // ══════════════════════════════════════════════════════════
@@ -751,7 +755,7 @@ window.sdanSubmit = async function() {
     fd.append('send_to', document.getElementById('sdanSendTo').value);
 
     try {
-        const res  = await fetch('api/school/create_announcement.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/school/create_announcement.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {

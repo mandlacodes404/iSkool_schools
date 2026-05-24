@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
@@ -10,6 +11,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'user') {
 $learnerEmail = $_SESSION['email'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $evaluation_id = intval($_POST['evaluation_id']);
     $rating = intval($_POST['rating']);
     $feedback = trim($_POST['feedback']);

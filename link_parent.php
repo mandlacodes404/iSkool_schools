@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 
 header('Content-Type: application/json');
@@ -8,6 +9,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
+
+verify_csrf_token();
 
 $learnerEmail = $_SESSION['email'];
 $parentEmail  = $_POST['parent_email'] ?? '';

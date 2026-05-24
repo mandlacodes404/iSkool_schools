@@ -1,3 +1,7 @@
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
 window.teacherResourceCache = null;
 
 window.fetchTeacherResources = async function() {
@@ -772,7 +776,7 @@ window.submitUploadResource = async function() {
     if (!hideSubmitLoader && loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/upload_resource.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/upload_resource.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {
@@ -816,7 +820,7 @@ window.executeDeleteResource = async function() {
     try {
         const fd = new FormData();
         fd.append('id', resourceToDelete);
-        const res  = await fetch('api/teacher/delete_resource.php', { method: 'POST', body: fd });
+        const res  = await fetch('api/teacher/delete_resource.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {

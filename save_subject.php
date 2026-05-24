@@ -1,6 +1,7 @@
 <?php
 // save_subject.php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
@@ -12,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['class_id']) || !isse
     echo json_encode(['success' => false, 'message' => 'Invalid request']);
     exit();
 }
+
+verify_csrf_token();
 
 $teacher_email = $_SESSION['email'];
 $class_id = intval($_POST['class_id']);

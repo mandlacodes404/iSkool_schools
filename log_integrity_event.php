@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
@@ -8,6 +9,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $quiz_id            = intval($_POST['quiz_id'] ?? 0);
     $event_type         = $_POST['event_type'] ?? 'unknown';
     $layout_mode        = $_POST['layout_mode'] ?? 'single_page';

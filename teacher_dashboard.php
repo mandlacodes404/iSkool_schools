@@ -48,6 +48,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#161b22">
     <meta name="mobile-web-app-capable" content="yes">
@@ -63,7 +64,12 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.4">
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
@@ -502,7 +508,7 @@ document.getElementById('topNavProfileInput').addEventListener('change', functio
     const fd = new FormData();
     fd.append('profile', file);
 
-    fetch('upload_teacher_profile.php', { method: 'POST', body: fd })
+    fetch('upload_teacher_profile.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
         .then(r => r.json())
         .then(d => {
             if (d.success) {
@@ -950,7 +956,7 @@ window.removeTeacherProfilePicture = function() {
     if (!confirm('Remove your profile picture?')) return;
     fetch('upload_profile.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
         body: 'remove=1'
     })
     .then(r => r.json())

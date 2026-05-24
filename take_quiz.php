@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 $is_mobile_ua = preg_match("/(android|iphone|ipad|ipod|webos|windows phone|mobile)/i", $user_agent);
 $is_mobile_get = (isset($_GET['mobile']) && $_GET['mobile'] == 'true');
@@ -50,7 +50,12 @@ body{font-family:'Nunito',sans-serif;background:#0d1117;color:#e2e8f0;display:fl
 h1{font-size:22px;font-weight:800;color:#f85149;margin-bottom:10px}
 p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 a{background:#4fd1c5;color:#0d1117;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;display:inline-block}
-</style></head><body>
+</style><script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head><body>
 <div class="state-card">
 <div class="state-icon"><svg viewBox="0 0 24 24" width="28" height="28" stroke="#f85149" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
 <h1>Quiz Closed</h1>
@@ -119,12 +124,18 @@ h1{font-size:22px;font-weight:800;color:#f85149;margin-bottom:10px}
 p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.06);border-top:3px solid #4fd1c5;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-</style></head><body>
+</style><script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head><body>
 <div class="state-card">
 <h1>⏱ Time's Up!</h1>
 <p>Your session has ended. Submitting your answers now...</p>
 <div class="spinner"></div>
 <form id="autoSubmitGate" action="submit_quiz.php" method="POST" style="display:none">
+<input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
 <input type="hidden" name="start_time" value="<?= $startTime ?>">
 </form></div>
@@ -189,6 +200,7 @@ $answeredCount = count($savedAnswers);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($quizTitle) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -943,7 +955,12 @@ $answeredCount = count($savedAnswers);
         .step-dot.done    { background: var(--green); }
         .step-dot.active  { background: var(--teal); }
     </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
 
 <!-- ═══════════════ TOP BAR ═══════════════ -->
@@ -1032,6 +1049,7 @@ $answeredCount = count($savedAnswers);
 
         <!-- Quiz Form -->
         <form id="quizForm" action="submit_quiz.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
             <input type="hidden" name="start_time" value="<?= $startTime ?>">
 
@@ -1399,7 +1417,7 @@ $answeredCount = count($savedAnswers);
             fd.append('question_id', questionId);
             fd.append('choice_id', choiceId);
         }
-        fetch('save_progress.php', { method: 'POST', body: fd })
+        fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .catch(e => console.warn('Save failed', e));
     }
 
@@ -1504,6 +1522,7 @@ function logIntegrity(eventType) {
     fd.append('event_type',         eventType);
     fd.append('layout_mode',        LAYOUT);
     fd.append('active_question_id', activeQid);
+    fd.append('csrf_token',         getCsrfToken());
 
     // sendBeacon ensures the request fires even when the page is unloading
     navigator.sendBeacon('log_integrity_event.php', fd);

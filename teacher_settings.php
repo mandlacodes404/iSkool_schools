@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
 require_once 'config.php'; // 1. Added config to talk to DB
 
 if (!isset($_SESSION['email'])) {
@@ -33,6 +33,7 @@ if (empty($initials)) { $initials = "T"; }
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Settings • iSkool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -175,7 +176,12 @@ if (empty($initials)) { $initials = "T"; }
         h2 { font-size: 30px; }
     }
 </style>
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
 
 <div class="settings-card">
@@ -225,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch('upload_profile.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' , 'X-CSRF-Token': getCsrfToken() },
             body: 'remove=1&role=teacher'
         })
         .then(r => r.json())

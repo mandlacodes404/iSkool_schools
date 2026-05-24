@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');
@@ -7,6 +8,8 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['email'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid request']); exit;
 }
+
+verify_csrf_token();
 
 $learner_email = $_SESSION['email'];
 $eval_id = (int)$_POST['eval_id'];

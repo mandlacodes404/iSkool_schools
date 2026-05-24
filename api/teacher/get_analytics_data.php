@@ -4,6 +4,7 @@ ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 
 ob_start();
 header('Content-Type: application/json');
@@ -15,6 +16,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     ob_end_flush();
     exit();
 }
+
+verify_csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['class_id'])) {
     echo json_encode(['error' => 'Invalid request']);

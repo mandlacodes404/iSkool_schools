@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
@@ -52,6 +53,8 @@ $classStmt->execute();
 $classResult = $classStmt->get_result();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_token();
+
     $title = trim($_POST['title'] ?? '');
     $class_id = intval($_POST['class_id'] ?? 0);
     $is_summative = isset($_POST['is_summative']) ? 1 : 0;
@@ -94,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Manual Add Quiz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -136,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <label>Quiz Title:</label>
             <input type="text" name="title" required>
 

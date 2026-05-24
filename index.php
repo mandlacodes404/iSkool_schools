@@ -23,7 +23,7 @@
  * @link        https://iskool.online
  */
 
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
 
 require_once 'config.php'; 
 require_once 'check_remember_me.php';     
@@ -63,6 +63,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <html>
 <head>
     <meta charset="UTF-8" />
+<meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login - iSkool</title>
 
@@ -84,7 +85,12 @@ if ($result && $row = $result->fetch_assoc()) {
     }
     </style>
     
-</head>
+<script>
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+</script></head>
 <body>
     <!-- Animation wrapper -->
     <div id="animation-wrapper">
@@ -1195,7 +1201,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         const formData = new FormData(this);
 
         try {
-            const res  = await fetch('send_reset_link.php', { method: 'POST', body: formData });
+            const res  = await fetch('send_reset_link.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: formData });
             const data = await res.json();
 
             if (data.success) {
@@ -1290,7 +1296,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         }
 
         try {
-            const res  = await fetch('login_ajax.php', { method: 'POST', body: formData });
+            const res  = await fetch('login_ajax.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: formData });
             const data = await res.json();
 
             if (data.success) {
@@ -1347,7 +1353,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         const formData = new FormData(this);
 
         try {
-            const res  = await fetch('register_ajax.php', { method: 'POST', body: formData });
+            const res  = await fetch('register_ajax.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: formData });
             const data = await res.json();
 
             if (data.success) {

@@ -5,8 +5,17 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
+
+// 1. Security Check
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_POST['quiz_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+verify_csrf_token();
 
 // === Fetch current academic year ===
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -14,12 +23,6 @@ if ($currentYearResult->num_rows === 0) {
     die("No active academic year set. Contact your admin.");
 }
 $current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
-
-// 1. Security Check
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_POST['quiz_id'])) {
-    header("Location: index.php");
-    exit();
-}
 
 $quizId    = intval($_POST['quiz_id']);
 $userEmail = $_SESSION['email'];

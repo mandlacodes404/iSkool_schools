@@ -7,6 +7,7 @@ ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once '../../config.php';
 
 if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 'admin'])) {
@@ -14,6 +15,8 @@ if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 
     echo json_encode(['error' => 'Unauthorized']);
     exit();
 }
+
+verify_csrf_token();
 
 header('Content-Type: application/json');
 
