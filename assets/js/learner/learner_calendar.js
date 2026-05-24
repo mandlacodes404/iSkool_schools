@@ -13,6 +13,7 @@ window.learnerCalendarPageState = {
 // ── ENTRY POINT ──
 window.fetchLearnerCalendar = async function () {
     sessionStorage.setItem('lastLearnerPage', 'learner_calendar');
+    if (typeof window.setActive === 'function') window.setActive('learner_calendar');
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');

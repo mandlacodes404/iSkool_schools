@@ -168,8 +168,8 @@ function buildHomeLayout(data, manualHtml) {
             </div>
 
             <!-- UPCOMING EVENTS SECTION -->
-            <div class="lh-section">
-                <div class="lh-section-header">
+            <div class="lh-section lh-events-section">
+                <div class="lh-section-header" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
                     <div class="lh-section-title">
                         <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;border:1px solid #f472b630;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f472b6" stroke-width="2.5" fill="none">
@@ -183,7 +183,7 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card">
+                <div class="lh-card" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
                     ${buildMobileEvents(eventsSlice)}
                 </div>
             </div>
@@ -581,7 +581,7 @@ function buildMobileEvents(events) {
         const isPast  = d < today;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:default;${isPast ? 'opacity:0.5;' : ''}">
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:pointer;${isPast ? 'opacity:0.5;' : ''}">
                 <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}

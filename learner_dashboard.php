@@ -219,7 +219,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.5">
 </head>
 <body>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
@@ -307,6 +307,16 @@ if (!empty($joinedClassIds)) {
 </a>
         <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" id="nav-discussions-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
+        </a>
+
+        <a href="javascript:void(0)" onclick="fetchLearnerCalendar()" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Calendar</span>
         </a>
 
         <?php if (empty($joinedClassIds)): ?>
@@ -662,6 +672,7 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchEvaluations') ||
                           onClick.includes('fetchGrades') ||
                           onClick.includes('fetchSyllabus') || 
+                          onClick.includes('fetchLearnerCalendar') ||
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
@@ -673,6 +684,7 @@ const isCached = (onClick.includes('loadManual') && window.manualCache) ||
                  (onClick.includes('fetchEvaluations') && (window.evaluationCache || window.evaluationPrefetchPromise)) ||
                  (onClick.includes('fetchGrades') && window.learnerGradesCache) ||
                  (onClick.includes('fetchSyllabus') && (window.syllabusCache || window.syllabusPrefetchPromise)) ||
+                 onClick.includes('fetchLearnerCalendar') ||
                  (onClick.includes('fetchDiscussions') && (window.discussionCache || window.discussionPrefetchPromise)); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
@@ -1934,6 +1946,8 @@ window.toggleSidebar = function (forceClose = false) {
     window.setActive('syllabus');
 } else if (lastSaved === "discussion_list.php") {
     window.setActive("discussion_list.php");
+} else if (lastSaved === "learner_calendar") {
+    window.setActive("learner_calendar");
 } else if (lastSaved === "learner_settings") {
     window.setActive("learner_settings");
 }
@@ -1983,6 +1997,7 @@ if (desktopToggle) {
             { selector: '#nav-evaluations-sidebar',   color: '#fc8181' },
             { selector: '#nav-syllabus-sidebar',      color: '#63b3ed' },
             { selector: '#nav-discussions-sidebar',   color: '#f85149' },
+            { selector: '#nav-calendar-sidebar',      color: '#f472b6' },
             { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
             { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
         ];
@@ -2466,7 +2481,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.0"></script>
-<script src="assets/js/learner/manual.js?v=2.7"></script>
+<script src="assets/js/learner/manual.js?v=2.8"></script>
 <script src="assets/js/learner/quiz.js?v=4.1"></script>
 <script src="assets/js/learner/assignments.js?v=3.7"></script>
 <script src="assets/js/learner/resources.js?v=3.3"></script>
@@ -2475,7 +2490,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/evaluations.js?v=2.0"></script>
 <script src="assets/js/learner/discussions.js?v=5.6"></script>
 <script src="assets/js/learner/syllabus.js?v=1.4"></script>
-<script src="assets/js/learner/learner_calendar.js?v=1.1"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.2"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

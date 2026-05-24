@@ -256,6 +256,10 @@ body {
     font-size: 12px;
 }
 
+.mobile-only-calendar {
+    display: none !important;
+}
+
 .desktop-toggle-btn {
     background: none; 
     color: var(--text-color);
@@ -745,8 +749,34 @@ iframe {
     .sidebar {
         left: -100%;
         width: 300px; /* Increased from 240px to 300px */
+        padding: 16px 18px;
         transition: left var(--transition-speed) ease;
         border-right: 1px solid #555555;
+    }
+
+    .mobile-only-calendar {
+        display: flex !important;
+    }
+
+    .sidebar-links {
+        margin-top: 18px;
+        padding-bottom: 12px;
+    }
+
+    .sidebar a,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        border-radius: 12px;
+        min-height: 48px;
+    }
+
+    .sidebar .footer {
+        position: static;
+        width: 100%;
+        margin-top: auto;
+        padding: 8px 12px;
+        flex-shrink: 0;
     }
 
     .sidebar.active {
@@ -839,12 +869,12 @@ iframe {
        
         box-sizing: border-box !important;
 
-        font-size: 17px !important; 
+        font-size: 16px !important;
         font-weight: 700 !important; /* Bold like teacher side */
-        padding: 18px 15px !important; /* Tall touch targets */
-        margin-bottom: 10px !important;
+        padding: 11px 13px !important;
+        margin-bottom: 6px !important;
         background: rgba(255, 255, 255, 0.03); /* Subtle button background */
-        border-radius: 14px !important;
+        border-radius: 12px !important;
     }
 
     .sidebar a i, .sidebar button i {
@@ -855,7 +885,7 @@ iframe {
     }
 
     .sidebar-links {
-        margin-top: 30px !important;
+        margin-top: 16px !important;
     }
     /* 1. Make the Profile Area "Pop" */
     .profile-picture-wrapper img.learner-avatar {
@@ -901,14 +931,14 @@ iframe {
     }
 
     .learner-email { 
-        font-size: 16px !important; 
-        margin-bottom: 30px !important; 
+        font-size: 14px !important;
+        margin-bottom: 12px !important;
         max-height: none !important; 
         opacity: 0.7;
     }
     .sidebar .footer {
-        bottom: 40px !important; /* Lifts it higher on mobile */
-        font-size: 16px !important;
+        bottom: auto !important;
+        font-size: 14px !important;
         opacity: 0.8 !important; /* Makes it a bit easier to see */
     }
 }
@@ -1354,7 +1384,7 @@ iframe {
         flex-shrink: 0;
         margin-right: 10px;
         transition: background 0.2s;
-        background: rgba(26, 25, 25, 0.92) !important;
+        background: rgba(26, 25, 25, 0.92);
     }
 }
 
