@@ -571,8 +571,11 @@ window.openCreateAssignment = async function() {
 
     // Target: panel on desktop, full apiArea on mobile
     const target = isDesktop ? panel : apiArea;
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
+        : null;
 
-    if (loader) loader.style.display = 'flex';
+    if (!hideInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const [classRes, termRes] = await Promise.all([
