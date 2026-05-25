@@ -499,6 +499,11 @@ function renderAnnouncements(data) {
                 flex-shrink: 0;
                 color: #30363d;
             }
+            .lan-mobile-card-date {
+                font-size: 12px;
+                color: #8b949e;
+                margin-top: 3px;
+            }
 
         </style>
 
@@ -552,6 +557,7 @@ function renderAnnouncements(data) {
                             <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
                             ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
                         </div>
+                        <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
                     <div class="lan-mobile-card-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -593,6 +599,7 @@ function renderAnnouncements(data) {
                                 <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
                                 ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
                             </div>
+                            <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
                         <div class="lan-mobile-card-chevron">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">

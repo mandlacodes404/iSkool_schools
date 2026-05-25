@@ -409,6 +409,11 @@ function renderResourceCards(data) {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            .lrs-mobile-row-size {
+                font-size: 12px;
+                color: #8b949e;
+                margin-top: 2px;
+            }
             .lrs-mobile-row-chevron {
                 flex-shrink: 0;
                 color: #30363d;
@@ -473,6 +478,7 @@ function renderResourceCards(data) {
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
                             <div class="lrs-mobile-row-title">${file.title}</div>
+                            ${file.size ? `<div class="lrs-mobile-row-size">${file.size}</div>` : ''}
                         </div>
                         <div class="lrs-mobile-row-chevron">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
