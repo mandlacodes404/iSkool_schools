@@ -69,25 +69,29 @@ if (!$isMember) {
 }
 
 // 4. Use server-side attempt start time only
+$conn->begin_transaction();
 $attemptStmt = $conn->prepare("
-    SELECT start_time
+    SELECT attempt_id, start_time, status
     FROM quiz_attempts
-    WHERE user_email = ? AND quiz_id = ? AND status = 'in_progress'
+    WHERE user_email = ? AND quiz_id = ? AND status != 'submitted'
+    ORDER BY attempt_number DESC, attempt_id DESC
     LIMIT 1
+    FOR UPDATE
 ");
 $attemptStmt->bind_param("si", $userEmail, $quizId);
 $attemptStmt->execute();
 $attempt = $attemptStmt->get_result()->fetch_assoc();
 $attemptStmt->close();
 if (!$attempt || empty($attempt['start_time'])) {
+    $conn->rollback();
     die("Invalid quiz attempt.");
 }
+$attemptId = (int)$attempt['attempt_id'];
 $timeTaken = max(0, time() - strtotime($attempt['start_time']));
 
 // 5. Prevent Double Submissions
-$conn->begin_transaction();
-$checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE user_email = ? AND quiz_id = ? FOR UPDATE");
-$checkStmt->bind_param("si", $userEmail, $quizId);
+$checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE attempt_id = ? FOR UPDATE");
+$checkStmt->bind_param("i", $attemptId);
 $checkStmt->execute();
 if ($checkStmt->get_result()->num_rows > 0) {
     $checkStmt->close();
@@ -113,11 +117,17 @@ while ($row = $res->fetch_assoc()) {
 }
 $stmt->close();
 
+$questionCountStmt = $conn->prepare("SELECT COUNT(*) AS total_questions FROM quizquestions WHERE quiz_id = ?");
+$questionCountStmt->bind_param("i", $quizId);
+$questionCountStmt->execute();
+$totalQuestions = (int)$questionCountStmt->get_result()->fetch_assoc()['total_questions'];
+$questionCountStmt->close();
+
 // 6. Consolidate Answers (POST + Database Fallback)
 $finalAnswers = isset($_POST['answers']) && is_array($_POST['answers']) ? $_POST['answers'] : [];
 if (empty($finalAnswers)) {
-    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
-    $savedStmt->bind_param("si", $userEmail, $quizId);
+    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE attempt_id = ?");
+    $savedStmt->bind_param("i", $attemptId);
     $savedStmt->execute();
     $savedRes = $savedStmt->get_result();
     while ($sRow = $savedRes->fetch_assoc()) {
@@ -139,28 +149,28 @@ try {
     // A. Insert Result Record
     $insRes = $conn->prepare("
         INSERT INTO quiz_results (
-            user_email, quiz_id, score, total, time_taken, submitted_at, academic_year_id
-        ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
+            user_email, quiz_id, attempt_id, score, total, time_taken, submitted_at, academic_year_id
+        ) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
     ");
-    $insRes->bind_param("siiiii", $userEmail, $quizId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
+    $insRes->bind_param("siiiiii", $userEmail, $quizId, $attemptId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
     $insRes->execute();
     $resultId = $insRes->insert_id;
 
     // B. Link/Update user_answers with the Result ID
     if (!empty($finalAnswers)) {
-        $ansQuery = "INSERT INTO user_answers (user_email, quiz_id, question_id, selected_choice_id, result_id) 
-                     VALUES (?, ?, ?, ?, ?) 
+        $ansQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, result_id) 
+                     VALUES (?, ?, ?, ?, ?, ?) 
                      ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), result_id = VALUES(result_id)";
         $ansStmt = $conn->prepare($ansQuery);
         foreach ($finalAnswers as $qid => $cid) {
-            $ansStmt->bind_param("siiii", $userEmail, $quizId, $qid, $cid, $resultId);
+            $ansStmt->bind_param("siiiii", $userEmail, $quizId, $attemptId, $qid, $cid, $resultId);
             $ansStmt->execute();
         }
     }
 
     // C. Update Attempt Status
-    $updAtt = $conn->prepare("UPDATE quiz_attempts SET status = 'submitted' WHERE user_email = ? AND quiz_id = ?");
-    $updAtt->bind_param("si", $userEmail, $quizId);
+    $updAtt = $conn->prepare("UPDATE quiz_attempts SET status = 'submitted', current_step = ? WHERE attempt_id = ?");
+    $updAtt->bind_param("ii", $totalQuestions, $attemptId);
     $updAtt->execute();
 
     $conn->commit();

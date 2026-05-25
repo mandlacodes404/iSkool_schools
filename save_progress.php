@@ -39,6 +39,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
         exit;
     }
 
+    $attemptStmt = $conn->prepare("
+        SELECT attempt_id
+        FROM quiz_attempts
+        WHERE user_email = ?
+          AND quiz_id = ?
+          AND status = 'in_progress'
+        ORDER BY attempt_number DESC, attempt_id DESC
+        LIMIT 1
+    ");
+    $attemptStmt->bind_param("si", $email, $quizId);
+    $attemptStmt->execute();
+    $attempt = $attemptStmt->get_result()->fetch_assoc();
+    $attemptStmt->close();
+    if (!$attempt) {
+        echo json_encode(['status' => 'success']);
+        exit;
+    }
+    $attemptId = (int)$attempt['attempt_id'];
+
     if ($questionId !== null && $choiceId !== null) {
         $validAnswerStmt = $conn->prepare("
             SELECT 1
@@ -65,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
         // 1. Save the Answer (if provided)
         if ($questionId !== null && $choiceId !== null) {
             $stmt = $conn->prepare("
-                INSERT INTO user_answers (user_email, quiz_id, question_id, selected_choice_id) 
-                VALUES (?, ?, ?, ?)
+                INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id) 
+                VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id)
             ");
-            $stmt->bind_param("siii", $email, $quizId, $questionId, $choiceId);
+            $stmt->bind_param("siiii", $email, $quizId, $attemptId, $questionId, $choiceId);
             $stmt->execute();
             $stmt->close();
         }
@@ -79,9 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
             $stmtStep = $conn->prepare("
                 UPDATE quiz_attempts 
                 SET current_step = ? 
-                WHERE user_email = ? AND quiz_id = ? AND status = 'in_progress'
+                WHERE attempt_id = ? AND status = 'in_progress'
             ");
-            $stmtStep->bind_param("isi", $currentStep, $email, $quizId);
+            $stmtStep->bind_param("ii", $currentStep, $attemptId);
             $stmtStep->execute();
             $stmtStep->close();
         }

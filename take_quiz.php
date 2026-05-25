@@ -21,7 +21,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_GE
 $userEmail = $_SESSION['email'];
 $quizId = intval($_GET['quiz_id']);
 
-$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions, is_linear, start_time, class_id, academic_year_id FROM quizzes WHERE id = ?");
+$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions, is_linear, start_time, class_id, academic_year_id, attempt_limit FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 if (!$quizStmt->execute()) { echo "Database error."; exit(); }
 $quizResult = $quizStmt->get_result();
@@ -36,6 +36,7 @@ $status = $quiz['status'] ?? 'Open';
 $quizStartTime = $quiz['start_time'] ?? null;
 $quizClassId = (int)$quiz['class_id'];
 $quizAcademicYearId = (int)($quiz['academic_year_id'] ?? 0);
+$attemptLimit = (int)($quiz['attempt_limit'] ?? 1);
 $quizStmt->close();
 
 if ($quizAcademicYearId <= 0) {
@@ -92,29 +93,55 @@ $classCheck->close();
 if (!$classInfo) { header("Location: quiz_list.php"); exit(); }
 
 // ── TIMER LOGIC ──────────────────────────────────────────────────────────────
-$checkAttempt = $conn->prepare("SELECT start_time, status, current_step, question_order FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+$checkAttempt = $conn->prepare("
+    SELECT attempt_id, start_time, status, current_step, question_order, choice_order
+    FROM quiz_attempts
+    WHERE user_email = ? AND quiz_id = ? AND status = 'in_progress'
+    ORDER BY attempt_number DESC, attempt_id DESC
+    LIMIT 1
+");
 $checkAttempt->bind_param("si", $userEmail, $quizId);
 $checkAttempt->execute();
 $attemptData = $checkAttempt->get_result()->fetch_assoc();
 $currentTime = time();
 
 if (!$attemptData) {
+    $completedStmt = $conn->prepare("SELECT COUNT(*) AS completed_count FROM quiz_attempts WHERE user_email = ? AND quiz_id = ? AND status = 'submitted'");
+    $completedStmt->bind_param("si", $userEmail, $quizId);
+    $completedStmt->execute();
+    $completedCount = (int)$completedStmt->get_result()->fetch_assoc()['completed_count'];
+    $completedStmt->close();
+
+    if ($attemptLimit > 0 && $completedCount >= $attemptLimit) {
+        die("You have used all your attempts for this quiz.");
+    }
+
+    $attemptNumberStmt = $conn->prepare("SELECT COUNT(*) AS attempt_total FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
+    $attemptNumberStmt->bind_param("si", $userEmail, $quizId);
+    $attemptNumberStmt->execute();
+    $attemptNumber = (int)$attemptNumberStmt->get_result()->fetch_assoc()['attempt_total'] + 1;
+    $attemptNumberStmt->close();
+
     $now = date('Y-m-d H:i:s');
-    $insertAttempt = $conn->prepare("INSERT INTO quiz_attempts (user_email, quiz_id, start_time, status) VALUES (?, ?, ?, 'in_progress')");
-    $insertAttempt->bind_param("sis", $userEmail, $quizId, $now);
+    $insertAttempt = $conn->prepare("INSERT INTO quiz_attempts (user_email, quiz_id, attempt_count, attempt_number, start_time, status) VALUES (?, ?, ?, ?, ?, 'in_progress')");
+    $insertAttempt->bind_param("siiis", $userEmail, $quizId, $attemptNumber, $attemptNumber, $now);
     if ($insertAttempt->execute()) {
+        $attemptId = $insertAttempt->insert_id;
         $startTime = $currentTime;
         $current_saved_step = 0;
         $saved_question_order = null;
+        $saved_choice_order = null;
     } else {
         die("Failed to create quiz attempt: " . $insertAttempt->error);
     }
     $insertAttempt->close();
 } else {
     if ($attemptData['status'] !== 'in_progress') { header("Location: learner_dashboard.php"); exit(); }
+    $attemptId = (int)$attemptData['attempt_id'];
     $startTime = strtotime($attemptData['start_time']);
     $current_saved_step = isset($attemptData['current_step']) ? (int)$attemptData['current_step'] : 0;
     $saved_question_order = $attemptData['question_order'] ?? null;
+    $saved_choice_order = $attemptData['choice_order'] ?? null;
 }
 
 $durationSeconds = $quizDuration * 60;
@@ -176,11 +203,25 @@ if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
     if (!empty($saved_question_order)) {
         // Returning learner — restore exact same shuffle
         $savedOrder = json_decode($saved_question_order, true);
+        $savedChoiceOrder = !empty($saved_choice_order) ? json_decode($saved_choice_order, true) : [];
         $indexed = [];
         foreach ($questions as $q) { $indexed[$q['id']] = $q; }
         $questions = [];
         foreach ($savedOrder as $qid) {
             if (isset($indexed[$qid])) $questions[] = $indexed[$qid];
+        }
+        if (is_array($savedChoiceOrder)) {
+            foreach ($questions as &$q) {
+                if (empty($savedChoiceOrder[$q['id']]) || empty($q['choices'])) continue;
+                $choiceIndexed = [];
+                foreach ($q['choices'] as $choice) { $choiceIndexed[$choice['id']] = $choice; }
+                $orderedChoices = [];
+                foreach ($savedChoiceOrder[$q['id']] as $choiceId) {
+                    if (isset($choiceIndexed[$choiceId])) $orderedChoices[] = $choiceIndexed[$choiceId];
+                }
+                if (!empty($orderedChoices)) $q['choices'] = $orderedChoices;
+            }
+            unset($q);
         }
     } else {
         // First visit — shuffle and save the order
@@ -189,16 +230,21 @@ if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
         unset($q);
         $order   = array_column($questions, 'id');
         $encoded = json_encode($order);
-        $saveOrder = $conn->prepare("UPDATE quiz_attempts SET question_order = ? WHERE user_email = ? AND quiz_id = ?");
-        $saveOrder->bind_param("ssi", $encoded, $userEmail, $quizId);
+        $choiceOrder = [];
+        foreach ($questions as $q) {
+            $choiceOrder[$q['id']] = array_column($q['choices'], 'id');
+        }
+        $encodedChoiceOrder = json_encode($choiceOrder);
+        $saveOrder = $conn->prepare("UPDATE quiz_attempts SET question_order = ?, choice_order = ? WHERE attempt_id = ?");
+        $saveOrder->bind_param("ssi", $encoded, $encodedChoiceOrder, $attemptId);
         $saveOrder->execute();
         $saveOrder->close();
     }
 }
 
 $savedAnswers = [];
-$loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE user_email = ? AND quiz_id = ?");
-$loadStmt->bind_param("si", $userEmail, $quizId);
+$loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE attempt_id = ?");
+$loadStmt->bind_param("i", $attemptId);
 $loadStmt->execute();
 $savedResult = $loadStmt->get_result();
 while ($row = $savedResult->fetch_assoc()) { $savedAnswers[$row['question_id']] = $row['selected_choice_id']; }
