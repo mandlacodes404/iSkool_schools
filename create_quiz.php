@@ -106,20 +106,65 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     verify_csrf_token();
 
     $quiz_title     = trim($_POST['quiz_title'] ?? '');
-    $duration       = intval($_POST['duration'] ?? 0);
+    $duration_raw   = $_POST['duration'] ?? null;
+    $duration_check = filter_var($duration_raw, FILTER_VALIDATE_INT);
+    $duration       = $duration_check === false ? -1 : (int)$duration_check;
     $class_id       = intval($_POST['class_id'] ?? 0);
     $publish_marks  = isset($_POST['publish_marks']) ? 1 : 0;
     $start_time     = $_POST['start_time'] ?? '';
     $status = $_POST['status'] ?? 'Scheduled'; 
     $is_summative   = isset($_POST['is_summative']) ? 1 : 0;
-    $weight_percent = $is_summative && !empty($_POST['weight_percent']) ? floatval($_POST['weight_percent']) : null;
+    $weight_raw     = $_POST['weight_percent'] ?? null;
+    $weight_check   = $is_summative && $weight_raw !== null && $weight_raw !== '' ? filter_var($weight_raw, FILTER_VALIDATE_FLOAT) : null;
+    $weight_percent = $weight_check === false ? -1 : $weight_check;
+    $attempt_raw    = $_POST['attempt_limit'] ?? 1;
+    $attempt_check  = filter_var($attempt_raw, FILTER_VALIDATE_INT);
+    $attempt_limit  = $attempt_check === false ? -1 : (int)$attempt_check;
+    $layout_mode = $_POST['layout_mode'] ?? 'single_page';
+    $shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
+    $is_linear = isset($_POST['is_linear']) ? 1 : 0;
 
     // Validation
     $errors = [];
     if (empty($quiz_title)) $errors[] = "Quiz title is required.";
-    if ($duration < 1 || $duration > 180) $errors[] = "Duration must be between 1 and 180 minutes.";
+    if (strlen($quiz_title) > 255) $errors[] = "Quiz title must be 255 characters or fewer.";
+    if (!in_array($status, ['Scheduled', 'Open', 'Closed'], true)) $errors[] = "Invalid quiz status.";
+    if (!in_array($layout_mode, ['single_page', 'multi_page'], true)) $errors[] = "Invalid quiz layout.";
+    if ($duration < 0 || $duration > 180) $errors[] = "Duration must be between 0 and 180 minutes.";
+    if ($attempt_limit < 0) $errors[] = "Attempt limit must be zero or greater.";
     if ($class_id < 1) $errors[] = "Invalid class selected.";
     if (empty($start_time) || !strtotime($start_time)) $errors[] = "Valid start time is required.";
+    if ($is_summative && ($weight_raw === null || $weight_raw === '')) $errors[] = "Weight percent must be between 0 and 100.";
+    if ($weight_percent !== null && ($weight_percent < 0 || $weight_percent > 100)) $errors[] = "Weight percent must be between 0 and 100.";
+
+    $questions = $_POST['question'] ?? [];
+    if (empty($questions) || !is_array($questions)) {
+        $errors[] = "At least one question is required.";
+    } else {
+        foreach ($questions as $i => $qText) {
+            $questionText = trim((string)$qText);
+            $choiceValues = $_POST['choices'][$i] ?? [];
+            $nonEmptyChoices = array_values(array_filter(array_map('trim', (array)$choiceValues), fn($choice) => $choice !== ''));
+            $correctCheck = isset($_POST['correct_choice'][$i]) ? filter_var($_POST['correct_choice'][$i], FILTER_VALIDATE_INT) : false;
+            $correctIndex = $correctCheck === false ? -1 : (int)$correctCheck;
+            $pointsCheck = isset($_POST['points'][$i]) ? filter_var($_POST['points'][$i], FILTER_VALIDATE_INT) : false;
+            $points = $pointsCheck === false ? 0 : (int)$pointsCheck;
+
+            if ($questionText === '') $errors[] = "Question " . ($i + 1) . " text is required.";
+            if (count($nonEmptyChoices) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two choices.";
+            if ($correctIndex < 0 || !isset($choiceValues[$correctIndex]) || trim((string)$choiceValues[$correctIndex]) === '') {
+                $errors[] = "Question " . ($i + 1) . " must have exactly one valid correct choice.";
+            }
+            if ($points <= 0) $errors[] = "Question " . ($i + 1) . " points must be greater than zero.";
+        }
+    }
+
+    $classOwnerStmt = $conn->prepare("SELECT 1 FROM teacher_subjects WHERE teacher_email = ? AND class_id = ? LIMIT 1");
+    $classOwnerStmt->bind_param("si", $email, $class_id);
+    $classOwnerStmt->execute();
+    $ownsClass = $classOwnerStmt->get_result()->num_rows > 0;
+    $classOwnerStmt->close();
+    if (!$ownsClass) $errors[] = "You are not assigned to this class.";
 
     if (!empty($errors)) {
         http_response_code(400);
@@ -149,55 +194,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         $validatedImages[$i] = $imageValidation['safe_name'];
     }
-// ... after layout_mode ...
-$layout_mode = $_POST['layout_mode'] ?? 'single_page';
-$shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
-$is_linear = isset($_POST['is_linear']) ? 1 : 0; // NEW: Capture Linear option
+try {
+    $conn->begin_transaction();
 
-// 1. Updated SQL to include is_linear
-$stmt = $conn->prepare("
-    INSERT INTO quizzes 
-    (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions, is_linear) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-");
+    $stmt = $conn->prepare("
+        INSERT INTO quizzes 
+        (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, attempt_limit, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions, is_linear) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param("siisiiiissidsii",
+        $quiz_title,
+        $duration,
+        $publish_marks,
+        $email,
+        $class_id,
+        $current_academic_year_id,
+        $current_global_term,
+        $attempt_limit,
+        $start_time,
+        $status,
+        $is_summative,
+        $weight_percent,
+        $layout_mode,
+        $shuffle_questions,
+        $is_linear
+    );
 
-/**
- * 2. Added "i" at the end for is_linear (integer 0 or 1)
- */
-$stmt->bind_param("siisiiissidsii", 
-    $quiz_title, 
-    $duration, 
-    $publish_marks, 
-    $email, 
-    $class_id, 
-    $current_academic_year_id, 
-    $current_global_term, 
-    $start_time, 
-    $status, 
-    $is_summative, 
-    $weight_percent,
-    $layout_mode,
-    $shuffle_questions,
-    $is_linear // NEW
-);
+    if (!$stmt->execute()) {
+        throw new RuntimeException("Quiz insert failed: " . $stmt->error);
+    }
 
-if (!$stmt->execute()) {
-    // This will help you see the EXACT error in your log if it fails again
-    error_log("SQL Execution Error: " . $stmt->error);
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Database error: " . $stmt->error]);
-    exit;
-}
-  
     $quiz_id = $stmt->insert_id;
     $stmt->close();
 
-    // INSERT QUESTIONS & CHOICES
     $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points) VALUES (?, ?, ?, ?)");
     $cStmt = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
 
     $targetDir = "quiz_images/";
-    if (!file_exists($targetDir)) mkdir($targetDir, 0755, true);
+    if (!file_exists($targetDir) && !mkdir($targetDir, 0755, true)) {
+        throw new RuntimeException("Failed to create quiz image directory.");
+    }
 
     foreach ($_POST['question'] as $i => $qText) {
         $points = intval($_POST['points'][$i]);
@@ -208,24 +244,37 @@ if (!$stmt->execute()) {
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
             $filename = time() . "_" . $i . "_" . $validatedImages[$i];
             $targetFile = $targetDir . $filename;
-            if (move_uploaded_file($_FILES['question_images']['tmp_name'][$i], $targetFile)) {
-                $imagePath = $targetFile;
+            if (!move_uploaded_file($_FILES['question_images']['tmp_name'][$i], $targetFile)) {
+                throw new RuntimeException("Image move failed for question " . ($i + 1));
             }
+            $imagePath = $targetFile;
         }
 
         $qStmt->bind_param("issi", $quiz_id, $qText, $imagePath, $points);
-        $qStmt->execute();
+        if (!$qStmt->execute()) {
+            throw new RuntimeException("Question insert failed: " . $qStmt->error);
+        }
         $question_id = $qStmt->insert_id;
 
         foreach ($choices as $index => $choiceText) {
             if (empty($choiceText)) continue;
             $isCorrect = ($index == $correct) ? 1 : 0;
             $cStmt->bind_param("isi", $question_id, $choiceText, $isCorrect);
-            $cStmt->execute();
+            if (!$cStmt->execute()) {
+                throw new RuntimeException("Choice insert failed: " . $cStmt->error);
+            }
         }
     }
     $qStmt->close();
     $cStmt->close();
+    $conn->commit();
+} catch (Throwable $e) {
+    $conn->rollback();
+    error_log("Quiz creation failed: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "An error occurred. Please try again."]);
+    exit;
+}
 
     // --- SMART NOTIFICATION LOGIC (Matching Assignment logic) ---
     $force_email = isset($_POST['force_email']) ? true : false;

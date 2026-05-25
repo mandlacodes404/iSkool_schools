@@ -9,20 +9,51 @@ if (!isset($_SESSION['email']) || !isset($_GET['quiz_id'])) {
 
 $quiz_id = (int)$_GET['quiz_id'];
 $user_email = $_SESSION['email'];
+$role = $_SESSION['role'] ?? '';
 
-// 1. Get the user's specific score for the circle
-$userStmt = $conn->prepare("SELECT score, total FROM quiz_results WHERE quiz_id = ? AND user_email = ? LIMIT 1");
-$userStmt->bind_param("is", $quiz_id, $user_email);
-$userStmt->execute();
-$userRes = $userStmt->get_result()->fetch_assoc();
-
-if (!$userRes) {
-    echo json_encode(['error' => 'No result found']);
+if (!in_array($role, ['learner', 'teacher'], true)) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Forbidden']);
     exit();
 }
 
-$userPercent = round(($userRes['score'] / $userRes['total']) * 100);
-$scoreDisplay = $userRes['score'] . " / " . $userRes['total'];
+if ($role === 'teacher') {
+    $accessStmt = $conn->prepare("SELECT 1 FROM quizzes WHERE id = ? AND created_by = ? LIMIT 1");
+    $accessStmt->bind_param("is", $quiz_id, $user_email);
+    $accessStmt->execute();
+    $hasAccess = $accessStmt->get_result()->num_rows > 0;
+    $accessStmt->close();
+    if (!$hasAccess) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden']);
+        exit();
+    }
+    $userPercent = null;
+    $scoreDisplay = '';
+} else {
+    $userStmt = $conn->prepare("
+        SELECT r.score, r.total
+        FROM quiz_results r
+        JOIN quizzes q ON q.id = r.quiz_id
+        WHERE r.quiz_id = ?
+          AND r.user_email = ?
+          AND q.publish_marks = 1
+        LIMIT 1
+    ");
+    $userStmt->bind_param("is", $quiz_id, $user_email);
+    $userStmt->execute();
+    $userRes = $userStmt->get_result()->fetch_assoc();
+    $userStmt->close();
+
+    if (!$userRes) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden']);
+        exit();
+    }
+
+    $userPercent = round(($userRes['score'] / $userRes['total']) * 100);
+    $scoreDisplay = $userRes['score'] . " / " . $userRes['total'];
+}
 
 // 2. Get Class Statistics (Min, Max, Avg)
 // We calculate percentage for everyone first, then get the stats

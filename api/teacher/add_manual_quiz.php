@@ -6,7 +6,7 @@ require_once dirname(__DIR__, 2) . '/config.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized', 'success' => false, 'error' => 'Unauthorized']);
     exit();
 }
 
@@ -31,7 +31,18 @@ $weight_percent = $is_summative && !empty($_POST['weight_percent'])
     : null;
 
 if (empty($title) || $class_id <= 0) {
-    echo json_encode(['success' => false, 'error' => 'Please fill in all required fields.']);
+    echo json_encode(['status' => 'error', 'message' => 'Please fill in all required fields.', 'success' => false, 'error' => 'Please fill in all required fields.']);
+    exit();
+}
+
+$classOwnerStmt = $conn->prepare("SELECT 1 FROM teacher_subjects WHERE teacher_email = ? AND class_id = ? LIMIT 1");
+$classOwnerStmt->bind_param("si", $email, $class_id);
+$classOwnerStmt->execute();
+$ownsClass = $classOwnerStmt->get_result()->num_rows > 0;
+$classOwnerStmt->close();
+if (!$ownsClass) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'You are not assigned to this class.', 'success' => false, 'error' => 'You are not assigned to this class.']);
     exit();
 }
 
@@ -53,8 +64,9 @@ $insert->bind_param(
 );
 
 if ($insert->execute()) {
-    echo json_encode(['success' => true]);
+    echo json_encode(['status' => 'success', 'data' => ['created' => true], 'success' => true]);
 } else {
-    echo json_encode(['success' => false, 'error' => 'Failed to add quiz.']);
+    error_log("Manual quiz insert failed: " . $insert->error);
+    echo json_encode(['status' => 'error', 'message' => 'An error occurred. Please try again.', 'success' => false, 'error' => 'An error occurred. Please try again.']);
 }
 $insert->close();

@@ -2,6 +2,15 @@ function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
 }
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 window.teacherQuizzesCache = null;
 window.currentQuizResultsData = null;
 
@@ -82,7 +91,7 @@ function renderTeacherQuizzes(data) {
                         ${isActive ? '<span class="qz-sidebar-term-active">ACTIVE</span>' : ''}
                     </div>`;
             termData.classes.forEach(cls => {
-                sidebarHtml += `<div class="qz-sidebar-class-label">${cls.class_name}</div>`;
+                sidebarHtml += `<div class="qz-sidebar-class-label">${escapeHtml(cls.class_name)}</div>`;
                 cls.quizzes.forEach(quiz => {
                     const statusColor = quiz.status === 'Open' ? '#f28c38'
                         : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
@@ -97,8 +106,8 @@ function renderTeacherQuizzes(data) {
                                 </svg>
                             </div>
                             <div class="qz-sidebar-item-info">
-                                <div class="qz-sidebar-item-title">${quiz.title}</div>
-                                <div class="qz-sidebar-item-meta">${quiz.duration} min</div>
+                                <div class="qz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                                <div class="qz-sidebar-item-meta">${escapeHtml(quiz.duration)} min</div>
                             </div>
                             <span class="qz-sidebar-status-dot" style="background:${statusColor};"></span>
                         </div>`;
@@ -347,7 +356,7 @@ function renderTeacherQuizzes(data) {
                 Create Quiz
             </button>
         </div>
-        <div class="teacher-year-badge">${yearName} &bull; Term ${currentTerm} Active</div>
+        <div class="teacher-year-badge">${escapeHtml(yearName)} &bull; Term ${currentTerm} Active</div>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="qz-desktop-layout">
@@ -388,7 +397,7 @@ function renderTeacherQuizzes(data) {
             termData.classes.forEach(cls => {
                 html += `
                     <div class="teacher-resource-section" style="margin-top:0;">
-                        <div class="teacher-resource-class-label">${cls.class_name}</div>`;
+                        <div class="teacher-resource-class-label">${escapeHtml(cls.class_name)}</div>`;
 
                 cls.quizzes.forEach(quiz => {
                     const statusColor = quiz.status === 'Open'
@@ -408,14 +417,14 @@ function renderTeacherQuizzes(data) {
                                     </svg>
                                 </div>
                                 <div class="teacher-resource-info">
-                                    <div class="teacher-resource-name">${quiz.title}</div>
+                                    <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
                                     <div class="teacher-resource-meta">
-                                        ${quiz.duration} min &middot; ${quiz.start_time}
+                                        ${escapeHtml(quiz.duration)} min &middot; ${escapeHtml(quiz.start_time)}
                                     </div>
                                 </div>
                                 <span class="teacher-quiz-status-badge" 
                                     style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
-                                    ${quiz.status}
+                                    ${escapeHtml(quiz.status)}
                                 </span>
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"
                                     class="teacher-quiz-chevron" id="chevron-${quiz.id}">
@@ -440,15 +449,18 @@ function renderTeacherQuizzes(data) {
                                     </button>
                                     <button class="teacher-quiz-action-btn ${quiz.status === 'Closed' ? 'reopen' : 'close'}"
                                         id="status-btn-${quiz.id}"
-                                        onclick="toggleQuizStatus(${quiz.id}, '${quiz.status}')">
+                                        data-quiz-id="${quiz.id}" data-quiz-status="${escapeHtml(quiz.status)}"
+                                        onclick="toggleQuizStatusFromElement(this)">
                                         ${quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz'}
                                     </button>
                                     <button class="teacher-quiz-action-btn results"
-                                        onclick="openQuizResults(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">
+                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                                        onclick="openQuizResultsFromElement(this)">
                                         View Results
                                     </button>
                                     <button class="teacher-quiz-action-btn integrity"
-                                        onclick="openIntegrityModal(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">
+                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                                        onclick="openIntegrityModalFromElement(this)">
                                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                         </svg>
@@ -551,16 +563,16 @@ window.selectDesktopQuiz = function(quizId) {
         <div class="qz-panel-content">
             <div class="qz-panel-quiz-header">
                 <div>
-                    <div class="qz-panel-quiz-title" id="qz-panel-title-${quizId}">${quiz.title}</div>
+                    <div class="qz-panel-quiz-title" id="qz-panel-title-${quizId}">${escapeHtml(quiz.title)}</div>
                     <div class="qz-panel-quiz-meta">
-                        <span>${quiz.class_name}</span>
+                        <span>${escapeHtml(quiz.class_name)}</span>
                         <span>&bull;</span>
-                        <span>${quiz.duration} min</span>
+                        <span>${escapeHtml(quiz.duration)} min</span>
                         <span>&bull;</span>
-                        <span>${quiz.start_time}</span>
+                        <span>${escapeHtml(quiz.start_time)}</span>
                         <span class="qz-panel-status-badge" id="qz-panel-status-badge-${quizId}"
                             style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
-                            ${quiz.status}
+                            ${escapeHtml(quiz.status)}
                         </span>
                     </div>
                 </div>
@@ -591,7 +603,8 @@ window.selectDesktopQuiz = function(quizId) {
 
                 <button class="qz-action-card ${statusBtnClass}"
                     id="status-btn-${quizId}"
-                    onclick="toggleQuizStatus(${quizId}, '${quiz.status}')">
+                    data-quiz-id="${quizId}" data-quiz-status="${escapeHtml(quiz.status)}"
+                    onclick="toggleQuizStatusFromElement(this)">
                     <div class="qz-action-card-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -607,7 +620,8 @@ window.selectDesktopQuiz = function(quizId) {
                 </button>
 
                 <button class="qz-action-card results"
-                    onclick="openQuizResults(${quizId}, '${quiz.title.replace(/'/g, "\\'")}')">
+                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}"
+                    onclick="openQuizResultsFromElement(this)">
                     <div class="qz-action-card-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -622,7 +636,8 @@ window.selectDesktopQuiz = function(quizId) {
                 </button>
 
                 <button class="qz-action-card integrity"
-                    onclick="openIntegrityModal(${quizId}, '${quiz.title.replace(/'/g, "\\'")}')">
+                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}"
+                    onclick="openIntegrityModalFromElement(this)">
                     <div class="qz-action-card-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -701,6 +716,10 @@ window.togglePublishMarks = async function(quizId) {
 // ─────────────────────────────────────────────
 // TOGGLE QUIZ STATUS
 // ─────────────────────────────────────────────
+window.toggleQuizStatusFromElement = function(el) {
+    toggleQuizStatus(parseInt(el.dataset.quizId, 10), el.dataset.quizStatus || '');
+};
+
 window.toggleQuizStatus = async function(quizId, currentStatus) {
     const newStatus = currentStatus === 'Closed' ? 'Open' : 'Closed';
     const loader    = document.getElementById('loaderOverlay');
@@ -715,8 +734,9 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
         const data = await res.json();
 
         if (data.success) {
-            const statusColor = newStatus === 'Open'
-                ? '#f28c38' : newStatus === 'Scheduled'
+            const updatedStatus = data.newStatus || data.data?.newStatus || newStatus;
+            const statusColor = updatedStatus === 'Open'
+                ? '#f28c38' : updatedStatus === 'Scheduled'
                 ? '#1e90ff' : '#6b7280';
 
             const badge = document.querySelector(
@@ -726,20 +746,20 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
             const btn = document.getElementById(`status-btn-${quizId}`);
 
             if (badge) {
-                badge.textContent   = newStatus;
+                badge.textContent   = updatedStatus;
                 badge.style.color   = statusColor;
                 badge.style.background = `${statusColor}20`;
                 badge.style.border  = `1px solid ${statusColor}50`;
             }
             if (panelBadge) {
-                panelBadge.textContent = newStatus;
+                panelBadge.textContent = updatedStatus;
                 panelBadge.style.color = statusColor;
                 panelBadge.style.background = `${statusColor}20`;
                 panelBadge.style.border = `1px solid ${statusColor}50`;
             }
             if (btn) {
-                const newBtnText = newStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
-                const newBtnClass = newStatus === 'Closed' ? 'reopen' : 'close';
+                const newBtnText = updatedStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+                const newBtnClass = updatedStatus === 'Closed' ? 'reopen' : 'close';
                 // Handle both desktop card and mobile button
                 if (btn.classList.contains('qz-action-card')) {
                     const span = btn.querySelector('.qz-action-card-text span:first-child');
@@ -749,12 +769,13 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
                     btn.textContent = newBtnText;
                     btn.className   = `teacher-quiz-action-btn ${newBtnClass}`;
                 }
-                btn.onclick = () => toggleQuizStatus(quizId, newStatus);
+                btn.dataset.quizStatus = updatedStatus;
+                btn.onclick = () => toggleQuizStatus(quizId, updatedStatus);
             }
             // Update cached quiz data
             if (window._allQuizzesFlat) {
                 const q = window._allQuizzesFlat.find(q => q.id == quizId);
-                if (q) q.status = newStatus;
+                if (q) q.status = updatedStatus;
             }
             window.teacherQuizzesCache = null;
         } else {
@@ -790,6 +811,10 @@ window.openQuizResults = async function(quizId, quizTitle) {
     }
 };
 
+window.openQuizResultsFromElement = function(el) {
+    openQuizResults(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
+};
+
 function renderQuizResults(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -810,7 +835,7 @@ function renderQuizResults(data) {
             </button>
         </div>
         <div style="${panel ? 'padding:0 32px 28px;' : ''}">
-        <h3 class="teacher-quiz-grades-title">${data.quiz_title}</h3>
+        <h3 class="teacher-quiz-grades-title">${escapeHtml(data.quiz_title)}</h3>
         <p class="teacher-quiz-grades-meta">${data.results.length} submission${data.results.length !== 1 ? 's' : ''}</p>`;
 
     if (data.results.length === 0) {
@@ -833,19 +858,19 @@ function renderQuizResults(data) {
 
         data.results.forEach(r => {
             const perc = r.percentage !== 'N/A'
-                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(r.percentage)}">${r.percentage}</span>`
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(r.percentage)}">${escapeHtml(r.percentage)}</span>`
                 : '<span style="color:#555e6a;">N/A</span>';
 
             html += `
                 <tr>
-                    <td>${r.name}</td>
-                    <td>${r.score} / ${r.total}</td>
+                    <td>${escapeHtml(r.name)}</td>
+                    <td>${escapeHtml(r.score)} / ${escapeHtml(r.total)}</td>
                     <td>${perc}</td>
-                    <td>${r.time_taken}</td>
-                    <td>${r.submitted_at}</td>
+                    <td>${escapeHtml(r.time_taken)}</td>
+                    <td>${escapeHtml(r.submitted_at)}</td>
                     <td>
                         <button class="teacher-edit-marks-btn"
-                            onclick="openQuizReview(${r.result_id}, '${data.quiz_title.replace(/'/g, "\\'")}')">
+                            onclick="openQuizReview(${r.result_id}, '')">
                             Review
                         </button>
                     </td>
@@ -909,22 +934,22 @@ function renderQuizReview(data) {
 
         <div style="${padStyle}">
         <div class="teacher-review-score-card">
-            <div class="teacher-review-percentage">${data.percentage}%</div>
-            <div class="teacher-review-title">${data.title}</div>
+            <div class="teacher-review-percentage">${escapeHtml(data.percentage)}%</div>
+            <div class="teacher-review-title">${escapeHtml(data.title)}</div>
             <div class="teacher-review-meta">
-                Points: <strong>${data.score} / ${data.total}</strong> &bull;
-                Date: ${data.submitted_at}
+                Points: <strong>${escapeHtml(data.score)} / ${escapeHtml(data.total)}</strong> &bull;
+                Date: ${escapeHtml(data.submitted_at)}
             </div>
         </div>`;
 
     data.questions.forEach((q, i) => {
         html += `
             <div class="teacher-review-question">
-                <div class="teacher-review-q-meta">Question ${i + 1} (${q.points} point${q.points != 1 ? 's' : ''})</div>
-                <div class="teacher-review-q-text">${q.text}</div>`;
+                <div class="teacher-review-q-meta">Question ${i + 1} (${escapeHtml(q.points)} point${q.points != 1 ? 's' : ''})</div>
+                <div class="teacher-review-q-text">${escapeHtml(q.text)}</div>`;
 
         if (q.image) {
-            html += `<img src="${q.image}" class="teacher-review-q-image" alt="Question image">`;
+            html += `<img src="${escapeHtml(q.image)}" class="teacher-review-q-image" alt="Question image">`;
         }
 
         q.choices.forEach(choice => {
@@ -954,7 +979,7 @@ function renderQuizReview(data) {
             html += `
                 <div class="teacher-review-choice ${cls}">
                     ${icon}
-                    <span>${choice.text}</span>
+                    <span>${escapeHtml(choice.text)}</span>
                     ${isSelected ? '<span class="teacher-review-your-answer">Your Answer</span>' : ''}
                 </div>`;
         });
@@ -1325,6 +1350,10 @@ window.openIntegrityModal = function(quizId, quizTitle) {
     document.getElementById('integrityModal').style.display    = 'flex';
 };
 
+window.openIntegrityModalFromElement = function(el) {
+    openIntegrityModal(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
+};
+
 window.closeIntegrityModal = function() {
     document.getElementById('integrityModal').style.display = 'none';
 };
@@ -1362,7 +1391,7 @@ window.decodeIntegrity = async function() {
         } else {
             let html = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-                    <span style="color:#8b949e;font-size:13px;">${data.length} learner${data.length !== 1 ? 's' : ''} flagged</span>
+                    <span style="color:#8b949e;font-size:13px;">${escapeHtml(data.length)} learner${data.length !== 1 ? 's' : ''} flagged</span>
                     <span style="background:rgba(79,209,197,0.2);color:#4fd1c5;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;border:1px solid #4fd1c5;">AI ACTIVE</span>
                 </div>`;
 
@@ -1374,9 +1403,9 @@ window.decodeIntegrity = async function() {
     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;${isLast ? '' : 'border-bottom:1px solid rgba(255,255,255,0.06);'}">
         <div style="display:flex;align-items:center;gap:10px;">
             <div style="width:8px;height:8px;border-radius:50%;background:#f85149;flex-shrink:0;"></div>
-            <span style="color:#e2e8f0;font-size:14px;">${row.name}</span>
+            <span style="color:#e2e8f0;font-size:14px;">${escapeHtml(row.name)}</span>
         </div>
-        <span style="color:#f85149;font-size:12px;font-weight:700;letter-spacing:0.3px;">Q ${row.problem_questions}</span>
+        <span style="color:#f85149;font-size:12px;font-weight:700;letter-spacing:0.3px;">Q ${escapeHtml(row.problem_questions)}</span>
     </div>`;
             });
 

@@ -1170,7 +1170,7 @@ function getCsrfToken() {
 
             <!-- Submit (single page + last question of multi-page) -->
             <?php if ($layoutType === 'single_page'): ?>
-            <button type="button" class="submit-btn" id="mainSubmit" onclick="submitQuiz()">
+            <button type="button" class="submit-btn" id="mainSubmitAlt" onclick="submitQuiz()">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="20 6 9 17 4 12"/>
                 </svg>

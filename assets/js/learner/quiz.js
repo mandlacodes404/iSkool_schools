@@ -1,4 +1,14 @@
 /* assets/js/quiz.js */
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 window.learnerQuizCache          = null;
 window.quizInstructionsCache     = {};
 window.learnerQuizPrefetchPromise = null;
@@ -178,15 +188,15 @@ if (loader) loader.style.display = 'flex';
                 <h2 style="text-align:center; color:#e2e8f0; margin-bottom:25px;">Quiz Instructions</h2>
                 
                 <div class="quiz-info-box">
-                    <p><strong>Quiz Title:</strong> ${data.title}</p>
-                    <p><strong>Duration:</strong> ${data.duration} minutes</p>
-                    <p><strong>Attempts Allowed:</strong> ${data.attemptLimit}</p>
+                    <p><strong>Quiz Title:</strong> ${escapeHtml(data.title)}</p>
+                    <p><strong>Duration:</strong> ${escapeHtml(data.duration)} minutes</p>
+                    <p><strong>Attempts Allowed:</strong> ${escapeHtml(data.attemptLimit)}</p>
                 </div>
 
                 <h3 style="color:#c9d1d9;">⚠️ Please read carefully:</h3>
                 <ul class="inst-list">
                     ${data.isContinuing ? `<li style="color: #e67e22;"><strong>Note:</strong> You have an unfinished attempt. You will resume.</li>` : ''}
-                    <li>You can only attempt this quiz <strong>${data.attemptLimit}</strong> time(s).</li>
+                    <li>You can only attempt this quiz <strong>${escapeHtml(data.attemptLimit)}</strong> time(s).</li>
                     <li>The timer starts immediately and cannot be paused.</li>
                 </ul>
 
@@ -221,7 +231,7 @@ if (!data.isContinuing) {
     window.quizInstructionsCache[quizId] = apiArea.innerHTML;
 }
     } catch (err) {
-        apiArea.innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
+        apiArea.innerHTML = `<p style="color:red; text-align:center;">Error: ${escapeHtml(err.message)}</p>`;
     } finally {
         if (loader) loader.style.display = 'none';
     }
@@ -279,7 +289,7 @@ function renderQuizCards(groupedData) {
     let sidebarHtml = '';
     let flatIdx = 0;
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        sidebarHtml += `<div class="lqz-sidebar-subject-label">${subject}</div>`;
+        sidebarHtml += `<div class="lqz-sidebar-subject-label">${escapeHtml(subject)}</div>`;
         quizzes.forEach(quiz => {
             const startTimeStr = quiz.start_time || "";
             let isScheduled = false;
@@ -304,8 +314,8 @@ function renderQuizCards(groupedData) {
                         </svg>
                     </div>
                     <div class="lqz-sidebar-item-info">
-                        <div class="lqz-sidebar-item-title">${quiz.title}</div>
-                        <div class="lqz-sidebar-item-meta">${quiz.duration} mins &middot; ${formatQuizDate(quiz.start_time)}</div>
+                        <div class="lqz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                        <div class="lqz-sidebar-item-meta">${escapeHtml(quiz.duration)} mins &middot; ${escapeHtml(formatQuizDate(quiz.start_time))}</div>
                     </div>
                     <span class="lqz-sidebar-status-dot" style="background:${dotColor};"></span>
                 </div>`;
@@ -569,7 +579,7 @@ function renderQuizCards(groupedData) {
         <div class="lqz-mobile-list">`;
 
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        html += `<div class="lqz-mobile-subject-header">${subject}</div>`;
+        html += `<div class="lqz-mobile-subject-header">${escapeHtml(subject)}</div>`;
 
         quizzes.forEach(quiz => {
             const displayDate = formatQuizDate(quiz.start_time);
@@ -624,7 +634,7 @@ function renderQuizCards(groupedData) {
                     </div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
-                            <span class="lqz-mobile-row-title-text">${quiz.title}</span>
+                            <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                             <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
                         </div>
                     </div>
@@ -701,16 +711,16 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
         <div class="lqz-panel-content">
             <div class="lqz-panel-header">
                 <div class="lqz-panel-title">
-                    ${quiz.title} ${summativeBadge}
+                    ${escapeHtml(quiz.title)} ${summativeBadge}
                 </div>
                 <div class="lqz-panel-meta">
-                    <span>${quiz.subject}</span>
+                    <span>${escapeHtml(quiz.subject)}</span>
                     <span>&bull;</span>
                     <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>${quiz.duration} mins</span>
+                    <span>${escapeHtml(quiz.duration)} mins</span>
                     <span>&bull;</span>
                     <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span>${formatQuizDate(quiz.start_time)}</span>
+                    <span>${escapeHtml(formatQuizDate(quiz.start_time))}</span>
                 </div>
             </div>
             <div class="lqz-panel-action-row">

@@ -855,11 +855,11 @@ function buildQuizList(quizzes, gi) {
         const detailsHtml = `
             <div class="quiz-row-details" id="qdetail-${gi}-${qi}">
                 ${published ? `
-                    <p><strong>Score:</strong> ${q.score} / ${q.total} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
+                    <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
                 ` : `<p style="color:#555e6a;font-style:italic;">Marks not published yet.</p>`}
-                <p style="margin-top:8px;"><strong>Duration:</strong> ${duration} min</p>
-                <p><strong>Time Taken:</strong> ${timeTaken}</p>
-                <p><strong>Taken on:</strong> ${submittedAt}</p>
+                <p style="margin-top:8px;"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
+                <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
+                <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
                 ${published ? `<div class="grade-inline-stats loading" id="gstats-${gi}-${qi}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
             </div>`;
 
@@ -928,7 +928,7 @@ function buildTermTable(quizzes, selectedTerm) {
         return `<tr>
             <td>${escHtml(q.quiz_title)}</td>
             <td>${w.toFixed(1)}%</td>
-            <td>${q.score}/${q.total}</td>
+            <td>${escHtml(String(q.score))}/${escHtml(String(q.total))}</td>
             <td style="color:#4fd1c5;font-weight:800;">${earned.toFixed(1)}/${w.toFixed(1)}</td>
         </tr>`;
     }).join('');
@@ -1450,14 +1450,14 @@ function renderProgressReport(data) {
                 </button>
             </div>
             <div class="pr-hero">
-                <img src="${data.school_logo}" alt="School Logo" class="pr-logo" onerror="this.style.display='none'">
+                <img src="${escAttr(data.school_logo)}" alt="School Logo" class="pr-logo" onerror="this.style.display='none'">
                 <div class="pr-hero-info">
                     <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
                     <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
                     <div class="pr-learner-meta">
                         ${escHtmlPr(data.learner_class)} &nbsp;·&nbsp;
                         Term ${currentTerm} Progress Report &nbsp;·&nbsp;
-                        ${data.date}
+                        ${escHtmlPr(data.date)}
                     </div>
                 </div>
                 <div class="pr-overall-badge">

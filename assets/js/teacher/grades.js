@@ -2,6 +2,15 @@ function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
 }
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 window.teacherGradesCache  = null;
 window.currentQuizData     = null;
 
@@ -70,7 +79,7 @@ function renderTeacherGrades(data) {
         data.forEach(termData => {
             sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
             termData.classes.forEach(cls => {
-                sidebarHtml += `<div class="gr-sidebar-class-label">${cls.class_name}</div>`;
+                sidebarHtml += `<div class="gr-sidebar-class-label">${escapeHtml(cls.class_name)}</div>`;
                 cls.quizzes.forEach(quiz => {
                     sidebarHtml += `
                         <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
@@ -82,8 +91,8 @@ function renderTeacherGrades(data) {
                                 </svg>
                             </div>
                             <div class="gr-sidebar-item-info">
-                                <div class="gr-sidebar-item-title">${quiz.title}</div>
-                                <div class="gr-sidebar-item-meta">${quiz.created_at}</div>
+                                <div class="gr-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                                <div class="gr-sidebar-item-meta">${escapeHtml(quiz.created_at)}</div>
                             </div>
                         </div>`;
                 });
@@ -286,11 +295,11 @@ function renderTeacherGrades(data) {
             termData.classes.forEach(cls => {
                 html += `
                     <div class="teacher-resource-section">
-                        <div class="teacher-resource-class-label">${cls.class_name}</div>`;
+                        <div class="teacher-resource-class-label">${escapeHtml(cls.class_name)}</div>`;
 
                 cls.quizzes.forEach(quiz => {
                     html += `
-                        <div class="teacher-resource-card" onclick="openQuizGrades(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">
+                        <div class="teacher-resource-card" data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}" onclick="openQuizGradesFromElement(this)">
                             <div class="teacher-resource-icon">
                                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -300,8 +309,8 @@ function renderTeacherGrades(data) {
                                 </svg>
                             </div>
                             <div class="teacher-resource-info">
-                                <div class="teacher-resource-name">${quiz.title}</div>
-                                <div class="teacher-resource-meta">${quiz.created_at}</div>
+                                <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
+                                <div class="teacher-resource-meta">${escapeHtml(quiz.created_at)}</div>
                             </div>
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
                                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -403,7 +412,7 @@ function renderGradesInPanel(data, panel) {
     let html = `
         <div class="gr-panel-content">
             <div class="gr-panel-header">
-                <div class="gr-panel-title">${data.quiz_title}</div>
+                <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
                 <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
             </div>`;
 
@@ -424,20 +433,21 @@ function renderGradesInPanel(data, panel) {
 
         data.learners.forEach(learner => {
             const score = learner.score !== null
-                ? `${learner.score} / ${learner.total}`
+                ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
                 : '<span style="color:#555e6a;">Not recorded</span>';
             const perc  = learner.percentage
-                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${learner.percentage}</span>`
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
                 : '<span style="color:#555e6a;">—</span>';
 
             html += `
                 <tr>
-                    <td>${learner.name}</td>
+                    <td>${escapeHtml(learner.name)}</td>
                     <td>${score}</td>
                     <td>${perc}</td>
                     <td>
                         <button class="teacher-edit-marks-btn"
-                            onclick="openEditMarksInPanel('${learner.email.replace(/'/g, "\\'")}', '${learner.name.replace(/'/g, "\\'")}', ${data.quiz_id}, '${data.quiz_title.replace(/'/g, "\\'")}', ${learner.score ?? 'null'}, ${learner.total ?? 100})">
+                            data-email="${escapeHtml(learner.email)}" data-name="${escapeHtml(learner.name)}" data-quiz-id="${data.quiz_id}" data-quiz-title="${escapeHtml(data.quiz_title)}" data-score="${escapeHtml(learner.score ?? '')}" data-total="${escapeHtml(learner.total ?? 100)}"
+                            onclick="openEditMarksInPanelFromElement(this)">
                             Edit
                         </button>
                     </td>
@@ -473,18 +483,18 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
                 </button>
                 <div>
                     <div class="gr-panel-title">Edit Marks</div>
-                    <div class="gr-panel-meta">${name} &bull; ${quizTitle}</div>
+                    <div class="gr-panel-meta">${escapeHtml(name)} &bull; ${escapeHtml(quizTitle)}</div>
                 </div>
             </div>
 
             <div class="teacher-edit-marks-box">
                 <label class="teacher-modal-label">Score Received</label>
                 <input type="number" step="0.01" id="editScore" class="teacher-modal-input"
-                    value="${scoreVal}" placeholder="e.g. 15">
+                    value="${escapeHtml(scoreVal)}" placeholder="e.g. 15">
 
                 <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
                 <input type="number" step="0.01" id="editTotal" class="teacher-modal-input"
-                    value="${totalVal}" placeholder="e.g. 20">
+                    value="${escapeHtml(totalVal)}" placeholder="e.g. 20">
 
                 <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
                 <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
@@ -494,7 +504,8 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
                         onclick="renderGradesInPanel(window.currentQuizData, document.getElementById('gr-main-panel'))">Cancel</button>
                     <button class="teacher-modal-submit" style="flex:2;"
                         id="saveMarksBtn"
-                        onclick="saveMarks('${email.replace(/'/g, "\\'")}', ${quizId})">
+                        data-email="${escapeHtml(email)}" data-quiz-id="${quizId}"
+                        onclick="saveMarksFromElement(this)">
                         Save Marks
                     </button>
                 </div>
@@ -529,6 +540,21 @@ window.openQuizGrades = async function(quizId, quizTitle) {
     }
 };
 
+window.openEditMarksInPanelFromElement = function(el) {
+    openEditMarksInPanel(
+        el.dataset.email || '',
+        el.dataset.name || '',
+        parseInt(el.dataset.quizId, 10),
+        el.dataset.quizTitle || '',
+        el.dataset.score === '' ? null : parseFloat(el.dataset.score),
+        parseFloat(el.dataset.total || '100')
+    );
+};
+
+window.openQuizGradesFromElement = function(el) {
+    openQuizGrades(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
+};
+
 function renderQuizGrades(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -543,7 +569,7 @@ function renderQuizGrades(data) {
             </button>
         </div>
 
-        <h3 class="teacher-quiz-grades-title">${data.quiz_title}</h3>
+        <h3 class="teacher-quiz-grades-title">${escapeHtml(data.quiz_title)}</h3>
         <p class="teacher-quiz-grades-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</p>`;
 
     if (data.learners.length === 0) {
@@ -563,20 +589,21 @@ function renderQuizGrades(data) {
 
         data.learners.forEach(learner => {
             const score = learner.score !== null
-                ? `${learner.score} / ${learner.total}`
+                ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
                 : '<span style="color:#555e6a;">Not recorded</span>';
             const perc  = learner.percentage
-                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${learner.percentage}</span>`
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
                 : '<span style="color:#555e6a;">—</span>';
 
             html += `
                 <tr>
-                    <td>${learner.name}</td>
+                    <td>${escapeHtml(learner.name)}</td>
                     <td>${score}</td>
                     <td>${perc}</td>
                     <td>
                         <button class="teacher-edit-marks-btn" 
-                            onclick="openEditMarks('${learner.email.replace(/'/g, "\\'")}', '${learner.name.replace(/'/g, "\\'")}', ${data.quiz_id}, '${data.quiz_title.replace(/'/g, "\\'")}', ${learner.score ?? 'null'}, ${learner.total ?? 100})">
+                            data-email="${escapeHtml(learner.email)}" data-name="${escapeHtml(learner.name)}" data-quiz-id="${data.quiz_id}" data-quiz-title="${escapeHtml(data.quiz_title)}" data-score="${escapeHtml(learner.score ?? '')}" data-total="${escapeHtml(learner.total ?? 100)}"
+                            onclick="openEditMarksFromElement(this)">
                             Edit
                         </button>
                     </td>
@@ -612,24 +639,24 @@ window.openEditMarks = function(email, name, quizId, quizTitle, currentScore, cu
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
-                Back to ${quizTitle}
+                Back to ${escapeHtml(quizTitle)}
             </button>
         </div>
 
         <div class="teacher-edit-marks-box">
             <h3 class="teacher-edit-marks-title">Edit Marks</h3>
             <p class="teacher-edit-marks-meta">
-                <strong>${name}</strong><br>
-                <span style="color:#8b949e;">${quizTitle}</span>
+                <strong>${escapeHtml(name)}</strong><br>
+                <span style="color:#8b949e;">${escapeHtml(quizTitle)}</span>
             </p>
 
             <label class="teacher-modal-label">Score Received</label>
             <input type="number" step="0.01" id="editScore" class="teacher-modal-input" 
-                value="${scoreVal}" placeholder="e.g. 15">
+                value="${escapeHtml(scoreVal)}" placeholder="e.g. 15">
 
             <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
             <input type="number" step="0.01" id="editTotal" class="teacher-modal-input" 
-                value="${totalVal}" placeholder="e.g. 20">
+                value="${escapeHtml(totalVal)}" placeholder="e.g. 20">
 
             <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
             <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
@@ -639,11 +666,23 @@ window.openEditMarks = function(email, name, quizId, quizTitle, currentScore, cu
                     onclick="renderQuizGrades(window.currentQuizData)">Cancel</button>
                 <button class="teacher-modal-submit" style="flex:2;" 
                     id="saveMarksBtn"
-                    onclick="saveMarks('${email.replace(/'/g, "\\'")}', ${quizId})">
+                    data-email="${escapeHtml(email)}" data-quiz-id="${quizId}"
+                    onclick="saveMarksFromElement(this)">
                     Save Marks
                 </button>
             </div>
         </div>`;
+};
+
+window.openEditMarksFromElement = function(el) {
+    openEditMarks(
+        el.dataset.email || '',
+        el.dataset.name || '',
+        parseInt(el.dataset.quizId, 10),
+        el.dataset.quizTitle || '',
+        el.dataset.score === '' ? null : parseFloat(el.dataset.score),
+        parseFloat(el.dataset.total || '100')
+    );
 };
 
 window.saveMarks = async function(email, quizId) {
@@ -705,6 +744,10 @@ window.saveMarks = async function(email, quizId) {
         saveBtn.textContent = 'Save Marks';
         if (loader) loader.style.display = 'none';
     }
+};
+
+window.saveMarksFromElement = function(el) {
+    saveMarks(el.dataset.email || '', parseInt(el.dataset.quizId, 10));
 };
 
 // ─────────────────────────────────────────────
