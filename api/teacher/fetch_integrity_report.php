@@ -11,6 +11,17 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $quiz_id = isset($_GET['quiz_id']) ? intval($_GET['quiz_id']) : 0;
 
+$ownerStmt = $conn->prepare("SELECT id FROM quizzes WHERE id = ? AND created_by = ? LIMIT 1");
+$ownerStmt->bind_param("is", $quiz_id, $_SESSION['email']);
+$ownerStmt->execute();
+$ownsQuiz = $ownerStmt->get_result()->num_rows > 0;
+$ownerStmt->close();
+if (!$ownsQuiz) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Quiz not found']);
+    exit();
+}
+
 // ── 1. Build master question number map from user_answers ─────────────────
 $q_stmt = $conn->prepare("
     SELECT DISTINCT question_id 

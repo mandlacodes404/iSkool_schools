@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 18, 2026 at 06:43 AM
+-- Generation Time: May 25, 2026 at 01:08 PM
 -- Server version: 11.4.10-MariaDB-cll-lve
 -- PHP Version: 8.3.31
 
@@ -203,7 +203,9 @@ INSERT INTO `announcements` (`id`, `class_id`, `title`, `message`, `created_by`,
 (80, 1, 'Test week II', 'iSkool has released a new version which includes the basic language model, we believe this is a cool feature and will help the schools immensely', 'sibusiso.mokoena@iskool.demo', '2026-05-13 06:59:47', 5, 1, 'learners', 'all'),
 (81, 1, 'No class', 'We have no class next week teachers are going to a workshop please use this time wisely and study for the upcoming exams i will also make sure that i talk to the class rep and make sure that everyone is on their best behaviour during the period, thank you have a good long weekend!', 'lerato.patel@iskool.demo', '2026-05-14 07:04:01', 5, 1, 'learners', 'all'),
 (82, 1, 'June exams', 'We will commence the june exams on the first week of june but we will release the time table soon, latest by next week monday have a good weekend.', 'sibusiso.mokoena@iskool.demo', '2026-05-17 08:48:12', 5, 1, 'learners', 'all'),
-(83, 1, 'iSkool v1.1.3', 'We have released a new version of iSkool now the teachers can connect with the parents directly through a feature called threads', 'sibusiso.mokoena@iskool.demo', '2026-05-17 09:16:43', 5, 1, 'learners', 'all');
+(83, 1, 'iSkool v1.1.3', 'We have released a new version of iSkool now the teachers can connect with the parents directly through a feature called threads', 'sibusiso.mokoena@iskool.demo', '2026-05-17 09:16:43', 5, 1, 'learners', 'all'),
+(84, 1, 'Testing Announcement', 'This is an announcement to test that we have successfully added .env file to the server and we have successfully secure the passwords successfully as we anticipated okay, you can ignone the message if you receive it, this is just a testing alert. have a good weekend to you all', 'sibusiso.mokoena@iskool.demo', '2026-05-24 15:13:59', 5, 1, 'learners', 'all'),
+(85, 1, 'iSkool Workflows', 'We are testing the iSkool workflows', 'sibusiso.mokoena@iskool.demo', '2026-05-24 18:23:39', 5, 1, 'learners', 'all');
 
 -- --------------------------------------------------------
 
@@ -268,7 +270,9 @@ INSERT INTO `assignments` (`id`, `title`, `description`, `file_url`, `due_date`,
 (21, 'Diagonals', 'We have diagonals that we need to do as an assignment guys for the term mark', 'assignment_Uploads/sandbox_high_school/1776686011_Tutorial.pdf', '2026-04-28 13:52:00', 1, 0, 5, 1, 0, '2026-04-20 11:53:31', 'sibusiso.mokoena@iskool.demo'),
 (22, 'Chapter 8', 'This is a term mark assignment', 'assignment_Uploads/sandbox_high_school/1777369095_Tutorial.pdf', '2026-04-30 11:42:00', 1, 0, 5, 1, 0, '2026-04-28 09:38:15', 'sibusiso.mokoena@iskool.demo'),
 (23, 'State Space', 'This is an assignment for state space analysis and it will cover 30% of the term mark like i said in the syllabus overview', 'assignment_Uploads/sandbox_high_school/1778669669_api resource.pdf', '2026-05-30 12:53:00', 1, 0, 5, 1, 0, '2026-05-13 10:54:29', 'sibusiso.mokoena@iskool.demo'),
-(24, 'Chapter 10', 'iSkool has released a new version which includes the basic language model, we believe this is a cool feature and will help the schools immensely', 'assignment_Uploads/sandbox_high_school/1778670126_api resource.pdf', '2026-05-26 13:01:00', 1, 0, 5, 1, 0, '2026-05-13 11:02:06', 'sibusiso.mokoena@iskool.demo');
+(24, 'Chapter 10', 'iSkool has released a new version which includes the basic language model, we believe this is a cool feature and will help the schools immensely', 'assignment_Uploads/sandbox_high_school/1778670126_api resource.pdf', '2026-05-26 13:01:00', 1, 0, 5, 1, 0, '2026-05-13 11:02:06', 'sibusiso.mokoena@iskool.demo'),
+(25, 'Quantum Physics', 'This is a quantum physics assignments okay', 'assignment_Uploads/sandbox_high_school/1779653070_create_quiz.php', '2026-06-06 00:03:00', 1, 0, 5, 1, 0, '2026-05-24 20:04:30', 'sibusiso.mokoena@iskool.demo'),
+(26, 'Quantum Physics II', 'This is a quantum physics term test okay', 'assignment_Uploads/sandbox_high_school/1779653228_api resource.pdf', '2026-06-04 00:06:00', 1, 0, 5, 1, 0, '2026-05-24 20:07:08', 'sibusiso.mokoena@iskool.demo');
 
 -- --------------------------------------------------------
 
@@ -811,7 +815,11 @@ INSERT INTO `choices` (`id`, `question_id`, `choice_text`, `is_correct`) VALUES
 (521, 526, '1', 1),
 (522, 526, '2', 0),
 (523, 526, '3', 0),
-(524, 526, '4', 0);
+(524, 526, '4', 0),
+(525, 527, '1', 1),
+(526, 527, '2', 0),
+(527, 527, '3', 0),
+(528, 527, '4', 0);
 
 -- --------------------------------------------------------
 
@@ -1047,7 +1055,11 @@ INSERT INTO `discussion_replies` (`id`, `discussion_id`, `parent_reply_id`, `mes
 (29, 17, NULL, '', 'mandlasimphiwe99@gmail.com', 1, NULL, 'disc_69de62020d6bf.webm', '2026-04-14 11:49:22'),
 (30, 31, NULL, 'Next Monday is the deadline', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-13 10:27:21'),
 (31, 31, NULL, 'I meant this coming week', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-13 10:27:57'),
-(32, 31, NULL, '12 May', 'mandlasimphiwe99@gmail.com', 1, NULL, NULL, '2026-05-13 10:28:13');
+(32, 31, NULL, '12 May', 'mandlasimphiwe99@gmail.com', 1, NULL, NULL, '2026-05-13 10:28:13'),
+(33, 17, NULL, 'When are the exams ?', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:38:24'),
+(34, 17, NULL, 'I mean the time table', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:44:28'),
+(35, 17, NULL, 'Yes', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:44:49'),
+(36, 17, NULL, 'No', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:45:31');
 
 -- --------------------------------------------------------
 
@@ -1141,7 +1153,7 @@ CREATE TABLE `discussion_typing` (
 
 INSERT INTO `discussion_typing` (`discussion_id`, `user_email`, `updated_at`) VALUES
 (17, 'mandi.vava@iskool.demo', '2026-05-07 13:53:57'),
-(17, 'mandlasimphiwe99@gmail.com', '2026-05-07 13:50:35'),
+(17, 'mandlasimphiwe99@gmail.com', '2026-05-24 20:45:29'),
 (24, 'mandlasimphiwe99@gmail.com', '2026-03-04 09:46:30'),
 (25, 'mandi.vava@iskool.demo', '2026-03-04 09:45:24'),
 (25, 'mandlasimphiwe99@gmail.com', '2026-05-06 12:37:38'),
@@ -1458,7 +1470,8 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`) VALUES
 (13, 'johannesmahlangu101@gmail.com', '8da5a3ad3f6983ffc70c5fe90f647e23d745e820694bd2356a219e2ba8dd2de2', '2026-05-04 13:24:31'),
 (14, 'mandlasimphiwe99@gmail.com', 'b5d62a2cff1270cbfb9758e42e4e29eef9003be839fc0717ad7706ed188ce47b', '2026-05-04 13:26:46'),
 (15, 'johannesmahlangu101@gmail.com', '864c8ef909f8689111431be682a86e2632df79d3e62ddba18d0bbe59c4e79027', '2026-05-04 13:43:26'),
-(16, 'mandla_mahlangu@icloud.com', 'dcd202b082cdec885b5235abfbd8f89030047f0a04f20779f59e4ee00d806b8b', '2026-05-04 14:08:50');
+(16, 'mandla_mahlangu@icloud.com', 'dcd202b082cdec885b5235abfbd8f89030047f0a04f20779f59e4ee00d806b8b', '2026-05-04 14:08:50'),
+(17, 'mandlasimphiwe99@gmail.com', '498bad35e5d739b61cf6fbb71b93fbab7423c6713306bf1fa613886bd1b0df98', '2026-05-24 22:15:53');
 
 -- --------------------------------------------------------
 
@@ -2049,7 +2062,8 @@ INSERT INTO `quizquestions` (`id`, `quiz_id`, `question_text`, `image_path`, `po
 (523, 108, 'WHAT IS IN THE IMAGE', NULL, 1),
 (524, 109, 'WHAT IS IN THE IMAGE', NULL, 1),
 (525, 110, 'WHAT IS IN THE IMAGE', NULL, 1),
-(526, 112, 'WHAT IS IN THE IMAGE', NULL, 1);
+(526, 112, 'WHAT IS IN THE IMAGE', NULL, 1),
+(527, 113, 'WHAT IS IN THE IMAGE', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -2195,7 +2209,8 @@ INSERT INTO `quizzes` (`id`, `title`, `duration`, `publish_marks`, `created_by`,
 (109, 'Chapter 5', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-04-28 09:34:24', 1, 5, 1, 1, '2026-04-28 11:38:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0),
 (110, 'Fourier Series', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-13 10:48:47', 1, 5, 1, 1, '2026-05-13 13:47:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0),
 (111, 'Quadratics', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-13 11:08:16', 1, 5, 1, 1, '2026-05-13 13:11:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0),
-(112, 'Quadratics', 30, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-13 11:10:02', 1, 5, 1, 1, '2026-05-13 13:14:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0);
+(112, 'Quadratics', 30, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-13 11:10:02', 1, 5, 1, 1, '2026-05-13 13:14:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0),
+(113, 'Linear Test', 15, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-25 13:17:18', 1, 5, 1, 1, '2026-05-25 15:24:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -4722,7 +4737,8 @@ INSERT INTO `resources` (`id`, `title`, `filename`, `class_id`, `uploaded_by`, `
 (25, 'Surds simplification', 'sandbox_high_school/1776686132_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-20 11:55:32', 'file', NULL),
 (26, 'Surds simplification II', 'sandbox_high_school/1776686242_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-20 11:57:22', 'file', NULL),
 (27, 'Chapter 8', 'sandbox_high_school/1777369298_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-28 09:41:38', 'file', NULL),
-(28, 'Chapter 9', 'sandbox_high_school/1777369478_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-28 09:44:38', 'file', NULL);
+(28, 'Chapter 9', 'sandbox_high_school/1777369478_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-28 09:44:38', 'file', NULL),
+(29, 'Workflows PDF', 'sandbox_high_school/1779661510_apiresource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-05-24 22:25:10', 'file', NULL);
 
 -- --------------------------------------------------------
 
@@ -4912,6 +4928,7 @@ CREATE TABLE `top_achievers` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
+  `second_name` varchar(100) DEFAULT NULL,
   `title` enum('Mr','Mrs','Ms','Dr','Prof','Rev') DEFAULT NULL,
   `surname` varchar(50) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
@@ -4943,102 +4960,102 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `title`, `surname`, `email`, `password`, `role`, `profile_pic`, `gender`, `age`, `date_of_birth`, `id_number`, `address`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_phone`, `medical_notes`, `profile_status`, `phone`, `subject_specialization`, `employment_type`, `created_at`, `is_deleted`, `profile_picture`) VALUES
-(1, 'Mandla', 'Mr', 'Mahlangu', 'mandlasimphiwe99@gmail.com', '$2y$10$dNMxD1Rj1WUbTzJWqB6dNeifjsfgSfAtrdDu1VBS.bMk/9e4cZOVG', 'learner', 'uploads/default_profile.png', 'male', 17, '2002-03-27', '9001065599086', '2047 Mandisa street, Tokoza', 'Zinhle Mahlangu', 'Mother', '0655750255', 'mandlasimphiwe99@gmail.com', 'Jonh Doe', '0655750255', 'No allergies', 'complete', NULL, NULL, NULL, '2025-11-29 14:02:43', 0, 'default.png'),
-(2, 'Siba', 'Mr', 'Mnqovu', 'mandlasimphiwe500@gmail.com', '$2y$10$GtRQT69MicRf8APvP4NWQ.IHeb8g2A7Pi9bsghHQMmAmTa6rAEXJm', 'teacher', 'uploads/default_profile.png', 'male', 30, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-11-29 14:18:01', 0, NULL),
-(3, 'Siphephelo', 'Mr', 'Ntuli', 'mandlasimphiwe510@gmail.com', '$2y$10$I071xwrl8GigQoGZCQ1EreULH.4nfjIRAmZMLobPKqOvdzDoLrtW.', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-11-29 14:32:10', 0, NULL),
-(4, 'Thandeka', 'Mr', 'Mahlangu', 'admin1@gmail.com', '$2y$10$jwvedIWi7aY0FhcL.58ptOQcHEg12UzCzgDnHzifUdlAGp3Aq7Gre', 'school_admin', 'uploads/default_profile.png', 'male', 34, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-02 07:44:27', 0, NULL),
-(5, 'Nwabisa', 'Mrs', 'Mahlangu', 'mandlasimphiwe100@gmail.com', '$2y$10$fghchmNcV6fwN7gBPAcU8.hlD4UWtYla5dg50AeTsth/.alYf/n4q', 'parent', 'uploads/default_profile.png', 'female', 45, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-03 07:08:28', 0, NULL),
-(8, 'Super Admin', 'Mr', 'iSkool', 'superadmin@iskool.co.za', '$2y$10$1EFVPhNC9xb3qe.KmntsyOjWOVssvHkNJTZAqebsF45dLiu7SP5Xa', 'admin', 'uploads/default_profile.png', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-04 11:39:50', 0, NULL),
-(25, 'Thabo', 'Mr', 'Nkosi', 'thabo.nkosi@iskool.demo', '$2y$10$lKL.z9.wGycJ.SQ3oOfmcupAVvqA.0g0tnStWAuq.rbzR9gHjpCJq', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:04', 0, NULL),
-(26, 'Lerato', 'Mrs', 'Patel', 'lerato.patel@iskool.demo', '$2y$10$YcQpy7Zyxedl9OWMgTsHT.NTP9a/YcuKiJDRCqpuGY.mGIJeb6yUS', 'teacher', 'uploads/default_profile.png', 'female', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, 'default.png'),
-(27, 'Nomsa', 'Ms', 'Khumalo', 'nomsa.khumalo@iskool.demo', '$2y$10$w4R.J9ZAD98ShfDJXJ.mvuNvBfqYHRrRwnPDXz2aKSyZNX/iKbxH2', 'teacher', 'uploads/default_profile.png', 'female', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
-(28, 'Pieter', 'Dr', 'van der Merwe', 'pieter.vandermerwe@iskool.demo', '$2y$10$KaevZZXeFOjU3.Z8YtHbce.aByZwwlK0oGMK6nAyC1ptjtiqBm2tq', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
-(29, 'Sibusiso', 'Mr', 'Mokoena', 'sibusiso.mokoena@iskool.demo', '$2y$10$2ZoACtqwi4Ew1UCU/ev.GOqh5Nn/PhSaQ0xq5iWRhde.7UkvVxUXG', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
-(30, 'Lungile', NULL, 'Buthelezi', 'lungile.buthelezi@iskool.demo', '$2y$10$JBKVgB8Ds24TLd8zKgZQHOMgWKDORdpmTh.sXwayVjUfn2Nyqm/A6', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, 'default.png'),
-(31, 'Lwandle', NULL, 'Ngubane', 'lwandle.ngubane@iskool.demo', '$2y$10$unkFn2L9cIRwGdSo1D.cEuYEa5MRMDfd0YYxtNWx3sWaakfSRoXZ.', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(32, 'Rethabile', NULL, 'Dlamini', 'rethabile.dlamini@iskool.demo', '$2y$10$8gnVdI7sphH4xsdfrvAEguGKZaXR4W/MlnWWnsUC6/fX0j3mVo.um', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(33, 'Ayanda', NULL, 'Khoza', 'ayanda.khoza@iskool.demo', '$2y$10$BgLiLepTB09/oyI.WrnPMe7qKCJIYeC7xoSugYS78ZbezlKCBRrBC', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(34, 'Sanele', NULL, 'Khuzwayo', 'sanele.khuzwayo@iskool.demo', '$2y$10$6XGNOKIkre5NsUWegO1AMuyyodiN/sTdgfvqnVrgHBso5Gdxm6RtK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(35, 'Junior', NULL, 'Khuzwayo', 'junior.khuzwayo@iskool.demo', '$2y$10$9MSHlnKknd.3zGM9LY1le.r15jU19B5VufzEDxfjzwr3VtwVX753e', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(36, 'Sanele', NULL, 'Mokoena', 'sanele.mokoena@iskool.demo', '$2y$10$2Pns1poKndO6gCvc97qxnuuOjT9pVUnlZ.KdtiNDzh1/XtI07Yv7C', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(37, 'Lwandle', NULL, 'Mthembu', 'lwandle.mthembu@iskool.demo', '$2y$10$9FoN3OY4ZvMqLbyRfzjWLuWW90uh0IiM8iZyJIhFwt6lWgr3nWsZK', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
-(38, 'Rethabile', NULL, 'Vilakazi', 'rethabile.vilakazi@iskool.demo', '$2y$10$oQ8UJ0hvlJBVubBhC3SEFuHVrqcF1iIHa8cO4wMXbKogwQRVlQVje', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(39, 'Bongani', NULL, 'Mbatha', 'bongani.mbatha@iskool.demo', '$2y$10$7wopX8OgazaGVo5Ao/2iLOMKp9SDVffzqOLUBWYoCju8ZWVGKsTMa', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(40, 'Tshepo', NULL, 'Gumede', 'tshepo.gumede@iskool.demo', '$2y$10$mg.owHhkvpbO80CLTkj/X.t9uGRnuPV4vhctm01Fx7danuOfEYOQ.', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(41, 'Andile', NULL, 'Mthethwa', 'andile.mthethwa@iskool.demo', '$2y$10$ZZ2Bz.0VSXlwKSqPRv6o3eGTwYmSXYm2ZnTRq9GhHy29KT.5Dk8Ea', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(42, 'Lindani', NULL, 'Vilakazi', 'lindani.vilakazi@iskool.demo', '$2y$10$DuyM783EzyteO7vViI3eaeDQpba/kRD2Le5tqL72NlQSi8l3/CEby', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(43, 'Rethabile', NULL, 'Hlongwane', 'rethabile.hlongwane@iskool.demo', '$2y$10$Dl3FAgzmoqAgzL.4s70bRunjE2.XlF0TlMDb6SOXREiEGVGaVD3aa', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
-(44, 'Sanele', NULL, 'Dlamini', 'sanele.dlamini@iskool.demo', '$2y$10$C0jflluiVErgUXBUTWSpL.WSjr5aS4KIMNJX.TU9KNtFD/zmGM79e', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(45, 'Sipho', NULL, 'Dlamini', 'sipho.dlamini@iskool.demo', '$2y$10$tWvUhsI4b1.a.ZZLhlZrnuNRaKJFexQ74WRb10FfTTWr.pvwHtwcq', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(46, 'Athi', NULL, 'Hlongwane', 'athi.hlongwane@iskool.demo', '$2y$10$iL3WNaUh2u2yuG1SCXTXHOaNVXm/WsmBfqrtwE4Bl2kquuXzKut.u', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(47, 'Siya', NULL, 'Vilakazi', 'siya.vilakazi@iskool.demo', '$2y$10$kEXs8wVPyGnfSg9AmOsRae/BEin7c.8C7ExvHx55PwD9X30ECBTny', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(48, 'Ayanda', NULL, 'Gumede', 'ayanda.gumede@iskool.demo', '$2y$10$HHEZ7eWZ.VO.srWBVAo0muO4gFiKWnB6gJ9p6A35.hlu7eWWQik7i', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(49, 'Lindani', NULL, 'Sibiya', 'lindani.sibiya@iskool.demo', '$2y$10$NmlzoL7e.aaGeYsX5mp4V.RkaOKhIK/aKAViIN0DzhxMn.F720AD2', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
-(50, 'Rethabile', NULL, 'Mbatha', 'rethabile.mbatha@iskool.demo', '$2y$10$HXtzEJb/kxGF4DXoIjRINukZqiC.eh06w25zzdlitYHqfCbYhFemq', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(51, 'Sipho', NULL, 'Mathenjwa', 'sipho.mathenjwa@iskool.demo', '$2y$10$.jdN4cptfDm2ys8RAkKS3usgAOchTNT77jQOmcF/yIyRbM1HrsJiy', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(52, 'Junior', NULL, 'Mthembu', 'junior.mthembu@iskool.demo', '$2y$10$5CD3MkphA.QS1.Lr46pJ4ONub5l5VEhrGZUm885jbvuLYU5wEMi2u', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(53, 'Ayanda', NULL, 'Mathenjwa', 'ayanda.mathenjwa@iskool.demo', '$2y$10$yCWzGH3X5Pw.jzeyAMmQ/.SgADq0EkCeTBwoHHldZ8JPT4jTzcrx.', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(54, 'Tshepo', NULL, 'Nkosi', 'tshepo.nkosi@iskool.demo', '$2y$10$NW/ShoSdL9R1hIG79S1RwOV6g1vFCl62fVpzQ0kuFhnI/yzE6aXCu', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(55, 'Bongani', NULL, 'Khuzwayo', 'bongani.khuzwayo@iskool.demo', '$2y$10$5UZOhh4DlzMADYqIoGM.JeCvwqNRvTwrMd8Fg4nunW6SiOC5k7Sg.', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(56, 'Rethabile', NULL, 'Khoza', 'rethabile.khoza@iskool.demo', '$2y$10$XltR.fQ08sPWAg41TzlxLOua3ZGMxExxHqpiwM0JgaPOYE6BzSOka', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
-(57, 'Ofentse', NULL, 'Mbatha', 'ofentse.mbatha@iskool.demo', '$2y$10$yDlEbyMxr2Op/xxp0Iup3.6kByGdY8dPI.EOyo00aQAzo1ChaqifK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
-(58, 'Ofentse', NULL, 'Ngubane', 'ofentse.ngubane@iskool.demo', '$2y$10$U95gqKe2EVBUY0DSoD7zt.K8SilJQ428qi2eAGyn6NQPDdehbTQYW', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
-(59, 'Mpho', NULL, 'Hlongwane', 'mpho.hlongwane@iskool.demo', '$2y$10$UU5G1Sc3d0Yrhin/9Pldb.AEmjGsM5zMT4yZoUexbDcGUHHTuOpUK', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
-(60, 'Sipho', NULL, 'Shabalala', 'sipho.shabalala@iskool.demo', '$2y$10$wwsXycFRip5W.bmyZZ5f3ee2n28YXQaDGpxPRtFguwnKPs9k4ySMm', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(61, 'Athi', NULL, 'Mathenjwa', 'athi.mathenjwa@iskool.demo', '$2y$10$wai6W3r4LpC/eemSOl7Wx.iUPniroxsq39vGVUtj3JiLrEvByIq3i', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(62, 'Thando', NULL, 'Nkosi', 'thando.nkosi@iskool.demo', '$2y$10$JLIPbSgM02tAcQJxU3VSxeltFwBF0UymXlONe.Fkz1BSfH6Ni9pRu', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(63, 'Kgomotso', NULL, 'Khuzwayo', 'kgomotso.khuzwayo@iskool.demo', '$2y$10$de2LYJL18rBfk6AFwz/LXO065Z8C8bmcXpPuUWmyZqjsEt0.K0k0m', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(64, 'Zandi', NULL, 'Buthelezi', 'zandi.buthelezi@iskool.demo', '$2y$10$OBAvXWeXHYjF32Nje7SgouRVNNOw2cWnobgpRLkYkgPP3/l5rGr7W', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(65, 'Naledi', NULL, 'Ndlovu', 'naledi.ndlovu@iskool.demo', '$2y$10$wqLI54kni3cZTwIkSKeE9e1uPRU15mpQsaAyCHYimgWrFpkhOrF1O', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
-(66, 'Thandi', NULL, 'Mhlongo', 'thandi.mhlongo@iskool.demo', '$2y$10$h1QVK2oA7zTG.4CCWBE7g.emSrhyJC38K/gmC2PxamPZfpHS4S.yW', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(67, 'Lindiwe', NULL, 'Dlamini', 'lindiwe.dlamini@iskool.demo', '$2y$10$BT8A6VxByTXGpM6jZh42MOgQuNHYObrKZgsykTlbylCsKyr4jSOOW', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(68, 'Kgomotso', NULL, 'Mthembu', 'kgomotso.mthembu@iskool.demo', '$2y$10$AjYk0rVLI1pItTz6X0yPmuJK99LfpIbfT6Sj/Ik8siVDQPN2kUD3u', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(69, 'Onthatile', NULL, 'Khoza', 'onthatile.khoza@iskool.demo', '$2y$10$..KCL3XGvwT0.HMmLygTdOftZDgsbe5J4OcUFvr79TaagM9xn7Prq', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(70, 'Tumelo', NULL, 'Ndlovu', 'tumelo.ndlovu@iskool.demo', '$2y$10$g.znp0R3zypa7RBP7Aq7QOvI9OjJTm3X9xR60l.H6HFZyQZ7uG2R6', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(71, 'Refilwe', NULL, 'Ngubane', 'refilwe.ngubane@iskool.demo', '$2y$10$OqTNj0cVv/81SkmiinG1o.7J1MF6IM9XdFJbQ185/YAhYxjGjoQUW', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(72, 'Nomvula', NULL, 'Ndlovu', 'nomvula.ndlovu@iskool.demo', '$2y$10$O1zVbbJPpZ/U/H4JHMfL8ec5TWwc3Go.gffKGNLpd2ihLpy0F.Fue', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
-(73, 'Lerato', NULL, 'Sibiya', 'lerato.sibiya@iskool.demo', '$2y$10$nUG6VXLc3wmr9K.iiN7wv.Hd/2b1ebTTzdSHEkK0Se1YLOtsnhzCa', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(74, 'Zinhle', NULL, 'Mbatha', 'zinhle.mbatha@iskool.demo', '$2y$10$UqI1yn5UlDrGCEPUkk5FIOAB.e0VoOlv.Y/MunvjUtNvxIlokLMxu', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(75, 'Nomvula', NULL, 'Mbatha', 'nomvula.mbatha@iskool.demo', '$2y$10$T5wc/3GKFNq0lJnaO8/MpObS3eB9Wr/VwOcvg9NvulVQgrVkBa.GK', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(76, 'Precious', NULL, 'Zulu', 'precious.zulu@iskool.demo', '$2y$10$d.BiKBfDGDwaiZTBxqG57eZoxJfxzDGssSKzVDTh3TfIVekJEEhyi', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(77, 'Siphesihle', NULL, 'Shabalala', 'siphesihle.shabalala@iskool.demo', '$2y$10$yk874hhvp.USOpqolqrWPOxnVZofhu0VZRau6laRGc2A9JbRZb0na', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(78, 'Amahle', NULL, 'Hlongwane', 'amahle.hlongwane@iskool.demo', '$2y$10$BKveeBdrAeuGFu/mXDLfQOoXNwk/qnghwAMgiXPEqsFZLcxMidH0e', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(79, 'Boitumelo', NULL, 'Sithole', 'boitumelo.sithole@iskool.demo', '$2y$10$7mWhY/h3UAE6xjo10CdTVOelwqQVbPTAJkIxpiuIeWdnRfSZcSpgK', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
-(80, 'Nokuthula', NULL, 'Khoza', 'nokuthula.khoza@iskool.demo', '$2y$10$gioGgx21AzY9l40AYRvDvuYb0vR64aJrOJq1W2yT469cemBB3RyY2', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(81, 'Zandi', NULL, 'Nkosi', 'zandi.nkosi@iskool.demo', '$2y$10$Fb3kMrTHeDpLx78pL7GcpeTxHAP1GzxR/Z9qWj1nO78uJt0rFFPWy', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(82, 'Ntokozo', NULL, 'Ndlovu', 'ntokozo.ndlovu@iskool.demo', '$2y$10$klhUO4.kujcFDFGWU/97oeg0cEcd1I73Xo8wd.VbvAPDOIu8WlUTS', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(83, 'Nomvula', NULL, 'Mhlongo', 'nomvula.mhlongo@iskool.demo', '$2y$10$rNCBW7cXlN29ETPcpZ5HFuA.4alIHArEuu0LbtJ/UGUlPK8zi1IwG', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(84, 'Thandi', NULL, 'Khoza', 'thandi.khoza@iskool.demo', '$2y$10$0HiXyNHevAXxsdJRED/gS.prOBvxsqhzUiqvpcZ9pCwWd0D4eXn.K', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(85, 'Nokuthula', NULL, 'Gumede', 'nokuthula.gumede@iskool.demo', '$2y$10$znnOSmWgk2Mnk4cQVJT0D.IxAPIWaXedtcREWkNs0LvIgq/H5TNxi', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
-(86, 'Refilwe', NULL, 'Sithole', 'refilwe.sithole@iskool.demo', '$2y$10$idWHaRu/Gl0vmGzMwDYWIeOP0lDG9Ir5feNG8OMJijaHjrhqLs7fC', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
-(87, 'Dineo', NULL, 'Gumede', 'dineo.gumede@iskool.demo', '$2y$10$ak/LsceLNDBhYBa/cxCkP.53NdESHybnPgk.evN.DvC6XjwCKmxDC', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
-(88, 'Tumelo', NULL, 'Shabalala', 'tumelo.shabalala@iskool.demo', '$2y$10$uZfDxY5xTnDbqxniD1wMt.n6ZCIRxK0KXv/yTY7SAwfQQDQ/EhU/.', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
-(89, 'Zandi', NULL, 'Shabalala', 'zandi.shabalala@iskool.demo', '$2y$10$duDvkATF8rCYknT7oMtVjul.P/46pCWDCo0o.nkvGcRb16p5yZiBy', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
-(90, 'Thulani', NULL, 'Mthembu', 'extra0_thulani.mthembu@iskool.demo', '$2y$10$626614BJt6DYKLDcSKxlUekStlexuAk6ZgG0EqICRXehFu.awUsVq', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:16', 0, NULL),
-(91, 'Siyabonga', NULL, 'Dlamini', 'extra1_siyabonga.dlamini@iskool.demo', '$2y$10$jUsYU5DpRuPZNOlgXyLu/ORZ1n1.rDM6zOC4lhLbx4AncVrLBrdFq', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:17', 0, NULL),
-(92, 'Nkosinathi', NULL, 'Zungu', 'extra2_nkosinathi.zungu@iskool.demo', '$2y$10$D8VHhbtPeTb2W8hNKdiXcOC9xKA5N7M5SzlWvhKRqTR4xs89EqBB2', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
-(93, 'Mthokozisi', NULL, 'Mkhize', 'extra3_mthokozisi.mkhize@iskool.demo', '$2y$10$6bDzhhz4islNKxgvNl6rBOVXm1wNg4hCDCNgMqKHf3hI8HfzcITHK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
-(94, 'Sandile', NULL, 'Nene', 'extra4_sandile.nene@iskool.demo', '$2y$10$/3ziccDuByiNwGFrXJoqVuDQnIcU526aT4/OpOpZ37TwTStBgpfkO', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
-(95, 'Mzwandile', NULL, 'Gumede', 'extra5_mzwandile.gumede@iskool.demo', '$2y$10$XnMzOusxbSr5FdP0EEv8COKMKmyW7TDByMDXPXK4AN3fkA7XBXTUm', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
-(96, 'Bhekumuzi', NULL, 'Shabalala', 'extra6_bhekumuzi.shabalala@iskool.demo', '$2y$10$E7BHsYtYOmJtNXTrsacud.EOJx.HLGvM6JbGXfVcqMXkz5mlLWc8a', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
-(97, 'Mandla', NULL, 'Mthethwa', 'extra7_mandla.mthethwa@iskool.demo', '$2y$10$kMyBk/OuatCwx6.u3LkoBevEhICbVnKMMONBz/NVoWQ15riNSTbWm', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
-(98, 'Sifiso', NULL, 'Nkosi', 'extra8_sifiso.nkosi@iskool.demo', '$2y$10$6wf6SAI8k0ynIa610JSRmekCRDsZVb1fh2EwzUYe6gke2GWLM6uzm', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
-(99, 'Xolani', NULL, 'Khoza', 'extra9_xolani.khoza@iskool.demo', '$2y$10$u4iEsUiob/wXvDzaXrCGAOq.51wlQmbH8ahGk9.yKxCHjb6nza.JK', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
-(100, 'Mlungisi', NULL, 'Sibiya', 'extra10_mlungisi.sibiya@iskool.demo', '$2y$10$JZkCrWoHpKoaRr8wGkhhW..bvvH4tf8CHHq/0rc9JQw8vaxgl5ceu', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
-(101, 'Dumisani', NULL, 'Ndlovu', 'extra11_dumisani.ndlovu@iskool.demo', '$2y$10$ejYyIuMDjNtYmysGWfKCXeDRU/j9b4MEsztYKihe37z4T/QBbwniq', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
-(102, 'Bonginkosi', NULL, 'Buthelezi', 'extra12_bonginkosi.buthelezi@iskool.demo', '$2y$10$av.PHb/bqqu5PUs9eH53v.SP8qi78xj.lsNmlyHGP4Y2iMs1os5Xe', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
-(103, 'Siphelele', NULL, 'Hlongwane', 'extra13_siphelele.hlongwane@iskool.demo', '$2y$10$AuF2UTRvpPT3n3y2G1gdZ.w2yVBaR8cnECUu1ThA.2LpzWqYzjXuG', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
-(104, 'Mvelo', NULL, 'Mbatha', 'extra14_mvelo.mbatha@iskool.demo', '$2y$10$.U6WrlD4ZSLde5dAQ0x4LuZQRtg8trVUrpsDBE13Qa406OjGYv2vW', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
-(105, 'Zinhle', 'Ms', 'Mkhathini', 'zinhle.mkhathini@iskool.demo', '$2y$10$Cp6CZME/FfwG/UKmqsgb.ed9nTLE6mUUlSl8DGCkO/MDmTSMuBUAa', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-03 15:18:53', 0, 'default.png'),
-(106, 'Mandi', 'Ms', 'Vava', 'mandi.vava@iskool.demo', '$2y$10$OS2OLsvxbU3nJ18ToYHPne6RdE3BndCRHqQB3LfzKiVlw0ny2oOX2', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-09 20:27:08', 0, NULL),
-(107, 'Mandla', 'Mr', 'Mahlangu', 'johannesmahlangu101@gmail.com', '$2y$10$CyWHjNaPes12kikojHUe3OfPsHdoSqivfQ0IQz1UV5q8fULmT4Jsu', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-12 19:41:37', 0, NULL),
-(108, 'Zandi', 'Ms', 'Ndlovu', 'zandi.ndlovu@iskool.demo', '$2y$10$mXJ7TI3uLpGmxq6DJm7q.Ob1MJDzjS9iC09tt89R1V2JZz77DJN2W', 'parent', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-21 09:55:41', 0, NULL),
-(109, 'Thandi', 'Mr', '.mokoena', 'Thandi.mokoena@iskool.demo', '$2y$10$S0oRq0PUcj1M0noKOqgvu.VaI.F568aLBFt.AckwVvaEEpMnjefEe', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-03-22 12:49:43', 0, NULL),
-(110, 'Thando', 'Mr', 'Mokoena', 'thando.mokoena@iskool.demo', '$2y$10$Mb2GxnN46c.wA6t0oh9JCujUeTEq8i8VaCRZ3EIFGhAVTu7qHxpo.', 'teacher', 'uploads/default_profile.png', 'male', 32, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-03-22 12:53:53', 0, NULL),
-(111, 'Mandla', 'Mr', 'Mahlangu2', 'johannesmahlangu102@gmail.com', '$2y$10$ZpWAkPN0h.8F4G.B5mfqLOhZF6coQQPlVYaJeEARNsYNCjHQjcC7y', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 09:55:40', 0, NULL),
-(112, 'Mandla2', 'Mrs', 'Mahlangu2', 'mandlasimphiwe099@gmail.com', '$2y$10$.SHSfR0LRehoZmb//d7POO75Bj563uNwD3PNVUet2rrFLFNWeqTq2', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:16:47', 0, NULL),
-(113, 'Mandla', 'Mr', 'Mahlangu', 'mandla_mahlangu@icloud.com', '$2y$10$fOUxZJDWJdawGnRO3hEgmOgG9GjgRWmTfnMjeVePLjUsb9maW8Csy', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:19:00', 0, NULL);
+INSERT INTO `users` (`id`, `name`, `second_name`, `title`, `surname`, `email`, `password`, `role`, `profile_pic`, `gender`, `age`, `date_of_birth`, `id_number`, `address`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_phone`, `medical_notes`, `profile_status`, `phone`, `subject_specialization`, `employment_type`, `created_at`, `is_deleted`, `profile_picture`) VALUES
+(1, 'Mandla', NULL, 'Mr', 'Mahlangu', 'mandlasimphiwe99@gmail.com', '$2y$10$dNMxD1Rj1WUbTzJWqB6dNeifjsfgSfAtrdDu1VBS.bMk/9e4cZOVG', 'learner', 'uploads/default_profile.png', 'male', 17, '2002-03-27', '9001065599086', '2047 Mandisa street, Tokoza', 'Zinhle Mahlangu', 'Mother', '0655750255', 'mandlasimphiwe99@gmail.com', 'Jonh Doe', '0655750255', 'No allergies', 'complete', NULL, NULL, NULL, '2025-11-29 14:02:43', 0, 'default.png'),
+(2, 'Siba', NULL, 'Mr', 'Mnqovu', 'mandlasimphiwe500@gmail.com', '$2y$10$GtRQT69MicRf8APvP4NWQ.IHeb8g2A7Pi9bsghHQMmAmTa6rAEXJm', 'teacher', 'uploads/default_profile.png', 'male', 30, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-11-29 14:18:01', 0, NULL),
+(3, 'Siphephelo', NULL, 'Mr', 'Ntuli', 'mandlasimphiwe510@gmail.com', '$2y$10$I071xwrl8GigQoGZCQ1EreULH.4nfjIRAmZMLobPKqOvdzDoLrtW.', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-11-29 14:32:10', 0, NULL),
+(4, 'Thandeka', NULL, 'Mr', 'Mahlangu', 'admin1@gmail.com', '$2y$10$jwvedIWi7aY0FhcL.58ptOQcHEg12UzCzgDnHzifUdlAGp3Aq7Gre', 'school_admin', 'uploads/default_profile.png', 'male', 34, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-02 07:44:27', 0, NULL),
+(5, 'Nwabisa', NULL, 'Mrs', 'Mahlangu', 'mandlasimphiwe100@gmail.com', '$2y$10$fghchmNcV6fwN7gBPAcU8.hlD4UWtYla5dg50AeTsth/.alYf/n4q', 'parent', 'uploads/default_profile.png', 'female', 45, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-03 07:08:28', 0, NULL),
+(8, 'Super Admin', NULL, 'Mr', 'iSkool', 'superadmin@iskool.co.za', '$2y$10$1EFVPhNC9xb3qe.KmntsyOjWOVssvHkNJTZAqebsF45dLiu7SP5Xa', 'admin', 'uploads/default_profile.png', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-04 11:39:50', 0, NULL),
+(25, 'Thabo', NULL, 'Mr', 'Nkosi', 'thabo.nkosi@iskool.demo', '$2y$10$lKL.z9.wGycJ.SQ3oOfmcupAVvqA.0g0tnStWAuq.rbzR9gHjpCJq', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:04', 0, NULL),
+(26, 'Lerato', NULL, 'Mrs', 'Patel', 'lerato.patel@iskool.demo', '$2y$10$YcQpy7Zyxedl9OWMgTsHT.NTP9a/YcuKiJDRCqpuGY.mGIJeb6yUS', 'teacher', 'uploads/default_profile.png', 'female', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, 'default.png'),
+(27, 'Nomsa', NULL, 'Ms', 'Khumalo', 'nomsa.khumalo@iskool.demo', '$2y$10$w4R.J9ZAD98ShfDJXJ.mvuNvBfqYHRrRwnPDXz2aKSyZNX/iKbxH2', 'teacher', 'uploads/default_profile.png', 'female', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
+(28, 'Pieter', NULL, 'Dr', 'van der Merwe', 'pieter.vandermerwe@iskool.demo', '$2y$10$KaevZZXeFOjU3.Z8YtHbce.aByZwwlK0oGMK6nAyC1ptjtiqBm2tq', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
+(29, 'Sibusiso', NULL, 'Mr', 'Mokoena', 'sibusiso.mokoena@iskool.demo', '$2y$10$2ZoACtqwi4Ew1UCU/ev.GOqh5Nn/PhSaQ0xq5iWRhde.7UkvVxUXG', 'teacher', 'uploads/default_profile.png', 'male', 35, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, NULL),
+(30, 'Lungile', NULL, NULL, 'Buthelezi', 'lungile.buthelezi@iskool.demo', '$2y$10$JBKVgB8Ds24TLd8zKgZQHOMgWKDORdpmTh.sXwayVjUfn2Nyqm/A6', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:05', 0, 'default.png'),
+(31, 'Lwandle', NULL, NULL, 'Ngubane', 'lwandle.ngubane@iskool.demo', '$2y$10$unkFn2L9cIRwGdSo1D.cEuYEa5MRMDfd0YYxtNWx3sWaakfSRoXZ.', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(32, 'Rethabile', NULL, NULL, 'Dlamini', 'rethabile.dlamini@iskool.demo', '$2y$10$8gnVdI7sphH4xsdfrvAEguGKZaXR4W/MlnWWnsUC6/fX0j3mVo.um', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(33, 'Ayanda', NULL, NULL, 'Khoza', 'ayanda.khoza@iskool.demo', '$2y$10$BgLiLepTB09/oyI.WrnPMe7qKCJIYeC7xoSugYS78ZbezlKCBRrBC', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(34, 'Sanele', NULL, NULL, 'Khuzwayo', 'sanele.khuzwayo@iskool.demo', '$2y$10$6XGNOKIkre5NsUWegO1AMuyyodiN/sTdgfvqnVrgHBso5Gdxm6RtK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(35, 'Junior', NULL, NULL, 'Khuzwayo', 'junior.khuzwayo@iskool.demo', '$2y$10$9MSHlnKknd.3zGM9LY1le.r15jU19B5VufzEDxfjzwr3VtwVX753e', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(36, 'Sanele', NULL, NULL, 'Mokoena', 'sanele.mokoena@iskool.demo', '$2y$10$2Pns1poKndO6gCvc97qxnuuOjT9pVUnlZ.KdtiNDzh1/XtI07Yv7C', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(37, 'Lwandle', NULL, NULL, 'Mthembu', 'lwandle.mthembu@iskool.demo', '$2y$10$9FoN3OY4ZvMqLbyRfzjWLuWW90uh0IiM8iZyJIhFwt6lWgr3nWsZK', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:06', 0, NULL),
+(38, 'Rethabile', NULL, NULL, 'Vilakazi', 'rethabile.vilakazi@iskool.demo', '$2y$10$oQ8UJ0hvlJBVubBhC3SEFuHVrqcF1iIHa8cO4wMXbKogwQRVlQVje', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(39, 'Bongani', NULL, NULL, 'Mbatha', 'bongani.mbatha@iskool.demo', '$2y$10$7wopX8OgazaGVo5Ao/2iLOMKp9SDVffzqOLUBWYoCju8ZWVGKsTMa', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(40, 'Tshepo', NULL, NULL, 'Gumede', 'tshepo.gumede@iskool.demo', '$2y$10$mg.owHhkvpbO80CLTkj/X.t9uGRnuPV4vhctm01Fx7danuOfEYOQ.', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(41, 'Andile', NULL, NULL, 'Mthethwa', 'andile.mthethwa@iskool.demo', '$2y$10$ZZ2Bz.0VSXlwKSqPRv6o3eGTwYmSXYm2ZnTRq9GhHy29KT.5Dk8Ea', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(42, 'Lindani', NULL, NULL, 'Vilakazi', 'lindani.vilakazi@iskool.demo', '$2y$10$DuyM783EzyteO7vViI3eaeDQpba/kRD2Le5tqL72NlQSi8l3/CEby', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(43, 'Rethabile', NULL, NULL, 'Hlongwane', 'rethabile.hlongwane@iskool.demo', '$2y$10$Dl3FAgzmoqAgzL.4s70bRunjE2.XlF0TlMDb6SOXREiEGVGaVD3aa', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:07', 0, NULL),
+(44, 'Sanele', NULL, NULL, 'Dlamini', 'sanele.dlamini@iskool.demo', '$2y$10$C0jflluiVErgUXBUTWSpL.WSjr5aS4KIMNJX.TU9KNtFD/zmGM79e', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(45, 'Sipho', NULL, NULL, 'Dlamini', 'sipho.dlamini@iskool.demo', '$2y$10$tWvUhsI4b1.a.ZZLhlZrnuNRaKJFexQ74WRb10FfTTWr.pvwHtwcq', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(46, 'Athi', NULL, NULL, 'Hlongwane', 'athi.hlongwane@iskool.demo', '$2y$10$iL3WNaUh2u2yuG1SCXTXHOaNVXm/WsmBfqrtwE4Bl2kquuXzKut.u', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(47, 'Siya', NULL, NULL, 'Vilakazi', 'siya.vilakazi@iskool.demo', '$2y$10$kEXs8wVPyGnfSg9AmOsRae/BEin7c.8C7ExvHx55PwD9X30ECBTny', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(48, 'Ayanda', NULL, NULL, 'Gumede', 'ayanda.gumede@iskool.demo', '$2y$10$HHEZ7eWZ.VO.srWBVAo0muO4gFiKWnB6gJ9p6A35.hlu7eWWQik7i', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(49, 'Lindani', NULL, NULL, 'Sibiya', 'lindani.sibiya@iskool.demo', '$2y$10$NmlzoL7e.aaGeYsX5mp4V.RkaOKhIK/aKAViIN0DzhxMn.F720AD2', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:08', 0, NULL),
+(50, 'Rethabile', NULL, NULL, 'Mbatha', 'rethabile.mbatha@iskool.demo', '$2y$10$HXtzEJb/kxGF4DXoIjRINukZqiC.eh06w25zzdlitYHqfCbYhFemq', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(51, 'Sipho', NULL, NULL, 'Mathenjwa', 'sipho.mathenjwa@iskool.demo', '$2y$10$.jdN4cptfDm2ys8RAkKS3usgAOchTNT77jQOmcF/yIyRbM1HrsJiy', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(52, 'Junior', NULL, NULL, 'Mthembu', 'junior.mthembu@iskool.demo', '$2y$10$5CD3MkphA.QS1.Lr46pJ4ONub5l5VEhrGZUm885jbvuLYU5wEMi2u', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(53, 'Ayanda', NULL, NULL, 'Mathenjwa', 'ayanda.mathenjwa@iskool.demo', '$2y$10$yCWzGH3X5Pw.jzeyAMmQ/.SgADq0EkCeTBwoHHldZ8JPT4jTzcrx.', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(54, 'Tshepo', NULL, NULL, 'Nkosi', 'tshepo.nkosi@iskool.demo', '$2y$10$NW/ShoSdL9R1hIG79S1RwOV6g1vFCl62fVpzQ0kuFhnI/yzE6aXCu', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(55, 'Bongani', NULL, NULL, 'Khuzwayo', 'bongani.khuzwayo@iskool.demo', '$2y$10$5UZOhh4DlzMADYqIoGM.JeCvwqNRvTwrMd8Fg4nunW6SiOC5k7Sg.', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(56, 'Rethabile', NULL, NULL, 'Khoza', 'rethabile.khoza@iskool.demo', '$2y$10$XltR.fQ08sPWAg41TzlxLOua3ZGMxExxHqpiwM0JgaPOYE6BzSOka', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:09', 0, NULL),
+(57, 'Ofentse', NULL, NULL, 'Mbatha', 'ofentse.mbatha@iskool.demo', '$2y$10$yDlEbyMxr2Op/xxp0Iup3.6kByGdY8dPI.EOyo00aQAzo1ChaqifK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
+(58, 'Ofentse', NULL, NULL, 'Ngubane', 'ofentse.ngubane@iskool.demo', '$2y$10$U95gqKe2EVBUY0DSoD7zt.K8SilJQ428qi2eAGyn6NQPDdehbTQYW', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
+(59, 'Mpho', NULL, NULL, 'Hlongwane', 'mpho.hlongwane@iskool.demo', '$2y$10$UU5G1Sc3d0Yrhin/9Pldb.AEmjGsM5zMT4yZoUexbDcGUHHTuOpUK', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:10', 0, NULL),
+(60, 'Sipho', NULL, NULL, 'Shabalala', 'sipho.shabalala@iskool.demo', '$2y$10$wwsXycFRip5W.bmyZZ5f3ee2n28YXQaDGpxPRtFguwnKPs9k4ySMm', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(61, 'Athi', NULL, NULL, 'Mathenjwa', 'athi.mathenjwa@iskool.demo', '$2y$10$wai6W3r4LpC/eemSOl7Wx.iUPniroxsq39vGVUtj3JiLrEvByIq3i', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(62, 'Thando', NULL, NULL, 'Nkosi', 'thando.nkosi@iskool.demo', '$2y$10$JLIPbSgM02tAcQJxU3VSxeltFwBF0UymXlONe.Fkz1BSfH6Ni9pRu', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(63, 'Kgomotso', NULL, NULL, 'Khuzwayo', 'kgomotso.khuzwayo@iskool.demo', '$2y$10$de2LYJL18rBfk6AFwz/LXO065Z8C8bmcXpPuUWmyZqjsEt0.K0k0m', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(64, 'Zandi', NULL, NULL, 'Buthelezi', 'zandi.buthelezi@iskool.demo', '$2y$10$OBAvXWeXHYjF32Nje7SgouRVNNOw2cWnobgpRLkYkgPP3/l5rGr7W', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(65, 'Naledi', NULL, NULL, 'Ndlovu', 'naledi.ndlovu@iskool.demo', '$2y$10$wqLI54kni3cZTwIkSKeE9e1uPRU15mpQsaAyCHYimgWrFpkhOrF1O', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:11', 0, NULL),
+(66, 'Thandi', NULL, NULL, 'Mhlongo', 'thandi.mhlongo@iskool.demo', '$2y$10$h1QVK2oA7zTG.4CCWBE7g.emSrhyJC38K/gmC2PxamPZfpHS4S.yW', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(67, 'Lindiwe', NULL, NULL, 'Dlamini', 'lindiwe.dlamini@iskool.demo', '$2y$10$BT8A6VxByTXGpM6jZh42MOgQuNHYObrKZgsykTlbylCsKyr4jSOOW', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(68, 'Kgomotso', NULL, NULL, 'Mthembu', 'kgomotso.mthembu@iskool.demo', '$2y$10$AjYk0rVLI1pItTz6X0yPmuJK99LfpIbfT6Sj/Ik8siVDQPN2kUD3u', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(69, 'Onthatile', NULL, NULL, 'Khoza', 'onthatile.khoza@iskool.demo', '$2y$10$..KCL3XGvwT0.HMmLygTdOftZDgsbe5J4OcUFvr79TaagM9xn7Prq', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(70, 'Tumelo', NULL, NULL, 'Ndlovu', 'tumelo.ndlovu@iskool.demo', '$2y$10$g.znp0R3zypa7RBP7Aq7QOvI9OjJTm3X9xR60l.H6HFZyQZ7uG2R6', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(71, 'Refilwe', NULL, NULL, 'Ngubane', 'refilwe.ngubane@iskool.demo', '$2y$10$OqTNj0cVv/81SkmiinG1o.7J1MF6IM9XdFJbQ185/YAhYxjGjoQUW', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(72, 'Nomvula', NULL, NULL, 'Ndlovu', 'nomvula.ndlovu@iskool.demo', '$2y$10$O1zVbbJPpZ/U/H4JHMfL8ec5TWwc3Go.gffKGNLpd2ihLpy0F.Fue', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:12', 0, NULL),
+(73, 'Lerato', NULL, NULL, 'Sibiya', 'lerato.sibiya@iskool.demo', '$2y$10$nUG6VXLc3wmr9K.iiN7wv.Hd/2b1ebTTzdSHEkK0Se1YLOtsnhzCa', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(74, 'Zinhle', NULL, NULL, 'Mbatha', 'zinhle.mbatha@iskool.demo', '$2y$10$UqI1yn5UlDrGCEPUkk5FIOAB.e0VoOlv.Y/MunvjUtNvxIlokLMxu', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(75, 'Nomvula', NULL, NULL, 'Mbatha', 'nomvula.mbatha@iskool.demo', '$2y$10$T5wc/3GKFNq0lJnaO8/MpObS3eB9Wr/VwOcvg9NvulVQgrVkBa.GK', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(76, 'Precious', NULL, NULL, 'Zulu', 'precious.zulu@iskool.demo', '$2y$10$d.BiKBfDGDwaiZTBxqG57eZoxJfxzDGssSKzVDTh3TfIVekJEEhyi', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(77, 'Siphesihle', NULL, NULL, 'Shabalala', 'siphesihle.shabalala@iskool.demo', '$2y$10$yk874hhvp.USOpqolqrWPOxnVZofhu0VZRau6laRGc2A9JbRZb0na', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(78, 'Amahle', NULL, NULL, 'Hlongwane', 'amahle.hlongwane@iskool.demo', '$2y$10$BKveeBdrAeuGFu/mXDLfQOoXNwk/qnghwAMgiXPEqsFZLcxMidH0e', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(79, 'Boitumelo', NULL, NULL, 'Sithole', 'boitumelo.sithole@iskool.demo', '$2y$10$7mWhY/h3UAE6xjo10CdTVOelwqQVbPTAJkIxpiuIeWdnRfSZcSpgK', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:13', 0, NULL),
+(80, 'Nokuthula', NULL, NULL, 'Khoza', 'nokuthula.khoza@iskool.demo', '$2y$10$gioGgx21AzY9l40AYRvDvuYb0vR64aJrOJq1W2yT469cemBB3RyY2', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(81, 'Zandi', NULL, NULL, 'Nkosi', 'zandi.nkosi@iskool.demo', '$2y$10$Fb3kMrTHeDpLx78pL7GcpeTxHAP1GzxR/Z9qWj1nO78uJt0rFFPWy', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(82, 'Ntokozo', NULL, NULL, 'Ndlovu', 'ntokozo.ndlovu@iskool.demo', '$2y$10$klhUO4.kujcFDFGWU/97oeg0cEcd1I73Xo8wd.VbvAPDOIu8WlUTS', 'learner', 'uploads/default_profile.png', 'female', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(83, 'Nomvula', NULL, NULL, 'Mhlongo', 'nomvula.mhlongo@iskool.demo', '$2y$10$rNCBW7cXlN29ETPcpZ5HFuA.4alIHArEuu0LbtJ/UGUlPK8zi1IwG', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(84, 'Thandi', NULL, NULL, 'Khoza', 'thandi.khoza@iskool.demo', '$2y$10$0HiXyNHevAXxsdJRED/gS.prOBvxsqhzUiqvpcZ9pCwWd0D4eXn.K', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(85, 'Nokuthula', NULL, NULL, 'Gumede', 'nokuthula.gumede@iskool.demo', '$2y$10$znnOSmWgk2Mnk4cQVJT0D.IxAPIWaXedtcREWkNs0LvIgq/H5TNxi', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:14', 0, NULL),
+(86, 'Refilwe', NULL, NULL, 'Sithole', 'refilwe.sithole@iskool.demo', '$2y$10$idWHaRu/Gl0vmGzMwDYWIeOP0lDG9Ir5feNG8OMJijaHjrhqLs7fC', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
+(87, 'Dineo', NULL, NULL, 'Gumede', 'dineo.gumede@iskool.demo', '$2y$10$ak/LsceLNDBhYBa/cxCkP.53NdESHybnPgk.evN.DvC6XjwCKmxDC', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
+(88, 'Tumelo', NULL, NULL, 'Shabalala', 'tumelo.shabalala@iskool.demo', '$2y$10$uZfDxY5xTnDbqxniD1wMt.n6ZCIRxK0KXv/yTY7SAwfQQDQ/EhU/.', 'learner', 'uploads/default_profile.png', 'female', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
+(89, 'Zandi', NULL, NULL, 'Shabalala', 'zandi.shabalala@iskool.demo', '$2y$10$duDvkATF8rCYknT7oMtVjul.P/46pCWDCo0o.nkvGcRb16p5yZiBy', 'learner', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-10 12:07:15', 0, NULL),
+(90, 'Thulani', NULL, NULL, 'Mthembu', 'extra0_thulani.mthembu@iskool.demo', '$2y$10$626614BJt6DYKLDcSKxlUekStlexuAk6ZgG0EqICRXehFu.awUsVq', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:16', 0, NULL),
+(91, 'Siyabonga', NULL, NULL, 'Dlamini', 'extra1_siyabonga.dlamini@iskool.demo', '$2y$10$jUsYU5DpRuPZNOlgXyLu/ORZ1n1.rDM6zOC4lhLbx4AncVrLBrdFq', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:17', 0, NULL),
+(92, 'Nkosinathi', NULL, NULL, 'Zungu', 'extra2_nkosinathi.zungu@iskool.demo', '$2y$10$D8VHhbtPeTb2W8hNKdiXcOC9xKA5N7M5SzlWvhKRqTR4xs89EqBB2', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
+(93, 'Mthokozisi', NULL, NULL, 'Mkhize', 'extra3_mthokozisi.mkhize@iskool.demo', '$2y$10$6bDzhhz4islNKxgvNl6rBOVXm1wNg4hCDCNgMqKHf3hI8HfzcITHK', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
+(94, 'Sandile', NULL, NULL, 'Nene', 'extra4_sandile.nene@iskool.demo', '$2y$10$/3ziccDuByiNwGFrXJoqVuDQnIcU526aT4/OpOpZ37TwTStBgpfkO', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
+(95, 'Mzwandile', NULL, NULL, 'Gumede', 'extra5_mzwandile.gumede@iskool.demo', '$2y$10$XnMzOusxbSr5FdP0EEv8COKMKmyW7TDByMDXPXK4AN3fkA7XBXTUm', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
+(96, 'Bhekumuzi', NULL, NULL, 'Shabalala', 'extra6_bhekumuzi.shabalala@iskool.demo', '$2y$10$E7BHsYtYOmJtNXTrsacud.EOJx.HLGvM6JbGXfVcqMXkz5mlLWc8a', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:18', 0, NULL),
+(97, 'Mandla', NULL, NULL, 'Mthethwa', 'extra7_mandla.mthethwa@iskool.demo', '$2y$10$kMyBk/OuatCwx6.u3LkoBevEhICbVnKMMONBz/NVoWQ15riNSTbWm', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
+(98, 'Sifiso', NULL, NULL, 'Nkosi', 'extra8_sifiso.nkosi@iskool.demo', '$2y$10$6wf6SAI8k0ynIa610JSRmekCRDsZVb1fh2EwzUYe6gke2GWLM6uzm', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
+(99, 'Xolani', NULL, NULL, 'Khoza', 'extra9_xolani.khoza@iskool.demo', '$2y$10$u4iEsUiob/wXvDzaXrCGAOq.51wlQmbH8ahGk9.yKxCHjb6nza.JK', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
+(100, 'Mlungisi', NULL, NULL, 'Sibiya', 'extra10_mlungisi.sibiya@iskool.demo', '$2y$10$JZkCrWoHpKoaRr8wGkhhW..bvvH4tf8CHHq/0rc9JQw8vaxgl5ceu', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:19', 0, NULL),
+(101, 'Dumisani', NULL, NULL, 'Ndlovu', 'extra11_dumisani.ndlovu@iskool.demo', '$2y$10$ejYyIuMDjNtYmysGWfKCXeDRU/j9b4MEsztYKihe37z4T/QBbwniq', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
+(102, 'Bonginkosi', NULL, NULL, 'Buthelezi', 'extra12_bonginkosi.buthelezi@iskool.demo', '$2y$10$av.PHb/bqqu5PUs9eH53v.SP8qi78xj.lsNmlyHGP4Y2iMs1os5Xe', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
+(103, 'Siphelele', NULL, NULL, 'Hlongwane', 'extra13_siphelele.hlongwane@iskool.demo', '$2y$10$AuF2UTRvpPT3n3y2G1gdZ.w2yVBaR8cnECUu1ThA.2LpzWqYzjXuG', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
+(104, 'Mvelo', NULL, NULL, 'Mbatha', 'extra14_mvelo.mbatha@iskool.demo', '$2y$10$.U6WrlD4ZSLde5dAQ0x4LuZQRtg8trVUrpsDBE13Qa406OjGYv2vW', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2025-12-11 15:03:20', 0, NULL),
+(105, 'Zinhle', NULL, 'Ms', 'Mkhathini', 'zinhle.mkhathini@iskool.demo', '$2y$10$Cp6CZME/FfwG/UKmqsgb.ed9nTLE6mUUlSl8DGCkO/MDmTSMuBUAa', 'learner', 'uploads/default_profile.png', 'female', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-03 15:18:53', 0, 'default.png'),
+(106, 'Mandi', NULL, 'Ms', 'Vava', 'mandi.vava@iskool.demo', '$2y$10$OS2OLsvxbU3nJ18ToYHPne6RdE3BndCRHqQB3LfzKiVlw0ny2oOX2', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-09 20:27:08', 0, NULL),
+(107, 'Mandla', NULL, 'Mr', 'Mahlangu', 'johannesmahlangu101@gmail.com', '$2y$10$CyWHjNaPes12kikojHUe3OfPsHdoSqivfQ0IQz1UV5q8fULmT4Jsu', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-12 19:41:37', 0, NULL),
+(108, 'Zandi', NULL, 'Ms', 'Ndlovu', 'zandi.ndlovu@iskool.demo', '$2y$10$mXJ7TI3uLpGmxq6DJm7q.Ob1MJDzjS9iC09tt89R1V2JZz77DJN2W', 'parent', 'uploads/default_profile.png', 'female', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-01-21 09:55:41', 0, NULL),
+(109, 'Thandi', NULL, 'Mr', '.mokoena', 'Thandi.mokoena@iskool.demo', '$2y$10$S0oRq0PUcj1M0noKOqgvu.VaI.F568aLBFt.AckwVvaEEpMnjefEe', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-03-22 12:49:43', 0, NULL),
+(110, 'Thando', NULL, 'Mr', 'Mokoena', 'thando.mokoena@iskool.demo', '$2y$10$Mb2GxnN46c.wA6t0oh9JCujUeTEq8i8VaCRZ3EIFGhAVTu7qHxpo.', 'teacher', 'uploads/default_profile.png', 'male', 32, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-03-22 12:53:53', 0, NULL),
+(111, 'Mandla', NULL, 'Mr', 'Mahlangu2', 'johannesmahlangu102@gmail.com', '$2y$10$ZpWAkPN0h.8F4G.B5mfqLOhZF6coQQPlVYaJeEARNsYNCjHQjcC7y', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 09:55:40', 0, NULL),
+(112, 'Mandla2', NULL, 'Mrs', 'Mahlangu2', 'mandlasimphiwe099@gmail.com', '$2y$10$.SHSfR0LRehoZmb//d7POO75Bj563uNwD3PNVUet2rrFLFNWeqTq2', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:16:47', 0, NULL),
+(113, 'Mandla', NULL, 'Mr', 'Mahlangu', 'mandla_mahlangu@icloud.com', '$2y$10$fOUxZJDWJdawGnRO3hEgmOgG9GjgRWmTfnMjeVePLjUsb9maW8Csy', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:19:00', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -5743,7 +5760,7 @@ ALTER TABLE `access_keys`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `answers`
@@ -5755,13 +5772,13 @@ ALTER TABLE `answers`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `choices`
 --
 ALTER TABLE `choices`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=525;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=529;
 
 --
 -- AUTO_INCREMENT for table `classes`
@@ -5785,7 +5802,7 @@ ALTER TABLE `class_students`
 -- AUTO_INCREMENT for table `discussion_replies`
 --
 ALTER TABLE `discussion_replies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `discussion_reports`
@@ -5833,7 +5850,7 @@ ALTER TABLE `parent_links`
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
@@ -5857,13 +5874,13 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT for table `quizquestions`
 --
 ALTER TABLE `quizquestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=527;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=528;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempts`
@@ -5887,7 +5904,7 @@ ALTER TABLE `quiz_results`
 -- AUTO_INCREMENT for table `resources`
 --
 ALTER TABLE `resources`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `subject_briefs`
@@ -5941,7 +5958,7 @@ ALTER TABLE `user_answers`
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1063;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1143;
 
 --
 -- AUTO_INCREMENT for table `user_tokens`

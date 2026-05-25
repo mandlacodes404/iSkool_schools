@@ -5,7 +5,7 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SESSION['role'] ?? '') === 'learner') {
     verify_csrf_token();
 
     $email = $_SESSION['email'];
@@ -16,6 +16,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email'])) {
     $questionId = isset($_POST['question_id']) ? intval($_POST['question_id']) : null;
     $choiceId = isset($_POST['choice_id']) ? intval($_POST['choice_id']) : null;
     $currentStep = isset($_POST['current_step']) ? intval($_POST['current_step']) : null;
+
+    $accessStmt = $conn->prepare("
+        SELECT 1
+        FROM quizzes q
+        JOIN class_students cs
+         ON cs.class_id = q.class_id
+         AND cs.academic_year_id = COALESCE(
+             q.academic_year_id,
+             (SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1)
+         )
+         AND cs.student_email = ?
+        WHERE q.id = ?
+        LIMIT 1
+    ");
+    $accessStmt->bind_param("si", $email, $quizId);
+    $accessStmt->execute();
+    $hasAccess = $accessStmt->get_result()->num_rows > 0;
+    $accessStmt->close();
+    if (!$hasAccess) {
+        echo json_encode(['status' => 'success']);
+        exit;
+    }
+
+    if ($questionId !== null && $choiceId !== null) {
+        $validAnswerStmt = $conn->prepare("
+            SELECT 1
+            FROM quizquestions q
+            JOIN choices c ON c.question_id = q.id
+            WHERE q.id = ?
+              AND q.quiz_id = ?
+              AND c.id = ?
+            LIMIT 1
+        ");
+        $validAnswerStmt->bind_param("iii", $questionId, $quizId, $choiceId);
+        $validAnswerStmt->execute();
+        $validAnswer = $validAnswerStmt->get_result()->num_rows > 0;
+        $validAnswerStmt->close();
+        if (!$validAnswer) {
+            echo json_encode(['status' => 'success']);
+            exit;
+        }
+    }
 
     $conn->begin_transaction();
 

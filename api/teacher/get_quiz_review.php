@@ -27,16 +27,17 @@ $stmt = $conn->prepare("
     JOIN quizquestions qq ON q.id = qq.quiz_id
     JOIN choices c ON qq.id = c.question_id
     LEFT JOIN user_answers ua ON ua.question_id = qq.id AND ua.result_id = r.id
-    WHERE r.id = ?
+    WHERE r.id = ? AND q.created_by = ?
     ORDER BY qq.id ASC, c.id ASC
 ");
-$stmt->bind_param("i", $result_id);
+$stmt->bind_param("is", $result_id, $_SESSION['email']);
 $stmt->execute();
 $res  = $stmt->get_result();
 $rows = $res->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 if (empty($rows)) {
+    http_response_code(403);
     echo json_encode(['error' => 'Review data not found']);
     exit();
 }

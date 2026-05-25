@@ -16,13 +16,14 @@ if ($quiz_id <= 0) {
 }
 
 // Get quiz title and class_id
-$quizStmt = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ?");
-$quizStmt->bind_param("i", $quiz_id);
+$quizStmt = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ? AND created_by = ?");
+$quizStmt->bind_param("is", $quiz_id, $_SESSION['email']);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
 $quizStmt->close();
 
 if (!$quiz) {
+    http_response_code(403);
     echo json_encode(['error' => 'Quiz not found']);
     exit();
 }

@@ -21,7 +21,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_GE
 $userEmail = $_SESSION['email'];
 $quizId = intval($_GET['quiz_id']);
 
-$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions, is_linear FROM quizzes WHERE id = ?");
+$quizStmt = $conn->prepare("SELECT title, duration, status, layout_mode, shuffle_questions, is_linear, start_time, class_id, academic_year_id FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 if (!$quizStmt->execute()) { echo "Database error."; exit(); }
 $quizResult = $quizStmt->get_result();
@@ -33,13 +33,25 @@ if ($is_linear == 1 || $is_linear == 'is_linear') { $layoutType = 'multi_page'; 
 $quizTitle = $quiz['title'];
 $quizDuration = $quiz['duration'];
 $status = $quiz['status'] ?? 'Open';
+$quizStartTime = $quiz['start_time'] ?? null;
+$quizClassId = (int)$quiz['class_id'];
+$quizAcademicYearId = (int)($quiz['academic_year_id'] ?? 0);
 $quizStmt->close();
 
+if ($quizAcademicYearId <= 0) {
+    $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+    if ($yearResult && $row = $yearResult->fetch_assoc()) {
+        $quizAcademicYearId = (int)$row['id'];
+    }
+}
+
 // ── CLOSED ──────────────────────────────────────────────────────────────────
-if ($status === 'Closed') { ?>
+$currentServerTime = time();
+$quizStartTimestamp = !empty($quizStartTime) ? strtotime($quizStartTime) : null;
+if ($status !== 'Open' || ($quizStartTimestamp && $currentServerTime < $quizStartTimestamp)) { ?>
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quiz Closed</title>
+<title>Quiz Unavailable</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -58,27 +70,26 @@ function getCsrfToken() {
 </script></head><body>
 <div class="state-card">
 <div class="state-icon"><svg viewBox="0 0 24 24" width="28" height="28" stroke="#f85149" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
-<h1>Quiz Closed</h1>
-<p>The quiz "<strong><?= htmlspecialchars($quizTitle) ?></strong>" is closed and cannot be attempted right now.</p>
+<h1>Quiz Unavailable</h1>
+<p>The quiz "<strong><?= htmlspecialchars($quizTitle) ?></strong>" is not available to attempt right now.</p>
 <a href="quiz_list.php">Back to Quizzes</a>
 </div></body></html>
 <?php exit(); }
 
 // ── CLASS ACCESS CHECK ───────────────────────────────────────────────────────
-$classCheck = $conn->prepare("SELECT cs.class_id FROM class_students cs WHERE cs.student_email = ? LIMIT 1");
-$classCheck->bind_param("s", $userEmail);
+$classCheck = $conn->prepare("
+    SELECT 1
+    FROM class_students cs
+    WHERE cs.student_email = ?
+      AND cs.class_id = ?
+      AND cs.academic_year_id = ?
+    LIMIT 1
+");
+$classCheck->bind_param("sii", $userEmail, $quizClassId, $quizAcademicYearId);
 $classCheck->execute();
 $classInfo = $classCheck->get_result()->fetch_assoc();
 $classCheck->close();
 if (!$classInfo) { header("Location: quiz_list.php"); exit(); }
-$learnerClassId = $classInfo['class_id'];
-
-$verifyQuiz = $conn->prepare("SELECT q.class_id FROM quizzes q WHERE q.id = ?");
-$verifyQuiz->bind_param("i", $quizId);
-$verifyQuiz->execute();
-$quizCheck = $verifyQuiz->get_result()->fetch_assoc();
-$verifyQuiz->close();
-if (!$quizCheck || $quizCheck['class_id'] != $learnerClassId) { header("Location: quiz_list.php"); exit(); }
 
 // ── TIMER LOGIC ──────────────────────────────────────────────────────────────
 $checkAttempt = $conn->prepare("SELECT start_time, status, current_step, question_order FROM quiz_attempts WHERE user_email = ? AND quiz_id = ?");
@@ -100,7 +111,7 @@ if (!$attemptData) {
     }
     $insertAttempt->close();
 } else {
-    if ($attemptData['status'] !== 'in_progress') { header("Location: quiz_results.php?quiz_id=" . $quizId); exit(); }
+    if ($attemptData['status'] !== 'in_progress') { header("Location: learner_dashboard.php"); exit(); }
     $startTime = strtotime($attemptData['start_time']);
     $current_saved_step = isset($attemptData['current_step']) ? (int)$attemptData['current_step'] : 0;
     $saved_question_order = $attemptData['question_order'] ?? null;

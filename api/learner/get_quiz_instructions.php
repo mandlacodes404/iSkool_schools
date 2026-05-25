@@ -14,12 +14,47 @@ $quizId = intval($_GET['quiz_id']);
 $userEmail = $_SESSION['email'];
 
 // 1. Fetch quiz info — now includes layout_mode
-$stmt = $conn->prepare("SELECT title, duration, attempt_limit, layout_mode FROM quizzes WHERE id = ?");
+$stmt = $conn->prepare("SELECT title, duration, attempt_limit, layout_mode, class_id, academic_year_id FROM quizzes WHERE id = ?");
 $stmt->bind_param("i", $quizId);
 $stmt->execute();
-$stmt->bind_result($quizTitle, $duration, $attemptLimit, $layoutMode);
-$stmt->fetch();
+$quiz = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
+if (!$quiz) {
+    echo json_encode(['error' => 'Quiz not found']);
+    exit();
+}
+
+$quizTitle = $quiz['title'];
+$duration = $quiz['duration'];
+$attemptLimit = $quiz['attempt_limit'];
+$layoutMode = $quiz['layout_mode'];
+$classId = (int)$quiz['class_id'];
+$academicYearId = (int)$quiz['academic_year_id'];
+
+if ($academicYearId <= 0) {
+    $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+    if ($currentYearResult && $row = $currentYearResult->fetch_assoc()) {
+        $academicYearId = (int)$row['id'];
+    }
+}
+
+$memberStmt = $conn->prepare("
+    SELECT 1
+    FROM class_students
+    WHERE student_email = ?
+      AND class_id = ?
+      AND academic_year_id = ?
+    LIMIT 1
+");
+$memberStmt->bind_param("sii", $userEmail, $classId, $academicYearId);
+$memberStmt->execute();
+$isMember = $memberStmt->get_result()->num_rows > 0;
+$memberStmt->close();
+if (!$isMember) {
+    echo json_encode(['error' => 'Unauthorized access']);
+    exit();
+}
 
 // 2. Check for existing attempt
 $attemptStatus = '';

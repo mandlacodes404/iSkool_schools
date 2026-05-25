@@ -27,18 +27,8 @@ $current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
 $quizId    = intval($_POST['quiz_id']);
 $userEmail = $_SESSION['email'];
 
-// 2. Prevent Double Submissions
-$checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE user_email = ? AND quiz_id = ?");
-$checkStmt->bind_param("si", $userEmail, $quizId);
-$checkStmt->execute();
-if ($checkStmt->get_result()->num_rows > 0) {
-    header("Location: learner_dashboard.php");
-    exit();
-}
-$checkStmt->close();
-
-// 3. Fetch Quiz Metadata
-$quizStmt = $conn->prepare("SELECT title, publish_marks, status FROM quizzes WHERE id = ?");
+// 2. Fetch Quiz Metadata
+$quizStmt = $conn->prepare("SELECT title, publish_marks, status, start_time, class_id, academic_year_id FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
@@ -47,17 +37,65 @@ if (!$quiz) { header("Location: learner_dashboard.php"); exit(); }
 $quizTitle    = $quiz['title'];
 $publishMarks = (int)$quiz['publish_marks'];
 $status       = $quiz['status'] ?? 'Open';
+$quizStartTime = $quiz['start_time'] ?? null;
+$quizClassId = (int)$quiz['class_id'];
+$quizAcademicYearId = (int)($quiz['academic_year_id'] ?? $current_academic_year_id);
 $quizStmt->close();
+if ($quizAcademicYearId <= 0) {
+    $quizAcademicYearId = $current_academic_year_id;
+}
 
-// 4. Handle Closed Status
-if ($status === 'Closed') {
+// 3. Verify availability and learner membership server-side
+$quizStartTimestamp = !empty($quizStartTime) ? strtotime($quizStartTime) : null;
+if ($status !== 'Open' || ($quizStartTimestamp && time() < $quizStartTimestamp)) {
     render_page("closed", $quizTitle, 0, 0, null);
     exit();
 }
 
-// 5. Grading Preparation
-$startTimePost = isset($_POST['start_time']) ? intval($_POST['start_time']) : 0;
-$timeTaken     = ($startTimePost > 0) ? max(0, time() - $startTimePost) : null;
+$memberStmt = $conn->prepare("
+    SELECT 1
+    FROM class_students
+    WHERE student_email = ?
+      AND class_id = ?
+      AND academic_year_id = ?
+    LIMIT 1
+");
+$memberStmt->bind_param("sii", $userEmail, $quizClassId, $quizAcademicYearId);
+$memberStmt->execute();
+$isMember = $memberStmt->get_result()->num_rows > 0;
+$memberStmt->close();
+if (!$isMember) {
+    die("You are not authorized to submit this quiz.");
+}
+
+// 4. Use server-side attempt start time only
+$attemptStmt = $conn->prepare("
+    SELECT start_time
+    FROM quiz_attempts
+    WHERE user_email = ? AND quiz_id = ? AND status = 'in_progress'
+    LIMIT 1
+");
+$attemptStmt->bind_param("si", $userEmail, $quizId);
+$attemptStmt->execute();
+$attempt = $attemptStmt->get_result()->fetch_assoc();
+$attemptStmt->close();
+if (!$attempt || empty($attempt['start_time'])) {
+    die("Invalid quiz attempt.");
+}
+$timeTaken = max(0, time() - strtotime($attempt['start_time']));
+
+// 5. Prevent Double Submissions
+$conn->begin_transaction();
+$checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE user_email = ? AND quiz_id = ? FOR UPDATE");
+$checkStmt->bind_param("si", $userEmail, $quizId);
+$checkStmt->execute();
+if ($checkStmt->get_result()->num_rows > 0) {
+    $checkStmt->close();
+    $conn->rollback();
+    header("Location: learner_dashboard.php");
+    exit();
+}
+$checkStmt->close();
 
 // Fetch Correct Answers
 $sql  = "SELECT q.id as qid, q.points, c.id as cid FROM quizquestions q 
@@ -97,7 +135,6 @@ foreach ($correctAnswers as $qid => $data) {
 }
 
 // 8. DATABASE UPDATES (Transaction-style)
-$conn->begin_transaction();
 try {
     // A. Insert Result Record
     $insRes = $conn->prepare("
@@ -105,7 +142,7 @@ try {
             user_email, quiz_id, score, total, time_taken, submitted_at, academic_year_id
         ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
     ");
-    $insRes->bind_param("siiiis", $userEmail, $quizId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
+    $insRes->bind_param("siiiii", $userEmail, $quizId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
     $insRes->execute();
     $resultId = $insRes->insert_id;
 

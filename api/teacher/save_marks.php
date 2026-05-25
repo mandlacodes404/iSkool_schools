@@ -22,6 +22,17 @@ if ($quiz_id <= 0 || empty($user_email)) {
     exit();
 }
 
+$ownerStmt = $conn->prepare("SELECT id FROM quizzes WHERE id = ? AND created_by = ? LIMIT 1");
+$ownerStmt->bind_param("is", $quiz_id, $_SESSION['email']);
+$ownerStmt->execute();
+$ownsQuiz = $ownerStmt->get_result()->num_rows > 0;
+$ownerStmt->close();
+if (!$ownsQuiz) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Quiz not found']);
+    exit();
+}
+
 // Check if record exists
 $check = $conn->prepare("SELECT id FROM quiz_results WHERE quiz_id = ? AND user_email = ?");
 $check->bind_param("is", $quiz_id, $user_email);
