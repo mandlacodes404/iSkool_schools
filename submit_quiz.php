@@ -28,7 +28,7 @@ $quizId    = intval($_POST['quiz_id']);
 $userEmail = $_SESSION['email'];
 
 // 2. Fetch Quiz Metadata
-$quizStmt = $conn->prepare("SELECT title, publish_marks, status, start_time, class_id, academic_year_id FROM quizzes WHERE id = ?");
+$quizStmt = $conn->prepare("SELECT title, publish_marks, status, start_time, class_id, academic_year_id, has_open_ended FROM quizzes WHERE id = ?");
 $quizStmt->bind_param("i", $quizId);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
@@ -40,6 +40,7 @@ $status       = $quiz['status'] ?? 'Open';
 $quizStartTime = $quiz['start_time'] ?? null;
 $quizClassId = (int)$quiz['class_id'];
 $quizAcademicYearId = (int)($quiz['academic_year_id'] ?? $current_academic_year_id);
+$hasOpenEnded = (int)($quiz['has_open_ended'] ?? 0);
 $quizStmt->close();
 if ($quizAcademicYearId <= 0) {
     $quizAcademicYearId = $current_academic_year_id;
@@ -103,7 +104,7 @@ $checkStmt->close();
 
 // Fetch Correct Answers
 $sql  = "SELECT q.id as qid, q.points, c.id as cid FROM quizquestions q 
-         JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND c.is_correct = 1";
+         JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND q.question_type = 'mcq' AND c.is_correct = 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $quizId);
 $stmt->execute();
@@ -113,9 +114,14 @@ $correctAnswers       = [];
 $totalPointsAvailable = 0;
 while ($row = $res->fetch_assoc()) {
     $correctAnswers[$row['qid']] = ['cid' => $row['cid'], 'pts' => (int)$row['points']];
-    $totalPointsAvailable += (int)$row['points'];
 }
 $stmt->close();
+
+$totalStmt = $conn->prepare("SELECT COALESCE(SUM(points), 0) AS total_points FROM quizquestions WHERE quiz_id = ?");
+$totalStmt->bind_param("i", $quizId);
+$totalStmt->execute();
+$totalPointsAvailable = (int)$totalStmt->get_result()->fetch_assoc()['total_points'];
+$totalStmt->close();
 
 $questionCountStmt = $conn->prepare("SELECT COUNT(*) AS total_questions FROM quizquestions WHERE quiz_id = ?");
 $questionCountStmt->bind_param("i", $quizId);
@@ -123,15 +129,30 @@ $questionCountStmt->execute();
 $totalQuestions = (int)$questionCountStmt->get_result()->fetch_assoc()['total_questions'];
 $questionCountStmt->close();
 
+$openQuestionIds = [];
+$openQuestionStmt = $conn->prepare("SELECT id FROM quizquestions WHERE quiz_id = ? AND question_type = 'open_ended'");
+$openQuestionStmt->bind_param("i", $quizId);
+$openQuestionStmt->execute();
+$openQuestionRows = $openQuestionStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$openQuestionStmt->close();
+foreach ($openQuestionRows as $openQuestionRow) {
+    $openQuestionIds[(int)$openQuestionRow['id']] = true;
+}
+
 // 6. Consolidate Answers (POST + Database Fallback)
 $finalAnswers = isset($_POST['answers']) && is_array($_POST['answers']) ? $_POST['answers'] : [];
+$finalOpenAnswers = isset($_POST['open_answers']) && is_array($_POST['open_answers']) ? $_POST['open_answers'] : [];
 if (empty($finalAnswers)) {
-    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE attempt_id = ?");
+    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
     $savedStmt->bind_param("i", $attemptId);
     $savedStmt->execute();
     $savedRes = $savedStmt->get_result();
     while ($sRow = $savedRes->fetch_assoc()) {
-        $finalAnswers[$sRow['question_id']] = $sRow['selected_choice_id'];
+        if ($sRow['answer_text'] !== null) {
+            $finalOpenAnswers[$sRow['question_id']] = $sRow['answer_text'];
+        } else {
+            $finalAnswers[$sRow['question_id']] = $sRow['selected_choice_id'];
+        }
     }
     $savedStmt->close();
 }
@@ -163,9 +184,44 @@ try {
                      ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), result_id = VALUES(result_id)";
         $ansStmt = $conn->prepare($ansQuery);
         foreach ($finalAnswers as $qid => $cid) {
+            $qid = (int)$qid;
+            $cid = (int)$cid;
+            if (!isset($correctAnswers[$qid])) {
+                continue;
+            }
             $ansStmt->bind_param("siiiii", $userEmail, $quizId, $attemptId, $qid, $cid, $resultId);
             $ansStmt->execute();
         }
+        $ansStmt->close();
+    }
+    if (!empty($finalOpenAnswers)) {
+        $openAnsQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text, result_id)
+                         VALUES (?, ?, ?, ?, NULL, ?, ?)
+                         ON DUPLICATE KEY UPDATE answer_text = VALUES(answer_text), result_id = VALUES(result_id)";
+        $openAnsStmt = $conn->prepare($openAnsQuery);
+        foreach ($finalOpenAnswers as $qid => $answerText) {
+            $qid = (int)$qid;
+            if (!isset($openQuestionIds[$qid])) {
+                continue;
+            }
+            $answerText = substr(trim((string)$answerText), 0, 5000);
+            $openAnsStmt->bind_param("siiisi", $userEmail, $quizId, $attemptId, $qid, $answerText, $resultId);
+            $openAnsStmt->execute();
+        }
+        $openAnsStmt->close();
+    }
+
+    if ($hasOpenEnded === 1) {
+        $gradeStmt = $conn->prepare("
+            INSERT INTO open_ended_grades (attempt_id, question_id, user_email, quiz_id, score, feedback, graded_by)
+            VALUES (?, ?, ?, ?, 0, NULL, NULL)
+            ON DUPLICATE KEY UPDATE quiz_id = VALUES(quiz_id)
+        ");
+        foreach (array_keys($openQuestionIds) as $openQuestionId) {
+            $gradeStmt->bind_param("iisi", $attemptId, $openQuestionId, $userEmail, $quizId);
+            $gradeStmt->execute();
+        }
+        $gradeStmt->close();
     }
 
     // C. Update Attempt Status

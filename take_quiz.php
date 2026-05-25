@@ -182,7 +182,7 @@ function getCsrfToken() {
 <?php exit(); }
 
 // ── QUESTIONS ────────────────────────────────────────────────────────────────
-$query = $conn->prepare("SELECT q.id AS question_id, q.question_text, q.image_path, q.points, c.id AS choice_id, c.choice_text FROM quizquestions q LEFT JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? ORDER BY q.id, c.id");
+$query = $conn->prepare("SELECT q.id AS question_id, q.question_text, q.image_path, q.points, q.question_type, c.id AS choice_id, c.choice_text FROM quizquestions q LEFT JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? ORDER BY q.id, c.id");
 $query->bind_param("i", $quizId);
 $query->execute();
 $result = $query->get_result();
@@ -191,7 +191,7 @@ $questions = [];
 while ($row = $result->fetch_assoc()) {
     $qid = $row['question_id'];
     if (!isset($questions[$qid])) {
-        $questions[$qid] = ['id' => $qid, 'text' => $row['question_text'], 'image' => $row['image_path'], 'points' => $row['points'], 'choices' => []];
+        $questions[$qid] = ['id' => $qid, 'text' => $row['question_text'], 'image' => $row['image_path'], 'points' => $row['points'], 'question_type' => $row['question_type'] ?? 'mcq', 'choices' => []];
     }
     if ($row['choice_id']) { $questions[$qid]['choices'][] = ['id' => $row['choice_id'], 'text' => $row['choice_text']]; }
 }
@@ -243,11 +243,13 @@ if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
 }
 
 $savedAnswers = [];
-$loadStmt = $conn->prepare("SELECT question_id, selected_choice_id FROM user_answers WHERE attempt_id = ?");
+$loadStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
 $loadStmt->bind_param("i", $attemptId);
 $loadStmt->execute();
 $savedResult = $loadStmt->get_result();
-while ($row = $savedResult->fetch_assoc()) { $savedAnswers[$row['question_id']] = $row['selected_choice_id']; }
+while ($row = $savedResult->fetch_assoc()) {
+    $savedAnswers[$row['question_id']] = $row['answer_text'] !== null ? $row['answer_text'] : $row['selected_choice_id'];
+}
 $loadStmt->close();
 
 $totalQuestions = count($questions);
@@ -752,6 +754,32 @@ $answeredCount = count($savedAnswers);
             width: 0; height: 0;
         }
 
+        .open-answer-box {
+            width: 100%;
+            min-height: 160px;
+            resize: vertical;
+            background: rgba(255,255,255,0.025);
+            border: 1.5px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            color: var(--text-1);
+            font-family: var(--font);
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 14px 16px;
+            outline: none;
+            transition: border-color 0.18s, background 0.18s;
+        }
+        .open-answer-box:focus {
+            background: rgba(255,255,255,0.04);
+            border-color: var(--teal);
+        }
+        .open-answer-counter {
+            margin-top: 8px;
+            color: var(--text-2);
+            font-size: 12px;
+            text-align: right;
+        }
+
         /* ═══════════════════════════════════════════════
            NAVIGATION BUTTONS (multi-page)
         ═══════════════════════════════════════════════ */
@@ -1138,6 +1166,16 @@ function getCsrfToken() {
                          onclick="openLightbox(this)">
                 <?php endif; ?>
 
+                <?php if (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
+                <textarea class="open-answer-box"
+                          name="open_answers[<?= $qid ?>]"
+                          maxlength="5000"
+                          placeholder="Type your answer here..."
+                          data-question-index="<?= $qNum ?>"><?= htmlspecialchars($savedAnswers[$qid] ?? '') ?></textarea>
+                <div class="open-answer-counter" id="open-counter-<?= $qid ?>">
+                    <?= strlen((string)($savedAnswers[$qid] ?? '')) ?> / 5000
+                </div>
+                <?php else: ?>
                 <div class="choices-list">
                     <?php foreach ($q['choices'] as $ci => $choice): ?>
                     <label class="choice-item" id="choice-<?= $qid ?>-<?= $choice['id'] ?>">
@@ -1150,6 +1188,7 @@ function getCsrfToken() {
                     </label>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
             <?php
             $qNum++;
@@ -1426,9 +1465,10 @@ function getCsrfToken() {
         questions.forEach(card => {
             const qid = card.getAttribute('data-question-id');
             const checked = card.querySelector('input[type="radio"]:checked');
-            if (checked) {
+            const textAnswer = card.querySelector('.open-answer-box');
+            if (checked || (textAnswer && textAnswer.value.trim().length > 0)) {
                 card.classList.add('card-answered');
-                checked.closest('.choice-item').classList.add('selected');
+                if (checked) checked.closest('.choice-item').classList.add('selected');
             }
         });
     }
@@ -1439,6 +1479,13 @@ function getCsrfToken() {
         const merged = { ...local, ...DB_ANSWERS };
 
         Object.entries(merged).forEach(([qid, cid]) => {
+            const textAnswer = document.querySelector(`textarea[name="open_answers[${qid}]"]`);
+            if (textAnswer) {
+                textAnswer.value = cid;
+                updateOpenCounter(textAnswer);
+                if (String(cid).trim().length > 0) textAnswer.closest('.question-card').classList.add('card-answered');
+                return;
+            }
             const radio = document.querySelector(`input[name="answers[${qid}]"][value="${cid}"]`);
             if (radio) {
                 radio.checked = true;
@@ -1462,6 +1509,10 @@ function getCsrfToken() {
             const m = r.name.match(/answers\[(\d+)\]/);
             if (m) obj[m[1]] = r.value;
         });
+        document.querySelectorAll('.open-answer-box').forEach(t => {
+            const m = t.name.match(/open_answers\[(\d+)\]/);
+            if (m && t.value.trim().length > 0) obj[m[1]] = t.value;
+        });
         sessionStorage.setItem('quiz_' + QUIZ_ID + '_' + '<?= $userEmail ?>', JSON.stringify(obj));
     }
 
@@ -1474,6 +1525,13 @@ function getCsrfToken() {
             fd.append('question_id', questionId);
             fd.append('choice_id', choiceId);
         }
+        if (questionId && choiceId === null) {
+            const textarea = document.querySelector(`.question-card[data-question-id="${questionId}"] .open-answer-box`);
+            if (textarea) {
+                fd.append('question_id', questionId);
+                fd.append('answer_text', textarea.value);
+            }
+        }
         fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .catch(e => console.warn('Save failed', e));
     }
@@ -1482,7 +1540,8 @@ function getCsrfToken() {
     function updatePalette() {
         questions.forEach((card, i) => {
             const qid = card.getAttribute('data-question-id');
-            const answered = card.querySelector('input[type="radio"]:checked');
+            const textAnswer = card.querySelector('.open-answer-box');
+            const answered = card.querySelector('input[type="radio"]:checked') || (textAnswer && textAnswer.value.trim().length > 0);
             const flagged  = document.getElementById(`flag-${i}`)?.classList.contains('flagged');
             const item = document.getElementById(`pi-${i}`);
             if (!item) return;
@@ -1496,7 +1555,8 @@ function getCsrfToken() {
 
     // ── PROGRESS BAR ─────────────────────────────────────────────────────────
     function updateProgress() {
-        const count = document.querySelectorAll('input[type="radio"]:checked').length;
+        const textCount = Array.from(document.querySelectorAll('.open-answer-box')).filter(t => t.value.trim().length > 0).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount;
         const pct   = TOTAL_Q > 0 ? Math.round((count / TOTAL_Q) * 100) : 0;
         if (progressFill) progressFill.style.width = pct + '%';
         if (answeredEl)   answeredEl.textContent = count;
@@ -1518,10 +1578,34 @@ function getCsrfToken() {
 
     // ── SUBMIT ───────────────────────────────────────────────────────────────
     function submitQuiz() {
-        const count = document.querySelectorAll('input[type="radio"]:checked').length;
+        const textCount = Array.from(document.querySelectorAll('.open-answer-box')).filter(t => t.value.trim().length > 0).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount;
         document.getElementById('smAnswered').textContent = count;
         document.getElementById('submitModal').classList.add('show');
     }
+
+    function updateOpenCounter(textarea) {
+        const card = textarea.closest('.question-card');
+        const qid = card.getAttribute('data-question-id');
+        const counter = document.getElementById(`open-counter-${qid}`);
+        if (counter) counter.textContent = `${textarea.value.length} / 5000`;
+    }
+
+    function onOpenAnswerInput(textarea, qIndex) {
+        const card = textarea.closest('.question-card');
+        updateOpenCounter(textarea);
+        if (textarea.value.trim().length > 0) card.classList.add('card-answered');
+        else card.classList.remove('card-answered');
+        saveAnswers();
+        autoSave(card.getAttribute('data-question-id'), null);
+        updatePalette();
+        updateProgress();
+    }
+
+    document.addEventListener('input', function(e) {
+        if (!e.target.classList.contains('open-answer-box')) return;
+        onOpenAnswerInput(e.target, parseInt(e.target.dataset.questionIndex, 10));
+    });
 
     function closeSubmitModal() {
         document.getElementById('submitModal').classList.remove('show');

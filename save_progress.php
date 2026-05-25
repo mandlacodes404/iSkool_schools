@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     // or JUST updating the step/bookmark.
     $questionId = isset($_POST['question_id']) ? intval($_POST['question_id']) : null;
     $choiceId = isset($_POST['choice_id']) ? intval($_POST['choice_id']) : null;
+    $answerText = isset($_POST['answer_text']) ? trim((string)$_POST['answer_text']) : null;
     $currentStep = isset($_POST['current_step']) ? intval($_POST['current_step']) : null;
 
     $accessStmt = $conn->prepare("
@@ -58,23 +59,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     }
     $attemptId = (int)$attempt['attempt_id'];
 
-    if ($questionId !== null && $choiceId !== null) {
-        $validAnswerStmt = $conn->prepare("
-            SELECT 1
-            FROM quizquestions q
-            JOIN choices c ON c.question_id = q.id
-            WHERE q.id = ?
-              AND q.quiz_id = ?
-              AND c.id = ?
-            LIMIT 1
-        ");
-        $validAnswerStmt->bind_param("iii", $questionId, $quizId, $choiceId);
-        $validAnswerStmt->execute();
-        $validAnswer = $validAnswerStmt->get_result()->num_rows > 0;
-        $validAnswerStmt->close();
-        if (!$validAnswer) {
+    $questionType = null;
+    if ($questionId !== null) {
+        $questionStmt = $conn->prepare("SELECT question_type FROM quizquestions WHERE id = ? AND quiz_id = ? LIMIT 1");
+        $questionStmt->bind_param("ii", $questionId, $quizId);
+        $questionStmt->execute();
+        $questionRow = $questionStmt->get_result()->fetch_assoc();
+        $questionStmt->close();
+        if (!$questionRow) {
             echo json_encode(['status' => 'success']);
             exit;
+        }
+        $questionType = $questionRow['question_type'] ?? 'mcq';
+
+        if ($questionType === 'open_ended') {
+            if ($answerText !== null && strlen($answerText) > 5000) {
+                $answerText = substr($answerText, 0, 5000);
+            }
+            $choiceId = null;
+        } elseif ($choiceId !== null) {
+            $validAnswerStmt = $conn->prepare("
+                SELECT 1
+                FROM choices
+                WHERE question_id = ?
+                  AND id = ?
+                LIMIT 1
+            ");
+            $validAnswerStmt->bind_param("ii", $questionId, $choiceId);
+            $validAnswerStmt->execute();
+            $validAnswer = $validAnswerStmt->get_result()->num_rows > 0;
+            $validAnswerStmt->close();
+            if (!$validAnswer) {
+                echo json_encode(['status' => 'success']);
+                exit;
+            }
+            $answerText = null;
         }
     }
 
@@ -82,13 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
 
     try {
         // 1. Save the Answer (if provided)
-        if ($questionId !== null && $choiceId !== null) {
+        if ($questionId !== null && ($choiceId !== null || $answerText !== null)) {
             $stmt = $conn->prepare("
-                INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id) 
-                VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id)
+                INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text) 
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), answer_text = VALUES(answer_text)
             ");
-            $stmt->bind_param("siiii", $email, $quizId, $attemptId, $questionId, $choiceId);
+            $stmt->bind_param("siiiis", $email, $quizId, $attemptId, $questionId, $choiceId, $answerText);
             $stmt->execute();
             $stmt->close();
         }

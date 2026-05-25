@@ -866,7 +866,9 @@ window.openQuizResults = async function(quizId, quizTitle) {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`);
+        const res  = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         window.currentQuizResultsData = data;
@@ -1200,6 +1202,9 @@ window.openCreateQuiz = async function() {
 
                     <!-- Questions -->
                     <label class="teacher-modal-label" style="margin-top:8px;">Questions *</label>
+                    <div id="cqOpenEndedBanner" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin:0 0 12px;">
+                        This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
+                    </div>
                     <div id="cqQuestionsContainer"></div>
                     <button type="button" onclick="addCqQuestion()"
                         style="width:100%;margin-top:8px;margin-bottom:16px;background:rgba(79,209,197,0.08);
@@ -1329,27 +1334,38 @@ window.addCqQuestion = function() {
         <input type="text" name="question[]" class="teacher-modal-input" 
             placeholder="Enter your question..." required>
 
+        <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
+        <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
+            <option value="mcq" selected>Multiple Choice</option>
+            <option value="open_ended">Open Ended</option>
+        </select>
+
         <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
         <input type="file" name="question_images[]" accept="image/*"
             style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
 
-        <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
-        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
-            placeholder="Choice 1" required style="margin-bottom:8px;">
-        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
-            placeholder="Choice 2" required style="margin-bottom:8px;">
-        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
-            placeholder="Choice 3" style="margin-bottom:8px;">
-        <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
-            placeholder="Choice 4" style="margin-bottom:8px;">
+        <div class="cq-mcq-fields">
+            <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+                placeholder="Choice 1" required style="margin-bottom:8px;">
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+                placeholder="Choice 2" required style="margin-bottom:8px;">
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+                placeholder="Choice 3" style="margin-bottom:8px;">
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+                placeholder="Choice 4" style="margin-bottom:8px;">
 
-        <label class="teacher-modal-label" style="margin-top:4px;">Correct Answer</label>
-        <select name="correct_choice[]" class="teacher-modal-input">
-            <option value="0">Choice 1</option>
-            <option value="1">Choice 2</option>
-            <option value="2">Choice 3</option>
-            <option value="3">Choice 4</option>
-        </select>
+            <label class="teacher-modal-label" style="margin-top:4px;">Correct Answer</label>
+            <select name="correct_choice[]" class="teacher-modal-input">
+                <option value="0">Choice 1</option>
+                <option value="1">Choice 2</option>
+                <option value="2">Choice 3</option>
+                <option value="3">Choice 4</option>
+            </select>
+        </div>
+        <div class="cq-open-preview" style="display:none;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
+            Learners will type their answer here.
+        </div>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
         <input type="number" name="points[]" min="1" value="1" 
@@ -1357,13 +1373,38 @@ window.addCqQuestion = function() {
             oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : '')">`;
 
     container.appendChild(div);
+    setQuestionTypeFields(div, 'mcq');
+    updateOpenEndedBanner();
     cqQuestionIndex++;
 };
 
 window.removeCqQuestion = function(i) {
     const el = document.getElementById(`cq-question-${i}`);
     if (el) el.remove();
+    updateOpenEndedBanner();
 };
+
+function setQuestionTypeFields(questionEl, questionType) {
+    const isOpenEnded = questionType === 'open_ended';
+    const mcqFields = questionEl ? questionEl.querySelector('.cq-mcq-fields, .eq-mcq-fields') : null;
+    const preview = questionEl ? questionEl.querySelector('.cq-open-preview, .eq-open-preview') : null;
+    if (mcqFields) {
+        mcqFields.style.display = isOpenEnded ? 'none' : 'block';
+        mcqFields.querySelectorAll('input, select, textarea').forEach(input => {
+            input.disabled = isOpenEnded;
+            if (input.type === 'text') input.required = !isOpenEnded && (input.placeholder === 'Choice 1' || input.placeholder === 'Choice 2');
+        });
+    }
+    if (preview) preview.style.display = isOpenEnded ? 'block' : 'none';
+}
+
+function updateOpenEndedBanner() {
+    const banner = document.getElementById('cqOpenEndedBanner') || document.getElementById('eqOpenEndedBanner');
+    if (!banner) return;
+    const hasOpenEnded = Array.from(document.querySelectorAll('select[name="question_type[]"]'))
+        .some(select => select.value === 'open_ended');
+    banner.style.display = hasOpenEnded ? 'block' : 'none';
+}
 
 window.toggleCqWeight = function() {
     const cb        = document.getElementById('cqSummative');
@@ -1415,23 +1456,26 @@ function getQuizFormTarget() {
 }
 
 function buildEditQuestionHtml(question, index, locked) {
+    const questionType = question.question_type === 'open_ended' ? 'open_ended' : 'mcq';
+    const isOpenEnded = questionType === 'open_ended';
     const choices = question.choices && question.choices.length ? question.choices : [
         { id: 0, choice_text: '', is_correct: 1 },
         { id: 0, choice_text: '', is_correct: 0 }
     ];
     const disabled = locked ? 'disabled' : '';
+    const choiceDisabled = locked || isOpenEnded ? 'disabled' : '';
     let choicesHtml = '';
 
     choices.forEach((choice, choiceIndex) => {
         choicesHtml += `
             <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
                 <input type="hidden" name="choice_id[${index}][]" value="${escapeHtml(choice.id || 0)}">
-                <input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${disabled}
+                <input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
                     style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">
                 <input type="text" name="choices[${index}][]" class="teacher-modal-input"
-                    value="${escapeHtml(choice.choice_text || '')}" placeholder="Choice ${choiceIndex + 1}" ${disabled}
+                    value="${escapeHtml(choice.choice_text || '')}" placeholder="Choice ${choiceIndex + 1}" ${choiceDisabled}
                     style="margin:0;">
-                ${!locked && choices.length > 2 ? `<button type="button" data-action="remove-edit-choice"
+                ${!locked && !isOpenEnded && choices.length > 2 ? `<button type="button" data-action="remove-edit-choice"
                     style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;border-radius:6px;padding:7px 9px;cursor:pointer;">Remove</button>` : ''}
             </div>`;
     });
@@ -1448,6 +1492,16 @@ function buildEditQuestionHtml(question, index, locked) {
             <input type="hidden" name="remove_image[]" value="0">
             <label class="teacher-modal-label">Question Text *</label>
             <input type="text" name="question[]" class="teacher-modal-input" value="${escapeHtml(question.question_text || '')}" ${disabled} required>
+            <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
+            ${locked ? `
+                <input type="hidden" name="question_type[]" value="${questionType}">
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#c9d1d9;padding:11px 12px;font-size:13px;">${questionType === 'open_ended' ? 'Open Ended' : 'Multiple Choice'}</div>
+            ` : `
+                <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
+                    <option value="mcq" ${questionType === 'mcq' ? 'selected' : ''}>Multiple Choice</option>
+                    <option value="open_ended" ${questionType === 'open_ended' ? 'selected' : ''}>Open Ended</option>
+                </select>
+            `}
             <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
             ${question.image_path ? `<div style="font-size:12px;color:#8b949e;margin-bottom:8px;">Current image: ${escapeHtml(question.image_path)}</div>` : ''}
             ${question.image_path && !locked ? `<label style="display:flex;align-items:center;gap:8px;color:#c9d1d9;font-size:13px;margin-bottom:8px;">
@@ -1455,10 +1509,15 @@ function buildEditQuestionHtml(question, index, locked) {
             </label>` : ''}
             <input type="file" name="question_images[]" accept="image/*" ${disabled}
                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
-            <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
-            <div class="eq-choices">${choicesHtml}</div>
-            ${!locked ? `<button type="button" data-action="add-edit-choice"
+            <div class="eq-mcq-fields" style="display:${isOpenEnded ? 'none' : 'block'};">
+                <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
+                <div class="eq-choices">${choicesHtml}</div>
+                ${!locked && !isOpenEnded ? `<button type="button" data-action="add-edit-choice"
                 style="margin-top:2px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Choice</button>` : ''}
+            </div>
+            <div class="eq-open-preview" style="display:${isOpenEnded ? 'block' : 'none'};background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
+                Learners will type their answer here.
+            </div>
             <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
             <input type="number" name="points[]" min="1" value="${escapeHtml(question.points || 1)}" class="teacher-modal-input" ${disabled}
                 style="max-width:100px;">
@@ -1513,6 +1572,9 @@ window.openEditQuiz = async function(quizId) {
             <div style="max-width:${isDesktop ? '620px' : '760px'};margin:0 auto;padding:${isDesktop ? '20px 32px 32px' : '0'};">
                 <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:0 0 20px;font-weight:800;">Edit Quiz</h2>
                 ${locked ? `<div style="background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;line-height:1.5;">${escapeHtml(data.data.locked_message)}</div>` : ''}
+                <div id="eqOpenEndedBanner" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
+                    This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
+                </div>
                 <form id="editQuizForm" enctype="multipart/form-data">
                     <input type="hidden" name="quiz_id" value="${escapeHtml(quiz.id)}">
                     <label class="teacher-modal-label">Quiz Title *</label>
@@ -1682,15 +1744,19 @@ document.addEventListener('click', function(e) {
         const container = document.getElementById('editQuestionsContainer');
         const index = container ? container.querySelectorAll('.eq-question').length : 0;
         if (container) {
-            container.insertAdjacentHTML('beforeend', buildEditQuestionHtml({ id: 0, question_text: '', points: 1, choices: [] }, index, false));
+            container.insertAdjacentHTML('beforeend', buildEditQuestionHtml({ id: 0, question_text: '', question_type: 'mcq', points: 1, choices: [] }, index, false));
             refreshEditQuestionIndexes();
+            updateOpenEndedBanner();
         }
     } else if (action === 'remove-edit-question') {
         const question = actionEl.closest('.eq-question');
         if (question) question.remove();
         refreshEditQuestionIndexes();
+        updateOpenEndedBanner();
     } else if (action === 'add-edit-choice') {
         const question = actionEl.closest('.eq-question');
+        const typeSelect = question ? question.querySelector('select[name="question_type[]"]') : null;
+        if (typeSelect && typeSelect.value === 'open_ended') return;
         const choices = question ? question.querySelector('.eq-choices') : null;
         if (choices) {
             choices.insertAdjacentHTML('beforeend', `
@@ -1712,6 +1778,14 @@ document.addEventListener('click', function(e) {
         const removeInput = question ? question.querySelector('input[name="remove_image[]"]') : null;
         if (removeInput) removeInput.value = actionEl.checked ? '1' : '0';
     }
+});
+
+document.addEventListener('change', function(e) {
+    const actionEl = e.target.closest('[data-action="change-question-type"]');
+    if (!actionEl) return;
+    const question = actionEl.closest('.eq-question') || actionEl.closest('[id^="cq-question-"]');
+    if (question) setQuestionTypeFields(question, actionEl.value);
+    updateOpenEndedBanner();
 });
 
 let activeIntegrityQuizId = null;

@@ -16,7 +16,7 @@ require_once 'push_functions.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     http_response_code(401);
-    echo json_encode(["success" => false, "message" => "Unauthorized access. Please log in as a teacher."]);
+    echo json_encode(["status" => "error", "success" => false, "message" => "Unauthorized access. Please log in as a teacher."]);
     ob_end_flush();
     exit;
 }
@@ -123,6 +123,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $layout_mode = $_POST['layout_mode'] ?? 'single_page';
     $shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
     $is_linear = isset($_POST['is_linear']) ? 1 : 0;
+    $question_types = $_POST['question_type'] ?? [];
+    $has_open_ended = 0;
 
     // Validation
     $errors = [];
@@ -143,6 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         foreach ($questions as $i => $qText) {
             $questionText = trim((string)$qText);
+            $questionType = $question_types[$i] ?? 'mcq';
             $choiceValues = $_POST['choices'][$i] ?? [];
             $nonEmptyChoices = array_values(array_filter(array_map('trim', (array)$choiceValues), fn($choice) => $choice !== ''));
             $correctCheck = isset($_POST['correct_choice'][$i]) ? filter_var($_POST['correct_choice'][$i], FILTER_VALIDATE_INT) : false;
@@ -150,10 +153,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pointsCheck = isset($_POST['points'][$i]) ? filter_var($_POST['points'][$i], FILTER_VALIDATE_INT) : false;
             $points = $pointsCheck === false ? 0 : (int)$pointsCheck;
 
+            if (!in_array($questionType, ['mcq', 'open_ended'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid question type.";
             if ($questionText === '') $errors[] = "Question " . ($i + 1) . " text is required.";
-            if (count($nonEmptyChoices) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two choices.";
-            if ($correctIndex < 0 || !isset($choiceValues[$correctIndex]) || trim((string)$choiceValues[$correctIndex]) === '') {
-                $errors[] = "Question " . ($i + 1) . " must have exactly one valid correct choice.";
+            if ($questionType === 'open_ended') {
+                $has_open_ended = 1;
+                if (count($nonEmptyChoices) > 0) $errors[] = "Question " . ($i + 1) . " is open-ended and must not have choices.";
+            } else {
+                if (count($nonEmptyChoices) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two choices.";
+                if ($correctIndex < 0 || !isset($choiceValues[$correctIndex]) || trim((string)$choiceValues[$correctIndex]) === '') {
+                    $errors[] = "Question " . ($i + 1) . " must have exactly one valid correct choice.";
+                }
             }
             if ($points <= 0) $errors[] = "Question " . ($i + 1) . " points must be greater than zero.";
         }
@@ -168,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!empty($errors)) {
         http_response_code(400);
-        echo json_encode(["success" => false, "message" => implode(" ", $errors)]);
+        echo json_encode(["status" => "error", "success" => false, "message" => implode(" ", $errors)]);
         ob_end_flush();
         exit;
     }
@@ -180,7 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         if ($_FILES['question_images']['error'][$i] !== UPLOAD_ERR_OK) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Image upload failed."]);
+            echo json_encode(["status" => "error", "success" => false, "message" => "Image upload failed."]);
             ob_end_flush();
             exit;
         }
@@ -188,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $imageValidation = validate_quiz_image_upload($_FILES['question_images'], $i);
         if (!$imageValidation['valid']) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => $imageValidation['message']]);
+            echo json_encode(["status" => "error", "success" => false, "message" => $imageValidation['message']]);
             ob_end_flush();
             exit;
         }
@@ -199,10 +208,10 @@ try {
 
     $stmt = $conn->prepare("
         INSERT INTO quizzes 
-        (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, attempt_limit, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions, is_linear) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, duration, publish_marks, created_by, class_id, academic_year_id, term_number, attempt_limit, start_time, status, is_summative, weight_percent, layout_mode, shuffle_questions, is_linear, has_open_ended) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("siisiiiissidsii",
+    $stmt->bind_param("siisiiiissidsiii",
         $quiz_title,
         $duration,
         $publish_marks,
@@ -217,7 +226,8 @@ try {
         $weight_percent,
         $layout_mode,
         $shuffle_questions,
-        $is_linear
+        $is_linear,
+        $has_open_ended
     );
 
     if (!$stmt->execute()) {
@@ -227,7 +237,7 @@ try {
     $quiz_id = $stmt->insert_id;
     $stmt->close();
 
-    $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points) VALUES (?, ?, ?, ?)");
+    $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points, question_type) VALUES (?, ?, ?, ?, ?)");
     $cStmt = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
 
     $targetDir = "quiz_images/";
@@ -237,8 +247,9 @@ try {
 
     foreach ($_POST['question'] as $i => $qText) {
         $points = intval($_POST['points'][$i]);
-        $choices = array_map('trim', $_POST['choices'][$i]);
-        $correct = intval($_POST['correct_choice'][$i]);
+        $questionType = $question_types[$i] ?? 'mcq';
+        $choices = array_map('trim', $_POST['choices'][$i] ?? []);
+        $correct = intval($_POST['correct_choice'][$i] ?? 0);
         $imagePath = null;
 
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
@@ -250,11 +261,15 @@ try {
             $imagePath = $targetFile;
         }
 
-        $qStmt->bind_param("issi", $quiz_id, $qText, $imagePath, $points);
+        $qStmt->bind_param("issis", $quiz_id, $qText, $imagePath, $points, $questionType);
         if (!$qStmt->execute()) {
             throw new RuntimeException("Question insert failed: " . $qStmt->error);
         }
         $question_id = $qStmt->insert_id;
+
+        if ($questionType === 'open_ended') {
+            continue;
+        }
 
         foreach ($choices as $index => $choiceText) {
             if (empty($choiceText)) continue;
@@ -272,7 +287,7 @@ try {
     $conn->rollback();
     error_log("Quiz creation failed: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "An error occurred. Please try again."]);
+    echo json_encode(["status" => "error", "success" => false, "message" => "An error occurred. Please try again."]);
     exit;
 }
 
@@ -395,7 +410,7 @@ if ($checkSub->get_result()->num_rows > 0) {
     
 
     ob_end_clean();
-    echo json_encode(["success" => true, "redirect" => "teacher_quizzes.php"]);
+    echo json_encode(["status" => "success", "success" => true, "data" => ["redirect" => "teacher_quizzes.php"], "redirect" => "teacher_quizzes.php"]);
     exit;
 }
 ?>

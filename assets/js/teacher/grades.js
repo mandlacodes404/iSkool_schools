@@ -401,8 +401,18 @@ window.selectDesktopGradeQuiz = async function(quizId) {
         const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
-        window.currentQuizData = data;
-        renderGradesInPanel(data, panel);
+        const resultRes = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
+        const resultPayload = await resultRes.json();
+        const resultData = normalizeQuizResultsPayload(resultPayload);
+        if (resultData && resultData.has_open_ended == 1) {
+            window.currentOpenEndedQuizData = resultData;
+            renderOpenEndedGrades(resultData, panel, true);
+        } else {
+            window.currentQuizData = data;
+            renderGradesInPanel(data, panel);
+        }
     } catch (e) {
         panel.innerHTML = `<div class="gr-panel-empty"><p style="color:#f85149;">Error loading grades.</p></div>`;
     }
@@ -528,8 +538,18 @@ window.openQuizGrades = async function(quizId, quizTitle) {
 
         if (data.error) throw new Error(data.error);
 
-        window.currentQuizData = data;
-        renderQuizGrades(data);
+        const resultRes = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
+        const resultPayload = await resultRes.json();
+        const resultData = normalizeQuizResultsPayload(resultPayload);
+        if (resultData && resultData.has_open_ended == 1) {
+            window.currentOpenEndedQuizData = resultData;
+            renderOpenEndedGrades(resultData, apiArea, false);
+        } else {
+            window.currentQuizData = data;
+            renderQuizGrades(data);
+        }
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
@@ -615,6 +635,203 @@ function renderQuizGrades(data) {
 
     apiArea.innerHTML = html;
 }
+
+function normalizeQuizResultsPayload(payload) {
+    if (!payload) return null;
+    if (payload.status === 'error' || payload.error) return null;
+    return payload.data || payload;
+}
+
+function formatOpenEndedScore(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed.toString() : '';
+}
+
+function renderOpenEndedGrades(data, target, isPanel) {
+    if (!target) return;
+    const results = data.results || [];
+    const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
+    const pendingLearners = results.filter(row => !row.is_fully_graded).length;
+    const releaseDisabled = data.has_open_ended == 1 && !fullyGraded;
+    const backButton = isPanel
+        ? ''
+        : `<button class="teacher-back-btn" data-action="open-ended-back">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back to Grades
+            </button>`;
+
+    let html = `
+        <div class="${isPanel ? 'gr-panel-content' : ''}">
+            ${!isPanel ? `<div class="teacher-resources-header">${backButton}</div>` : ''}
+            <div class="gr-panel-header">
+                <div>
+                    <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Quiz Results')}</div>
+                    <div class="gr-panel-meta">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <button type="button" class="teacher-modal-submit" data-action="toggle-open-ended-publish" data-quiz-id="${escapeHtml(data.quiz_id)}" ${releaseDisabled ? 'disabled' : ''}
+                        title="${releaseDisabled ? 'Grade all open-ended responses before releasing marks.' : ''}"
+                        style="padding:9px 12px;font-size:12px;opacity:${releaseDisabled ? '0.55' : '1'};cursor:${releaseDisabled ? 'not-allowed' : 'pointer'};">
+                        Release Marks
+                    </button>
+                    ${releaseDisabled ? `<div style="color:#f5c38b;font-size:12px;text-align:right;">Grade all open-ended responses before releasing marks.</div>` : ''}
+                    <div id="oeReleaseMessage" style="display:none;font-size:12px;text-align:right;"></div>
+                </div>
+            </div>`;
+
+    if (results.length === 0) {
+        html += `<p class="teacher-empty-state">No submitted attempts found for this quiz.</p>`;
+    } else {
+        results.forEach(learner => {
+            const openQuestions = learner.open_ended || [];
+            const pendingCount = openQuestions.filter(question => !question.grade).length;
+            const badge = learner.is_fully_graded
+                ? `<span style="background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.35);color:#7ee787;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Fully Graded</span>`
+                : `<span style="background:rgba(242,140,56,0.12);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
+
+            html += `
+                <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin:14px 0;">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;">
+                        <div>
+                            <div style="color:#e2e8f0;font-weight:800;">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
+                            <div style="color:#8b949e;font-size:12px;margin-top:3px;">Score: ${escapeHtml(learner.score ?? '0')} / ${escapeHtml(learner.total ?? '0')}</div>
+                        </div>
+                        ${badge}
+                    </div>`;
+
+            openQuestions.forEach(question => {
+                const savedScore = question.grade ? formatOpenEndedScore(question.grade.score) : '';
+                const feedback = question.grade && question.grade.feedback ? question.grade.feedback : '';
+                html += `
+                    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;margin-top:12px;">
+                        <div style="color:#c9d1d9;font-weight:700;font-size:13px;line-height:1.45;">${escapeHtml(question.question_text || '')}</div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:4px;">Max points: ${escapeHtml(question.points)}</div>
+                        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#d8dee9;font-size:13px;line-height:1.5;padding:12px;margin:10px 0;white-space:pre-wrap;">${escapeHtml(question.answer_text || 'No answer submitted.')}</div>
+                        <div style="display:grid;grid-template-columns:minmax(90px,140px) 1fr auto;gap:10px;align-items:end;">
+                            <label style="display:flex;flex-direction:column;gap:5px;color:#8b949e;font-size:12px;">Score
+                                <input type="number" min="0" max="${escapeHtml(question.points)}" step="0.01" class="teacher-modal-input"
+                                    id="oe-score-${escapeHtml(learner.attempt_id)}-${escapeHtml(question.question_id)}"
+                                    value="${escapeHtml(savedScore)}" style="margin:0;">
+                            </label>
+                            <label style="display:flex;flex-direction:column;gap:5px;color:#8b949e;font-size:12px;">Feedback
+                                <textarea class="teacher-modal-input" id="oe-feedback-${escapeHtml(learner.attempt_id)}-${escapeHtml(question.question_id)}"
+                                    rows="2" style="margin:0;resize:vertical;">${escapeHtml(feedback)}</textarea>
+                            </label>
+                            <button type="button" class="teacher-edit-marks-btn" data-action="save-open-ended-grade"
+                                data-attempt-id="${escapeHtml(learner.attempt_id)}"
+                                data-question-id="${escapeHtml(question.question_id)}">
+                                Save
+                            </button>
+                        </div>
+                        ${question.grade ? `<div style="color:#7ee787;font-size:12px;margin-top:8px;">Saved: ${escapeHtml(savedScore || '0')} / ${escapeHtml(question.points)}</div>` : ''}
+                    </div>`;
+            });
+
+            html += `</div>`;
+        });
+    }
+
+    if (pendingLearners > 0) {
+        html += `<div style="color:#f5c38b;font-size:12px;margin-top:10px;">${pendingLearners} learner${pendingLearners !== 1 ? 's' : ''} still need manual grading.</div>`;
+    }
+
+    html += `</div>`;
+    target.innerHTML = html;
+}
+
+async function refreshOpenEndedGrades(quizId, targetMode) {
+    const res = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
+        headers: { 'X-CSRF-Token': getCsrfToken() }
+    });
+    const payload = await res.json();
+    const data = normalizeQuizResultsPayload(payload);
+    if (!data) throw new Error(payload.message || payload.error || 'Unable to reload open-ended results.');
+    window.currentOpenEndedQuizData = data;
+    const panel = document.getElementById('gr-main-panel');
+    const apiArea = document.getElementById('api-content-area');
+    renderOpenEndedGrades(data, targetMode === 'panel' && panel ? panel : apiArea, targetMode === 'panel');
+}
+
+async function saveOpenEndedGrade(button) {
+    const attemptId = button.dataset.attemptId;
+    const questionId = button.dataset.questionId;
+    const score = document.getElementById(`oe-score-${attemptId}-${questionId}`)?.value ?? '';
+    const feedback = document.getElementById(`oe-feedback-${attemptId}-${questionId}`)?.value ?? '';
+    const quizId = window.currentOpenEndedQuizData?.quiz_id;
+    const panel = document.getElementById('gr-main-panel');
+    const targetMode = panel && panel.contains(button) ? 'panel' : 'mobile';
+
+    const fd = new FormData();
+    fd.append('attempt_id', attemptId);
+    fd.append('question_id', questionId);
+    fd.append('score', score);
+    fd.append('feedback', feedback);
+
+    button.disabled = true;
+    button.textContent = 'Saving...';
+    try {
+        const res = await fetch('api/teacher/grade_open_ended.php', {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': getCsrfToken() },
+            body: fd
+        });
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message || 'Unable to save grade.');
+        await refreshOpenEndedGrades(quizId, targetMode);
+    } catch (e) {
+        alert(e.message || 'Unable to save grade.');
+        button.disabled = false;
+        button.textContent = 'Save';
+    }
+}
+
+async function toggleOpenEndedPublish(button) {
+    if (button.disabled) return;
+    const quizId = parseInt(button.dataset.quizId, 10);
+    const message = document.getElementById('oeReleaseMessage');
+    button.disabled = true;
+    button.textContent = 'Updating...';
+    if (message) message.style.display = 'none';
+    try {
+        const res = await fetch('api/teacher/toggle_publish_marks.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+            body: JSON.stringify({ quiz_id: quizId })
+        });
+        const data = await res.json();
+        if (data.status !== 'success' && !data.success) throw new Error(data.message || 'Unable to release marks.');
+        if (message) {
+            message.textContent = data.newStatus == 1 || data.data?.newStatus == 1 ? 'Marks released.' : 'Marks unpublished.';
+            message.style.color = '#7ee787';
+            message.style.display = 'block';
+        }
+    } catch (e) {
+        if (message) {
+            message.textContent = e.message || 'Unable to release marks.';
+            message.style.color = '#f85149';
+            message.style.display = 'block';
+        } else {
+            alert(e.message || 'Unable to release marks.');
+        }
+    } finally {
+        await refreshOpenEndedGrades(quizId, document.getElementById('gr-main-panel') && document.getElementById('gr-main-panel').contains(button) ? 'panel' : 'mobile').catch(() => {});
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const actionEl = e.target.closest('[data-action]');
+    if (!actionEl) return;
+    if (actionEl.dataset.action === 'save-open-ended-grade') {
+        saveOpenEndedGrade(actionEl);
+    } else if (actionEl.dataset.action === 'toggle-open-ended-publish') {
+        toggleOpenEndedPublish(actionEl);
+    } else if (actionEl.dataset.action === 'open-ended-back') {
+        fetchTeacherGrades();
+    }
+});
 
 function getGradeBadgeClass(percentage) {
     const val = parseFloat(percentage);

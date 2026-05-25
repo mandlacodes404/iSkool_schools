@@ -21,7 +21,7 @@ if ($quiz_id < 1) {
 $stmt = $conn->prepare("
     SELECT q.id, q.title, q.duration, q.publish_marks, q.class_id, q.attempt_limit,
            q.start_time, q.status, q.is_summative, q.weight_percent, q.layout_mode,
-           q.shuffle_questions, q.is_linear, c.name AS class_name
+           q.shuffle_questions, q.is_linear, q.has_open_ended, c.name AS class_name
     FROM quizzes q
     INNER JOIN classes c ON q.class_id = c.id
     WHERE q.id = ? AND q.created_by = ?
@@ -44,7 +44,7 @@ $has_attempts = $attemptStmt->get_result()->num_rows > 0;
 $attemptStmt->close();
 
 $questionsStmt = $conn->prepare("
-    SELECT id, question_text, image_path, points
+    SELECT id, question_text, image_path, points, question_type
     FROM quizquestions
     WHERE quiz_id = ?
     ORDER BY id ASC
@@ -72,6 +72,7 @@ while ($question = $questionsResult->fetch_assoc()) {
         'question_text' => $question['question_text'],
         'image_path' => $question['image_path'],
         'points' => (int)$question['points'],
+        'question_type' => in_array($question['question_type'] ?? 'mcq', ['mcq', 'open_ended'], true) ? $question['question_type'] : 'mcq',
         'choices' => array_map(function ($choice) {
             return [
                 'id' => (int)$choice['id'],
@@ -95,6 +96,7 @@ $quiz['status'] = in_array($quiz['status'], ['Scheduled', 'Open', 'Closed'], tru
 $quiz['layout_mode'] = in_array($quiz['layout_mode'], ['single_page', 'multi_page'], true) ? $quiz['layout_mode'] : 'single_page';
 $quiz['shuffle_questions'] = (int)$quiz['shuffle_questions'];
 $quiz['is_linear'] = (int)$quiz['is_linear'];
+$quiz['has_open_ended'] = (int)$quiz['has_open_ended'];
 $quiz['start_time_local'] = $quiz['start_time'] ? date('Y-m-d\TH:i', strtotime($quiz['start_time'])) : '';
 
 echo json_encode([
@@ -104,7 +106,7 @@ echo json_encode([
         'questions' => $questions,
         'has_attempts' => $has_attempts,
         'locked_message' => $has_attempts
-            ? 'This quiz already has learner attempts. Questions, choices, points, layout mode, shuffle questions, and linear progression are locked to protect existing attempts.'
+            ? 'This quiz already has learner attempts. Questions, question types, choices, points, layout mode, shuffle questions, and linear progression are locked to protect existing attempts.'
             : ''
     ]
 ]);

@@ -46,6 +46,7 @@ function normalize_question_payload(): array {
     $question_texts = $_POST['question'] ?? [];
     $question_ids = $_POST['question_id'] ?? [];
     $points_values = $_POST['points'] ?? [];
+    $question_types = $_POST['question_type'] ?? [];
     $remove_images = $_POST['remove_image'] ?? [];
     $choices_payload = $_POST['choices'] ?? [];
     $choice_ids_payload = $_POST['choice_id'] ?? [];
@@ -67,6 +68,7 @@ function normalize_question_payload(): array {
         $questions[] = [
             'id' => (int)($question_ids[$i] ?? 0),
             'text' => trim((string)$question_text),
+            'question_type' => $question_types[$i] ?? 'mcq',
             'points' => (int)($points_values[$i] ?? 0),
             'remove_image' => (int)($remove_images[$i] ?? 0),
             'choices' => $choices
@@ -156,9 +158,14 @@ if (!$has_attempts) {
             }
         }
 
+        if (!in_array($question['question_type'], ['mcq', 'open_ended'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid question type.';
         if ($question['text'] === '') $errors[] = 'Question ' . ($i + 1) . ' text is required.';
-        if (count($non_empty_choices) < 2) $errors[] = 'Question ' . ($i + 1) . ' must have at least two choices.';
-        if ($correct_count !== 1) $errors[] = 'Question ' . ($i + 1) . ' must have exactly one valid correct choice.';
+        if ($question['question_type'] === 'open_ended') {
+            if (count($non_empty_choices) > 0) $errors[] = 'Question ' . ($i + 1) . ' is open-ended and must not have choices.';
+        } else {
+            if (count($non_empty_choices) < 2) $errors[] = 'Question ' . ($i + 1) . ' must have at least two choices.';
+            if ($correct_count !== 1) $errors[] = 'Question ' . ($i + 1) . ' must have exactly one valid correct choice.';
+        }
         if ($question['points'] <= 0) $errors[] = 'Question ' . ($i + 1) . ' points must be greater than zero.';
     }
 }
@@ -225,7 +232,7 @@ try {
             'data' => [
                 'updated' => true,
                 'locked' => true,
-                'message' => 'Quiz metadata was updated. This quiz already has learner attempts, so questions, choices, points, layout mode, shuffle questions, and linear progression were not changed.'
+                'message' => 'Quiz metadata was updated. This quiz already has learner attempts, so questions, question types, choices, points, layout mode, shuffle questions, and linear progression were not changed.'
             ]
         ]);
         exit();
@@ -242,7 +249,7 @@ try {
     }
     $updateLocked->close();
 
-    $existingQuestionsStmt = $conn->prepare("SELECT id, image_path FROM quizquestions WHERE quiz_id = ?");
+    $existingQuestionsStmt = $conn->prepare("SELECT id, image_path, question_type FROM quizquestions WHERE quiz_id = ?");
     $existingQuestionsStmt->bind_param("i", $quiz_id);
     $existingQuestionsStmt->execute();
     $existingQuestionRows = $existingQuestionsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -250,7 +257,10 @@ try {
 
     $existing_question_map = [];
     foreach ($existingQuestionRows as $row) {
-        $existing_question_map[(int)$row['id']] = $row['image_path'];
+        $existing_question_map[(int)$row['id']] = [
+            'image_path' => $row['image_path'],
+            'question_type' => $row['question_type'] ?? 'mcq'
+        ];
     }
 
     $submitted_question_ids = array_values(array_filter(array_map(function ($question) {
@@ -265,8 +275,8 @@ try {
 
     $questions_to_delete = array_diff(array_keys($existing_question_map), $submitted_question_ids);
     foreach ($questions_to_delete as $question_id_to_delete) {
-        if (!empty($existing_question_map[$question_id_to_delete])) {
-            $old_images_to_delete[] = $existing_question_map[$question_id_to_delete];
+        if (!empty($existing_question_map[$question_id_to_delete]['image_path'])) {
+            $old_images_to_delete[] = $existing_question_map[$question_id_to_delete]['image_path'];
         }
         $deleteChoices = $conn->prepare("DELETE FROM choices WHERE question_id = ?");
         $deleteChoices->bind_param("i", $question_id_to_delete);
@@ -290,7 +300,7 @@ try {
 
     foreach ($questions as $i => $question) {
         $question_id = (int)$question['id'];
-        $image_path = $question_id > 0 ? ($existing_question_map[$question_id] ?? null) : null;
+        $image_path = $question_id > 0 ? ($existing_question_map[$question_id]['image_path'] ?? null) : null;
         $old_image_path = $image_path;
 
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
@@ -310,20 +320,30 @@ try {
         }
 
         if ($question_id > 0) {
-            $updateQuestion = $conn->prepare("UPDATE quizquestions SET question_text = ?, image_path = ?, points = ? WHERE id = ? AND quiz_id = ?");
-            $updateQuestion->bind_param("ssiii", $question['text'], $image_path, $question['points'], $question_id, $quiz_id);
+            $updateQuestion = $conn->prepare("UPDATE quizquestions SET question_text = ?, image_path = ?, points = ?, question_type = ? WHERE id = ? AND quiz_id = ?");
+            $updateQuestion->bind_param("ssisii", $question['text'], $image_path, $question['points'], $question['question_type'], $question_id, $quiz_id);
             if (!$updateQuestion->execute()) {
                 throw new RuntimeException("Question update failed: " . $updateQuestion->error);
             }
             $updateQuestion->close();
         } else {
-            $insertQuestion = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points) VALUES (?, ?, ?, ?)");
-            $insertQuestion->bind_param("issi", $quiz_id, $question['text'], $image_path, $question['points']);
+            $insertQuestion = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points, question_type) VALUES (?, ?, ?, ?, ?)");
+            $insertQuestion->bind_param("issis", $quiz_id, $question['text'], $image_path, $question['points'], $question['question_type']);
             if (!$insertQuestion->execute()) {
                 throw new RuntimeException("Question insert failed: " . $insertQuestion->error);
             }
             $question_id = $insertQuestion->insert_id;
             $insertQuestion->close();
+        }
+
+        if ($question['question_type'] === 'open_ended') {
+            $deleteOpenChoices = $conn->prepare("DELETE FROM choices WHERE question_id = ?");
+            $deleteOpenChoices->bind_param("i", $question_id);
+            if (!$deleteOpenChoices->execute()) {
+                throw new RuntimeException("Open-ended choice cleanup failed: " . $deleteOpenChoices->error);
+            }
+            $deleteOpenChoices->close();
+            continue;
         }
 
         $existingChoicesStmt = $conn->prepare("SELECT id FROM choices WHERE question_id = ?");
@@ -381,6 +401,19 @@ try {
             throw new RuntimeException("Question correct choice validation failed.");
         }
     }
+
+    $hasOpenEndedStmt = $conn->prepare("SELECT 1 FROM quizquestions WHERE quiz_id = ? AND question_type = 'open_ended' LIMIT 1");
+    $hasOpenEndedStmt->bind_param("i", $quiz_id);
+    $hasOpenEndedStmt->execute();
+    $has_open_ended = $hasOpenEndedStmt->get_result()->num_rows > 0 ? 1 : 0;
+    $hasOpenEndedStmt->close();
+
+    $updateOpenFlag = $conn->prepare("UPDATE quizzes SET has_open_ended = ? WHERE id = ? AND created_by = ?");
+    $updateOpenFlag->bind_param("iis", $has_open_ended, $quiz_id, $email);
+    if (!$updateOpenFlag->execute()) {
+        throw new RuntimeException("Open-ended flag update failed: " . $updateOpenFlag->error);
+    }
+    $updateOpenFlag->close();
 
     $conn->commit();
 } catch (Throwable $e) {
