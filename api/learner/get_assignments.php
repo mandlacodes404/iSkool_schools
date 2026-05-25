@@ -14,8 +14,11 @@ $studentEmail = $_SESSION['email'];
 $currentDateTime = date('Y-m-d H:i:s');
 
 // 1. Get Academic Year
-$yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-$current_academic_year_id = (int)$yearRes->fetch_assoc()['id'];
+$yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt->execute();
+$yearRes = $yearStmt->get_result();
+$current_academic_year_id = (int)($yearRes->fetch_assoc()['id'] ?? 0);
+$yearStmt->close();
 
 // 2. Get Assignments with Submission Status
 $sql = "

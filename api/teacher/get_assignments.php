@@ -11,8 +11,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-$yearResult      = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-$current_year_id = (int)$yearResult->fetch_assoc()['id'];
+$yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt->execute();
+$yearResult = $yearStmt->get_result();
+$current_year_id = (int)($yearResult->fetch_assoc()['id'] ?? 0);
+$yearStmt->close();
 
 // Fetch all assignments for this teacher
 $stmt = $conn->prepare("

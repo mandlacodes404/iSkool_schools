@@ -19,7 +19,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 verify_csrf_token();
 
 $email       = $_SESSION['email'];
-$maxFileSize = 10 * 1024 * 1024;
+$maxFileSize = 100 * 1024 * 1024;
 
 // ── YouTube ID extractor ──────────────────────────────────────────────────────
 function extractYouTubeId(string $url): ?string {
@@ -123,15 +123,21 @@ function notifyLearners($conn, $classId, $yearId, $title, $teacherEmail, $teache
     $learnerStmt->close();
 }
 
-$yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt->execute();
+$yearResult = $yearStmt->get_result();
 if ($yearResult->num_rows === 0) {
     echo json_encode(['success' => false, 'error' => 'No active academic year']);
     exit();
 }
 $current_year_id = (int)$yearResult->fetch_assoc()['id'];
+$yearStmt->close();
 
-$termResult   = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termStmt = $conn->prepare("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termStmt->execute();
+$termResult = $termStmt->get_result();
 $current_term = $termResult ? (int)$termResult->fetch_assoc()['current_global_term'] : 1;
+$termStmt->close();
 
 $title      = trim($_POST['title'] ?? '');
 $classId    = (int)($_POST['class_id'] ?? 0);
@@ -155,10 +161,13 @@ if ($userData) {
 }
 
 // ── School name (needed by both branches) ─────────────────────────────────────
-$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt = $conn->prepare("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt->execute();
+$schoolNameResult = $schoolNameStmt->get_result();
 $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     ? $row['setting_value']
     : $_SERVER['HTTP_HOST'];
+$schoolNameStmt->close();
 
 if (empty($title)) {
     echo json_encode(['success' => false, 'error' => 'Please enter a title.']);
@@ -205,14 +214,47 @@ if (!isset($_FILES['resource']) || $_FILES['resource']['error'] !== UPLOAD_ERR_O
 
 $file = $_FILES['resource'];
 if ($file['size'] > $maxFileSize) {
-    echo json_encode(['success' => false, 'error' => 'File too large. Max 10MB.']);
+    echo json_encode(['success' => false, 'error' => 'File too large. Maximum size is 100MB.']);
     exit();
 }
 
-$allowedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
-$ext          = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-if (!in_array($ext, $allowedTypes)) {
-    echo json_encode(['success' => false, 'error' => 'Invalid file type.']);
+$safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($file['name']));
+$ext = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
+$allowed = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'mp3', 'wav', 'zip', 'rar', 'txt', 'csv'];
+$blocked = ['php', 'phtml', 'phar', 'php3', 'php4', 'php5', 'php7', 'cgi', 'pl', 'asp', 'aspx', 'js', 'html', 'htm', 'svg'];
+$allowedMimeTypes = [
+    'pdf' => ['application/pdf'],
+    'doc' => ['application/msword', 'application/vnd.ms-office', 'application/x-cfb'],
+    'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+    'ppt' => ['application/vnd.ms-powerpoint', 'application/vnd.ms-office', 'application/x-cfb'],
+    'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
+    'xls' => ['application/vnd.ms-excel', 'application/vnd.ms-office', 'application/x-cfb'],
+    'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
+    'jpg' => ['image/jpeg'],
+    'jpeg' => ['image/jpeg'],
+    'png' => ['image/png'],
+    'gif' => ['image/gif'],
+    'webp' => ['image/webp'],
+    'mp4' => ['video/mp4'],
+    'mov' => ['video/quicktime'],
+    'avi' => ['video/x-msvideo'],
+    'mp3' => ['audio/mpeg'],
+    'wav' => ['audio/wav', 'audio/x-wav'],
+    'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'],
+    'rar' => ['application/vnd.rar', 'application/x-rar-compressed'],
+    'txt' => ['text/plain'],
+    'csv' => ['text/csv', 'text/plain', 'application/vnd.ms-excel']
+];
+
+if ($safe_name === '' || in_array($ext, $blocked, true) || !in_array($ext, $allowed, true)) {
+    echo json_encode(['success' => false, 'error' => 'File type not allowed.']);
+    exit();
+}
+
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$mime = $finfo->file($file['tmp_name']);
+if (!isset($allowedMimeTypes[$ext]) || !in_array($mime, $allowedMimeTypes[$ext], true)) {
+    echo json_encode(['success' => false, 'error' => 'File type not allowed.']);
     exit();
 }
 
@@ -222,7 +264,7 @@ $uploadDir  = getSchoolUploadDir($conn, $baseDir);
 $schoolSlug = getSchoolSlug($conn);
 // ─────────────────────────────────────────────────────────────────────────────
 
-$filename   = time() . '_' . preg_replace("/[^A-Za-z0-9._-]/", "", basename($file['name']));
+$filename   = time() . '_' . $safe_name;
 $targetPath = $uploadDir . $filename;
 
 if (!move_uploaded_file($file['tmp_name'], $targetPath)) {

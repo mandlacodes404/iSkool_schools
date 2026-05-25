@@ -975,8 +975,11 @@ window.openCreateQuiz = async function() {
     const panel   = document.getElementById('qz-main-panel');
     const isDesktop = window.innerWidth >= 900 && panel;
     const target  = isDesktop ? panel : apiArea;
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
+        : null;
 
-    if (loader) loader.style.display = 'flex';
+    if (!hideInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const [classRes, termRes] = await Promise.all([
@@ -1158,18 +1161,25 @@ window.openCreateQuiz = async function() {
                 : null;
             if (!hideSubmitLoader && loader) loader.style.display = 'flex';
             try {
-                const res  = await fetch('../../../create_quiz.php', {
+                const res  = await fetch('create_quiz.php', {
                     method: 'POST',
                     headers: { 'X-CSRF-Token': getCsrfToken() },
                     body: fd
                 });
-                const data = await res.json();
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (parseError) {
+                    console.error('Create quiz returned non-JSON response:', text);
+                    throw new Error('Invalid server response');
+                }
 
                 if (data.success) {
                     window.teacherQuizzesCache = null;
                     fetchTeacherQuizzes();
                 } else {
-                    errorDiv.textContent = data.error || 'Failed to create quiz.';
+                    errorDiv.textContent = data.error || data.message || 'Failed to create quiz.';
                     errorDiv.style.display = 'block';
                 }
             } catch (err) {

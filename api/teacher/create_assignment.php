@@ -35,8 +35,11 @@ if ($userData) {
 }
 
 // Get current academic year
-$yearResult      = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-$current_year_id = (int)$yearResult->fetch_assoc()['id'];
+$yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt->execute();
+$yearResult = $yearStmt->get_result();
+$current_year_id = (int)($yearResult->fetch_assoc()['id'] ?? 0);
+$yearStmt->close();
 
 if (!$current_year_id) {
     echo json_encode(['error' => 'No active academic year found.']);
@@ -44,8 +47,11 @@ if (!$current_year_id) {
 }
 
 // Get current term
-$termResult   = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
-$current_term = (int)$termResult->fetch_assoc()['current_global_term'];
+$termStmt = $conn->prepare("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termStmt->execute();
+$termResult = $termStmt->get_result();
+$current_term = (int)($termResult->fetch_assoc()['current_global_term'] ?? 1);
+$termStmt->close();
 
 // Validate inputs
 $title       = trim($_POST['title'] ?? '');
@@ -64,21 +70,69 @@ $filePath       = null;
 $hasAttachment  = false;
 $attachmentName = '';
 
+if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ERR_NO_FILE && $_FILES['attachment']['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['error' => 'File upload failed.']);
+    exit();
+}
+
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+    $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($_FILES['attachment']['name']));
+    $ext = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
+    $max_size = 50 * 1024 * 1024;
+    $allowed = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'zip', 'rar', 'txt', 'csv'];
+    $blocked = ['php', 'phtml', 'phar', 'php3', 'php4', 'php5', 'php7', 'cgi', 'pl', 'asp', 'aspx', 'js', 'html', 'htm', 'svg'];
+    $allowedMimeTypes = [
+        'pdf' => ['application/pdf'],
+        'doc' => ['application/msword', 'application/vnd.ms-office', 'application/x-cfb'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+        'ppt' => ['application/vnd.ms-powerpoint', 'application/vnd.ms-office', 'application/x-cfb'],
+        'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
+        'xls' => ['application/vnd.ms-excel', 'application/vnd.ms-office', 'application/x-cfb'],
+        'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'gif' => ['image/gif'],
+        'webp' => ['image/webp'],
+        'mp4' => ['video/mp4'],
+        'mov' => ['video/quicktime'],
+        'avi' => ['video/x-msvideo'],
+        'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'],
+        'rar' => ['application/vnd.rar', 'application/x-rar-compressed'],
+        'txt' => ['text/plain'],
+        'csv' => ['text/csv', 'text/plain', 'application/vnd.ms-excel']
+    ];
+
+    if ($_FILES['attachment']['size'] > $max_size) {
+        echo json_encode(['error' => 'File too large. Maximum size is 50MB.']);
+        exit();
+    }
+    if ($safe_name === '' || in_array($ext, $blocked, true) || !in_array($ext, $allowed, true)) {
+        echo json_encode(['error' => 'File type not allowed.']);
+        exit();
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($_FILES['attachment']['tmp_name']);
+    if (!isset($allowedMimeTypes[$ext]) || !in_array($mime, $allowedMimeTypes[$ext], true)) {
+        echo json_encode(['error' => 'File type not allowed.']);
+        exit();
+    }
+
     // ── CHANGED: school-scoped upload directory ──────────────────────────────
     $baseDir   = dirname(__DIR__, 2) . '/assignment_Uploads';
     $uploadDir = getSchoolUploadDir($conn, $baseDir);
     $schoolSlug = getSchoolSlug($conn);
     // ────────────────────────────────────────────────────────────────────────
 
-    $filename = time() . '_' . basename($_FILES['attachment']['name']);
+    $filename = time() . '_' . $safe_name;
 
     // file_url stored in DB as relative path (used by learner to download)
     $filePath = 'assignment_Uploads/' . $schoolSlug . '/' . $filename;
 
     if (move_uploaded_file($_FILES['attachment']['tmp_name'], $uploadDir . $filename)) {
         $hasAttachment  = true;
-        $attachmentName = basename($_FILES['attachment']['name']);
+        $attachmentName = $safe_name;
     }
 }
 
@@ -107,10 +161,13 @@ $assignment_id = $stmt->insert_id;
 $stmt->close();
 
 // School name
-$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt = $conn->prepare("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt->execute();
+$schoolNameResult = $schoolNameStmt->get_result();
 $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     ? $row['setting_value']
     : $_SERVER['HTTP_HOST'];
+$schoolNameStmt->close();
 
 // Formatted due date
 $formatted_due_date = date("l, F j, Y", strtotime($due_date));

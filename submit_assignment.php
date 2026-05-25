@@ -32,6 +32,35 @@ if (!$assignment) {
     exit();
 }
 
+$assignment_year_id = (int)($assignment['academic_year_id'] ?? 0);
+if ($assignment_year_id <= 0) {
+    $yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+    $yearStmt->execute();
+    $yearRow = $yearStmt->get_result()->fetch_assoc();
+    $assignment_year_id = (int)($yearRow['id'] ?? 0);
+    $yearStmt->close();
+}
+
+$classCheckStmt = $conn->prepare("
+    SELECT 1
+    FROM class_students
+    WHERE student_email = ?
+      AND class_id = ?
+      AND academic_year_id = ?
+    LIMIT 1
+");
+$assignment_class_id = (int)$assignment['class_id'];
+$classCheckStmt->bind_param("sii", $email, $assignment_class_id, $assignment_year_id);
+$classCheckStmt->execute();
+$isInAssignmentClass = $classCheckStmt->get_result()->num_rows > 0;
+$classCheckStmt->close();
+
+if (!$isInAssignmentClass) {
+    http_response_code(403);
+    echo "You are not allowed to submit this assignment.";
+    exit();
+}
+
 // Check due date
 $now = new DateTime('2025-08-19 18:01:00', new DateTimeZone('SAST')); // For testing, matches learner_assignments.php
 $due = new DateTime($assignment['due_date']);
@@ -55,19 +84,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
     $fileUrl = $submission['file_url'] ?? null;
 
     // 1. Handle File Upload
+    if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] !== UPLOAD_ERR_NO_FILE && $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
+        echo json_encode(['error' => 'File upload failed.']);
+        exit();
+    }
+
     if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === 0) {
         $uploadDir = "assignment_submissions/";
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
 
         $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($_FILES['submission_file']['name']));
-        $fileExt = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
-        $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
-        $blockedExtensions = ['php', 'phtml', 'phar', 'html', 'svg', 'js', 'asp', 'cgi', 'pl'];
+        $ext = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
+        $max_size = 50 * 1024 * 1024;
+        $allowed = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'zip'];
+        $blocked = ['php', 'phtml', 'phar', 'php3', 'php4', 'php5', 'php7', 'cgi', 'pl', 'asp', 'aspx', 'js', 'html', 'htm', 'svg'];
         $allowedMimeTypes = [
             'pdf' => ['application/pdf'],
-            'doc' => ['application/msword', 'application/x-cfb'],
+            'doc' => ['application/msword', 'application/vnd.ms-office', 'application/x-cfb'],
             'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
-            'ppt' => ['application/vnd.ms-powerpoint', 'application/x-cfb'],
+            'ppt' => ['application/vnd.ms-powerpoint', 'application/vnd.ms-office', 'application/x-cfb'],
             'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
             'jpg' => ['image/jpeg'],
             'jpeg' => ['image/jpeg'],
@@ -75,21 +110,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
             'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip']
         ];
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo ? finfo_file($finfo, $_FILES['submission_file']['tmp_name']) : false;
-        if ($finfo) {
-            finfo_close($finfo);
+        if ($_FILES['submission_file']['size'] > $max_size) {
+            echo json_encode(['error' => 'File too large. Maximum size is 50MB.']);
+            exit();
+        }
+        if ($safe_name === '' || in_array($ext, $blocked, true) || !in_array($ext, $allowed, true)) {
+            echo json_encode(['error' => 'File type not allowed.']);
+            exit();
         }
 
-        if (
-            $safe_name === '' ||
-            $_FILES['submission_file']['size'] > 10 * 1024 * 1024 ||
-            in_array($fileExt, $blockedExtensions, true) ||
-            !in_array($fileExt, $allowedExtensions, true) ||
-            !isset($allowedMimeTypes[$fileExt]) ||
-            !in_array($mimeType, $allowedMimeTypes[$fileExt], true)
-        ) {
-            echo json_encode(['error' => 'File not allowed']);
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($_FILES['submission_file']['tmp_name']);
+        if (!isset($allowedMimeTypes[$ext]) || !in_array($mime, $allowedMimeTypes[$ext], true)) {
+            echo json_encode(['error' => 'File type not allowed.']);
             exit();
         }
 

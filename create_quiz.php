@@ -23,27 +23,70 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 $teacherDisplayName = 'Teacher';
+
+$userStmt = $conn->prepare("SELECT title, name, surname FROM users WHERE email = ? LIMIT 1");
+$userStmt->bind_param("s", $email);
+$userStmt->execute();
+$userData = $userStmt->get_result()->fetch_assoc();
+$userStmt->close();
+
 if ($userData) {
     $firstInitial       = !empty($userData['name']) ? strtoupper(substr(trim($userData['name']), 0, 1)) . '.' : '';
     $teacherDisplayName = trim($userData['title'] . ' ' . $firstInitial . ' ' . $userData['surname']);
 }
 
+function validate_quiz_image_upload(array $files, int $index): array {
+    $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($files['name'][$index]));
+    $ext = strtolower(pathinfo($safe_name, PATHINFO_EXTENSION));
+    $max_size = 5 * 1024 * 1024;
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $blocked = ['php', 'phtml', 'phar', 'php3', 'php4', 'php5', 'php7', 'cgi', 'pl', 'asp', 'aspx', 'js', 'html', 'htm', 'svg'];
+    $allowedMimeTypes = [
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'gif' => ['image/gif'],
+        'webp' => ['image/webp']
+    ];
+
+    if ($files['size'][$index] > $max_size) {
+        return ['valid' => false, 'message' => 'File too large. Maximum size is 5MB.'];
+    }
+    if ($safe_name === '' || in_array($ext, $blocked, true) || !in_array($ext, $allowed, true)) {
+        return ['valid' => false, 'message' => 'File type not allowed.'];
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($files['tmp_name'][$index]);
+    if (!isset($allowedMimeTypes[$ext]) || !in_array($mime, $allowedMimeTypes[$ext], true)) {
+        return ['valid' => false, 'message' => 'File type not allowed.'];
+    }
+
+    return ['valid' => true, 'safe_name' => $safe_name];
+}
+
 // ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
-$result = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
+$yearStmt->execute();
+$result = $yearStmt->get_result();
 if ($result && $row = $result->fetch_assoc()) {
     $current_academic_year_id = $row['id'];
 }
+$yearStmt->close();
 if (!$current_academic_year_id) {
     die("No active academic year found. Please contact your admin.");
 }
 
 // ==================== GET CURRENT GLOBAL TERM ====================
 $current_global_term = 4; 
-$result = $conn->query("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termStmt = $conn->prepare("SELECT current_global_term FROM platform_settings LIMIT 1");
+$termStmt->execute();
+$result = $termStmt->get_result();
 if ($result && $row = $result->fetch_assoc()) {
     $current_global_term = (int)$row['current_global_term'];
 }
+$termStmt->close();
 
 // Fetch classes 
 $stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
@@ -51,10 +94,13 @@ $stmt->execute();
 $classResult = $stmt->get_result();
 
 // School name
-$schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt = $conn->prepare("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolNameStmt->execute();
+$schoolNameResult = $schoolNameStmt->get_result();
 $schoolName = ($schoolNameResult && $row = $schoolNameResult->fetch_assoc())
     ? $row['setting_value']
     : $_SERVER['HTTP_HOST'];
+$schoolNameStmt->close();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     verify_csrf_token();
@@ -81,6 +127,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ob_end_flush();
         exit;
     }
+
+    $validatedImages = [];
+    foreach ($_FILES['question_images']['name'] ?? [] as $i => $unused) {
+        if ($_FILES['question_images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+        if ($_FILES['question_images']['error'][$i] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Image upload failed."]);
+            ob_end_flush();
+            exit;
+        }
+
+        $imageValidation = validate_quiz_image_upload($_FILES['question_images'], $i);
+        if (!$imageValidation['valid']) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => $imageValidation['message']]);
+            ob_end_flush();
+            exit;
+        }
+        $validatedImages[$i] = $imageValidation['safe_name'];
+    }
 // ... after layout_mode ...
 $layout_mode = $_POST['layout_mode'] ?? 'single_page';
 $shuffle_questions = isset($_POST['shuffle_questions']) ? 1 : 0; 
@@ -96,7 +164,7 @@ $stmt = $conn->prepare("
 /**
  * 2. Added "i" at the end for is_linear (integer 0 or 1)
  */
-$stmt->bind_param("siisiiisssdsii", 
+$stmt->bind_param("siisiiissidsii", 
     $quiz_title, 
     $duration, 
     $publish_marks, 
@@ -138,7 +206,7 @@ if (!$stmt->execute()) {
         $imagePath = null;
 
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
-            $filename = time() . "_" . basename($_FILES['question_images']['name'][$i]);
+            $filename = time() . "_" . $i . "_" . $validatedImages[$i];
             $targetFile = $targetDir . $filename;
             if (move_uploaded_file($_FILES['question_images']['tmp_name'][$i], $targetFile)) {
                 $imagePath = $targetFile;
@@ -567,6 +635,7 @@ function getCsrfToken() {
                                                     <line x1="6" y1="20" x2="6" y2="14"></line>
                                             </svg> Create a New Quiz</h1>
   <form id="quizForm" action="create_quiz.php" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <label>Quiz Title:</label>
     <input type="text" name="quiz_title" required aria-label="Quiz title">
 

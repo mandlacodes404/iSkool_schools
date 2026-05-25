@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/auth/session_guard.php';
 include("config.php");
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
@@ -12,6 +12,24 @@ if (!isset($_GET['assignment_id'])) {
 }
 
 $assignment_id = intval($_GET['assignment_id']);
+$teacher_email = $_SESSION['email'];
+
+$assignmentStmt = $conn->prepare("SELECT id FROM assignments WHERE id = ? AND created_by = ? LIMIT 1");
+$assignmentStmt->bind_param("is", $assignment_id, $teacher_email);
+$assignmentStmt->execute();
+$assignmentExists = $assignmentStmt->get_result()->num_rows === 1;
+$assignmentStmt->close();
+
+if (!$assignmentExists) {
+    http_response_code(403);
+    exit();
+}
+
+$base = realpath(__DIR__ . '/assignment_submissions/');
+if ($base === false) {
+    http_response_code(404);
+    exit();
+}
 
 // Get all submissions for this assignment
 $stmt = $conn->prepare("SELECT student_email, file_url FROM submissions WHERE assignment_id = ? AND submission_type = 'file' AND file_url IS NOT NULL");
@@ -32,10 +50,10 @@ if ($zip->open($zipFilename, ZipArchive::CREATE) !== TRUE) {
 }
 
 while ($row = $result->fetch_assoc()) {
-    $filePath = $row['file_url'];
+    $filePath = realpath($base . '/' . basename($row['file_url']));
     $studentEmail = $row['student_email'];
     
-    if (file_exists($filePath)) {
+    if ($filePath !== false && strpos($filePath, $base) === 0 && file_exists($filePath)) {
         // Add the file to the zip using email + original filename to avoid collisions
         $fileName = basename($filePath);
         $zip->addFile($filePath, $studentEmail . '_' . $fileName);
