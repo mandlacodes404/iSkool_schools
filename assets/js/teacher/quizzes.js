@@ -341,9 +341,15 @@ function renderTeacherQuizzes(data) {
             .qz-action-card.results:hover { border-color: #1e90ff; background: rgba(30,144,255,0.08); color: #1e90ff; }
             .qz-action-card.integrity { border-color: rgba(242,140,56,0.2); }
             .qz-action-card.integrity:hover { border-color: #f28c38; background: rgba(242,140,56,0.08); color: #f28c38; }
+            .qz-action-card.edit { border-color: rgba(79,209,197,0.2); }
+            .qz-action-card.edit:hover { border-color: #4fd1c5; background: rgba(79,209,197,0.08); color: #4fd1c5; }
+            .qz-action-card.delete { border-color: rgba(248,81,73,0.2); }
+            .qz-action-card.delete:hover { border-color: #f85149; background: rgba(248,81,73,0.08); color: #f85149; }
             .qz-action-card-icon { flex-shrink: 0; }
             .qz-action-card-text { display: flex; flex-direction: column; gap: 2px; }
             .qz-action-card-sub  { font-size: 11px; font-weight: 400; color: #555e6a; }
+            .teacher-quiz-action-btn.edit { background: rgba(79,209,197,0.1); color: #4fd1c5; border-color: rgba(79,209,197,0.25); }
+            .teacher-quiz-action-btn.delete { background: rgba(248,81,73,0.1); color: #f85149; border-color: rgba(248,81,73,0.25); }
         </style>
 
         <div class="teacher-resources-header">
@@ -458,6 +464,16 @@ function renderTeacherQuizzes(data) {
                                         onclick="openQuizResultsFromElement(this)">
                                         View Results
                                     </button>
+                                    <button class="teacher-quiz-action-btn edit"
+                                        data-action="edit-quiz"
+                                        data-quiz-id="${quiz.id}">
+                                        Edit Quiz
+                                    </button>
+                                    <button class="teacher-quiz-action-btn delete"
+                                        data-action="delete-quiz"
+                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}">
+                                        Delete Quiz
+                                    </button>
                                     <button class="teacher-quiz-action-btn integrity"
                                         data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
                                         onclick="openIntegrityModalFromElement(this)">
@@ -527,6 +543,26 @@ function renderTeacherQuizzes(data) {
                 </div>
                 <div class="teacher-modal-footer" id="integrityFooter" style="display:none;">
                     <button onclick="closeIntegrityModal()" class="teacher-modal-cancel">Dismiss</button>
+                </div>
+            </div>
+        </div>
+        <div id="deleteQuizModal" class="teacher-modal-overlay" style="display:none;">
+            <div class="teacher-modal-box" style="max-width:420px;">
+                <div class="teacher-modal-header">
+                    <span>Delete Quiz</span>
+                    <button data-action="close-delete-quiz" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p style="color:#cbd5e0;line-height:1.6;margin-top:0;">
+                        Delete <strong id="deleteQuizTitle" style="color:#e2e8f0;"></strong>?
+                    </p>
+                    <p style="color:#f85149;font-size:13px;margin-bottom:0;">This action cannot be undone.</p>
+                    <div id="deleteQuizError" style="color:#ff5555;font-size:14px;margin-top:12px;display:none;"></div>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button data-action="close-delete-quiz" class="teacher-modal-cancel">Cancel</button>
+                    <button data-action="confirm-delete-quiz" class="teacher-modal-submit"
+                        style="background:#f85149;color:#fff;">Delete Quiz</button>
                 </div>
             </div>
         </div>`;
@@ -632,6 +668,38 @@ window.selectDesktopQuiz = function(quizId) {
                     <div class="qz-action-card-text">
                         <span>View Results</span>
                         <span class="qz-action-card-sub">See submissions & scores</span>
+                    </div>
+                </button>
+
+                <button class="qz-action-card edit"
+                    data-action="edit-quiz"
+                    data-quiz-id="${quizId}">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>Edit Quiz</span>
+                        <span class="qz-action-card-sub">Update content</span>
+                    </div>
+                </button>
+
+                <button class="qz-action-card delete"
+                    data-action="delete-quiz"
+                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}">
+                    <div class="qz-action-card-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14H6L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                        </svg>
+                    </div>
+                    <div class="qz-action-card-text">
+                        <span>Delete Quiz</span>
+                        <span class="qz-action-card-sub">Remove draft quiz</span>
                     </div>
                 </button>
 
@@ -1338,6 +1406,314 @@ window.toggleCqMultiPage = function(radio) {
 // ─────────────────────────────────────────────
 // INTEGRITY MODAL
 // ─────────────────────────────────────────────
+let activeDeleteQuizId = null;
+
+function getQuizFormTarget() {
+    const apiArea = document.getElementById('api-content-area');
+    const panel = document.getElementById('qz-main-panel');
+    return window.innerWidth >= 900 && panel ? panel : apiArea;
+}
+
+function buildEditQuestionHtml(question, index, locked) {
+    const choices = question.choices && question.choices.length ? question.choices : [
+        { id: 0, choice_text: '', is_correct: 1 },
+        { id: 0, choice_text: '', is_correct: 0 }
+    ];
+    const disabled = locked ? 'disabled' : '';
+    let choicesHtml = '';
+
+    choices.forEach((choice, choiceIndex) => {
+        choicesHtml += `
+            <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                <input type="hidden" name="choice_id[${index}][]" value="${escapeHtml(choice.id || 0)}">
+                <input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${disabled}
+                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">
+                <input type="text" name="choices[${index}][]" class="teacher-modal-input"
+                    value="${escapeHtml(choice.choice_text || '')}" placeholder="Choice ${choiceIndex + 1}" ${disabled}
+                    style="margin:0;">
+                ${!locked && choices.length > 2 ? `<button type="button" data-action="remove-edit-choice"
+                    style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;border-radius:6px;padding:7px 9px;cursor:pointer;">Remove</button>` : ''}
+            </div>`;
+    });
+
+    return `
+        <div class="eq-question" data-question-index="${index}"
+            style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <span style="font-size:15px;font-weight:800;color:#4fd1c5;">Question ${index + 1}</span>
+                ${!locked ? `<button type="button" data-action="remove-edit-question"
+                    style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Remove</button>` : ''}
+            </div>
+            <input type="hidden" name="question_id[]" value="${escapeHtml(question.id || 0)}">
+            <input type="hidden" name="remove_image[]" value="0">
+            <label class="teacher-modal-label">Question Text *</label>
+            <input type="text" name="question[]" class="teacher-modal-input" value="${escapeHtml(question.question_text || '')}" ${disabled} required>
+            <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
+            ${question.image_path ? `<div style="font-size:12px;color:#8b949e;margin-bottom:8px;">Current image: ${escapeHtml(question.image_path)}</div>` : ''}
+            ${question.image_path && !locked ? `<label style="display:flex;align-items:center;gap:8px;color:#c9d1d9;font-size:13px;margin-bottom:8px;">
+                <input type="checkbox" data-action="toggle-remove-image" style="accent-color:#4fd1c5;"> Remove current image
+            </label>` : ''}
+            <input type="file" name="question_images[]" accept="image/*" ${disabled}
+                style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
+            <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
+            <div class="eq-choices">${choicesHtml}</div>
+            ${!locked ? `<button type="button" data-action="add-edit-choice"
+                style="margin-top:2px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Choice</button>` : ''}
+            <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
+            <input type="number" name="points[]" min="1" value="${escapeHtml(question.points || 1)}" class="teacher-modal-input" ${disabled}
+                style="max-width:100px;">
+        </div>`;
+}
+
+function refreshEditQuestionIndexes() {
+    document.querySelectorAll('#editQuestionsContainer .eq-question').forEach((questionEl, index) => {
+        questionEl.dataset.questionIndex = index;
+        const title = questionEl.querySelector('span');
+        if (title) title.textContent = `Question ${index + 1}`;
+        questionEl.querySelectorAll('.eq-choice-row').forEach((choiceEl, choiceIndex) => {
+            const idInput = choiceEl.querySelector('input[type="hidden"]');
+            const radio = choiceEl.querySelector('input[type="radio"]');
+            const text = choiceEl.querySelector('input[type="text"]');
+            if (idInput) idInput.name = `choice_id[${index}][]`;
+            if (radio) {
+                radio.name = `correct_choice[${index}]`;
+                radio.value = choiceIndex;
+            }
+            if (text) {
+                text.name = `choices[${index}][]`;
+                text.placeholder = `Choice ${choiceIndex + 1}`;
+            }
+        });
+    });
+}
+
+window.openEditQuiz = async function(quizId) {
+    const loader = document.getElementById('loaderOverlay');
+    const target = getQuizFormTarget();
+    const panel = document.getElementById('qz-main-panel');
+    const isDesktop = target === panel;
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        const res = await fetch(`api/teacher/get_quiz_edit_data.php?quiz_id=${quizId}`, {
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message || 'Failed to load quiz.');
+
+        const quiz = data.data.quiz;
+        const locked = data.data.has_attempts;
+        const statusOptions = ['Scheduled', 'Open', 'Closed'].map(status =>
+            `<option value="${status}" ${quiz.status === status ? 'selected' : ''}>${status}</option>`
+        ).join('');
+        const layoutDisabled = locked ? 'disabled' : '';
+        const questionsHtml = (data.data.questions || []).map((question, index) => buildEditQuestionHtml(question, index, locked)).join('');
+
+        target.innerHTML = `
+            <div style="max-width:${isDesktop ? '620px' : '760px'};margin:0 auto;padding:${isDesktop ? '20px 32px 32px' : '0'};">
+                <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:0 0 20px;font-weight:800;">Edit Quiz</h2>
+                ${locked ? `<div style="background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;line-height:1.5;">${escapeHtml(data.data.locked_message)}</div>` : ''}
+                <form id="editQuizForm" enctype="multipart/form-data">
+                    <input type="hidden" name="quiz_id" value="${escapeHtml(quiz.id)}">
+                    <label class="teacher-modal-label">Quiz Title *</label>
+                    <input type="text" name="quiz_title" class="teacher-modal-input" value="${escapeHtml(quiz.title)}" required>
+                    <div style="font-size:12px;color:#8b949e;margin:8px 0 14px;">Class: ${escapeHtml(quiz.class_name)}</div>
+                    <label class="teacher-modal-label">Duration (minutes) *</label>
+                    <input type="number" name="duration" class="teacher-modal-input" min="0" max="180" value="${escapeHtml(quiz.duration)}" required style="max-width:160px;">
+                    <label class="teacher-modal-label">Attempt Limit</label>
+                    <input type="number" name="attempt_limit" class="teacher-modal-input" min="0" value="${escapeHtml(quiz.attempt_limit)}" style="max-width:160px;">
+                    <label class="teacher-modal-label">Start Time *</label>
+                    <input type="datetime-local" name="start_time" class="teacher-modal-input" value="${escapeHtml(quiz.start_time_local)}" required>
+                    <label class="teacher-modal-label">Quiz Status</label>
+                    <select name="status" class="teacher-modal-input">${statusOptions}</select>
+                    <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;margin-top:16px;cursor:pointer;">
+                        <input type="checkbox" name="is_summative" value="1" id="eqSummative" ${quiz.is_summative == 1 ? 'checked' : ''}
+                            style="width:18px;height:18px;accent-color:#4fd1c5;">
+                        Counts toward official term mark
+                    </label>
+                    <div id="eqWeightContainer" style="display:${quiz.is_summative == 1 ? 'block' : 'none'};margin-left:28px;">
+                        <label class="teacher-modal-label">Weight % of term mark</label>
+                        <input type="number" name="weight_percent" id="eqWeight" class="teacher-modal-input" min="0" max="100" step="0.1"
+                            value="${escapeHtml(quiz.weight_percent ?? '')}" style="max-width:150px;">
+                    </div>
+                    <label class="teacher-modal-label" style="margin-top:18px;">Quiz Layout Mode</label>
+                    <select name="layout_mode" class="teacher-modal-input" ${layoutDisabled}>
+                        <option value="single_page" ${quiz.layout_mode === 'single_page' ? 'selected' : ''}>Single Page</option>
+                        <option value="multi_page" ${quiz.layout_mode === 'multi_page' ? 'selected' : ''}>Multi-Page</option>
+                    </select>
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                        <label style="display:flex;gap:10px;color:#c9d1d9;font-size:13px;">
+                            <input type="checkbox" name="shuffle_questions" value="1" ${quiz.shuffle_questions == 1 ? 'checked' : ''} ${layoutDisabled}
+                                style="width:16px;height:16px;accent-color:#4fd1c5;"> Shuffle Questions
+                        </label>
+                        <label style="display:flex;gap:10px;color:#c9d1d9;font-size:13px;">
+                            <input type="checkbox" name="is_linear" value="1" ${quiz.is_linear == 1 ? 'checked' : ''} ${layoutDisabled}
+                                style="width:16px;height:16px;accent-color:#4fd1c5;"> Linear Progression
+                        </label>
+                    </div>
+                    <label class="teacher-modal-label" style="margin-top:18px;">Questions *</label>
+                    <div id="editQuestionsContainer">${questionsHtml}</div>
+                    ${!locked ? `<button type="button" data-action="add-edit-question"
+                        style="width:100%;margin-top:8px;margin-bottom:16px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;">+ Add Question</button>` : ''}
+                    <div id="eqError" style="color:#ff5555;font-size:14px;margin-top:8px;display:none;"></div>
+                    <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;">
+                        <button type="button" data-action="cancel-edit-quiz" class="teacher-modal-cancel" style="flex:1;padding:13px;">Cancel</button>
+                        <button type="submit" class="teacher-modal-submit" id="eqSubmitBtn" style="flex:2;padding:13px;font-size:14px;">Save Quiz</button>
+                    </div>
+                </form>
+            </div>`;
+
+        document.getElementById('editQuizForm').addEventListener('submit', submitEditQuiz);
+        document.getElementById('eqSummative').addEventListener('change', function() {
+            const weightContainer = document.getElementById('eqWeightContainer');
+            if (weightContainer) weightContainer.style.display = this.checked ? 'block' : 'none';
+            if (!this.checked) document.getElementById('eqWeight').value = '';
+        });
+    } catch (e) {
+        if (target) target.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">${escapeHtml(e.message || 'Error loading quiz.')}</p>`;
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
+};
+
+async function submitEditQuiz(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const errorDiv = document.getElementById('eqError');
+    const submitBtn = document.getElementById('eqSubmitBtn');
+    const loader = document.getElementById('loaderOverlay');
+    errorDiv.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        refreshEditQuestionIndexes();
+        const res = await fetch('api/teacher/edit_quiz.php', {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': getCsrfToken() },
+            body: new FormData(form)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            window.teacherQuizzesCache = null;
+            fetchTeacherQuizzes();
+            if (data.data?.message) alert(data.data.message);
+        } else {
+            errorDiv.textContent = data.message || 'Failed to save quiz.';
+            errorDiv.style.display = 'block';
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Something went wrong. Please try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Quiz';
+        if (loader) loader.style.display = 'none';
+    }
+}
+
+window.openDeleteQuizModal = function(quizId, quizTitle) {
+    activeDeleteQuizId = quizId;
+    const modal = document.getElementById('deleteQuizModal');
+    const title = document.getElementById('deleteQuizTitle');
+    const error = document.getElementById('deleteQuizError');
+    if (title) title.textContent = quizTitle;
+    if (error) error.style.display = 'none';
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeDeleteQuizModal = function() {
+    const modal = document.getElementById('deleteQuizModal');
+    if (modal) modal.style.display = 'none';
+    activeDeleteQuizId = null;
+};
+
+window.confirmDeleteQuiz = async function() {
+    if (!activeDeleteQuizId) return;
+    const error = document.getElementById('deleteQuizError');
+    const loader = document.getElementById('loaderOverlay');
+    if (error) error.style.display = 'none';
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        const res = await fetch('api/teacher/delete_quiz.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+            body: JSON.stringify({ quiz_id: activeDeleteQuizId })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            const row = document.querySelector(`.teacher-quiz-card[data-quiz-id="${activeDeleteQuizId}"]`);
+            if (row) row.remove();
+            window.teacherQuizzesCache = null;
+            closeDeleteQuizModal();
+            if (document.getElementById('qz-main-panel')) fetchTeacherQuizzes();
+        } else if (error) {
+            error.textContent = data.message || 'Failed to delete quiz.';
+            error.style.display = 'block';
+        }
+    } catch (e) {
+        if (error) {
+            error.textContent = 'Connection error.';
+            error.style.display = 'block';
+        }
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
+};
+
+document.addEventListener('click', function(e) {
+    const actionEl = e.target.closest('[data-action]');
+    if (!actionEl) return;
+    const action = actionEl.dataset.action;
+
+    if (action === 'edit-quiz') {
+        openEditQuiz(parseInt(actionEl.dataset.quizId, 10));
+    } else if (action === 'delete-quiz') {
+        openDeleteQuizModal(parseInt(actionEl.dataset.quizId, 10), actionEl.dataset.quizTitle || '');
+    } else if (action === 'close-delete-quiz') {
+        closeDeleteQuizModal();
+    } else if (action === 'confirm-delete-quiz') {
+        confirmDeleteQuiz();
+    } else if (action === 'cancel-edit-quiz') {
+        fetchTeacherQuizzes();
+    } else if (action === 'add-edit-question') {
+        const container = document.getElementById('editQuestionsContainer');
+        const index = container ? container.querySelectorAll('.eq-question').length : 0;
+        if (container) {
+            container.insertAdjacentHTML('beforeend', buildEditQuestionHtml({ id: 0, question_text: '', points: 1, choices: [] }, index, false));
+            refreshEditQuestionIndexes();
+        }
+    } else if (action === 'remove-edit-question') {
+        const question = actionEl.closest('.eq-question');
+        if (question) question.remove();
+        refreshEditQuestionIndexes();
+    } else if (action === 'add-edit-choice') {
+        const question = actionEl.closest('.eq-question');
+        const choices = question ? question.querySelector('.eq-choices') : null;
+        if (choices) {
+            choices.insertAdjacentHTML('beforeend', `
+                <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                    <input type="hidden" name="choice_id[0][]" value="0">
+                    <input type="radio" name="correct_choice[0]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">
+                    <input type="text" name="choices[0][]" class="teacher-modal-input" value="" placeholder="Choice" style="margin:0;">
+                    <button type="button" data-action="remove-edit-choice"
+                        style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;border-radius:6px;padding:7px 9px;cursor:pointer;">Remove</button>
+                </div>`);
+            refreshEditQuestionIndexes();
+        }
+    } else if (action === 'remove-edit-choice') {
+        const row = actionEl.closest('.eq-choice-row');
+        if (row) row.remove();
+        refreshEditQuestionIndexes();
+    } else if (action === 'toggle-remove-image') {
+        const question = actionEl.closest('.eq-question');
+        const removeInput = question ? question.querySelector('input[name="remove_image[]"]') : null;
+        if (removeInput) removeInput.value = actionEl.checked ? '1' : '0';
+    }
+});
+
 let activeIntegrityQuizId = null;
 
 window.openIntegrityModal = function(quizId, quizTitle) {
