@@ -689,6 +689,9 @@ function renderOpenEndedGrades(data, target, isPanel) {
         results.forEach(learner => {
             const openQuestions = learner.open_ended || [];
             const pendingCount = openQuestions.filter(question => !question.grade).length;
+            const scoreDisplay = data.has_open_ended == 1 && !fullyGraded
+                ? '***'
+                : escapeHtml(learner.score ?? '0');
             const badge = learner.is_fully_graded
                 ? `<span style="background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.35);color:#7ee787;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Fully Graded</span>`
                 : `<span style="background:rgba(242,140,56,0.12);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
@@ -698,7 +701,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
                     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;">
                         <div>
                             <div style="color:#e2e8f0;font-weight:800;">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
-                            <div style="color:#8b949e;font-size:12px;margin-top:3px;">Score: ${escapeHtml(learner.score ?? '0')} / ${escapeHtml(learner.total ?? '0')}</div>
+                            <div style="color:#8b949e;font-size:12px;margin-top:3px;">Score: ${scoreDisplay} / ${escapeHtml(learner.total ?? '0')}</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
                             ${badge}

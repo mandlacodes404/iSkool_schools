@@ -1097,11 +1097,11 @@ window.removeTeacherProfilePicture = function() {
 
 <script src="assets/js/teacher/dashboard.js?v=4.8"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=3.2"></script>
+<script src="assets/js/teacher/quizzes.js?v=3.3"></script>
 <script src="assets/js/teacher/announcements.js?v=2.6"></script>
 <script src="assets/js/teacher/evaluations.js?v=2.0"></script>
 <script src="assets/js/teacher/resources.js?v=1.8"></script>
-<script src="assets/js/teacher/grades.js?v=1.7"></script>
+<script src="assets/js/teacher/grades.js?v=1.8"></script>
 <script src="assets/js/teacher/assignments.js?v=1.9"></script>
 <script src="assets/js/teacher/discussions.js?v=1.1"></script>
 <script src="assets/js/teacher/sbo.js?v=1.9"></script>

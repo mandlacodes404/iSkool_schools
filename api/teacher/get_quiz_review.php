@@ -18,6 +18,7 @@ if ($result_id <= 0) {
 $stmt = $conn->prepare("
     SELECT
         r.id AS result_id, r.score, r.total, r.submitted_at, r.user_email, r.attempt_id,
+        u.name AS learner_name, u.surname AS learner_surname,
         q.id AS quiz_id, q.title, q.publish_marks,
         qq.id AS q_id, qq.question_text, qq.image_path, qq.points, qq.question_type,
         c.id AS choice_id, c.choice_text, c.is_correct,
@@ -25,6 +26,7 @@ $stmt = $conn->prepare("
         og.score AS open_score, og.feedback AS open_feedback, og.graded_by, og.graded_at
     FROM quiz_results r
     JOIN quizzes q ON r.quiz_id = q.id
+    LEFT JOIN users u ON u.email = r.user_email
     JOIN quizquestions qq ON q.id = qq.quiz_id
     LEFT JOIN choices c ON qq.id = c.question_id
     LEFT JOIN user_answers ua
@@ -82,12 +84,18 @@ foreach ($rows as $row) {
 $percentage = $quizInfo['total'] > 0
     ? round($quizInfo['score'] / $quizInfo['total'] * 100)
     : 0;
+$learnerName = trim(($quizInfo['learner_name'] ?? '') . ' ' . ($quizInfo['learner_surname'] ?? ''));
+if ($learnerName === '') {
+    $learnerName = $quizInfo['user_email'];
+}
 
 echo json_encode([
     'status' => 'success',
     'data' => [
         'quiz_id'     => (int)$quizInfo['quiz_id'],
         'title'       => $quizInfo['title'],
+        'user_email'   => $quizInfo['user_email'],
+        'learner_name' => $learnerName,
         'score'       => $quizInfo['score'],
         'total'       => $quizInfo['total'],
         'percentage'  => $percentage,
@@ -96,6 +104,8 @@ echo json_encode([
     ],
     'quiz_id'     => (int)$quizInfo['quiz_id'],
     'title'       => $quizInfo['title'],
+    'user_email'   => $quizInfo['user_email'],
+    'learner_name' => $learnerName,
     'score'       => $quizInfo['score'],
     'total'       => $quizInfo['total'],
     'percentage'  => $percentage,

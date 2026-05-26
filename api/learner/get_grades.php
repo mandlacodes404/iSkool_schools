@@ -12,7 +12,7 @@ header('Content-Type: application/json');
 
 // ── SECURITY ────────────────────────────────────────────────────────────────
 if (!isset($_SESSION['email'])) {
-    echo json_encode(['error' => 'Unauthorized']); exit();
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized', 'error' => 'Unauthorized']); exit();
 }
 
 $viewerEmail = $_SESSION['email'];
@@ -35,16 +35,16 @@ if ($viewerRole === 'parent' && isset($_GET['learner'])) {
 
 // Block invalid access
 if ($viewerRole === 'learner' && $targetEmail !== $viewerEmail) {
-    echo json_encode(['error' => 'Forbidden']); exit();
+    echo json_encode(['status' => 'error', 'message' => 'Forbidden', 'error' => 'Forbidden']); exit();
 }
 if (!in_array($viewerRole, ['learner', 'parent'])) {
-    echo json_encode(['error' => 'Forbidden']); exit();
+    echo json_encode(['status' => 'error', 'message' => 'Forbidden', 'error' => 'Forbidden']); exit();
 }
 
 // ── ACADEMIC YEAR ────────────────────────────────────────────────────────────
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
-    echo json_encode(['error' => 'No active academic year']); exit();
+    echo json_encode(['status' => 'error', 'message' => 'No active academic year', 'error' => 'No active academic year']); exit();
 }
 $current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
 
@@ -63,9 +63,11 @@ $sql = "
         r.total,
         r.submitted_at,
         r.time_taken,
+        r.attempt_id,
         q.id          AS quiz_id,
         q.title       AS quiz_title,
         q.duration,
+        q.has_open_ended,
         q.publish_marks,
         q.is_summative,
         q.weight_percent,
@@ -74,7 +76,37 @@ $sql = "
         q.created_by,
         COALESCE(ts.subject_name,
             CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Unknown'))
-        ) AS display_group
+        ) AS display_group,
+        CASE
+            WHEN q.has_open_ended = 0 THEN 1
+            WHEN NOT EXISTS (
+                SELECT 1
+                FROM quizquestions qq2
+                LEFT JOIN open_ended_grades og2
+                    ON og2.question_id = qq2.id
+                    AND og2.attempt_id = r.attempt_id
+                WHERE qq2.quiz_id = q.id
+                  AND qq2.question_type = 'open_ended'
+                  AND (og2.graded_by IS NULL OR og2.graded_by = '')
+            ) THEN 1
+            ELSE 0
+        END AS is_fully_graded,
+        CASE
+            WHEN q.has_open_ended = 0 THEN 1
+            WHEN NOT EXISTS (
+                SELECT 1
+                FROM quiz_results qr2
+                JOIN quizquestions qq3
+                    ON qq3.quiz_id = qr2.quiz_id
+                    AND qq3.question_type = 'open_ended'
+                LEFT JOIN open_ended_grades og3
+                    ON og3.question_id = qq3.id
+                    AND og3.attempt_id = qr2.attempt_id
+                WHERE qr2.quiz_id = q.id
+                  AND (og3.graded_by IS NULL OR og3.graded_by = '')
+            ) THEN 1
+            ELSE 0
+        END AS quiz_fully_graded
     FROM quiz_results r
     JOIN quizzes q ON r.quiz_id = q.id
     JOIN class_students cs
@@ -116,7 +148,10 @@ foreach ($rows as $row) {
         'total'          => (int)$row['total'],
         'duration'       => (int)$row['duration'],
         'time_taken'     => (int)$row['time_taken'],
+        'has_open_ended' => (int)$row['has_open_ended'],
         'publish_marks'  => (int)$row['publish_marks'],
+        'is_fully_graded' => (int)$row['is_fully_graded'] === 1,
+        'quiz_fully_graded' => (int)$row['quiz_fully_graded'] === 1,
         'is_summative'   => (int)$row['is_summative'],
         'weight_percent' => (float)$row['weight_percent'],
         'term_number'    => (int)$row['term_number'],
@@ -134,6 +169,13 @@ foreach ($grouped as $groupName => $quizzes) {
 }
 
 echo json_encode([
+    'status'              => 'success',
+    'data'                => [
+        'groups'              => $output,
+        'current_term'        => $current_global_term,
+        'target_email'        => $targetEmail,
+        'viewer_role'         => $viewerRole,
+    ],
     'groups'              => $output,
     'current_term'        => $current_global_term,
     'target_email'        => $targetEmail,

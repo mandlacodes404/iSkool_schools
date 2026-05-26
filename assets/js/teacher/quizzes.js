@@ -894,6 +894,7 @@ function renderQuizResults(data) {
     const target = panel || apiArea;
     const backFn = panel ? `selectDesktopQuiz(${window._activeDesktopQuizId})` : 'fetchTeacherQuizzes()';
     const backLabel = panel ? 'Back to Quiz' : 'Back to Quizzes';
+    const marksPublished = data.publish_marks == 1;
 
     let html = `
         <div class="teacher-resources-header" style="${panel ? 'padding:20px 32px 0;' : ''}">
@@ -927,14 +928,19 @@ function renderQuizResults(data) {
                     <tbody>`;
 
         data.results.forEach(r => {
-            const perc = r.percentage !== 'N/A'
+            const score = marksPublished
+                ? `${escapeHtml(r.score)} / ${escapeHtml(r.total)}`
+                : '***';
+            const perc = !marksPublished
+                ? '<span style="color:#c9d1d9;font-weight:800;">***</span>'
+                : r.percentage !== 'N/A'
                 ? `<span class="teacher-grade-badge ${getGradeBadgeClass(r.percentage)}">${escapeHtml(r.percentage)}</span>`
                 : '<span style="color:#555e6a;">N/A</span>';
 
             html += `
                 <tr>
                     <td>${escapeHtml(r.name)}</td>
-                    <td>${escapeHtml(r.score)} / ${escapeHtml(r.total)}</td>
+                    <td>${score}</td>
                     <td>${perc}</td>
                     <td>${escapeHtml(r.time_taken)}</td>
                     <td>${escapeHtml(r.submitted_at)}</td>
@@ -991,6 +997,9 @@ function renderQuizReview(data) {
     const panel = document.getElementById('qz-main-panel');
     const target = panel || apiArea;
     const padStyle = panel ? 'padding:20px 32px 28px;' : '';
+    const learnerLabel = data.learner_name
+        ? `${data.learner_name}'s Answer`
+        : 'Learner Answer';
 
     let html = `
         <div class="teacher-resources-header" style="${panel ? 'padding:20px 32px 0;' : ''}">
@@ -1081,7 +1090,7 @@ function renderQuizReview(data) {
                 <div class="teacher-review-choice ${cls}">
                     ${icon}
                     <span>${escapeHtml(choice.text)}</span>
-                    ${isSelected ? '<span class="teacher-review-your-answer">Your Answer</span>' : ''}
+                    ${isSelected ? `<span class="teacher-review-your-answer">${escapeHtml(learnerLabel)}</span>` : ''}
                 </div>`;
         });
 

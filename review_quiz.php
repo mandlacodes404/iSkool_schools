@@ -27,17 +27,24 @@ $userRole = $_SESSION['role'] ?? 'learner';
 // 2. Optimized Data Fetch (Combined results, quiz info, questions, and choices)
 $stmt = $conn->prepare("
     SELECT 
-        r.score, r.total, r.submitted_at, r.user_email,
+        r.score, r.total, r.submitted_at, r.user_email, r.attempt_id,
         q.id as quiz_id, q.title, q.publish_marks,
-        qq.id AS q_id, qq.question_text, qq.image_path, qq.points,
+        qq.id AS q_id, qq.question_text, qq.image_path, qq.points, qq.question_type,
         c.id AS choice_id, c.choice_text, c.is_correct,
-        ua.selected_choice_id
+        ua.selected_choice_id, ua.answer_text,
+        og.score AS open_score, og.feedback AS open_feedback, og.graded_by, og.graded_at
     FROM quiz_results r
     JOIN quizzes q ON r.quiz_id = q.id
     JOIN quizquestions qq ON q.id = qq.quiz_id
-    JOIN choices c ON qq.id = c.question_id
-    LEFT JOIN user_answers ua ON ua.question_id = qq.id AND ua.result_id = r.id
+    LEFT JOIN choices c ON qq.id = c.question_id
+    LEFT JOIN user_answers ua
+        ON ua.question_id = qq.id
+        AND (ua.result_id = r.id OR ua.attempt_id = r.attempt_id)
+    LEFT JOIN open_ended_grades og
+        ON og.question_id = qq.id
+        AND og.attempt_id = r.attempt_id
     WHERE r.id = ?
+    ORDER BY qq.id ASC, c.id ASC
 ");
 $stmt->bind_param("i", $resultId);
 $stmt->execute();
@@ -55,15 +62,25 @@ while ($row = $res->fetch_assoc()) {
             'text' => $row['question_text'],
             'image' => $row['image_path'],
             'points' => $row['points'],
+            'question_type' => $row['question_type'] ?? 'mcq',
             'selected' => $row['selected_choice_id'],
+            'answer_text' => $row['answer_text'] ?? '',
+            'grade' => !empty($row['graded_by']) ? [
+                'score' => $row['open_score'],
+                'feedback' => $row['open_feedback'],
+                'graded_by' => $row['graded_by'],
+                'graded_at' => $row['graded_at']
+            ] : null,
             'choices' => []
         ];
     }
-    $questions[$qid]['choices'][] = [
-        'id' => $row['choice_id'],
-        'text' => $row['choice_text'],
-        'is_correct' => $row['is_correct']
-    ];
+    if ($row['choice_id'] !== null) {
+        $questions[$qid]['choices'][] = [
+            'id' => $row['choice_id'],
+            'text' => $row['choice_text'],
+            'is_correct' => $row['is_correct']
+        ];
+    }
 }
 $stmt->close();
 
@@ -168,6 +185,34 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
         .badge-user {
             margin-left: auto; font-size: 11px; background: rgba(255,255,255,0.1);
             padding: 2px 8px; border-radius: 10px; opacity: 0.8;
+        }
+
+        .open-answer-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        .open-grade-box {
+            background: rgba(39,174,96,0.12);
+            border: 1px solid rgba(39,174,96,0.28);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            color: #d8f5df;
+        }
+
+        .open-pending-box {
+            background: rgba(242,140,56,0.1);
+            border: 1px solid rgba(242,140,56,0.28);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            color: #f5c38b;
         }
 
         .back-btn {
@@ -385,6 +430,26 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
                 <img src="<?= htmlspecialchars($q['image']) ?>" class="q-image" alt="Question Image">
             <?php endif; ?>
 
+            <?php if (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
+                <div class="open-answer-box">
+                    <strong>Your answer:</strong><br>
+                    <?= nl2br(htmlspecialchars($q['answer_text'] !== '' ? $q['answer_text'] : 'No answer submitted.')) ?>
+                </div>
+                <?php if (!empty($q['grade'])): ?>
+                    <div class="open-grade-box">
+                        <strong>Awarded:</strong>
+                        <?= htmlspecialchars((string)$q['grade']['score']) ?> / <?= htmlspecialchars((string)$q['points']) ?>
+                        <?php if (!empty($q['grade']['feedback'])): ?>
+                            <div style="margin-top:8px;">
+                                <strong>Teacher feedback:</strong><br>
+                                <?= nl2br(htmlspecialchars($q['grade']['feedback'])) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="open-pending-box">Awaiting teacher grading.</div>
+                <?php endif; ?>
+            <?php else: ?>
             <div class="choices-list">
                 <?php foreach ($q['choices'] as $choice): 
                     $isSelected = ($choice['id'] == $q['selected']);
@@ -411,6 +476,7 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
                     </div>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         </div>
     <?php endforeach; ?>
 

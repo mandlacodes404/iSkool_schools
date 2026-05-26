@@ -81,9 +81,12 @@ async function loadGradesData() {
         window.learnerGradesCachePromise = fetch('api/learner/get_grades.php')
             .then(res => res.json())
             .then(data => {
-                if (data.error) throw new Error(data.error);
-                window.learnerGradesCache = data;
-                return data;
+                if (data.status === 'error' || data.error) throw new Error(data.message || data.error);
+                const payload = data.status === 'success' && data.data
+                    ? Object.assign({}, data, data.data)
+                    : data;
+                window.learnerGradesCache = payload;
+                return payload;
             })
             .finally(() => {
                 window.learnerGradesCachePromise = null;
@@ -372,6 +375,10 @@ function renderGrades(data) {
     .quiz-score-pill.mid  { background: rgba(79,209,197,0.15); color: #4fd1c5; }
     .quiz-score-pill.low  { background: rgba(248,81,73,0.15); color: #f85149; }
     .quiz-score-pill.hidden-score { background: rgba(255,255,255,0.05); color: #555e6a; }
+    .quiz-grading-status { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:800; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+    .quiz-grading-status.pending { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
+    .quiz-grading-status.done { color:#22c55e; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); }
+    .quiz-grading-status.partial { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
     .quiz-expand-btn { background: none; border: none; color: #555e6a; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
     .quiz-expand-btn:hover { color: #4fd1c5; }
     .quiz-expand-btn svg { transition: transform 0.3s ease; }
@@ -817,14 +824,40 @@ window.gradesSearchDesktop = function (val) {
 // ─────────────────────────────────────────────────────────────────────────────
 // BUILD QUIZ LIST
 // ─────────────────────────────────────────────────────────────────────────────
+function buildOpenEndedGradingStatus(q) {
+    if (q.has_open_ended != 1) {
+        return { badge: '', details: '' };
+    }
+
+    if (q.publish_marks != 1) {
+        return {
+            badge: '<span class="quiz-grading-status pending">Pending</span>',
+            details: '<p><strong>Grading Status:</strong> Pending - awaiting teacher grading.</p>'
+        };
+    }
+
+    if (q.quiz_fully_graded === true || q.is_fully_graded === true) {
+        return {
+            badge: '<span class="quiz-grading-status done">Fully Graded</span>',
+            details: '<p><strong>Grading Status:</strong> <span style="color:#22c55e;font-weight:800;">Fully Graded</span></p>'
+        };
+    }
+
+    return {
+        badge: '<span class="quiz-grading-status partial">Partially Graded</span>',
+        details: '<p><strong>Grading Status:</strong> <span style="color:#f5c38b;font-weight:800;">Partially Graded</span></p>'
+    };
+}
+
 function buildQuizList(quizzes, gi) {
     if (!quizzes || quizzes.length === 0) return '<p class="no-summative">No quizzes found.</p>';
 
     return quizzes.map((q, qi) => {
-        const published  = q.publish_marks === 1;
+        const published  = q.publish_marks == 1;
         const pct        = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
         const pillClass  = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
         const pillText   = published ? `${pct}%` : 'Pending';
+        const gradingStatus = buildOpenEndedGradingStatus(q);
         const titleHtml  = published
             ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
             : escHtml(q.quiz_title);
@@ -857,6 +890,7 @@ function buildQuizList(quizzes, gi) {
                 ${published ? `
                     <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
                 ` : `<p style="color:#555e6a;font-style:italic;">Marks not published yet.</p>`}
+                ${gradingStatus.details}
                 <p style="margin-top:8px;"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
                 <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
                 <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
@@ -872,6 +906,7 @@ function buildQuizList(quizzes, gi) {
                 <div class="quiz-row-title">
                     ${titleHtml}
                     ${summBadge}
+                    ${gradingStatus.badge}
                 </div>
                 <span class="quiz-score-pill ${pillClass}">${pillText}</span>
                 <button class="quiz-expand-btn" id="qexp-${gi}-${qi}" type="button"
