@@ -2,7 +2,7 @@
 /**
  * iSkool - Learner Dashboard
  *
- * Main interface for logged in learners. Provides navigation to all learner features,
+ * Main interface for logged-in learners. Provides navigation to all learner features,
  * including quizzes, assignments, grades, resources, announcements, and teacher evaluations.
  * Features:
  * - Responsive sidebar with collapsible mode and mobile support
