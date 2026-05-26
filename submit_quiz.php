@@ -250,7 +250,9 @@ try {
 }
 
 // 9. Render Final Page
-if ($publishMarks === 0) {
+if ($hasOpenEnded === 1) {
+    render_page("open_pending", $quizTitle, 0, $totalPointsAvailable, $timeTaken);
+} elseif ($publishMarks === 0) {
     render_page("pending", $quizTitle, $earnedScore, $totalPointsAvailable, $timeTaken);
 } else {
     render_page("result", $quizTitle, $earnedScore, $totalPointsAvailable, $timeTaken);
@@ -281,7 +283,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
     <title>
         <?php
         if ($type === 'closed')  echo 'Quiz Closed';
-        elseif ($type === 'pending') echo 'Submitted!';
+        elseif ($type === 'pending' || $type === 'open_pending') echo 'Submitted!';
         else echo 'Quiz Result';
         ?>
     </title>
@@ -624,7 +626,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
     </div>
 </div>
 
-<?php elseif ($type === 'pending'): ?>
+<?php elseif ($type === 'pending' || $type === 'open_pending'): ?>
 <!-- ═══════════════════════════════════════════════
      PENDING — marks not published yet
 ═══════════════════════════════════════════════ -->
@@ -645,7 +647,11 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
         </div>
         <div class="state-title">Marks Pending</div>
         <div class="state-msg">
+            <?php if ($type === 'open_pending'): ?>
+            Your responses have been submitted. Your teacher will review and release your marks once all responses have been graded.
+            <?php else: ?>
             Your answers have been saved. Your teacher will publish the results soon.
+            <?php endif; ?>
         </div>
         <?php if ($timeStr): ?>
         <div style="font-size:13px;color:var(--muted);">Time taken: <strong style="color:var(--text);"><?= $timeStr ?></strong></div>

@@ -19,7 +19,7 @@ if ($quiz_id <= 0) {
 }
 
 // Verify ownership
-$titleStmt = $conn->prepare("SELECT title, has_open_ended FROM quizzes WHERE id = ? AND created_by = ?");
+$titleStmt = $conn->prepare("SELECT title, has_open_ended, publish_marks FROM quizzes WHERE id = ? AND created_by = ?");
 $titleStmt->bind_param("is", $quiz_id, $_SESSION['email']);
 $titleStmt->execute();
 $quiz = $titleStmt->get_result()->fetch_assoc();
@@ -119,12 +119,14 @@ echo json_encode([
         'quiz_id'    => $quiz_id,
         'quiz_title' => $quiz['title'],
         'has_open_ended' => (int)($quiz['has_open_ended'] ?? 0),
+        'publish_marks' => (int)($quiz['publish_marks'] ?? 0),
         'quiz_fully_graded' => $quiz_fully_graded,
         'results'    => $results
     ],
     'quiz_id'    => $quiz_id,
     'quiz_title' => $quiz['title'],
     'has_open_ended' => (int)($quiz['has_open_ended'] ?? 0),
+    'publish_marks' => (int)($quiz['publish_marks'] ?? 0),
     'quiz_fully_graded' => $quiz_fully_graded,
     'results'    => $results
 ]);

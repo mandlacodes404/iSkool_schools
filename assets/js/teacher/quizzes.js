@@ -972,8 +972,9 @@ window.openQuizReview = async function(resultId, quizTitle) {
 
     try {
         const res  = await fetch(`api/teacher/get_quiz_review.php?result_id=${resultId}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        const payload = await res.json();
+        if (payload.status === 'error' || payload.error) throw new Error(payload.message || payload.error);
+        const data = payload.data || payload;
         renderQuizReview(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
@@ -1020,6 +1021,36 @@ function renderQuizReview(data) {
 
         if (q.image) {
             html += `<img src="${escapeHtml(q.image)}" class="teacher-review-q-image" alt="Question image">`;
+        }
+
+        if ((q.question_type || 'mcq') === 'open_ended') {
+            if (q.grade) {
+                html += `
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-top:12px;">
+                        <div style="color:#8b949e;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Learner Answer</div>
+                        <div style="color:#d8dee9;white-space:pre-wrap;line-height:1.55;">${escapeHtml(q.answer_text || 'No answer submitted.')}</div>
+                    </div>
+                    <div style="background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.25);border-radius:10px;padding:14px;margin-top:10px;">
+                        <div style="color:#7ee787;font-size:13px;font-weight:800;">Awarded: ${escapeHtml(q.grade.score ?? '0')} / ${escapeHtml(q.points)}</div>
+                        ${q.grade.feedback ? `<div style="color:#c9d1d9;font-size:13px;margin-top:8px;white-space:pre-wrap;">${escapeHtml(q.grade.feedback)}</div>` : ''}
+                    </div>`;
+            } else {
+                html += `
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-top:12px;">
+                        <div style="color:#8b949e;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Learner Answer</div>
+                        <div style="color:#d8dee9;white-space:pre-wrap;line-height:1.55;">${escapeHtml(q.answer_text || 'No answer submitted.')}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.3);border-radius:10px;padding:12px;margin-top:10px;">
+                        <span style="color:#f5c38b;font-size:13px;font-weight:800;">Not yet graded</span>
+                        <button type="button" class="teacher-edit-marks-btn" data-action="go-to-open-ended-grade"
+                            data-quiz-id="${escapeHtml(data.quiz_id)}"
+                            data-quiz-title="${escapeHtml(data.title)}">
+                            Go to Grades to mark this response
+                        </button>
+                    </div>`;
+            }
+            html += `</div>`;
+            return;
         }
 
         q.choices.forEach(choice => {
@@ -1123,11 +1154,16 @@ window.openCreateQuiz = async function() {
                     </select>
 
                     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
-                        <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
-                            <input type="checkbox" name="publish_marks" value="1"
-                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
-                            Publish marks immediately after submission
-                        </label>
+                        <div id="cqPublishMarksWrap">
+                            <label id="cqPublishMarksLabel" style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
+                                <input type="checkbox" name="publish_marks" value="1"
+                                    style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
+                                Publish marks immediately after submission
+                            </label>
+                            <div id="cqPublishMarksOpenMessage" style="display:none;background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;">
+                                Marks cannot be auto-released when the quiz contains open-ended questions. You must grade all responses manually before releasing marks.
+                            </div>
+                        </div>
 
                         <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
                             <input type="checkbox" name="is_summative" value="1" id="cqSummative"
@@ -1250,6 +1286,9 @@ window.openCreateQuiz = async function() {
                 errorDiv.textContent = 'Please select a class.';
                 errorDiv.style.display = 'block';
                 return;
+            }
+            if (hasOpenEndedQuestions(form)) {
+                fd.delete('publish_marks');
             }
             fd.set('class_id', classId);
             submitBtn.disabled    = true;
@@ -1401,9 +1440,40 @@ function setQuestionTypeFields(questionEl, questionType) {
 function updateOpenEndedBanner() {
     const banner = document.getElementById('cqOpenEndedBanner') || document.getElementById('eqOpenEndedBanner');
     if (!banner) return;
-    const hasOpenEnded = Array.from(document.querySelectorAll('select[name="question_type[]"]'))
-        .some(select => select.value === 'open_ended');
+    const hasOpenEnded = hasOpenEndedQuestions(document.getElementById('createQuizForm') || document.getElementById('editQuizForm') || document);
     banner.style.display = hasOpenEnded ? 'block' : 'none';
+    updatePublishMarksOpenEndedGate();
+}
+
+function hasOpenEndedQuestions(scope) {
+    return Array.from((scope || document).querySelectorAll('[name="question_type[]"]'))
+        .some(field => field.value === 'open_ended');
+}
+
+function updatePublishMarksOpenEndedGate() {
+    const createForm = document.getElementById('createQuizForm');
+    const editForm = document.getElementById('editQuizForm');
+    const hasOpenEnded = hasOpenEndedQuestions(createForm || editForm || document);
+
+    const createLabel = document.getElementById('cqPublishMarksLabel');
+    const createMessage = document.getElementById('cqPublishMarksOpenMessage');
+    const createCheckbox = createLabel ? createLabel.querySelector('input[name="publish_marks"]') : null;
+    if (createLabel && createMessage) {
+        createLabel.style.display = hasOpenEnded ? 'none' : 'flex';
+        createMessage.style.display = hasOpenEnded ? 'block' : 'none';
+        if (hasOpenEnded && createCheckbox) createCheckbox.checked = false;
+    }
+
+    const editMessage = document.getElementById('eqPublishMarksOpenMessage');
+    if (editMessage) {
+        editMessage.style.display = hasOpenEnded ? 'block' : 'none';
+    }
+    const editLabel = document.getElementById('eqPublishMarksLabel');
+    const editCheckbox = editLabel ? editLabel.querySelector('input[name="publish_marks"]') : null;
+    if (editLabel) {
+        editLabel.style.display = hasOpenEnded ? 'none' : 'flex';
+        if (hasOpenEnded && editCheckbox) editCheckbox.checked = false;
+    }
 }
 
 window.toggleCqWeight = function() {
@@ -1575,6 +1645,9 @@ window.openEditQuiz = async function(quizId) {
                 <div id="eqOpenEndedBanner" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
                     This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
                 </div>
+                <div id="eqPublishMarksOpenMessage" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
+                    Marks cannot be auto-released when the quiz contains open-ended questions. You must grade all responses manually before releasing marks.
+                </div>
                 <form id="editQuizForm" enctype="multipart/form-data">
                     <input type="hidden" name="quiz_id" value="${escapeHtml(quiz.id)}">
                     <label class="teacher-modal-label">Quiz Title *</label>
@@ -1588,6 +1661,13 @@ window.openEditQuiz = async function(quizId) {
                     <input type="datetime-local" name="start_time" class="teacher-modal-input" value="${escapeHtml(quiz.start_time_local)}" required>
                     <label class="teacher-modal-label">Quiz Status</label>
                     <select name="status" class="teacher-modal-input">${statusOptions}</select>
+                    <div id="eqPublishMarksWrap" style="margin-top:16px;">
+                        <label id="eqPublishMarksLabel" style="display:${quiz.has_open_ended == 1 ? 'none' : 'flex'};align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
+                            <input type="checkbox" name="publish_marks" value="1" ${quiz.publish_marks == 1 ? 'checked' : ''}
+                                style="width:18px;height:18px;accent-color:#4fd1c5;">
+                            Publish marks immediately after submission
+                        </label>
+                    </div>
                     <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;margin-top:16px;cursor:pointer;">
                         <input type="checkbox" name="is_summative" value="1" id="eqSummative" ${quiz.is_summative == 1 ? 'checked' : ''}
                             style="width:18px;height:18px;accent-color:#4fd1c5;">
@@ -1626,6 +1706,7 @@ window.openEditQuiz = async function(quizId) {
             </div>`;
 
         document.getElementById('editQuizForm').addEventListener('submit', submitEditQuiz);
+        updatePublishMarksOpenEndedGate();
         document.getElementById('eqSummative').addEventListener('change', function() {
             const weightContainer = document.getElementById('eqWeightContainer');
             if (weightContainer) weightContainer.style.display = this.checked ? 'block' : 'none';
@@ -1777,8 +1858,22 @@ document.addEventListener('click', function(e) {
         const question = actionEl.closest('.eq-question');
         const removeInput = question ? question.querySelector('input[name="remove_image[]"]') : null;
         if (removeInput) removeInput.value = actionEl.checked ? '1' : '0';
+    } else if (action === 'go-to-open-ended-grade') {
+        openGradesForQuizFromReview(parseInt(actionEl.dataset.quizId, 10), actionEl.dataset.quizTitle || '');
     }
 });
+
+async function openGradesForQuizFromReview(quizId, quizTitle) {
+    if (!quizId) return;
+    if (typeof window.fetchTeacherGrades === 'function') {
+        await window.fetchTeacherGrades();
+    }
+    if (typeof window.selectDesktopGradeQuiz === 'function' && window.innerWidth >= 900) {
+        window.selectDesktopGradeQuiz(quizId);
+    } else if (typeof window.openQuizGrades === 'function') {
+        window.openQuizGrades(quizId, quizTitle);
+    }
+}
 
 document.addEventListener('change', function(e) {
     const actionEl = e.target.closest('[data-action="change-question-type"]');

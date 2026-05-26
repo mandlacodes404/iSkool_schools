@@ -654,6 +654,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
     const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
     const pendingLearners = results.filter(row => !row.is_fully_graded).length;
     const releaseDisabled = data.has_open_ended == 1 && !fullyGraded;
+    const marksPublished = data.publish_marks == 1;
     const backButton = isPanel
         ? ''
         : `<button class="teacher-back-btn" data-action="open-ended-back">
@@ -675,7 +676,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
                     <button type="button" class="teacher-modal-submit" data-action="toggle-open-ended-publish" data-quiz-id="${escapeHtml(data.quiz_id)}" ${releaseDisabled ? 'disabled' : ''}
                         title="${releaseDisabled ? 'Grade all open-ended responses before releasing marks.' : ''}"
                         style="padding:9px 12px;font-size:12px;opacity:${releaseDisabled ? '0.55' : '1'};cursor:${releaseDisabled ? 'not-allowed' : 'pointer'};">
-                        Release Marks
+                        ${marksPublished ? 'Unpublish Marks' : 'Release Marks'}
                     </button>
                     ${releaseDisabled ? `<div style="color:#f5c38b;font-size:12px;text-align:right;">Grade all open-ended responses before releasing marks.</div>` : ''}
                     <div id="oeReleaseMessage" style="display:none;font-size:12px;text-align:right;"></div>
@@ -699,8 +700,15 @@ function renderOpenEndedGrades(data, target, isPanel) {
                             <div style="color:#e2e8f0;font-weight:800;">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
                             <div style="color:#8b949e;font-size:12px;margin-top:3px;">Score: ${escapeHtml(learner.score ?? '0')} / ${escapeHtml(learner.total ?? '0')}</div>
                         </div>
-                        ${badge}
-                    </div>`;
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+                            ${badge}
+                            <button type="button" class="teacher-edit-marks-btn" data-action="toggle-open-ended-learner"
+                                data-target-id="oe-learner-${escapeHtml(learner.attempt_id)}">
+                                Grade Responses
+                            </button>
+                        </div>
+                    </div>
+                    <div id="oe-learner-${escapeHtml(learner.attempt_id)}" style="display:none;">`;
 
             openQuestions.forEach(question => {
                 const savedScore = question.grade ? formatOpenEndedScore(question.grade.score) : '';
@@ -726,11 +734,11 @@ function renderOpenEndedGrades(data, target, isPanel) {
                                 Save
                             </button>
                         </div>
-                        ${question.grade ? `<div style="color:#7ee787;font-size:12px;margin-top:8px;">Saved: ${escapeHtml(savedScore || '0')} / ${escapeHtml(question.points)}</div>` : ''}
+                        ${question.grade ? `<div style="color:#7ee787;font-size:12px;margin-top:8px;font-weight:700;">&#10003; Saved: ${escapeHtml(savedScore || '0')} / ${escapeHtml(question.points)}</div>` : ''}
                     </div>`;
             });
 
-            html += `</div>`;
+            html += `</div></div>`;
         });
     }
 
@@ -828,6 +836,13 @@ document.addEventListener('click', function(e) {
         saveOpenEndedGrade(actionEl);
     } else if (actionEl.dataset.action === 'toggle-open-ended-publish') {
         toggleOpenEndedPublish(actionEl);
+    } else if (actionEl.dataset.action === 'toggle-open-ended-learner') {
+        const target = document.getElementById(actionEl.dataset.targetId || '');
+        if (target) {
+            const isHidden = target.style.display === 'none';
+            target.style.display = isHidden ? 'block' : 'none';
+            actionEl.textContent = isHidden ? 'Hide Responses' : 'Grade Responses';
+        }
     } else if (actionEl.dataset.action === 'open-ended-back') {
         fetchTeacherGrades();
     }

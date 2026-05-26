@@ -110,6 +110,7 @@ $attempt_check = filter_var($_POST['attempt_limit'] ?? 1, FILTER_VALIDATE_INT);
 $attempt_limit = $attempt_check === false ? -1 : (int)$attempt_check;
 $start_time = $_POST['start_time'] ?? '';
 $status = $_POST['status'] ?? ($existing_quiz['status'] ?? 'Closed');
+$publish_marks = isset($_POST['publish_marks']) ? 1 : 0;
 $is_summative = isset($_POST['is_summative']) ? 1 : 0;
 $weight_raw = $_POST['weight_percent'] ?? null;
 $weight_check = $is_summative && $weight_raw !== null && $weight_raw !== '' ? filter_var($weight_raw, FILTER_VALIDATE_FLOAT) : null;
@@ -205,16 +206,17 @@ try {
     $updateQuiz = $conn->prepare("
         UPDATE quizzes
         SET title = ?, duration = ?, attempt_limit = ?, start_time = ?, status = ?,
-            is_summative = ?, weight_percent = ?
+            publish_marks = ?, is_summative = ?, weight_percent = ?
         WHERE id = ? AND created_by = ?
     ");
     $updateQuiz->bind_param(
-        "siissidis",
+        "siissiidis",
         $quiz_title,
         $duration,
         $attempt_limit,
         $start_time,
         $status,
+        $publish_marks,
         $is_summative,
         $weight_percent,
         $quiz_id,
@@ -408,8 +410,9 @@ try {
     $has_open_ended = $hasOpenEndedStmt->get_result()->num_rows > 0 ? 1 : 0;
     $hasOpenEndedStmt->close();
 
-    $updateOpenFlag = $conn->prepare("UPDATE quizzes SET has_open_ended = ? WHERE id = ? AND created_by = ?");
-    $updateOpenFlag->bind_param("iis", $has_open_ended, $quiz_id, $email);
+    $forced_publish_marks = $has_open_ended === 1 ? 0 : $publish_marks;
+    $updateOpenFlag = $conn->prepare("UPDATE quizzes SET has_open_ended = ?, publish_marks = ? WHERE id = ? AND created_by = ?");
+    $updateOpenFlag->bind_param("iiis", $has_open_ended, $forced_publish_marks, $quiz_id, $email);
     if (!$updateOpenFlag->execute()) {
         throw new RuntimeException("Open-ended flag update failed: " . $updateOpenFlag->error);
     }

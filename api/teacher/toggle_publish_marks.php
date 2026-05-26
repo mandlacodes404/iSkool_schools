@@ -40,9 +40,9 @@ $newPublish = $currentPublish ? 0 : 1;
 
 if ($newPublish === 1 && (int)$hasOpenEnded === 1) {
     $ungradedStmt = $conn->prepare("
-        SELECT COUNT(*) AS ungraded_count
+        SELECT COUNT(DISTINCT user_email) AS ungraded_count
         FROM (
-            SELECT qa.attempt_id
+            SELECT qa.attempt_id, qa.user_email
             FROM quiz_attempts qa
             INNER JOIN quizquestions qq
                 ON qq.quiz_id = qa.quiz_id

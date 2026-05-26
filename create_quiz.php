@@ -182,6 +182,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+    if ($has_open_ended === 1) {
+        $publish_marks = 0;
+    }
+
     $validatedImages = [];
     foreach ($_FILES['question_images']['name'] ?? [] as $i => $unused) {
         if ($_FILES['question_images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
@@ -729,6 +733,9 @@ function getCsrfToken() {
       <input type="checkbox" name="publish_marks" value="1" id="publishMarksCheckbox" />
       <label for="publishMarksCheckbox">Publish marks immediately <i class="fas fa-poll"></i></label>
     </div>
+    <div id="publishMarksOpenMessage" style="display:none;background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;margin:20px 0 30px;">
+      Marks cannot be auto-released when the quiz contains open-ended questions. You must grade all responses manually before releasing marks.
+    </div>
 
     <div class="checkbox-container" style="margin-top: 20px;">
   <input type="checkbox" name="is_summative" value="1" id="isSummativeCheckbox" />
@@ -893,6 +900,18 @@ function addQuestion() {
   });
 
   questionIndex++;
+  updatePublishMarksForOpenEnded();
+}
+
+function updatePublishMarksForOpenEnded() {
+  const hasOpenEnded = Array.from(document.querySelectorAll('select[name="question_type[]"]'))
+    .some(select => select.value === 'open_ended');
+  const checkbox = document.getElementById('publishMarksCheckbox');
+  const wrapper = checkbox ? checkbox.closest('.checkbox-container') : null;
+  const message = document.getElementById('publishMarksOpenMessage');
+  if (wrapper) wrapper.style.display = hasOpenEnded ? 'none' : 'flex';
+  if (message) message.style.display = hasOpenEnded ? 'block' : 'none';
+  if (hasOpenEnded && checkbox) checkbox.checked = false;
 }
 
 document.querySelectorAll('.points-input').forEach(input => {
@@ -912,6 +931,9 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       loader.style.display = "flex";
       const formData = new FormData(form);
+      if (Array.from(form.querySelectorAll('select[name="question_type[]"]')).some(select => select.value === 'open_ended')) {
+        formData.delete('publish_marks');
+      }
       console.log('Form data:', Object.fromEntries(formData.entries()));
 
       fetch("create_quiz.php", {
@@ -957,6 +979,12 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("❌ Something went wrong, please try again!");
       });
     });
+  }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.name === 'question_type[]') {
+    updatePublishMarksForOpenEnded();
   }
 });
 
