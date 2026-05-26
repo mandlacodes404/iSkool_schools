@@ -656,7 +656,7 @@ function renderQuizCards(groupedData) {
                             <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                             <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
                         </div>
-                        ${(quiz.total_points > 0 || quiz.question_count > 0) ? `<div class="lqz-mobile-row-meta">${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''}</div>` : ''}
+                        ${(quiz.total_points > 0 || quiz.question_count > 0) ? `<div class="lqz-mobile-row-meta">${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''} &bull; ${quiz.status}</div>` : `<div class="lqz-mobile-row-meta">${quiz.status}</div>`}
                     </div>
                     <div class="lqz-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
