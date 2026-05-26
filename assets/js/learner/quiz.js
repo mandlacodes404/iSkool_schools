@@ -551,6 +551,11 @@ function renderQuizCards(groupedData) {
                 flex-shrink: 0;
                 color: #30363d;
             }
+            .lqz-mobile-row-meta {
+                font-size: 12px;
+                color: #8b949e;
+                margin-top: 3px;
+            }
             .lqz-summative-badge {
                 display: inline-flex;
                 align-items: center;
@@ -651,6 +656,7 @@ function renderQuizCards(groupedData) {
                             <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                             <span class="lqz-mobile-row-status-dot" style="background:${dotColor};"></span>
                         </div>
+                        ${(quiz.total_points > 0 || quiz.question_count > 0) ? `<div class="lqz-mobile-row-meta">${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''}</div>` : ''}
                     </div>
                     <div class="lqz-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">

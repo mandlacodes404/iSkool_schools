@@ -77,7 +77,7 @@ while ($row = $schoolRes->fetch_assoc()) {
         'title'        => $row['title']   ?? '(No Title)',
         'message'      => $row['message'] ?? '',
         'created_at'   => $row['created_at'],
-        'display_date' => date('F j, Y, g:i a', strtotime($row['created_at'])),
+        'display_date' => date('j M \a\t H:i', strtotime($row['created_at'])),
         'sender'       => $schoolName,
     ];
 }
@@ -118,7 +118,7 @@ if ($classId) {
             'title'        => $row['title']   ?? '(No Title)',
             'message'      => $row['message'] ?? '',
             'created_at'   => $row['created_at'],
-            'display_date' => date('F j, Y, g:i a', strtotime($row['created_at'])),
+            'display_date' => date('j M \a\t H:i', strtotime($row['created_at'])),
         ];
     }
     $teacherStmt->close();
