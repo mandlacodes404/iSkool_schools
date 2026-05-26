@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
-    echo json_encode(["error" => "Unauthorized"]);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit();
 }
 
@@ -14,7 +14,7 @@ $studentEmail = $_SESSION['email'];
 // Get current academic year
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
-    echo json_encode(["error" => "No active academic year"]);
+    echo json_encode(['status' => 'error', 'message' => 'No active academic year']);
     exit();
 }
 $current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
@@ -37,7 +37,7 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 if (empty($joinedClassIds)) {
-    echo json_encode([]);
+    echo json_encode(['status' => 'success', 'data' => []]);
     exit();
 }
 
@@ -54,12 +54,22 @@ $stmt = $conn->prepare("
         q.start_time,
         q.status AS quiz_db_status,
         q.is_summative,
+        q.publish_marks,
         COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher'))) AS display_group,
-        qa.status AS attempt_status
+        qa.status AS attempt_status,
+        qr.score,
+        qr.total
     FROM quizzes q
     LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
     LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
-    LEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_email = ?
+    LEFT JOIN (
+        SELECT quiz_id, user_email, MAX(attempt_id) AS latest_attempt_id
+        FROM quiz_attempts
+        WHERE user_email = ?
+        GROUP BY quiz_id, user_email
+    ) latest_attempt ON latest_attempt.quiz_id = q.id
+    LEFT JOIN quiz_attempts qa ON qa.attempt_id = latest_attempt.latest_attempt_id
+    LEFT JOIN quiz_results qr ON qr.attempt_id = qa.attempt_id
     WHERE q.class_id IN ($placeholders)
       AND q.academic_year_id = ?
     ORDER BY display_group ASC, q.start_time DESC
@@ -86,9 +96,13 @@ while ($row = $quizzesResult->fetch_assoc()) {
         'start_time'     => $row['start_time'],
         'status'         => $row['quiz_db_status'] ?? 'Open',
         'is_summative'   => !empty($row['is_summative']),
-        'attempt_status' => $row['attempt_status'], // Now included!
+        'attempt_status' => $row['attempt_status'],
+        'publish_marks'  => (int)($row['publish_marks'] ?? 1),
+        'score'          => $row['score'],
+        'total'          => $row['total'],
+        'result_label'   => ($row['attempt_status'] === 'submitted' && (int)($row['publish_marks'] ?? 1) === 0) ? 'Pending' : null,
         'current_time'   => $currentTime
     ];
 }
 
-echo json_encode($groupedQuizzes);
+echo json_encode(['status' => 'success', 'data' => $groupedQuizzes]);

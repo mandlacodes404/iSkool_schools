@@ -9,7 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     verify_csrf_token();
 
     $email = $_SESSION['email'];
-    $quizId = intval($_POST['quiz_id']);
+    $quizId = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    if ($quizId <= 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+        exit;
+    }
     
     // We make these optional so the file can be used for JUST saving an answer 
     // or JUST updating the step/bookmark.
@@ -19,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     $currentStep = isset($_POST['current_step']) ? intval($_POST['current_step']) : null;
 
     $accessStmt = $conn->prepare("
-        SELECT 1
+        SELECT q.status, q.start_time
         FROM quizzes q
         JOIN class_students cs
          ON cs.class_id = q.class_id
@@ -33,10 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     ");
     $accessStmt->bind_param("si", $email, $quizId);
     $accessStmt->execute();
-    $hasAccess = $accessStmt->get_result()->num_rows > 0;
+    $quizAccess = $accessStmt->get_result()->fetch_assoc();
     $accessStmt->close();
-    if (!$hasAccess) {
-        echo json_encode(['status' => 'success']);
+    if (!$quizAccess) {
+        echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+        exit;
+    }
+
+    $quizStartTimestamp = !empty($quizAccess['start_time']) ? strtotime($quizAccess['start_time']) : null;
+    $isQuizAvailable = false;
+    if (($quizAccess['status'] ?? 'Open') === 'Open') {
+        $isQuizAvailable = !$quizStartTimestamp || time() >= $quizStartTimestamp;
+    } elseif (($quizAccess['status'] ?? '') === 'Scheduled') {
+        $isQuizAvailable = $quizStartTimestamp && time() >= $quizStartTimestamp;
+    }
+    if (!$isQuizAvailable) {
+        echo json_encode(['status' => 'error', 'message' => 'Quiz unavailable']);
         exit;
     }
 
@@ -54,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     $attempt = $attemptStmt->get_result()->fetch_assoc();
     $attemptStmt->close();
     if (!$attempt) {
-        echo json_encode(['status' => 'success']);
+        echo json_encode(['status' => 'error', 'message' => 'No active attempt']);
         exit;
     }
     $attemptId = (int)$attempt['attempt_id'];
@@ -67,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
         $questionRow = $questionStmt->get_result()->fetch_assoc();
         $questionStmt->close();
         if (!$questionRow) {
-            echo json_encode(['status' => 'success']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid question']);
             exit;
         }
         $questionType = $questionRow['question_type'] ?? 'mcq';
@@ -90,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
             $validAnswer = $validAnswerStmt->get_result()->num_rows > 0;
             $validAnswerStmt->close();
             if (!$validAnswer) {
-                echo json_encode(['status' => 'success']);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid answer']);
                 exit;
             }
             $answerText = null;
@@ -125,12 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
         }
 
         $conn->commit();
-        echo json_encode(['status' => 'success', 'debug_step' => $currentStep]);
+        echo json_encode(['status' => 'success', 'data' => ['current_step' => $currentStep]]);
 
     } catch (Exception $e) {
         $conn->rollback();
         error_log("Save progress failed: " . $e->getMessage());
-        echo json_encode(['status' => 'error', 'message' => 'Database update failed']);
+        echo json_encode(['status' => 'error', 'message' => 'Could not save progress']);
     }
     exit;
 } else {

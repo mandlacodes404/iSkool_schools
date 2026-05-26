@@ -48,7 +48,14 @@ if ($quizAcademicYearId <= 0) {
 
 // 3. Verify availability and learner membership server-side
 $quizStartTimestamp = !empty($quizStartTime) ? strtotime($quizStartTime) : null;
-if ($status !== 'Open' || ($quizStartTimestamp && time() < $quizStartTimestamp)) {
+$currentServerTime = time();
+$isQuizAvailable = false;
+if ($status === 'Open') {
+    $isQuizAvailable = !$quizStartTimestamp || $currentServerTime >= $quizStartTimestamp;
+} elseif ($status === 'Scheduled') {
+    $isQuizAvailable = $quizStartTimestamp && $currentServerTime >= $quizStartTimestamp;
+}
+if (!$isQuizAvailable) {
     render_page("closed", $quizTitle, 0, 0, null);
     exit();
 }
@@ -103,17 +110,21 @@ if ($checkStmt->get_result()->num_rows > 0) {
 $checkStmt->close();
 
 // Fetch Correct Answers
-$sql  = "SELECT q.id as qid, q.points, c.id as cid FROM quizquestions q 
-         JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND q.question_type = 'mcq' AND c.is_correct = 1";
+$sql  = "SELECT q.id as qid, q.points, c.id as cid, c.is_correct FROM quizquestions q 
+         JOIN choices c ON q.id = c.question_id WHERE q.quiz_id = ? AND q.question_type = 'mcq'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $quizId);
 $stmt->execute();
 $res = $stmt->get_result();
 
 $correctAnswers       = [];
+$validChoices         = [];
 $totalPointsAvailable = 0;
 while ($row = $res->fetch_assoc()) {
-    $correctAnswers[$row['qid']] = ['cid' => $row['cid'], 'pts' => (int)$row['points']];
+    $validChoices[(int)$row['qid']][(int)$row['cid']] = true;
+    if ((int)$row['is_correct'] === 1) {
+        $correctAnswers[(int)$row['qid']] = ['cid' => (int)$row['cid'], 'pts' => (int)$row['points']];
+    }
 }
 $stmt->close();
 
@@ -142,25 +153,27 @@ foreach ($openQuestionRows as $openQuestionRow) {
 // 6. Consolidate Answers (POST + Database Fallback)
 $finalAnswers = isset($_POST['answers']) && is_array($_POST['answers']) ? $_POST['answers'] : [];
 $finalOpenAnswers = isset($_POST['open_answers']) && is_array($_POST['open_answers']) ? $_POST['open_answers'] : [];
-if (empty($finalAnswers)) {
-    $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
-    $savedStmt->bind_param("i", $attemptId);
-    $savedStmt->execute();
-    $savedRes = $savedStmt->get_result();
-    while ($sRow = $savedRes->fetch_assoc()) {
-        if ($sRow['answer_text'] !== null) {
-            $finalOpenAnswers[$sRow['question_id']] = $sRow['answer_text'];
-        } else {
-            $finalAnswers[$sRow['question_id']] = $sRow['selected_choice_id'];
+$savedStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
+$savedStmt->bind_param("i", $attemptId);
+$savedStmt->execute();
+$savedRes = $savedStmt->get_result();
+while ($sRow = $savedRes->fetch_assoc()) {
+    $savedQid = (int)$sRow['question_id'];
+    if ($sRow['answer_text'] !== null) {
+        if (!array_key_exists($savedQid, $finalOpenAnswers)) {
+            $finalOpenAnswers[$savedQid] = $sRow['answer_text'];
         }
+    } elseif (!array_key_exists($savedQid, $finalAnswers)) {
+        $finalAnswers[$savedQid] = $sRow['selected_choice_id'];
     }
-    $savedStmt->close();
 }
+$savedStmt->close();
 
 // 7. Scoring
 $earnedScore = 0;
 foreach ($correctAnswers as $qid => $data) {
-    if (isset($finalAnswers[$qid]) && $finalAnswers[$qid] == $data['cid']) {
+    $submittedChoiceId = isset($finalAnswers[$qid]) ? (int)$finalAnswers[$qid] : null;
+    if ($submittedChoiceId !== null && isset($validChoices[$qid][$submittedChoiceId]) && $submittedChoiceId === $data['cid']) {
         $earnedScore += $data['pts'];
     }
 }
@@ -179,14 +192,14 @@ try {
 
     // B. Link/Update user_answers with the Result ID
     if (!empty($finalAnswers)) {
-        $ansQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, result_id) 
-                     VALUES (?, ?, ?, ?, ?, ?) 
-                     ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), result_id = VALUES(result_id)";
+        $ansQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text, result_id) 
+                     VALUES (?, ?, ?, ?, ?, NULL, ?) 
+                     ON DUPLICATE KEY UPDATE selected_choice_id = VALUES(selected_choice_id), answer_text = NULL, result_id = VALUES(result_id)";
         $ansStmt = $conn->prepare($ansQuery);
         foreach ($finalAnswers as $qid => $cid) {
             $qid = (int)$qid;
             $cid = (int)$cid;
-            if (!isset($correctAnswers[$qid])) {
+            if (!isset($validChoices[$qid][$cid])) {
                 continue;
             }
             $ansStmt->bind_param("siiiii", $userEmail, $quizId, $attemptId, $qid, $cid, $resultId);
@@ -197,7 +210,7 @@ try {
     if (!empty($finalOpenAnswers)) {
         $openAnsQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text, result_id)
                          VALUES (?, ?, ?, ?, NULL, ?, ?)
-                         ON DUPLICATE KEY UPDATE answer_text = VALUES(answer_text), result_id = VALUES(result_id)";
+                         ON DUPLICATE KEY UPDATE selected_choice_id = NULL, answer_text = VALUES(answer_text), result_id = VALUES(result_id)";
         $openAnsStmt = $conn->prepare($openAnsQuery);
         foreach ($finalOpenAnswers as $qid => $answerText) {
             $qid = (int)$qid;

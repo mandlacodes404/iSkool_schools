@@ -49,7 +49,13 @@ if ($quizAcademicYearId <= 0) {
 // ── CLOSED ──────────────────────────────────────────────────────────────────
 $currentServerTime = time();
 $quizStartTimestamp = !empty($quizStartTime) ? strtotime($quizStartTime) : null;
-if ($status !== 'Open' || ($quizStartTimestamp && $currentServerTime < $quizStartTimestamp)) { ?>
+$isQuizAvailable = false;
+if ($status === 'Open') {
+    $isQuizAvailable = !$quizStartTimestamp || $currentServerTime >= $quizStartTimestamp;
+} elseif ($status === 'Scheduled') {
+    $isQuizAvailable = $quizStartTimestamp && $currentServerTime >= $quizStartTimestamp;
+}
+if (!$isQuizAvailable) { ?>
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quiz Unavailable</title>
@@ -132,7 +138,8 @@ if (!$attemptData) {
         $saved_question_order = null;
         $saved_choice_order = null;
     } else {
-        die("Failed to create quiz attempt: " . $insertAttempt->error);
+        error_log("Failed to create quiz attempt for quiz {$quizId}: " . $insertAttempt->error);
+        die("Failed to create quiz attempt.");
     }
     $insertAttempt->close();
 } else {

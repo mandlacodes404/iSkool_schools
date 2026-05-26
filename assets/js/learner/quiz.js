@@ -23,7 +23,10 @@ window.prefetchQuizzes = function () {
     if (window.learnerQuizPrefetchPromise) return; // already in-flight
     window.learnerQuizPrefetchPromise = fetch('api/learner/get_quizzes.php')
         .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
-        .then(data => { window.learnerQuizCache = data; })
+        .then(data => {
+            if (data.status === 'error') throw new Error(data.message || 'prefetch failed');
+            window.learnerQuizCache = data.data ?? data;
+        })
         .catch(() => { /* silent – user will retry on click */ })
         .finally(() => { window.learnerQuizPrefetchPromise = null; });
 };
@@ -86,7 +89,9 @@ window.fetchQuizzes = async function() {
         const response = await fetch('api/learner/get_quizzes.php');
         if (!response.ok) throw new Error('Network response was not ok');
         
-        const groupedData = await response.json();
+        const payload = await response.json();
+        if (payload.status === 'error') throw new Error(payload.message || 'Unable to load quizzes');
+        const groupedData = payload.data ?? payload;
         window.learnerQuizCache = groupedData; 
         renderQuizCards(groupedData);
         restoreQuizPageState();
@@ -159,9 +164,11 @@ if (loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch(`api/learner/get_quiz_instructions.php?quiz_id=${quizId}`);
-        const data = await response.json();
+        const payload = await response.json();
 
-        if (data.error) throw new Error(data.error);
+        if (payload.status === 'error') throw new Error(payload.message || 'Unable to load instructions');
+        if (payload.error) throw new Error(payload.error);
+        const data = payload.data ?? payload;
 
         // 2. Inject your EXACT HTML and Styles
         apiArea.innerHTML = `
@@ -262,11 +269,14 @@ function renderQuizCards(groupedData) {
         const startTimeStr = quiz.start_time || "";
         if (startTimeStr) {
             const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-            isScheduled = (quiz.status === 'Scheduled' && startTime > now);
+            isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && startTime > now);
         }
         const isClosed = quiz.status === 'Closed';
 
         if (quiz.attempt_status === 'submitted') {
+            if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
+                return `<span style="color:#fdd663; font-weight:700; font-size:13px;">Pending</span>`;
+            }
             return `<span style="color:#27ae60; font-weight:700; font-size:13px;">✓ Completed</span>`;
         } else if (isClosed) {
             return `<span style="color:#8b949e; font-weight:700; font-size:13px;">Closed</span>`;
@@ -295,7 +305,7 @@ function renderQuizCards(groupedData) {
             let isScheduled = false;
             if (startTimeStr) {
                 const st = new Date(startTimeStr.replace(/-/g, "/"));
-                isScheduled = (quiz.status === 'Scheduled' && st > now);
+                isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && st > now);
             }
             const dotColor = quiz.attempt_status === 'submitted' ? '#22c55e'
                 : quiz.status === 'Closed' ? '#6b7280'
@@ -587,7 +597,7 @@ function renderQuizCards(groupedData) {
             let startTimeStr = quiz.start_time || "";
             if (startTimeStr) {
                 const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-                isScheduled = (quiz.status === 'Scheduled' && startTime > now);
+                isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && startTime > now);
             }
             const isClosed = quiz.status === 'Closed';
 
@@ -595,7 +605,11 @@ function renderQuizCards(groupedData) {
             let rowClick = '';
             let rowKeydown = '';
             if (quiz.attempt_status === 'submitted') {
+                if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
+                    actionBtn = `<span class="lqz-mobile-row-action" style="color:#fdd663;">Pending</span>`;
+                } else {
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
+                }
             } else if (isClosed) {
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#6b7280;">Closed</span>`;
             } else if (isScheduled) {
@@ -674,13 +688,17 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     let isScheduled = false;
     if (startTimeStr) {
         const st = new Date(startTimeStr.replace(/-/g, "/"));
-        isScheduled = (quiz.status === 'Scheduled' && st > now);
+        isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && st > now);
     }
     const isClosed = quiz.status === 'Closed';
 
     let actionBtn = '';
     if (quiz.attempt_status === 'submitted') {
+        if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
+            actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:15px;">Pending</span>`;
+        } else {
         actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:15px;">✓ Completed</span>`;
+        }
     } else if (isClosed) {
         actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:15px;">Closed</span>`;
     } else if (isScheduled) {
