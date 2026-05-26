@@ -1356,7 +1356,7 @@ window.addCqQuestion = function() {
                 placeholder="Choice 4" style="margin-bottom:8px;">
 
             <label class="teacher-modal-label" style="margin-top:4px;">Correct Answer</label>
-            <select name="correct_choice[]" class="teacher-modal-input">
+            <select name="correct_choice[${i}]" class="teacher-modal-input">
                 <option value="0">Choice 1</option>
                 <option value="1">Choice 2</option>
                 <option value="2">Choice 3</option>
