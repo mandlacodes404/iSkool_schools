@@ -58,7 +58,7 @@ window.fetchAssignments = async function() {
 
     // 4. Update Header (Safely)
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Assignments', mode: 'standard' });
+        window.configureHeader({ title: 'Assignments', mode: 'standard', color: '#a78bfa' });
     }
 
     // 5. Immediate UI Swap
@@ -346,7 +346,7 @@ function renderAssignmentCards(groupedData) {
                 padding: 16px 16px 6px;
                 font-size: 11px;
                 font-weight: 600;
-                color: #8b949e;
+                color: #a78bfa;
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #1a1919;
@@ -365,8 +365,8 @@ function renderAssignmentCards(groupedData) {
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
-                background: #4fd1c518;
-                border: 1px solid #4fd1c530;
+                background: #a78bfa18;
+                border: 1px solid #a78bfa30;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -412,7 +412,7 @@ function renderAssignmentCards(groupedData) {
             </div>
             <div class="las-main-panel" id="las-main-panel">
                 <div class="las-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#a78bfa" stroke-width="1.5" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -441,7 +441,7 @@ function renderAssignmentCards(groupedData) {
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }"
                     style="${task.is_past_due ? 'opacity:0.65;' : ''}">
                     <div class="las-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>

@@ -113,7 +113,7 @@ window.fetchGrades = async function () {
     sessionStorage.setItem('lastLearnerPage', 'grades');
 
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Grades', mode: 'standard' });
+        window.configureHeader({ title: 'Grades', mode: 'standard', color: '#68d391' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -210,7 +210,7 @@ function renderGrades(data) {
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 1.5px;
-        color: #4fd1c5;
+        color: #68d391;
         text-transform: uppercase;
         flex-shrink: 0;
     }
@@ -239,8 +239,8 @@ function renderGrades(data) {
     }
     .grades-dt-subject-item:hover { background: rgba(255,255,255,0.04); }
     .grades-dt-subject-item.active {
-        background: rgba(79,209,197,0.08);
-        border-left-color: #4fd1c5;
+        background: rgba(104,211,145,0.08);
+        border-left-color: #68d391;
     }
     .grades-dt-subject-icon { flex-shrink: 0; opacity: 0.7; }
     .grades-dt-subject-info { flex: 1; min-width: 0; }
@@ -329,16 +329,16 @@ function renderGrades(data) {
         width: 180px;
         transition: border-color 0.2s;
     }
-    .grades-search:focus { outline: none; border-color: #4fd1c5; }
+    .grades-search:focus { outline: none; border-color: #68d391; }
     .grades-search::placeholder { color: #555e6a; }
     .grades-report-btn {
         display: inline-flex;
         align-items: center;
         gap: 7px;
         padding: 9px 16px;
-        background: rgba(79,209,197,0.1);
-        color: #4fd1c5;
-        border: 1px solid rgba(79,209,197,0.3);
+        background: rgba(104,211,145,0.1);
+        color: #68d391;
+        border: 1px solid rgba(104,211,145,0.3);
         border-radius: 10px;
         font-size: 13px;
         font-weight: 700;
@@ -346,7 +346,7 @@ function renderGrades(data) {
         font-family: 'Nunito', sans-serif;
         transition: all 0.2s;
     }
-    .grades-report-btn:hover { background: rgba(79,209,197,0.2); }
+    .grades-report-btn:hover { background: rgba(104,211,145,0.2); }
     .subject-card { background: #161b22; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; margin-bottom: 16px; overflow: hidden; transition: border-color 0.2s; }
     .subject-card:hover { border-color: rgba(255,255,255,0.1); }
     .subject-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; user-select: none; }
@@ -357,22 +357,22 @@ function renderGrades(data) {
     .subject-chevron.open { transform: rotate(90deg); }
     .view-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .view-toggle-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #8b949e; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.2s; }
-    .view-toggle-btn:hover { background: rgba(79,209,197,0.08); color: #4fd1c5; }
-    .view-toggle-btn.active-view { color: #4fd1c5; background: rgba(79,209,197,0.08); }
+    .view-toggle-btn:hover { background: rgba(104,211,145,0.08); color: #68d391; }
+    .view-toggle-btn.active-view { color: #68d391; background: rgba(104,211,145,0.08); }
     .quiz-list { padding: 8px 16px 16px; }
     .quiz-row { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
-    .quiz-row:hover:not(.quiz-unpublished) { border-color: rgba(79,209,197,0.2); transform: translateX(3px); }
+    .quiz-row:hover:not(.quiz-unpublished) { border-color: rgba(104,211,145,0.2); transform: translateX(3px); }
     .quiz-unpublished { opacity: 0.5; }
     .quiz-unpublished:hover { transform: none; }
     .quiz-row-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; cursor: pointer; }
     .quiz-row-icon { flex-shrink: 0; }
-    .quiz-row-title { flex: 1; font-size: 14px; font-weight: 700; color: #4fd1c5; display: flex; align-items: center; gap: 6px; }
-    .quiz-row-title a { color: #4fd1c5; text-decoration: none; transition: color 0.2s; }
+    .quiz-row-title { flex: 1; font-size: 14px; font-weight: 700; color: #68d391; display: flex; align-items: center; gap: 6px; }
+    .quiz-row-title a { color: #68d391; text-decoration: none; transition: color 0.2s; }
     .quiz-row-title a:hover { color: #22c55e; }
     .quiz-unpublished .quiz-row-title { color: #8b949e; }
     .quiz-score-pill { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
     .quiz-score-pill.high { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .quiz-score-pill.mid  { background: rgba(79,209,197,0.15); color: #4fd1c5; }
+    .quiz-score-pill.mid  { background: rgba(104,211,145,0.15); color: #68d391; }
     .quiz-score-pill.low  { background: rgba(248,81,73,0.15); color: #f85149; }
     .quiz-score-pill.hidden-score { background: rgba(255,255,255,0.05); color: #555e6a; }
     .quiz-grading-status { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:800; border-radius:999px; padding:2px 8px; white-space:nowrap; }
@@ -380,31 +380,31 @@ function renderGrades(data) {
     .quiz-grading-status.done { color:#22c55e; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); }
     .quiz-grading-status.partial { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
     .quiz-expand-btn { background: none; border: none; color: #555e6a; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
-    .quiz-expand-btn:hover { color: #4fd1c5; }
+    .quiz-expand-btn:hover { color: #68d391; }
     .quiz-expand-btn svg { transition: transform 0.3s ease; }
     .quiz-expand-btn.open svg { transform: rotate(180deg); }
     .quiz-row-details { display: none; padding: 12px 16px 14px; border-top: 1px solid rgba(255,255,255,0.04); background: rgba(0,0,0,0.2); font-size: 13px; color: #8b949e; line-height: 1.7; }
     .quiz-row-details p { margin: 2px 0; }
     .quiz-row-details strong { color: #c9d1d9; }
-    .view-details-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(79,209,197,0.08); color: #4fd1c5; border: 1px solid rgba(79,209,197,0.2); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
-    .view-details-btn:hover { background: rgba(79,209,197,0.15); }
+    .view-details-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(104,211,145,0.08); color: #68d391; border: 1px solid rgba(104,211,145,0.2); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+    .view-details-btn:hover { background: rgba(104,211,145,0.15); }
     .term-marks-view { padding: 0 16px 16px; }
     .term-selector-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
     .term-selector { padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .term-selector:focus { outline: none; border-color: #4fd1c5; }
+    .term-selector:focus { outline: none; border-color: #68d391; }
     .term-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); }
     .term-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .term-table th { padding: 10px 14px; text-align: left; color: #4fd1c5; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .term-table th { padding: 10px 14px; text-align: left; color: #68d391; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
     .term-table th:not(:first-child) { text-align: center; }
     .term-table td { padding: 10px 14px; color: #c9d1d9; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .term-table td:not(:first-child) { text-align: center; }
     .term-table tr:last-child td { border-bottom: none; }
     .term-table tr:hover td { background: rgba(255,255,255,0.01); }
-    .term-table-total td { font-weight: 800; color: #4fd1c5; border-top: 2px solid rgba(79,209,197,0.3) !important; padding-top: 12px; }
+    .term-table-total td { font-weight: 800; color: #68d391; border-top: 2px solid rgba(104,211,145,0.3) !important; padding-top: 12px; }
     .term-total-result { color: #22c55e; font-size: 14px; }
     .term-still-pending { text-align: center; font-size: 12px; color: #555e6a; padding: 10px 0 0; }
     .no-summative { text-align: center; color: #555e6a; font-style: italic; font-size: 13px; padding: 20px; }
-    .review-link { color: #4fd1c5; font-size: 11px; text-decoration: none; margin-left: 6px; opacity: 0.7; }
+    .review-link { color: #68d391; font-size: 11px; text-decoration: none; margin-left: 6px; opacity: 0.7; }
     .review-link:hover { opacity: 1; }
     .grades-mobile-review-frame {
         width: 100%;
@@ -413,7 +413,7 @@ function renderGrades(data) {
         background: #0d1117;
         display: block;
     }
-    .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
+    .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #68d391; border: 1px solid rgba(104,211,145,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
     .grades-empty { text-align: center; color: #555e6a; font-size: 15px; padding: 60px 20px; }
     .g-modal-overlay { display: none !important; }
 
@@ -430,7 +430,7 @@ function renderGrades(data) {
     .score-out-of { font-size: 13px; color: #8b949e; margin-bottom: 16px; }
     .dist-bar-wrap { position: relative; height: 10px; background: rgba(255,255,255,0.06); border-radius: 100px; margin: 24px 0 8px; }
     .dist-marker { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; transition: left 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
-    .dist-marker.me { background: #fff; border: 3px solid #4fd1c5; }
+    .dist-marker.me { background: #fff; border: 3px solid #68d391; }
     .dist-line { position: absolute; top: -8px; bottom: -4px; width: 2px; transform: translateX(-50%); }
     .dist-line.low  { background: #f85149; }
     .dist-line.avg  { background: #f59e0b; }
@@ -444,7 +444,7 @@ function renderGrades(data) {
     .report-modal-overlay.show { display: flex; }
     .report-modal-box { background: #0d1117; border-radius: 14px; width: 95vw; max-width: 1000px; height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.6); }
     .report-modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #161b22; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .report-modal-header span { font-size: 15px; font-weight: 800; color: #4fd1c5; }
+    .report-modal-header span { font-size: 15px; font-weight: 800; color: #68d391; }
     .report-modal-close { background: none; border: none; color: #8b949e; font-size: 24px; cursor: pointer; line-height: 1; }
     .report-modal-close:hover { color: #e2e8f0; }
     #gradesReportFrame { flex: 1; width: 100%; border: none; background: #0d1117; }
@@ -504,8 +504,8 @@ function renderGrades(data) {
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            background: #4fd1c518;
-            border: 1px solid #4fd1c530;
+            background: #68d39118;
+            border: 1px solid #68d39130;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -539,7 +539,7 @@ function renderGrades(data) {
                      data-grade-subject-index="${gi}"
                      onclick="selectDesktopGradeSubject(${gi})">
                     <div class="grades-dt-subject-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                         </svg>
@@ -582,7 +582,7 @@ function renderGrades(data) {
             <div class="subject-card" id="scard-${gi}">
                 <div class="subject-header" onclick="toggleSubjectCard(${gi})">
                     <div class="subject-name">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                         </svg>
@@ -674,7 +674,7 @@ function renderGrades(data) {
             </div>` : ''}
             <div class="grades-dt-panel-scroll" id="grades-dt-panel">
                 <div class="grades-dt-empty">
-                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#68d391" stroke-width="1.5" fill="none">
                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                     </svg>
@@ -709,7 +709,7 @@ function renderGrades(data) {
             </div>
             <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
             <div class="dist-legend">
-                <div><span style="color:#4fd1c5">●</span> Blue dot — your score</div>
+                <div><span style="color:#68d391">●</span> Blue dot — your score</div>
                 <div><span style="color:#f85149">|</span> Red line — lowest in class</div>
                 <div><span style="color:#f59e0b">|</span> Yellow line — class average</div>
                 <div><span style="color:#22c55e">|</span> Green line — highest in class</div>
@@ -759,7 +759,7 @@ window.selectDesktopGradeSubject = function (gi) {
     panel.innerHTML = `
         <div class="grades-dt-panel-header">
             <h3 class="grades-dt-panel-title">
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#68d391" stroke-width="2" fill="none">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                 </svg>
@@ -859,7 +859,7 @@ function buildQuizList(quizzes, gi) {
         const pillText   = published ? `${pct}%` : 'Pending';
         const gradingStatus = buildOpenEndedGradingStatus(q);
         const titleHtml  = published
-            ? `<span style="color:#4fd1c5;cursor:pointer;" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
+            ? `<span style="color:#68d391;cursor:pointer;" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
             : escHtml(q.quiz_title);
 
         const summBadge = q.is_summative
@@ -871,7 +871,7 @@ function buildQuizList(quizzes, gi) {
                </span>` : '';
 
         const iconHtml = published
-            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none">
                     <line x1="18" y1="20" x2="18" y2="10"/>
                     <line x1="12" y1="20" x2="12" y2="4"/>
                     <line x1="6"  y1="20" x2="6"  y2="14"/>
@@ -964,7 +964,7 @@ function buildTermTable(quizzes, selectedTerm) {
             <td>${escHtml(q.quiz_title)}</td>
             <td>${w.toFixed(1)}%</td>
             <td>${escHtml(String(q.score))}/${escHtml(String(q.total))}</td>
-            <td style="color:#4fd1c5;font-weight:800;">${earned.toFixed(1)}/${w.toFixed(1)}</td>
+            <td style="color:#68d391;font-weight:800;">${earned.toFixed(1)}/${w.toFixed(1)}</td>
         </tr>`;
     }).join('');
 
@@ -1238,7 +1238,7 @@ function renderGradeStatsBox(box, data) {
                 </div>
                 <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                 <div class="dist-legend">
-                    <div><span style="color:#4fd1c5">●</span> Blue dot - your score</div>
+                    <div><span style="color:#68d391">●</span> Blue dot - your score</div>
                     <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
                     <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
                     <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
@@ -1294,7 +1294,7 @@ async function loadGradeStatsInline(statsId) {
                     </div>
                     <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                     <div class="dist-legend">
-                        <div><span style="color:#4fd1c5">●</span> Blue dot - your score</div>
+                        <div><span style="color:#68d391">●</span> Blue dot - your score</div>
                         <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
                         <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
                         <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
@@ -1353,13 +1353,13 @@ function renderProgressReport(data) {
             .pr-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
             .pr-back-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
             .pr-back-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
-            .pr-print-btn { display: inline-flex; align-items: center; gap: 7px; background: rgba(79,209,197,0.1); border: 1px solid rgba(79,209,197,0.3); color: #4fd1c5; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
-            .pr-print-btn:hover { background: rgba(79,209,197,0.2); }
+            .pr-print-btn { display: inline-flex; align-items: center; gap: 7px; background: rgba(104,211,145,0.1); border: 1px solid rgba(104,211,145,0.3); color: #68d391; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
+            .pr-print-btn:hover { background: rgba(104,211,145,0.2); }
             .pr-hero { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 24px; position: relative; overflow: hidden; }
-            .pr-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #4fd1c5, #22c55e, #4e79a7); }
+            .pr-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #68d391, #22c55e, #4e79a7); }
             .pr-logo { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; background: rgba(255,255,255,0.05); }
             .pr-hero-info { flex: 1; }
-            .pr-school-name { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #4fd1c5; margin-bottom: 6px; }
+            .pr-school-name { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #68d391; margin-bottom: 6px; }
             .pr-learner-name { font-size: 22px; font-weight: 900; color: #e2e8f0; margin-bottom: 4px; }
             .pr-learner-meta { font-size: 13px; color: #8b949e; }
             .pr-overall-badge { text-align: center; flex-shrink: 0; }
@@ -1370,13 +1370,13 @@ function renderProgressReport(data) {
             .pr-term-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
             .pr-term-tab { flex: 1; padding: 10px; text-align: center; background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
             .pr-term-tab:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); }
-            .pr-term-tab.active { background: rgba(79,209,197,0.08); border-color: rgba(79,209,197,0.35); }
+            .pr-term-tab.active { background: rgba(104,211,145,0.08); border-color: rgba(104,211,145,0.35); }
             .pr-term-tab-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8b949e; margin-bottom: 4px; }
-            .pr-term-tab.active .pr-term-tab-label { color: #4fd1c5; }
+            .pr-term-tab.active .pr-term-tab-label { color: #68d391; }
             .pr-term-tab-avg { font-size: 18px; font-weight: 900; color: #e2e8f0; }
-            .pr-term-tab.active .pr-term-tab-avg { color: #4fd1c5; }
+            .pr-term-tab.active .pr-term-tab-avg { color: #68d391; }
             .pr-term-tab-sub { font-size: 10px; color: #555e6a; margin-top: 2px; }
-            .pr-current-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; }
+            .pr-current-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #68d391; }
             .pr-subjects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
             .pr-subject-card { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px 18px 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
             .pr-subject-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
@@ -1413,7 +1413,7 @@ function renderProgressReport(data) {
     function pctColor(v) {
         if (v === null) return { text: '#555e6a', bg: 'rgba(74,85,104,0.15)', border: '#555e6a' };
         if (v >= 80)   return { text: '#22c55e', bg: 'rgba(34,197,94,0.15)',   border: '#22c55e' };
-        if (v >= 60)   return { text: '#4fd1c5', bg: 'rgba(79,209,197,0.15)',  border: '#4fd1c5' };
+        if (v >= 60)   return { text: '#68d391', bg: 'rgba(104,211,145,0.15)',  border: '#68d391' };
         if (v >= 40)   return { text: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: '#f59e0b' };
         return           { text: '#f85149', bg: 'rgba(248,81,73,0.15)',    border: '#f85149' };
     }

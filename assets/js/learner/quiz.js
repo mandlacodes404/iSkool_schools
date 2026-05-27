@@ -54,7 +54,7 @@ window.fetchQuizzes = async function() {
 
     // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Quizzes', mode: 'standard' });
+        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663' });
     }
 
     // 2. Sidebar & UI Management
@@ -488,7 +488,7 @@ function renderQuizCards(groupedData) {
                 padding: 16px 16px 6px;
                 font-size: 11px;
                 font-weight: 600;
-                color: #8b949e;
+                color: #fdd663;
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #1a1919;
@@ -508,8 +508,8 @@ function renderQuizCards(groupedData) {
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
-                background: #4fd1c518;
-                border: 1px solid #4fd1c530;
+                background: #fdd66318;
+                border: 1px solid #fdd66330;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -580,7 +580,7 @@ function renderQuizCards(groupedData) {
             </div>
             <div class="lqz-main-panel" id="lqz-main-panel">
                 <div class="lqz-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#fdd663" stroke-width="1.5" fill="none">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -645,7 +645,7 @@ function renderQuizCards(groupedData) {
             html += `
                 <div class="lqz-mobile-row" ${rowAttrs}>
                     <div class="lqz-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
                             <line x1="12" y1="20" x2="12" y2="4"></line>
                             <line x1="6" y1="20" x2="6" y2="14"></line>

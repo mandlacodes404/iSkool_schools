@@ -263,7 +263,7 @@ function getCsrfToken() {
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
-    <div class="sidebar-links">
+    <div class="sidebar-links" style="margin-top:20px;">
       <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -2061,10 +2061,10 @@ if (desktopToggle) {
                 // Header: solid when scrolled down, transparent at top
                 if (scrollTop > SCROLL_THRESHOLD) {
                     mainHeader.classList.add('header-scrolled');
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', window.learnerCurrentPageColor || '#1a1919');
                 } else {
                     mainHeader.classList.remove('header-scrolled');
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', window.learnerCurrentPageColor || '#000000');
                 }
 
                 if (mainHeader.classList.contains('mobile-detail-mode')) {
@@ -2095,8 +2095,31 @@ function toggleJoinClassForm() {
 }
 
 // --- DYNAMIC UI COMMAND CENTER ---
+// Tracks the current page accent colour so the scroll handler can keep
+// the browser bar in sync without resetting it to black on every scroll.
+window.learnerCurrentPageColor = '#000000';
+
 window.configureHeader = function(config) {
-    let { title, mode } = config;
+    let { title, mode, color } = config;
+
+    // ── Mobile colour theming ──────────────────────────────────────────
+    // Only applies on mobile. Home has no colour (stays black).
+    if (window.innerWidth <= 768) {
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        const mainHeader     = document.querySelector('.main-header');
+
+        if (color) {
+            window.learnerCurrentPageColor = color;
+            if (themeColorMeta) themeColorMeta.setAttribute('content', color);
+            if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
+        } else {
+            // Home or no colour supplied — reset to black
+            window.learnerCurrentPageColor = '#000000';
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
+            if (mainHeader)     mainHeader.style.borderBottom = '';
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────
     
     // Select our UI elements
     const mainHeader = document.querySelector('.main-header');

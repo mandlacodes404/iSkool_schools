@@ -24,7 +24,7 @@ window.fetchResources = async function() {
 
     // 2. UPDATE DYNAMIC HEADER
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Resources', mode: 'standard' });
+        window.configureHeader({ title: 'Resources', mode: 'standard', color: '#f28c38' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -372,7 +372,7 @@ function renderResourceCards(data) {
                 padding: 16px 16px 6px;
                 font-size: 11px;
                 font-weight: 600;
-                color: #8b949e;
+                color: #f28c38;
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #1a1919;
@@ -392,8 +392,8 @@ function renderResourceCards(data) {
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
-                background: #4fd1c518;
-                border: 1px solid #4fd1c530;
+                background: #f28c3818;
+                border: 1px solid #f28c3830;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -428,7 +428,7 @@ function renderResourceCards(data) {
             </div>
             <div class="lrs-main-panel" id="lrs-main-panel">
                 <div class="lrs-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -757,7 +757,7 @@ window.selectDesktopLearnerResource = function(flatIdx) {
 };
 
 function getFileIcon(ext, isVideo = false) {
-    const color = "#4fd1c5";
+    const color = "#f28c38";
 
     // Video icon (YouTube red play button style)
     if (isVideo) {

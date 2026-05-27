@@ -1,21 +1,20 @@
-/* assets/js/assignments.js */
-window.learnerAssignmentCache          = null;
-window.learnerAssignmentPrefetchPromise = null;
+window.announcementCache          = null;
+window.announcementPrefetchPromise = null;
 
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
 // ─────────────────────────────────────────────
-window.prefetchAssignments = function () {
-    if (window.learnerAssignmentCache) return;
-    if (window.learnerAssignmentPrefetchPromise) return;
-    window.learnerAssignmentPrefetchPromise = fetch('api/learner/get_assignments.php')
+window.prefetchAnnouncements = function () {
+    if (window.announcementCache) return;
+    if (window.announcementPrefetchPromise) return;
+    window.announcementPrefetchPromise = fetch('api/learner/get_announcements.php')
         .then(r => { if (!r.ok) throw new Error('prefetch failed'); return r.json(); })
-        .then(data => { window.learnerAssignmentCache = data; })
+        .then(data => { window.announcementCache = data; })
         .catch(() => {})
-        .finally(() => { window.learnerAssignmentPrefetchPromise = null; });
+        .finally(() => { window.announcementPrefetchPromise = null; });
 };
 
-function showLearnerAssignmentMobileBottomNav() {
+function showLearnerAnnouncementMobileBottomNav() {
     if (window.innerWidth > 899) return;
 
     const mobileBottomNav = document.getElementById('mobileBottomNav');
@@ -24,85 +23,57 @@ function showLearnerAssignmentMobileBottomNav() {
     }
 }
 
-window.openLearnerAssignmentSubmission = function(event, href) {
-    if (event) event.preventDefault();
-
-    const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    if (apiArea) apiArea.style.display = 'none';
-    if (iframe) {
-        const keepNavVisible = function() {
-            showLearnerAssignmentMobileBottomNav();
-            iframe.removeEventListener('load', keepNavVisible);
-        };
-        iframe.addEventListener('load', keepNavVisible);
-        iframe.style.display = 'block';
-        iframe.src = href;
-    }
-    showLearnerAssignmentMobileBottomNav();
-};
-
-window.fetchAssignments = async function() {
-    // 1. Clear any existing timers
+window.fetchAnnouncements = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    // 2. Set the UI State
-    sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
-    if (typeof window.setActive === 'function') window.setActive("assignment_list.php");
+    // 1. SAVE STATE & UI Highlighting
+    sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
+    if (typeof window.setActive === 'function') window.setActive("announcement_list.php");
 
-    // 3. Elements
+    // 2. UPDATE DYNAMIC HEADER
+    if (window.configureHeader) {
+        window.configureHeader({ title: 'Announcements', mode: 'standard', color: '#f28c38' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
     const loader  = document.getElementById("loaderOverlay");
     const myClassContent = document.getElementById("myClassContent");
 
-    // 4. Update Header (Safely)
-    if (window.configureHeader) {
-        window.configureHeader({ title: 'Assignments', mode: 'standard' });
-    }
-
-    // 5. Immediate UI Swap
+    // 3. UI Preparation
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 6a. If prefetch is still in-flight, wait for it (no duplicate request)
-    if (window.learnerAssignmentPrefetchPromise) {
+    // 4a. If prefetch is still in-flight, wait for it (no duplicate request)
+    if (window.announcementPrefetchPromise) {
         if (loader) loader.style.display = 'flex';
-        await window.learnerAssignmentPrefetchPromise;
+        await window.announcementPrefetchPromise;
     }
 
-    // 6b. CACHE LOGIC
-    if (window.learnerAssignmentCache) {
-        renderAssignmentCards(window.learnerAssignmentCache);
+    // 4b. CACHE CHECK (Instant Load)
+    if (window.announcementCache) {
+        renderAnnouncements(window.announcementCache);
         if (loader) loader.style.display = 'none';
-        restoreAssignmentPageState();
+        restoreAnnouncementPageState();
         return;
     }
 
-    // 7. FETCH LOGIC
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/learner/get_assignments.php');
-        if (!response.ok) throw new Error('Failed to fetch assignments');
-        
-        const groupedData = await response.json();
-        window.learnerAssignmentCache = groupedData;
-        renderAssignmentCards(groupedData);
-        restoreAssignmentPageState();
+        const response = await fetch('api/learner/get_announcements.php');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        window.announcementCache = data;
+        renderAnnouncements(data);
+        restoreAnnouncementPageState();
     } catch (error) {
-        console.error("Assignment Fetch Error:", error);
+        console.error("Fetch Error:", error);
         if (apiArea) {
-            apiArea.innerHTML = `
-                <div style="text-align:center; margin-top:50px; padding:20px;">
-                    <p style="color: #ff5555;">Unable to load assignments.</p>
-                    <button onclick="window.learnerAssignmentCache=null; window.fetchAssignments()" 
-                            class="quiz-start-btn">Try Again</button>
-                </div>`;
+            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading announcements.</p>";
         }
     } finally {
-        // 8. ALWAYS hide the loader, even if it fails
         if (loader) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
@@ -111,89 +82,151 @@ window.fetchAssignments = async function() {
 // ─────────────────────────────────────────────
 // STATE PERSISTENCE (sessionStorage)
 // ─────────────────────────────────────────────
-function saveAssignmentPageState() {
-    const sidebar = document.querySelector('.las-sidebar-scroll');
+function saveAnnouncementPageState() {
+    const sidebar = document.querySelector('.lan-sidebar-scroll');
     const state = {
-        selectedIdx:   window._learnerAssignmentSelectedIdx ?? null,
+        selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
     };
-    sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
+    sessionStorage.setItem('announcementPageState', JSON.stringify(state));
 }
 
-function restoreAssignmentPageState() {
-    const raw = sessionStorage.getItem('assignmentPageState');
+function restoreAnnouncementPageState() {
+    const raw = sessionStorage.getItem('announcementPageState');
     if (!raw) return;
     try {
         const state = JSON.parse(raw);
         if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
             requestAnimationFrame(() => {
-                window.selectDesktopLearnerAssignment(state.selectedIdx);
-                const sidebar = document.querySelector('.las-sidebar-scroll');
+                window.selectDesktopLearnerAnnouncement(state.selectedIdx);
+                const sidebar = document.querySelector('.lan-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
             });
         }
     } catch (e) { /* ignore bad state */ }
 }
 
-function renderAssignmentCards(groupedData) {
+function renderAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    if (Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No assignments found.</p>";
+    // data shape expected:
+    // {
+    //   school_wide: [ { id, title, message, created_at, display_date, sender } ],
+    //   teacher:     { "Teacher Name": [ { id, title, message, created_at, display_date } ], ... }
+    // }
+
+    const schoolWide  = data.school_wide  || [];
+    const teacherData = data.teacher      || {};
+
+    const hasSchoolWide  = schoolWide.length > 0;
+    const hasTeacher     = Object.keys(teacherData).length > 0;
+
+    if (!hasSchoolWide && !hasTeacher) {
+        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No announcements found.</p>";
         return;
     }
 
-    // ── Build flat list for desktop panel lookup ──
-    window._allLearnerAssignmentsFlat = [];
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
-        tasks.forEach(task => {
-            window._allLearnerAssignmentsFlat.push({ ...task, teacher });
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // ── Build flat list (school-wide FIRST, then teacher) ──
+    window._allLearnerAnnouncementsFlat = [];
+
+    schoolWide.forEach(ann => {
+        window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'school', teacher: ann.sender || 'School Admin' });
+    });
+
+    for (const [teacher, items] of Object.entries(teacherData)) {
+        items.forEach(ann => {
+            window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'teacher', teacher });
         });
     }
 
     // ── Build sidebar HTML ──
     let sidebarHtml = '';
     let flatIdx = 0;
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
-        sidebarHtml += `<div class="las-sidebar-teacher-label">${teacher}</div>`;
-        tasks.forEach(task => {
-            const isDone = !!task.submission_file;
-            const dotColor = task.is_past_due ? '#6b7280'
-                : isDone ? '#4fd1c5' : '#e67e22';
 
+    // School-wide section
+    if (hasSchoolWide) {
+        sidebarHtml += `
+            <div class="lan-sidebar-section-label lan-section-school">
+                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                School-wide
+            </div>`;
+
+        schoolWide.forEach(ann => {
+            const isNew = new Date(ann.created_at) > sevenDaysAgo;
             sidebarHtml += `
-                <div class="las-sidebar-item" id="las-sidebar-${flatIdx}"
-                    onclick="selectDesktopLearnerAssignment(${flatIdx})">
-                    <div class="las-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
+                <div class="lan-sidebar-item lan-sidebar-item--school" id="lan-sidebar-${flatIdx}"
+                    onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
+                    <div class="lan-sidebar-item-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                     </div>
-                    <div class="las-sidebar-item-info">
-                        <div class="las-sidebar-item-title">${task.title}</div>
-                        <div class="las-sidebar-item-meta">${task.class_name} &middot; Due ${task.due_date}</div>
+                    <div class="lan-sidebar-item-info">
+                        <div class="lan-sidebar-item-title">${ann.title}</div>
+                        <div class="lan-sidebar-item-meta">${ann.display_date}</div>
                     </div>
-                    <span class="las-sidebar-status-dot" style="background:${dotColor};"></span>
+                    ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
                 </div>`;
             flatIdx++;
         });
+    }
+
+    // Teacher section
+    if (hasTeacher) {
+        sidebarHtml += `
+            <div class="lan-sidebar-section-label lan-section-teacher" style="margin-top:${hasSchoolWide ? '8px' : '0'}">
+                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                From Teachers
+            </div>`;
+
+        for (const [teacher, items] of Object.entries(teacherData)) {
+            sidebarHtml += `<div class="lan-sidebar-teacher-label">${teacher}</div>`;
+            items.forEach(ann => {
+                const isNew = new Date(ann.created_at) > sevenDaysAgo;
+                sidebarHtml += `
+                    <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
+                        onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
+                        <div class="lan-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="lan-sidebar-item-info">
+                            <div class="lan-sidebar-item-title">${ann.title}</div>
+                            <div class="lan-sidebar-item-meta">${ann.display_date}</div>
+                        </div>
+                        ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
+                    </div>`;
+                flatIdx++;
+            });
+        }
     }
 
     // ── Build full HTML ──
     let html = `
         <style>
             @media (min-width: 900px) {
-                .las-desktop-layout { display: flex !important; }
-                .las-mobile-list    { display: none !important; }
+                .lan-desktop-layout { display: flex !important; }
+                .lan-mobile-list    { display: none !important; }
             }
             @media (max-width: 899px) {
-                .las-desktop-layout { display: none !important; }
-                .las-mobile-list    { display: block !important; }
+                .lan-desktop-layout { display: none !important; }
+                .lan-mobile-list    { display: block !important; }
             }
 
-            .las-desktop-layout {
+            .lan-desktop-layout {
                 display: flex;
                 gap: 0;
                 height: calc(100vh - 140px);
@@ -204,7 +237,7 @@ function renderAssignmentCards(groupedData) {
                 margin-top: 12px;
             }
 
-            .las-sidebar {
+            .lan-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
@@ -214,7 +247,7 @@ function renderAssignmentCards(groupedData) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .las-sidebar-header {
+            .lan-sidebar-header {
                 padding: 16px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
                 font-size: 11px;
@@ -224,24 +257,41 @@ function renderAssignmentCards(groupedData) {
                 text-transform: uppercase;
                 flex-shrink: 0;
             }
-            .las-sidebar-scroll {
+            .lan-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
                 padding: 8px 0;
             }
-            .las-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .las-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .las-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .lan-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .lan-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .lan-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .las-sidebar-teacher-label {
-                padding: 8px 16px 4px;
+            /* Section labels (School-wide / From Teachers) */
+            .lan-sidebar-section-label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 16px 4px;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .lan-section-school  { color: #d29522; border-top: 1px solid rgba(210,149,34,0.15); margin-top: 4px; }
+            .lan-section-school:first-child { border-top: none; margin-top: 0; }
+            .lan-section-teacher { color: #4fd1c5; border-top: 1px solid rgba(79,209,197,0.12); margin-top: 4px; }
+
+            /* Teacher sub-label */
+            .lan-sidebar-teacher-label {
+                padding: 6px 16px 2px 24px;
                 font-size: 10px;
                 font-weight: 700;
-                color: #8b949e;
+                color: #555e6a;
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
             }
-            .las-sidebar-item {
+
+            .lan-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -250,14 +300,20 @@ function renderAssignmentCards(groupedData) {
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
             }
-            .las-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .las-sidebar-item.active {
+            .lan-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .lan-sidebar-item.active {
                 background: rgba(79,209,197,0.08);
                 border-left-color: #4fd1c5;
             }
-            .las-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .las-sidebar-item-info { flex: 1; min-width: 0; }
-            .las-sidebar-item-title {
+            /* School-wide active gets orange accent */
+            .lan-sidebar-item--school.active {
+                background: rgba(210,149,34,0.08);
+                border-left-color: #d29522;
+            }
+
+            .lan-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .lan-sidebar-item-info { flex: 1; min-width: 0; }
+            .lan-sidebar-item-title {
                 font-size: 13px;
                 font-weight: 600;
                 color: #c9d1d9;
@@ -265,26 +321,32 @@ function renderAssignmentCards(groupedData) {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .las-sidebar-item.active .las-sidebar-item-title { color: #e2e8f0; }
-            .las-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-            .las-sidebar-status-dot {
-                width: 7px; height: 7px;
-                border-radius: 50%;
+            .lan-sidebar-item.active .lan-sidebar-item-title { color: #e2e8f0; }
+            .lan-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+            .lan-sidebar-new-badge {
+                background: rgba(79,209,197,0.1);
+                color: #4fd1c5;
+                border: 1px solid rgba(79,209,197,0.4);
+                font-size: 9px;
+                font-weight: 800;
+                padding: 2px 5px;
+                border-radius: 4px;
                 flex-shrink: 0;
+                letter-spacing: 0.5px;
             }
 
-            .las-main-panel {
+            .lan-main-panel {
                 flex: 1;
                 background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
             }
-            .las-main-panel::-webkit-scrollbar { width: 5px; }
-            .las-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .las-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .lan-main-panel::-webkit-scrollbar { width: 5px; }
+            .lan-main-panel::-webkit-scrollbar-track { background: transparent; }
+            .lan-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .las-panel-empty {
+            .lan-panel-empty {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
@@ -294,64 +356,91 @@ function renderAssignmentCards(groupedData) {
                 gap: 12px;
                 padding: 40px;
             }
-            .las-panel-empty svg { opacity: 0.3; }
-            .las-panel-empty p { font-size: 14px; margin: 0; }
+            .lan-panel-empty svg { opacity: 0.3; }
+            .lan-panel-empty p { font-size: 14px; margin: 0; }
 
-            .las-panel-content { padding: 28px 32px; }
+            .lan-panel-content { padding: 28px 32px; }
 
-            .las-panel-header {
+            .lan-panel-header {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+                flex-wrap: wrap;
             }
-            .las-panel-title {
+            .lan-panel-title {
                 font-size: 20px;
                 font-weight: 800;
-                color: #e2e8f0;
+                color: #4fd1c5;
                 margin: 0 0 8px;
             }
-            .las-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
+            .lan-panel-title--school { color: #d29522; }
+            .lan-panel-meta { font-size: 13px; color: #8b949e; }
+
+            /* School-wide badge in panel */
+            .lan-school-wide-badge {
+                display: inline-flex;
                 align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
+                gap: 5px;
+                background: rgba(210,149,34,0.1);
+                color: #d29522;
+                border: 1px solid rgba(210,149,34,0.35);
+                font-size: 10px;
+                font-weight: 800;
+                padding: 3px 8px;
+                border-radius: 5px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                margin-bottom: 10px;
             }
-            .las-panel-desc {
-                font-size: 13px;
-                color: #c9d1d9;
-                line-height: 1.7;
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
-                padding: 16px 18px;
-                margin-bottom: 20px;
-            }
-            .las-panel-links {
-                display: flex;
-                gap: 16px;
-                flex-wrap: wrap;
-                margin-bottom: 24px;
+
+            .lan-panel-message {
+                font-size: 14px;
+                color: #e2e8f0;
+                line-height: 1.8;
             }
 
             /* ── MOBILE LIST STYLES ── */
-            .las-mobile-list {
+            .lan-mobile-list {
                 background: #1a1919;
                 border-radius: 12px;
                 overflow: hidden;
                 margin: 0 0 16px;
             }
-            .las-mobile-teacher-header {
-                padding: 16px 16px 6px;
-                font-size: 11px;
-                font-weight: 600;
-                color: #8b949e;
+            .lan-mobile-section-header {
+                padding: 12px 16px 6px;
+                font-size: 10px;
+                font-weight: 800;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lan-mobile-section-header--school {
+                color: #d29522;
+                background: rgba(210,149,34,0.06);
+                border-bottom: 1px solid rgba(210,149,34,0.12);
+            }
+            .lan-mobile-section-header--teacher {
+                color: #4fd1c5;
+                background: rgba(79,209,197,0.04);
+                border-top: 1px solid rgba(79,209,197,0.1);
+                border-bottom: 1px solid rgba(79,209,197,0.1);
+            }
+            .lan-mobile-teacher-header {
+                padding: 8px 16px 4px 20px;
+                font-size: 10px;
+                font-weight: 600;
+                color: #555e6a;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
                 background: #1a1919;
             }
-            .las-mobile-row {
+            .lan-mobile-card {
                 display: flex;
                 align-items: center;
                 gap: 14px;
@@ -360,8 +449,11 @@ function renderAssignmentCards(groupedData) {
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
             }
-            .las-mobile-row:last-child { border-bottom: none; }
-            .las-mobile-row-icon {
+            .lan-mobile-card--school {
+                border-left: 3px solid rgba(210,149,34,0.5);
+            }
+            .lan-mobile-card:last-child { border-bottom: none; }
+            .lan-mobile-card-icon {
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
@@ -372,12 +464,17 @@ function renderAssignmentCards(groupedData) {
                 justify-content: center;
                 flex-shrink: 0;
             }
-            .las-mobile-row-body { flex: 1; min-width: 0; }
-            .las-mobile-row-title {
+            .lan-mobile-card--school .lan-mobile-card-icon {
+                background: #d2952218;
+                border-color: #d2952230;
+            }
+            .lan-mobile-card-body { flex: 1; min-width: 0; }
+            .lan-mobile-card-title {
                 font-size: 14px;
                 font-weight: 400;
                 color: #e2e8f0;
                 margin: 0;
+                line-height: 1.3;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -385,80 +482,84 @@ function renderAssignmentCards(groupedData) {
                 align-items: center;
                 gap: 8px;
             }
-            .las-mobile-row-status-dot {
+            .lan-mobile-card-title-text {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .lan-mobile-status-dot {
                 display: inline-block;
                 width: 7px;
                 height: 7px;
                 border-radius: 50%;
                 flex-shrink: 0;
             }
-            .las-mobile-row-title-text {
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            .las-mobile-row-chevron {
+            .lan-mobile-card-chevron {
                 flex-shrink: 0;
                 color: #30363d;
             }
-            .las-mobile-row-meta {
+            .lan-mobile-card-date {
                 font-size: 12px;
                 color: #8b949e;
                 margin-top: 3px;
             }
+
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="las-desktop-layout">
-            <div class="las-sidebar">
-                <div class="las-sidebar-header">All Assignments</div>
-                <div class="las-sidebar-scroll">${sidebarHtml}</div>
+        <div class="lan-desktop-layout">
+            <div class="lan-sidebar">
+                <div class="lan-sidebar-header">All Announcements</div>
+                <div class="lan-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="las-main-panel" id="las-main-panel">
-                <div class="las-panel-empty">
+            <div class="lan-main-panel" id="lan-main-panel">
+                <div class="lan-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                     </svg>
-                    <p>Select an assignment from the left</p>
+                    <p>Select an announcement from the left</p>
                 </div>
             </div>
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
-        <div class="las-mobile-list">`;
+        <div class="lan-mobile-list">`;
 
     let mobileFlatIdx = 0;
 
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<div class="las-mobile-teacher-header">${escapeLearnerAssignmentHtml(teacher)}</div>`;
+    // Mobile — School-wide section
+    if (hasSchoolWide) {
+        html += `
+            <div class="lan-mobile-section-header lan-mobile-section-header--school">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#d29522" stroke-width="2.5" fill="none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                School-wide Announcements
+            </div>`;
 
-        tasks.forEach(task => {
-            const isDone = !!task.submission_file;
-            const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
-
+        schoolWide.forEach(ann => {
+            const isNew = new Date(ann.created_at) > sevenDaysAgo;
             html += `
-                <div class="las-mobile-row" role="button" tabindex="0"
-                    onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
-                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }"
-                    style="${task.is_past_due ? 'opacity:0.65;' : ''}">
-                    <div class="las-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
+                <div class="lan-mobile-card lan-mobile-card--school" role="button" tabindex="0"
+                    onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
+                    <div class="lan-mobile-card-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                     </div>
-                    <div class="las-mobile-row-body">
-                        <div class="las-mobile-row-title">
-                            <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
-                            <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
+                    <div class="lan-mobile-card-body">
+                        <div class="lan-mobile-card-title">
+                            <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                            ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
                         </div>
-                        <div class="las-mobile-row-meta">Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}</div>
+                        <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
-                    <div class="las-mobile-row-chevron">
+                    <div class="lan-mobile-card-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
@@ -468,12 +569,55 @@ function renderAssignmentCards(groupedData) {
         });
     }
 
-    html += `</div>`; // close .las-mobile-list
+    // Mobile — Teacher section
+    if (hasTeacher) {
+        html += `
+            <div class="lan-mobile-section-header lan-mobile-section-header--teacher">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                From Teachers
+            </div>`;
+
+        for (const [teacher, items] of Object.entries(teacherData)) {
+            html += `<div class="lan-mobile-teacher-header">${escapeLearnerAnnouncementHtml(teacher)}</div>`;
+            items.forEach(ann => {
+                const isNew = new Date(ann.created_at) > sevenDaysAgo;
+                html += `
+                    <div class="lan-mobile-card" role="button" tabindex="0"
+                        onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
+                        onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
+                        <div class="lan-mobile-card-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="lan-mobile-card-body">
+                            <div class="lan-mobile-card-title">
+                                <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                                ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
+                            </div>
+                            <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                        </div>
+                        <div class="lan-mobile-card-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>`;
+                mobileFlatIdx++;
+            });
+        }
+    }
+
+    html += `</div>`; // close .lan-mobile-list
 
     apiArea.innerHTML = html;
 }
 
-function escapeLearnerAssignmentHtml(value) {
+function escapeLearnerAnnouncementHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -483,46 +627,54 @@ function escapeLearnerAssignmentHtml(value) {
     }[char]));
 }
 
-function escapeLearnerAssignmentJsString(value) {
-    return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
+function formatLearnerAnnouncementMessage(message) {
+    return escapeLearnerAnnouncementHtml(message).replace(/\n/g, '<br>');
 }
 
-window.openMobileLearnerAssignment = function(flatIdx) {
+window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (window.innerWidth > 899) return;
 
-    const task = (window._allLearnerAssignmentsFlat || [])[flatIdx];
+    const ann = (window._allLearnerAnnouncementsFlat || [])[flatIdx];
     const apiArea = document.getElementById('api-content-area');
     const iframe = document.getElementById('mainFrame');
     const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
 
-    if (!task || !apiArea) return;
+    if (!ann || !apiArea) return;
 
     if (iframe) iframe.style.display = 'none';
     if (apiArea) apiArea.style.display = 'block';
     if (myClassContent) myClassContent.classList.remove('active');
+    if (mainContent) mainContent.scrollTop = 0;
 
-    sessionStorage.setItem("lastLearnerPage", "assignment_list.php");
+    sessionStorage.setItem("lastLearnerPage", "announcement_list.php");
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Submission', mode: 'detail' });
+        window.configureHeader({ title: ann.title || 'Announcement', mode: 'detail', detailType: 'Announcement' });
     }
-    showLearnerAssignmentMobileBottomNav();
+    showLearnerAnnouncementMobileBottomNav();
 
-    const isDone = !!task.submission_file;
-    const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
-    const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
-    const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
-    const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
+    const isSchool = ann._type === 'school';
+    const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
+    const detailIcon = isSchool
+        ? `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#d29522" stroke-width="2.5" fill="none">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+           </svg>`
+        : `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+           </svg>`;
 
     apiArea.innerHTML = `
         <style>
-            .las-mobile-detail {
+            .lan-mobile-detail {
                 min-height: calc(100vh - 74px);
                 padding: 18px 16px 96px;
             }
-            .las-mobile-detail-status {
+            .lan-mobile-detail-badge {
                 display: inline-flex;
                 align-items: center;
-                gap: 7px;
+                gap: 6px;
                 padding: 4px 9px;
                 border-radius: 6px;
                 font-size: 10px;
@@ -530,191 +682,108 @@ window.openMobileLearnerAssignment = function(flatIdx) {
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 margin-bottom: 12px;
-                color: #c9d1d9;
-                border: 1px solid rgba(255,255,255,0.1);
-                background: rgba(255,255,255,0.04);
             }
-            .las-mobile-row-status-dot {
-                display: inline-block;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
+            .lan-mobile-detail-badge--school {
+                color: #d29522;
+                border: 1px solid rgba(210,149,34,0.35);
+                background: rgba(210,149,34,0.1);
             }
-            .las-mobile-detail-title {
+            .lan-mobile-detail-badge--teacher {
+                color: #4fd1c5;
+                border: 1px solid rgba(79,209,197,0.35);
+                background: rgba(79,209,197,0.1);
+            }
+            .lan-mobile-detail-title {
                 margin: 0 0 10px;
                 color: #e2e8f0;
-                font-size: 21px;
+                font-size: 28px;
                 line-height: 1.28;
                 font-weight: 800;
+                letter-spacing: 0;
             }
-            .las-mobile-detail-meta {
+            .lan-mobile-detail-meta {
                 color: #8b949e;
                 font-size: 12px;
-                line-height: 1.6;
+                line-height: 1.5;
                 padding-bottom: 18px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
                 margin-bottom: 18px;
             }
-            .las-mobile-detail-desc {
+            .lan-mobile-detail-message {
                 color: #e2e8f0;
                 font-size: 15px;
                 line-height: 1.75;
                 overflow-wrap: anywhere;
-                margin-bottom: 20px;
-            }
-            .las-mobile-detail-links {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin-bottom: 22px;
-            }
-            .las-mobile-detail-link,
-            .las-mobile-detail-action {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                min-height: 44px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 800;
-                text-decoration: none;
-                box-sizing: border-box;
-            }
-            .las-mobile-detail-link {
-                color: #4fd1c5;
-                border: 1px solid rgba(79,209,197,0.35);
-                background: rgba(79,209,197,0.08);
-            }
-            .las-mobile-detail-action {
-                color: #0d1117;
-                background: #4fd1c5;
-                border: 1px solid #4fd1c5;
-                width: 100%;
-            }
-            .las-mobile-detail-action--locked {
-                color: #8b949e;
-                background: rgba(255,255,255,0.04);
-                border-color: rgba(255,255,255,0.1);
+                white-space: normal;
             }
             @media (min-width: 900px) {
-                .las-mobile-detail { display: none; }
+                .lan-mobile-detail { display: none; }
             }
         </style>
-        <article class="las-mobile-detail">
-            <div class="las-mobile-detail-status">
-                <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
-                ${statusLabel}
+        <article class="lan-mobile-detail">
+            <div class="lan-mobile-detail-badge ${isSchool ? 'lan-mobile-detail-badge--school' : 'lan-mobile-detail-badge--teacher'}">
+                ${detailIcon}
+                ${isSchool ? 'School-wide' : 'Teacher'}
             </div>
-            <h1 class="las-mobile-detail-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</h1>
-            <div class="las-mobile-detail-meta">
-                ${escapeLearnerAssignmentHtml(task.teacher || 'Teacher')} &bull; Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}
-            </div>
-            <div class="las-mobile-detail-desc">
-                ${task.description ? escapeLearnerAssignmentHtml(task.description).replace(/\n/g, '<br>') : 'No description provided.'}
-            </div>
-            <div class="las-mobile-detail-links">
-                ${task.teacher_file ? `
-                    <a class="las-mobile-detail-link" href="javascript:void(0)"
-                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.teacher_file)}', 'Teacher Attachment: ${escapeLearnerAssignmentJsString(task.title)}')">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                        Teacher Attachment
-                    </a>` : ''}
-                ${task.submission_file ? `
-                    <a class="las-mobile-detail-link" href="javascript:void(0)"
-                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.submission_file)}', 'My Submission: ${escapeLearnerAssignmentJsString(task.title)}')">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View My Work
-                    </a>` : ''}
-            </div>
-            ${task.is_past_due
-                ? `<span class="las-mobile-detail-action las-mobile-detail-action--locked">${actionLabel}</span>`
-                : `<a class="las-mobile-detail-action" href="${actionHref}" target="mainFrame" onclick="openLearnerAssignmentSubmission(event, '${actionHref}')">${actionLabel}</a>`}
+            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
+            <div class="lan-mobile-detail-meta">${escapeLearnerAnnouncementHtml(sender)} &bull; ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+            <div class="lan-mobile-detail-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
         </article>`;
 
-    const mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTop = 0;
 };
 
-window.openMobileLearnerAssignmentById = function(assignmentId) {
-    const targetId = String(assignmentId || '');
-    const flatIdx = (window._allLearnerAssignmentsFlat || []).findIndex(task => String(task.id) === targetId);
+window.openMobileLearnerAnnouncementById = function(announcementId) {
+    const targetId = String(announcementId || '');
+    const flatIdx = (window._allLearnerAnnouncementsFlat || []).findIndex(ann => String(ann.id) === targetId);
     if (flatIdx >= 0) {
-        window.openMobileLearnerAssignment(flatIdx);
+        window.openMobileLearnerAnnouncement(flatIdx);
     }
 };
 
 // ─────────────────────────────────────────────
-// DESKTOP PANEL: SELECT ASSIGNMENT
+// DESKTOP PANEL: SELECT ANNOUNCEMENT
 // ─────────────────────────────────────────────
-window.selectDesktopLearnerAssignment = function(flatIdx) {
-    window._learnerAssignmentSelectedIdx = flatIdx;
-    saveAssignmentPageState();
-    document.querySelectorAll('.las-sidebar-item').forEach(el => el.classList.remove('active'));
-    const sidebarItem = document.getElementById(`las-sidebar-${flatIdx}`);
+window.selectDesktopLearnerAnnouncement = function(flatIdx) {
+    window._learnerAnnouncementSelectedIdx = flatIdx;
+    saveAnnouncementPageState();
+    document.querySelectorAll('.lan-sidebar-item').forEach(el => el.classList.remove('active'));
+    const sidebarItem = document.getElementById(`lan-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
-    const task = (window._allLearnerAssignmentsFlat || [])[flatIdx];
-    if (!task) return;
+    const ann = (window._allLearnerAnnouncementsFlat || [])[flatIdx];
+    if (!ann) return;
 
-    const panel = document.getElementById('las-main-panel');
+    const panel = document.getElementById('lan-main-panel');
     if (!panel) return;
 
-    const isDone = !!task.submission_file;
-    const statusColor = task.is_past_due ? '#f85149' : (isDone ? '#4fd1c5' : '#888');
-    const statusSVG = task.is_past_due
-        ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align:middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
-        : (isDone
-            ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2.5" fill="none" style="vertical-align:middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
-            : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align:middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const isNew = new Date(ann.created_at) > sevenDaysAgo;
 
-    const submitAction = task.is_past_due
-        ? `<span style="color:#8b949e; font-weight:700; font-size:14px;">Locked</span>`
-        : `<a href="submit_assignment.php?assignment_id=${task.id}"
-              style="background:rgba(${isDone ? '79,209,197' : '230,126,34'},0.1);border:1px solid rgba(${isDone ? '79,209,197' : '230,126,34'},0.4);color:${isDone ? '#4fd1c5' : '#e67e22'};padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-block;">
-              ${isDone ? 'Update Submission' : 'Submit Assignment'}
-           </a>`;
+    const isSchool = ann._type === 'school';
 
     panel.innerHTML = `
-        <div class="las-panel-content">
-            <div class="las-panel-header">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    ${statusSVG}
-                    <div class="las-panel-title">${task.title}</div>
+        <div class="lan-panel-content">
+            <div class="lan-panel-header">
+                <div>
+                    ${isSchool ? `
+                        <div class="lan-school-wide-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                            School-wide
+                        </div>` : ''}
+                    <div class="lan-panel-title ${isSchool ? 'lan-panel-title--school' : ''}">
+                        <i class="${isSchool ? 'fas fa-school' : 'fas fa-bullhorn'}" style="margin-right:8px;"></i>${ann.title}
+                    </div>
+                    <div class="lan-panel-meta">${ann.teacher} &bull; ${ann.display_date}</div>
                 </div>
-                <div class="las-panel-meta">
-                    <span>${task.teacher}</span>
-                    <span>&bull;</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><path d="M2 3h20v14H2z"></path><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
-                    <span>${task.class_name}</span>
-                    <span>&bull;</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>Due: ${task.due_date}</span>
-                </div>
+                ${isNew ? '<span style="background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid #4fd1c5;padding:3px 10px;font-size:11px;font-weight:800;border-radius:6px;letter-spacing:0.5px;">NEW</span>' : ''}
             </div>
-
-            <div class="las-panel-desc">
-                ${task.description ? task.description.replace(/\n/g, '<br>') : 'No description provided.'}
+            <div class="lan-panel-message">
+                ${ann.message.replace(/\n/g, '<br>')}
             </div>
-
-            <div class="las-panel-links">
-                ${task.teacher_file ? `
-                    <a href="javascript:void(0)"
-                        onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#4fd1c5;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                        Teacher Attachment
-                    </a>` : ''}
-                ${task.submission_file ? `
-                    <a href="javascript:void(0)"
-                        onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#4fd1c5;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View My Work
-                    </a>` : ''}
-            </div>
-
-            ${submitAction}
         </div>`;
 };
