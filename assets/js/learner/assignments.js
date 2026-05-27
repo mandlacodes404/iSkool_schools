@@ -160,13 +160,13 @@ function renderAssignmentCards(groupedData) {
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
             const dotColor = task.is_past_due ? '#6b7280'
-                : isDone ? '#4fd1c5' : '#e67e22';
+                : isDone ? '#a78bfa' : '#e67e22';
 
             sidebarHtml += `
                 <div class="las-sidebar-item" id="las-sidebar-${flatIdx}"
                     onclick="selectDesktopLearnerAssignment(${flatIdx})">
                     <div class="las-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#a78bfa" stroke-width="2" fill="none">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>
@@ -220,7 +220,7 @@ function renderAssignmentCards(groupedData) {
                 font-size: 11px;
                 font-weight: 800;
                 letter-spacing: 1.5px;
-                color: #4fd1c5;
+                color: #a78bfa;
                 text-transform: uppercase;
                 flex-shrink: 0;
             }
@@ -252,8 +252,8 @@ function renderAssignmentCards(groupedData) {
             }
             .las-sidebar-item:hover { background: rgba(255,255,255,0.04); }
             .las-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
+                background: rgba(167,139,250,0.08);
+                border-left-color: #a78bfa;
             }
             .las-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
             .las-sidebar-item-info { flex: 1; min-width: 0; }
@@ -577,14 +577,14 @@ window.openMobileLearnerAssignment = function(flatIdx) {
                 box-sizing: border-box;
             }
             .las-mobile-detail-link {
-                color: #4fd1c5;
-                border: 1px solid rgba(79,209,197,0.35);
-                background: rgba(79,209,197,0.08);
+                color: #a78bfa;
+                border: 1px solid rgba(167,139,250,0.35);
+                background: rgba(167,139,250,0.08);
             }
             .las-mobile-detail-action {
                 color: #0d1117;
-                background: #4fd1c5;
-                border: 1px solid #4fd1c5;
+                background: #a78bfa;
+                border: 1px solid #a78bfa;
                 width: 100%;
             }
             .las-mobile-detail-action--locked {
@@ -656,7 +656,7 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     if (!panel) return;
 
     const isDone = !!task.submission_file;
-    const statusColor = task.is_past_due ? '#f85149' : (isDone ? '#4fd1c5' : '#888');
+    const statusColor = task.is_past_due ? '#f85149' : (isDone ? '#a78bfa' : '#888');
     const statusSVG = task.is_past_due
         ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2" fill="none" style="vertical-align:middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
         : (isDone
@@ -666,7 +666,7 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     const submitAction = task.is_past_due
         ? `<span style="color:#8b949e; font-weight:700; font-size:14px;">Locked</span>`
         : `<a href="submit_assignment.php?assignment_id=${task.id}"
-              style="background:rgba(${isDone ? '79,209,197' : '230,126,34'},0.1);border:1px solid rgba(${isDone ? '79,209,197' : '230,126,34'},0.4);color:${isDone ? '#4fd1c5' : '#e67e22'};padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-block;">
+              style="background:rgba(${isDone ? '167,139,250' : '230,126,34'},0.1);border:1px solid rgba(${isDone ? '167,139,250' : '230,126,34'},0.4);color:${isDone ? '#a78bfa' : '#e67e22'};padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-block;">
               ${isDone ? 'Update Submission' : 'Submit Assignment'}
            </a>`;
 
@@ -696,15 +696,15 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
                 ${task.teacher_file ? `
                     <a href="javascript:void(0)"
                         onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#4fd1c5;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        style="color:#a78bfa;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                         Teacher Attachment
                     </a>` : ''}
                 ${task.submission_file ? `
                     <a href="javascript:void(0)"
                         onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#4fd1c5;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        style="color:#a78bfa;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         View My Work
                     </a>` : ''}
             </div>

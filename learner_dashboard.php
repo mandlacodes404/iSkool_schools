@@ -2060,11 +2060,20 @@ if (desktopToggle) {
 
                 // Header: solid when scrolled down, transparent at top
                 if (scrollTop > SCROLL_THRESHOLD) {
+                    const pageColor = window.learnerCurrentPageColor || '#000000';
+                    const isHome = !mainHeader.getAttribute('data-page-color');
+                    // Home stays dark glass; other pages get a subtle colour tint
+                    const headerBg = isHome
+                        ? 'rgba(26, 25, 25, 0.92)'
+                        : pageColor + '18'; // ~9% opacity tint of the page colour
                     mainHeader.classList.add('header-scrolled');
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', window.learnerCurrentPageColor || '#1a1919');
+                    mainHeader.style.background = headerBg;
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#1a1919' : pageColor);
                 } else {
                     mainHeader.classList.remove('header-scrolled');
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', window.learnerCurrentPageColor || '#000000');
+                    mainHeader.style.background = '';
+                    const pageColor = window.learnerCurrentPageColor || '#000000';
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', pageColor);
                 }
 
                 if (mainHeader.classList.contains('mobile-detail-mode')) {
@@ -2111,12 +2120,15 @@ window.configureHeader = function(config) {
         if (color) {
             window.learnerCurrentPageColor = color;
             if (themeColorMeta) themeColorMeta.setAttribute('content', color);
+            // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
+            if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
         } else {
-            // Home or no colour supplied — reset to black
+            // Home or no colour — reset to black/default
             window.learnerCurrentPageColor = '#000000';
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
             if (mainHeader)     mainHeader.style.borderBottom = '';
+            if (mainHeader)     mainHeader.removeAttribute('data-page-color');
         }
     }
     // ──────────────────────────────────────────────────────────────────
@@ -2526,9 +2538,9 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/main.js?v=1.1"></script>
 <script src="assets/js/learner/manual.js?v=3.0"></script>
 <script src="assets/js/learner/quiz.js?v=4.8"></script>
-<script src="assets/js/learner/assignments.js?v=4.0"></script>
+<script src="assets/js/learner/assignments.js?v=4.1"></script>
 <script src="assets/js/learner/resources.js?v=3.6"></script>
-<script src="assets/js/learner/announcements.js?v=3.2"></script>
+<script src="assets/js/learner/announcements.js?v=3.3"></script>
 <script src="assets/js/learner/grades.js?v=2.7"></script>
 <script src="assets/js/learner/evaluations.js?v=2.1"></script>
 <script src="assets/js/learner/discussions.js?v=5.7"></script>
