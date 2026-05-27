@@ -421,15 +421,15 @@ function renderAnnouncements(data) {
                 gap: 6px;
             }
             .lan-mobile-section-header--school {
-                color: #d29522;
-                background: rgba(210,149,34,0.06);
-                border-bottom: 1px solid rgba(210,149,34,0.12);
+                color: #f28c38;
+                background: rgba(242,140,56,0.06);
+                border-bottom: 1px solid rgba(242,140,56,0.12);
             }
             .lan-mobile-section-header--teacher {
-                color: #4fd1c5;
-                background: rgba(79,209,197,0.04);
-                border-top: 1px solid rgba(79,209,197,0.1);
-                border-bottom: 1px solid rgba(79,209,197,0.1);
+                color: #f28c38;
+                background: rgba(242,140,56,0.04);
+                border-top: 1px solid rgba(242,140,56,0.1);
+                border-bottom: 1px solid rgba(242,140,56,0.1);
             }
             .lan-mobile-teacher-header {
                 padding: 8px 16px 4px 20px;
@@ -450,23 +450,23 @@ function renderAnnouncements(data) {
                 cursor: pointer;
             }
             .lan-mobile-card--school {
-                border-left: 3px solid rgba(210,149,34,0.5);
+                border-left: 3px solid rgba(242,140,56,0.5);
             }
             .lan-mobile-card:last-child { border-bottom: none; }
             .lan-mobile-card-icon {
                 width: 32px;
                 height: 32px;
                 border-radius: 8px;
-                background: #4fd1c518;
-                border: 1px solid #4fd1c530;
+                background: #f28c3818;
+                border: 1px solid #f28c3830;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
             }
             .lan-mobile-card--school .lan-mobile-card-icon {
-                background: #d2952218;
-                border-color: #d2952230;
+                background: #f28c3818;
+                border-color: #f28c3830;
             }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
@@ -533,7 +533,7 @@ function renderAnnouncements(data) {
     if (hasSchoolWide) {
         html += `
             <div class="lan-mobile-section-header lan-mobile-section-header--school">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#d29522" stroke-width="2.5" fill="none">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
@@ -547,7 +547,7 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
@@ -555,7 +555,7 @@ function renderAnnouncements(data) {
                     <div class="lan-mobile-card-body">
                         <div class="lan-mobile-card-title">
                             <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                            ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
+                            ${isNew ? '<span class="lan-mobile-status-dot" style="background:#f28c38;"></span>' : ''}
                         </div>
                         <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
@@ -573,7 +573,7 @@ function renderAnnouncements(data) {
     if (hasTeacher) {
         html += `
             <div class="lan-mobile-section-header lan-mobile-section-header--teacher">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                     <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                 </svg>
@@ -589,7 +589,7 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>
@@ -597,7 +597,7 @@ function renderAnnouncements(data) {
                         <div class="lan-mobile-card-body">
                             <div class="lan-mobile-card-title">
                                 <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                                ${isNew ? '<span class="lan-mobile-status-dot" style="background:#4fd1c5;"></span>' : ''}
+                                ${isNew ? '<span class="lan-mobile-status-dot" style="background:#f28c38;"></span>' : ''}
                             </div>
                             <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
@@ -656,11 +656,11 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const detailIcon = isSchool
-        ? `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#d29522" stroke-width="2.5" fill="none">
+        ? `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
            </svg>`
-        : `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+        : `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
            </svg>`;
@@ -684,14 +684,14 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
                 margin-bottom: 12px;
             }
             .lan-mobile-detail-badge--school {
-                color: #d29522;
-                border: 1px solid rgba(210,149,34,0.35);
-                background: rgba(210,149,34,0.1);
+                color: #f28c38;
+                border: 1px solid rgba(242,140,56,0.35);
+                background: rgba(242,140,56,0.1);
             }
             .lan-mobile-detail-badge--teacher {
-                color: #4fd1c5;
-                border: 1px solid rgba(79,209,197,0.35);
-                background: rgba(79,209,197,0.1);
+                color: #f28c38;
+                border: 1px solid rgba(242,140,56,0.35);
+                background: rgba(242,140,56,0.1);
             }
             .lan-mobile-detail-title {
                 margin: 0 0 10px;
