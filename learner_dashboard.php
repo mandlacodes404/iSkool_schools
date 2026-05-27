@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=2.0">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2065,7 +2065,7 @@ if (desktopToggle) {
                     // Home stays dark glass; other pages match the browser bar colour
                     const headerBg = isHome
                         ? 'rgba(26, 25, 25, 0.92)'
-                        : pageColor + 'cc'; // ~80% opacity – matches the browser bar colour
+                        : pageColor; // solid – matches the browser bar colour exactly
                     mainHeader.classList.add('header-scrolled');
                     mainHeader.style.background = headerBg;
                     if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#1a1919' : pageColor);
