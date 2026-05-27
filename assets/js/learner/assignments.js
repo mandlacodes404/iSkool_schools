@@ -449,7 +449,6 @@ function renderAssignmentCards(groupedData) {
                     <div class="las-mobile-row-body">
                         <div class="las-mobile-row-title">
                             <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
-                            <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
                         </div>
                     </div>
                     <div class="las-mobile-row-chevron">

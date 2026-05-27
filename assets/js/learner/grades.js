@@ -370,6 +370,11 @@ function renderGrades(data) {
     .quiz-row-title a { color: #68d391; text-decoration: none; transition: color 0.2s; }
     .quiz-row-title a:hover { color: #22c55e; }
     .quiz-unpublished .quiz-row-title { color: #8b949e; }
+    @media (max-width: 899px) {
+        .quiz-row-title { color: #e2e8f0; }
+        .quiz-row-title a { color: #e2e8f0; }
+        .quiz-row-title a:hover { color: #fff; }
+    }
     .quiz-score-pill { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
     .quiz-score-pill.high { background: rgba(34,197,94,0.15); color: #22c55e; }
     .quiz-score-pill.mid  { background: rgba(104,211,145,0.15); color: #68d391; }
@@ -906,7 +911,6 @@ function buildQuizList(quizzes, gi) {
                 <div class="quiz-row-title">
                     ${titleHtml}
                     ${summBadge}
-                    ${gradingStatus.badge}
                 </div>
                 <span class="quiz-score-pill ${pillClass}">${pillText}</span>
                 <button class="quiz-expand-btn" id="qexp-${gi}-${qi}" type="button"

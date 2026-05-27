@@ -555,7 +555,6 @@ function renderAnnouncements(data) {
                     <div class="lan-mobile-card-body">
                         <div class="lan-mobile-card-title">
                             <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                            ${isNew ? '<span class="lan-mobile-status-dot" style="background:#f28c38;"></span>' : ''}
                         </div>
                         <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
@@ -597,7 +596,6 @@ function renderAnnouncements(data) {
                         <div class="lan-mobile-card-body">
                             <div class="lan-mobile-card-title">
                                 <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                                ${isNew ? '<span class="lan-mobile-status-dot" style="background:#f28c38;"></span>' : ''}
                             </div>
                             <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
