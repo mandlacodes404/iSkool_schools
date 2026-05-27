@@ -2062,10 +2062,10 @@ if (desktopToggle) {
                 if (scrollTop > SCROLL_THRESHOLD) {
                     const pageColor = window.learnerCurrentPageColor || '#000000';
                     const isHome = !mainHeader.getAttribute('data-page-color');
-                    // Home stays dark glass; other pages get a subtle colour tint
+                    // Home stays dark glass; other pages match the browser bar colour
                     const headerBg = isHome
                         ? 'rgba(26, 25, 25, 0.92)'
-                        : pageColor + '18'; // ~9% opacity tint of the page colour
+                        : pageColor + 'cc'; // ~80% opacity – matches the browser bar colour
                     mainHeader.classList.add('header-scrolled');
                     mainHeader.style.background = headerBg;
                     if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#1a1919' : pageColor);
