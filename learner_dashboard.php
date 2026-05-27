@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=2.1">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2094,6 +2094,121 @@ if (desktopToggle) {
                 }
             }, { passive: true });
         }
+    }
+    // ─────────────────────────────────────────────────────────────────────
+    // PULL-TO-REFRESH — mobile only
+    // Swipe down from the very top of .main-content to refresh the current page.
+    // Shows a small animated indicator, busts the cache, then re-calls the active
+    // page fetch function so fresh data loads without a full page reload.
+    // ─────────────────────────────────────────────────────────────────────
+    if (window.innerWidth <= 768) {
+        (function initPullToRefresh() {
+            const scrollEl = document.querySelector('.main-content');
+            if (!scrollEl) return;
+
+            // Inject spin keyframe once
+            if (!document.getElementById('ptrStyles')) {
+                const st = document.createElement('style');
+                st.id = 'ptrStyles';
+                st.textContent = '@keyframes ptrSpin { to { transform: rotate(360deg); } }';
+                document.head.appendChild(st);
+            }
+
+            // ── Indicator element ───────────────────────────────────────────────
+            const ptr = document.createElement('div');
+            ptr.id = 'ptrIndicator';
+            ptr.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points=\"1 4 1 10 7 10\"></polyline><path d=\"M3.51 15a9 9 0 1 0 .49-4\"></path></svg>';
+            Object.assign(ptr.style, {
+                position:       'fixed',
+                top:            '70px',
+                left:           '50%',
+                transform:      'translateX(-50%) translateY(-80px)',
+                width:          '44px',
+                height:         '44px',
+                borderRadius:   '50%',
+                background:     'rgba(27,27,27,0.92)',
+                border:         '1px solid rgba(79,209,197,0.35)',
+                display:        'flex',
+                alignItems:     'center',
+                justifyContent: 'center',
+                zIndex:         '9999',
+                opacity:        '0',
+                transition:     'opacity 0.2s ease',
+                pointerEvents:  'none',
+                backdropFilter: 'blur(10px)',
+            });
+            document.body.appendChild(ptr);
+
+            const svgEl   = ptr.querySelector('svg');
+            const THRESHOLD = 72;
+            let startY = 0, pulling = false, triggered = false;
+
+            function startSpin() { svgEl.style.animation = 'ptrSpin 0.7s linear infinite'; }
+            function hide()       { ptr.style.opacity = '0'; ptr.style.transform = 'translateX(-50%) translateY(-80px)'; svgEl.style.animation = 'none'; }
+
+            // ── Cache bust + re-fetch for current page ──────────────────────────
+            function refreshCurrentPage() {
+                const page = sessionStorage.getItem('lastLearnerPage') || 'home';
+                if (page === 'quiz_list.php')         window.learnerQuizCache          = null;
+                if (page === 'assignment_list.php')   window.learnerAssignmentCache    = null;
+                if (page === 'announcement_list.php') window.announcementCache         = null;
+                if (page === 'grades')                window.learnerGradesCache        = null;
+                if (page === 'resources')             window.learnerResourcesCache     = null;
+                if (page === 'manual')                window.learnerManualCache        = null;
+
+                const fnMap = {
+                    'quiz_list.php':         window.fetchQuizzes,
+                    'assignment_list.php':   window.fetchAssignments,
+                    'announcement_list.php': window.fetchAnnouncements,
+                    'grades':                window.fetchGrades,
+                    'resources':             window.fetchResources,
+                    'manual':                window.fetchManual,
+                };
+                const fn = fnMap[page];
+                if (typeof fn === 'function') fn();
+                else if (typeof window.loadLearnerHome === 'function') window.loadLearnerHome();
+            }
+
+            // ── Touch handlers ──────────────────────────────────────────────────
+            scrollEl.addEventListener('touchstart', function(e) {
+                if (scrollEl.scrollTop === 0) {
+                    startY    = e.touches[0].clientY;
+                    pulling   = true;
+                    triggered = false;
+                }
+            }, { passive: true });
+
+            scrollEl.addEventListener('touchmove', function(e) {
+                if (!pulling) return;
+                const deltaY = e.touches[0].clientY - startY;
+                if (deltaY <= 0) { pulling = false; return; }
+
+                const capped    = Math.min(deltaY, THRESHOLD * 1.5);
+                const progress  = Math.min(capped / THRESHOLD, 1);
+                const translateY = Math.min(capped * 0.4, 36);
+
+                ptr.style.opacity   = String(Math.min(progress * 1.5, 1));
+                ptr.style.transform = 'translateX(-50%) translateY(' + translateY + 'px)';
+
+                if (capped >= THRESHOLD && !triggered) {
+                    triggered = true;
+                    startSpin();
+                }
+            }, { passive: true });
+
+            scrollEl.addEventListener('touchend', function() {
+                if (!pulling) return;
+                pulling = false;
+                if (triggered) {
+                    setTimeout(function() {
+                        refreshCurrentPage();
+                        setTimeout(hide, 700);
+                    }, 150);
+                } else {
+                    hide();
+                }
+            }, { passive: true });
+        })();
     }
     // ─────────────────────────────────────────────────────────────────────
 });
