@@ -358,14 +358,22 @@ body {
     position: relative;
 }
 
-/* ── MOBILE SCROLL FIX: #api-content-area is the ONLY scroll container ──
-   .main-content must NOT scroll — it stays static so the fixed header
-   never bounces. #api-content-area fills the space below the fixed header
-   and handles all scrolling itself (see quiz.css for its mobile rules).
+/* ── MOBILE SCROLL FIX: main-content must scroll on mobile ─────────────
+   On desktop, #api-content-area handles its own scroll (overflow-y: auto).
+   On mobile, #api-content-area is height:auto + overflow:visible, so the
+   parent (.main-content) must be the scroll container instead.
 ──────────────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
     .main-content {
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    /* Chrome / Safari / Edge */
+    .main-content::-webkit-scrollbar {
+        display: none;
     }
 }
 
@@ -802,15 +810,6 @@ iframe {
     .main-header {
         justify-content: space-between;
         padding: 10px 12px;
-        /* Fixed (not sticky) so it never moves regardless of scroll container.
-           Dynamic background/colour set by JS still works normally. */
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        width: 100%;
-        box-sizing: border-box;
     }
 
     .main-header h1 {

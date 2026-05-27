@@ -16,21 +16,15 @@
     padding-bottom: 120px;      /* Extra space so the last card isn't stuck at the bottom */
 }
 
-/* ── MOBILE: #api-content-area is the ONLY scrollable element ───────────
-   The header is position:fixed (~50px tall), so we push this area down
-   with margin-top and size it to fill the remaining viewport.
-   Adjust the 50px if your header is taller/shorter.
-   .disc-thread-active override preserved so discussions still work.     */
+/* ── MOBILE: Consistent 18px padding so all pages have breathing room ── */
+/* NOTE: .disc-thread-active is added by discussions.js when a thread is open,
+   so these !important overrides don't fight the thread's scroll layout.       */
 @media (max-width: 767px) {
     #api-content-area:not(.disc-thread-active) {
-        height: calc(100vh - 50px) !important;
-        margin-top: 50px !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch;
+        height: auto !important;
+        overflow: visible !important;
         padding: 18px !important;
         padding-bottom: 110px !important; /* Clears the bottom nav bar */
-        box-sizing: border-box !important;
     }
 }
 
