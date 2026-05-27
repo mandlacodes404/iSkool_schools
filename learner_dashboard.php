@@ -2524,12 +2524,12 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.1"></script>
-<script src="assets/js/learner/manual.js?v=2.9"></script>
-<script src="assets/js/learner/quiz.js?v=4.7"></script>
-<script src="assets/js/learner/assignments.js?v=3.9"></script>
-<script src="assets/js/learner/resources.js?v=3.5"></script>
-<script src="assets/js/learner/announcements.js?v=3.1"></script>
-<script src="assets/js/learner/grades.js?v=2.6"></script>
+<script src="assets/js/learner/manual.js?v=3.0"></script>
+<script src="assets/js/learner/quiz.js?v=4.8"></script>
+<script src="assets/js/learner/assignments.js?v=4.0"></script>
+<script src="assets/js/learner/resources.js?v=3.6"></script>
+<script src="assets/js/learner/announcements.js?v=3.2"></script>
+<script src="assets/js/learner/grades.js?v=2.7"></script>
 <script src="assets/js/learner/evaluations.js?v=2.1"></script>
 <script src="assets/js/learner/discussions.js?v=5.7"></script>
 <script src="assets/js/learner/syllabus.js?v=1.5"></script>
