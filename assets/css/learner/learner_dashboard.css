@@ -1395,9 +1395,11 @@ iframe {
    Desktop is NEVER affected — every rule here is inside max-width:768px.
 ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    /* Base state: transparent, no border */
+    /* Base state: transparent, no border.
+       No !important on background so JS inline style can override it
+       when configureHeader sets a page colour. */
     .main-header {
-        background: transparent !important;
+        background: transparent;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -1406,7 +1408,10 @@ iframe {
                     backdrop-filter 0.28s ease;
     }
 
-    /* Scrolled state: glass effect locks in */
+    /* Scrolled state: glass effect locks in.
+       background is intentionally NOT set here — it comes from
+       mainHeader.style.background (set by the scroll handler in JS),
+       which now wins because the base rule above has no !important. */
     .main-header.header-scrolled {
         border-bottom-color: rgba(255, 255, 255, 0.07) !important;
         backdrop-filter: blur(10px) !important;
