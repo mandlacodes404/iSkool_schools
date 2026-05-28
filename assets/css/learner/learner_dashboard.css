@@ -365,18 +365,24 @@ body {
 ──────────────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
     .main-content {
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Firefox */
-        padding-top: calc(68px + env(safe-area-inset-top));
+        overflow: visible;
+        padding-top: calc(68px + env(safe-area-inset-top, 0));
         min-height: 100vh;
         height: 100vh;
         box-sizing: border-box;
     }
 
+    #api-content-area {
+        height: calc(100vh - 68px - env(safe-area-inset-top, 0));
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
+        padding-bottom: 120px;
+    }
+
     /* Chrome / Safari / Edge */
-    .main-content::-webkit-scrollbar {
+    #api-content-area::-webkit-scrollbar {
         display: none;
     }
 }
@@ -1206,15 +1212,8 @@ iframe {
     height: 16px;
 }
 @media (max-width: 768px) {
-    /* Perspective is key for the 3D 'pop' */
     body {
-        perspective: 1200px;
         overflow-x: hidden;
-    }
-
-    .main-content {
-        backface-visibility: hidden;
-        transform-style: preserve-3d;
     }
 
     @keyframes mobileHorizontalFlip {
@@ -1231,7 +1230,8 @@ iframe {
     }
 
     .mobile-first-load {
-        /* Duration 0.6s with a 'spring' ease-out */
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
         animation: mobileHorizontalFlip 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 }
@@ -1404,10 +1404,12 @@ iframe {
        when configureHeader sets a page colour. */
     .main-header {
         position: fixed;
-        top: 0;
+        top: env(safe-area-inset-top, 0);
         left: 0;
         right: 0;
         width: 100%;
+        min-height: 68px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0));
         background: transparent;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
@@ -1415,6 +1417,17 @@ iframe {
         transition: background 0.28s ease,
                     border-color 0.28s ease,
                     backdrop-filter 0.28s ease;
+    }
+
+    .main-header > div,
+    .main-header .logo-container,
+    .main-header #headerLeft,
+    .main-header #headerRight {
+        min-width: 0;
+    }
+
+    .main-header .top-nav-avatar-btn {
+        overflow: visible;
     }
 
     /* Scrolled state: glass effect locks in.

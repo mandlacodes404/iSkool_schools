@@ -212,7 +212,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=3.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=3.3">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.2">
     <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=2.9">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2044,19 +2044,19 @@ if (desktopToggle) {
     // Only wired on mobile. Discussion threads set overflow:hidden on
     // .main-content so scrollTop never changes — safe during threads.
     if (window.innerWidth <= 768) {
-        const mainContent  = document.querySelector('.main-content');
-        const mainHeader   = document.querySelector('.main-header');
-        const bottomNav    = document.getElementById('mobileBottomNav');
+        const apiArea       = document.querySelector('#api-content-area');
+        const mainHeader    = document.querySelector('.main-header');
+        const bottomNav     = document.getElementById('mobileBottomNav');
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         const SCROLL_THRESHOLD = 10; // px before header solidifies
         const DETAIL_TITLE_THRESHOLD = 28; // px before detail title collapses into header
         const BOTTOM_THRESHOLD = 10; // px from bottom before nav fades out
 
-        if (mainContent && mainHeader) {
-            mainContent.addEventListener('scroll', function () {
-                const scrollTop    = mainContent.scrollTop;
-                const scrollHeight = mainContent.scrollHeight;
-                const clientHeight = mainContent.clientHeight;
+        if (apiArea && mainHeader) {
+            apiArea.addEventListener('scroll', function () {
+                const scrollTop    = apiArea.scrollTop;
+                const scrollHeight = apiArea.scrollHeight;
+                const clientHeight = apiArea.clientHeight;
                 const distFromBottom = scrollHeight - scrollTop - clientHeight;
 
                 // Header: solid when scrolled down, transparent at top
@@ -2098,13 +2098,13 @@ if (desktopToggle) {
     }
     // ─────────────────────────────────────────────────────────────────────
     // PULL-TO-REFRESH — mobile only
-    // Swipe down from the very top of .main-content to refresh the current page.
+    // Swipe down from the very top of #api-content-area to refresh the current page.
     // Shows a small animated indicator, busts the cache, then re-calls the active
     // page fetch function so fresh data loads without a full page reload.
     // ─────────────────────────────────────────────────────────────────────
     if (window.innerWidth <= 768) {
         (function initPullToRefresh() {
-            const scrollEl = document.querySelector('.main-content');
+            const scrollEl = document.querySelector('#api-content-area');
             if (!scrollEl) return;
 
             // Inject spin keyframe once
@@ -2251,7 +2251,7 @@ window.configureHeader = function(config) {
     
     // Select our UI elements
     const mainHeader = document.querySelector('.main-header');
-    const mainContent = document.querySelector('.main-content');
+    const mainContent = document.querySelector('#api-content-area') || document.querySelector('.main-content');
     const mobileBottomNav = document.getElementById('mobileBottomNav');
     const titleEl = document.getElementById('headerTitle');
     const logoEl = document.getElementById('headerLogo');

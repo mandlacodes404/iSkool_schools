@@ -21,8 +21,9 @@
    so these !important overrides don't fight the thread's scroll layout.       */
 @media (max-width: 767px) {
     #api-content-area:not(.disc-thread-active) {
-        height: auto !important;
-        overflow: visible !important;
+        height: calc(100vh - 68px - env(safe-area-inset-top, 0)) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         padding: 18px !important;
         padding-bottom: 110px !important; /* Clears the bottom nav bar */
     }
