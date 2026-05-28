@@ -478,37 +478,6 @@ function renderQuizCards(groupedData) {
             }
 
             /* ── MOBILE LIST STYLES ── */
-            .learner-mobile-search-wrapper {
-                padding: 14px 16px 0;
-                background: #1a1919;
-            }
-            .learner-mobile-search-label {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                width: 100%;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.1);
-                border-radius: 999px;
-                padding: 11px 14px;
-            }
-            .learner-mobile-search-label svg {
-                flex-shrink: 0;
-                color: #c9d1d9;
-            }
-            .learner-mobile-search-input {
-                width: 100%;
-                border: none;
-                outline: none;
-                background: transparent;
-                color: #ffffff;
-                font-size: 14px;
-                line-height: 1.3;
-                min-width: 0;
-            }
-            .learner-mobile-search-input::placeholder {
-                color: rgba(255,255,255,0.55);
-            }
             .lqz-mobile-list {
                 background: #1a1919;
                 border-radius: 12px;
@@ -621,20 +590,11 @@ function renderQuizCards(groupedData) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (mobile only search bar added) ═══ -->
-        <div class="lqz-mobile-list">
-            <div class="learner-mobile-search-wrapper">
-                <label class="learner-mobile-search-label">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-                        <circle cx="11" cy="11" r="7"></circle>
-                        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-                    </svg>
-                    <input type="search" class="learner-mobile-search-input" placeholder="Search quizzes" autocomplete="off">
-                </label>
-            </div>`;
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <div class="lqz-mobile-list">`;
 
     for (const [subject, quizzes] of Object.entries(groupedData)) {
-        html += `<div class="lqz-mobile-group"><div class="lqz-mobile-subject-header">${escapeHtml(subject)}</div>`;
+        html += `<div class="lqz-mobile-subject-header">${escapeHtml(subject)}</div>`;
 
         quizzes.forEach(quiz => {
             const displayDate = formatQuizDate(quiz.start_time);
@@ -683,7 +643,7 @@ function renderQuizCards(groupedData) {
                 : '#4fd1c5';
 
             html += `
-                <div class="lqz-mobile-row" ${rowAttrs} data-search="${escapeHtml((quiz.title + ' ' + subject + ' ' + quiz.status).toLowerCase())}">
+                <div class="lqz-mobile-row" ${rowAttrs}>
                     <div class="lqz-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -704,40 +664,12 @@ function renderQuizCards(groupedData) {
                     </div>
                 </div>`;
         });
-        html += `</div>`;
     }
 
     html += `</div>`; // close .lqz-mobile-list
 
     apiArea.innerHTML = html;
-    initLearnerQuizMobileSearch();
     startQuizCountdowns();
-}
-
-function initLearnerQuizMobileSearch() {
-    const apiArea = document.getElementById('api-content-area');
-    if (!apiArea) return;
-    const input = apiArea.querySelector('.learner-mobile-search-input');
-    if (!input) return;
-
-    input.addEventListener('input', () => {
-        const query = input.value.trim().toLowerCase();
-        filterLearnerQuizMobileRows(query);
-    });
-}
-
-function filterLearnerQuizMobileRows(query) {
-    const groups = document.querySelectorAll('.lqz-mobile-group');
-    groups.forEach(group => {
-        let anyVisible = false;
-        group.querySelectorAll('.lqz-mobile-row').forEach(row => {
-            const text = row.dataset.search || '';
-            const visible = !query || text.indexOf(query) !== -1;
-            row.style.display = visible ? 'flex' : 'none';
-            if (visible) anyVisible = true;
-        });
-        group.style.display = anyVisible ? '' : 'none';
-    });
 }
 
 // ─────────────────────────────────────────────
