@@ -603,6 +603,11 @@ iframe {
         flex-shrink: 0;
     }
 
+    .main-header {
+        align-items: flex-start;
+        padding: 6px 12px;
+    }
+
     #headerBackLabel {
         display: inline-block;
         min-width: 0;
@@ -819,7 +824,8 @@ iframe {
 
     .main-header {
         justify-content: space-between;
-        padding: 10px 12px;
+        padding: 6px 12px;
+        align-items: flex-start;
     }
 
     .main-header h1 {
