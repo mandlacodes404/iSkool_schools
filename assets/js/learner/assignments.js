@@ -135,6 +135,17 @@ function restoreAssignmentPageState() {
     } catch (e) { /* ignore bad state */ }
 }
 
+function formatAssignmentDueDate(dueDateStr) {
+    if (!dueDateStr || dueDateStr === 'No Due Date') return 'No Due Date';
+    const date = new Date(dueDateStr.replace(/-/g, '/'));
+    if (isNaN(date)) return dueDateStr;
+    const day = date.getDate();
+    const month = date.toLocaleString('en-GB', { month: 'short' });
+    const hours = String(date.getHours()).padStart(2, '0');
+    const mins = String(date.getMinutes()).padStart(2, '0');
+    return `Due ${day} ${month}, ${hours}:${mins}`;
+}
+
 function renderAssignmentCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -449,6 +460,9 @@ function renderAssignmentCards(groupedData) {
                     <div class="las-mobile-row-body">
                         <div class="las-mobile-row-title">
                             <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
+                        </div>
+                        <div class="las-mobile-row-meta" style="font-size:12px; color:${task.is_past_due ? '#6b7280' : (isDone ? '#a78bfa' : '#e67e22')}; margin-top:3px;">
+                            ${formatAssignmentDueDate(task.due_date)}
                         </div>
                     </div>
                     <div class="las-mobile-row-chevron">
