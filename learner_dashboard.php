@@ -2066,15 +2066,14 @@ if (desktopToggle) {
                     // Home stays dark glass; other pages match the browser bar colour
                     const headerBg = isHome
                         ? 'rgba(26, 25, 25, 0.92)'
-                        : pageColor; // solid – matches the browser bar colour exactly
+                        : pageColor;
                     mainHeader.classList.add('header-scrolled');
                     mainHeader.style.background = headerBg;
                     if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#1a1919' : pageColor);
                 } else {
                     mainHeader.classList.remove('header-scrolled');
                     mainHeader.style.background = '';
-                    const pageColor = window.learnerCurrentPageColor || '#000000';
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', pageColor);
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
                 }
 
                 if (mainHeader.classList.contains('mobile-detail-mode')) {
@@ -2235,7 +2234,7 @@ window.configureHeader = function(config) {
 
         if (color) {
             window.learnerCurrentPageColor = color;
-            if (themeColorMeta) themeColorMeta.setAttribute('content', color);
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#000000');
             // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
             if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
