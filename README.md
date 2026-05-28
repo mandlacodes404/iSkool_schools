@@ -2,7 +2,7 @@
 
 > A cloud-based, multi-tenant Learning Management System built for African schools. Teachers create content, learners complete work and track progress, parents stay informed, and administrators oversee everything — all from any device, any browser.
 
-**Live:** https://iskool.online | **Version:** 1.1.0 | **License:** Proprietary © 2025 iSkool EdTech
+**Live:** https://iskool.online | **Version:** 1.1.2 | **License:** Proprietary © 2026 iSkool EdTech
 
 ---
 
@@ -159,12 +159,13 @@ iskool_schools/
 
 ## Getting Started
 
-This project runs on live servers — there is no local development environment.
+The project supports both local development and live hosting. Use a PHP+MySQL stack locally (XAMPP/MAMP/WAMP or equivalent), then configure the environment from `.env`.
 
 ### Prerequisites
-- Access to the dev server
+- PHP 8.2+ and MySQL / MariaDB
 - Git
-- Composer (for managing PHP dependencies)
+- Composer
+- Local web server for localhost testing, or a hosting server for production
 
 ### First-time Setup
 
@@ -180,16 +181,28 @@ git checkout dev
 composer install
 ```
 
-**3. Configure the database**
-
-Copy `config.php` from the server or create one based on this structure:
-```php
-// Never commit config.php — it is in .gitignore
-$host = 'your-db-host';
-$user = 'your-db-user';
-$password = 'your-db-password';
-$db_prefix = 'iskowdbw_';
+**3. Configure the environment**
+Copy `.env.example` to `.env` and set your values:
+```env
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_PREFIX=iskowdbw_
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_PORT=465
+SMTP_FROM=
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+SUPERADMIN_PASSWORD=
+CPANEL_USER=
+CPANEL_TOKEN=
 ```
+
+`config.php` loads these values automatically at runtime.
+
+For local testing, use `localhost`, `127.0.0.1`, or `iskool.test`. For live hosting, the school database name is built from `DB_PREFIX` plus the subdomain.
 
 **4. Set up a school database**
 
@@ -393,4 +406,4 @@ refactor: move grade calculation to helper function
 
 ---
 
-© 2025 iSkool EdTech. All rights reserved. Unauthorised use prohibited.
+© 2026 iSkool EdTech. All rights reserved. Unauthorised use prohibited.

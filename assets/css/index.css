@@ -39,7 +39,8 @@ body {
 }
 
 /* Update your existing #loader-logo svg style */
-#loader-logo svg {
+#loader-logo svg,
+#loader-logo img {
         width: 104px; 
         height: 104px;
         animation: reveal 0.6s ease-out forwards, wheelSpin 10s linear 0.6s infinite;
@@ -58,7 +59,8 @@ body {
 
 /* Desktop: no spin on splash screen */
 @media (min-width: 769px) {
-    #loader-logo svg {
+    #loader-logo svg,
+    #loader-logo img {
         animation: reveal 0.6s ease-out forwards;
     }
 }
@@ -107,7 +109,8 @@ body {
         #loader-logo {
             font-size: 4rem;
         }
-        #loader-logo svg {
+        #loader-logo svg,
+        #loader-logo img {
             width: 92px;
             height: 92px;
             animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
@@ -129,7 +132,8 @@ body {
         #loader-logo {
             font-size: 3rem;
         }
-        #loader-logo svg {
+        #loader-logo svg,
+        #loader-logo img {
             width: 82px;
             height: 82px;
             animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
@@ -730,7 +734,8 @@ body {
         max-width: 380px;
     }
 
-    #form-logo-svg svg {
+    #form-logo-svg svg,
+    #form-logo-svg img {
         display: block;
         width: 54px;
         height: 54px;
@@ -786,13 +791,15 @@ body {
     box-sizing: border-box;
 }
 
-#iskool-brand svg {
+#iskool-brand svg,
+#iskool-brand img {
     width: 90px;
     height: 90px;
 }
 
 @media (max-width: 480px) {
-    #iskool-brand svg { width: 65px; height: 65px; }
+    #iskool-brand svg,
+    #iskool-brand img { width: 65px; height: 65px; }
     #iskool-brand { margin-bottom: 25px; max-width: 95vw; }
 }
 

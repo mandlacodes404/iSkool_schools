@@ -140,8 +140,7 @@ Key tables: `academic_years`, `class_students`, `learners`, `teachers`, `quizzes
 
 > These are existing problems in the codebase. Do not replicate these patterns in new code.
 
-- `config.php` contains **plaintext database credentials** — it should use a `.env` file
-  (it is in `.gitignore` so it won't be committed, but it's still a risk)
+- `config.php` loads configuration from `.env`; keep `.env` out of version control and use `.env.example` as a template.
 - `php_errors.log` may contain sensitive stack traces — never expose it publicly
 - `$_SERVER['HTTP_HOST']` is used directly for base URL detection — can be spoofed behind proxies
 - Timezone is hardcoded to `Africa/Johannesburg` in `config.php`
