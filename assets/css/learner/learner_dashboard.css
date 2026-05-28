@@ -604,8 +604,16 @@ iframe {
     }
 
     .main-header {
-        align-items: flex-start;
-        padding: 6px 12px;
+        align-items: center;
+        padding: calc(8px + env(safe-area-inset-top, 0)) calc(16px + env(safe-area-inset-right, 0)) 8px calc(16px + env(safe-area-inset-left, 0));
+        min-height: calc(56px + env(safe-area-inset-top, 0));
+        box-sizing: border-box;
+    }
+
+    .main-header #headerLeft,
+    .main-header #headerRight,
+    .main-header .logo-container {
+        align-items: center;
     }
 
     #headerBackLabel {
@@ -1414,8 +1422,8 @@ iframe {
         left: 0;
         right: 0;
         width: 100%;
-        min-height: 68px;
-        padding-top: calc(10px + env(safe-area-inset-top, 0));
+        min-height: calc(56px + env(safe-area-inset-top, 0));
+        padding: calc(8px + env(safe-area-inset-top, 0)) calc(16px + env(safe-area-inset-right, 0)) 8px calc(16px + env(safe-area-inset-left, 0));
         background: transparent;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
