@@ -341,6 +341,42 @@ function renderResourceCards(data) {
                 border: none;
                 display: block;
             }
+
+            .learner-mobile-search-wrapper {
+                padding: 14px 16px 0;
+                background: #1a1919;
+            }
+            .learner-mobile-search-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 999px;
+                padding: 11px 14px;
+            }
+            .learner-mobile-search-label svg {
+                flex-shrink: 0;
+                color: #c9d1d9;
+            }
+            .learner-mobile-search-input {
+                width: 100%;
+                border: none;
+                outline: none;
+                background: transparent;
+                color: #ffffff;
+                font-size: 14px;
+                line-height: 1.3;
+                min-width: 0;
+            }
+            .learner-mobile-search-input::placeholder {
+                color: rgba(255,255,255,0.55);
+            }
+            .learner-mobile-search-wrapper { display: none; }
+            @media (max-width: 899px) {
+                .learner-mobile-search-wrapper { display: block; }
+            }
             .lrs-mobile-video-card {
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -442,6 +478,19 @@ function renderResourceCards(data) {
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="lrs-mobile-list">`;
 
+    // Add mobile search bar only for narrow screens
+    html = html.replace('<div class="lrs-mobile-list">', `
+        <div class="learner-mobile-search-wrapper">
+            <label class="learner-mobile-search-label">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+                <input type="search" class="learner-mobile-search-input" placeholder="Search resources" autocomplete="off">
+            </label>
+        </div>
+        <div class="lrs-mobile-list">`);
+
     for (const [teacher, files] of Object.entries(data)) {
         html += `<div class="lrs-mobile-teacher-header">${teacher}</div>`;
         files.forEach(file => {
@@ -450,7 +499,7 @@ function renderResourceCards(data) {
             if (isVideo) {
                 // ── Mobile: inline video embed ──
                 html += `
-                    <div class="lrs-mobile-video-card">
+                    <div class="lrs-mobile-video-card" data-search="${escapeLearnerResourceHtml(((file.title || '') + ' ' + (file.uploaded_at || '') + ' ' + (teacher || '')).toLowerCase())}">
                         <div class="lrs-mobile-video-title">${file.title}</div>
                         <div class="lrs-mobile-video-meta">
                             <svg viewBox="0 0 24 24" width="12" height="12" fill="#ff4444" stroke="none">
@@ -474,7 +523,8 @@ function renderResourceCards(data) {
                 const icon = getFileIcon(file.ext, false);
                 html += `
                     <div class="lrs-mobile-row"
-                         onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
+                        onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")})"
+                        data-search="${escapeLearnerResourceHtml(((file.title || '') + ' ' + (file.path || '') + ' ' + (teacher || '')).toLowerCase())}">
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
                             <div class="lrs-mobile-row-title">${file.title}</div>
@@ -493,6 +543,48 @@ function renderResourceCards(data) {
     html += `</div>`; // close .lrs-mobile-list
 
     apiArea.innerHTML = html;
+    initLearnerResourceMobileSearch();
+}
+
+function initLearnerResourceMobileSearch() {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+    const input = apiArea.querySelector('.learner-mobile-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        filterLearnerResourceMobileRows(input.value.trim().toLowerCase());
+    });
+}
+
+function filterLearnerResourceMobileRows(query) {
+    document.querySelectorAll('.lrs-mobile-row, .lrs-mobile-video-card').forEach(card => {
+        const text = (card.dataset.search || '').toLowerCase();
+        card.style.display = !query || text.indexOf(query) !== -1 ? '' : 'none';
+    });
+
+    document.querySelectorAll('.lrs-mobile-teacher-header').forEach(header => {
+        let next = header.nextElementSibling;
+        let anyVisible = false;
+        while (next && !next.classList.contains('lrs-mobile-teacher-header')) {
+            if (next.matches('.lrs-mobile-row, .lrs-mobile-video-card') && next.style.display !== 'none') {
+                anyVisible = true;
+                break;
+            }
+            next = next.nextElementSibling;
+        }
+        header.style.display = anyVisible ? '' : 'none';
+    });
+}
+
+function escapeLearnerResourceHtml(value) {
+    return String(value ?? '').replace(/[&<>'\"]/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
 }
 
 // ─────────────────────────────────────────────

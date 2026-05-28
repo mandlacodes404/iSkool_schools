@@ -342,6 +342,37 @@ function renderAssignmentCards(groupedData) {
                 overflow: hidden;
                 margin: 0 0 16px;
             }
+            .learner-mobile-search-wrapper {
+                padding: 14px 16px 0;
+                background: #1a1919;
+            }
+            .learner-mobile-search-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 999px;
+                padding: 11px 14px;
+            }
+            .learner-mobile-search-label svg {
+                flex-shrink: 0;
+                color: #c9d1d9;
+            }
+            .learner-mobile-search-input {
+                width: 100%;
+                border: none;
+                outline: none;
+                background: transparent;
+                color: #ffffff;
+                font-size: 14px;
+                line-height: 1.3;
+                min-width: 0;
+            }
+            .learner-mobile-search-input::placeholder {
+                color: rgba(255,255,255,0.55);
+            }
             .las-mobile-teacher-header {
                 padding: 16px 16px 6px;
                 font-size: 11px;
@@ -424,12 +455,21 @@ function renderAssignmentCards(groupedData) {
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
-        <div class="las-mobile-list">`;
+        <div class="las-mobile-list">
+            <div class="learner-mobile-search-wrapper">
+                <label class="learner-mobile-search-label">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                    </svg>
+                    <input type="search" class="learner-mobile-search-input" placeholder="Search assignments" autocomplete="off">
+                </label>
+            </div>`;
 
     let mobileFlatIdx = 0;
 
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<div class="las-mobile-teacher-header">${escapeLearnerAssignmentHtml(teacher)}</div>`;
+        html += `<div class="las-mobile-group"><div class="las-mobile-teacher-header">${escapeLearnerAssignmentHtml(teacher)}</div>`;
 
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
@@ -439,6 +479,7 @@ function renderAssignmentCards(groupedData) {
                 <div class="las-mobile-row" role="button" tabindex="0"
                     onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }"
+                    data-search="${escapeLearnerAssignmentHtml((task.title || 'Assignment') + ' ' + teacher).toLowerCase() }"
                     style="${task.is_past_due ? 'opacity:0.65;' : ''}">
                     <div class="las-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none">
@@ -459,11 +500,38 @@ function renderAssignmentCards(groupedData) {
                 </div>`;
             mobileFlatIdx++;
         });
+        html += `</div>`;
     }
 
     html += `</div>`; // close .las-mobile-list
 
     apiArea.innerHTML = html;
+    initLearnerAssignmentMobileSearch();
+}
+
+function initLearnerAssignmentMobileSearch() {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+    const input = apiArea.querySelector('.learner-mobile-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        filterLearnerAssignmentMobileRows(input.value.trim().toLowerCase());
+    });
+}
+
+function filterLearnerAssignmentMobileRows(query) {
+    const groups = document.querySelectorAll('.las-mobile-group');
+    groups.forEach(group => {
+        let anyVisible = false;
+        group.querySelectorAll('.las-mobile-row').forEach(row => {
+            const text = row.dataset.search || '';
+            const visible = !query || text.indexOf(query) !== -1;
+            row.style.display = visible ? 'flex' : 'none';
+            if (visible) anyVisible = true;
+        });
+        group.style.display = anyVisible ? '' : 'none';
+    });
 }
 
 function escapeLearnerAssignmentHtml(value) {

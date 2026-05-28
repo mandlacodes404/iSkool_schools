@@ -505,6 +505,42 @@ function renderAnnouncements(data) {
                 margin-top: 3px;
             }
 
+            .learner-mobile-search-wrapper {
+                padding: 14px 16px 0;
+                background: #1a1919;
+            }
+            .learner-mobile-search-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 999px;
+                padding: 11px 14px;
+            }
+            .learner-mobile-search-label svg {
+                flex-shrink: 0;
+                color: #c9d1d9;
+            }
+            .learner-mobile-search-input {
+                width: 100%;
+                border: none;
+                outline: none;
+                background: transparent;
+                color: #ffffff;
+                font-size: 14px;
+                line-height: 1.3;
+                min-width: 0;
+            }
+            .learner-mobile-search-input::placeholder {
+                color: rgba(255,255,255,0.55);
+            }
+            .learner-mobile-search-wrapper { display: none; }
+            @media (max-width: 899px) {
+                .learner-mobile-search-wrapper { display: block; }
+            }
+
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -525,6 +561,15 @@ function renderAnnouncements(data) {
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
+        <div class="learner-mobile-search-wrapper">
+            <label class="learner-mobile-search-label">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+                <input type="search" class="learner-mobile-search-input" placeholder="Search announcements" autocomplete="off">
+            </label>
+        </div>
         <div class="lan-mobile-list">`;
 
     let mobileFlatIdx = 0;
@@ -546,6 +591,7 @@ function renderAnnouncements(data) {
                 <div class="lan-mobile-card lan-mobile-card--school" role="button" tabindex="0"
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
+                    data-search="${escapeLearnerAnnouncementHtml(((ann.title || 'Announcement') + ' ' + (ann.display_date || '') + ' ' + (ann.sender || 'School Admin')).toLowerCase())}">
                     <div class="lan-mobile-card-icon">
                         <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -582,11 +628,11 @@ function renderAnnouncements(data) {
         for (const [teacher, items] of Object.entries(teacherData)) {
             html += `<div class="lan-mobile-teacher-header">${escapeLearnerAnnouncementHtml(teacher)}</div>`;
             items.forEach(ann => {
-                const isNew = new Date(ann.created_at) > sevenDaysAgo;
                 html += `
                     <div class="lan-mobile-card" role="button" tabindex="0"
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
-                        onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
+                        onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }"
+                        data-search="${escapeLearnerAnnouncementHtml(((ann.title || 'Announcement') + ' ' + (ann.display_date || '') + ' ' + teacher).toLowerCase())}">
                         <div class="lan-mobile-card-icon">
                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -613,6 +659,38 @@ function renderAnnouncements(data) {
     html += `</div>`; // close .lan-mobile-list
 
     apiArea.innerHTML = html;
+    initLearnerAnnouncementMobileSearch();
+}
+
+function initLearnerAnnouncementMobileSearch() {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+    const input = apiArea.querySelector('.learner-mobile-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        filterLearnerAnnouncementMobileRows(input.value.trim().toLowerCase());
+    });
+}
+
+function filterLearnerAnnouncementMobileRows(query) {
+    document.querySelectorAll('.lan-mobile-card').forEach(card => {
+        const text = (card.dataset.search || '').toLowerCase();
+        card.style.display = !query || text.indexOf(query) !== -1 ? '' : 'none';
+    });
+
+    document.querySelectorAll('.lan-mobile-section-header, .lan-mobile-teacher-header').forEach(header => {
+        let next = header.nextElementSibling;
+        let anyVisible = false;
+        while (next && !next.classList.contains('lan-mobile-section-header') && !next.classList.contains('lan-mobile-teacher-header')) {
+            if (next.matches('.lan-mobile-card') && next.style.display !== 'none') {
+                anyVisible = true;
+                break;
+            }
+            next = next.nextElementSibling;
+        }
+        header.style.display = anyVisible ? '' : 'none';
+    });
 }
 
 function escapeLearnerAnnouncementHtml(value) {
