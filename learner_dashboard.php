@@ -263,7 +263,7 @@ function getCsrfToken() {
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
-    <div class="sidebar-links" style="margin-top:20px;">
+    <div class="sidebar-links" style="margin-top:50px;">
       <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
