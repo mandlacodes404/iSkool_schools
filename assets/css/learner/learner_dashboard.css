@@ -369,6 +369,7 @@ body {
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none; /* Firefox */
+        padding-top: 68px;
     }
 
     /* Chrome / Safari / Edge */
@@ -1399,6 +1400,11 @@ iframe {
        No !important on background so JS inline style can override it
        when configureHeader sets a page colour. */
     .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
         background: transparent;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
