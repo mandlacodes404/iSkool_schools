@@ -350,6 +350,9 @@ function renderTeacherQuizzes(data) {
             .qz-action-card-sub  { font-size: 11px; font-weight: 400; color: #555e6a; }
             .teacher-quiz-action-btn.edit { background: rgba(79,209,197,0.1); color: #4fd1c5; border-color: rgba(79,209,197,0.25); }
             .teacher-quiz-action-btn.delete { background: rgba(248,81,73,0.1); color: #f85149; border-color: rgba(248,81,73,0.25); }
+            @media (max-width: 899px) {
+                .qz-desktop-only-btn { display: none !important; }
+            }
         </style>
 
         <div class="teacher-resources-header">
@@ -459,12 +462,12 @@ function renderTeacherQuizzes(data) {
                                         onclick="toggleQuizStatusFromElement(this)">
                                         ${quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz'}
                                     </button>
-                                    <button class="teacher-quiz-action-btn results"
+                                    <button class="teacher-quiz-action-btn results qz-desktop-only-btn"
                                         data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
                                         onclick="openQuizResultsFromElement(this)">
                                         View Results
                                     </button>
-                                    <button class="teacher-quiz-action-btn edit"
+                                    <button class="teacher-quiz-action-btn edit qz-desktop-only-btn"
                                         data-action="edit-quiz"
                                         data-quiz-id="${quiz.id}">
                                         Edit Quiz

@@ -618,10 +618,8 @@ function renderQuizCards(groupedData) {
                     statusText = 'Awaiting Results';
                     statusColor = '#fdd663';
                 } else {
-                    rowClick    = `onclick="loadQuizResults(${quiz.id})"`;
-                    rowKeydown  = `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();loadQuizResults(${quiz.id});}"`;
-                    actionBtn   = `<span class="lqz-mobile-row-action" style="color:#22c55e;" onclick="loadQuizResults(${quiz.id})">View Results</span>`;
-                    statusText  = 'Completed';
+                    actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
+                    statusText = 'Completed';
                     statusColor = '#22c55e';
                 }
             } else if (isClosed) {
@@ -723,10 +721,7 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
         if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
             actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:15px;">Pending</span>`;
         } else {
-            actionBtn = `<button onclick="loadQuizResults(${quiz.id})"
-                style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.4);color:#27ae60;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
-                View Results
-            </button>`;
+        actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:15px;">✓ Completed</span>`;
         }
     } else if (isClosed) {
         actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:15px;">Closed</span>`;
