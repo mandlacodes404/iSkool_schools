@@ -96,7 +96,73 @@ try {
     $open_score = (float)($openStmt->get_result()->fetch_assoc()['open_score'] ?? 0);
     $openStmt->close();
 
-    $updated_total = $mcq_score + $open_score;
+    $fitbStmt = $conn->prepare("
+        SELECT qq.id AS question_id, qq.points, fq.scoring_mode, ua.answer_text
+        FROM quizquestions qq
+        INNER JOIN fitb_questions fq ON fq.question_id = qq.id
+        LEFT JOIN user_answers ua ON ua.question_id = qq.id AND ua.attempt_id = ?
+        WHERE qq.quiz_id = ? AND qq.question_type = 'fill_in_blank'
+    ");
+    $fitbStmt->bind_param("ii", $attempt_id, $quiz_id);
+    $fitbStmt->execute();
+    $fitbRows = $fitbStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $fitbStmt->close();
+
+    $fitb_score = 0.0;
+    if (!empty($fitbRows)) {
+        $blankStmt = $conn->prepare("
+            SELECT blank_index, accepted_answers_json, case_sensitive
+            FROM fitb_blanks
+            WHERE question_id = ?
+            ORDER BY blank_index ASC
+        ");
+
+        foreach ($fitbRows as $fitbRow) {
+            $fitbQuestionId = (int)$fitbRow['question_id'];
+            $submittedAnswers = json_decode((string)($fitbRow['answer_text'] ?? ''), true);
+            if (!is_array($submittedAnswers)) {
+                $submittedAnswers = [];
+            }
+
+            $blankStmt->bind_param("i", $fitbQuestionId);
+            $blankStmt->execute();
+            $blankRows = $blankStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $blankCount = count($blankRows);
+            if ($blankCount === 0) {
+                continue;
+            }
+
+            $correctCount = 0;
+            foreach ($blankRows as $blankRow) {
+                $blankIndex = (int)$blankRow['blank_index'];
+                $learnerAnswer = trim((string)($submittedAnswers[(string)$blankIndex] ?? $submittedAnswers[$blankIndex] ?? ''));
+                $acceptedAnswers = json_decode($blankRow['accepted_answers_json'] ?? '[]', true);
+                if (!is_array($acceptedAnswers)) {
+                    $acceptedAnswers = [];
+                }
+                foreach ($acceptedAnswers as $acceptedAnswer) {
+                    $acceptedAnswer = trim((string)$acceptedAnswer);
+                    $isCorrect = ((int)$blankRow['case_sensitive'] === 1)
+                        ? $learnerAnswer === $acceptedAnswer
+                        : mb_strtolower($learnerAnswer) === mb_strtolower($acceptedAnswer);
+                    if ($isCorrect) {
+                        $correctCount++;
+                        break;
+                    }
+                }
+            }
+
+            $fitbPoints = (float)$fitbRow['points'];
+            if (($fitbRow['scoring_mode'] ?? 'partial') === 'all_or_nothing') {
+                $fitb_score += $correctCount === $blankCount ? $fitbPoints : 0;
+            } else {
+                $fitb_score += ($fitbPoints / $blankCount) * $correctCount;
+            }
+        }
+        $blankStmt->close();
+    }
+
+    $updated_total = $mcq_score + $fitb_score + $open_score;
     $resultStmt = $conn->prepare("UPDATE quiz_results SET score = ? WHERE attempt_id = ? AND quiz_id = ?");
     $resultStmt->bind_param("dii", $updated_total, $attempt_id, $quiz_id);
     $resultStmt->execute();
