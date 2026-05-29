@@ -1176,15 +1176,26 @@ window.openCreateQuiz = async function() {
                     <input type="number" name="duration" class="teacher-modal-input"
                         min="1" max="180" placeholder="e.g. 60" required style="max-width:160px;">
 
-                    <label class="teacher-modal-label">Start Time *</label>
-                    <input type="datetime-local" name="start_time" class="teacher-modal-input" required>
+                    <!-- FIX 8: Start time with default + helper text -->
+                    <div id="cqStartTimeWrapper">
+                        <label class="teacher-modal-label">Start Time *</label>
+                        <input type="datetime-local" name="start_time" id="cqStartTime" class="teacher-modal-input" required>
+                        <span id="cqStartTimeHelper" style="display:block;margin-top:5px;font-size:12px;color:#8b949e;">You can change this — learners won't see the quiz until this time.</span>
+                        <span id="cqStartTimeIgnored" style="display:none;margin-top:5px;font-size:12px;color:#8b949e;font-style:italic;"><i class="fas fa-info-circle"></i> Start time is ignored when quiz is set to Open.</span>
+                    </div>
 
+                    <!-- FIX 4: Status with clearer label + conditional start time -->
                     <label class="teacher-modal-label">Quiz Status</label>
-                    <select name="status" class="teacher-modal-input">
-                        <option value="Scheduled">Scheduled (Opens at start time)</option>
+                    <select name="status" id="cqStatus" class="teacher-modal-input" onchange="handleCqStatusChange(this.value)">
+                        <option value="Scheduled">Opens automatically at start time</option>
                         <option value="Open">Open (Available immediately)</option>
                         <option value="Closed">Closed (Not accessible)</option>
                     </select>
+
+                    <!-- FIX 5: Attempt limit with helper text -->
+                    <label class="teacher-modal-label">Attempt Limit</label>
+                    <input type="number" name="attempt_limit" id="cqAttemptLimit" class="teacher-modal-input" min="0" value="0" placeholder="0 = unlimited" style="max-width:160px;">
+                    <span style="display:block;margin-top:5px;font-size:12px;color:#8b949e;">How many times can a learner attempt this quiz? Enter <strong style="color:#4fd1c5;">0</strong> for unlimited.</span>
 
                     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
                         <div id="cqPublishMarksWrap">
@@ -1212,11 +1223,15 @@ window.openCreateQuiz = async function() {
                                 placeholder="e.g. 30" style="max-width:150px;">
                         </div>
 
-                        <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;">
-                            <input type="checkbox" name="force_email" value="1"
-                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;margin-top:2px;flex-shrink:0;">
-                            <span>Learners automatically get mobile notifications. Tick this box to also send email notifications (not recommended — heavy on server).</span>
-                        </label>
+                        <!-- FIX 7: Shortened force email label + helper -->
+                        <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;">
+                            <label style="display:flex;align-items:center;gap:10px;color:#4fd1c5;font-size:14px;font-weight:600;cursor:pointer;margin:0;">
+                                <input type="checkbox" name="force_email" value="1"
+                                    style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;flex-shrink:0;">
+                                Also send email notifications
+                            </label>
+                            <p style="margin:6px 0 0 28px;font-size:12px;color:#8b949e;line-height:1.5;">Mobile push notifications are sent automatically. Email is optional and uses more server resources.</p>
+                        </div>
                     </div>
 
                     <!-- Term Info -->
@@ -1269,6 +1284,13 @@ window.openCreateQuiz = async function() {
                         </label>
                     </div>
 
+                    <!-- FIX 3: Live summary bar -->
+                    <div id="cqSummaryBar" style="display:flex;align-items:center;justify-content:center;gap:16px;background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 16px;margin:16px 0 8px;font-size:13px;font-weight:700;color:#4fd1c5;">
+                        <span><i class="fas fa-list-ol" style="margin-right:5px;"></i><span id="cqSummaryQCount">0</span> question<span id="cqSummaryQPlural">s</span></span>
+                        <span style="color:rgba(255,255,255,0.15);font-size:18px;font-weight:300;">|</span>
+                        <span><i class="fas fa-star" style="margin-right:5px;"></i><span id="cqSummaryMarks">0</span> mark<span id="cqSummaryMPlural">s</span> total</span>
+                    </div>
+
                     <!-- Questions -->
                     <label class="teacher-modal-label" style="margin-top:8px;">Questions *</label>
                     <div id="cqOpenEndedBanner" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin:0 0 12px;">
@@ -1305,6 +1327,25 @@ window.openCreateQuiz = async function() {
         window.cqQuestionIndex = 0;
         addCqQuestion();
 
+        // FIX 8: Set start time default to now + 1 hour rounded to nearest 15 min
+        const cqStartTimeEl = document.getElementById('cqStartTime');
+        if (cqStartTimeEl && !cqStartTimeEl.value) {
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            const roundedMins = Math.round(now.getMinutes() / 15) * 15;
+            now.setMinutes(roundedMins === 60 ? 0 : roundedMins);
+            if (roundedMins === 60) now.setHours(now.getHours() + 1);
+            now.setSeconds(0);
+            const pad = n => String(n).padStart(2, '0');
+            cqStartTimeEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+
+        // FIX 4: Init status handler on load
+        handleCqStatusChange(document.getElementById('cqStatus')?.value || 'Scheduled');
+
+        // FIX 3: Init summary bar
+        updateCqSummaryBar();
+
         // Handle submit
         const form = document.getElementById('createQuizForm');
         form.addEventListener('submit', async function(e) {
@@ -1320,6 +1361,10 @@ window.openCreateQuiz = async function() {
                 errorDiv.style.display = 'block';
                 return;
             }
+
+            // FIX 9: Client-side pre-submit validation
+            if (!cqValidateBeforeSubmit()) return;
+
             if (hasOpenEndedQuestions(form)) {
                 fd.delete('publish_marks');
             }
@@ -1388,7 +1433,7 @@ window.addCqQuestion = function() {
     const i   = cqQuestionIndex;
     const div = document.createElement('div');
     div.id    = `cq-question-${i}`;
-    div.style.cssText = 'background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;';
+    div.style.cssText = 'background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;transition:border-color 0.2s;';
 
     div.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -1403,15 +1448,33 @@ window.addCqQuestion = function() {
         </div>
 
         <label class="teacher-modal-label">Question Text *</label>
-        <input type="text" name="question[]" class="teacher-modal-input" 
+
+        <!-- FIX 2: FITB callout shown when fill_in_blank selected -->
+        <div class="cq-fitb-callout" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.35);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#a0aec0;line-height:1.6;">
+            <strong style="color:#4fd1c5;"><i class="fas fa-lightbulb"></i> Fill in the Blank instructions</strong><br>
+            Type your question and use <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 5px;border-radius:4px;font-family:monospace;">{blank}</code> where you want a gap.<br>
+            <em>Example: The capital of France is {blank}.</em><br>
+            <button type="button" onclick="cqInsertBlankTag(this)" style="margin-top:6px;background:rgba(79,209,197,0.15);color:#4fd1c5;border:1px solid rgba(79,209,197,0.4);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;">+ Insert {blank} at cursor</button>
+        </div>
+
+        <input type="text" name="question[]" class="teacher-modal-input cq-question-text"
             placeholder="Enter your question..." required>
 
+        <!-- FIX 2: Live blank counter -->
+        <div class="cq-blank-counter" style="display:none;margin-top:5px;font-size:12px;color:#8b949e;">
+            <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> blank<span class="cq-blank-plural">s</span> detected → <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> answer<span class="cq-blank-plural">s</span> required
+        </div>
+
+        <!-- FIX 1: Question type with inline description -->
         <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
-        <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
+        <select name="question_type[]" class="teacher-modal-input cq-qtype-select" data-action="change-question-type" style="max-width:220px;">
             <option value="mcq" selected>Multiple Choice</option>
             <option value="open_ended">Open Ended</option>
             <option value="fill_in_blank">Fill in the Blank</option>
         </select>
+        <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students choose the correct answer from a list of options you provide.</div>
+        <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students write a free-text response. You will grade these manually.</div>
+        <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students type answers into blanks. Write <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> in your question where you want a gap.</div>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
         <input type="file" name="question_images[]" accept="image/*"
@@ -1419,17 +1482,18 @@ window.addCqQuestion = function() {
 
         <div class="cq-mcq-fields">
             <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
-            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input cq-choice-input"
                 placeholder="Choice 1" required style="margin-bottom:8px;">
-            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input cq-choice-input"
                 placeholder="Choice 2" required style="margin-bottom:8px;">
-            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input cq-choice-input"
                 placeholder="Choice 3" style="margin-bottom:8px;">
-            <input type="text" name="choices[${i}][]" class="teacher-modal-input" 
+            <input type="text" name="choices[${i}][]" class="teacher-modal-input cq-choice-input"
                 placeholder="Choice 4" style="margin-bottom:8px;">
 
+            <!-- FIX 6: Correct answer select mirrors typed choice text -->
             <label class="teacher-modal-label" style="margin-top:4px;">Correct Answer</label>
-            <select name="correct_choice[${i}]" class="teacher-modal-input">
+            <select name="correct_choice[${i}]" class="teacher-modal-input cq-correct-select">
                 <option value="0">Choice 1</option>
                 <option value="1">Choice 2</option>
                 <option value="2">Choice 3</option>
@@ -1442,20 +1506,57 @@ window.addCqQuestion = function() {
         ${buildFitbBuilderHtml('cq', i, null, false)}
 
         <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
-        <input type="number" name="points[]" min="1" value="1" 
-            class="teacher-modal-input" style="max-width:100px;"
-            oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : '')">`;
+        <input type="number" name="points[]" min="1" value="1"
+            class="teacher-modal-input cq-points-input" style="max-width:100px;"
+            oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : ''); updateCqSummaryBar();">`;
 
     container.appendChild(div);
     setQuestionTypeFields(div, 'mcq');
     updateOpenEndedBanner();
     cqQuestionIndex++;
+
+    // FIX 1 & 2: Bind question type change for helpers + FITB callout
+    const qtypeSelect = div.querySelector('.cq-qtype-select');
+    qtypeSelect.addEventListener('change', function() {
+        const val = this.value;
+        // Toggle type helper texts
+        div.querySelector('.cq-mcq-helper').style.display  = val === 'mcq'            ? 'block' : 'none';
+        div.querySelector('.cq-oe-helper').style.display   = val === 'open_ended'     ? 'block' : 'none';
+        div.querySelector('.cq-fitb-helper').style.display = val === 'fill_in_blank'  ? 'block' : 'none';
+        // FITB callout + blank counter
+        div.querySelector('.cq-fitb-callout').style.display  = val === 'fill_in_blank' ? 'block' : 'none';
+        div.querySelector('.cq-blank-counter').style.display = val === 'fill_in_blank' ? 'block' : 'none';
+        updateOpenEndedBanner();
+    });
+
+    // FIX 2: Bind live blank counter on question text input
+    const questionInput = div.querySelector('.cq-question-text');
+    questionInput.addEventListener('input', function() {
+        const count = (this.value.match(/\{blank\}/gi) || []).length;
+        div.querySelectorAll('.cq-blank-count').forEach(el => el.textContent = count);
+        div.querySelectorAll('.cq-blank-plural').forEach(el => el.textContent = count === 1 ? '' : 's');
+    });
+
+    // FIX 6: Mirror choice text into correct-answer select
+    const choiceInputs = div.querySelectorAll('.cq-choice-input');
+    const correctSelect = div.querySelector('.cq-correct-select');
+    choiceInputs.forEach((input, idx) => {
+        input.addEventListener('input', () => {
+            if (correctSelect && correctSelect.options[idx]) {
+                correctSelect.options[idx].textContent = input.value.trim() || ('Choice ' + (idx + 1));
+            }
+        });
+    });
+
+    // FIX 3: Update summary bar after adding question
+    updateCqSummaryBar();
 };
 
 window.removeCqQuestion = function(i) {
     const el = document.getElementById(`cq-question-${i}`);
     if (el) el.remove();
     updateOpenEndedBanner();
+    updateCqSummaryBar();
 };
 
 function countFitbMarkers(text) {
@@ -1669,6 +1770,161 @@ window.toggleCqMultiPage = function(radio) {
         }
     }
 };
+
+// ─────────────────────────────────────────────
+// FIX 3: Live summary bar
+// ─────────────────────────────────────────────
+function updateCqSummaryBar() {
+    const container = document.getElementById('cqQuestionsContainer');
+    if (!container) return;
+    const questions = container.querySelectorAll('[id^="cq-question-"]');
+    const qCount = questions.length;
+    let totalMarks = 0;
+    questions.forEach(q => {
+        const pts = parseInt(q.querySelector('.cq-points-input')?.value) || 0;
+        totalMarks += pts;
+    });
+    const qCountEl = document.getElementById('cqSummaryQCount');
+    const qPluralEl = document.getElementById('cqSummaryQPlural');
+    const marksEl = document.getElementById('cqSummaryMarks');
+    const mPluralEl = document.getElementById('cqSummaryMPlural');
+    if (qCountEl) qCountEl.textContent = qCount;
+    if (qPluralEl) qPluralEl.textContent = qCount === 1 ? '' : 's';
+    if (marksEl) marksEl.textContent = totalMarks;
+    if (mPluralEl) mPluralEl.textContent = totalMarks === 1 ? '' : 's';
+}
+
+// ─────────────────────────────────────────────
+// FIX 4: Status / start time coupling
+// ─────────────────────────────────────────────
+window.handleCqStatusChange = function(val) {
+    const wrapper    = document.getElementById('cqStartTimeWrapper');
+    const ignoredMsg = document.getElementById('cqStartTimeIgnored');
+    const helperMsg  = document.getElementById('cqStartTimeHelper');
+    const startInput = document.getElementById('cqStartTime');
+    if (!wrapper) return;
+    if (val === 'Open') {
+        wrapper.style.opacity        = '0.45';
+        wrapper.style.pointerEvents  = 'none';
+        if (ignoredMsg) ignoredMsg.style.display = 'block';
+        if (helperMsg)  helperMsg.style.display  = 'none';
+    } else {
+        wrapper.style.opacity        = '1';
+        wrapper.style.pointerEvents  = '';
+        if (ignoredMsg) ignoredMsg.style.display = 'none';
+        if (helperMsg)  helperMsg.style.display  = 'block';
+    }
+};
+
+// ─────────────────────────────────────────────
+// FIX 2: Insert {blank} at cursor
+// ─────────────────────────────────────────────
+window.cqInsertBlankTag = function(btn) {
+    const questionBlock = btn.closest('[id^="cq-question-"]');
+    if (!questionBlock) return;
+    const input = questionBlock.querySelector('.cq-question-text');
+    if (!input) return;
+    const start = input.selectionStart;
+    const end   = input.selectionEnd;
+    input.value = input.value.substring(0, start) + '{blank}' + input.value.substring(end);
+    input.selectionStart = input.selectionEnd = start + 7;
+    input.focus();
+    input.dispatchEvent(new Event('input'));
+};
+
+// ─────────────────────────────────────────────
+// FIX 9: Client-side pre-submit validation
+// ─────────────────────────────────────────────
+function cqClearValidationErrors() {
+    document.querySelectorAll('[id^="cq-question-"].cq-has-error').forEach(el => {
+        el.classList.remove('cq-has-error');
+        el.style.borderColor = 'rgba(255,255,255,0.06)';
+    });
+    document.querySelectorAll('.cq-field-error').forEach(el => el.remove());
+    document.querySelectorAll('.cq-input-error').forEach(el => {
+        el.classList.remove('cq-input-error');
+        el.style.borderColor = '';
+    });
+}
+
+function cqAddFieldError(field, msg) {
+    if (field) {
+        field.style.borderColor = '#f85149';
+        field.classList.add('cq-input-error');
+        const errEl = document.createElement('div');
+        errEl.className = 'cq-field-error';
+        errEl.style.cssText = 'color:#f85149;font-size:12px;margin-top:4px;display:flex;align-items:center;gap:4px;';
+        errEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+        field.parentNode.insertBefore(errEl, field.nextSibling);
+    }
+}
+
+function cqValidateBeforeSubmit() {
+    cqClearValidationErrors();
+    const container = document.getElementById('cqQuestionsContainer');
+    if (!container) return true;
+    const questions = container.querySelectorAll('[id^="cq-question-"]');
+    let firstError = null;
+
+    questions.forEach(block => {
+        const qInput   = block.querySelector('.cq-question-text');
+        const qtype    = block.querySelector('.cq-qtype-select')?.value || 'mcq';
+        const ptsInput = block.querySelector('.cq-points-input');
+        let hasError   = false;
+
+        // Question text required
+        if (!qInput || qInput.value.trim() === '') {
+            cqAddFieldError(qInput, 'Question text is required.');
+            hasError = true;
+        }
+
+        // FITB must have at least one {blank}
+        if (qtype === 'fill_in_blank' && qInput && qInput.value.trim() !== '') {
+            const blanks = (qInput.value.match(/\{blank\}/gi) || []).length;
+            if (blanks < 1) {
+                cqAddFieldError(qInput, 'Fill in the Blank questions must contain at least one {blank}.');
+                hasError = true;
+            }
+        }
+
+        // MCQ: at least 2 choices, valid correct answer
+        if (qtype === 'mcq') {
+            const choiceInputs = block.querySelectorAll('.cq-choice-input');
+            const filled = Array.from(choiceInputs).filter(c => c.value.trim() !== '');
+            if (filled.length < 2) {
+                cqAddFieldError(choiceInputs[0], 'At least 2 choices are required.');
+                hasError = true;
+            }
+            const correctSelect = block.querySelector('.cq-correct-select');
+            if (correctSelect) {
+                const selectedIdx = parseInt(correctSelect.value);
+                const choiceArr = Array.from(choiceInputs);
+                if (!choiceArr[selectedIdx] || choiceArr[selectedIdx].value.trim() === '') {
+                    cqAddFieldError(correctSelect, 'The selected correct choice must not be empty.');
+                    hasError = true;
+                }
+            }
+        }
+
+        // Points must be >= 1
+        if (!ptsInput || parseInt(ptsInput.value) < 1) {
+            cqAddFieldError(ptsInput, 'Points must be at least 1.');
+            hasError = true;
+        }
+
+        if (hasError) {
+            block.classList.add('cq-has-error');
+            block.style.borderColor = '#f85149';
+            if (!firstError) firstError = block;
+        }
+    });
+
+    if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+    return true;
+}
 
 // ─────────────────────────────────────────────
 // INTEGRITY MODAL

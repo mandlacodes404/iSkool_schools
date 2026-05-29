@@ -134,7 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $weight_raw     = $_POST['weight_percent'] ?? null;
     $weight_check   = $is_summative && $weight_raw !== null && $weight_raw !== '' ? filter_var($weight_raw, FILTER_VALIDATE_FLOAT) : null;
     $weight_percent = $weight_check === false ? -1 : $weight_check;
-    $attempt_raw    = $_POST['attempt_limit'] ?? 0;
+    $attempt_raw    = $_POST['attempt_limit'] ?? 1;
     $attempt_check  = filter_var($attempt_raw, FILTER_VALIDATE_INT);
     $attempt_limit  = $attempt_check === false ? -1 : (int)$attempt_check;
     $layout_mode = $_POST['layout_mode'] ?? 'single_page';
@@ -355,9 +355,10 @@ try {
     exit;
 }
 
-    // --- SMART NOTIFICATION LOGIC ---
+    // --- SMART NOTIFICATION LOGIC (Matching Assignment logic) ---
     $force_email = isset($_POST['force_email']) ? true : false;
 
+    // 1. Define the link
 $cleanBaseUrl = rtrim(BASE_URL, '/');
 $quizLink = $cleanBaseUrl . "/learner_dashboard.php?page=quiz_detail&id=" . $quiz_id;
 
@@ -366,9 +367,10 @@ $quizLink = $cleanBaseUrl . "/learner_dashboard.php?page=quiz_detail&id=" . $qui
     FROM users u 
     JOIN class_students cs ON u.email = cs.student_email 
     WHERE cs.class_id = ? 
-    AND cs.academic_year_id = ?
+    AND cs.academic_year_id = ?  /* <--- Add this */
     AND u.role = 'learner'
 ");
+// Bind two integers: class_id and current_academic_year_id
 $learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
     $learnersQuery->execute();
     $result = $learnersQuery->get_result();
@@ -377,9 +379,11 @@ $learnersQuery->bind_param("ii", $class_id, $current_academic_year_id);
         $currentEmail = $learner['email'];
         $isPushSent = false;
 
+        // A. Try Mobile Push (Automatic if subscription exists)
         $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
         $checkSub->bind_param("s", $currentEmail);
         $checkSub->execute();
+        // 2. Add the link as the 5th parameter in the push function
 if ($checkSub->get_result()->num_rows > 0) {
     $isPushSent = sendPushToUser(
         $conn, 
@@ -393,6 +397,7 @@ if ($checkSub->get_result()->num_rows > 0) {
 }
         $checkSub->close();
 
+        // B. Send Email if Push failed OR Force Email is checked
         if (!$isPushSent || $force_email) {
             try {
                 $mail = new PHPMailer(true);
@@ -419,10 +424,20 @@ if ($checkSub->get_result()->num_rows > 0) {
 <body style="margin:0;padding:0;background:#ffffff;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
 <tr><td style="padding:48px 32px 40px;">
+
+  <!-- School name in red -->
   <p style="margin:0 0 28px;font-size:13px;font-weight:700;color:#cc1f1f;letter-spacing:0.8px;text-transform:uppercase;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($schoolName) . '</p>
+
+  <!-- Title -->
   <p style="margin:0 0 20px;font-size:28px;font-weight:700;color:#0d0d0d;line-height:1.25;letter-spacing:-0.5px;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">New quiz: ' . htmlspecialchars($quiz_title) . '</p>
+
+  <!-- Divider -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
+
+  <!-- Greeting -->
   <p style="margin:0 0 28px;font-size:16px;color:#2d2d2d;line-height:1.8;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Hi <strong>' . htmlspecialchars($learner['name']) . '</strong>, a new quiz has been posted in your class.</p>
+
+  <!-- Meta rows -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
     <tr>
       <td style="padding:8px 0;font-size:14px;color:#888888;width:120px;vertical-align:top;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Status</td>
@@ -433,11 +448,18 @@ if ($checkSub->get_result()->num_rows > 0) {
       <td style="padding:8px 0;font-size:14px;color:#0d0d0d;font-weight:600;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">' . htmlspecialchars($duration) . ' minutes</td>
     </tr>
   </table>
+
+  <!-- Posted by -->
   <p style="margin:0 0 40px;font-size:14px;color:#888888;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">Posted by <span style="color:#0d0d0d;font-weight:600;">' . htmlspecialchars($teacherDisplayName) . '</span></p>
+
+  <!-- Footer divider -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr><td style="border-top:1px solid #e5e5e5;"></td></tr></table>
+
+  <!-- Footer -->
   <p style="margin:0;font-size:12px;color:#aaaaaa;line-height:1.6;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
     ' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#aaaaaa;text-decoration:underline;">iSkool</a>
   </p>
+
 </td></tr>
 </table>
 </body>
@@ -513,23 +535,6 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
   box-shadow: 0 0 6px rgba(79, 209, 197, 0.5);
   background-color: #21262d;
 }
-/* FIX 9: Inline validation error highlight */
-.validation-error {
-  border: 2px solid #f85149 !important;
-  box-shadow: 0 0 6px rgba(248, 81, 73, 0.4) !important;
-}
-.question-block.has-error {
-  border: 2px solid #f85149 !important;
-  box-shadow: 0 0 12px rgba(248, 81, 73, 0.25) !important;
-}
-.field-error-msg {
-  color: #f85149;
-  font-size: 12px;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
 .question-block {
   background: #1a202c;
   padding: 25px 30px;
@@ -537,8 +542,6 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus, input[type="
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 28px;
   position: relative;
-  border: 2px solid transparent;
-  transition: border-color 0.2s ease;
 }
 .question-block h3 {
   margin: 0;
@@ -731,185 +734,20 @@ input[type="radio"]:checked + .mode-card i {
     max-width: 450px;
     border: 1px solid #4fd1c5;
 }
+/* Add this to your <style> section */
 .layout-options label {
     cursor: pointer;
 }
+
+/* This ensures when the hidden radio is checked, the card inside it glows */
 input[type="radio"]:checked + .mode-card {
     border-color: #4fd1c5 !important;
     background: rgba(79, 209, 197, 0.1) !important;
     box-shadow: 0 0 10px rgba(79, 209, 197, 0.2);
 }
+
 input[type="radio"]:checked + .mode-card i {
     color: #4fd1c5 !important;
-}
-
-/* FIX 1 & 2: Question type helper text */
-.qtype-helper {
-  margin-top: 8px;
-  padding: 10px 14px;
-  background: rgba(79, 209, 197, 0.07);
-  border-left: 3px solid #4fd1c5;
-  border-radius: 0 8px 8px 0;
-  font-size: 13px;
-  color: #a0aec0;
-  line-height: 1.5;
-  display: none;
-}
-.qtype-helper.visible {
-  display: block;
-}
-/* FIX 2: FITB callout */
-.fitb-callout {
-  display: none;
-  background: rgba(79, 209, 197, 0.08);
-  border: 1px solid rgba(79, 209, 197, 0.35);
-  border-radius: 8px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-  font-size: 13px;
-  color: #a0aec0;
-  line-height: 1.6;
-}
-.fitb-callout.visible {
-  display: block;
-}
-.fitb-callout code {
-  background: rgba(79,209,197,0.15);
-  color: #4fd1c5;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-}
-.fitb-insert-btn {
-  display: inline-block;
-  margin-top: 6px;
-  background: rgba(79, 209, 197, 0.15);
-  color: #4fd1c5;
-  border: 1px solid rgba(79, 209, 197, 0.4);
-  border-radius: 6px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.fitb-insert-btn:hover {
-  background: rgba(79, 209, 197, 0.25);
-}
-/* FIX 2: Blank counter badge */
-.fitb-blank-counter {
-  display: none;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #8b949e;
-}
-.fitb-blank-counter.visible {
-  display: block;
-}
-.fitb-blank-counter .blank-count {
-  color: #4fd1c5;
-  font-weight: 700;
-}
-
-/* FIX 3: Sticky summary bar */
-#quiz-summary-bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #4fd1c5;
-  margin: -30px -20px 20px;
-  letter-spacing: 0.3px;
-}
-#quiz-summary-bar span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-#quiz-summary-bar .sep {
-  color: #30363d;
-  font-weight: 300;
-  font-size: 18px;
-}
-
-/* FIX 4: Start time field greyed out when status = Open */
-#start_time_wrapper.greyed {
-  opacity: 0.45;
-  pointer-events: none;
-}
-#start_time_ignored_msg {
-  display: none;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #8b949e;
-  font-style: italic;
-}
-#start_time_ignored_msg.visible {
-  display: block;
-}
-#start_time_helper {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #8b949e;
-}
-
-/* FIX 5: Attempt limit helper */
-.field-helper {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #8b949e;
-  line-height: 1.5;
-}
-
-/* FIX 7: Force email styles */
-.force-email-wrapper {
-  background: #1a202c;
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #30363d;
-  margin: 20px 0;
-}
-.force-email-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  color: #4fd1c5;
-  font-weight: 600;
-  font-size: 15px;
-  margin: 0;
-}
-.force-email-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: #4fd1c5;
-  flex-shrink: 0;
-}
-.force-email-helper {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #8b949e;
-  line-height: 1.5;
-  padding-left: 32px;
-}
-
-/* Question type select width */
-.qtype-select-wrap {
-  position: relative;
-}
-.qtype-select-wrap select {
-  max-width: 220px;
 }
 </style>
 <script>
@@ -919,19 +757,11 @@ function getCsrfToken() {
 }
 </script></head>
 <body>
-
-<!-- FIX 3: Sticky summary bar -->
-<div id="quiz-summary-bar">
-  <span><i class="fas fa-list-ol"></i> <span id="summary-q-count">1</span> question<span id="summary-q-plural"></span></span>
-  <span class="sep">|</span>
-  <span><i class="fas fa-star"></i> <span id="summary-marks">1</span> mark<span id="summary-m-plural"></span> total</span>
-</div>
-
-  <h1><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="18" y1="20" x2="18" y2="10"></line>
-    <line x1="12" y1="20" x2="12" y2="4"></line>
-    <line x1="6" y1="20" x2="6" y2="14"></line>
-  </svg> Create a New Quiz</h1>
+  <h1><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="quiz-icon">
+                                              <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                            </svg> Create a New Quiz</h1>
   <form id="quizForm" action="create_quiz.php" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <label>Quiz Title:</label>
@@ -949,26 +779,15 @@ function getCsrfToken() {
     <label>Quiz Duration (in minutes):</label>
     <input type="number" name="duration" min="1" max="180" required aria-label="Quiz duration in minutes">
 
-    <!-- FIX 8: Start time with default value and helper text -->
-    <div id="start_time_wrapper">
-      <label>Start Time (when quiz should become available):</label>
-      <input type="datetime-local" name="start_time" id="start_time" required aria-label="Quiz start time">
-      <span id="start_time_helper">You can change this — learners won't see the quiz until this time.</span>
-      <span id="start_time_ignored_msg"><i class="fas fa-info-circle"></i> Start time is ignored when quiz is set to Open.</span>
-    </div>
+    <label>Start Time (when quiz should become available):</label>
+    <input type="datetime-local" name="start_time" required aria-label="Quiz start time">
 
-    <!-- FIX 4: Status with clearer labels and conditional UI -->
     <label>Quiz Status:</label>
-    <select name="status" id="quizStatus" required>
-      <option value="Scheduled">Opens automatically at start time</option>
-      <option value="Open">Open (Available immediately)</option>
-      <option value="Closed">Closed (Not accessible)</option>
-    </select>
-
-    <!-- FIX 5: Attempt limit field with helper text -->
-    <label>Attempt Limit:</label>
-    <input type="number" name="attempt_limit" id="attempt_limit" min="0" value="0" placeholder="0 = unlimited" style="max-width:160px;" aria-label="Attempt limit">
-    <span class="field-helper">How many times can a learner attempt this quiz? Enter <strong style="color:#4fd1c5;">0</strong> for unlimited.</span>
+<select name="status" id="quizStatus" required>
+  <option value="Scheduled">Scheduled (Opens at start time)</option>
+  <option value="Open">Open (Available immediately)</option>
+  <option value="Closed">Closed (Not accessible)</option>
+</select>
 
     <div class="checkbox-container">
       <input type="checkbox" name="publish_marks" value="1" id="publishMarksCheckbox" />
@@ -983,18 +802,18 @@ function getCsrfToken() {
   <label for="isSummativeCheckbox">Counts toward official term mark (Verified)</label>
 </div>
 
-    <!-- FIX 7: Shortened force email label with helper text -->
-    <div class="force-email-wrapper">
-      <label class="force-email-label">
-        <input type="checkbox" name="force_email" value="1">
-        Also send email notifications
-      </label>
-      <p class="force-email-helper">Mobile push notifications are sent automatically. Email is optional and uses more server resources.</p>
-    </div>
+<div style="background:#1a202c; padding:15px; border-radius:10px; border:1px solid #30363d; margin:20px 0;">
+    <label style="display: flex; align-items: center; cursor: pointer; color: #4fd1c5; font-weight: bold; margin:0;">
+        <input type="checkbox" name="force_email" value="1" style="width: 20px; height: 20px; margin-right: 12px;">
+        Learners automatically get mobile notifications, tick the box if you want the learners to get emails too but we recommend mobile notifications because emails are heavy on the server.
+    </label>
+</div>
 
   <div style="background:#1a202c; padding:18px; border-radius:10px; border-left:5px solid #4fd1c5; margin:25px 0; text-align:center; font-size:1.1rem;">
         <strong style="color:#4fd1c5; font-size:1.3rem;">Posting to: TERM <?= $current_global_term ?></strong><br>
-       </div>
+      
+       </small>
+    </div>
 
 <div id="weightContainer" style="margin-top: 12px; display: none; background: #1a202c; padding: 16px; border-radius: 8px; border: 1px solid #30363d;">
   <label for="weight_percent">Weight % of term mark (e.g., 40 for 40%)</label>
@@ -1067,53 +886,21 @@ function getCsrfToken() {
           <h3>Question 1</h3>
           <span class="points-display">1 pt</span>
         </div>
-
-        <!-- FIX 1: Question type with description helper -->
-        <label>Question Type:</label>
-        <div class="qtype-select-wrap">
-          <select name="question_type[]" class="qtype-select" aria-label="Question type for question 1">
-            <option value="mcq">Multiple Choice</option>
-            <option value="open_ended">Open Ended</option>
-            <option value="fill_in_blank">Fill in the Blank</option>
-          </select>
-        </div>
-        <div class="qtype-helper mcq-helper visible">Students choose the correct answer from a list of options you provide.</div>
-        <div class="qtype-helper oe-helper">Students write a free-text response. You will grade these manually.</div>
-        <div class="qtype-helper fitb-helper">Students type answers into blanks. Write <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 6px;border-radius:4px;font-family:monospace;">{blank}</code> in your question where you want a gap.</div>
-
-        <!-- FIX 2: FITB callout shown when fill_in_blank selected -->
-        <div class="fitb-callout">
-          <strong style="color:#4fd1c5;"><i class="fas fa-lightbulb"></i> Fill in the Blank instructions</strong><br>
-          Type your question and use <code>{blank}</code> where you want a gap.<br>
-          <em>Example: The capital of France is {blank}.</em><br>
-          <button type="button" class="fitb-insert-btn" onclick="insertBlankTag(this)">+ Insert {blank} at cursor</button>
-        </div>
-
-        <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question 1 text" class="question-text-input">
-
-        <!-- FIX 2: Live blank counter -->
-        <div class="fitb-blank-counter"><span class="blank-count">0</span> blank<span class="blank-count-plural">s</span> detected → <span class="blank-count">0</span> answer<span class="blank-count-plural">s</span> required</div>
-
+        <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question 1 text">
         <label>Optional Image:</label>
         <input type="file" name="question_images[]" accept="image/*" aria-label="Upload image for question 1">
-
-        <!-- MCQ choices section -->
-        <div class="mcq-choices-section">
-          <label>Choices:</label>
-          <input type="text" name="choices[0][]" placeholder="Choice 1" required aria-label="Choice 1 for question 1" class="choice-input">
-          <input type="text" name="choices[0][]" placeholder="Choice 2" required aria-label="Choice 2 for question 1" class="choice-input">
-          <input type="text" name="choices[0][]" placeholder="Choice 3" aria-label="Choice 3 for question 1" class="choice-input">
-          <input type="text" name="choices[0][]" placeholder="Choice 4" aria-label="Choice 4 for question 1" class="choice-input">
-          <!-- FIX 6: Correct choice mirrors typed text -->
-          <label>Correct Choice:</label>
-          <select name="correct_choice[]" class="correct-choice-select" aria-label="Correct choice for question 1">
-            <option value="0">Choice 1</option>
-            <option value="1">Choice 2</option>
-            <option value="2">Choice 3</option>
-            <option value="3">Choice 4</option>
-          </select>
-        </div>
-
+        <label>Choices:</label>
+        <input type="text" name="choices[0][]" placeholder="Choice 1" required aria-label="Choice 1 for question 1">
+        <input type="text" name="choices[0][]" placeholder="Choice 2" required aria-label="Choice 2 for question 1">
+        <input type="text" name="choices[0][]" placeholder="Choice 3" aria-label="Choice 3 for question 1">
+        <input type="text" name="choices[0][]" placeholder="Choice 4" aria-label="Choice 4 for question 1">
+        <label>Correct Choice:</label>
+        <select name="correct_choice[]" aria-label="Correct choice for question 1">
+          <option value="0">Choice 1</option>
+          <option value="1">Choice 2</option>
+          <option value="2">Choice 3</option>
+          <option value="3">Choice 4</option>
+        </select>
         <label>Points for this question:</label>
         <input type="number" name="points[]" min="1" value="1" required aria-label="Points for question 1" class="points-input">
       </div>
@@ -1136,87 +923,6 @@ function getCsrfToken() {
 <script>
 let questionIndex = 1;
 
-// ─── FIX 1 & 2: Question type descriptions + FITB callout ───
-const qtypeDescriptions = {
-  mcq: { selector: '.mcq-helper', showChoices: true },
-  open_ended: { selector: '.oe-helper', showChoices: false },
-  fill_in_blank: { selector: '.fitb-helper', showChoices: false }
-};
-
-function handleQtypeChange(block, value) {
-  // Hide all helpers
-  block.querySelectorAll('.qtype-helper').forEach(el => el.classList.remove('visible'));
-  // Show relevant helper
-  const helperClass = value === 'mcq' ? '.mcq-helper' : value === 'open_ended' ? '.oe-helper' : '.fitb-helper';
-  const helper = block.querySelector(helperClass);
-  if (helper) helper.classList.add('visible');
-
-  // FITB callout
-  const fitbCallout = block.querySelector('.fitb-callout');
-  const fitbCounter = block.querySelector('.fitb-blank-counter');
-  if (fitbCallout) fitbCallout.classList.toggle('visible', value === 'fill_in_blank');
-  if (fitbCounter) fitbCounter.classList.toggle('visible', value === 'fill_in_blank');
-
-  // MCQ choices visibility
-  const choicesSection = block.querySelector('.mcq-choices-section');
-  if (choicesSection) choicesSection.style.display = (value === 'mcq') ? 'block' : 'none';
-}
-
-function insertBlankTag(btn) {
-  const block = btn.closest('.question-block');
-  const input = block.querySelector('.question-text-input');
-  if (!input) return;
-  const start = input.selectionStart;
-  const end = input.selectionEnd;
-  const val = input.value;
-  input.value = val.substring(0, start) + '{blank}' + val.substring(end);
-  input.selectionStart = input.selectionEnd = start + 7;
-  input.focus();
-  updateBlankCounter(input);
-}
-
-function updateBlankCounter(input) {
-  const block = input.closest('.question-block');
-  if (!block) return;
-  const counter = block.querySelector('.fitb-blank-counter');
-  if (!counter) return;
-  const matches = (input.value.match(/\{blank\}/gi) || []).length;
-  const countEls = counter.querySelectorAll('.blank-count');
-  countEls.forEach(el => el.textContent = matches);
-  const plurals = counter.querySelectorAll('.blank-count-plural');
-  plurals.forEach(el => el.textContent = matches === 1 ? '' : 's');
-}
-
-// ─── FIX 6: Mirror choice text into correct-choice select ───
-function bindChoiceMirror(block) {
-  const choiceInputs = block.querySelectorAll('.choice-input');
-  const correctSelect = block.querySelector('.correct-choice-select');
-  if (!correctSelect) return;
-  choiceInputs.forEach((input, idx) => {
-    input.addEventListener('input', () => {
-      const opt = correctSelect.options[idx];
-      if (opt) {
-        opt.textContent = input.value.trim() || ('Choice ' + (idx + 1));
-      }
-    });
-  });
-}
-
-// ─── FIX 3: Summary bar update ───
-function updateSummaryBar() {
-  const blocks = document.querySelectorAll('.question-block');
-  const qCount = blocks.length;
-  let totalMarks = 0;
-  blocks.forEach(block => {
-    const pts = parseInt(block.querySelector('.points-input')?.value) || 0;
-    totalMarks += pts;
-  });
-  document.getElementById('summary-q-count').textContent = qCount;
-  document.getElementById('summary-q-plural').textContent = qCount === 1 ? '' : 's';
-  document.getElementById('summary-marks').textContent = totalMarks;
-  document.getElementById('summary-m-plural').textContent = totalMarks === 1 ? '' : 's';
-}
-
 function addQuestion() {
   const container = document.getElementById("questions-container");
   const block = document.createElement("div");
@@ -1226,48 +932,22 @@ function addQuestion() {
       <h3>Question ${questionIndex + 1}</h3>
       <span class="points-display">1 pt</span>
     </div>
-    <button type="button" class="delete-btn" onclick="this.closest('.question-block').remove(); updateSummaryBar(); updatePublishMarksForOpenEnded();">Delete <i class="fas fa-trash"></i></button>
-
-    <label>Question Type:</label>
-    <div class="qtype-select-wrap">
-      <select name="question_type[]" class="qtype-select" aria-label="Question type for question ${questionIndex + 1}">
-        <option value="mcq">Multiple Choice</option>
-        <option value="open_ended">Open Ended</option>
-        <option value="fill_in_blank">Fill in the Blank</option>
-      </select>
-    </div>
-    <div class="qtype-helper mcq-helper visible">Students choose the correct answer from a list of options you provide.</div>
-    <div class="qtype-helper oe-helper">Students write a free-text response. You will grade these manually.</div>
-    <div class="qtype-helper fitb-helper">Students type answers into blanks. Write <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 6px;border-radius:4px;font-family:monospace;">{blank}</code> in your question where you want a gap.</div>
-
-    <div class="fitb-callout">
-      <strong style="color:#4fd1c5;"><i class="fas fa-lightbulb"></i> Fill in the Blank instructions</strong><br>
-      Type your question and use <code>{blank}</code> where you want a gap.<br>
-      <em>Example: The capital of France is {blank}.</em><br>
-      <button type="button" class="fitb-insert-btn" onclick="insertBlankTag(this)">+ Insert {blank} at cursor</button>
-    </div>
-
-    <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question ${questionIndex + 1} text" class="question-text-input">
-    <div class="fitb-blank-counter"><span class="blank-count">0</span> blank<span class="blank-count-plural">s</span> detected → <span class="blank-count">0</span> answer<span class="blank-count-plural">s</span> required</div>
-
+    <button type="button" class="delete-btn" onclick="this.parentElement.remove()">Delete <i class="fas fa-trash"></i></button>
+    <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question ${questionIndex + 1} text">
     <label>Optional Image:</label>
     <input type="file" name="question_images[]" accept="image/*" aria-label="Upload image for question ${questionIndex + 1}">
-
-    <div class="mcq-choices-section">
-      <label>Choices:</label>
-      <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 1" required aria-label="Choice 1 for question ${questionIndex + 1}" class="choice-input">
-      <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 2" required aria-label="Choice 2 for question ${questionIndex + 1}" class="choice-input">
-      <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 3" aria-label="Choice 3 for question ${questionIndex + 1}" class="choice-input">
-      <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 4" aria-label="Choice 4 for question ${questionIndex + 1}" class="choice-input">
-      <label>Correct Choice:</label>
-      <select name="correct_choice[]" class="correct-choice-select" aria-label="Correct choice for question ${questionIndex + 1}">
-        <option value="0">Choice 1</option>
-        <option value="1">Choice 2</option>
-        <option value="2">Choice 3</option>
-        <option value="3">Choice 4</option>
-      </select>
-    </div>
-
+    <label>Choices:</label>
+    <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 1" required aria-label="Choice 1 for question ${questionIndex + 1}">
+    <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 2" required aria-label="Choice 2 for question ${questionIndex + 1}">
+    <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 3" aria-label="Choice 3 for question ${questionIndex + 1}">
+    <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 4" aria-label="Choice 4 for question ${questionIndex + 1}">
+    <label>Correct Choice:</label>
+    <select name="correct_choice[]" aria-label="Correct choice for question ${questionIndex + 1}">
+      <option value="0">Choice 1</option>
+      <option value="1">Choice 2</option>
+      <option value="2">Choice 3</option>
+      <option value="3">Choice 4</option>
+    </select>
     <label>Points for this question:</label>
     <input type="number" name="points[]" min="1" value="1" required aria-label="Points for question ${questionIndex + 1}" class="points-input">
   `;
@@ -1276,31 +956,15 @@ function addQuestion() {
   const pointsInput = block.querySelector('.points-input');
   const pointsDisplay = block.querySelector('.points-display');
   pointsInput.addEventListener('input', () => {
-    pointsDisplay.textContent = `${pointsInput.value} pt${parseInt(pointsInput.value) > 1 ? 's' : ''}`;
-    updateSummaryBar();
+    pointsDisplay.textContent = `${pointsInput.value} pt${pointsInput.value > 1 ? 's' : ''}`;
   });
-
-  // FIX 1 & 2: Bind qtype change
-  const qtypeSelect = block.querySelector('.qtype-select');
-  qtypeSelect.addEventListener('change', function() {
-    handleQtypeChange(block, this.value);
-    updatePublishMarksForOpenEnded();
-  });
-
-  // FIX 2: Bind blank counter
-  const questionInput = block.querySelector('.question-text-input');
-  questionInput.addEventListener('input', () => updateBlankCounter(questionInput));
-
-  // FIX 6: Bind choice mirror
-  bindChoiceMirror(block);
 
   questionIndex++;
-  updateSummaryBar();
   updatePublishMarksForOpenEnded();
 }
 
 function updatePublishMarksForOpenEnded() {
-  const hasOpenEnded = Array.from(document.querySelectorAll('.qtype-select'))
+  const hasOpenEnded = Array.from(document.querySelectorAll('select[name="question_type[]"]'))
     .some(select => select.value === 'open_ended');
   const checkbox = document.getElementById('publishMarksCheckbox');
   const wrapper = checkbox ? checkbox.closest('.checkbox-container') : null;
@@ -1313,164 +977,24 @@ function updatePublishMarksForOpenEnded() {
 document.querySelectorAll('.points-input').forEach(input => {
   const pointsDisplay = input.closest('.question-block').querySelector('.points-display');
   input.addEventListener('input', () => {
-    pointsDisplay.textContent = `${input.value} pt${parseInt(input.value) > 1 ? 's' : ''}`;
-    updateSummaryBar();
+    pointsDisplay.textContent = `${input.value} pt${input.value > 1 ? 's' : ''}`;
   });
 });
-
-// ─── FIX 4: Status/start time coupling ───
-function handleStatusChange(val) {
-  const wrapper = document.getElementById('start_time_wrapper');
-  const ignoredMsg = document.getElementById('start_time_ignored_msg');
-  const helper = document.getElementById('start_time_helper');
-  if (val === 'Open') {
-    wrapper.classList.add('greyed');
-    ignoredMsg.classList.add('visible');
-    helper.style.display = 'none';
-  } else {
-    wrapper.classList.remove('greyed');
-    ignoredMsg.classList.remove('visible');
-    helper.style.display = 'block';
-  }
-}
-
-// ─── FIX 9: Client-side inline validation ───
-function clearValidationErrors() {
-  document.querySelectorAll('.question-block.has-error').forEach(b => b.classList.remove('has-error'));
-  document.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
-  document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
-}
-
-function addFieldError(field, msg) {
-  field.classList.add('validation-error');
-  const errDiv = document.createElement('div');
-  errDiv.className = 'field-error-msg';
-  errDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
-  field.parentNode.insertBefore(errDiv, field.nextSibling);
-}
-
-function validateBeforeSubmit() {
-  clearValidationErrors();
-  let firstError = null;
-
-  const blocks = document.querySelectorAll('.question-block');
-  blocks.forEach((block, idx) => {
-    const qInput = block.querySelector('.question-text-input');
-    const qtype = block.querySelector('.qtype-select')?.value || 'mcq';
-    const ptsInput = block.querySelector('.points-input');
-    let blockHasError = false;
-
-    // Question text
-    if (!qInput || qInput.value.trim() === '') {
-      addFieldError(qInput, 'Question text is required.');
-      blockHasError = true;
-    }
-
-    // FITB: must have at least one {blank}
-    if (qtype === 'fill_in_blank' && qInput) {
-      const blanks = (qInput.value.match(/\{blank\}/gi) || []).length;
-      if (blanks < 1) {
-        addFieldError(qInput, 'Fill in the Blank questions must contain at least one {blank}.');
-        blockHasError = true;
-      }
-    }
-
-    // MCQ: at least 2 choices filled, correct choice selected
-    if (qtype === 'mcq') {
-      const choiceInputs = block.querySelectorAll('.choice-input');
-      const filled = Array.from(choiceInputs).filter(c => c.value.trim() !== '');
-      if (filled.length < 2) {
-        const firstChoice = choiceInputs[0];
-        addFieldError(firstChoice, 'At least 2 choices are required.');
-        blockHasError = true;
-      }
-      const correctSelect = block.querySelector('.correct-choice-select');
-      if (correctSelect) {
-        const selectedIdx = parseInt(correctSelect.value);
-        const choiceArr = Array.from(choiceInputs);
-        if (!choiceArr[selectedIdx] || choiceArr[selectedIdx].value.trim() === '') {
-          addFieldError(correctSelect, 'The selected correct choice must not be empty.');
-          blockHasError = true;
-        }
-      }
-    }
-
-    // Points > 0
-    if (!ptsInput || parseInt(ptsInput.value) < 1) {
-      addFieldError(ptsInput, 'Points must be at least 1.');
-      blockHasError = true;
-    }
-
-    if (blockHasError) {
-      block.classList.add('has-error');
-      if (!firstError) firstError = block;
-    }
-  });
-
-  if (firstError) {
-    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return false;
-  }
-  return true;
-}
 
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector("#quizForm");
   const loader = document.getElementById("loaderOverlay");
   const popup = document.getElementById("successPopup");
 
-  // FIX 8: Set start time default to now + 1 hour, rounded to nearest 15 min
-  const startTimeInput = document.getElementById('start_time');
-  if (startTimeInput && !startTimeInput.value) {
-    const now = new Date();
-    now.setHours(now.getHours() + 1);
-    const mins = now.getMinutes();
-    const roundedMins = Math.round(mins / 15) * 15;
-    now.setMinutes(roundedMins === 60 ? 0 : roundedMins);
-    if (roundedMins === 60) now.setHours(now.getHours() + 1);
-    now.setSeconds(0);
-    // Format as datetime-local value (YYYY-MM-DDThh:mm)
-    const pad = n => String(n).padStart(2, '0');
-    const formatted = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    startTimeInput.value = formatted;
-  }
-
-  // FIX 4: Status change listener
-  const statusSelect = document.getElementById('quizStatus');
-  if (statusSelect) {
-    statusSelect.addEventListener('change', function() { handleStatusChange(this.value); });
-    handleStatusChange(statusSelect.value);
-  }
-
-  // FIX 1 & 2: Bind initial question block
-  const firstBlock = document.querySelector('.question-block');
-  if (firstBlock) {
-    const qtypeSelect = firstBlock.querySelector('.qtype-select');
-    qtypeSelect.addEventListener('change', function() {
-      handleQtypeChange(firstBlock, this.value);
-      updatePublishMarksForOpenEnded();
-    });
-    const questionInput = firstBlock.querySelector('.question-text-input');
-    questionInput.addEventListener('input', () => updateBlankCounter(questionInput));
-    // FIX 6: Bind choice mirror on first block
-    bindChoiceMirror(firstBlock);
-  }
-
-  // Init summary bar
-  updateSummaryBar();
-
   if (form) {
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-
-      // FIX 9: Run client-side validation first
-      if (!validateBeforeSubmit()) return;
-
       loader.style.display = "flex";
       const formData = new FormData(form);
-      if (Array.from(form.querySelectorAll('.qtype-select')).some(select => select.value === 'open_ended')) {
+      if (Array.from(form.querySelectorAll('select[name="question_type[]"]')).some(select => select.value === 'open_ended')) {
         formData.delete('publish_marks');
       }
+      console.log('Form data:', Object.fromEntries(formData.entries()));
 
       fetch("create_quiz.php", {
         method: "POST",
@@ -1479,6 +1003,7 @@ document.addEventListener("DOMContentLoaded", function () {
         redirect: 'manual'
       })
       .then(res => {
+        console.log('Response status:', res.status);
         if (res.type === 'opaqueredirect') {
           loader.style.display = "none";
           alert("Session expired. Please log in again.");
@@ -1496,6 +1021,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(data => {
         loader.style.display = "none";
+        console.log('Response data:', data);
         if (data.success) {
           popup.classList.add("show");
           setTimeout(() => {
@@ -1516,7 +1042,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Layout radio buttons
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.name === 'question_type[]') {
+    updatePublishMarksForOpenEnded();
+  }
+});
+
+// Listen for changes on the layout radio buttons
 document.querySelectorAll('input[name="layout_mode"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const multiPageDiv = document.getElementById('multiPageOptions');
@@ -1524,6 +1056,7 @@ document.querySelectorAll('input[name="layout_mode"]').forEach(radio => {
             multiPageDiv.style.display = 'block';
         } else {
             multiPageDiv.style.display = 'none';
+            // Reset both security options if they go back to Single Page
             document.getElementById('shuffleCheckbox').checked = false;
             document.getElementById('linearCheckbox').checked = false;
         }
@@ -1540,12 +1073,15 @@ document.getElementById('isSummativeCheckbox').addEventListener('change', functi
     }
 });
 
+// Trigger on page load (in case of form errors)
 document.addEventListener('DOMContentLoaded', function() {
     const checkbox = document.getElementById('isSummativeCheckbox');
     if (checkbox) {
         const event = new Event('change');
         checkbox.dispatchEvent(event);
     }
+
+    // NEW: Check layout mode on load
     const selectedLayout = document.querySelector('input[name="layout_mode"]:checked');
     if (selectedLayout && selectedLayout.value === 'multi_page') {
         document.getElementById('multiPageOptions').style.display = 'block';
