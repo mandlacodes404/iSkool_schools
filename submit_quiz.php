@@ -150,9 +150,40 @@ foreach ($openQuestionRows as $openQuestionRow) {
     $openQuestionIds[(int)$openQuestionRow['id']] = true;
 }
 
+$fitbQuestions = [];
+$fitbStmt = $conn->prepare("
+    SELECT q.id AS question_id, q.points, fq.scoring_mode,
+           fb.blank_index, fb.accepted_answers_json, fb.case_sensitive
+    FROM quizquestions q
+    JOIN fitb_questions fq ON fq.question_id = q.id
+    JOIN fitb_blanks fb ON fb.question_id = q.id
+    WHERE q.quiz_id = ? AND q.question_type = 'fill_in_blank'
+    ORDER BY q.id ASC, fb.blank_index ASC
+");
+$fitbStmt->bind_param("i", $quizId);
+$fitbStmt->execute();
+$fitbRows = $fitbStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$fitbStmt->close();
+foreach ($fitbRows as $fitbRow) {
+    $qid = (int)$fitbRow['question_id'];
+    if (!isset($fitbQuestions[$qid])) {
+        $fitbQuestions[$qid] = [
+            'points' => (float)$fitbRow['points'],
+            'scoring_mode' => in_array($fitbRow['scoring_mode'], ['partial', 'all_or_nothing'], true) ? $fitbRow['scoring_mode'] : 'partial',
+            'blanks' => []
+        ];
+    }
+    $answers = json_decode($fitbRow['accepted_answers_json'] ?? '[]', true);
+    $fitbQuestions[$qid]['blanks'][(int)$fitbRow['blank_index']] = [
+        'accepted_answers' => is_array($answers) ? $answers : [],
+        'case_sensitive' => (int)$fitbRow['case_sensitive']
+    ];
+}
+
 // 6. Consolidate Answers (POST + Database Fallback)
 $finalAnswers = isset($_POST['answers']) && is_array($_POST['answers']) ? $_POST['answers'] : [];
 $finalOpenAnswers = isset($_POST['open_answers']) && is_array($_POST['open_answers']) ? $_POST['open_answers'] : [];
+$finalFitbAnswers = isset($_POST['fitb_answers']) && is_array($_POST['fitb_answers']) ? $_POST['fitb_answers'] : [];
 $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
 $savedStmt->bind_param("i", $attemptId);
 $savedStmt->execute();
@@ -160,7 +191,10 @@ $savedRes = $savedStmt->get_result();
 while ($sRow = $savedRes->fetch_assoc()) {
     $savedQid = (int)$sRow['question_id'];
     if ($sRow['answer_text'] !== null) {
-        if (!array_key_exists($savedQid, $finalOpenAnswers)) {
+        if (isset($fitbQuestions[$savedQid]) && !array_key_exists($savedQid, $finalFitbAnswers)) {
+            $decoded = json_decode($sRow['answer_text'], true);
+            $finalFitbAnswers[$savedQid] = is_array($decoded) ? $decoded : [];
+        } elseif (!isset($fitbQuestions[$savedQid]) && !array_key_exists($savedQid, $finalOpenAnswers)) {
             $finalOpenAnswers[$savedQid] = $sRow['answer_text'];
         }
     } elseif (!array_key_exists($savedQid, $finalAnswers)) {
@@ -178,6 +212,47 @@ foreach ($correctAnswers as $qid => $data) {
     }
 }
 
+foreach ($fitbQuestions as $qid => $fitbQuestion) {
+    $submittedBlanks = $finalFitbAnswers[$qid] ?? [];
+    if (is_string($submittedBlanks)) {
+        $decoded = json_decode($submittedBlanks, true);
+        $submittedBlanks = is_array($decoded) ? $decoded : [];
+    }
+    if (!is_array($submittedBlanks)) {
+        $submittedBlanks = [];
+    }
+
+    $blankCount = count($fitbQuestion['blanks']);
+    if ($blankCount === 0) {
+        continue;
+    }
+
+    $correctCount = 0;
+    foreach ($fitbQuestion['blanks'] as $blankIndex => $blank) {
+        $learnerAnswer = trim((string)($submittedBlanks[(string)$blankIndex] ?? $submittedBlanks[$blankIndex] ?? ''));
+        foreach ($blank['accepted_answers'] as $acceptedAnswer) {
+            $acceptedAnswer = trim((string)$acceptedAnswer);
+            if ($blank['case_sensitive'] === 1) {
+                $isCorrect = $learnerAnswer === $acceptedAnswer;
+            } else {
+                $isCorrect = mb_strtolower($learnerAnswer) === mb_strtolower($acceptedAnswer);
+            }
+            if ($isCorrect) {
+                $correctCount++;
+                break;
+            }
+        }
+    }
+
+    if ($fitbQuestion['scoring_mode'] === 'all_or_nothing') {
+        if ($correctCount === $blankCount) {
+            $earnedScore += $fitbQuestion['points'];
+        }
+    } else {
+        $earnedScore += ($fitbQuestion['points'] / $blankCount) * $correctCount;
+    }
+}
+
 // 8. DATABASE UPDATES (Transaction-style)
 try {
     // A. Insert Result Record
@@ -186,7 +261,7 @@ try {
             user_email, quiz_id, attempt_id, score, total, time_taken, submitted_at, academic_year_id
         ) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
     ");
-    $insRes->bind_param("siiiiii", $userEmail, $quizId, $attemptId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
+    $insRes->bind_param("siiddii", $userEmail, $quizId, $attemptId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
     $insRes->execute();
     $resultId = $insRes->insert_id;
 
@@ -222,6 +297,30 @@ try {
             $openAnsStmt->execute();
         }
         $openAnsStmt->close();
+    }
+    if (!empty($finalFitbAnswers)) {
+        $fitbAnsQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text, result_id)
+                         VALUES (?, ?, ?, ?, NULL, ?, ?)
+                         ON DUPLICATE KEY UPDATE selected_choice_id = NULL, answer_text = VALUES(answer_text), result_id = VALUES(result_id)";
+        $fitbAnsStmt = $conn->prepare($fitbAnsQuery);
+        foreach ($finalFitbAnswers as $qid => $answers) {
+            $qid = (int)$qid;
+            if (!isset($fitbQuestions[$qid])) {
+                continue;
+            }
+            $cleanAnswers = [];
+            foreach ((array)$answers as $blankIndex => $answerText) {
+                $index = (int)$blankIndex;
+                if ($index < 1) {
+                    continue;
+                }
+                $cleanAnswers[(string)$index] = substr(trim((string)$answerText), 0, 200);
+            }
+            $fitbAnswerText = json_encode($cleanAnswers);
+            $fitbAnsStmt->bind_param("siiisi", $userEmail, $quizId, $attemptId, $qid, $fitbAnswerText, $resultId);
+            $fitbAnsStmt->execute();
+        }
+        $fitbAnsStmt->close();
     }
 
     if ($hasOpenEnded === 1) {

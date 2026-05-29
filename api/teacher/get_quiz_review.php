@@ -81,6 +81,81 @@ foreach ($rows as $row) {
     }
 }
 
+$fitbQuestionIds = [];
+foreach ($questions as $qid => $question) {
+    if (($question['question_type'] ?? 'mcq') === 'fill_in_blank') {
+        $fitbQuestionIds[] = (int)$qid;
+    }
+}
+
+if (!empty($fitbQuestionIds)) {
+    $fitbStmt = $conn->prepare("
+        SELECT fq.question_id, fq.sub_type, fq.scoring_mode, fq.distractors_json,
+               fb.blank_index, fb.accepted_answers_json, fb.case_sensitive
+        FROM fitb_questions fq
+        JOIN fitb_blanks fb ON fb.question_id = fq.question_id
+        JOIN quizquestions qq ON qq.id = fq.question_id
+        JOIN quiz_results r ON r.quiz_id = qq.quiz_id
+        WHERE r.id = ?
+        ORDER BY fq.question_id ASC, fb.blank_index ASC
+    ");
+    $fitbStmt->bind_param("i", $result_id);
+    $fitbStmt->execute();
+    $fitbRows = $fitbStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $fitbStmt->close();
+
+    foreach ($fitbRows as $fitbRow) {
+        $qid = (int)$fitbRow['question_id'];
+        if (!isset($questions[$qid])) {
+            continue;
+        }
+        if (!isset($questions[$qid]['fitb'])) {
+            $answerMap = json_decode($questions[$qid]['answer_text'] ?? '[]', true);
+            $questions[$qid]['fitb'] = [
+                'sub_type' => $fitbRow['sub_type'],
+                'scoring_mode' => $fitbRow['scoring_mode'],
+                'learner_answers' => is_array($answerMap) ? $answerMap : [],
+                'blanks' => [],
+                'points_awarded' => 0
+            ];
+        }
+        $accepted = json_decode($fitbRow['accepted_answers_json'] ?? '[]', true);
+        $accepted = is_array($accepted) ? $accepted : [];
+        $blankIndex = (int)$fitbRow['blank_index'];
+        $learnerAnswer = trim((string)($questions[$qid]['fitb']['learner_answers'][(string)$blankIndex] ?? ''));
+        $isCorrect = false;
+        foreach ($accepted as $acceptedAnswer) {
+            $acceptedAnswer = trim((string)$acceptedAnswer);
+            $isCorrect = ((int)$fitbRow['case_sensitive'] === 1)
+                ? $learnerAnswer === $acceptedAnswer
+                : mb_strtolower($learnerAnswer) === mb_strtolower($acceptedAnswer);
+            if ($isCorrect) {
+                break;
+            }
+        }
+        $questions[$qid]['fitb']['blanks'][] = [
+            'blank_index' => $blankIndex,
+            'learner_answer' => $learnerAnswer,
+            'accepted_answers' => $accepted,
+            'case_sensitive' => (int)$fitbRow['case_sensitive'],
+            'is_correct' => $isCorrect
+        ];
+    }
+
+    foreach ($fitbQuestionIds as $qid) {
+        if (empty($questions[$qid]['fitb']['blanks'])) {
+            continue;
+        }
+        $correctCount = count(array_filter($questions[$qid]['fitb']['blanks'], fn($blank) => $blank['is_correct']));
+        $blankCount = count($questions[$qid]['fitb']['blanks']);
+        if ($questions[$qid]['fitb']['scoring_mode'] === 'all_or_nothing') {
+            $questions[$qid]['fitb']['points_awarded'] = $correctCount === $blankCount ? (float)$questions[$qid]['points'] : 0;
+        } else {
+            $questions[$qid]['fitb']['points_awarded'] = $blankCount > 0 ? ((float)$questions[$qid]['points'] / $blankCount) * $correctCount : 0;
+        }
+    }
+}
+
 $percentage = $quizInfo['total'] > 0
     ? round($quizInfo['score'] / $quizInfo['total'] * 100)
     : 0;

@@ -72,7 +72,7 @@ while ($question = $questionsResult->fetch_assoc()) {
         'question_text' => $question['question_text'],
         'image_path' => $question['image_path'],
         'points' => (int)$question['points'],
-        'question_type' => in_array($question['question_type'] ?? 'mcq', ['mcq', 'open_ended'], true) ? $question['question_type'] : 'mcq',
+        'question_type' => in_array($question['question_type'] ?? 'mcq', ['mcq', 'open_ended', 'fill_in_blank'], true) ? $question['question_type'] : 'mcq',
         'choices' => array_map(function ($choice) {
             return [
                 'id' => (int)$choice['id'],
@@ -81,6 +81,33 @@ while ($question = $questionsResult->fetch_assoc()) {
             ];
         }, $choices)
     ];
+
+    if (($questions[count($questions) - 1]['question_type'] ?? 'mcq') === 'fill_in_blank') {
+        $fitbStmt = $conn->prepare("SELECT sub_type, scoring_mode, distractors_json FROM fitb_questions WHERE question_id = ? LIMIT 1");
+        $fitbStmt->bind_param("i", $question_id);
+        $fitbStmt->execute();
+        $fitbMeta = $fitbStmt->get_result()->fetch_assoc();
+        $fitbStmt->close();
+
+        $blankStmt = $conn->prepare("SELECT blank_index, accepted_answers_json, case_sensitive FROM fitb_blanks WHERE question_id = ? ORDER BY blank_index ASC");
+        $blankStmt->bind_param("i", $question_id);
+        $blankStmt->execute();
+        $blankRows = $blankStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $blankStmt->close();
+
+        $questions[count($questions) - 1]['fitb'] = [
+            'sub_type' => in_array($fitbMeta['sub_type'] ?? '', ['free_type', 'word_bank'], true) ? $fitbMeta['sub_type'] : 'free_type',
+            'scoring_mode' => in_array($fitbMeta['scoring_mode'] ?? '', ['partial', 'all_or_nothing'], true) ? $fitbMeta['scoring_mode'] : 'partial',
+            'distractors' => json_decode($fitbMeta['distractors_json'] ?? '[]', true) ?: [],
+            'blanks' => array_map(function ($blank) {
+                return [
+                    'blank_index' => (int)$blank['blank_index'],
+                    'accepted_answers' => json_decode($blank['accepted_answers_json'] ?? '[]', true) ?: [],
+                    'case_sensitive' => (int)$blank['case_sensitive']
+                ];
+            }, $blankRows)
+        ];
+    }
 }
 $questionsStmt->close();
 $choicesStmt->close();

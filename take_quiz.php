@@ -204,6 +204,41 @@ while ($row = $result->fetch_assoc()) {
 }
 $query->close();
 
+$fitbStmt = $conn->prepare("
+    SELECT fq.question_id, fq.sub_type, fq.scoring_mode, fq.distractors_json,
+           fb.blank_index, fb.accepted_answers_json, fb.case_sensitive
+    FROM fitb_questions fq
+    JOIN fitb_blanks fb ON fb.question_id = fq.question_id
+    JOIN quizquestions qq ON qq.id = fq.question_id
+    WHERE qq.quiz_id = ?
+    ORDER BY fq.question_id ASC, fb.blank_index ASC
+");
+$fitbStmt->bind_param("i", $quizId);
+$fitbStmt->execute();
+$fitbResult = $fitbStmt->get_result();
+while ($row = $fitbResult->fetch_assoc()) {
+    $qid = (int)$row['question_id'];
+    if (!isset($questions[$qid])) {
+        continue;
+    }
+    if (!isset($questions[$qid]['fitb'])) {
+        $distractors = json_decode($row['distractors_json'] ?? '[]', true);
+        $questions[$qid]['fitb'] = [
+            'sub_type' => in_array($row['sub_type'], ['free_type', 'word_bank'], true) ? $row['sub_type'] : 'free_type',
+            'scoring_mode' => in_array($row['scoring_mode'], ['partial', 'all_or_nothing'], true) ? $row['scoring_mode'] : 'partial',
+            'distractors' => is_array($distractors) ? $distractors : [],
+            'blanks' => []
+        ];
+    }
+    $answers = json_decode($row['accepted_answers_json'] ?? '[]', true);
+    $questions[$qid]['fitb']['blanks'][] = [
+        'blank_index' => (int)$row['blank_index'],
+        'accepted_answers' => is_array($answers) ? $answers : [],
+        'case_sensitive' => (int)$row['case_sensitive']
+    ];
+}
+$fitbStmt->close();
+
 if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
     $questions = array_values($questions);
 
@@ -261,6 +296,46 @@ $loadStmt->close();
 
 $totalQuestions = count($questions);
 $answeredCount = count($savedAnswers);
+
+function decode_fitb_answer_map($raw): array {
+    $decoded = json_decode((string)$raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function render_fitb_sentence(string $text, int $questionId, array $answerMap, string $subType): string {
+    $parts = preg_split('/(\{blank\})/i', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $html = '';
+    $blankIndex = 1;
+    foreach ($parts as $part) {
+        if (preg_match('/^\{blank\}$/i', $part)) {
+            $value = htmlspecialchars((string)($answerMap[(string)$blankIndex] ?? $answerMap[$blankIndex] ?? ''));
+            $slotClass = $subType === 'word_bank' ? ' fitb-word-slot' : '';
+            $html .= '<input type="text" class="fitb-input' . $slotClass . '" name="fitb_answers[' . $questionId . '][' . $blankIndex . ']" data-blank-index="' . $blankIndex . '" maxlength="200" placeholder="..." value="' . $value . '">';
+            $blankIndex++;
+        } else {
+            $html .= htmlspecialchars($part);
+        }
+    }
+    return $html;
+}
+
+function build_word_bank(array $fitb): array {
+    $words = [];
+    foreach ($fitb['blanks'] ?? [] as $blank) {
+        foreach ($blank['accepted_answers'] ?? [] as $answer) {
+            if ($answer !== '' && !in_array($answer, $words, true)) {
+                $words[] = $answer;
+            }
+        }
+    }
+    foreach ($fitb['distractors'] ?? [] as $distractor) {
+        if ($distractor !== '' && !in_array($distractor, $words, true)) {
+            $words[] = $distractor;
+        }
+    }
+    shuffle($words);
+    return $words;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -787,6 +862,57 @@ $answeredCount = count($savedAnswers);
             text-align: right;
         }
 
+        .fitb-sentence {
+            font-size: 18px;
+            line-height: 2.1;
+            color: var(--text-1);
+            margin: 8px 0 16px;
+        }
+
+        .fitb-input {
+            display: inline-block;
+            width: min(220px, 70vw);
+            min-width: 120px;
+            margin: 0 6px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-1);
+            font: inherit;
+        }
+
+        .fitb-input:focus,
+        .fitb-input.selected {
+            outline: none;
+            border-color: var(--teal);
+            background: rgba(79,209,197,0.07);
+        }
+
+        .fitb-word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .fitb-chip {
+            border: 1px solid rgba(79,209,197,0.28);
+            background: rgba(79,209,197,0.08);
+            color: var(--teal);
+            border-radius: var(--radius-sm);
+            padding: 8px 11px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .fitb-chip.used {
+            opacity: 0.4;
+            cursor: default;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-2);
+        }
+
         /* ═══════════════════════════════════════════════
            NAVIGATION BUTTONS (multi-page)
         ═══════════════════════════════════════════════ */
@@ -1166,14 +1292,28 @@ function getCsrfToken() {
                     </div>
                 </div>
 
-                <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
-
                 <?php if (!empty($q['image'])): ?>
                     <img src="<?= htmlspecialchars($q['image']) ?>" class="q-image" alt="Question image"
                          onclick="openLightbox(this)">
                 <?php endif; ?>
 
-                <?php if (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
+                <?php if (($q['question_type'] ?? 'mcq') === 'fill_in_blank'):
+                    $fitb = $q['fitb'] ?? ['sub_type' => 'free_type', 'blanks' => [], 'distractors' => []];
+                    $fitbAnswers = decode_fitb_answer_map($savedAnswers[$qid] ?? '');
+                    $fitbSubType = $fitb['sub_type'] ?? 'free_type';
+                ?>
+                <div class="fitb-sentence" data-fitb-sub-type="<?= htmlspecialchars($fitbSubType) ?>">
+                    <?= render_fitb_sentence($q['text'], (int)$qid, $fitbAnswers, $fitbSubType) ?>
+                </div>
+                <?php if ($fitbSubType === 'word_bank'): ?>
+                    <div class="fitb-word-bank" data-question-id="<?= $qid ?>">
+                        <?php foreach (build_word_bank($fitb) as $word): ?>
+                            <button type="button" class="fitb-chip" data-word="<?= htmlspecialchars($word) ?>"><?= htmlspecialchars($word) ?></button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <?php elseif (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
+                <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
                 <textarea class="open-answer-box"
                           name="open_answers[<?= $qid ?>]"
                           maxlength="5000"
@@ -1183,6 +1323,7 @@ function getCsrfToken() {
                     <?= strlen((string)($savedAnswers[$qid] ?? '')) ?> / 5000
                 </div>
                 <?php else: ?>
+                <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
                 <div class="choices-list">
                     <?php foreach ($q['choices'] as $ci => $choice): ?>
                     <label class="choice-item" id="choice-<?= $qid ?>-<?= $choice['id'] ?>">
@@ -1473,7 +1614,9 @@ function getCsrfToken() {
             const qid = card.getAttribute('data-question-id');
             const checked = card.querySelector('input[type="radio"]:checked');
             const textAnswer = card.querySelector('.open-answer-box');
-            if (checked || (textAnswer && textAnswer.value.trim().length > 0)) {
+            const fitbInputs = Array.from(card.querySelectorAll('.fitb-input'));
+            const fitbAnswered = fitbInputs.length > 0 && fitbInputs.every(input => input.value.trim().length > 0);
+            if (checked || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered) {
                 card.classList.add('card-answered');
                 if (checked) checked.closest('.choice-item').classList.add('selected');
             }
@@ -1491,6 +1634,19 @@ function getCsrfToken() {
                 textAnswer.value = cid;
                 updateOpenCounter(textAnswer);
                 if (String(cid).trim().length > 0) textAnswer.closest('.question-card').classList.add('card-answered');
+                return;
+            }
+            const fitbInputs = document.querySelectorAll(`input[name^="fitb_answers[${qid}]"]`);
+            if (fitbInputs.length > 0) {
+                let map = {};
+                try { map = typeof cid === 'string' ? JSON.parse(cid) : cid; } catch (e) { map = {}; }
+                fitbInputs.forEach(input => {
+                    const blankIndex = input.dataset.blankIndex;
+                    input.value = map[blankIndex] || '';
+                });
+                const card = fitbInputs[0].closest('.question-card');
+                updateFitbCardState(card);
+                syncFitbChips(card);
                 return;
             }
             const radio = document.querySelector(`input[name="answers[${qid}]"][value="${cid}"]`);
@@ -1520,6 +1676,18 @@ function getCsrfToken() {
             const m = t.name.match(/open_answers\[(\d+)\]/);
             if (m && t.value.trim().length > 0) obj[m[1]] = t.value;
         });
+        document.querySelectorAll('.question-card').forEach(card => {
+            const inputs = Array.from(card.querySelectorAll('.fitb-input'));
+            if (inputs.length === 0) return;
+            const qid = card.getAttribute('data-question-id');
+            const map = {};
+            let hasAny = false;
+            inputs.forEach(input => {
+                map[input.dataset.blankIndex] = input.value;
+                if (input.value.trim().length > 0) hasAny = true;
+            });
+            if (hasAny) obj[qid] = map;
+        });
         sessionStorage.setItem('quiz_' + QUIZ_ID + '_' + '<?= $userEmail ?>', JSON.stringify(obj));
     }
 
@@ -1538,6 +1706,15 @@ function getCsrfToken() {
                 fd.append('question_id', questionId);
                 fd.append('answer_text', textarea.value);
             }
+            const fitbInputs = document.querySelectorAll(`.question-card[data-question-id="${questionId}"] .fitb-input`);
+            if (fitbInputs.length > 0) {
+                const map = {};
+                fitbInputs.forEach(input => {
+                    map[input.dataset.blankIndex] = input.value.slice(0, 200);
+                });
+                fd.append('question_id', questionId);
+                fd.append('fitb_answers', JSON.stringify(map));
+            }
         }
         fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .catch(e => console.warn('Save failed', e));
@@ -1548,7 +1725,9 @@ function getCsrfToken() {
         questions.forEach((card, i) => {
             const qid = card.getAttribute('data-question-id');
             const textAnswer = card.querySelector('.open-answer-box');
-            const answered = card.querySelector('input[type="radio"]:checked') || (textAnswer && textAnswer.value.trim().length > 0);
+            const fitbInputs = Array.from(card.querySelectorAll('.fitb-input'));
+            const fitbAnswered = fitbInputs.length > 0 && fitbInputs.every(input => input.value.trim().length > 0);
+            const answered = card.querySelector('input[type="radio"]:checked') || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered;
             const flagged  = document.getElementById(`flag-${i}`)?.classList.contains('flagged');
             const item = document.getElementById(`pi-${i}`);
             if (!item) return;
@@ -1563,7 +1742,11 @@ function getCsrfToken() {
     // ── PROGRESS BAR ─────────────────────────────────────────────────────────
     function updateProgress() {
         const textCount = Array.from(document.querySelectorAll('.open-answer-box')).filter(t => t.value.trim().length > 0).length;
-        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount;
+        const fitbCount = Array.from(document.querySelectorAll('.question-card')).filter(card => {
+            const inputs = Array.from(card.querySelectorAll('.fitb-input'));
+            return inputs.length > 0 && inputs.every(input => input.value.trim().length > 0);
+        }).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount + fitbCount;
         const pct   = TOTAL_Q > 0 ? Math.round((count / TOTAL_Q) * 100) : 0;
         if (progressFill) progressFill.style.width = pct + '%';
         if (answeredEl)   answeredEl.textContent = count;
@@ -1586,7 +1769,11 @@ function getCsrfToken() {
     // ── SUBMIT ───────────────────────────────────────────────────────────────
     function submitQuiz() {
         const textCount = Array.from(document.querySelectorAll('.open-answer-box')).filter(t => t.value.trim().length > 0).length;
-        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount;
+        const fitbCount = Array.from(document.querySelectorAll('.question-card')).filter(card => {
+            const inputs = Array.from(card.querySelectorAll('.fitb-input'));
+            return inputs.length > 0 && inputs.every(input => input.value.trim().length > 0);
+        }).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount + fitbCount;
         document.getElementById('smAnswered').textContent = count;
         document.getElementById('submitModal').classList.add('show');
     }
@@ -1610,8 +1797,60 @@ function getCsrfToken() {
     }
 
     document.addEventListener('input', function(e) {
-        if (!e.target.classList.contains('open-answer-box')) return;
-        onOpenAnswerInput(e.target, parseInt(e.target.dataset.questionIndex, 10));
+        if (e.target.classList.contains('open-answer-box')) {
+            onOpenAnswerInput(e.target, parseInt(e.target.dataset.questionIndex, 10));
+            return;
+        }
+        if (e.target.classList.contains('fitb-input')) {
+            const card = e.target.closest('.question-card');
+            updateFitbCardState(card);
+            syncFitbChips(card);
+            saveAnswers();
+            autoSave(card.getAttribute('data-question-id'), null);
+            updatePalette();
+            updateProgress();
+        }
+    });
+
+    function updateFitbCardState(card) {
+        if (!card) return;
+        const inputs = Array.from(card.querySelectorAll('.fitb-input'));
+        if (inputs.length > 0 && inputs.every(input => input.value.trim().length > 0)) card.classList.add('card-answered');
+        else card.classList.remove('card-answered');
+    }
+
+    function syncFitbChips(card) {
+        if (!card) return;
+        const used = Array.from(card.querySelectorAll('.fitb-input')).map(input => input.value.trim());
+        card.querySelectorAll('.fitb-chip').forEach(chip => {
+            chip.classList.toggle('used', used.includes(chip.dataset.word));
+        });
+    }
+
+    let selectedFitbInput = null;
+    document.addEventListener('focusin', function(e) {
+        if (!e.target.classList.contains('fitb-input')) return;
+        selectedFitbInput = e.target;
+        document.querySelectorAll('.fitb-input.selected').forEach(input => input.classList.remove('selected'));
+        e.target.classList.add('selected');
+    });
+
+    document.addEventListener('click', function(e) {
+        const chip = e.target.closest('.fitb-chip');
+        if (!chip || chip.classList.contains('used')) return;
+        const card = chip.closest('.question-card');
+        const target = selectedFitbInput && selectedFitbInput.closest('.question-card') === card
+            ? selectedFitbInput
+            : Array.from(card.querySelectorAll('.fitb-input')).find(input => input.value.trim() === '');
+        if (!target) return;
+        target.value = chip.dataset.word;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    document.addEventListener('dblclick', function(e) {
+        if (!e.target.classList.contains('fitb-word-slot')) return;
+        e.target.value = '';
+        e.target.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     function closeSubmitModal() {

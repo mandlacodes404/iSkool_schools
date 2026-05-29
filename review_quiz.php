@@ -86,6 +86,57 @@ $stmt->close();
 
 if (!$quizInfo) die("Review data not found.");
 
+$fitbStmt = $conn->prepare("
+    SELECT fq.question_id, fq.sub_type, fq.scoring_mode,
+           fb.blank_index, fb.accepted_answers_json, fb.case_sensitive
+    FROM fitb_questions fq
+    JOIN fitb_blanks fb ON fb.question_id = fq.question_id
+    JOIN quizquestions qq ON qq.id = fq.question_id
+    JOIN quiz_results r ON r.quiz_id = qq.quiz_id
+    WHERE r.id = ?
+    ORDER BY fq.question_id ASC, fb.blank_index ASC
+");
+$fitbStmt->bind_param("i", $resultId);
+$fitbStmt->execute();
+$fitbRows = $fitbStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$fitbStmt->close();
+
+foreach ($fitbRows as $fitbRow) {
+    $qid = (int)$fitbRow['question_id'];
+    if (!isset($questions[$qid]) || ($questions[$qid]['question_type'] ?? 'mcq') !== 'fill_in_blank') {
+        continue;
+    }
+    if (!isset($questions[$qid]['fitb'])) {
+        $answerMap = json_decode($questions[$qid]['answer_text'] ?? '[]', true);
+        $questions[$qid]['fitb'] = [
+            'sub_type' => $fitbRow['sub_type'],
+            'scoring_mode' => $fitbRow['scoring_mode'],
+            'learner_answers' => is_array($answerMap) ? $answerMap : [],
+            'blanks' => []
+        ];
+    }
+    $accepted = json_decode($fitbRow['accepted_answers_json'] ?? '[]', true);
+    $accepted = is_array($accepted) ? $accepted : [];
+    $blankIndex = (int)$fitbRow['blank_index'];
+    $learnerAnswer = trim((string)($questions[$qid]['fitb']['learner_answers'][(string)$blankIndex] ?? ''));
+    $isCorrect = false;
+    foreach ($accepted as $acceptedAnswer) {
+        $acceptedAnswer = trim((string)$acceptedAnswer);
+        $isCorrect = ((int)$fitbRow['case_sensitive'] === 1)
+            ? $learnerAnswer === $acceptedAnswer
+            : mb_strtolower($learnerAnswer) === mb_strtolower($acceptedAnswer);
+        if ($isCorrect) {
+            break;
+        }
+    }
+    $questions[$qid]['fitb']['blanks'][] = [
+        'blank_index' => $blankIndex,
+        'learner_answer' => $learnerAnswer,
+        'accepted_answers' => $accepted,
+        'is_correct' => $isCorrect
+    ];
+}
+
 // 3. Strict Access Control
 // Fixed: Using 'learner' instead of 'user'
 if ($userRole === 'learner') {
@@ -214,6 +265,19 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
             margin-top: 10px;
             color: #f5c38b;
         }
+
+        .fitb-review-row {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+
+        .fitb-review-row.correct { border-color: var(--correct); background: rgba(39,174,96,0.13); }
+        .fitb-review-row.incorrect { border-color: var(--incorrect); background: rgba(231,76,60,0.13); }
+        .fitb-review-answer { font-weight: 800; color: var(--text-color); }
+        .fitb-review-correct { font-size: 12px; opacity: 0.8; margin-top: 5px; }
 
         .back-btn {
             display: inline-block; padding: 12px 25px; background: var(--card-bg);
@@ -430,7 +494,22 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
                 <img src="<?= htmlspecialchars($q['image']) ?>" class="q-image" alt="Question Image">
             <?php endif; ?>
 
-            <?php if (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
+            <?php if (($q['question_type'] ?? 'mcq') === 'fill_in_blank'): ?>
+                <?php foreach (($q['fitb']['blanks'] ?? []) as $blank): ?>
+                    <div class="fitb-review-row <?= $blank['is_correct'] ? 'correct' : 'incorrect' ?>">
+                        <div>
+                            <i class="fas <?= $blank['is_correct'] ? 'fa-check-circle' : 'fa-times-circle' ?>"></i>
+                            Blank <?= htmlspecialchars((string)$blank['blank_index']) ?> - Your answer:
+                            <span class="fitb-review-answer"><?= htmlspecialchars($blank['learner_answer'] !== '' ? $blank['learner_answer'] : 'No answer submitted.') ?></span>
+                        </div>
+                        <?php if ((int)$quizInfo['publish_marks'] === 1): ?>
+                            <div class="fitb-review-correct">
+                                Accepted answers: <?= htmlspecialchars(implode(', ', $blank['accepted_answers'])) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php elseif (($q['question_type'] ?? 'mcq') === 'open_ended'): ?>
                 <div class="open-answer-box">
                     <strong>Your answer:</strong><br>
                     <?= nl2br(htmlspecialchars($q['answer_text'] !== '' ? $q['answer_text'] : 'No answer submitted.')) ?>

@@ -1035,6 +1035,27 @@ function renderQuizReview(data) {
             html += `<img src="${escapeHtml(q.image)}" class="teacher-review-q-image" alt="Question image">`;
         }
 
+        if ((q.question_type || 'mcq') === 'fill_in_blank') {
+            const fitb = q.fitb || { blanks: [] };
+            html += `
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-top:12px;">
+                    <div style="color:#8b949e;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Fill in the Blank</div>`;
+            (fitb.blanks || []).forEach(blank => {
+                const ok = !!blank.is_correct;
+                html += `
+                    <div style="border:1px solid ${ok ? 'rgba(39,174,96,.35)' : 'rgba(231,76,60,.35)'};background:${ok ? 'rgba(39,174,96,.10)' : 'rgba(231,76,60,.10)'};border-radius:8px;padding:10px 12px;margin-top:8px;">
+                        <div style="display:flex;gap:8px;align-items:center;color:#d8dee9;">
+                            <span style="color:${ok ? '#27ae60' : '#e74c3c'};font-weight:900;">${ok ? '&#10003;' : '&#10005;'}</span>
+                            <strong>Blank ${escapeHtml(blank.blank_index)}:</strong>
+                            <span>${escapeHtml(blank.learner_answer || 'No answer submitted.')}</span>
+                        </div>
+                        <div style="color:#8b949e;font-size:12px;margin-top:5px;">Accepted: ${escapeHtml((blank.accepted_answers || []).join(', '))}</div>
+                    </div>`;
+            });
+            html += `<div style="color:#4fd1c5;font-weight:800;font-size:13px;margin-top:10px;">Awarded: ${escapeHtml(fitb.points_awarded ?? 0)} / ${escapeHtml(q.points)}</div></div></div>`;
+            return;
+        }
+
         if ((q.question_type || 'mcq') === 'open_ended') {
             if (q.grade) {
                 html += `
@@ -1389,6 +1410,7 @@ window.addCqQuestion = function() {
         <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
             <option value="mcq" selected>Multiple Choice</option>
             <option value="open_ended">Open Ended</option>
+            <option value="fill_in_blank">Fill in the Blank</option>
         </select>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
@@ -1417,6 +1439,7 @@ window.addCqQuestion = function() {
         <div class="cq-open-preview" style="display:none;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
             Learners will type their answer here.
         </div>
+        ${buildFitbBuilderHtml('cq', i, null, false)}
 
         <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
         <input type="number" name="points[]" min="1" value="1" 
@@ -1435,18 +1458,139 @@ window.removeCqQuestion = function(i) {
     updateOpenEndedBanner();
 };
 
+function countFitbMarkers(text) {
+    const matches = String(text || '').match(/\{blank\}/gi);
+    return matches ? matches.length : 0;
+}
+
+function fitbPreviewHtml(text) {
+    const parts = String(text || '').split(/(\{blank\})/i);
+    let blankIndex = 1;
+    return parts.map(part => {
+        if (/^\{blank\}$/i.test(part)) {
+            return `<input type="text" disabled placeholder="..." style="display:inline-block;width:110px;margin:0 4px;padding:5px 7px;border-radius:6px;border:1px solid rgba(79,209,197,.35);background:rgba(255,255,255,.05);color:#c9d1d9;">`;
+        }
+        return escapeHtml(part);
+    }).join('') || '<span style="color:#8b949e;">Type a sentence using {blank}.</span>';
+}
+
+function buildChipInputs(name, values) {
+    return (values || []).map(value => `
+        <span class="fitb-chip-tag" style="display:inline-flex;align-items:center;gap:6px;background:rgba(79,209,197,.08);border:1px solid rgba(79,209,197,.25);color:#4fd1c5;border-radius:6px;padding:4px 7px;font-size:12px;font-weight:800;">
+            ${escapeHtml(value)}
+            <button type="button" data-action="remove-fitb-chip" style="background:transparent;border:0;color:#f85149;cursor:pointer;font-weight:900;">x</button>
+            <input type="hidden" name="${name}" value="${escapeHtml(value)}">
+        </span>`).join('');
+}
+
+function buildFitbBuilderHtml(prefix, index, fitb, locked) {
+    const subType = fitb?.sub_type || 'free_type';
+    const scoringMode = fitb?.scoring_mode || 'partial';
+    const distractors = fitb?.distractors || [];
+    const lockedAttr = locked ? 'data-locked="1" disabled' : '';
+    const blanksJson = escapeHtml(JSON.stringify(fitb?.blanks || []));
+    return `
+        <div class="fitb-builder" data-prefix="${prefix}" data-locked="${locked ? '1' : '0'}" data-fitb-blanks="${blanksJson}" style="display:none;margin-top:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+            <div style="color:#b7f5ef;font-size:13px;line-height:1.5;margin-bottom:10px;">
+                Type {blank} wherever you want a blank to appear. Example: "The capital of France is {blank}."
+            </div>
+            <label class="teacher-modal-label">Fill in the Blank Sub-Type</label>
+            <select name="fitb_sub_type[${index}]" class="teacher-modal-input fitb-sub-type" ${lockedAttr}>
+                <option value="free_type" ${subType === 'free_type' ? 'selected' : ''}>Free Type</option>
+                <option value="word_bank" ${subType === 'word_bank' ? 'selected' : ''}>Word Bank</option>
+            </select>
+            <label class="teacher-modal-label" style="margin-top:10px;">Scoring Mode</label>
+            <select name="fitb_scoring_mode[${index}]" class="teacher-modal-input fitb-scoring-mode" ${lockedAttr}>
+                <option value="partial" ${scoringMode === 'partial' ? 'selected' : ''}>Partial Credit</option>
+                <option value="all_or_nothing" ${scoringMode === 'all_or_nothing' ? 'selected' : ''}>All or Nothing</option>
+            </select>
+            <div class="fitb-preview" style="margin-top:10px;padding:10px;border:1px dashed rgba(79,209,197,.35);border-radius:8px;color:#e2e8f0;line-height:2;"></div>
+            <div class="fitb-blanks" style="margin-top:10px;"></div>
+            <div class="fitb-distractors" style="display:${subType === 'word_bank' ? 'block' : 'none'};margin-top:12px;">
+                <label class="teacher-modal-label">Distractor Words</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" class="teacher-modal-input fitb-distractor-input" placeholder="Extra word" style="margin:0;" ${lockedAttr}>
+                    <button type="button" data-action="add-fitb-distractor" ${lockedAttr} style="background:rgba(79,209,197,.1);border:1px solid rgba(79,209,197,.3);color:#4fd1c5;border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
+                </div>
+                <div class="fitb-distractor-chips" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;">${buildChipInputs(`fitb_distractors[${index}][]`, distractors)}</div>
+                <div class="fitb-bank-count" style="font-size:12px;color:#8b949e;margin-top:8px;"></div>
+            </div>
+        </div>`;
+}
+
+function syncFitbBuilder(questionEl) {
+    const builder = questionEl ? questionEl.querySelector('.fitb-builder') : null;
+    if (!builder) return;
+    const index = questionEl.dataset.questionIndex || questionEl.id?.replace(/\D/g, '') || 0;
+    const questionInput = questionEl.querySelector('input[name="question[]"]');
+    const text = questionInput ? questionInput.value : '';
+    const blankCount = countFitbMarkers(text);
+    const blanksContainer = builder.querySelector('.fitb-blanks');
+    const preview = builder.querySelector('.fitb-preview');
+    const stored = JSON.parse(builder.dataset.fitbBlanks || '[]');
+    const current = [];
+    builder.querySelectorAll('.fitb-blank-row').forEach(row => {
+        current.push({
+            blank_index: parseInt(row.dataset.blankIndex, 10),
+            accepted_answers: Array.from(row.querySelectorAll('.fitb-answer-chips input[type="hidden"]')).map(input => input.value),
+            case_sensitive: row.querySelector('input[type="checkbox"]')?.checked ? 1 : 0
+        });
+    });
+    if (preview) preview.innerHTML = fitbPreviewHtml(text);
+    let html = '';
+    for (let blankIndex = 1; blankIndex <= blankCount; blankIndex++) {
+        const existing = current.find(blank => parseInt(blank.blank_index, 10) === blankIndex)
+            || stored.find(blank => parseInt(blank.blank_index, 10) === blankIndex)
+            || {};
+        const answers = existing.accepted_answers || [];
+        const caseSensitive = existing.case_sensitive == 1;
+        html += `
+            <div class="fitb-blank-row" data-blank-index="${blankIndex}" style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px;margin-top:10px;">
+                <label class="teacher-modal-label">Blank ${blankIndex} accepted answers:</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" class="teacher-modal-input fitb-answer-input" placeholder="Accepted answer" style="margin:0;">
+                    <button type="button" data-action="add-fitb-answer" style="background:rgba(79,209,197,.1);border:1px solid rgba(79,209,197,.3);color:#4fd1c5;border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
+                </div>
+                <div class="fitb-answer-chips" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;">${buildChipInputs(`fitb_accepted_answers[${index}][${blankIndex}][]`, answers)}</div>
+                <label style="display:flex;align-items:center;gap:8px;margin-top:8px;color:#c9d1d9;font-size:13px;">
+                    <input type="checkbox" name="fitb_case_sensitive[${index}][${blankIndex}]" value="1" ${caseSensitive ? 'checked' : ''} style="width:16px;height:16px;accent-color:#4fd1c5;">
+                    Case sensitive
+                </label>
+            </div>`;
+    }
+    blanksContainer.innerHTML = html || '<div style="color:#f5c38b;font-size:12px;">Add at least one {blank} marker to generate answer fields.</div>';
+    updateFitbBankCount(builder);
+}
+
+function updateFitbBankCount(builder) {
+    const answerCount = builder.querySelectorAll('.fitb-answer-chips input[type="hidden"]').length;
+    const distractorCount = builder.querySelectorAll('.fitb-distractor-chips input[type="hidden"]').length;
+    const count = builder.querySelector('.fitb-bank-count');
+    if (count) count.textContent = `Word bank will contain ${answerCount + distractorCount} words (${answerCount} answers + ${distractorCount} distractors).`;
+}
+
 function setQuestionTypeFields(questionEl, questionType) {
     const isOpenEnded = questionType === 'open_ended';
+    const isFitb = questionType === 'fill_in_blank';
     const mcqFields = questionEl ? questionEl.querySelector('.cq-mcq-fields, .eq-mcq-fields') : null;
     const preview = questionEl ? questionEl.querySelector('.cq-open-preview, .eq-open-preview') : null;
+    const fitbFields = questionEl ? questionEl.querySelector('.fitb-builder') : null;
     if (mcqFields) {
-        mcqFields.style.display = isOpenEnded ? 'none' : 'block';
+        mcqFields.style.display = (isOpenEnded || isFitb) ? 'none' : 'block';
         mcqFields.querySelectorAll('input, select, textarea').forEach(input => {
-            input.disabled = isOpenEnded;
-            if (input.type === 'text') input.required = !isOpenEnded && (input.placeholder === 'Choice 1' || input.placeholder === 'Choice 2');
+            input.disabled = isOpenEnded || isFitb;
+            if (input.type === 'text') input.required = !isOpenEnded && !isFitb && (input.placeholder === 'Choice 1' || input.placeholder === 'Choice 2');
         });
     }
     if (preview) preview.style.display = isOpenEnded ? 'block' : 'none';
+    if (fitbFields) {
+        fitbFields.style.display = isFitb ? 'block' : 'none';
+        if (isFitb) syncFitbBuilder(questionEl);
+        const builderLocked = fitbFields.dataset.locked === '1';
+        fitbFields.querySelectorAll('input, select, button').forEach(input => {
+            input.disabled = !isFitb || builderLocked || input.dataset.locked === '1';
+        });
+    }
 }
 
 function updateOpenEndedBanner() {
@@ -1538,14 +1682,15 @@ function getQuizFormTarget() {
 }
 
 function buildEditQuestionHtml(question, index, locked) {
-    const questionType = question.question_type === 'open_ended' ? 'open_ended' : 'mcq';
+    const questionType = ['open_ended', 'fill_in_blank'].includes(question.question_type) ? question.question_type : 'mcq';
     const isOpenEnded = questionType === 'open_ended';
+    const isFitb = questionType === 'fill_in_blank';
     const choices = question.choices && question.choices.length ? question.choices : [
         { id: 0, choice_text: '', is_correct: 1 },
         { id: 0, choice_text: '', is_correct: 0 }
     ];
     const disabled = locked ? 'disabled' : '';
-    const choiceDisabled = locked || isOpenEnded ? 'disabled' : '';
+    const choiceDisabled = locked || isOpenEnded || isFitb ? 'disabled' : '';
     let choicesHtml = '';
 
     choices.forEach((choice, choiceIndex) => {
@@ -1577,11 +1722,12 @@ function buildEditQuestionHtml(question, index, locked) {
             <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
             ${locked ? `
                 <input type="hidden" name="question_type[]" value="${questionType}">
-                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#c9d1d9;padding:11px 12px;font-size:13px;">${questionType === 'open_ended' ? 'Open Ended' : 'Multiple Choice'}</div>
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#c9d1d9;padding:11px 12px;font-size:13px;">${questionType === 'open_ended' ? 'Open Ended' : questionType === 'fill_in_blank' ? 'Fill in the Blank' : 'Multiple Choice'}</div>
             ` : `
                 <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
                     <option value="mcq" ${questionType === 'mcq' ? 'selected' : ''}>Multiple Choice</option>
                     <option value="open_ended" ${questionType === 'open_ended' ? 'selected' : ''}>Open Ended</option>
+                    <option value="fill_in_blank" ${questionType === 'fill_in_blank' ? 'selected' : ''}>Fill in the Blank</option>
                 </select>
             `}
             <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
@@ -1591,7 +1737,7 @@ function buildEditQuestionHtml(question, index, locked) {
             </label>` : ''}
             <input type="file" name="question_images[]" accept="image/*" ${disabled}
                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
-            <div class="eq-mcq-fields" style="display:${isOpenEnded ? 'none' : 'block'};">
+            <div class="eq-mcq-fields" style="display:${(isOpenEnded || isFitb) ? 'none' : 'block'};">
                 <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
                 <div class="eq-choices">${choicesHtml}</div>
                 ${!locked && !isOpenEnded ? `<button type="button" data-action="add-edit-choice"
@@ -1600,6 +1746,7 @@ function buildEditQuestionHtml(question, index, locked) {
             <div class="eq-open-preview" style="display:${isOpenEnded ? 'block' : 'none'};background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
                 Learners will type their answer here.
             </div>
+            ${buildFitbBuilderHtml('eq', index, question.fitb || null, locked).replace('display:none;', `display:${isFitb ? 'block' : 'none'};`)}
             <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
             <input type="number" name="points[]" min="1" value="${escapeHtml(question.points || 1)}" class="teacher-modal-input" ${disabled}
                 style="max-width:100px;">
@@ -1625,6 +1772,22 @@ function refreshEditQuestionIndexes() {
                 text.placeholder = `Choice ${choiceIndex + 1}`;
             }
         });
+        const builder = questionEl.querySelector('.fitb-builder');
+        if (builder) {
+            builder.querySelectorAll('.fitb-sub-type').forEach(input => input.name = `fitb_sub_type[${index}]`);
+            builder.querySelectorAll('.fitb-scoring-mode').forEach(input => input.name = `fitb_scoring_mode[${index}]`);
+            builder.querySelectorAll('.fitb-blank-row').forEach(row => {
+                const blankIndex = row.dataset.blankIndex;
+                row.querySelectorAll('.fitb-answer-chips input[type="hidden"]').forEach(input => {
+                    input.name = `fitb_accepted_answers[${index}][${blankIndex}][]`;
+                });
+                const caseBox = row.querySelector('input[type="checkbox"]');
+                if (caseBox) caseBox.name = `fitb_case_sensitive[${index}][${blankIndex}]`;
+            });
+            builder.querySelectorAll('.fitb-distractor-chips input[type="hidden"]').forEach(input => {
+                input.name = `fitb_distractors[${index}][]`;
+            });
+        }
     });
 }
 
@@ -1718,6 +1881,10 @@ window.openEditQuiz = async function(quizId) {
             </div>`;
 
         document.getElementById('editQuizForm').addEventListener('submit', submitEditQuiz);
+        document.querySelectorAll('#editQuestionsContainer .eq-question').forEach(questionEl => {
+            const type = questionEl.querySelector('[name="question_type[]"]');
+            if (type) setQuestionTypeFields(questionEl, type.value);
+        });
         updatePublishMarksOpenEndedGate();
         document.getElementById('eqSummative').addEventListener('change', function() {
             const weightContainer = document.getElementById('eqWeightContainer');
@@ -1872,6 +2039,33 @@ document.addEventListener('click', function(e) {
         if (removeInput) removeInput.value = actionEl.checked ? '1' : '0';
     } else if (action === 'go-to-open-ended-grade') {
         openGradesForQuizFromReview(parseInt(actionEl.dataset.quizId, 10), actionEl.dataset.quizTitle || '');
+    } else if (action === 'add-fitb-answer') {
+        const row = actionEl.closest('.fitb-blank-row');
+        const question = actionEl.closest('.eq-question') || actionEl.closest('[id^="cq-question-"]');
+        const builder = actionEl.closest('.fitb-builder');
+        const input = row ? row.querySelector('.fitb-answer-input') : null;
+        if (row && input && input.value.trim() !== '') {
+            const index = question?.dataset.questionIndex || question?.id?.replace(/\D/g, '') || 0;
+            const blankIndex = row.dataset.blankIndex;
+            row.querySelector('.fitb-answer-chips').insertAdjacentHTML('beforeend', buildChipInputs(`fitb_accepted_answers[${index}][${blankIndex}][]`, [input.value.trim()]));
+            input.value = '';
+            if (builder) updateFitbBankCount(builder);
+        }
+    } else if (action === 'add-fitb-distractor') {
+        const builder = actionEl.closest('.fitb-builder');
+        const question = actionEl.closest('.eq-question') || actionEl.closest('[id^="cq-question-"]');
+        const input = builder ? builder.querySelector('.fitb-distractor-input') : null;
+        if (builder && input && input.value.trim() !== '') {
+            const index = question?.dataset.questionIndex || question?.id?.replace(/\D/g, '') || 0;
+            builder.querySelector('.fitb-distractor-chips').insertAdjacentHTML('beforeend', buildChipInputs(`fitb_distractors[${index}][]`, [input.value.trim()]));
+            input.value = '';
+            updateFitbBankCount(builder);
+        }
+    } else if (action === 'remove-fitb-chip') {
+        const builder = actionEl.closest('.fitb-builder');
+        const chip = actionEl.closest('.fitb-chip-tag');
+        if (chip) chip.remove();
+        if (builder) updateFitbBankCount(builder);
     }
 });
 
@@ -1889,10 +2083,25 @@ async function openGradesForQuizFromReview(quizId, quizTitle) {
 
 document.addEventListener('change', function(e) {
     const actionEl = e.target.closest('[data-action="change-question-type"]');
-    if (!actionEl) return;
-    const question = actionEl.closest('.eq-question') || actionEl.closest('[id^="cq-question-"]');
-    if (question) setQuestionTypeFields(question, actionEl.value);
-    updateOpenEndedBanner();
+    if (actionEl) {
+        const question = actionEl.closest('.eq-question') || actionEl.closest('[id^="cq-question-"]');
+        if (question) setQuestionTypeFields(question, actionEl.value);
+        updateOpenEndedBanner();
+        return;
+    }
+    if (e.target.classList.contains('fitb-sub-type')) {
+        const builder = e.target.closest('.fitb-builder');
+        const distractors = builder ? builder.querySelector('.fitb-distractors') : null;
+        if (distractors) distractors.style.display = e.target.value === 'word_bank' ? 'block' : 'none';
+        if (builder) updateFitbBankCount(builder);
+    }
+});
+
+document.addEventListener('input', function(e) {
+    if (e.target.name !== 'question[]') return;
+    const question = e.target.closest('.eq-question') || e.target.closest('[id^="cq-question-"]');
+    const type = question ? question.querySelector('[name="question_type[]"]') : null;
+    if (type && type.value === 'fill_in_blank') syncFitbBuilder(question);
 });
 
 let activeIntegrityQuizId = null;

@@ -42,6 +42,23 @@ function validate_quiz_edit_image_upload(array $files, int $index): array {
     return ['valid' => true, 'safe_name' => $safe_name];
 }
 
+function normalize_fitb_list($value): array {
+    $items = is_array($value) ? $value : [];
+    $clean = [];
+    foreach ($items as $item) {
+        $item = trim((string)$item);
+        if ($item !== '' && !in_array($item, $clean, true)) {
+            $clean[] = $item;
+        }
+    }
+    return $clean;
+}
+
+function count_fitb_blanks(string $text): int {
+    preg_match_all('/\{blank\}/i', $text, $matches);
+    return count($matches[0]);
+}
+
 function normalize_question_payload(): array {
     $question_texts = $_POST['question'] ?? [];
     $question_ids = $_POST['question_id'] ?? [];
@@ -51,6 +68,11 @@ function normalize_question_payload(): array {
     $choices_payload = $_POST['choices'] ?? [];
     $choice_ids_payload = $_POST['choice_id'] ?? [];
     $correct_choices = $_POST['correct_choice'] ?? [];
+    $fitb_sub_types = $_POST['fitb_sub_type'] ?? [];
+    $fitb_scoring_modes = $_POST['fitb_scoring_mode'] ?? [];
+    $fitb_accepted_answers = $_POST['fitb_accepted_answers'] ?? [];
+    $fitb_case_sensitive = $_POST['fitb_case_sensitive'] ?? [];
+    $fitb_distractors = $_POST['fitb_distractors'] ?? [];
 
     $questions = [];
     foreach ($question_texts as $i => $question_text) {
@@ -71,7 +93,14 @@ function normalize_question_payload(): array {
             'question_type' => $question_types[$i] ?? 'mcq',
             'points' => (int)($points_values[$i] ?? 0),
             'remove_image' => (int)($remove_images[$i] ?? 0),
-            'choices' => $choices
+            'choices' => $choices,
+            'fitb' => [
+                'sub_type' => $fitb_sub_types[$i] ?? 'free_type',
+                'scoring_mode' => $fitb_scoring_modes[$i] ?? 'partial',
+                'accepted_answers' => $fitb_accepted_answers[$i] ?? [],
+                'case_sensitive' => $fitb_case_sensitive[$i] ?? [],
+                'distractors' => $fitb_distractors[$i] ?? []
+            ]
         ];
     }
 
@@ -159,10 +188,23 @@ if (!$has_attempts) {
             }
         }
 
-        if (!in_array($question['question_type'], ['mcq', 'open_ended'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid question type.';
+        if (!in_array($question['question_type'], ['mcq', 'open_ended', 'fill_in_blank'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid question type.';
         if ($question['text'] === '') $errors[] = 'Question ' . ($i + 1) . ' text is required.';
         if ($question['question_type'] === 'open_ended') {
             if (count($non_empty_choices) > 0) $errors[] = 'Question ' . ($i + 1) . ' is open-ended and must not have choices.';
+        } elseif ($question['question_type'] === 'fill_in_blank') {
+            if (count($non_empty_choices) > 0) $errors[] = 'Question ' . ($i + 1) . ' is fill in the blank and must not have choices.';
+            $blank_count = count_fitb_blanks($question['text']);
+            if ($blank_count < 1) $errors[] = 'Question ' . ($i + 1) . ' must include at least one {blank} marker.';
+            if (!in_array($question['fitb']['sub_type'], ['free_type', 'word_bank'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid fill in the blank sub-type.';
+            if (!in_array($question['fitb']['scoring_mode'], ['partial', 'all_or_nothing'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid fill in the blank scoring mode.';
+            for ($blank_index = 1; $blank_index <= $blank_count; $blank_index++) {
+                $answers = normalize_fitb_list($question['fitb']['accepted_answers'][$blank_index] ?? []);
+                if (count($answers) < 1) $errors[] = 'Question ' . ($i + 1) . ", blank {$blank_index} needs at least one accepted answer.";
+            }
+            if ($question['fitb']['sub_type'] === 'word_bank' && count(normalize_fitb_list($question['fitb']['distractors'])) < 2) {
+                $errors[] = 'Question ' . ($i + 1) . ' word bank needs at least two distractor words.';
+            }
         } else {
             if (count($non_empty_choices) < 2) $errors[] = 'Question ' . ($i + 1) . ' must have at least two choices.';
             if ($correct_count !== 1) $errors[] = 'Question ' . ($i + 1) . ' must have exactly one valid correct choice.';
@@ -287,6 +329,20 @@ try {
         }
         $deleteChoices->close();
 
+        $deleteFitbBlanks = $conn->prepare("DELETE FROM fitb_blanks WHERE question_id = ?");
+        $deleteFitbBlanks->bind_param("i", $question_id_to_delete);
+        if (!$deleteFitbBlanks->execute()) {
+            throw new RuntimeException("Deleted FITB blanks failed: " . $deleteFitbBlanks->error);
+        }
+        $deleteFitbBlanks->close();
+
+        $deleteFitbQuestion = $conn->prepare("DELETE FROM fitb_questions WHERE question_id = ?");
+        $deleteFitbQuestion->bind_param("i", $question_id_to_delete);
+        if (!$deleteFitbQuestion->execute()) {
+            throw new RuntimeException("Deleted FITB metadata failed: " . $deleteFitbQuestion->error);
+        }
+        $deleteFitbQuestion->close();
+
         $deleteQuestion = $conn->prepare("DELETE FROM quizquestions WHERE id = ? AND quiz_id = ?");
         $deleteQuestion->bind_param("ii", $question_id_to_delete, $quiz_id);
         if (!$deleteQuestion->execute()) {
@@ -345,8 +401,71 @@ try {
                 throw new RuntimeException("Open-ended choice cleanup failed: " . $deleteOpenChoices->error);
             }
             $deleteOpenChoices->close();
+            $deleteFitbBlanks = $conn->prepare("DELETE FROM fitb_blanks WHERE question_id = ?");
+            $deleteFitbBlanks->bind_param("i", $question_id);
+            $deleteFitbBlanks->execute();
+            $deleteFitbBlanks->close();
+            $deleteFitbQuestion = $conn->prepare("DELETE FROM fitb_questions WHERE question_id = ?");
+            $deleteFitbQuestion->bind_param("i", $question_id);
+            $deleteFitbQuestion->execute();
+            $deleteFitbQuestion->close();
             continue;
         }
+
+        if ($question['question_type'] === 'fill_in_blank') {
+            $deleteFitbChoices = $conn->prepare("DELETE FROM choices WHERE question_id = ?");
+            $deleteFitbChoices->bind_param("i", $question_id);
+            if (!$deleteFitbChoices->execute()) {
+                throw new RuntimeException("FITB choice cleanup failed: " . $deleteFitbChoices->error);
+            }
+            $deleteFitbChoices->close();
+
+            $deleteFitbBlanks = $conn->prepare("DELETE FROM fitb_blanks WHERE question_id = ?");
+            $deleteFitbBlanks->bind_param("i", $question_id);
+            if (!$deleteFitbBlanks->execute()) {
+                throw new RuntimeException("FITB blank cleanup failed: " . $deleteFitbBlanks->error);
+            }
+            $deleteFitbBlanks->close();
+
+            $deleteFitbQuestion = $conn->prepare("DELETE FROM fitb_questions WHERE question_id = ?");
+            $deleteFitbQuestion->bind_param("i", $question_id);
+            if (!$deleteFitbQuestion->execute()) {
+                throw new RuntimeException("FITB metadata cleanup failed: " . $deleteFitbQuestion->error);
+            }
+            $deleteFitbQuestion->close();
+
+            $sub_type = $question['fitb']['sub_type'];
+            $scoring_mode = $question['fitb']['scoring_mode'];
+            $distractors_json = json_encode($sub_type === 'word_bank' ? normalize_fitb_list($question['fitb']['distractors']) : []);
+            $insertFitbQuestion = $conn->prepare("INSERT INTO fitb_questions (question_id, sub_type, scoring_mode, distractors_json) VALUES (?, ?, ?, ?)");
+            $insertFitbQuestion->bind_param("isss", $question_id, $sub_type, $scoring_mode, $distractors_json);
+            if (!$insertFitbQuestion->execute()) {
+                throw new RuntimeException("FITB metadata insert failed: " . $insertFitbQuestion->error);
+            }
+            $insertFitbQuestion->close();
+
+            $insertFitbBlank = $conn->prepare("INSERT INTO fitb_blanks (question_id, blank_index, accepted_answers_json, case_sensitive) VALUES (?, ?, ?, ?)");
+            $blank_count = count_fitb_blanks($question['text']);
+            for ($blank_index = 1; $blank_index <= $blank_count; $blank_index++) {
+                $answers_json = json_encode(normalize_fitb_list($question['fitb']['accepted_answers'][$blank_index] ?? []));
+                $case_sensitive = isset($question['fitb']['case_sensitive'][$blank_index]) ? 1 : 0;
+                $insertFitbBlank->bind_param("iisi", $question_id, $blank_index, $answers_json, $case_sensitive);
+                if (!$insertFitbBlank->execute()) {
+                    throw new RuntimeException("FITB blank insert failed: " . $insertFitbBlank->error);
+                }
+            }
+            $insertFitbBlank->close();
+            continue;
+        }
+
+        $deleteFitbBlanks = $conn->prepare("DELETE FROM fitb_blanks WHERE question_id = ?");
+        $deleteFitbBlanks->bind_param("i", $question_id);
+        $deleteFitbBlanks->execute();
+        $deleteFitbBlanks->close();
+        $deleteFitbQuestion = $conn->prepare("DELETE FROM fitb_questions WHERE question_id = ?");
+        $deleteFitbQuestion->bind_param("i", $question_id);
+        $deleteFitbQuestion->execute();
+        $deleteFitbQuestion->close();
 
         $existingChoicesStmt = $conn->prepare("SELECT id FROM choices WHERE question_id = ?");
         $existingChoicesStmt->bind_param("i", $question_id);

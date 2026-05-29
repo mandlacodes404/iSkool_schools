@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     $questionId = isset($_POST['question_id']) ? intval($_POST['question_id']) : null;
     $choiceId = isset($_POST['choice_id']) ? intval($_POST['choice_id']) : null;
     $answerText = isset($_POST['answer_text']) ? trim((string)$_POST['answer_text']) : null;
+    $fitbAnswersRaw = isset($_POST['fitb_answers']) ? (string)$_POST['fitb_answers'] : null;
     $currentStep = isset($_POST['current_step']) ? intval($_POST['current_step']) : null;
 
     $accessStmt = $conn->prepare("
@@ -92,6 +93,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
             if ($answerText !== null && strlen($answerText) > 5000) {
                 $answerText = substr($answerText, 0, 5000);
             }
+            $choiceId = null;
+        } elseif ($questionType === 'fill_in_blank') {
+            $decoded = json_decode((string)$fitbAnswersRaw, true);
+            if (!is_array($decoded)) {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid answer']);
+                exit;
+            }
+            $cleanFitbAnswers = [];
+            foreach ($decoded as $blankIndex => $blankAnswer) {
+                $index = (int)$blankIndex;
+                if ($index < 1) {
+                    continue;
+                }
+                $cleanFitbAnswers[(string)$index] = substr(trim((string)$blankAnswer), 0, 200);
+            }
+            $answerText = json_encode($cleanFitbAnswers);
             $choiceId = null;
         } elseif ($choiceId !== null) {
             $validAnswerStmt = $conn->prepare("

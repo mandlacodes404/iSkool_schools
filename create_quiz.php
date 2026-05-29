@@ -65,6 +65,23 @@ function validate_quiz_image_upload(array $files, int $index): array {
     return ['valid' => true, 'safe_name' => $safe_name];
 }
 
+function normalize_fitb_list($value): array {
+    $items = is_array($value) ? $value : [];
+    $clean = [];
+    foreach ($items as $item) {
+        $item = trim((string)$item);
+        if ($item !== '' && !in_array($item, $clean, true)) {
+            $clean[] = $item;
+        }
+    }
+    return $clean;
+}
+
+function count_fitb_blanks(string $text): int {
+    preg_match_all('/\{blank\}/i', $text, $matches);
+    return count($matches[0]);
+}
+
 // ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
 $yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -153,11 +170,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pointsCheck = isset($_POST['points'][$i]) ? filter_var($_POST['points'][$i], FILTER_VALIDATE_INT) : false;
             $points = $pointsCheck === false ? 0 : (int)$pointsCheck;
 
-            if (!in_array($questionType, ['mcq', 'open_ended'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid question type.";
+            if (!in_array($questionType, ['mcq', 'open_ended', 'fill_in_blank'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid question type.";
             if ($questionText === '') $errors[] = "Question " . ($i + 1) . " text is required.";
             if ($questionType === 'open_ended') {
                 $has_open_ended = 1;
                 if (count($nonEmptyChoices) > 0) $errors[] = "Question " . ($i + 1) . " is open-ended and must not have choices.";
+            } elseif ($questionType === 'fill_in_blank') {
+                if (count($nonEmptyChoices) > 0) $errors[] = "Question " . ($i + 1) . " is fill in the blank and must not have choices.";
+                $blankCount = count_fitb_blanks($questionText);
+                if ($blankCount < 1) $errors[] = "Question " . ($i + 1) . " must include at least one {blank} marker.";
+                $subType = $_POST['fitb_sub_type'][$i] ?? 'free_type';
+                $scoringMode = $_POST['fitb_scoring_mode'][$i] ?? 'partial';
+                if (!in_array($subType, ['free_type', 'word_bank'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid fill in the blank sub-type.";
+                if (!in_array($scoringMode, ['partial', 'all_or_nothing'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid fill in the blank scoring mode.";
+                for ($blankIndex = 1; $blankIndex <= $blankCount; $blankIndex++) {
+                    $answers = normalize_fitb_list($_POST['fitb_accepted_answers'][$i][$blankIndex] ?? []);
+                    if (count($answers) < 1) $errors[] = "Question " . ($i + 1) . ", blank {$blankIndex} needs at least one accepted answer.";
+                }
+                if ($subType === 'word_bank') {
+                    $distractors = normalize_fitb_list($_POST['fitb_distractors'][$i] ?? []);
+                    if (count($distractors) < 2) $errors[] = "Question " . ($i + 1) . " word bank needs at least two distractor words.";
+                }
             } else {
                 if (count($nonEmptyChoices) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two choices.";
                 if ($correctIndex < 0 || !isset($choiceValues[$correctIndex]) || trim((string)$choiceValues[$correctIndex]) === '') {
@@ -243,6 +276,8 @@ try {
 
     $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points, question_type) VALUES (?, ?, ?, ?, ?)");
     $cStmt = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
+    $fitbQuestionStmt = $conn->prepare("INSERT INTO fitb_questions (question_id, sub_type, scoring_mode, distractors_json) VALUES (?, ?, ?, ?)");
+    $fitbBlankStmt = $conn->prepare("INSERT INTO fitb_blanks (question_id, blank_index, accepted_answers_json, case_sensitive) VALUES (?, ?, ?, ?)");
 
     $targetDir = "quiz_images/";
     if (!file_exists($targetDir) && !mkdir($targetDir, 0755, true)) {
@@ -275,6 +310,29 @@ try {
             continue;
         }
 
+        if ($questionType === 'fill_in_blank') {
+            $subType = $_POST['fitb_sub_type'][$i] ?? 'free_type';
+            $scoringMode = $_POST['fitb_scoring_mode'][$i] ?? 'partial';
+            $distractors = $subType === 'word_bank' ? normalize_fitb_list($_POST['fitb_distractors'][$i] ?? []) : [];
+            $distractorsJson = json_encode($distractors);
+            $fitbQuestionStmt->bind_param("isss", $question_id, $subType, $scoringMode, $distractorsJson);
+            if (!$fitbQuestionStmt->execute()) {
+                throw new RuntimeException("FITB question insert failed: " . $fitbQuestionStmt->error);
+            }
+
+            $blankCount = count_fitb_blanks((string)$qText);
+            for ($blankIndex = 1; $blankIndex <= $blankCount; $blankIndex++) {
+                $answers = normalize_fitb_list($_POST['fitb_accepted_answers'][$i][$blankIndex] ?? []);
+                $answersJson = json_encode($answers);
+                $caseSensitive = isset($_POST['fitb_case_sensitive'][$i][$blankIndex]) ? 1 : 0;
+                $fitbBlankStmt->bind_param("iisi", $question_id, $blankIndex, $answersJson, $caseSensitive);
+                if (!$fitbBlankStmt->execute()) {
+                    throw new RuntimeException("FITB blank insert failed: " . $fitbBlankStmt->error);
+                }
+            }
+            continue;
+        }
+
         foreach ($choices as $index => $choiceText) {
             if (empty($choiceText)) continue;
             $isCorrect = ($index == $correct) ? 1 : 0;
@@ -286,6 +344,8 @@ try {
     }
     $qStmt->close();
     $cStmt->close();
+    $fitbQuestionStmt->close();
+    $fitbBlankStmt->close();
     $conn->commit();
 } catch (Throwable $e) {
     $conn->rollback();
