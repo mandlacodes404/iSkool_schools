@@ -201,12 +201,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    $classOwnerStmt = $conn->prepare("SELECT 1 FROM teacher_subjects WHERE teacher_email = ? AND class_id = ? LIMIT 1");
-    $classOwnerStmt->bind_param("si", $email, $class_id);
-    $classOwnerStmt->execute();
-    $ownsClass = $classOwnerStmt->get_result()->num_rows > 0;
-    $classOwnerStmt->close();
-    if (!$ownsClass) $errors[] = "You are not assigned to this class.";
+    if ($class_id > 0) {
+        $classCheckStmt = $conn->prepare("SELECT id FROM classes WHERE id = ? LIMIT 1");
+        $classCheckStmt->bind_param("i", $class_id);
+        $classCheckStmt->execute();
+        $classExists = $classCheckStmt->get_result()->num_rows > 0;
+        $classCheckStmt->close();
+        if (!$classExists) $errors[] = "Invalid class selected.";
+    }
 
     if (!empty($errors)) {
         http_response_code(400);
