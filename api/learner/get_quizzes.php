@@ -43,8 +43,8 @@ if (empty($joinedClassIds)) {
 
 // Step 2: Fetch quizzes with Attempt Status (Match origin logic)
 $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-// Added 's' at the start for studentEmail and 'i' at the end for academic_year_id
-$types = 's' . str_repeat('i', count($joinedClassIds)) . 'i';
+// Two student email params are used by the latest-attempt derived table and join.
+$types = 'ss' . str_repeat('i', count($joinedClassIds)) . 'i';
 
 $stmt = $conn->prepare("
     SELECT 
@@ -53,6 +53,7 @@ $stmt = $conn->prepare("
         q.duration,
         q.start_time,
         q.status AS quiz_db_status,
+        q.publish_marks,
         q.is_summative,
         COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher'))) AS display_group,
         qa.status AS attempt_status,
@@ -61,7 +62,16 @@ $stmt = $conn->prepare("
     FROM quizzes q
     LEFT JOIN users u ON q.created_by = u.email AND u.role = 'teacher'
     LEFT JOIN teacher_subjects ts ON ts.teacher_email = q.created_by AND ts.class_id = q.class_id
-    LEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_email = ?
+    LEFT JOIN (
+        SELECT qa1.quiz_id, qa1.user_email, qa1.status
+        FROM quiz_attempts qa1
+        INNER JOIN (
+            SELECT quiz_id, user_email, MAX(attempt_id) AS latest_attempt_id
+            FROM quiz_attempts
+            WHERE user_email = ?
+            GROUP BY quiz_id, user_email
+        ) latest ON latest.latest_attempt_id = qa1.attempt_id
+    ) qa ON qa.quiz_id = q.id AND qa.user_email = ?
     LEFT JOIN (
         SELECT quiz_id,
                COUNT(*) AS question_count,
@@ -74,8 +84,8 @@ $stmt = $conn->prepare("
     ORDER BY display_group ASC, q.start_time DESC
 ");
 
-// Merge parameters: Email first, then class IDs, then Academic Year ID
-$bind_params = array_merge([$studentEmail], $joinedClassIds, [$current_academic_year_id]);
+// Merge parameters: email twice, then class IDs, then Academic Year ID
+$bind_params = array_merge([$studentEmail, $studentEmail], $joinedClassIds, [$current_academic_year_id]);
 $stmt->bind_param($types, ...$bind_params);
 $stmt->execute();
 $quizzesResult = $stmt->get_result();
@@ -94,6 +104,7 @@ while ($row = $quizzesResult->fetch_assoc()) {
         'duration'       => $row['duration'],
         'start_time'     => $row['start_time'],
         'status'         => $row['quiz_db_status'] ?? 'Open',
+        'publish_marks'  => (int)($row['publish_marks'] ?? 0),
         'is_summative'   => !empty($row['is_summative']),
         'attempt_status'  => $row['attempt_status'],
         'question_count'  => (int)$row['question_count'],

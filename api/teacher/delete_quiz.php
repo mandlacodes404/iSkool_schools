@@ -66,6 +66,38 @@ $questionStmt->close();
 try {
     $conn->begin_transaction();
 
+    $deleteAnswers = $conn->prepare("DELETE FROM user_answers WHERE quiz_id = ?");
+    $deleteAnswers->bind_param("i", $quiz_id);
+    if (!$deleteAnswers->execute()) {
+        throw new RuntimeException("Answer delete failed: " . $deleteAnswers->error);
+    }
+    $deleteAnswers->close();
+
+    if (!empty($question_ids)) {
+        $placeholders = implode(',', array_fill(0, count($question_ids), '?'));
+        $types = str_repeat('i', count($question_ids));
+        $deleteLegacyAnswers = $conn->prepare("DELETE FROM user_answers WHERE question_id IN ($placeholders)");
+        $deleteLegacyAnswers->bind_param($types, ...$question_ids);
+        if (!$deleteLegacyAnswers->execute()) {
+            throw new RuntimeException("Legacy answer delete failed: " . $deleteLegacyAnswers->error);
+        }
+        $deleteLegacyAnswers->close();
+    }
+
+    $deleteFitbBlanks = $conn->prepare("DELETE fb FROM fitb_blanks fb INNER JOIN quizquestions q ON fb.question_id = q.id WHERE q.quiz_id = ?");
+    $deleteFitbBlanks->bind_param("i", $quiz_id);
+    if (!$deleteFitbBlanks->execute()) {
+        throw new RuntimeException("FITB blank delete failed: " . $deleteFitbBlanks->error);
+    }
+    $deleteFitbBlanks->close();
+
+    $deleteFitbQuestions = $conn->prepare("DELETE fq FROM fitb_questions fq INNER JOIN quizquestions q ON fq.question_id = q.id WHERE q.quiz_id = ?");
+    $deleteFitbQuestions->bind_param("i", $quiz_id);
+    if (!$deleteFitbQuestions->execute()) {
+        throw new RuntimeException("FITB metadata delete failed: " . $deleteFitbQuestions->error);
+    }
+    $deleteFitbQuestions->close();
+
     $deleteChoices = $conn->prepare("DELETE c FROM choices c INNER JOIN quizquestions q ON c.question_id = q.id WHERE q.quiz_id = ?");
     $deleteChoices->bind_param("i", $quiz_id);
     if (!$deleteChoices->execute()) {
@@ -86,24 +118,6 @@ try {
         throw new RuntimeException("Integrity delete failed: " . $deleteIntegrity->error);
     }
     $deleteIntegrity->close();
-
-    $deleteAnswers = $conn->prepare("DELETE FROM user_answers WHERE quiz_id = ? OR question_id IN (SELECT id FROM quizquestions WHERE quiz_id = ?)");
-    $deleteAnswers->bind_param("ii", $quiz_id, $quiz_id);
-    if (!$deleteAnswers->execute()) {
-        throw new RuntimeException("Answer delete failed: " . $deleteAnswers->error);
-    }
-    $deleteAnswers->close();
-
-    if (!empty($question_ids)) {
-        $placeholders = implode(',', array_fill(0, count($question_ids), '?'));
-        $types = str_repeat('i', count($question_ids));
-        $deleteLegacyAnswers = $conn->prepare("DELETE FROM user_answers WHERE question_id IN ($placeholders)");
-        $deleteLegacyAnswers->bind_param($types, ...$question_ids);
-        if (!$deleteLegacyAnswers->execute()) {
-            throw new RuntimeException("Legacy answer delete failed: " . $deleteLegacyAnswers->error);
-        }
-        $deleteLegacyAnswers->close();
-    }
 
     $deleteQuiz = $conn->prepare("DELETE FROM quizzes WHERE id = ? AND created_by = ?");
     $deleteQuiz->bind_param("is", $quiz_id, $_SESSION['email']);
