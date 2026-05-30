@@ -1192,11 +1192,6 @@ window.openCreateQuiz = async function() {
                         <option value="Closed">Closed (Not accessible)</option>
                     </select>
 
-                    <!-- FIX 5: Attempt limit with helper text -->
-                    <label class="teacher-modal-label">Attempt Limit</label>
-                    <input type="number" name="attempt_limit" id="cqAttemptLimit" class="teacher-modal-input" min="0" value="0" placeholder="0 = unlimited" style="max-width:160px;">
-                    <span style="display:block;margin-top:5px;font-size:12px;color:#8b949e;">How many times can a learner attempt this quiz? Enter <strong style="color:#4fd1c5;">0</strong> for unlimited.</span>
-
                     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
                         <div id="cqPublishMarksWrap">
                             <label id="cqPublishMarksLabel" style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
