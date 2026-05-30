@@ -1187,7 +1187,7 @@ window.openCreateQuiz = async function() {
                     <!-- FIX 4: Status with clearer label + conditional start time -->
                     <label class="teacher-modal-label">Quiz Status</label>
                     <select name="status" id="cqStatus" class="teacher-modal-input" onchange="handleCqStatusChange(this.value)">
-                        <option value="Scheduled">Opens automatically at start time</option>
+                        <option value="Scheduled">Scheduled (Opens at start time)</option>
                         <option value="Open">Open (Available immediately)</option>
                         <option value="Closed">Closed (Not accessible)</option>
                     </select>
@@ -1328,8 +1328,10 @@ window.openCreateQuiz = async function() {
         addCqQuestion();
 
         // FIX 8: Set start time default to now + 1 hour rounded to nearest 15 min
-        const cqStartTimeEl = document.getElementById('cqStartTime');
-        if (cqStartTimeEl && !cqStartTimeEl.value) {
+        // Must run immediately after innerHTML is set — DOMContentLoaded has already fired
+        (function() {
+            const cqStartTimeEl = document.getElementById('cqStartTime');
+            if (!cqStartTimeEl) return;
             const now = new Date();
             now.setHours(now.getHours() + 1);
             const roundedMins = Math.round(now.getMinutes() / 15) * 15;
@@ -1338,7 +1340,7 @@ window.openCreateQuiz = async function() {
             now.setSeconds(0);
             const pad = n => String(n).padStart(2, '0');
             cqStartTimeEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        }
+        })();
 
         // FIX 4: Init status handler on load
         handleCqStatusChange(document.getElementById('cqStatus')?.value || 'Scheduled');
@@ -1394,8 +1396,9 @@ window.openCreateQuiz = async function() {
                     window.teacherQuizzesCache = null;
                     fetchTeacherQuizzes();
                 } else {
-                    errorDiv.textContent = data.error || data.message || 'Failed to create quiz.';
+                    errorDiv.textContent = data.message || data.error || 'Failed to create quiz.';
                     errorDiv.style.display = 'block';
+                    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             } catch (err) {
                 errorDiv.textContent = 'Something went wrong. Please try again.';

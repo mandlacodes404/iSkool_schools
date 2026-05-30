@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 29, 2026 at 07:13 AM
+-- Generation Time: May 29, 2026 at 04:22 PM
 -- Server version: 11.4.10-MariaDB-cll-lve
 -- PHP Version: 8.4.21
 
@@ -1393,6 +1393,51 @@ INSERT INTO `evaluation_statements` (`id`, `evaluation_id`, `statement`, `order_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `fitb_blanks`
+--
+
+CREATE TABLE `fitb_blanks` (
+  `id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `blank_index` int(11) NOT NULL,
+  `accepted_answers_json` text NOT NULL,
+  `case_sensitive` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `fitb_blanks`
+--
+
+INSERT INTO `fitb_blanks` (`id`, `question_id`, `blank_index`, `accepted_answers_json`, `case_sensitive`) VALUES
+(1, 534, 1, '[\"1969\"]', 0),
+(2, 535, 1, '[\"2010\"]', 0),
+(3, 535, 2, '[\"July\"]', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fitb_questions`
+--
+
+CREATE TABLE `fitb_questions` (
+  `id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `sub_type` enum('free_type','word_bank') NOT NULL DEFAULT 'free_type',
+  `scoring_mode` enum('partial','all_or_nothing') NOT NULL DEFAULT 'partial',
+  `distractors_json` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `fitb_questions`
+--
+
+INSERT INTO `fitb_questions` (`id`, `question_id`, `sub_type`, `scoring_mode`, `distractors_json`) VALUES
+(1, 534, 'free_type', 'all_or_nothing', '[]'),
+(2, 535, 'word_bank', 'partial', '[\"2009\",\"2008\",\"August\",\"September\",\"June\",\"2010\"]');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `messages`
 --
 
@@ -1569,7 +1614,7 @@ CREATE TABLE `quizquestions` (
   `question_text` text NOT NULL,
   `image_path` varchar(255) DEFAULT NULL,
   `points` int(11) DEFAULT 1,
-  `question_type` enum('mcq','open_ended') NOT NULL DEFAULT 'mcq'
+  `question_type` enum('mcq','open_ended','fill_in_blank') NOT NULL DEFAULT 'mcq'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -2108,7 +2153,9 @@ INSERT INTO `quizquestions` (`id`, `quiz_id`, `question_text`, `image_path`, `po
 (530, 115, 'WHAT IS IN THE IMAGE', NULL, 5, 'mcq'),
 (531, 116, 'WHAT IS IN THE IMAGE', NULL, 10, 'open_ended'),
 (532, 117, 'WHAT IS IN THE IMAGE', NULL, 7, 'open_ended'),
-(533, 117, 'WHAT IS IN THE IMAGE', NULL, 5, 'mcq');
+(533, 117, 'WHAT IS IN THE IMAGE', NULL, 5, 'mcq'),
+(534, 118, 'It was in {blank} when the first men landed on moon', NULL, 1, 'fill_in_blank'),
+(535, 118, 'The world cup in South Africa was in {blank} and in was in the month of {blank}.', NULL, 10, 'fill_in_blank');
 
 -- --------------------------------------------------------
 
@@ -2259,7 +2306,8 @@ INSERT INTO `quizzes` (`id`, `title`, `duration`, `publish_marks`, `created_by`,
 (114, 'Induction', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-25 20:07:20', 1, 5, 1, 1, '2026-05-25 22:10:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0, 0),
 (115, 'Open ended', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:54:19', 1, 5, 1, 1, '2026-05-26 11:56:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0, 1),
 (116, 'Maths', 25, 0, 'sibusiso.mokoena@iskool.demo', '2026-05-26 12:05:34', 1, 5, 1, 1, '2026-05-26 14:07:00', 0, 0, 'Closed', 0, NULL, 'single_page', 0, 0, 1),
-(117, 'Maths II', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 13:34:17', 1, 5, 1, 1, '2026-05-26 15:36:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 1);
+(117, 'Maths II', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 13:34:17', 1, 5, 1, 1, '2026-05-26 15:36:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 1),
+(118, 'Exam', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-29 13:05:37', 1, 5, 1, 1, '2026-05-29 15:07:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -3473,7 +3521,10 @@ INSERT INTO `quiz_attempts` (`attempt_id`, `id`, `user_email`, `quiz_id`, `attem
 (1182, 0, 'mandi.vava@iskool.demo', 116, 1, 1, '2026-05-26 13:21:23', '2026-05-26 15:21:23', 'submitted', 1, NULL, NULL),
 (1183, 0, 'mandlasimphiwe99@gmail.com', 117, 1, 1, '2026-05-26 13:38:26', '2026-05-26 15:38:26', 'submitted', 2, NULL, NULL),
 (1184, 0, 'mandi.vava@iskool.demo', 117, 1, 1, '2026-05-26 13:41:29', '2026-05-26 15:41:29', 'submitted', 2, NULL, NULL),
-(1185, 0, 'zinhle.mkhathini@iskool.demo', 117, 1, 1, '2026-05-26 13:42:44', '2026-05-26 15:42:44', 'submitted', 2, NULL, NULL);
+(1185, 0, 'zinhle.mkhathini@iskool.demo', 117, 1, 1, '2026-05-26 13:42:44', '2026-05-26 15:42:44', 'submitted', 2, NULL, NULL),
+(1186, 0, 'mandlasimphiwe99@gmail.com', 118, 1, 1, '2026-05-29 13:09:07', '2026-05-29 15:09:07', 'submitted', 2, NULL, NULL),
+(1187, 0, 'mandi.vava@iskool.demo', 118, 1, 1, '2026-05-29 13:38:54', '2026-05-29 15:38:54', 'submitted', 2, NULL, NULL),
+(1188, 0, 'zinhle.mkhathini@iskool.demo', 118, 1, 1, '2026-05-29 13:41:23', '2026-05-29 15:41:23', 'submitted', 2, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -4742,7 +4793,10 @@ INSERT INTO `quiz_results` (`id`, `user_email`, `quiz_id`, `attempt_id`, `academ
 (1184, 'mandi.vava@iskool.demo', 116, 1182, 5, 4.00, 10.00, 17, '2026-05-26 09:21:40'),
 (1185, 'mandlasimphiwe99@gmail.com', 117, 1183, 5, 12.00, 12.00, 79, '2026-05-26 09:39:45'),
 (1186, 'mandi.vava@iskool.demo', 117, 1184, 5, 5.00, 12.00, 23, '2026-05-26 09:41:52'),
-(1187, 'zinhle.mkhathini@iskool.demo', 117, 1185, 5, 8.00, 12.00, 57, '2026-05-26 09:43:41');
+(1187, 'zinhle.mkhathini@iskool.demo', 117, 1185, 5, 8.00, 12.00, 57, '2026-05-26 09:43:41'),
+(1188, 'mandlasimphiwe99@gmail.com', 118, 1186, 5, 0.00, 11.00, 181, '2026-05-29 09:12:08'),
+(1189, 'mandi.vava@iskool.demo', 118, 1187, 5, 11.00, 11.00, 42, '2026-05-29 09:39:36'),
+(1190, 'zinhle.mkhathini@iskool.demo', 118, 1188, 5, 6.00, 11.00, 20, '2026-05-29 09:41:43');
 
 -- --------------------------------------------------------
 
@@ -5390,7 +5444,13 @@ INSERT INTO `user_answers` (`id`, `user_email`, `quiz_id`, `attempt_id`, `result
 (610, 'mandi.vava@iskool.demo', 117, 1184, 1186, 532, NULL, 'I am not sure'),
 (623, 'mandi.vava@iskool.demo', 117, 1184, 1186, 533, 538, NULL),
 (626, 'zinhle.mkhathini@iskool.demo', 117, 1185, 1187, 532, NULL, 'i will check the answer'),
-(649, 'zinhle.mkhathini@iskool.demo', 117, 1185, 1187, 533, 537, NULL);
+(649, 'zinhle.mkhathini@iskool.demo', 117, 1185, 1187, 533, 537, NULL),
+(652, 'mandlasimphiwe99@gmail.com', 118, 1186, 1188, 534, NULL, '{\"1\":\"1979\"}'),
+(660, 'mandlasimphiwe99@gmail.com', 118, 1186, 1188, 535, NULL, '{\"1\":\"2009\",\"2\":\"June\"}'),
+(702, 'mandi.vava@iskool.demo', 118, 1187, 1189, 534, NULL, '{\"1\":\"1969\"}'),
+(706, 'mandi.vava@iskool.demo', 118, 1187, 1189, 535, NULL, '{\"1\":\"2010\",\"2\":\"July\"}'),
+(716, 'zinhle.mkhathini@iskool.demo', 118, 1188, 1190, 534, NULL, '{\"1\":\"1969\"}'),
+(717, 'zinhle.mkhathini@iskool.demo', 118, 1188, 1190, 535, NULL, '{\"1\":\"2010\",\"2\":\"June\"}');
 
 -- --------------------------------------------------------
 
@@ -5473,8 +5533,7 @@ INSERT INTO `user_tokens` (`id`, `selector`, `hashed_validator`, `user_email`, `
 (63, 'b5f83600ec94', '931f9bec3981008514ba99f3296331ea5dfd5e8cf01235091bfa86f1bf9d743b', 'mandlasimphiwe99@gmail.com', '2026-06-11 21:46:37'),
 (66, 'c39dffb7ecb2', 'ca3ecefa7104005385b1ebe994003b4930bfc6b468d6f17eb82676b3c4122528', 'mandlasimphiwe99@gmail.com', '2026-06-15 15:31:08'),
 (67, '9c05159c8ed6', '4df46649533e9666ced5622123890d1eba86ae05457ee20f9207af8c31779d6b', 'mandlasimphiwe99@gmail.com', '2026-06-16 14:27:41'),
-(68, '2e512548b39b', 'c3274c83de85043870bb31b7bc3e720e9e789bc7d2e04dfe0b2013e5b1812082', 'mandlasimphiwe99@gmail.com', '2026-06-16 15:14:50'),
-(72, '3101f2ed47ab', '0a97f5c02b4cb4978c213f2872be8c14c98468f222cab7a1c4a3ac5f1f4c0785', 'mandlasimphiwe99@gmail.com', '2026-06-27 17:49:40');
+(68, '2e512548b39b', 'c3274c83de85043870bb31b7bc3e720e9e789bc7d2e04dfe0b2013e5b1812082', 'mandlasimphiwe99@gmail.com', '2026-06-16 15:14:50');
 
 --
 -- Indexes for dumped tables
@@ -5610,6 +5669,22 @@ ALTER TABLE `evaluation_responses`
 ALTER TABLE `evaluation_statements`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_eval` (`evaluation_id`);
+
+--
+-- Indexes for table `fitb_blanks`
+--
+ALTER TABLE `fitb_blanks`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_fitb_blank` (`question_id`,`blank_index`),
+  ADD KEY `idx_fitb_blanks_question_id` (`question_id`);
+
+--
+-- Indexes for table `fitb_questions`
+--
+ALTER TABLE `fitb_questions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_fitb_question` (`question_id`),
+  ADD KEY `idx_fitb_question_id` (`question_id`);
 
 --
 -- Indexes for table `messages`
@@ -5891,6 +5966,18 @@ ALTER TABLE `evaluation_statements`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
 
 --
+-- AUTO_INCREMENT for table `fitb_blanks`
+--
+ALTER TABLE `fitb_blanks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `fitb_questions`
+--
+ALTER TABLE `fitb_questions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
@@ -5936,19 +6023,19 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT for table `quizquestions`
 --
 ALTER TABLE `quizquestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=534;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=536;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
-  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1186;
+  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1189;
 
 --
 -- AUTO_INCREMENT for table `quiz_integrity_logs`
@@ -5960,7 +6047,7 @@ ALTER TABLE `quiz_integrity_logs`
 -- AUTO_INCREMENT for table `quiz_results`
 --
 ALTER TABLE `quiz_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1188;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1191;
 
 --
 -- AUTO_INCREMENT for table `resources`
@@ -6014,7 +6101,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_answers`
 --
 ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=652;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=721;
 
 --
 -- AUTO_INCREMENT for table `user_subscriptions`
@@ -6079,6 +6166,18 @@ ALTER TABLE `evaluation_responses`
 ALTER TABLE `evaluation_statements`
   ADD CONSTRAINT `evaluation_statements_ibfk_1` FOREIGN KEY (`evaluation_id`) REFERENCES `teacher_evaluations` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_eval_stmt` FOREIGN KEY (`evaluation_id`) REFERENCES `teacher_evaluations` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `fitb_blanks`
+--
+ALTER TABLE `fitb_blanks`
+  ADD CONSTRAINT `fk_fitb_blanks_question` FOREIGN KEY (`question_id`) REFERENCES `quizquestions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `fitb_questions`
+--
+ALTER TABLE `fitb_questions`
+  ADD CONSTRAINT `fk_fitb_questions_question` FOREIGN KEY (`question_id`) REFERENCES `quizquestions` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `open_ended_grades`
