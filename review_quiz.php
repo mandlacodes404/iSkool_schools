@@ -61,7 +61,9 @@ while ($row = $res->fetch_assoc()) {
         $questions[$qid] = [
             'text' => $row['question_text'],
             'image' => $row['image_path'],
-            'points' => $row['points'],
+            'points' => (float)$row['points'],
+            'points_possible' => (float)$row['points'],
+            'points_earned' => 0,
             'question_type' => $row['question_type'] ?? 'mcq',
             'selected' => $row['selected_choice_id'],
             'answer_text' => $row['answer_text'] ?? '',
@@ -155,12 +157,78 @@ foreach ($maRows as $maRow) {
         continue;
     }
     $selectedIds = json_decode($questions[$qid]['answer_text'] ?? '[]', true);
+    $selectedIds = is_array($selectedIds) ? array_map('intval', $selectedIds) : [];
+    $correctIds = [];
+    foreach ($questions[$qid]['choices'] as $choice) {
+        if ((int)$choice['is_correct'] === 1) {
+            $correctIds[(int)$choice['id']] = true;
+        }
+    }
+    $selectedSet = array_fill_keys($selectedIds, true);
+    $scoringMode = in_array($maRow['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match';
+    $pointsAwarded = 0;
+    $correctSelectedCount = 0;
+    $wrongSelectedCount = 0;
+    $pointsAdded = 0;
+    $pointsDeducted = 0;
+    if ($scoringMode === 'exact_match') {
+        if (count($selectedSet) === count($correctIds) && empty(array_diff_key($selectedSet, $correctIds)) && empty(array_diff_key($correctIds, $selectedSet))) {
+            $pointsAwarded = (float)$questions[$qid]['points'];
+        }
+    } else {
+        $correctCount = count($correctIds);
+        $pointsPerChoice = $correctCount > 0 ? ((float)$questions[$qid]['points'] / $correctCount) : 0;
+        foreach ($selectedSet as $choiceId => $_) {
+            if (isset($correctIds[$choiceId])) {
+                $correctSelectedCount++;
+                $pointsAdded += $pointsPerChoice;
+            } else {
+                $wrongSelectedCount++;
+                $pointsDeducted += $pointsPerChoice;
+            }
+        }
+        $pointsAwarded = max(0, $pointsAdded - $pointsDeducted);
+    }
     $questions[$qid]['multiple_answer'] = [
-        'scoring_mode' => in_array($maRow['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match',
+        'scoring_mode' => $scoringMode,
         'select_exactly' => $maRow['select_exactly'] === null ? null : (int)$maRow['select_exactly'],
-        'selected_choice_ids' => is_array($selectedIds) ? array_map('intval', $selectedIds) : []
+        'selected_choice_ids' => $selectedIds,
+        'points_awarded' => $pointsAwarded,
+        'correct_selected_count' => $correctSelectedCount,
+        'wrong_selected_count' => $wrongSelectedCount,
+        'points_added' => $pointsAdded,
+        'points_deducted' => $pointsDeducted
     ];
+    $questions[$qid]['points_earned'] = $pointsAwarded;
 }
+
+foreach ($questions as &$question) {
+    if (($question['question_type'] ?? 'mcq') === 'mcq') {
+        foreach ($question['choices'] as $choice) {
+            if ((int)$choice['is_correct'] === 1 && (int)$question['selected'] === (int)$choice['id']) {
+                $question['points_earned'] = (float)$question['points'];
+                break;
+            }
+        }
+    } elseif (($question['question_type'] ?? 'mcq') === 'open_ended') {
+        $question['points_earned'] = isset($question['grade']['score']) ? (float)$question['grade']['score'] : 0;
+    }
+}
+unset($question);
+
+foreach ($questions as &$question) {
+    if (($question['question_type'] ?? 'mcq') !== 'fill_in_blank' || empty($question['fitb']['blanks'])) {
+        continue;
+    }
+    $correctCount = count(array_filter($question['fitb']['blanks'], fn($blank) => $blank['is_correct']));
+    $blankCount = count($question['fitb']['blanks']);
+    if (($question['fitb']['scoring_mode'] ?? 'partial') === 'all_or_nothing') {
+        $question['points_earned'] = $correctCount === $blankCount ? (float)$question['points'] : 0;
+    } else {
+        $question['points_earned'] = $blankCount > 0 ? ((float)$question['points'] / $blankCount) * $correctCount : 0;
+    }
+}
+unset($question);
 
 // 3. Strict Access Control
 // Fixed: Using 'learner' instead of 'user'
@@ -195,6 +263,11 @@ if ($userRole === 'learner') {
 
 $percentage = ($quizInfo['total'] > 0) ? round(($quizInfo['score'] / $quizInfo['total']) * 100) : 0;
 $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.php';
+
+function format_review_points($value): string {
+    $formatted = number_format((float)$value, 2, '.', '');
+    return rtrim(rtrim($formatted, '0'), '.');
+}
 ?>
 
 <!DOCTYPE html>
@@ -512,7 +585,9 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
 
     <?php $count = 1; foreach ($questions as $q): ?>
         <div class="question-box">
-            <div class="q-meta">Question <?= $count++ ?> (<?= $q['points'] ?> Points)</div>
+            <div class="q-meta">
+                Question <?= $count++ ?> - <?= htmlspecialchars(format_review_points($q['points_earned'])) ?> / <?= htmlspecialchars(format_review_points($q['points_possible'])) ?> pts
+            </div>
             <strong class="question-text"><?= htmlspecialchars($q['text']) ?></strong>
 
             <?php if (!empty($q['image'])): ?>
@@ -554,6 +629,19 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
                     <div class="open-pending-box">Awaiting teacher grading.</div>
                 <?php endif; ?>
             <?php elseif (($q['question_type'] ?? 'mcq') === 'multiple_answer'): ?>
+            <?php
+                $ma = $q['multiple_answer'] ?? [];
+                $showDeduction = (int)$quizInfo['publish_marks'] === 1
+                    && ($ma['scoring_mode'] ?? '') === 'partial_penalty'
+                    && (float)($ma['points_deducted'] ?? 0) > 0
+                    && (int)($ma['wrong_selected_count'] ?? 0) > 0;
+            ?>
+            <?php if ($showDeduction): ?>
+                <div style="color:#f5c38b;font-size:13px;margin-bottom:12px;">
+                    <?= (int)($ma['correct_selected_count'] ?? 0) ?> correct selected (+<?= htmlspecialchars(format_review_points($ma['points_added'] ?? 0)) ?>pts),
+                    <?= (int)($ma['wrong_selected_count'] ?? 0) ?> wrong selected (-<?= htmlspecialchars(format_review_points($ma['points_deducted'] ?? 0)) ?>pts deducted)
+                </div>
+            <?php endif; ?>
             <div class="choices-list">
                 <?php
                 $selectedIds = $q['multiple_answer']['selected_choice_ids'] ?? [];

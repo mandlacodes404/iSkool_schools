@@ -252,7 +252,7 @@ while ($row = $maResult->fetch_assoc()) {
     if (isset($questions[$qid])) {
         $questions[$qid]['multiple_answer'] = [
             'scoring_mode' => in_array($row['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $row['scoring_mode'] : 'exact_match',
-            'select_exactly' => $row['select_exactly'] === null ? null : (int)$row['select_exactly']
+            'select_exactly' => empty($row['select_exactly']) ? null : (int)$row['select_exactly']
         ];
     }
 }
@@ -1356,11 +1356,11 @@ function getCsrfToken() {
                 <?php elseif (($q['question_type'] ?? 'mcq') === 'multiple_answer'):
                     $savedMultipleAnswers = json_decode((string)($savedAnswers[$qid] ?? '[]'), true);
                     $savedMultipleAnswers = is_array($savedMultipleAnswers) ? array_map('intval', $savedMultipleAnswers) : [];
-                    $selectExactly = $q['multiple_answer']['select_exactly'] ?? null;
+                    $selectExactly = (int)($q['multiple_answer']['select_exactly'] ?? 0);
                 ?>
                 <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
                 <div style="color:#8b949e;font-size:13px;font-weight:700;margin-bottom:12px;">
-                    <?= $selectExactly ? 'Select exactly ' . (int)$selectExactly . ' answers.' : 'Select all that apply.' ?>
+                    <?= $selectExactly > 0 ? 'Select exactly ' . $selectExactly . ' answers.' : 'Select all that apply.' ?>
                 </div>
                 <div class="choices-list">
                     <?php foreach ($q['choices'] as $ci => $choice): ?>

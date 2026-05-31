@@ -57,9 +57,12 @@ foreach ($rows as $row) {
     $qid = $row['q_id'];
     if (!isset($questions[$qid])) {
         $questions[$qid] = [
+            'id'       => (int)$qid,
             'text'     => $row['question_text'],
             'image'    => $row['image_path'],
-            'points'   => $row['points'],
+            'points'   => (float)$row['points'],
+            'points_possible' => (float)$row['points'],
+            'points_earned' => 0,
             'question_type' => $row['question_type'] ?? 'mcq',
             'selected' => $row['selected_choice_id'],
             'answer_text' => $row['answer_text'] ?? '',
@@ -156,6 +159,7 @@ if (!empty($fitbQuestionIds)) {
         } else {
             $questions[$qid]['fitb']['points_awarded'] = $blankCount > 0 ? ((float)$questions[$qid]['points'] / $blankCount) * $correctCount : 0;
         }
+        $questions[$qid]['points_earned'] = $questions[$qid]['fitb']['points_awarded'];
     }
 }
 
@@ -188,6 +192,10 @@ if (!empty($multipleAnswerQuestionIds)) {
         $selectedSet = array_fill_keys($selectedIds, true);
         $scoringMode = in_array($maRow['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match';
         $pointsAwarded = 0;
+        $correctSelectedCount = 0;
+        $wrongSelectedCount = 0;
+        $pointsAdded = 0;
+        $pointsDeducted = 0;
         if ($scoringMode === 'exact_match') {
             if (count($selectedSet) === count($correctIds) && empty(array_diff_key($selectedSet, $correctIds)) && empty(array_diff_key($correctIds, $selectedSet))) {
                 $pointsAwarded = (float)$questions[$qid]['points'];
@@ -196,18 +204,43 @@ if (!empty($multipleAnswerQuestionIds)) {
             $correctCount = count($correctIds);
             $pointsPerChoice = $correctCount > 0 ? ((float)$questions[$qid]['points'] / $correctCount) : 0;
             foreach ($selectedSet as $choiceId => $_) {
-                $pointsAwarded += isset($correctIds[$choiceId]) ? $pointsPerChoice : -$pointsPerChoice;
+                if (isset($correctIds[$choiceId])) {
+                    $correctSelectedCount++;
+                    $pointsAdded += $pointsPerChoice;
+                } else {
+                    $wrongSelectedCount++;
+                    $pointsDeducted += $pointsPerChoice;
+                }
             }
-            $pointsAwarded = max(0, $pointsAwarded);
+            $pointsAwarded = max(0, $pointsAdded - $pointsDeducted);
         }
         $questions[$qid]['multiple_answer'] = [
             'scoring_mode' => $scoringMode,
             'select_exactly' => $maRow['select_exactly'] === null ? null : (int)$maRow['select_exactly'],
             'selected_choice_ids' => $selectedIds,
-            'points_awarded' => $pointsAwarded
+            'points_awarded' => $pointsAwarded,
+            'correct_selected_count' => $correctSelectedCount,
+            'wrong_selected_count' => $wrongSelectedCount,
+            'points_added' => $pointsAdded,
+            'points_deducted' => $pointsDeducted
         ];
+        $questions[$qid]['points_earned'] = $pointsAwarded;
     }
 }
+
+foreach ($questions as $qid => &$question) {
+    if (($question['question_type'] ?? 'mcq') === 'mcq') {
+        foreach ($question['choices'] as $choice) {
+            if ((int)$choice['is_correct'] === 1 && (int)$question['selected'] === (int)$choice['id']) {
+                $question['points_earned'] = (float)$question['points'];
+                break;
+            }
+        }
+    } elseif (($question['question_type'] ?? 'mcq') === 'open_ended') {
+        $question['points_earned'] = isset($question['grade']['score']) ? (float)$question['grade']['score'] : 0;
+    }
+}
+unset($question);
 
 $percentage = $quizInfo['total'] > 0
     ? round($quizInfo['score'] / $quizInfo['total'] * 100)

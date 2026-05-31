@@ -11,6 +11,10 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+function formatPts(value) {
+    const num = Number(value || 0);
+    return Number.isInteger(num) ? String(num) : String(Math.round(num * 100) / 100);
+}
 window.teacherQuizzesCache = null;
 window.currentQuizResultsData = null;
 
@@ -1029,6 +1033,9 @@ function renderQuizReview(data) {
         html += `
             <div class="teacher-review-question">
                 <div class="teacher-review-q-meta">Question ${i + 1} (${escapeHtml(q.points)} point${q.points != 1 ? 's' : ''})</div>
+                <div style="color:#4fd1c5;font-weight:800;font-size:13px;margin-bottom:10px;">
+                    ${escapeHtml(formatPts(q.points_earned))} / ${escapeHtml(formatPts(q.points_possible ?? q.points))} pts
+                </div>
                 <div class="teacher-review-q-text">${escapeHtml(q.text)}</div>`;
 
         if (q.image) {
@@ -1052,7 +1059,7 @@ function renderQuizReview(data) {
                         <div style="color:#8b949e;font-size:12px;margin-top:5px;">Accepted: ${escapeHtml((blank.accepted_answers || []).join(', '))}</div>
                     </div>`;
             });
-            html += `<div style="color:#4fd1c5;font-weight:800;font-size:13px;margin-top:10px;">Awarded: ${escapeHtml(fitb.points_awarded ?? 0)} / ${escapeHtml(q.points)}</div></div></div>`;
+            html += `</div></div>`;
             return;
         }
 
@@ -1090,10 +1097,11 @@ function renderQuizReview(data) {
             const ma = q.multiple_answer || { selected_choice_ids: [] };
             const selectedIds = (ma.selected_choice_ids || []).map(id => String(id));
             const scoringLabel = ma.scoring_mode === 'partial_penalty' ? 'Partial Credit with Penalty' : 'Exact Match';
+            const showDeduction = ma.scoring_mode === 'partial_penalty' && Number(ma.points_deducted || 0) > 0 && Number(ma.wrong_selected_count || 0) > 0;
             html += `
                 <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;margin-top:12px;color:#c9d1d9;font-size:13px;">
                     <strong style="color:#4fd1c5;">Multiple Answer</strong> &bull; ${escapeHtml(scoringLabel)}
-                    <div style="margin-top:6px;color:#8b949e;">Awarded: ${escapeHtml(ma.points_awarded ?? 0)} / ${escapeHtml(q.points)}</div>
+                    ${showDeduction ? `<div style="margin-top:6px;color:#f5c38b;">${escapeHtml(ma.correct_selected_count || 0)} correct selected (+${escapeHtml(formatPts(ma.points_added))}pts), ${escapeHtml(ma.wrong_selected_count || 0)} wrong selected (-${escapeHtml(formatPts(ma.points_deducted))}pts deducted)</div>` : ''}
                 </div>`;
             q.choices.forEach(choice => {
                 const isSelected = selectedIds.includes(String(choice.id));
@@ -1546,7 +1554,7 @@ window.addCqQuestion = function() {
                     <option value="exact_match" selected>Exact Match</option>
                     <option value="partial_penalty">Partial Credit with Penalty</option>
                 </select>
-                <label class="teacher-modal-label" style="margin-top:10px;">Tell learners how many to select</label>
+                <label class="teacher-modal-label" style="margin-top:10px;">Optional: tell learners how many to select</label>
                 <input type="number" name="ma_select_exactly[${i}]" min="1" class="teacher-modal-input" placeholder="Optional" style="max-width:150px;">
             </div>
         </div>
@@ -2125,7 +2133,7 @@ function buildEditQuestionHtml(question, index, locked) {
                         <option value="exact_match" ${(question.multiple_answer?.scoring_mode || 'exact_match') === 'exact_match' ? 'selected' : ''}>Exact Match</option>
                         <option value="partial_penalty" ${question.multiple_answer?.scoring_mode === 'partial_penalty' ? 'selected' : ''}>Partial Credit with Penalty</option>
                     </select>
-                    <label class="teacher-modal-label" style="margin-top:10px;">Tell learners how many to select</label>
+                    <label class="teacher-modal-label" style="margin-top:10px;">Optional: tell learners how many to select</label>
                     <input type="number" name="ma_select_exactly[${index}]" min="1" class="teacher-modal-input" value="${escapeHtml(question.multiple_answer?.select_exactly ?? '')}" placeholder="Optional" ${choiceDisabled} style="max-width:150px;">
                 </div>
             </div>
