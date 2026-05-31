@@ -239,6 +239,25 @@ while ($row = $fitbResult->fetch_assoc()) {
 }
 $fitbStmt->close();
 
+$maStmt = $conn->prepare("
+    SELECT question_id, scoring_mode, select_exactly
+    FROM multiple_answer_questions
+    WHERE question_id IN (SELECT id FROM quizquestions WHERE quiz_id = ?)
+");
+$maStmt->bind_param("i", $quizId);
+$maStmt->execute();
+$maResult = $maStmt->get_result();
+while ($row = $maResult->fetch_assoc()) {
+    $qid = (int)$row['question_id'];
+    if (isset($questions[$qid])) {
+        $questions[$qid]['multiple_answer'] = [
+            'scoring_mode' => in_array($row['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $row['scoring_mode'] : 'exact_match',
+            'select_exactly' => $row['select_exactly'] === null ? null : (int)$row['select_exactly']
+        ];
+    }
+}
+$maStmt->close();
+
 if (isset($quiz['shuffle_questions']) && $quiz['shuffle_questions'] == 1) {
     $questions = array_values($questions);
 
@@ -296,6 +315,15 @@ $loadStmt->close();
 
 $totalQuestions = count($questions);
 $answeredCount = count($savedAnswers);
+$answeredCount = 0;
+foreach ($savedAnswers as $savedAnswer) {
+    $decoded = is_string($savedAnswer) ? json_decode($savedAnswer, true) : null;
+    if (is_array($decoded)) {
+        if (count($decoded) > 0) $answeredCount++;
+    } elseif (trim((string)$savedAnswer) !== '') {
+        $answeredCount++;
+    }
+}
 
 function decode_fitb_answer_map($raw): array {
     $decoded = json_decode((string)$raw, true);
@@ -818,6 +846,8 @@ function build_word_bank(array $fitb): array {
         }
 
         .choice-item.selected .choice-radio::after { transform: scale(1); }
+        .choice-checkbox { border-radius: 5px; }
+        .choice-checkbox::after { border-radius: 2px; }
 
         .choice-item.selected .choice-text { color: var(--teal); font-weight: 700; }
 
@@ -829,8 +859,9 @@ function build_word_bank(array $fitb): array {
             flex: 1;
         }
 
-        /* Hidden real radio */
-        .choice-item input[type="radio"] {
+        /* Hidden real inputs */
+        .choice-item input[type="radio"],
+        .choice-item input[type="checkbox"] {
             position: absolute;
             opacity: 0;
             width: 0; height: 0;
@@ -1322,6 +1353,27 @@ function getCsrfToken() {
                 <div class="open-answer-counter" id="open-counter-<?= $qid ?>">
                     <?= strlen((string)($savedAnswers[$qid] ?? '')) ?> / 5000
                 </div>
+                <?php elseif (($q['question_type'] ?? 'mcq') === 'multiple_answer'):
+                    $savedMultipleAnswers = json_decode((string)($savedAnswers[$qid] ?? '[]'), true);
+                    $savedMultipleAnswers = is_array($savedMultipleAnswers) ? array_map('intval', $savedMultipleAnswers) : [];
+                    $selectExactly = $q['multiple_answer']['select_exactly'] ?? null;
+                ?>
+                <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
+                <div style="color:#8b949e;font-size:13px;font-weight:700;margin-bottom:12px;">
+                    <?= $selectExactly ? 'Select exactly ' . (int)$selectExactly . ' answers.' : 'Select all that apply.' ?>
+                </div>
+                <div class="choices-list">
+                    <?php foreach ($q['choices'] as $ci => $choice): ?>
+                    <label class="choice-item <?= in_array((int)$choice['id'], $savedMultipleAnswers, true) ? 'selected' : '' ?>" id="choice-<?= $qid ?>-<?= $choice['id'] ?>">
+                        <input type="checkbox"
+                               name="multiple_answers[<?= $qid ?>][]"
+                               value="<?= $choice['id'] ?>"
+                               <?= in_array((int)$choice['id'], $savedMultipleAnswers, true) ? 'checked' : '' ?>>
+                        <div class="choice-radio choice-checkbox"></div>
+                        <span class="choice-text"><?= htmlspecialchars($choice['text']) ?></span>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
                 <?php else: ?>
                 <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
                 <div class="choices-list">
@@ -1609,16 +1661,32 @@ function getCsrfToken() {
         updateProgress();
     }
 
+    function onMultipleAnswerChange(checkbox) {
+        const card = checkbox.closest('.question-card');
+        if (!card) return;
+        const checkedBoxes = Array.from(card.querySelectorAll('input[type="checkbox"][name^="multiple_answers["]:checked'));
+        card.querySelectorAll('.choice-item').forEach(li => li.classList.remove('selected'));
+        checkedBoxes.forEach(box => box.closest('.choice-item').classList.add('selected'));
+        if (checkedBoxes.length > 0) card.classList.add('card-answered');
+        else card.classList.remove('card-answered');
+        saveAnswers();
+        autoSave(card.getAttribute('data-question-id'), null);
+        updatePalette();
+        updateProgress();
+    }
+
     function updateAllCardStates() {
         questions.forEach(card => {
             const qid = card.getAttribute('data-question-id');
             const checked = card.querySelector('input[type="radio"]:checked');
+            const multiChecked = card.querySelector('input[type="checkbox"][name^="multiple_answers["]:checked');
             const textAnswer = card.querySelector('.open-answer-box');
             const fitbInputs = Array.from(card.querySelectorAll('.fitb-input'));
             const fitbAnswered = fitbInputs.length > 0 && fitbInputs.every(input => input.value.trim().length > 0);
-            if (checked || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered) {
+            if (checked || multiChecked || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered) {
                 card.classList.add('card-answered');
                 if (checked) checked.closest('.choice-item').classList.add('selected');
+                card.querySelectorAll('input[type="checkbox"][name^="multiple_answers["]:checked').forEach(box => box.closest('.choice-item').classList.add('selected'));
             }
         });
     }
@@ -1649,6 +1717,18 @@ function getCsrfToken() {
                 syncFitbChips(card);
                 return;
             }
+            const multiInputs = document.querySelectorAll(`input[name="multiple_answers[${qid}][]"]`);
+            if (multiInputs.length > 0) {
+                let values = [];
+                try { values = typeof cid === 'string' ? JSON.parse(cid) : cid; } catch (e) { values = []; }
+                values = Array.isArray(values) ? values.map(String) : [];
+                multiInputs.forEach(input => {
+                    input.checked = values.includes(String(input.value));
+                    input.closest('.choice-item').classList.toggle('selected', input.checked);
+                });
+                if (values.length > 0) multiInputs[0].closest('.question-card').classList.add('card-answered');
+                return;
+            }
             const radio = document.querySelector(`input[name="answers[${qid}]"][value="${cid}"]`);
             if (radio) {
                 radio.checked = true;
@@ -1677,6 +1757,12 @@ function getCsrfToken() {
             if (m && t.value.trim().length > 0) obj[m[1]] = t.value;
         });
         document.querySelectorAll('.question-card').forEach(card => {
+            const multiInputs = Array.from(card.querySelectorAll('input[type="checkbox"][name^="multiple_answers["]:checked'));
+            if (multiInputs.length > 0) {
+                const qid = card.getAttribute('data-question-id');
+                obj[qid] = multiInputs.map(input => input.value);
+                return;
+            }
             const inputs = Array.from(card.querySelectorAll('.fitb-input'));
             if (inputs.length === 0) return;
             const qid = card.getAttribute('data-question-id');
@@ -1715,6 +1801,15 @@ function getCsrfToken() {
                 fd.append('question_id', questionId);
                 fd.append('fitb_answers', JSON.stringify(map));
             }
+            const multipleInputs = document.querySelectorAll(`.question-card[data-question-id="${questionId}"] input[type="checkbox"][name^="multiple_answers["]`);
+            if (multipleInputs.length > 0) {
+                const choiceIds = Array.from(multipleInputs)
+                    .filter(input => input.checked)
+                    .map(input => parseInt(input.value, 10))
+                    .filter(Number.isInteger);
+                fd.append('question_id', questionId);
+                fd.append('selected_choice_ids', JSON.stringify(choiceIds));
+            }
         }
         fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
             .catch(e => console.warn('Save failed', e));
@@ -1727,7 +1822,7 @@ function getCsrfToken() {
             const textAnswer = card.querySelector('.open-answer-box');
             const fitbInputs = Array.from(card.querySelectorAll('.fitb-input'));
             const fitbAnswered = fitbInputs.length > 0 && fitbInputs.every(input => input.value.trim().length > 0);
-            const answered = card.querySelector('input[type="radio"]:checked') || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered;
+            const answered = card.querySelector('input[type="radio"]:checked') || card.querySelector('input[type="checkbox"][name^="multiple_answers["]:checked') || (textAnswer && textAnswer.value.trim().length > 0) || fitbAnswered;
             const flagged  = document.getElementById(`flag-${i}`)?.classList.contains('flagged');
             const item = document.getElementById(`pi-${i}`);
             if (!item) return;
@@ -1746,7 +1841,8 @@ function getCsrfToken() {
             const inputs = Array.from(card.querySelectorAll('.fitb-input'));
             return inputs.length > 0 && inputs.every(input => input.value.trim().length > 0);
         }).length;
-        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount + fitbCount;
+        const multiCount = Array.from(document.querySelectorAll('.question-card')).filter(card => card.querySelector('input[type="checkbox"][name^="multiple_answers["]:checked')).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + multiCount + textCount + fitbCount;
         const pct   = TOTAL_Q > 0 ? Math.round((count / TOTAL_Q) * 100) : 0;
         if (progressFill) progressFill.style.width = pct + '%';
         if (answeredEl)   answeredEl.textContent = count;
@@ -1773,7 +1869,8 @@ function getCsrfToken() {
             const inputs = Array.from(card.querySelectorAll('.fitb-input'));
             return inputs.length > 0 && inputs.every(input => input.value.trim().length > 0);
         }).length;
-        const count = document.querySelectorAll('input[type="radio"]:checked').length + textCount + fitbCount;
+        const multiCount = Array.from(document.querySelectorAll('.question-card')).filter(card => card.querySelector('input[type="checkbox"][name^="multiple_answers["]:checked')).length;
+        const count = document.querySelectorAll('input[type="radio"]:checked').length + multiCount + textCount + fitbCount;
         document.getElementById('smAnswered').textContent = count;
         document.getElementById('submitModal').classList.add('show');
     }
@@ -1809,6 +1906,12 @@ function getCsrfToken() {
             autoSave(card.getAttribute('data-question-id'), null);
             updatePalette();
             updateProgress();
+        }
+    });
+
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="checkbox"][name^="multiple_answers["]')) {
+            onMultipleAnswerChange(e.target);
         }
     });
 

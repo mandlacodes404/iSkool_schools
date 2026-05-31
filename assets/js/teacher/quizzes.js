@@ -1086,6 +1086,39 @@ function renderQuizReview(data) {
             return;
         }
 
+        if ((q.question_type || 'mcq') === 'multiple_answer') {
+            const ma = q.multiple_answer || { selected_choice_ids: [] };
+            const selectedIds = (ma.selected_choice_ids || []).map(id => String(id));
+            const scoringLabel = ma.scoring_mode === 'partial_penalty' ? 'Partial Credit with Penalty' : 'Exact Match';
+            html += `
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;margin-top:12px;color:#c9d1d9;font-size:13px;">
+                    <strong style="color:#4fd1c5;">Multiple Answer</strong> &bull; ${escapeHtml(scoringLabel)}
+                    <div style="margin-top:6px;color:#8b949e;">Awarded: ${escapeHtml(ma.points_awarded ?? 0)} / ${escapeHtml(q.points)}</div>
+                </div>`;
+            q.choices.forEach(choice => {
+                const isSelected = selectedIds.includes(String(choice.id));
+                const isCorrect  = choice.is_correct == 1;
+                let cls = '';
+                let icon = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="#555e6a" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="3"></rect></svg>`;
+                if (isCorrect) {
+                    cls = 'correct';
+                    icon = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="#27ae60" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="3"></rect><polyline points="8 12 11 15 16 9"></polyline></svg>`;
+                } else if (isSelected) {
+                    cls = 'incorrect';
+                    icon = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="#e74c3c" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="3"></rect><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+                }
+                html += `
+                    <div class="teacher-review-choice ${cls}">
+                        ${icon}
+                        <span>${escapeHtml(choice.text)}</span>
+                        ${isCorrect ? `<span class="teacher-review-your-answer">Correct</span>` : ''}
+                        ${isSelected ? `<span class="teacher-review-your-answer">${escapeHtml(learnerLabel)}</span>` : ''}
+                    </div>`;
+            });
+            html += `</div>`;
+            return;
+        }
+
         q.choices.forEach(choice => {
             const isSelected = choice.id == q.selected;
             const isCorrect  = choice.is_correct == 1;
@@ -1467,10 +1500,12 @@ window.addCqQuestion = function() {
         <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
         <select name="question_type[]" class="teacher-modal-input cq-qtype-select" data-action="change-question-type" style="max-width:220px;">
             <option value="mcq" selected>Multiple Choice</option>
+            <option value="multiple_answer">Multiple Answer</option>
             <option value="open_ended">Open Ended</option>
             <option value="fill_in_blank">Fill in the Blank</option>
         </select>
         <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students choose the correct answer from a list of options you provide.</div>
+        <div class="cq-qtype-helper cq-ma-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students can tick more than one correct answer.</div>
         <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students write a free-text response. You will grade these manually.</div>
         <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students type answers into blanks. Write <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> in your question where you want a gap.</div>
 
@@ -1497,6 +1532,23 @@ window.addCqQuestion = function() {
                 <option value="2">Choice 3</option>
                 <option value="3">Choice 4</option>
             </select>
+            <div class="cq-ma-correct-list" style="display:none;margin-top:8px;">
+                ${[0, 1, 2, 3].map(n => `
+                    <label style="display:flex;align-items:center;gap:8px;color:#c9d1d9;font-size:13px;margin:6px 0;">
+                        <input type="checkbox" name="multiple_answer_correct[${i}][]" value="${n}" style="width:16px;height:16px;accent-color:#4fd1c5;">
+                        <span>Choice ${n + 1}</span>
+                    </label>
+                `).join('')}
+            </div>
+            <div class="cq-ma-settings" style="display:none;margin-top:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+                <label class="teacher-modal-label">Scoring Mode</label>
+                <select name="ma_scoring_mode[${i}]" class="teacher-modal-input">
+                    <option value="exact_match" selected>Exact Match</option>
+                    <option value="partial_penalty">Partial Credit with Penalty</option>
+                </select>
+                <label class="teacher-modal-label" style="margin-top:10px;">Tell learners how many to select</label>
+                <input type="number" name="ma_select_exactly[${i}]" min="1" class="teacher-modal-input" placeholder="Optional" style="max-width:150px;">
+            </div>
         </div>
         <div class="cq-open-preview" style="display:none;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
             Learners will type their answer here.
@@ -1519,6 +1571,7 @@ window.addCqQuestion = function() {
         const val = this.value;
         // Toggle type helper texts
         div.querySelector('.cq-mcq-helper').style.display  = val === 'mcq'            ? 'block' : 'none';
+        div.querySelector('.cq-ma-helper').style.display   = val === 'multiple_answer' ? 'block' : 'none';
         div.querySelector('.cq-oe-helper').style.display   = val === 'open_ended'     ? 'block' : 'none';
         div.querySelector('.cq-fitb-helper').style.display = val === 'fill_in_blank'  ? 'block' : 'none';
         // FITB callout + blank counter
@@ -1543,6 +1596,8 @@ window.addCqQuestion = function() {
             if (correctSelect && correctSelect.options[idx]) {
                 correctSelect.options[idx].textContent = input.value.trim() || ('Choice ' + (idx + 1));
             }
+            const maLabel = div.querySelectorAll('.cq-ma-correct-list span')[idx];
+            if (maLabel) maLabel.textContent = input.value.trim() || ('Choice ' + (idx + 1));
         });
     });
 
@@ -1671,15 +1726,34 @@ function updateFitbBankCount(builder) {
 function setQuestionTypeFields(questionEl, questionType) {
     const isOpenEnded = questionType === 'open_ended';
     const isFitb = questionType === 'fill_in_blank';
+    const isMultipleAnswer = questionType === 'multiple_answer';
     const mcqFields = questionEl ? questionEl.querySelector('.cq-mcq-fields, .eq-mcq-fields') : null;
     const preview = questionEl ? questionEl.querySelector('.cq-open-preview, .eq-open-preview') : null;
     const fitbFields = questionEl ? questionEl.querySelector('.fitb-builder') : null;
+    if (questionEl && questionEl.classList.contains('eq-question')) {
+        updateEditChoiceCorrectControls(questionEl, isMultipleAnswer);
+    }
     if (mcqFields) {
         mcqFields.style.display = (isOpenEnded || isFitb) ? 'none' : 'block';
         mcqFields.querySelectorAll('input, select, textarea').forEach(input => {
             input.disabled = isOpenEnded || isFitb;
             if (input.type === 'text') input.required = !isOpenEnded && !isFitb && (input.placeholder === 'Choice 1' || input.placeholder === 'Choice 2');
         });
+        const correctSelect = mcqFields.querySelector('.cq-correct-select, .eq-correct-select');
+        const maCorrectList = mcqFields.querySelector('.cq-ma-correct-list, .eq-ma-correct-list');
+        const maSettings = mcqFields.querySelector('.cq-ma-settings, .eq-ma-settings');
+        if (correctSelect) {
+            correctSelect.style.display = isMultipleAnswer ? 'none' : '';
+            correctSelect.disabled = isOpenEnded || isFitb || isMultipleAnswer;
+        }
+        if (maCorrectList) {
+            maCorrectList.style.display = isMultipleAnswer ? 'block' : 'none';
+            maCorrectList.querySelectorAll('input').forEach(input => input.disabled = !isMultipleAnswer || isOpenEnded || isFitb);
+        }
+        if (maSettings) {
+            maSettings.style.display = isMultipleAnswer ? 'block' : 'none';
+            maSettings.querySelectorAll('input, select').forEach(input => input.disabled = !isMultipleAnswer || isOpenEnded || isFitb);
+        }
     }
     if (preview) preview.style.display = isOpenEnded ? 'block' : 'none';
     if (fitbFields) {
@@ -1690,6 +1764,27 @@ function setQuestionTypeFields(questionEl, questionType) {
             input.disabled = !isFitb || builderLocked || input.dataset.locked === '1';
         });
     }
+}
+
+function updateEditChoiceCorrectControls(questionEl, isMultipleAnswer) {
+    const index = questionEl.dataset.questionIndex || 0;
+    questionEl.querySelectorAll('.eq-choice-row').forEach((row, choiceIndex) => {
+        const oldControl = row.querySelector('input[type="radio"], input[type="checkbox"]');
+        if (!oldControl) return;
+        if ((isMultipleAnswer && oldControl.type === 'checkbox') || (!isMultipleAnswer && oldControl.type === 'radio')) {
+            oldControl.name = isMultipleAnswer ? `multiple_answer_correct[${index}][]` : `correct_choice[${index}]`;
+            oldControl.value = choiceIndex;
+            return;
+        }
+        const replacement = document.createElement('input');
+        replacement.type = isMultipleAnswer ? 'checkbox' : 'radio';
+        replacement.name = isMultipleAnswer ? `multiple_answer_correct[${index}][]` : `correct_choice[${index}]`;
+        replacement.value = choiceIndex;
+        replacement.checked = oldControl.checked;
+        replacement.style.cssText = oldControl.style.cssText;
+        replacement.disabled = oldControl.disabled;
+        oldControl.replaceWith(replacement);
+    });
 }
 
 function updateOpenEndedBanner() {
@@ -1904,6 +1999,28 @@ function cqValidateBeforeSubmit() {
             }
         }
 
+        if (qtype === 'multiple_answer') {
+            const choiceInputs = block.querySelectorAll('.cq-choice-input');
+            const filledIndexes = Array.from(choiceInputs)
+                .map((choice, index) => choice.value.trim() !== '' ? index : null)
+                .filter(index => index !== null);
+            const checkedIndexes = Array.from(block.querySelectorAll('.cq-ma-correct-list input[type="checkbox"]:checked'))
+                .map(input => parseInt(input.value, 10))
+                .filter(index => filledIndexes.includes(index));
+            if (filledIndexes.length < 3) {
+                cqAddFieldError(choiceInputs[0], 'Multiple Answer questions need at least 3 choices.');
+                hasError = true;
+            }
+            if (checkedIndexes.length < 2) {
+                cqAddFieldError(block.querySelector('.cq-ma-correct-list'), 'Mark at least 2 correct answers.');
+                hasError = true;
+            }
+            if (filledIndexes.length - checkedIndexes.length < 1) {
+                cqAddFieldError(block.querySelector('.cq-ma-correct-list'), 'Leave at least 1 incorrect choice as a distractor.');
+                hasError = true;
+            }
+        }
+
         // Points must be >= 1
         if (!ptsInput || parseInt(ptsInput.value) < 1) {
             cqAddFieldError(ptsInput, 'Points must be at least 1.');
@@ -1936,9 +2053,10 @@ function getQuizFormTarget() {
 }
 
 function buildEditQuestionHtml(question, index, locked) {
-    const questionType = ['open_ended', 'fill_in_blank'].includes(question.question_type) ? question.question_type : 'mcq';
+    const questionType = ['multiple_answer', 'open_ended', 'fill_in_blank'].includes(question.question_type) ? question.question_type : 'mcq';
     const isOpenEnded = questionType === 'open_ended';
     const isFitb = questionType === 'fill_in_blank';
+    const isMultipleAnswer = questionType === 'multiple_answer';
     const choices = question.choices && question.choices.length ? question.choices : [
         { id: 0, choice_text: '', is_correct: 1 },
         { id: 0, choice_text: '', is_correct: 0 }
@@ -1948,11 +2066,15 @@ function buildEditQuestionHtml(question, index, locked) {
     let choicesHtml = '';
 
     choices.forEach((choice, choiceIndex) => {
+        const correctControl = isMultipleAnswer
+            ? `<input type="checkbox" name="multiple_answer_correct[${index}][]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
+                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">`
+            : `<input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
+                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">`;
         choicesHtml += `
             <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
                 <input type="hidden" name="choice_id[${index}][]" value="${escapeHtml(choice.id || 0)}">
-                <input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
-                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">
+                ${correctControl}
                 <input type="text" name="choices[${index}][]" class="teacher-modal-input"
                     value="${escapeHtml(choice.choice_text || '')}" placeholder="Choice ${choiceIndex + 1}" ${choiceDisabled}
                     style="margin:0;">
@@ -1976,10 +2098,11 @@ function buildEditQuestionHtml(question, index, locked) {
             <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
             ${locked ? `
                 <input type="hidden" name="question_type[]" value="${questionType}">
-                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#c9d1d9;padding:11px 12px;font-size:13px;">${questionType === 'open_ended' ? 'Open Ended' : questionType === 'fill_in_blank' ? 'Fill in the Blank' : 'Multiple Choice'}</div>
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#c9d1d9;padding:11px 12px;font-size:13px;">${questionType === 'open_ended' ? 'Open Ended' : questionType === 'fill_in_blank' ? 'Fill in the Blank' : questionType === 'multiple_answer' ? 'Multiple Answer' : 'Multiple Choice'}</div>
             ` : `
                 <select name="question_type[]" class="teacher-modal-input" data-action="change-question-type">
                     <option value="mcq" ${questionType === 'mcq' ? 'selected' : ''}>Multiple Choice</option>
+                    <option value="multiple_answer" ${questionType === 'multiple_answer' ? 'selected' : ''}>Multiple Answer</option>
                     <option value="open_ended" ${questionType === 'open_ended' ? 'selected' : ''}>Open Ended</option>
                     <option value="fill_in_blank" ${questionType === 'fill_in_blank' ? 'selected' : ''}>Fill in the Blank</option>
                 </select>
@@ -1996,6 +2119,15 @@ function buildEditQuestionHtml(question, index, locked) {
                 <div class="eq-choices">${choicesHtml}</div>
                 ${!locked && !isOpenEnded ? `<button type="button" data-action="add-edit-choice"
                 style="margin-top:2px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Choice</button>` : ''}
+                <div class="eq-ma-settings" style="display:${isMultipleAnswer ? 'block' : 'none'};margin-top:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
+                    <label class="teacher-modal-label">Scoring Mode</label>
+                    <select name="ma_scoring_mode[${index}]" class="teacher-modal-input" ${choiceDisabled}>
+                        <option value="exact_match" ${(question.multiple_answer?.scoring_mode || 'exact_match') === 'exact_match' ? 'selected' : ''}>Exact Match</option>
+                        <option value="partial_penalty" ${question.multiple_answer?.scoring_mode === 'partial_penalty' ? 'selected' : ''}>Partial Credit with Penalty</option>
+                    </select>
+                    <label class="teacher-modal-label" style="margin-top:10px;">Tell learners how many to select</label>
+                    <input type="number" name="ma_select_exactly[${index}]" min="1" class="teacher-modal-input" value="${escapeHtml(question.multiple_answer?.select_exactly ?? '')}" placeholder="Optional" ${choiceDisabled} style="max-width:150px;">
+                </div>
             </div>
             <div class="eq-open-preview" style="display:${isOpenEnded ? 'block' : 'none'};background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
                 Learners will type their answer here.
@@ -2014,11 +2146,11 @@ function refreshEditQuestionIndexes() {
         if (title) title.textContent = `Question ${index + 1}`;
         questionEl.querySelectorAll('.eq-choice-row').forEach((choiceEl, choiceIndex) => {
             const idInput = choiceEl.querySelector('input[type="hidden"]');
-            const radio = choiceEl.querySelector('input[type="radio"]');
+            const radio = choiceEl.querySelector('input[type="radio"], input[type="checkbox"]');
             const text = choiceEl.querySelector('input[type="text"]');
             if (idInput) idInput.name = `choice_id[${index}][]`;
             if (radio) {
-                radio.name = `correct_choice[${index}]`;
+                radio.name = radio.type === 'checkbox' ? `multiple_answer_correct[${index}][]` : `correct_choice[${index}]`;
                 radio.value = choiceIndex;
             }
             if (text) {
@@ -2041,6 +2173,13 @@ function refreshEditQuestionIndexes() {
             builder.querySelectorAll('.fitb-distractor-chips input[type="hidden"]').forEach(input => {
                 input.name = `fitb_distractors[${index}][]`;
             });
+        }
+        const maSettings = questionEl.querySelector('.eq-ma-settings');
+        if (maSettings) {
+            const scoring = maSettings.querySelector('select[name^="ma_scoring_mode"]');
+            const selectExactly = maSettings.querySelector('input[name^="ma_select_exactly"]');
+            if (scoring) scoring.name = `ma_scoring_mode[${index}]`;
+            if (selectExactly) selectExactly.name = `ma_select_exactly[${index}]`;
         }
     });
 }
@@ -2270,13 +2409,17 @@ document.addEventListener('click', function(e) {
     } else if (action === 'add-edit-choice') {
         const question = actionEl.closest('.eq-question');
         const typeSelect = question ? question.querySelector('select[name="question_type[]"]') : null;
-        if (typeSelect && typeSelect.value === 'open_ended') return;
+        const currentType = typeSelect ? typeSelect.value : (question?.querySelector('input[name="question_type[]"]')?.value || 'mcq');
+        if (currentType === 'open_ended' || currentType === 'fill_in_blank') return;
         const choices = question ? question.querySelector('.eq-choices') : null;
         if (choices) {
+            const correctControl = currentType === 'multiple_answer'
+                ? '<input type="checkbox" name="multiple_answer_correct[0][]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">'
+                : '<input type="radio" name="correct_choice[0]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">';
             choices.insertAdjacentHTML('beforeend', `
                 <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
                     <input type="hidden" name="choice_id[0][]" value="0">
-                    <input type="radio" name="correct_choice[0]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">
+                    ${correctControl}
                     <input type="text" name="choices[0][]" class="teacher-modal-input" value="" placeholder="Choice" style="margin:0;">
                     <button type="button" data-action="remove-edit-choice"
                         style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;border-radius:6px;padding:7px 9px;cursor:pointer;">Remove</button>

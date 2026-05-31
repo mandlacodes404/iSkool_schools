@@ -82,6 +82,18 @@ function count_fitb_blanks(string $text): int {
     return count($matches[0]);
 }
 
+function normalize_choice_indexes($value): array {
+    $items = is_array($value) ? $value : [$value];
+    $clean = [];
+    foreach ($items as $item) {
+        $index = filter_var($item, FILTER_VALIDATE_INT);
+        if ($index !== false && $index >= 0 && !in_array((int)$index, $clean, true)) {
+            $clean[] = (int)$index;
+        }
+    }
+    return $clean;
+}
+
 // ==================== AUTOMATIC ACADEMIC YEAR DETECTION ====================
 $current_academic_year_id = null;
 $yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -170,7 +182,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $pointsCheck = isset($_POST['points'][$i]) ? filter_var($_POST['points'][$i], FILTER_VALIDATE_INT) : false;
             $points = $pointsCheck === false ? 0 : (int)$pointsCheck;
 
-            if (!in_array($questionType, ['mcq', 'open_ended', 'fill_in_blank'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid question type.";
+            if (!in_array($questionType, ['mcq', 'multiple_answer', 'open_ended', 'fill_in_blank'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid question type.";
             if ($questionText === '') $errors[] = "Question " . ($i + 1) . " text is required.";
             if ($questionType === 'open_ended') {
                 $has_open_ended = 1;
@@ -190,6 +202,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 if ($subType === 'word_bank') {
                     $distractors = normalize_fitb_list($_POST['fitb_distractors'][$i] ?? []);
                     if (count($distractors) < 2) $errors[] = "Question " . ($i + 1) . " word bank needs at least two distractor words.";
+                }
+            } elseif ($questionType === 'multiple_answer') {
+                $correctIndexes = normalize_choice_indexes($_POST['multiple_answer_correct'][$i] ?? []);
+                $filledIndexes = [];
+                foreach ((array)$choiceValues as $choiceIndex => $choiceValue) {
+                    if (trim((string)$choiceValue) !== '') {
+                        $filledIndexes[] = (int)$choiceIndex;
+                    }
+                }
+                $validCorrectIndexes = array_values(array_intersect($correctIndexes, $filledIndexes));
+                $scoringMode = $_POST['ma_scoring_mode'][$i] ?? 'exact_match';
+                $selectExactlyRaw = $_POST['ma_select_exactly'][$i] ?? '';
+                $selectExactly = $selectExactlyRaw === '' ? null : filter_var($selectExactlyRaw, FILTER_VALIDATE_INT);
+                if (count($nonEmptyChoices) < 3) $errors[] = "Question " . ($i + 1) . " must have at least three choices.";
+                if (count($validCorrectIndexes) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two correct answers.";
+                if ((count($nonEmptyChoices) - count($validCorrectIndexes)) < 1) $errors[] = "Question " . ($i + 1) . " must have at least one incorrect choice.";
+                if (!in_array($scoringMode, ['exact_match', 'partial_penalty'], true)) $errors[] = "Question " . ($i + 1) . " has an invalid multiple answer scoring mode.";
+                if ($selectExactlyRaw !== '' && ($selectExactly === false || $selectExactly < 1 || $selectExactly > count($nonEmptyChoices))) {
+                    $errors[] = "Question " . ($i + 1) . " has an invalid select-exactly instruction.";
                 }
             } else {
                 if (count($nonEmptyChoices) < 2) $errors[] = "Question " . ($i + 1) . " must have at least two choices.";
@@ -278,6 +309,7 @@ try {
 
     $qStmt = $conn->prepare("INSERT INTO quizquestions (quiz_id, question_text, image_path, points, question_type) VALUES (?, ?, ?, ?, ?)");
     $cStmt = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
+    $maQuestionStmt = $conn->prepare("INSERT INTO multiple_answer_questions (question_id, scoring_mode, select_exactly) VALUES (?, ?, ?)");
     $fitbQuestionStmt = $conn->prepare("INSERT INTO fitb_questions (question_id, sub_type, scoring_mode, distractors_json) VALUES (?, ?, ?, ?)");
     $fitbBlankStmt = $conn->prepare("INSERT INTO fitb_blanks (question_id, blank_index, accepted_answers_json, case_sensitive) VALUES (?, ?, ?, ?)");
 
@@ -291,6 +323,7 @@ try {
         $questionType = $question_types[$i] ?? 'mcq';
         $choices = array_map('trim', $_POST['choices'][$i] ?? []);
         $correct = intval($_POST['correct_choice'][$i] ?? 0);
+        $multipleCorrect = normalize_choice_indexes($_POST['multiple_answer_correct'][$i] ?? []);
         $imagePath = null;
 
         if (isset($_FILES['question_images']['name'][$i]) && $_FILES['question_images']['error'][$i] === UPLOAD_ERR_OK) {
@@ -335,6 +368,26 @@ try {
             continue;
         }
 
+        if ($questionType === 'multiple_answer') {
+            $scoringMode = $_POST['ma_scoring_mode'][$i] ?? 'exact_match';
+            $selectExactlyRaw = $_POST['ma_select_exactly'][$i] ?? '';
+            $selectExactly = $selectExactlyRaw === '' ? null : (int)$selectExactlyRaw;
+            $maQuestionStmt->bind_param("isi", $question_id, $scoringMode, $selectExactly);
+            if (!$maQuestionStmt->execute()) {
+                throw new RuntimeException("Multiple answer metadata insert failed: " . $maQuestionStmt->error);
+            }
+
+            foreach ($choices as $index => $choiceText) {
+                if (empty($choiceText)) continue;
+                $isCorrect = in_array((int)$index, $multipleCorrect, true) ? 1 : 0;
+                $cStmt->bind_param("isi", $question_id, $choiceText, $isCorrect);
+                if (!$cStmt->execute()) {
+                    throw new RuntimeException("Choice insert failed: " . $cStmt->error);
+                }
+            }
+            continue;
+        }
+
         foreach ($choices as $index => $choiceText) {
             if (empty($choiceText)) continue;
             $isCorrect = ($index == $correct) ? 1 : 0;
@@ -346,6 +399,7 @@ try {
     }
     $qStmt->close();
     $cStmt->close();
+    $maQuestionStmt->close();
     $fitbQuestionStmt->close();
     $fitbBlankStmt->close();
     $conn->commit();
@@ -891,18 +945,39 @@ function getCsrfToken() {
         <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question 1 text">
         <label>Optional Image:</label>
         <input type="file" name="question_images[]" accept="image/*" aria-label="Upload image for question 1">
+        <label>Question Type:</label>
+        <select name="question_type[]" class="legacy-question-type" onchange="toggleLegacyQuestionType(this, 0)">
+          <option value="mcq" selected>Multiple Choice</option>
+          <option value="multiple_answer">Multiple Answer</option>
+          <option value="open_ended">Open Ended</option>
+          <option value="fill_in_blank">Fill in the Blank</option>
+        </select>
         <label>Choices:</label>
         <input type="text" name="choices[0][]" placeholder="Choice 1" required aria-label="Choice 1 for question 1">
         <input type="text" name="choices[0][]" placeholder="Choice 2" required aria-label="Choice 2 for question 1">
         <input type="text" name="choices[0][]" placeholder="Choice 3" aria-label="Choice 3 for question 1">
         <input type="text" name="choices[0][]" placeholder="Choice 4" aria-label="Choice 4 for question 1">
-        <label>Correct Choice:</label>
-        <select name="correct_choice[]" aria-label="Correct choice for question 1">
+        <label class="legacy-mcq-label">Correct Choice:</label>
+        <select name="correct_choice[0]" class="legacy-correct-select" aria-label="Correct choice for question 1">
           <option value="0">Choice 1</option>
           <option value="1">Choice 2</option>
           <option value="2">Choice 3</option>
           <option value="3">Choice 4</option>
         </select>
+        <div class="legacy-ma-fields" style="display:none;">
+          <label>Correct Answers:</label>
+          <label><input type="checkbox" name="multiple_answer_correct[0][]" value="0"> Choice 1</label>
+          <label><input type="checkbox" name="multiple_answer_correct[0][]" value="1"> Choice 2</label>
+          <label><input type="checkbox" name="multiple_answer_correct[0][]" value="2"> Choice 3</label>
+          <label><input type="checkbox" name="multiple_answer_correct[0][]" value="3"> Choice 4</label>
+          <label>Scoring Mode:</label>
+          <select name="ma_scoring_mode[0]">
+            <option value="exact_match" selected>Exact Match</option>
+            <option value="partial_penalty">Partial Credit with Penalty</option>
+          </select>
+          <label>Tell learners how many to select:</label>
+          <input type="number" name="ma_select_exactly[0]" min="1" placeholder="Optional">
+        </div>
         <label>Points for this question:</label>
         <input type="number" name="points[]" min="1" value="1" required aria-label="Points for question 1" class="points-input">
       </div>
@@ -925,6 +1000,31 @@ function getCsrfToken() {
 <script>
 let questionIndex = 1;
 
+function toggleLegacyQuestionType(select, index) {
+  const block = select.closest('.question-block');
+  if (!block) return;
+  const isMultipleAnswer = select.value === 'multiple_answer';
+  const isOpenEnded = select.value === 'open_ended' || select.value === 'fill_in_blank';
+  const mcqLabel = block.querySelector('.legacy-mcq-label');
+  const correctSelect = block.querySelector('.legacy-correct-select');
+  const maFields = block.querySelector('.legacy-ma-fields');
+  block.querySelectorAll(`input[name^="choices[${index}]"]`).forEach((input, choiceIndex) => {
+    input.disabled = isOpenEnded;
+    input.required = !isOpenEnded && choiceIndex < 2;
+  });
+  if (mcqLabel) mcqLabel.style.display = isMultipleAnswer || isOpenEnded ? 'none' : 'block';
+  if (correctSelect) {
+    correctSelect.style.display = isMultipleAnswer || isOpenEnded ? 'none' : 'block';
+    correctSelect.disabled = isMultipleAnswer || isOpenEnded;
+  }
+  if (maFields) {
+    maFields.style.display = isMultipleAnswer ? 'block' : 'none';
+    maFields.querySelectorAll('input, select').forEach(input => {
+      input.disabled = !isMultipleAnswer;
+    });
+  }
+}
+
 function addQuestion() {
   const container = document.getElementById("questions-container");
   const block = document.createElement("div");
@@ -938,18 +1038,39 @@ function addQuestion() {
     <input type="text" name="question[]" placeholder="Enter question text" required aria-label="Question ${questionIndex + 1} text">
     <label>Optional Image:</label>
     <input type="file" name="question_images[]" accept="image/*" aria-label="Upload image for question ${questionIndex + 1}">
+    <label>Question Type:</label>
+    <select name="question_type[]" class="legacy-question-type" onchange="toggleLegacyQuestionType(this, ${questionIndex})">
+      <option value="mcq" selected>Multiple Choice</option>
+      <option value="multiple_answer">Multiple Answer</option>
+      <option value="open_ended">Open Ended</option>
+      <option value="fill_in_blank">Fill in the Blank</option>
+    </select>
     <label>Choices:</label>
     <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 1" required aria-label="Choice 1 for question ${questionIndex + 1}">
     <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 2" required aria-label="Choice 2 for question ${questionIndex + 1}">
     <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 3" aria-label="Choice 3 for question ${questionIndex + 1}">
     <input type="text" name="choices[${questionIndex}][]" placeholder="Choice 4" aria-label="Choice 4 for question ${questionIndex + 1}">
-    <label>Correct Choice:</label>
-    <select name="correct_choice[]" aria-label="Correct choice for question ${questionIndex + 1}">
+    <label class="legacy-mcq-label">Correct Choice:</label>
+    <select name="correct_choice[${questionIndex}]" class="legacy-correct-select" aria-label="Correct choice for question ${questionIndex + 1}">
       <option value="0">Choice 1</option>
       <option value="1">Choice 2</option>
       <option value="2">Choice 3</option>
       <option value="3">Choice 4</option>
     </select>
+    <div class="legacy-ma-fields" style="display:none;">
+      <label>Correct Answers:</label>
+      <label><input type="checkbox" name="multiple_answer_correct[${questionIndex}][]" value="0"> Choice 1</label>
+      <label><input type="checkbox" name="multiple_answer_correct[${questionIndex}][]" value="1"> Choice 2</label>
+      <label><input type="checkbox" name="multiple_answer_correct[${questionIndex}][]" value="2"> Choice 3</label>
+      <label><input type="checkbox" name="multiple_answer_correct[${questionIndex}][]" value="3"> Choice 4</label>
+      <label>Scoring Mode:</label>
+      <select name="ma_scoring_mode[${questionIndex}]">
+        <option value="exact_match" selected>Exact Match</option>
+        <option value="partial_penalty">Partial Credit with Penalty</option>
+      </select>
+      <label>Tell learners how many to select:</label>
+      <input type="number" name="ma_select_exactly[${questionIndex}]" min="1" placeholder="Optional">
+    </div>
     <label>Points for this question:</label>
     <input type="number" name="points[]" min="1" value="1" required aria-label="Points for question ${questionIndex + 1}" class="points-input">
   `;

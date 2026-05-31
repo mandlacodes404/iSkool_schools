@@ -137,6 +137,31 @@ foreach ($fitbRows as $fitbRow) {
     ];
 }
 
+$maStmt = $conn->prepare("
+    SELECT maq.question_id, maq.scoring_mode, maq.select_exactly
+    FROM multiple_answer_questions maq
+    JOIN quizquestions qq ON qq.id = maq.question_id
+    JOIN quiz_results r ON r.quiz_id = qq.quiz_id
+    WHERE r.id = ?
+");
+$maStmt->bind_param("i", $resultId);
+$maStmt->execute();
+$maRows = $maStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$maStmt->close();
+
+foreach ($maRows as $maRow) {
+    $qid = (int)$maRow['question_id'];
+    if (!isset($questions[$qid]) || ($questions[$qid]['question_type'] ?? 'mcq') !== 'multiple_answer') {
+        continue;
+    }
+    $selectedIds = json_decode($questions[$qid]['answer_text'] ?? '[]', true);
+    $questions[$qid]['multiple_answer'] = [
+        'scoring_mode' => in_array($maRow['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match',
+        'select_exactly' => $maRow['select_exactly'] === null ? null : (int)$maRow['select_exactly'],
+        'selected_choice_ids' => is_array($selectedIds) ? array_map('intval', $selectedIds) : []
+    ];
+}
+
 // 3. Strict Access Control
 // Fixed: Using 'learner' instead of 'user'
 if ($userRole === 'learner') {
@@ -528,6 +553,37 @@ $backLink = ($userRole === 'teacher') ? 'teacher_quizzes.php' : 'quiz_history.ph
                 <?php else: ?>
                     <div class="open-pending-box">Awaiting teacher grading.</div>
                 <?php endif; ?>
+            <?php elseif (($q['question_type'] ?? 'mcq') === 'multiple_answer'): ?>
+            <div class="choices-list">
+                <?php
+                $selectedIds = $q['multiple_answer']['selected_choice_ids'] ?? [];
+                foreach ($q['choices'] as $choice):
+                    $isSelected = in_array((int)$choice['id'], $selectedIds, true);
+                    $isCorrect = ((int)$choice['is_correct'] === 1);
+                    $class = '';
+                    if ((int)$quizInfo['publish_marks'] === 1 && $isCorrect) $class = 'correct';
+                    elseif ((int)$quizInfo['publish_marks'] === 1 && $isSelected && !$isCorrect) $class = 'incorrect';
+                ?>
+                    <div class="choice <?= $class ?>">
+                        <?php if ((int)$quizInfo['publish_marks'] === 1 && $isCorrect): ?>
+                            <i class="fas fa-check-circle"></i>
+                        <?php elseif ((int)$quizInfo['publish_marks'] === 1 && $isSelected && !$isCorrect): ?>
+                            <i class="fas fa-times-circle"></i>
+                        <?php else: ?>
+                            <i class="far fa-square" style="opacity:0.3"></i>
+                        <?php endif; ?>
+
+                        <?= htmlspecialchars($choice['text']) ?>
+
+                        <?php if ($isSelected): ?>
+                            <span class="badge-user">Your Answer</span>
+                        <?php endif; ?>
+                        <?php if ((int)$quizInfo['publish_marks'] === 1 && $isCorrect): ?>
+                            <span class="badge-correct">Correct</span>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
             <?php else: ?>
             <div class="choices-list">
                 <?php foreach ($q['choices'] as $choice): 

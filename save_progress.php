@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
     $questionId = isset($_POST['question_id']) ? intval($_POST['question_id']) : null;
     $choiceId = isset($_POST['choice_id']) ? intval($_POST['choice_id']) : null;
     $answerText = isset($_POST['answer_text']) ? trim((string)$_POST['answer_text']) : null;
+    $selectedChoiceIdsRaw = isset($_POST['selected_choice_ids']) ? (string)$_POST['selected_choice_ids'] : null;
     $fitbAnswersRaw = isset($_POST['fitb_answers']) ? (string)$_POST['fitb_answers'] : null;
     $currentStep = isset($_POST['current_step']) ? intval($_POST['current_step']) : null;
 
@@ -109,6 +110,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['email']) && ($_SES
                 $cleanFitbAnswers[(string)$index] = substr(trim((string)$blankAnswer), 0, 200);
             }
             $answerText = json_encode($cleanFitbAnswers);
+            $choiceId = null;
+        } elseif ($questionType === 'multiple_answer') {
+            $decoded = json_decode((string)$selectedChoiceIdsRaw, true);
+            if (!is_array($decoded)) {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid answer']);
+                exit;
+            }
+            $cleanChoiceIds = [];
+            foreach ($decoded as $selectedChoiceId) {
+                $selectedChoiceId = filter_var($selectedChoiceId, FILTER_VALIDATE_INT);
+                if ($selectedChoiceId !== false && $selectedChoiceId > 0 && !in_array((int)$selectedChoiceId, $cleanChoiceIds, true)) {
+                    $cleanChoiceIds[] = (int)$selectedChoiceId;
+                }
+            }
+            if (!empty($cleanChoiceIds)) {
+                $placeholders = implode(',', array_fill(0, count($cleanChoiceIds), '?'));
+                $types = str_repeat('i', count($cleanChoiceIds) + 1);
+                $validAnswerStmt = $conn->prepare("
+                    SELECT id
+                    FROM choices
+                    WHERE question_id = ?
+                      AND id IN ($placeholders)
+                ");
+                $params = array_merge([$questionId], $cleanChoiceIds);
+                $validAnswerStmt->bind_param($types, ...$params);
+                $validAnswerStmt->execute();
+                $validRows = $validAnswerStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $validAnswerStmt->close();
+                if (count($validRows) !== count($cleanChoiceIds)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid answer']);
+                    exit;
+                }
+            }
+            sort($cleanChoiceIds);
+            $answerText = json_encode($cleanChoiceIds);
             $choiceId = null;
         } elseif ($choiceId !== null) {
             $validAnswerStmt = $conn->prepare("

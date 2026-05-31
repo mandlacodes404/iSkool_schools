@@ -82,9 +82,12 @@ foreach ($rows as $row) {
 }
 
 $fitbQuestionIds = [];
+$multipleAnswerQuestionIds = [];
 foreach ($questions as $qid => $question) {
     if (($question['question_type'] ?? 'mcq') === 'fill_in_blank') {
         $fitbQuestionIds[] = (int)$qid;
+    } elseif (($question['question_type'] ?? 'mcq') === 'multiple_answer') {
+        $multipleAnswerQuestionIds[] = (int)$qid;
     }
 }
 
@@ -153,6 +156,56 @@ if (!empty($fitbQuestionIds)) {
         } else {
             $questions[$qid]['fitb']['points_awarded'] = $blankCount > 0 ? ((float)$questions[$qid]['points'] / $blankCount) * $correctCount : 0;
         }
+    }
+}
+
+if (!empty($multipleAnswerQuestionIds)) {
+    $maStmt = $conn->prepare("
+        SELECT maq.question_id, maq.scoring_mode, maq.select_exactly
+        FROM multiple_answer_questions maq
+        JOIN quizquestions qq ON qq.id = maq.question_id
+        JOIN quiz_results r ON r.quiz_id = qq.quiz_id
+        WHERE r.id = ?
+    ");
+    $maStmt->bind_param("i", $result_id);
+    $maStmt->execute();
+    $maRows = $maStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $maStmt->close();
+
+    foreach ($maRows as $maRow) {
+        $qid = (int)$maRow['question_id'];
+        if (!isset($questions[$qid])) {
+            continue;
+        }
+        $selectedIds = json_decode($questions[$qid]['answer_text'] ?? '[]', true);
+        $selectedIds = is_array($selectedIds) ? array_map('intval', $selectedIds) : [];
+        $correctIds = [];
+        foreach ($questions[$qid]['choices'] as $choice) {
+            if ((int)$choice['is_correct'] === 1) {
+                $correctIds[(int)$choice['id']] = true;
+            }
+        }
+        $selectedSet = array_fill_keys($selectedIds, true);
+        $scoringMode = in_array($maRow['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match';
+        $pointsAwarded = 0;
+        if ($scoringMode === 'exact_match') {
+            if (count($selectedSet) === count($correctIds) && empty(array_diff_key($selectedSet, $correctIds)) && empty(array_diff_key($correctIds, $selectedSet))) {
+                $pointsAwarded = (float)$questions[$qid]['points'];
+            }
+        } else {
+            $correctCount = count($correctIds);
+            $pointsPerChoice = $correctCount > 0 ? ((float)$questions[$qid]['points'] / $correctCount) : 0;
+            foreach ($selectedSet as $choiceId => $_) {
+                $pointsAwarded += isset($correctIds[$choiceId]) ? $pointsPerChoice : -$pointsPerChoice;
+            }
+            $pointsAwarded = max(0, $pointsAwarded);
+        }
+        $questions[$qid]['multiple_answer'] = [
+            'scoring_mode' => $scoringMode,
+            'select_exactly' => $maRow['select_exactly'] === null ? null : (int)$maRow['select_exactly'],
+            'selected_choice_ids' => $selectedIds,
+            'points_awarded' => $pointsAwarded
+        ];
     }
 }
 

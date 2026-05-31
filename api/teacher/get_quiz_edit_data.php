@@ -72,7 +72,7 @@ while ($question = $questionsResult->fetch_assoc()) {
         'question_text' => $question['question_text'],
         'image_path' => $question['image_path'],
         'points' => (int)$question['points'],
-        'question_type' => in_array($question['question_type'] ?? 'mcq', ['mcq', 'open_ended', 'fill_in_blank'], true) ? $question['question_type'] : 'mcq',
+        'question_type' => in_array($question['question_type'] ?? 'mcq', ['mcq', 'multiple_answer', 'open_ended', 'fill_in_blank'], true) ? $question['question_type'] : 'mcq',
         'choices' => array_map(function ($choice) {
             return [
                 'id' => (int)$choice['id'],
@@ -106,6 +106,19 @@ while ($question = $questionsResult->fetch_assoc()) {
                     'case_sensitive' => (int)$blank['case_sensitive']
                 ];
             }, $blankRows)
+        ];
+    }
+    if (($questions[count($questions) - 1]['question_type'] ?? 'mcq') === 'multiple_answer') {
+        $maStmt = $conn->prepare("SELECT scoring_mode, select_exactly FROM multiple_answer_questions WHERE question_id = ? LIMIT 1");
+        $maStmt->bind_param("i", $question_id);
+        $maStmt->execute();
+        $maMeta = $maStmt->get_result()->fetch_assoc();
+        $maStmt->close();
+        $selectExactly = $maMeta['select_exactly'] ?? null;
+
+        $questions[count($questions) - 1]['multiple_answer'] = [
+            'scoring_mode' => in_array($maMeta['scoring_mode'] ?? '', ['exact_match', 'partial_penalty'], true) ? $maMeta['scoring_mode'] : 'exact_match',
+            'select_exactly' => $selectExactly === null ? null : (int)$selectExactly
         ];
     }
 }

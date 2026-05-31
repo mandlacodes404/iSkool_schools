@@ -180,10 +180,41 @@ foreach ($fitbRows as $fitbRow) {
     ];
 }
 
+$multipleAnswerQuestions = [];
+$maStmt = $conn->prepare("
+    SELECT q.id AS question_id, q.points, maq.scoring_mode, c.id AS choice_id, c.is_correct
+    FROM quizquestions q
+    JOIN multiple_answer_questions maq ON maq.question_id = q.id
+    JOIN choices c ON c.question_id = q.id
+    WHERE q.quiz_id = ? AND q.question_type = 'multiple_answer'
+    ORDER BY q.id ASC, c.id ASC
+");
+$maStmt->bind_param("i", $quizId);
+$maStmt->execute();
+$maRows = $maStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$maStmt->close();
+foreach ($maRows as $maRow) {
+    $qid = (int)$maRow['question_id'];
+    if (!isset($multipleAnswerQuestions[$qid])) {
+        $multipleAnswerQuestions[$qid] = [
+            'points' => (float)$maRow['points'],
+            'scoring_mode' => in_array($maRow['scoring_mode'], ['exact_match', 'partial_penalty'], true) ? $maRow['scoring_mode'] : 'exact_match',
+            'correct_choice_ids' => [],
+            'valid_choice_ids' => []
+        ];
+    }
+    $choiceId = (int)$maRow['choice_id'];
+    $multipleAnswerQuestions[$qid]['valid_choice_ids'][$choiceId] = true;
+    if ((int)$maRow['is_correct'] === 1) {
+        $multipleAnswerQuestions[$qid]['correct_choice_ids'][$choiceId] = true;
+    }
+}
+
 // 6. Consolidate Answers (POST + Database Fallback)
 $finalAnswers = isset($_POST['answers']) && is_array($_POST['answers']) ? $_POST['answers'] : [];
 $finalOpenAnswers = isset($_POST['open_answers']) && is_array($_POST['open_answers']) ? $_POST['open_answers'] : [];
 $finalFitbAnswers = isset($_POST['fitb_answers']) && is_array($_POST['fitb_answers']) ? $_POST['fitb_answers'] : [];
+$finalMultipleAnswers = isset($_POST['multiple_answers']) && is_array($_POST['multiple_answers']) ? $_POST['multiple_answers'] : [];
 $savedStmt = $conn->prepare("SELECT question_id, selected_choice_id, answer_text FROM user_answers WHERE attempt_id = ?");
 $savedStmt->bind_param("i", $attemptId);
 $savedStmt->execute();
@@ -194,6 +225,9 @@ while ($sRow = $savedRes->fetch_assoc()) {
         if (isset($fitbQuestions[$savedQid]) && !array_key_exists($savedQid, $finalFitbAnswers)) {
             $decoded = json_decode($sRow['answer_text'], true);
             $finalFitbAnswers[$savedQid] = is_array($decoded) ? $decoded : [];
+        } elseif (isset($multipleAnswerQuestions[$savedQid]) && !array_key_exists($savedQid, $finalMultipleAnswers)) {
+            $decoded = json_decode($sRow['answer_text'], true);
+            $finalMultipleAnswers[$savedQid] = is_array($decoded) ? $decoded : [];
         } elseif (!isset($fitbQuestions[$savedQid]) && !array_key_exists($savedQid, $finalOpenAnswers)) {
             $finalOpenAnswers[$savedQid] = $sRow['answer_text'];
         }
@@ -251,6 +285,44 @@ foreach ($fitbQuestions as $qid => $fitbQuestion) {
     } else {
         $earnedScore += ($fitbQuestion['points'] / $blankCount) * $correctCount;
     }
+}
+
+foreach ($multipleAnswerQuestions as $qid => $maQuestion) {
+    $submittedChoiceIds = $finalMultipleAnswers[$qid] ?? [];
+    if (is_string($submittedChoiceIds)) {
+        $decoded = json_decode($submittedChoiceIds, true);
+        $submittedChoiceIds = is_array($decoded) ? $decoded : [];
+    }
+    if (!is_array($submittedChoiceIds)) {
+        $submittedChoiceIds = [];
+    }
+
+    $selectedSet = [];
+    foreach ($submittedChoiceIds as $choiceId) {
+        $choiceId = (int)$choiceId;
+        if (isset($maQuestion['valid_choice_ids'][$choiceId])) {
+            $selectedSet[$choiceId] = true;
+        }
+    }
+
+    $correctSet = $maQuestion['correct_choice_ids'];
+    if ($maQuestion['scoring_mode'] === 'exact_match') {
+        if (count($selectedSet) === count($correctSet) && empty(array_diff_key($selectedSet, $correctSet)) && empty(array_diff_key($correctSet, $selectedSet))) {
+            $earnedScore += $maQuestion['points'];
+        }
+        continue;
+    }
+
+    $correctCount = count($correctSet);
+    if ($correctCount === 0) {
+        continue;
+    }
+    $pointsPerChoice = $maQuestion['points'] / $correctCount;
+    $questionScore = 0;
+    foreach ($selectedSet as $choiceId => $_) {
+        $questionScore += isset($correctSet[$choiceId]) ? $pointsPerChoice : -$pointsPerChoice;
+    }
+    $earnedScore += max(0, $questionScore);
 }
 
 // 8. DATABASE UPDATES (Transaction-style)
@@ -321,6 +393,34 @@ try {
             $fitbAnsStmt->execute();
         }
         $fitbAnsStmt->close();
+    }
+    if (!empty($finalMultipleAnswers)) {
+        $maAnsQuery = "INSERT INTO user_answers (user_email, quiz_id, attempt_id, question_id, selected_choice_id, answer_text, result_id)
+                       VALUES (?, ?, ?, ?, NULL, ?, ?)
+                       ON DUPLICATE KEY UPDATE selected_choice_id = NULL, answer_text = VALUES(answer_text), result_id = VALUES(result_id)";
+        $maAnsStmt = $conn->prepare($maAnsQuery);
+        foreach ($finalMultipleAnswers as $qid => $choiceIds) {
+            $qid = (int)$qid;
+            if (!isset($multipleAnswerQuestions[$qid])) {
+                continue;
+            }
+            if (is_string($choiceIds)) {
+                $decoded = json_decode($choiceIds, true);
+                $choiceIds = is_array($decoded) ? $decoded : [];
+            }
+            $cleanChoiceIds = [];
+            foreach ((array)$choiceIds as $choiceId) {
+                $choiceId = (int)$choiceId;
+                if (isset($multipleAnswerQuestions[$qid]['valid_choice_ids'][$choiceId]) && !in_array($choiceId, $cleanChoiceIds, true)) {
+                    $cleanChoiceIds[] = $choiceId;
+                }
+            }
+            sort($cleanChoiceIds);
+            $maAnswerText = json_encode($cleanChoiceIds);
+            $maAnsStmt->bind_param("siiisi", $userEmail, $quizId, $attemptId, $qid, $maAnswerText, $resultId);
+            $maAnsStmt->execute();
+        }
+        $maAnsStmt->close();
     }
 
     if ($hasOpenEnded === 1) {

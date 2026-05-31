@@ -59,6 +59,18 @@ function count_fitb_blanks(string $text): int {
     return count($matches[0]);
 }
 
+function normalize_choice_indexes($value): array {
+    $items = is_array($value) ? $value : [$value];
+    $clean = [];
+    foreach ($items as $item) {
+        $index = filter_var($item, FILTER_VALIDATE_INT);
+        if ($index !== false && $index >= 0 && !in_array((int)$index, $clean, true)) {
+            $clean[] = (int)$index;
+        }
+    }
+    return $clean;
+}
+
 function normalize_question_payload(): array {
     $question_texts = $_POST['question'] ?? [];
     $question_ids = $_POST['question_id'] ?? [];
@@ -73,6 +85,9 @@ function normalize_question_payload(): array {
     $fitb_accepted_answers = $_POST['fitb_accepted_answers'] ?? [];
     $fitb_case_sensitive = $_POST['fitb_case_sensitive'] ?? [];
     $fitb_distractors = $_POST['fitb_distractors'] ?? [];
+    $multiple_answer_correct = $_POST['multiple_answer_correct'] ?? [];
+    $ma_scoring_modes = $_POST['ma_scoring_mode'] ?? [];
+    $ma_select_exactly = $_POST['ma_select_exactly'] ?? [];
 
     $questions = [];
     foreach ($question_texts as $i => $question_text) {
@@ -100,6 +115,11 @@ function normalize_question_payload(): array {
                 'accepted_answers' => $fitb_accepted_answers[$i] ?? [],
                 'case_sensitive' => $fitb_case_sensitive[$i] ?? [],
                 'distractors' => $fitb_distractors[$i] ?? []
+            ],
+            'multiple_answer' => [
+                'correct_indexes' => normalize_choice_indexes($multiple_answer_correct[$i] ?? []),
+                'scoring_mode' => $ma_scoring_modes[$i] ?? 'exact_match',
+                'select_exactly' => $ma_select_exactly[$i] ?? ''
             ]
         ];
     }
@@ -188,7 +208,7 @@ if (!$has_attempts) {
             }
         }
 
-        if (!in_array($question['question_type'], ['mcq', 'open_ended', 'fill_in_blank'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid question type.';
+        if (!in_array($question['question_type'], ['mcq', 'multiple_answer', 'open_ended', 'fill_in_blank'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid question type.';
         if ($question['text'] === '') $errors[] = 'Question ' . ($i + 1) . ' text is required.';
         if ($question['question_type'] === 'open_ended') {
             if (count($non_empty_choices) > 0) $errors[] = 'Question ' . ($i + 1) . ' is open-ended and must not have choices.';
@@ -204,6 +224,23 @@ if (!$has_attempts) {
             }
             if ($question['fitb']['sub_type'] === 'word_bank' && count(normalize_fitb_list($question['fitb']['distractors'])) < 2) {
                 $errors[] = 'Question ' . ($i + 1) . ' word bank needs at least two distractor words.';
+            }
+        } elseif ($question['question_type'] === 'multiple_answer') {
+            $filled_indexes = [];
+            foreach ($question['choices'] as $choice_index => $choice) {
+                if ($choice['text'] !== '') {
+                    $filled_indexes[] = (int)$choice_index;
+                }
+            }
+            $valid_correct_indexes = array_values(array_intersect($question['multiple_answer']['correct_indexes'], $filled_indexes));
+            $select_exactly_raw = $question['multiple_answer']['select_exactly'];
+            $select_exactly = $select_exactly_raw === '' ? null : filter_var($select_exactly_raw, FILTER_VALIDATE_INT);
+            if (count($non_empty_choices) < 3) $errors[] = 'Question ' . ($i + 1) . ' must have at least three choices.';
+            if (count($valid_correct_indexes) < 2) $errors[] = 'Question ' . ($i + 1) . ' must have at least two correct answers.';
+            if ((count($non_empty_choices) - count($valid_correct_indexes)) < 1) $errors[] = 'Question ' . ($i + 1) . ' must have at least one incorrect choice.';
+            if (!in_array($question['multiple_answer']['scoring_mode'], ['exact_match', 'partial_penalty'], true)) $errors[] = 'Question ' . ($i + 1) . ' has an invalid multiple answer scoring mode.';
+            if ($select_exactly_raw !== '' && ($select_exactly === false || $select_exactly < 1 || $select_exactly > count($non_empty_choices))) {
+                $errors[] = 'Question ' . ($i + 1) . ' has an invalid select-exactly instruction.';
             }
         } else {
             if (count($non_empty_choices) < 2) $errors[] = 'Question ' . ($i + 1) . ' must have at least two choices.';
@@ -343,6 +380,13 @@ try {
         }
         $deleteFitbQuestion->close();
 
+        $deleteMaQuestion = $conn->prepare("DELETE FROM multiple_answer_questions WHERE question_id = ?");
+        $deleteMaQuestion->bind_param("i", $question_id_to_delete);
+        if (!$deleteMaQuestion->execute()) {
+            throw new RuntimeException("Deleted multiple answer metadata failed: " . $deleteMaQuestion->error);
+        }
+        $deleteMaQuestion->close();
+
         $deleteQuestion = $conn->prepare("DELETE FROM quizquestions WHERE id = ? AND quiz_id = ?");
         $deleteQuestion->bind_param("ii", $question_id_to_delete, $quiz_id);
         if (!$deleteQuestion->execute()) {
@@ -409,6 +453,10 @@ try {
             $deleteFitbQuestion->bind_param("i", $question_id);
             $deleteFitbQuestion->execute();
             $deleteFitbQuestion->close();
+            $deleteMaQuestion = $conn->prepare("DELETE FROM multiple_answer_questions WHERE question_id = ?");
+            $deleteMaQuestion->bind_param("i", $question_id);
+            $deleteMaQuestion->execute();
+            $deleteMaQuestion->close();
             continue;
         }
 
@@ -433,6 +481,10 @@ try {
                 throw new RuntimeException("FITB metadata cleanup failed: " . $deleteFitbQuestion->error);
             }
             $deleteFitbQuestion->close();
+            $deleteMaQuestion = $conn->prepare("DELETE FROM multiple_answer_questions WHERE question_id = ?");
+            $deleteMaQuestion->bind_param("i", $question_id);
+            $deleteMaQuestion->execute();
+            $deleteMaQuestion->close();
 
             $sub_type = $question['fitb']['sub_type'];
             $scoring_mode = $question['fitb']['scoring_mode'];
@@ -466,6 +518,22 @@ try {
         $deleteFitbQuestion->bind_param("i", $question_id);
         $deleteFitbQuestion->execute();
         $deleteFitbQuestion->close();
+        $deleteMaQuestion = $conn->prepare("DELETE FROM multiple_answer_questions WHERE question_id = ?");
+        $deleteMaQuestion->bind_param("i", $question_id);
+        $deleteMaQuestion->execute();
+        $deleteMaQuestion->close();
+
+        if ($question['question_type'] === 'multiple_answer') {
+            $scoring_mode = $question['multiple_answer']['scoring_mode'];
+            $select_exactly_raw = $question['multiple_answer']['select_exactly'];
+            $select_exactly = $select_exactly_raw === '' ? null : (int)$select_exactly_raw;
+            $insertMaQuestion = $conn->prepare("INSERT INTO multiple_answer_questions (question_id, scoring_mode, select_exactly) VALUES (?, ?, ?)");
+            $insertMaQuestion->bind_param("isi", $question_id, $scoring_mode, $select_exactly);
+            if (!$insertMaQuestion->execute()) {
+                throw new RuntimeException("Multiple answer metadata insert failed: " . $insertMaQuestion->error);
+            }
+            $insertMaQuestion->close();
+        }
 
         $existingChoicesStmt = $conn->prepare("SELECT id FROM choices WHERE question_id = ?");
         $existingChoicesStmt->bind_param("i", $question_id);
@@ -477,7 +545,7 @@ try {
         }, $existingChoiceRows);
 
         $submitted_choice_ids = [];
-        foreach ($question['choices'] as $choice) {
+        foreach ($question['choices'] as $choice_index => $choice) {
             if ($choice['text'] === '') {
                 continue;
             }
@@ -486,15 +554,21 @@ try {
                     throw new RuntimeException("Choice ownership validation failed.");
                 }
                 $submitted_choice_ids[] = $choice['id'];
+                $is_correct = $question['question_type'] === 'multiple_answer'
+                    ? (in_array((int)$choice_index, $question['multiple_answer']['correct_indexes'], true) ? 1 : 0)
+                    : $choice['is_correct'];
                 $updateChoice = $conn->prepare("UPDATE choices SET choice_text = ?, is_correct = ? WHERE id = ? AND question_id = ?");
-                $updateChoice->bind_param("siii", $choice['text'], $choice['is_correct'], $choice['id'], $question_id);
+                $updateChoice->bind_param("siii", $choice['text'], $is_correct, $choice['id'], $question_id);
                 if (!$updateChoice->execute()) {
                     throw new RuntimeException("Choice update failed: " . $updateChoice->error);
                 }
                 $updateChoice->close();
             } else {
+                $is_correct = $question['question_type'] === 'multiple_answer'
+                    ? (in_array((int)$choice_index, $question['multiple_answer']['correct_indexes'], true) ? 1 : 0)
+                    : $choice['is_correct'];
                 $insertChoice = $conn->prepare("INSERT INTO choices (question_id, choice_text, is_correct) VALUES (?, ?, ?)");
-                $insertChoice->bind_param("isi", $question_id, $choice['text'], $choice['is_correct']);
+                $insertChoice->bind_param("isi", $question_id, $choice['text'], $is_correct);
                 if (!$insertChoice->execute()) {
                     throw new RuntimeException("Choice insert failed: " . $insertChoice->error);
                 }
@@ -518,7 +592,16 @@ try {
         $correctCheck->execute();
         $correct_count = (int)$correctCheck->get_result()->fetch_assoc()['correct_count'];
         $correctCheck->close();
-        if ($correct_count !== 1) {
+        if ($question['question_type'] === 'multiple_answer') {
+            $choiceCountCheck = $conn->prepare("SELECT COUNT(*) AS choice_count FROM choices WHERE question_id = ?");
+            $choiceCountCheck->bind_param("i", $question_id);
+            $choiceCountCheck->execute();
+            $choice_count = (int)$choiceCountCheck->get_result()->fetch_assoc()['choice_count'];
+            $choiceCountCheck->close();
+            if ($correct_count < 2 || ($choice_count - $correct_count) < 1) {
+                throw new RuntimeException("Multiple answer choice validation failed.");
+            }
+        } elseif ($correct_count !== 1) {
             throw new RuntimeException("Question correct choice validation failed.");
         }
     }
