@@ -143,27 +143,7 @@ try {
         <p style="margin:0 0 28px;font-size:16px;color:#4a4a4a;line-height:1.7;">
           Your account has been successfully created at
           <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . htmlspecialchars($schoolName) . '</a>.
-          Here are your account details.
         </p>
-
-        <!-- Divider -->
-        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
-
-        <!-- Account details -->
-        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-          <tr>
-            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;width:100px;vertical-align:top;">School</td>
-            <td style="padding:10px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . htmlspecialchars($schoolName) . '</td>
-          </tr>
-          <tr>
-            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Platform</td>
-            <td style="padding:10px 0;font-size:14px;"><a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . $schoolUrl . '</a></td>
-          </tr>
-          <tr>
-            <td style="padding:10px 0;font-size:14px;color:#6a6a6a;vertical-align:top;">Role</td>
-            <td style="padding:10px 0;font-size:14px;color:#0d0d0d;font-weight:500;">' . $roleLabel . '</td>
-          </tr>
-        </table>
 
         <!-- Getting started -->
         <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">Here is how to get started:</p>
