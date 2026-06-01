@@ -553,17 +553,6 @@ function getCsrfToken() {
         </div><!-- /.form-panel -->
     </div><!-- /.container -->
     <div id="loaderOverlay">
-        <!-- Mobile pull-to-refresh loader (top) -->
-        <div class="mobile-loader-pull" aria-hidden="true">
-            <div class="spinner" role="img" aria-label="Loading"></div>
-        </div>
-
-        <!-- Mobile centered loader (main) -->
-        <div class="mobile-loader-center" aria-hidden="true">
-            <div class="ring" role="img" aria-label="Loading"></div>
-        </div>
-
-        <!-- Fallback / desktop loader kept for compatibility -->
         <div class="loader-container">
             <div class="loader-book">
                 <i class="fas fa-book-open"></i>

@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.5">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -496,12 +496,6 @@ function getCsrfToken() {
 <iframe id="mainFrame" name="mainFrame" src="about:blank" style="display:none;"></iframe>
 
 <div id="loaderOverlay">
-    <div class="mobile-loader-pull" aria-hidden="true">
-        <div class="spinner" role="img" aria-label="Loading"></div>
-    </div>
-    <div class="mobile-loader-center" aria-hidden="true">
-        <div class="ring" role="img" aria-label="Loading"></div>
-    </div>
     <div class="loader">
         <div class="loader-dot3"></div>
         <div class="loader-dot4"></div>
