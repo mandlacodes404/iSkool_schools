@@ -784,5 +784,33 @@ function switchTab(os, btn) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
+<!-- Replacement script: swap all inline SVGs with the current icon.svg at runtime -->
+<script>
+(async function(){
+  try {
+    const resp = await fetch('icon.svg');
+    if (!resp.ok) return;
+    const svgText = await resp.text();
+    // For each existing <svg> on the page, replace with the current svg content
+    document.querySelectorAll('svg').forEach(orig => {
+      try {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = svgText.trim();
+        const newSvg = wrapper.querySelector('svg');
+        if (!newSvg) return;
+        // Preserve simple sizing attributes from the original element
+        const w = orig.getAttribute('width');
+        const h = orig.getAttribute('height');
+        if (w) newSvg.setAttribute('width', w);
+        if (h) newSvg.setAttribute('height', h);
+        // Replace in DOM
+        orig.replaceWith(newSvg.cloneNode(true));
+      } catch (e) { /* ignore individual replacements */ }
+    });
+  } catch (e) {
+    console.error('Failed to load icon.svg for replacement', e);
+  }
+})();
+</script>
 </body>
 </html>
