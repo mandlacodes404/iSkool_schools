@@ -74,19 +74,23 @@ if ($role === 'learner') {
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
             <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                 <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">1</span>
-                Log in and go to <strong>Classes</strong> — create your school\'s classes before inviting anyone.
+                Customise your school — add your <strong>logo</strong> and update your <strong>school name</strong> if necessary.
             </td></tr>
             <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                 <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">2</span>
-                Share the <strong>Teacher Access Key</strong> with your teachers so they can register.
+                Log in and go to <strong>Classes</strong> — create your school\'s classes before inviting anyone.
             </td></tr>
             <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                 <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">3</span>
-                Share the <strong>Learner Access Key</strong> with your learners to register and join classes.
+                Share the <strong>Teacher Access Key</strong> with your staff so they can register and access the platform.
             </td></tr>
             <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                 <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">4</span>
-                Check the <strong>Analytics</strong> dashboard to monitor school-wide performance from day one.
+                Share the <strong>Learner Access Key</strong> with your learners so they can register and join their classes.
+            </td></tr>
+            <tr><td style="padding:10px 0;font-size:13px;color:#555;">
+                <span style="display:inline-block;background:#f85149;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">5</span>
+                Use the <strong>Admin</strong> dashboard to monitor and control school-wide activity.
             </td></tr>
         </table>';
 }
