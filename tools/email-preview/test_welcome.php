@@ -26,23 +26,31 @@ if ($role === 'learner') {
     $roleLabel = 'Learner';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Log in and join your class using the Learner Access Key from your teacher.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Allow notifications so you never miss a quiz or announcement.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Check your Grades section to track your performance across all subjects.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">
-                Install iSkool on your phone for the best experience. Follow our step-by-step install guide attached to this email, or visit
-                <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a> anytime.
-            </td></tr>
-        </table>';
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">1.&nbsp; Install iSkool on your phone for the best experience.</td></tr>
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">2.&nbsp; Log in and join the class you are currently enrolled in at your school.</td></tr>
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">3.&nbsp; Enable notifications in your device settings to receive mobile alerts.</td></tr>
+        </table>
+        <p style="margin:16px 0 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            Follow our step-by-step installation guide attached to this email, or visit
+            <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
+            for instructions.
+        </p>';
 } elseif ($role === 'teacher') {
     $roleLabel = 'Teacher';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Log in and go to Home — your quick snapshot dashboard is waiting.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Ask your school admin for your class assignment so learners can find you.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">Create your first quiz from the Quizzes section — it takes under 5 minutes.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">Check Analytics after your first quiz to see class performance and gender gap data.</td></tr>
-        </table>';
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
+                Visit <a href="https://iskool.online" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online</a> on your desktop browser — this is where you will create and send content to your class.
+            </td></tr>
+            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                You can also download the iSkool mobile app and enable notifications in your device settings to stay updated wherever you are.
+            </td></tr>
+        </table>
+        <p style="margin:16px 0 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            Follow our step-by-step setup guide attached to this email, or visit
+            <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
+            for instructions.
+        </p>';
 } elseif ($role === 'parent') {
     $roleLabel = 'Parent';
     $roleTips  = '
