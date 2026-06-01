@@ -496,6 +496,12 @@ function getCsrfToken() {
 <iframe id="mainFrame" name="mainFrame" src="about:blank" style="display:none;"></iframe>
 
 <div id="loaderOverlay">
+    <div class="mobile-loader-pull" aria-hidden="true">
+        <div class="spinner" role="img" aria-label="Loading"></div>
+    </div>
+    <div class="mobile-loader-center" aria-hidden="true">
+        <div class="ring" role="img" aria-label="Loading"></div>
+    </div>
     <div class="loader">
         <div class="loader-dot3"></div>
         <div class="loader-dot4"></div>
