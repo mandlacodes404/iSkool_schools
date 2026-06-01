@@ -12,8 +12,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 $role       = $_GET['role'] ?? 'learner';
-$first_name = 'Mandla';
 $email      = 'mandlasimphiwe99@gmail.com';
+$first_name = ($role === 'teacher') ? 'Mr Mahlangu' : 'Mandla Mahlangu';
 
 $schoolUrl        = rtrim(BASE_URL, '/');
 $schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
@@ -26,11 +26,11 @@ if ($role === 'learner') {
     $roleLabel = 'Learner';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">1.&nbsp; Install iSkool on your phone for the best experience.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">2.&nbsp; Log in and join the class you are currently enrolled in at your school.</td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;">3.&nbsp; Enable notifications in your device settings to receive mobile alerts.</td></tr>
+            <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">1.&nbsp; Install iSkool on your phone for the best experience.</td></tr>
+            <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">2.&nbsp; Log in and join the class you are currently enrolled in at your school.</td></tr>
+            <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.6;">3.&nbsp; Enable notifications in your device settings to receive mobile alerts.</td></tr>
         </table>
-        <p style="margin:16px 0 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+        <p style="margin:16px 0 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
             Follow our step-by-step installation guide attached to this email, or visit
             <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
             for instructions.
@@ -39,14 +39,14 @@ if ($role === 'learner') {
     $roleLabel = 'Teacher';
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
+            <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
                 Visit <a href="https://iskool.online" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online</a> on your desktop browser — this is where you will create and send content to your class.
             </td></tr>
-            <tr><td style="padding:10px 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
                 You can also download the iSkool mobile app and enable notifications in your device settings to stay updated wherever you are.
             </td></tr>
         </table>
-        <p style="margin:16px 0 0;font-size:15px;color:#4a4a4a;line-height:1.7;">
+        <p style="margin:16px 0 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
             Follow our step-by-step setup guide attached to this email, or visit
             <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
             for instructions.
@@ -132,25 +132,25 @@ try {
               <img src="https://iskool.online/apple-touch-icon.png?v=1.1" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
+              <span style="font-size:13px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
             </td>
           </tr>
         </table>
 
         <!-- Heading -->
-        <p style="margin:0 0 20px;font-size:24px;font-weight:600;color:#0d0d0d;line-height:1.3;">Welcome to iSkool, ' . htmlspecialchars($first_name) . '.</p>
+        <p style="margin:0 0 20px;font-size:20px;font-weight:600;color:#0d0d0d;line-height:1.3;">Welcome to iSkool, ' . htmlspecialchars($first_name) . '.</p>
 
-        <p style="margin:0 0 28px;font-size:16px;color:#4a4a4a;line-height:1.7;">
+        <p style="margin:0 0 28px;font-size:14px;color:#4a4a4a;line-height:1.7;">
           Your account has been successfully created at
           <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;">' . htmlspecialchars($schoolName) . '</a>.
         </p>
 
         <!-- Getting started -->
-        <p style="margin:0 0 16px;font-size:16px;color:#4a4a4a;line-height:1.7;">Here is how to get started:</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#4a4a4a;line-height:1.7;">Here is how to get started:</p>
         ' . $roleTips . '
 
         <!-- CTA -->
-        <p style="margin:28px 0 40px;font-size:16px;line-height:1.6;">
+        <p style="margin:28px 0 40px;font-size:14px;line-height:1.6;">
           <a href="' . $schoolUrl . '" style="color:#0866ff;text-decoration:none;font-weight:500;">Log in to iSkool →</a>
         </p>
 
@@ -158,12 +158,12 @@ try {
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="border-top:1px solid #e8e6e2;"></td></tr></table>
 
         <!-- Security note -->
-        <p style="margin:0 0 24px;font-size:14px;color:#6a6a6a;line-height:1.7;">
+        <p style="margin:0 0 24px;font-size:13px;color:#6a6a6a;line-height:1.7;">
           If you did not register for this account, contact us immediately at
           <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
         </p>
 
-        <p style="margin:0 0 40px;font-size:14px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Support</p>
+        <p style="margin:0 0 40px;font-size:13px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Support</p>
 
         <!-- Footer -->
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">
