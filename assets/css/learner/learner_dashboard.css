@@ -820,6 +820,65 @@ iframe {
         transition: transform var(--transition-speed) ease, filter var(--transition-speed) ease;
     }
 
+    /* Mobile-specific loaders: show the new pull-to-refresh and centered loaders, hide orbital loader */
+    #loaderOverlay {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 12000 !important;
+        pointer-events: none !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+    }
+
+    #loaderOverlay .loader,
+    #loaderOverlay .loader-version {
+        display: none !important;
+    }
+
+    #loaderOverlay .mobile-loader-pull {
+        position: absolute;
+        top: calc(48px + env(safe-area-inset-top, 0));
+        left: 50%;
+        transform: translateX(-50%);
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 1;
+    }
+
+    #loaderOverlay .mobile-loader-pull .spinner {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: conic-gradient(#e6e6e6 0deg, #a8a8a8 45deg, transparent 120deg);
+        animation: spin 1s linear infinite;
+    }
+
+    #loaderOverlay .mobile-loader-center {
+        position: absolute;
+        left: 50%;
+        top: 60%;
+        transform: translate(-50%, -50%);
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    #loaderOverlay .mobile-loader-center .ring {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: conic-gradient(#3b82f6 0deg, #60a5fa 120deg, transparent 220deg);
+        box-shadow: inset 0 0 0 6px rgba(2,6,23,0.6);
+        animation: spin 1.1s linear infinite;
+    }
+    }
+
     .sidebar.active ~ .main-content {
         position: fixed;
         top: 0;
@@ -885,7 +944,7 @@ iframe {
     .sidebar.collapsed .logout span {
         display: inline !important;
     }
-}
+
 
 @media (max-width: 480px) {
     .sidebar a, .sidebar button {
