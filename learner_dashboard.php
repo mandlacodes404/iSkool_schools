@@ -522,6 +522,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (isMobile && !sessionStorage.getItem("lastLearnerPage")) {
         const mainContent = document.querySelector(".main-content");
         mainContent.classList.add("mobile-first-load");
+
+        // Ensure the bottom navigation shows its glass background on first open
+        const bottomNav = document.getElementById('mobileBottomNav');
+        if (bottomNav) bottomNav.classList.add('nav-scrolled');
+
         setTimeout(() => {
             mainContent.classList.remove("mobile-first-load");
             mainContent.style.transform = '';
