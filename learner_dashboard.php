@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.6">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2103,55 +2103,87 @@ if (desktopToggle) {
     // ─────────────────────────────────────────────────────────────────────
     // PULL-TO-REFRESH — mobile only
     // Swipe down from the very top of #api-content-area to refresh the current page.
-    // Shows a small animated indicator, busts the cache, then re-calls the active
-    // page fetch function so fresh data loads without a full page reload.
+    // Shows a small grey starburst spinner (matching the native iOS PTR style),
+    // busts the cache, then re-calls the active page fetch function.
+    // The loaderOverlay is suppressed during PTR so only ONE spinner is visible.
     // ─────────────────────────────────────────────────────────────────────
     if (window.innerWidth <= 768) {
         (function initPullToRefresh() {
             const scrollEl = document.querySelector('#api-content-area');
             if (!scrollEl) return;
 
-            // Inject spin keyframe once
+            // Inject keyframes once
             if (!document.getElementById('ptrStyles')) {
                 const st = document.createElement('style');
                 st.id = 'ptrStyles';
-                st.textContent = '@keyframes ptrSpin { to { transform: rotate(360deg); } }';
+                st.textContent = [
+                    '@keyframes ptrSpin { to { transform: rotate(360deg); } }',
+                    '@keyframes ptrFadeIn { from { opacity:0; } to { opacity:1; } }'
+                ].join(' ');
                 document.head.appendChild(st);
             }
 
-            // ── Indicator element ───────────────────────────────────────────────
+            // ── Indicator element — grey starburst spinner ───────────────────────
+            // Replicates the native iOS pull-to-refresh indicator:
+            // a 32px grey spinner made of 12 radial lines (like a clock face),
+            // sitting in a white pill/circle, centered just below the header.
             const ptr = document.createElement('div');
             ptr.id = 'ptrIndicator';
-            ptr.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points=\"1 4 1 10 7 10\"></polyline><path d=\"M3.51 15a9 9 0 1 0 .49-4\"></path></svg>';
+
+            // Build 12 radial lines (starburst) as inline SVG — grey, like Image 1
+            ptr.innerHTML = '<svg id="ptrSpinSvg" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                + (function() {
+                    var lines = '';
+                    for (var i = 0; i < 12; i++) {
+                        var angle  = i * 30;
+                        var opacity = (0.2 + (i / 12) * 0.8).toFixed(2);
+                        // Each line: short inner segment to outer edge from center
+                        var rad    = (angle - 90) * Math.PI / 180;
+                        var x1     = (13 + Math.cos(rad) * 6).toFixed(2);
+                        var y1     = (13 + Math.sin(rad) * 6).toFixed(2);
+                        var x2     = (13 + Math.cos(rad) * 11).toFixed(2);
+                        var y2     = (13 + Math.sin(rad) * 11).toFixed(2);
+                        lines += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2
+                               + '" stroke="rgba(120,120,128,' + opacity + ')" stroke-width="2.2" stroke-linecap="round"/>';
+                    }
+                    return lines;
+                }())
+                + '</svg>';
+
             Object.assign(ptr.style, {
-                position:       'fixed',
-                top:            '70px',
-                left:           '50%',
-                transform:      'translateX(-50%) translateY(-80px)',
-                width:          '44px',
-                height:         '44px',
-                borderRadius:   '50%',
-                background:     'rgba(27,27,27,0.92)',
-                border:         '1px solid rgba(79,209,197,0.35)',
-                display:        'flex',
-                alignItems:     'center',
-                justifyContent: 'center',
-                zIndex:         '9999',
-                opacity:        '0',
-                transition:     'opacity 0.2s ease',
-                pointerEvents:  'none',
-                backdropFilter: 'blur(10px)',
+                position:        'fixed',
+                top:             '68px',
+                left:            '50%',
+                transform:       'translateX(-50%) translateY(-80px)',
+                width:           '36px',
+                height:          '36px',
+                borderRadius:    '50%',
+                background:      'rgba(255,255,255,0.92)',
+                boxShadow:       '0 2px 8px rgba(0,0,0,0.18)',
+                display:         'flex',
+                alignItems:      'center',
+                justifyContent:  'center',
+                zIndex:          '9999',
+                opacity:         '0',
+                transition:      'opacity 0.18s ease, transform 0.18s ease',
+                pointerEvents:   'none',
             });
             document.body.appendChild(ptr);
 
-            const svgEl   = ptr.querySelector('svg');
+            const svgEl    = ptr.querySelector('#ptrSpinSvg');
             const THRESHOLD = 72;
             let startY = 0, pulling = false, triggered = false;
 
-            function startSpin() { svgEl.style.animation = 'ptrSpin 0.7s linear infinite'; }
-            function hide()       { ptr.style.opacity = '0'; ptr.style.transform = 'translateX(-50%) translateY(-80px)'; svgEl.style.animation = 'none'; }
+            function startSpin() {
+                svgEl.style.animation = 'ptrSpin 0.75s linear infinite';
+            }
+            function hide() {
+                ptr.style.opacity   = '0';
+                ptr.style.transform = 'translateX(-50%) translateY(-80px)';
+                svgEl.style.animation = 'none';
+            }
 
-            // ── Cache bust + re-fetch for current page ──────────────────────────
+            // ── Cache bust + re-fetch — loaderOverlay suppressed during PTR ──────
             function refreshCurrentPage() {
                 const page = sessionStorage.getItem('lastLearnerPage') || 'home';
                 if (page === 'quiz_list.php')         window.learnerQuizCache          = null;
@@ -2160,6 +2192,11 @@ if (desktopToggle) {
                 if (page === 'grades')                window.learnerGradesCache        = null;
                 if (page === 'resources')             window.learnerResourcesCache     = null;
                 if (page === 'manual')                window.learnerManualCache        = null;
+
+                // Suppress the loaderOverlay so only the PTR spinner is visible
+                window._ptrRefreshing = true;
+                clearTimeout(window.loaderTimeout);
+                loader.style.display = 'none';
 
                 const fnMap = {
                     'quiz_list.php':         window.fetchQuizzes,
@@ -2172,6 +2209,9 @@ if (desktopToggle) {
                 const fn = fnMap[page];
                 if (typeof fn === 'function') fn();
                 else if (typeof window.loadLearnerHome === 'function') window.loadLearnerHome();
+
+                // Re-enable loaderOverlay after the fetch cycle completes
+                setTimeout(function() { window._ptrRefreshing = false; }, 1200);
             }
 
             // ── Touch handlers ──────────────────────────────────────────────────
@@ -2188,9 +2228,9 @@ if (desktopToggle) {
                 const deltaY = e.touches[0].clientY - startY;
                 if (deltaY <= 0) { pulling = false; return; }
 
-                const capped    = Math.min(deltaY, THRESHOLD * 1.5);
-                const progress  = Math.min(capped / THRESHOLD, 1);
-                const translateY = Math.min(capped * 0.4, 36);
+                const capped     = Math.min(deltaY, THRESHOLD * 1.5);
+                const progress   = Math.min(capped / THRESHOLD, 1);
+                const translateY = Math.min(capped * 0.4, 28);
 
                 ptr.style.opacity   = String(Math.min(progress * 1.5, 1));
                 ptr.style.transform = 'translateX(-50%) translateY(' + translateY + 'px)';
@@ -2207,13 +2247,38 @@ if (desktopToggle) {
                 if (triggered) {
                     setTimeout(function() {
                         refreshCurrentPage();
-                        setTimeout(hide, 700);
+                        setTimeout(hide, 900);
                     }, 150);
                 } else {
                     hide();
                 }
             }, { passive: true });
         })();
+
+        // ── Patch loaderOverlay show logic to respect PTR suppression ──────────
+        // Wrap the native display setter so that when a PTR refresh is in
+        // progress, the overlay cannot be made visible by the fetch functions.
+        (function patchLoaderForPTR() {
+            var origSet = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style');
+            // Lightweight approach: override on the specific element after DOM ready
+            var _loaderEl = document.getElementById('loaderOverlay');
+            if (!_loaderEl) return;
+            var _origDisplayDescriptor = Object.getOwnPropertyDescriptor(
+                CSSStyleDeclaration.prototype, 'display'
+            );
+            // Monkey-patch only this element's style.display
+            Object.defineProperty(_loaderEl.style, 'display', {
+                get: function() {
+                    return _origDisplayDescriptor.get.call(_loaderEl.style);
+                },
+                set: function(val) {
+                    // If a PTR refresh is running, block any attempt to show the overlay
+                    if (val === 'flex' && window._ptrRefreshing) return;
+                    _origDisplayDescriptor.set.call(_loaderEl.style, val);
+                },
+                configurable: true,
+            });
+        }());
     }
     // ─────────────────────────────────────────────────────────────────────
 });

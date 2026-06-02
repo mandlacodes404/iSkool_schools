@@ -714,7 +714,7 @@ iframe {
     pointer-events: all;
 }
 
-/* Orbital dots container */
+/* Orbital dots container — desktop default */
 .loader {
     width: 48px;
     height: 48px;
@@ -726,7 +726,7 @@ iframe {
     margin: 0;
 }
 
-/* Each dot orbits the center */
+/* Each dot orbits the center — desktop */
 .loader::before,
 .loader::after,
 .loader-dot3,
@@ -763,6 +763,46 @@ iframe {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── MOBILE LOADER OVERRIDE — replaces orbital dots with a blue arc spinner ── */
+@media (max-width: 768px) {
+    /* Make the overlay full-screen fixed on mobile so it sits
+       above the content area instead of being clipped inside it */
+    #loaderOverlay {
+        position: fixed;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(3px);
+        z-index: 8000;
+    }
+
+    /* Hide the version text on mobile */
+    .loader-version {
+        display: none;
+    }
+
+    /* Reset the orbital-dot container so it becomes the arc ring */
+    .loader {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3.5px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #4c8bf5;
+        background: none;
+        animation: mobileArcSpin 0.75s linear infinite;
+    }
+
+    /* Kill the orbital pseudo-elements and the extra dots on mobile */
+    .loader::before,
+    .loader::after,
+    .loader-dot3,
+    .loader-dot4 {
+        display: none;
+    }
+
+    @keyframes mobileArcSpin {
+        to { transform: rotate(360deg); }
+    }
+}
 
 @media (max-width: 768px) {
     body {
