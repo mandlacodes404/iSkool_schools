@@ -410,36 +410,40 @@ function renderAnnouncements(data) {
                 overflow: hidden;
                 margin: 0 0 16px;
             }
-            .lan-mobile-section-header {
-                padding: 12px 16px 6px;
-                font-size: 10px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+            .lan-mobile-folder-header {
                 display: flex;
                 align-items: center;
-                gap: 6px;
-            }
-            .lan-mobile-section-header--school {
-                color: #f28c38;
-                background: rgba(242,140,56,0.06);
-                border-bottom: 1px solid rgba(242,140,56,0.12);
-            }
-            .lan-mobile-section-header--teacher {
-                color: #f28c38;
-                background: rgba(242,140,56,0.04);
-                border-top: 1px solid rgba(242,140,56,0.1);
-                border-bottom: 1px solid rgba(242,140,56,0.1);
-            }
-            .lan-mobile-teacher-header {
-                padding: 8px 16px 4px 20px;
-                font-size: 10px;
-                font-weight: 600;
-                color: #555e6a;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
+                gap: 10px;
+                padding: 14px 16px;
                 background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
+                user-select: none;
             }
+            .lan-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .lan-mobile-folder-icon { flex-shrink: 0; }
+            .lan-mobile-folder-name {
+                flex: 1;
+                font-size: 13px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lan-mobile-folder-count {
+                font-size: 11px;
+                color: #8b949e;
+                flex-shrink: 0;
+            }
+            .lan-mobile-folder-chevron {
+                flex-shrink: 0;
+                color: #555e6a;
+                transition: transform 0.25s ease;
+            }
+            .lan-mobile-folder-chevron.open { transform: rotate(90deg); }
+            .lan-mobile-folder-body { display: block; }
+            .lan-mobile-folder-body.collapsed { display: none; }
             .lan-mobile-card {
                 display: flex;
                 align-items: center;
@@ -531,14 +535,21 @@ function renderAnnouncements(data) {
 
     // Mobile — School-wide section
     if (hasSchoolWide) {
+        const swGid = 'lan-mg-school';
         html += `
-            <div class="lan-mobile-section-header lan-mobile-section-header--school">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
+            <div class="lan-mobile-folder-header" onclick="toggleLanMobileFolder('${swGid}', this)">
+                <div class="lan-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <span class="lan-mobile-folder-name">School-wide</span>
+                <span class="lan-mobile-folder-count">${schoolWide.length} announcement${schoolWide.length !== 1 ? 's' : ''}</span>
+                <svg class="lan-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <polyline points="9 18 15 12 9 6"/>
                 </svg>
-                School-wide Announcements
-            </div>`;
+            </div>
+            <div class="lan-mobile-folder-body" id="${swGid}">`;
 
         schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
@@ -566,21 +577,29 @@ function renderAnnouncements(data) {
                 </div>`;
             mobileFlatIdx++;
         });
+        html += `</div>`; // close school folder body
     }
 
     // Mobile — Teacher section
     if (hasTeacher) {
-        html += `
-            <div class="lan-mobile-section-header lan-mobile-section-header--teacher">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-                From Teachers
-            </div>`;
-
+        let teacherGroupIdx = 0;
         for (const [teacher, items] of Object.entries(teacherData)) {
-            html += `<div class="lan-mobile-teacher-header">${escapeLearnerAnnouncementHtml(teacher)}</div>`;
+            const tGid = `lan-mg-teacher-${teacherGroupIdx}`;
+            html += `
+                <div class="lan-mobile-folder-header" onclick="toggleLanMobileFolder('${tGid}', this)">
+                    <div class="lan-mobile-folder-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
+                    <span class="lan-mobile-folder-count">${items.length} announcement${items.length !== 1 ? 's' : ''}</span>
+                    <svg class="lan-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </div>
+                <div class="lan-mobile-folder-body" id="${tGid}">`;
+            teacherGroupIdx++;
             items.forEach(ann => {
                 const isNew = new Date(ann.created_at) > sevenDaysAgo;
                 html += `
@@ -607,6 +626,7 @@ function renderAnnouncements(data) {
                     </div>`;
                 mobileFlatIdx++;
             });
+            html += `</div>`; // close teacher folder body
         }
     }
 
@@ -614,6 +634,15 @@ function renderAnnouncements(data) {
 
     apiArea.innerHTML = html;
 }
+
+window.toggleLanMobileFolder = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const chevron = headerEl.querySelector('.lan-mobile-folder-chevron');
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+};
 
 function escapeLearnerAnnouncementHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({

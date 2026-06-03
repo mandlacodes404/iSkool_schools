@@ -2725,7 +2725,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/quiz.js?v=5.5"></script>
 <script src="assets/js/learner/assignments.js?v=4.6"></script>
 <script src="assets/js/learner/resources.js?v=3.9"></script>
-<script src="assets/js/learner/announcements.js?v=3.7"></script>
+<script src="assets/js/learner/announcements.js?v=3.8"></script>
 <script src="assets/js/learner/grades.js?v=2.9"></script>
 <script src="assets/js/learner/evaluations.js?v=2.1"></script>
 <script src="assets/js/learner/discussions.js?v=5.7"></script>
