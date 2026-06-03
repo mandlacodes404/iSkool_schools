@@ -516,26 +516,30 @@ function renderQuizCards(groupedData) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 14px 16px;
+                padding: 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
                 user-select: none;
             }
-            .lqz-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .lqz-mobile-folder-header:active { background: rgba(253,214,99,0.06); }
             .lqz-mobile-folder-icon { flex-shrink: 0; }
             .lqz-mobile-folder-name {
                 flex: 1;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: 16px;
+                font-weight: 800;
                 color: #e2e8f0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .lqz-mobile-folder-count {
-                font-size: 11px;
+                font-size: 12px;
                 color: #8b949e;
+                font-weight: 600;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 20px;
                 flex-shrink: 0;
             }
             .lqz-mobile-folder-chevron {
@@ -556,7 +560,7 @@ function renderQuizCards(groupedData) {
                 cursor: pointer;
             }
             .lqz-mobile-row:last-child { border-bottom: none; }
-            .lqz-mobile-row:active { background: rgba(255,255,255,0.04); }
+            .lqz-mobile-row:active { background: rgba(253,214,99,0.06); }
             .lqz-mobile-row-icon {
                 width: 32px;
                 height: 32px;
@@ -571,7 +575,7 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
                 font-size: 14px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;
                 white-space: nowrap;
@@ -697,7 +701,7 @@ function renderQuizCards(groupedData) {
                     </svg>
                 </div>
                 <span class="lqz-mobile-folder-name">${escapeHtml(subject)}</span>
-                <span class="lqz-mobile-folder-count">${quizzes.length} quiz${quizzes.length !== 1 ? 'zes' : ''}</span>
+                <span class="lqz-mobile-folder-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
                 <svg class="lqz-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
