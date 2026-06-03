@@ -455,7 +455,6 @@ function renderGrades(data) {
     #gradesReportFrame { flex: 1; width: 100%; border: none; background: #0d1117; }
 
     @media (max-width: 768px) {
-        .grades-search { width: 140px; }
         .grades-wrap {
             max-width: none;
             padding: 0 0 64px;
@@ -466,7 +465,41 @@ function renderGrades(data) {
         }
         .grades-header-right {
             width: 100%;
-            justify-content: space-between;
+            display: block;
+        }
+        .grades-mobile-search-wrap {
+            display: block;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .grades-mobile-search-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        .grades-mobile-search-wrap .grades-search {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 9px 14px 9px 36px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            font-size: 13px;
+            font-family: 'Nunito', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .grades-mobile-search-wrap .grades-search:focus { outline: none; border-color: #68d391; }
+        .grades-mobile-search-wrap .grades-search::placeholder { color: #555e6a; }
+        .grades-report-btn {
+            width: 100%;
+            min-height: 35px;
+            box-sizing: border-box;
+            justify-content: center;
+            padding: 9px 14px;
         }
         .grades-mobile-layout .subject-card {
             background: #1a1919;
@@ -562,8 +595,13 @@ function renderGrades(data) {
         <div class="grades-header">
             <div class="grades-header-right">
                 ${groups.length > 0 ? `
-                <input type="text" class="grades-search" id="gradesSearch"
-                    placeholder="Search quiz..." oninput="gradesSearch(this.value)">
+                <div class="grades-mobile-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="grades-search" id="gradesSearch"
+                        placeholder="Search quiz..." oninput="gradesSearch(this.value)">
+                </div>
                 ` : ''}
                 <button class="grades-report-btn" onclick="generateGradesReport('${targetEmail}')">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">

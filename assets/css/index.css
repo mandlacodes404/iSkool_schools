@@ -117,7 +117,8 @@ body {
         }
         .branding {
             font-size: 13px;
-            bottom: 40px;
+            bottom: 64px;
+            color: #596270;
         }
         .branding span:nth-child(1) {
             font-size: 13px;
@@ -140,7 +141,8 @@ body {
         }
         .branding {
             font-size: 12px;
-            bottom: 36px;
+            bottom: 60px;
+            color: #596270;
         }
         .branding span:nth-child(1) {
             font-size: 12px;

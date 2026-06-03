@@ -86,17 +86,20 @@ function saveSyllabusPageState() {
         activeTerm:  window._syllabusActiveTerm ?? null,
         scrollTop:   mainContent ? mainContent.scrollTop : 0,
     };
-    sessionStorage.setItem('syllabusPageState', JSON.stringify(state));
+    if (window.learnerPageState) window.learnerPageState.set('syllabus', state);
+    else sessionStorage.setItem('syllabusPageState', JSON.stringify(state));
 }
 
 function restoreSyllabusPageState() {
-    const raw = sessionStorage.getItem('syllabusPageState');
-    if (!raw) return;
     try {
-        const state = JSON.parse(raw);
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('syllabus')
+            : JSON.parse(sessionStorage.getItem('syllabusPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
         if (state.activeTerm !== null && state.activeTerm !== undefined) {
             requestAnimationFrame(() => {
-                const tab = document.querySelector(`.syl-tab[data-term="${state.activeTerm}"]`);
+                const tab = document.getElementById(`syl-mob-tab-${state.activeTerm}`)
+                    || document.getElementById(`syl-dt-tab-${state.activeTerm}`);
                 if (tab) tab.click();
                 const mainContent = document.querySelector('.main-content');
                 if (mainContent) mainContent.scrollTop = state.scrollTop || 0;

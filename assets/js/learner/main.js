@@ -3,6 +3,50 @@
  * This handles shared components like the Global Document Viewer.
  */
 
+(function ensureLearnerPageState() {
+    const existing = window.learnerPageState || {};
+    const prefix = existing.prefix || 'learnerPageState:';
+
+    window.learnerPageState = {
+        prefix,
+        get(page) {
+            if (typeof existing.get === 'function') {
+                const value = existing.get(page);
+                if (value && typeof value === 'object') return value;
+            }
+            try {
+                const raw = sessionStorage.getItem(prefix + page) || sessionStorage.getItem(page);
+                const parsed = raw ? JSON.parse(raw) : {};
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch (e) {
+                return {};
+            }
+        },
+        set(page, state) {
+            if (typeof existing.set === 'function') {
+                existing.set(page, state || {});
+                return;
+            }
+            try {
+                sessionStorage.setItem(prefix + page, JSON.stringify(state || {}));
+            } catch (e) {}
+        },
+        update(page, patch) {
+            this.set(page, Object.assign({}, this.get(page), patch || {}));
+        },
+        clear(page) {
+            if (typeof existing.clear === 'function') {
+                existing.clear(page);
+                return;
+            }
+            try {
+                sessionStorage.removeItem(prefix + page);
+                sessionStorage.removeItem(page);
+            } catch (e) {}
+        }
+    };
+})();
+
 window.viewDocument = function(url, title) {
     const viewer = document.getElementById('globalViewer');
     const content = document.getElementById('viewerContent');

@@ -15,6 +15,36 @@ let currentDiscId            = null;
 let lastReplyId              = 0;
 let lastSeenDateKey          = null;
 
+function saveDiscussionPageState(patch = {}) {
+    const list = document.getElementById('disc-sidebar-list');
+    const mainContent = document.querySelector('.main-content');
+    const state = Object.assign({
+        activeDiscId: currentDiscId,
+        sidebarScroll: list ? list.scrollTop : 0,
+        mainScroll: mainContent ? mainContent.scrollTop : 0,
+    }, patch);
+    if (window.learnerPageState) window.learnerPageState.set('discussions', state);
+    else sessionStorage.setItem('discussionPageState', JSON.stringify(state));
+}
+
+function restoreDiscussionPageState() {
+    try {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('discussions')
+            : JSON.parse(sessionStorage.getItem('discussionPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
+        requestAnimationFrame(() => {
+            const list = document.getElementById('disc-sidebar-list');
+            const mainContent = document.querySelector('.main-content');
+            if (list) list.scrollTop = state.sidebarScroll || 0;
+            if (mainContent) mainContent.scrollTop = state.mainScroll || 0;
+            if (isDesktop() && state.activeDiscId) {
+                window.loadDiscussionThread(state.activeDiscId);
+            }
+        });
+    } catch (e) { /* ignore bad state */ }
+}
+
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
@@ -148,6 +178,7 @@ window.fetchDiscussions = async function() {
     if (window.discussionCache) {
         renderDiscussions(window.discussionCache);
         if (loader) loader.style.display = 'none';
+        restoreDiscussionPageState();
         return;
     }
 
@@ -159,6 +190,7 @@ window.fetchDiscussions = async function() {
         const data = await res.json();
         window.discussionCache = data;
         renderDiscussions(data);
+        restoreDiscussionPageState();
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading discussions.</p>`;
     } finally {
@@ -465,6 +497,10 @@ function renderSidebarList(data) {
             <div class="dsk-item-preview">${escHtml(d.preview)}</div>
         </div>`
     ).join('');
+    if (list.dataset.discStateWired !== '1') {
+        list.dataset.discStateWired = '1';
+        list.addEventListener('scroll', () => saveDiscussionPageState(), { passive: true });
+    }
 }
 
 function renderMobileList(data) {
@@ -513,6 +549,11 @@ function renderMobileList(data) {
     }
 
     apiArea.innerHTML = html;
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent && mainContent.dataset.discStateWired !== '1') {
+        mainContent.dataset.discStateWired = '1';
+        mainContent.addEventListener('scroll', () => saveDiscussionPageState(), { passive: true });
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -521,6 +562,7 @@ function renderMobileList(data) {
 window.loadDiscussionThread = async function(discId) {
     stopDiscPolling();
     window._inDiscussionThread = true;
+    saveDiscussionPageState({ activeDiscId: discId });
 
     if (isDesktop()) {
         if (window.configureHeader) window.configureHeader({ title: 'Discussions', mode: 'standard' });

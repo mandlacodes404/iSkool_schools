@@ -3,6 +3,52 @@ window.homeDataCache     = null;
 window.learnerCalState   = { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
 window.learnerCalEvents  = [];
 
+function saveManualPageState(patch = {}) {
+    const mainContent = document.querySelector('.main-content');
+    const state = Object.assign({
+        calendarMonth: window.learnerCalState.month,
+        calendarYear: window.learnerCalState.year,
+        scrollTop: mainContent ? mainContent.scrollTop : 0,
+    }, patch);
+    if (window.learnerPageState) window.learnerPageState.set('manual', state);
+    else sessionStorage.setItem('manualPageState', JSON.stringify(state));
+}
+
+function getManualPageState() {
+    try {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('manual')
+            : JSON.parse(sessionStorage.getItem('manualPageState') || '{}');
+        return state && typeof state === 'object' ? state : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function restoreManualPageState() {
+    const state = getManualPageState();
+    if (!state || Object.keys(state).length === 0) return;
+    if (Number.isFinite(state.calendarMonth) && Number.isFinite(state.calendarYear)) {
+        window.learnerCalState = {
+            month: state.calendarMonth,
+            year: state.calendarYear
+        };
+    }
+    requestAnimationFrame(() => {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent && Number.isFinite(state.scrollTop)) mainContent.scrollTop = state.scrollTop;
+    });
+}
+
+function wireManualScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.manualScrollState === '1') return;
+    mainContent.dataset.manualScrollState = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveManualPageState();
+    }, { passive: true });
+}
+
 window.loadManual = async function(containerId = 'api-content-area') {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
@@ -73,6 +119,9 @@ window.loadManual = async function(containerId = 'api-content-area') {
 
 // Called after home HTML is injected — loads calendar on desktop only, then kicks off prefetches
 function afterHomeRender() {
+    restoreManualPageState();
+    wireManualScrollState();
+
     if (window.innerWidth > 768) {
         window.loadLearnerCalendar(
             window.learnerCalState.month,
@@ -729,6 +778,7 @@ window.learnerCalPrev = function() {
     month--;
     if (month < 1) { month = 12; year--; }
     window.learnerCalState = { month, year };
+    saveManualPageState({ calendarMonth: month, calendarYear: year });
     window.loadLearnerCalendar(month, year);
 };
 
@@ -737,6 +787,7 @@ window.learnerCalNext = function() {
     month++;
     if (month > 12) { month = 1; year++; }
     window.learnerCalState = { month, year };
+    saveManualPageState({ calendarMonth: month, calendarYear: year });
     window.loadLearnerCalendar(month, year);
 };
 

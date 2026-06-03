@@ -87,22 +87,41 @@ function saveAnnouncementPageState() {
     const state = {
         selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
+        openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
     };
-    sessionStorage.setItem('announcementPageState', JSON.stringify(state));
+    if (window.learnerPageState) window.learnerPageState.set('announcements', state);
+    else sessionStorage.setItem('announcementPageState', JSON.stringify(state));
 }
 
 function restoreAnnouncementPageState() {
-    const raw = sessionStorage.getItem('announcementPageState');
-    if (!raw) return;
     try {
-        const state = JSON.parse(raw);
-        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-            requestAnimationFrame(() => {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('announcements')
+            : JSON.parse(sessionStorage.getItem('announcementPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
+        requestAnimationFrame(() => {
+            if (state.mobileSearch) {
+                const input = document.getElementById('lanMobileSearch');
+                if (input) {
+                    input.value = state.mobileSearch;
+                    window.lanMobileSearch(state.mobileSearch);
+                }
+            }
+            if (Array.isArray(state.openFolders)) {
+                document.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
+                    const open = state.openFolders.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const chev = body.previousElementSibling?.querySelector('.lan-mobile-folder-chevron');
+                    if (chev) chev.classList.toggle('open', open);
+                });
+            }
+            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerAnnouncement(state.selectedIdx);
                 const sidebar = document.querySelector('.lan-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
-            });
-        }
+            }
+        });
     } catch (e) { /* ignore bad state */ }
 }
 
@@ -681,6 +700,7 @@ function renderAnnouncements(data) {
 }
 
 window.lanMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('announcements', { mobileSearch: val });
     const term = val.toLowerCase().trim();
     document.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
@@ -710,6 +730,7 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveAnnouncementPageState();
 };
 
 function escapeLearnerAnnouncementHtml(value) {

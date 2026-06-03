@@ -10,6 +10,29 @@ window.learnerCalendarPageState = {
     events: []
 };
 
+function saveLearnerCalendarState() {
+    const mainContent = document.querySelector('.main-content');
+    const { month, year } = window.learnerCalendarPageState;
+    const state = {
+        month,
+        year,
+        scrollTop: mainContent ? mainContent.scrollTop : 0,
+    };
+    if (window.learnerPageState) window.learnerPageState.set('learner_calendar', state);
+    else sessionStorage.setItem('learnerCalendarPageState', JSON.stringify(state));
+}
+
+function getSavedLearnerCalendarState() {
+    try {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('learner_calendar')
+            : JSON.parse(sessionStorage.getItem('learnerCalendarPageState') || '{}');
+        return state && typeof state === 'object' ? state : {};
+    } catch (e) {
+        return {};
+    }
+}
+
 // ── ENTRY POINT ──
 window.fetchLearnerCalendar = async function () {
     sessionStorage.setItem('lastLearnerPage', 'learner_calendar');
@@ -31,8 +54,14 @@ window.fetchLearnerCalendar = async function () {
         window.configureHeader({ title: 'Calendar', mode: 'detail' });
     }
 
-    const { month, year } = window.learnerCalendarPageState;
+    const savedState = getSavedLearnerCalendarState();
+    const month = savedState.month || window.learnerCalendarPageState.month;
+    const year = savedState.year || window.learnerCalendarPageState.year;
     await renderLearnerCalendarPage(month, year);
+    requestAnimationFrame(() => {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent && Number.isFinite(savedState.scrollTop)) mainContent.scrollTop = savedState.scrollTop;
+    });
 };
 
 // ── MAIN RENDER ──
@@ -50,6 +79,7 @@ async function renderLearnerCalendarPage(month, year) {
         window.learnerCalendarPageState.events = data.events || [];
         window.learnerCalendarPageState.month  = month;
         window.learnerCalendarPageState.year   = year;
+        saveLearnerCalendarState();
     } catch (e) {
         window.learnerCalendarPageState.events = [];
     }
@@ -555,6 +585,7 @@ window.learnerCalPagePrev = async function () {
     month--;
     if (month < 1) { month = 12; year--; }
     await renderLearnerCalendarPage(month, year);
+    saveLearnerCalendarState();
 };
 
 window.learnerCalPageNext = async function () {
@@ -562,6 +593,7 @@ window.learnerCalPageNext = async function () {
     month++;
     if (month > 12) { month = 1; year++; }
     await renderLearnerCalendarPage(month, year);
+    saveLearnerCalendarState();
 };
 
 // ══════════════════════════════════════════════════════════════

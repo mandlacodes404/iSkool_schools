@@ -116,22 +116,41 @@ function saveAssignmentPageState() {
     const state = {
         selectedIdx:   window._learnerAssignmentSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
+        openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
     };
-    sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
+    if (window.learnerPageState) window.learnerPageState.set('assignments', state);
+    else sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
 }
 
 function restoreAssignmentPageState() {
-    const raw = sessionStorage.getItem('assignmentPageState');
-    if (!raw) return;
     try {
-        const state = JSON.parse(raw);
-        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-            requestAnimationFrame(() => {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('assignments')
+            : JSON.parse(sessionStorage.getItem('assignmentPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
+        requestAnimationFrame(() => {
+            if (state.mobileSearch) {
+                const input = document.getElementById('lasMobileSearch');
+                if (input) {
+                    input.value = state.mobileSearch;
+                    window.lasMobileSearch(state.mobileSearch);
+                }
+            }
+            if (Array.isArray(state.openFolders)) {
+                document.querySelectorAll('.las-mobile-folder-body').forEach(body => {
+                    const open = state.openFolders.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const chev = body.previousElementSibling?.querySelector('.las-mobile-folder-chevron');
+                    if (chev) chev.classList.toggle('open', open);
+                });
+            }
+            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerAssignment(state.selectedIdx);
                 const sidebar = document.querySelector('.las-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
-            });
-        }
+            }
+        });
     } catch (e) { /* ignore bad state */ }
 }
 
@@ -573,9 +592,11 @@ window.toggleLasMobileFolder = function(id, headerEl) {
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveAssignmentPageState();
 };
 
 window.lasMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('assignments', { mobileSearch: val });
     const term = val.toLowerCase().trim();
     document.querySelectorAll('.las-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;

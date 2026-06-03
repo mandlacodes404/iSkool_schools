@@ -3,6 +3,37 @@
  * Fetches the static manual and injects it into the dashboard
  */
 
+function saveLearnerManualPageState() {
+    const mainContent = document.querySelector('.main-content');
+    const state = {
+        scrollTop: mainContent ? mainContent.scrollTop : 0,
+    };
+    if (window.learnerPageState) window.learnerPageState.set('learner_manual', state);
+    else sessionStorage.setItem('learnerManualPageState', JSON.stringify(state));
+}
+
+function restoreLearnerManualPageState() {
+    try {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('learner_manual')
+            : JSON.parse(sessionStorage.getItem('learnerManualPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
+        requestAnimationFrame(() => {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && Number.isFinite(state.scrollTop)) mainContent.scrollTop = state.scrollTop;
+        });
+    } catch (e) { /* ignore bad state */ }
+}
+
+function wireLearnerManualScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.learnerManualScrollState === '1') return;
+    mainContent.dataset.learnerManualScrollState = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveLearnerManualPageState();
+    }, { passive: true });
+}
+
 window.fetchManual = async function() {
     // 1. Set State and Update UI Highlighting
     localStorage.setItem("lastLearnerPage", "learner_manual.php");
@@ -46,6 +77,8 @@ window.fetchManual = async function() {
 
         // 8. Inject the HTML Content
         apiArea.innerHTML = bodyContent;
+        restoreLearnerManualPageState();
+        wireLearnerManualScrollState();
 
     } catch (error) {
         console.error("Manual Load Error:", error);

@@ -822,7 +822,7 @@ iframe {
     }
 
     .sidebar-links {
-        margin-top: 50px;
+        margin-top: 56px;
         padding-bottom: 12px;
     }
 
@@ -949,7 +949,7 @@ iframe {
     }
 
     .sidebar-links {
-        margin-top: 16px !important;
+        margin-top: 34px !important;
     }
     /* 1. Make the Profile Area "Pop" */
     .profile-picture-wrapper img.learner-avatar {
@@ -1146,7 +1146,7 @@ iframe {
     opacity: 0;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .sidebar-links {
         margin-top: 45px;
     }

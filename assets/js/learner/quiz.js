@@ -13,6 +13,19 @@ window.learnerQuizCache          = null;
 window.quizInstructionsCache     = {};
 window.learnerQuizPrefetchPromise = null;
 
+const LEARNER_QUIZ_PENCIL_SVG = `
+    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>`;
+
+function learnerQuizPencilSvg(width = 20, height = 20, color = 'currentColor') {
+    return LEARNER_QUIZ_PENCIL_SVG
+        .replace('width="20"', `width="${width}"`)
+        .replace('height="20"', `height="${height}"`)
+        .replace('stroke="currentColor"', `stroke="${color}"`);
+}
+
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
 // Called from the dashboard ~1 500 ms after home loads.
@@ -121,22 +134,41 @@ function saveQuizPageState() {
     const state = {
         selectedIdx:  window._learnerQuizSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mobileSearch: document.getElementById('lqzMobileSearch')?.value || '',
+        openFolders: Array.from(document.querySelectorAll('.lqz-mobile-folder-body:not(.collapsed)')).map(el => el.id),
     };
-    sessionStorage.setItem('quizPageState', JSON.stringify(state));
+    if (window.learnerPageState) window.learnerPageState.set('quiz', state);
+    else sessionStorage.setItem('quizPageState', JSON.stringify(state));
 }
 
 function restoreQuizPageState() {
-    const raw = sessionStorage.getItem('quizPageState');
-    if (!raw) return;
     try {
-        const state = JSON.parse(raw);
-        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-            requestAnimationFrame(() => {
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('quiz')
+            : JSON.parse(sessionStorage.getItem('quizPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
+        requestAnimationFrame(() => {
+            if (state.mobileSearch) {
+                const input = document.getElementById('lqzMobileSearch');
+                if (input) {
+                    input.value = state.mobileSearch;
+                    window.lqzMobileSearch(state.mobileSearch);
+                }
+            }
+            if (Array.isArray(state.openFolders)) {
+                document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
+                    const open = state.openFolders.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const chev = body.previousElementSibling?.querySelector('.lqz-mobile-folder-chevron');
+                    if (chev) chev.classList.toggle('open', open);
+                });
+            }
+            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerQuiz(state.selectedIdx);
                 const sidebar = document.querySelector('.lqz-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
-            });
-        }
+            }
+        });
     } catch (e) { /* ignore bad state */ }
 }
 
@@ -317,11 +349,7 @@ function renderQuizCards(groupedData) {
                 <div class="lqz-sidebar-item" id="lqz-sidebar-${flatIdx}"
                     onclick="selectDesktopLearnerQuiz(${flatIdx})">
                     <div class="lqz-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                        </svg>
+                        ${learnerQuizPencilSvg(16, 16, '#4fd1c5')}
                     </div>
                     <div class="lqz-sidebar-item-info">
                         <div class="lqz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
@@ -636,11 +664,7 @@ function renderQuizCards(groupedData) {
             </div>
             <div class="lqz-main-panel" id="lqz-main-panel">
                 <div class="lqz-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#fdd663" stroke-width="1.5" fill="none">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
+                    ${learnerQuizPencilSvg(48, 48, '#fdd663').replace('stroke-width="2"', 'stroke-width="1.5"')}
                     <p>Select a quiz from the left</p>
                 </div>
             </div>
@@ -749,11 +773,7 @@ function renderQuizCards(groupedData) {
             html += `
                 <div class="lqz-mobile-row" ${rowAttrs} data-title="${escapeHtml(quiz.title).toLowerCase()}">
                     <div class="lqz-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                        </svg>
+                        ${learnerQuizPencilSvg(20, 20, '#fdd663')}
                     </div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
@@ -861,6 +881,7 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
 };
 
 window.lqzMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('quiz', { mobileSearch: val });
     const term = val.toLowerCase().trim();
     document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
@@ -893,6 +914,7 @@ window.toggleLqzMobileFolder = function(id, headerEl) {
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveQuizPageState();
 };
 
 function startQuizCountdowns() {

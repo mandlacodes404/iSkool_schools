@@ -28,14 +28,16 @@ function saveEvaluationPageState() {
         selectedIdx:   window._learnerEvaluationSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
     };
-    sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
+    if (window.learnerPageState) window.learnerPageState.set('evaluations', state);
+    else sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
 }
 
 function restoreEvaluationPageState() {
-    const raw = sessionStorage.getItem('evaluationPageState');
-    if (!raw) return;
     try {
-        const state = JSON.parse(raw);
+        const state = window.learnerPageState
+            ? window.learnerPageState.get('evaluations')
+            : JSON.parse(sessionStorage.getItem('evaluationPageState') || '{}');
+        if (!state || Object.keys(state).length === 0) return;
         if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
             requestAnimationFrame(() => {
                 window.selectDesktopLearnerEvaluation(state.selectedIdx);
