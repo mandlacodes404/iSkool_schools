@@ -353,15 +353,40 @@ function renderAssignmentCards(groupedData) {
                 overflow: hidden;
                 margin: 0 0 16px;
             }
-            .las-mobile-teacher-header {
-                padding: 16px 16px 6px;
-                font-size: 11px;
-                font-weight: 600;
-                color: #a78bfa;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+            .las-mobile-folder-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 14px 16px;
                 background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
+                user-select: none;
             }
+            .las-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .las-mobile-folder-icon { flex-shrink: 0; }
+            .las-mobile-folder-name {
+                flex: 1;
+                font-size: 13px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .las-mobile-folder-count {
+                font-size: 11px;
+                color: #8b949e;
+                flex-shrink: 0;
+            }
+            .las-mobile-folder-chevron {
+                flex-shrink: 0;
+                color: #555e6a;
+                transition: transform 0.25s ease;
+            }
+            .las-mobile-folder-chevron.open { transform: rotate(90deg); }
+            .las-mobile-folder-body { display: block; }
+            .las-mobile-folder-body.collapsed { display: none; }
             .las-mobile-row {
                 display: flex;
                 align-items: center;
@@ -439,8 +464,24 @@ function renderAssignmentCards(groupedData) {
 
     let mobileFlatIdx = 0;
 
+    let mobileGroupIdx = 0;
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        html += `<div class="las-mobile-teacher-header">${escapeLearnerAssignmentHtml(teacher)}</div>`;
+        const gid = `las-mg-${mobileGroupIdx}`;
+        html += `
+            <div class="las-mobile-folder-header" onclick="toggleLasMobileFolder('${gid}', this)">
+                <div class="las-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <span class="las-mobile-folder-name">${escapeLearnerAssignmentHtml(teacher)}</span>
+                <span class="las-mobile-folder-count">${tasks.length} assignment${tasks.length !== 1 ? 's' : ''}</span>
+                <svg class="las-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>
+            <div class="las-mobile-folder-body" id="${gid}">`;
+        mobileGroupIdx++;
 
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
@@ -473,12 +514,22 @@ function renderAssignmentCards(groupedData) {
                 </div>`;
             mobileFlatIdx++;
         });
+        html += `</div>`; // close .las-mobile-folder-body
     }
 
     html += `</div>`; // close .las-mobile-list
 
     apiArea.innerHTML = html;
 }
+
+window.toggleLasMobileFolder = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const chevron = headerEl.querySelector('.las-mobile-folder-chevron');
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+};
 
 function escapeLearnerAssignmentHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({

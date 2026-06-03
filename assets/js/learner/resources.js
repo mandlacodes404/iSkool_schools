@@ -368,15 +368,40 @@ function renderResourceCards(data) {
                 overflow: hidden;
                 margin: 0 0 16px;
             }
-            .lrs-mobile-teacher-header {
-                padding: 16px 16px 6px;
-                font-size: 11px;
-                font-weight: 600;
-                color: #f28c38;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+            .lrs-mobile-folder-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 14px 16px;
                 background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                cursor: pointer;
+                user-select: none;
             }
+            .lrs-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .lrs-mobile-folder-icon { flex-shrink: 0; }
+            .lrs-mobile-folder-name {
+                flex: 1;
+                font-size: 13px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lrs-mobile-folder-count {
+                font-size: 11px;
+                color: #8b949e;
+                flex-shrink: 0;
+            }
+            .lrs-mobile-folder-chevron {
+                flex-shrink: 0;
+                color: #555e6a;
+                transition: transform 0.25s ease;
+            }
+            .lrs-mobile-folder-chevron.open { transform: rotate(90deg); }
+            .lrs-mobile-folder-body { display: block; }
+            .lrs-mobile-folder-body.collapsed { display: none; }
             .lrs-mobile-row {
                 display: flex;
                 align-items: center;
@@ -442,8 +467,24 @@ function renderResourceCards(data) {
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="lrs-mobile-list">`;
 
+    let mobileGroupIdx = 0;
     for (const [teacher, files] of Object.entries(data)) {
-        html += `<div class="lrs-mobile-teacher-header">${teacher}</div>`;
+        const gid = `lrs-mg-${mobileGroupIdx}`;
+        html += `
+            <div class="lrs-mobile-folder-header" onclick="toggleLrsMobileFolder('${gid}', this)">
+                <div class="lrs-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <span class="lrs-mobile-folder-name">${teacher}</span>
+                <span class="lrs-mobile-folder-count">${files.length} file${files.length !== 1 ? 's' : ''}</span>
+                <svg class="lrs-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>
+            <div class="lrs-mobile-folder-body" id="${gid}">`;
+        mobileGroupIdx++;
         files.forEach(file => {
             const isVideo = file.resource_type === 'video';
 
@@ -488,6 +529,7 @@ function renderResourceCards(data) {
                     </div>`;
             }
         });
+        html += `</div>`; // close .lrs-mobile-folder-body
     }
 
     html += `</div>`; // close .lrs-mobile-list
@@ -498,6 +540,15 @@ function renderResourceCards(data) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT RESOURCE (inline preview)
 // ─────────────────────────────────────────────
+window.toggleLrsMobileFolder = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const chevron = headerEl.querySelector('.lrs-mobile-folder-chevron');
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+};
+
 window.selectDesktopLearnerResource = function(flatIdx) {
     window._learnerResourceSelectedIdx = flatIdx;
     saveResourcePageState();
