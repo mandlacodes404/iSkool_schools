@@ -443,6 +443,37 @@ function renderResourceCards(data) {
                 flex-shrink: 0;
                 color: #30363d;
             }
+
+            /* ── MOBILE SEARCH BAR ── */
+            @media (max-width: 899px) {
+                .lrs-mobile-search-wrap {
+                    display: block;
+                    margin-bottom: 10px;
+                    position: relative;
+                }
+                .lrs-mobile-search-wrap svg {
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    opacity: 0.4;
+                }
+                .lrs-mobile-search {
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 9px 14px 9px 36px;
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: #e2e8f0;
+                    font-size: 13px;
+                    font-family: 'Nunito', sans-serif;
+                    transition: border-color 0.2s;
+                }
+                .lrs-mobile-search:focus { outline: none; border-color: #f28c38; }
+                .lrs-mobile-search::placeholder { color: #555e6a; }
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -464,8 +495,20 @@ function renderResourceCards(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST ═══ -->
-        <div class="lrs-mobile-list">`;
+        <!-- ═══ MOBILE LIST ═══ -->`;
+
+    if (Object.keys(data).length > 0) {
+        html += `
+        <div class="lrs-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
+                placeholder="Search resources..." oninput="lrsMobileSearch(this.value)">
+        </div>`;
+    }
+
+    html += `<div class="lrs-mobile-list">`;
 
     let mobileGroupIdx = 0;
     for (const [teacher, files] of Object.entries(data)) {
@@ -515,6 +558,7 @@ function renderResourceCards(data) {
                 const icon = getFileIcon(file.ext, false);
                 html += `
                     <div class="lrs-mobile-row"
+                         data-title="${file.title.toLowerCase()}"
                          onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
@@ -805,6 +849,30 @@ window.selectDesktopLearnerResource = function(flatIdx) {
         </div>
 
         ${previewHtml}`;
+};
+
+window.lrsMobileSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lrs-mobile-folder-body').forEach(body => {
+        const header = body.previousElementSibling;
+        const folderName = header ? header.querySelector('.lrs-mobile-folder-name').textContent.toLowerCase() : '';
+        const rows = body.querySelectorAll('.lrs-mobile-row, .lrs-mobile-video-card');
+        let visible = 0;
+        rows.forEach(row => {
+            const titleEl = row.querySelector('.lrs-mobile-row-title, .lrs-mobile-video-title');
+            const title = (row.dataset.title || (titleEl ? titleEl.textContent : '')).toLowerCase();
+            const show = !term || title.includes(term) || folderName.includes(term);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header ? header.querySelector('.lrs-mobile-folder-chevron') : null;
+            if (chev) chev.classList.add('open');
+        }
+    });
 };
 
 function getFileIcon(ext, isVideo = false) {
