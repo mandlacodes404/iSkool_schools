@@ -595,6 +595,37 @@ function renderQuizCards(groupedData) {
                 flex-shrink: 0;
                 white-space: nowrap;
             }
+
+            /* ── MOBILE SEARCH BAR ── */
+            @media (max-width: 899px) {
+                .lqz-mobile-search-wrap {
+                    display: block;
+                    margin-bottom: 10px;
+                    position: relative;
+                }
+                .lqz-mobile-search-wrap svg {
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    opacity: 0.4;
+                }
+                .lqz-mobile-search {
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 9px 14px 9px 36px;
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: #e2e8f0;
+                    font-size: 13px;
+                    font-family: 'Nunito', sans-serif;
+                    transition: border-color 0.2s;
+                }
+                .lqz-mobile-search:focus { outline: none; border-color: #fdd663; }
+                .lqz-mobile-search::placeholder { color: #555e6a; }
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -615,8 +646,21 @@ function renderQuizCards(groupedData) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
-        <div class="lqz-mobile-list">`;
+        <!-- ═══ MOBILE LIST (unchanged) ═══ -->`;
+
+    // Mobile search bar (rendered outside the card so it spans full width)
+    if (Object.keys(groupedData).length > 0) {
+        html += `
+        <div class="lqz-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="lqz-mobile-search" id="lqzMobileSearch"
+                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)">
+        </div>`;
+    }
+
+    html += `<div class="lqz-mobile-list">`;
 
     let mobileGroupIdx = 0;
     for (const [subject, quizzes] of Object.entries(groupedData)) {
@@ -703,7 +747,7 @@ function renderQuizCards(groupedData) {
                 : '';
 
             html += `
-                <div class="lqz-mobile-row" ${rowAttrs}>
+                <div class="lqz-mobile-row" ${rowAttrs} data-title="${escapeHtml(quiz.title).toLowerCase()}">
                     <div class="lqz-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -814,6 +858,32 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
 
     // Kick off countdown if needed
     startQuizCountdowns();
+};
+
+window.lqzMobileSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
+        const header = body.previousElementSibling;
+        const folderName = header ? header.querySelector('.lqz-mobile-folder-name').textContent.toLowerCase() : '';
+        const rows = body.querySelectorAll('.lqz-mobile-row');
+        let visible = 0;
+        rows.forEach(row => {
+            const title = (row.dataset.title || '');
+            const show = !term || title.includes(term) || folderName.includes(term);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        // Show/hide entire folder based on matches
+        const folderWrap = header ? header.parentElement : null;
+        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        // Keep folder open while searching
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header ? header.querySelector('.lqz-mobile-folder-chevron') : null;
+            if (chev) chev.classList.add('open');
+        }
+    });
 };
 
 window.toggleLqzMobileFolder = function(id, headerEl) {
