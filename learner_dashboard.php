@@ -2131,7 +2131,7 @@ if (desktopToggle) {
             ptr.id = 'ptrIndicator';
 
             // Build 12 radial lines (starburst) as inline SVG — grey, like Image 1
-            ptr.innerHTML = '<svg id="ptrSpinSvg" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            ptr.innerHTML = '<svg id="ptrSpinSvg" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">'
                 + (function() {
                     var lines = '';
                     for (var i = 0; i < 12; i++) {
@@ -2139,12 +2139,12 @@ if (desktopToggle) {
                         var opacity = (0.2 + (i / 12) * 0.8).toFixed(2);
                         // Each line: short inner segment to outer edge from center
                         var rad    = (angle - 90) * Math.PI / 180;
-                        var x1     = (13 + Math.cos(rad) * 6).toFixed(2);
-                        var y1     = (13 + Math.sin(rad) * 6).toFixed(2);
-                        var x2     = (13 + Math.cos(rad) * 11).toFixed(2);
-                        var y2     = (13 + Math.sin(rad) * 11).toFixed(2);
+                        var x1     = (16 + Math.cos(rad) * 7).toFixed(2);
+                        var y1     = (16 + Math.sin(rad) * 7).toFixed(2);
+                        var x2     = (16 + Math.cos(rad) * 13).toFixed(2);
+                        var y2     = (16 + Math.sin(rad) * 13).toFixed(2);
                         lines += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2
-                               + '" stroke="rgba(120,120,128,' + opacity + ')" stroke-width="2.2" stroke-linecap="round"/>';
+                               + '" stroke="rgba(120,120,128,' + opacity + ')" stroke-width="2.6" stroke-linecap="round"/>';
                     }
                     return lines;
                 }())
@@ -2155,8 +2155,8 @@ if (desktopToggle) {
                 top:             '68px',
                 left:            '50%',
                 transform:       'translateX(-50%) translateY(-80px)',
-                width:           '36px',
-                height:          '36px',
+                width:           '42px',
+                height:          '42px',
                 borderRadius:    '50%',
                 background:      'transparent',
                 boxShadow:       'none',
