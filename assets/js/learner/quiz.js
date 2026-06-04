@@ -522,14 +522,13 @@ function renderQuizCards(groupedData) {
                 cursor: pointer;
                 user-select: none;
             }
-            .lqz-mobile-folder-header:active { background: rgba(255,255,255,0.02); }
+            .lqz-mobile-folder-header:active { background: rgba(253,214,99,0.06); }
             .lqz-mobile-folder-icon { flex-shrink: 0; }
             .lqz-mobile-folder-name {
                 flex: 1;
                 font-size: 16px;
                 font-weight: 800;
                 color: #e2e8f0;
-                font-family: 'Nunito', sans-serif;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -549,23 +548,19 @@ function renderQuizCards(groupedData) {
                 transition: transform 0.25s ease;
             }
             .lqz-mobile-folder-chevron.open { transform: rotate(90deg); }
-            .lqz-mobile-folder-body { display: block; padding: 8px 16px 16px; }
+            .lqz-mobile-folder-body { display: block; }
             .lqz-mobile-folder-body.collapsed { display: none; }
             .lqz-mobile-row {
                 display: flex;
                 align-items: center;
                 gap: 14px;
-                padding: 13px 16px;
-                background: rgba(255,255,255,0.02);
-                border: 1px solid rgba(255,255,255,0.04);
-                border-radius: 10px;
-                margin-bottom: 8px;
+                padding: 14px 16px;
+                background: #1a1919;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
-                transition: border-color 0.2s, transform 0.2s;
-                overflow: hidden;
             }
-            .lqz-mobile-row:last-child { margin-bottom: 0; }
-            .lqz-mobile-row:active { transform: translateX(3px); border-color: rgba(253,214,99,0.2); }
+            .lqz-mobile-row:last-child { border-bottom: none; }
+            .lqz-mobile-row:active { background: rgba(253,214,99,0.06); }
             .lqz-mobile-row-icon {
                 width: 32px;
                 height: 32px;
@@ -582,7 +577,6 @@ function renderQuizCards(groupedData) {
                 font-size: 14px;
                 font-weight: 700;
                 color: #e2e8f0;
-                font-family: 'Nunito', sans-serif;
                 margin: 0;
                 white-space: nowrap;
                 overflow: hidden;

@@ -223,7 +223,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=3.9">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2722,7 +2722,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=3.1"></script>
-<script src="assets/js/learner/quiz.js?v=5.9"></script>
+<script src="assets/js/learner/quiz.js?v=6.0"></script>
 <script src="assets/js/learner/assignments.js?v=4.8"></script>
 <script src="assets/js/learner/resources.js?v=4.1"></script>
 <script src="assets/js/learner/announcements.js?v=4.0"></script>
