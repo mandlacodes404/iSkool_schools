@@ -673,7 +673,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
   </ul>
   <div class="nav-actions">
     <button class="nav-login" onclick="location.href='#faq'">FAQs</button>
-    <button class="nav-pilot" onclick="openPilotForm()">Apply for Free Pilot</button>
+    <button class="nav-pilot" onclick="openPilotForm()">Start free pilot →</button>
   </div>
   <button class="nav-hamburger" id="navHamburger" onclick="toggleMenu()" aria-label="Menu">
     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -733,7 +733,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
   <a href="#get-started" onclick="closeMenu()">Get started</a>
   <a href="contact.html" onclick="closeMenu()">Contact us</a>
   <a href="#faq" onclick="closeMenu()">FAQs</a>
-  <button class="mobile-pilot" onclick="closeMenu();openPilotForm()">Apply for Free Pilot →</button>
+  <button class="mobile-pilot" onclick="closeMenu();openPilotForm()">Start free pilot →</button>
 </div>
 
 <!-- HERO -->
@@ -742,15 +742,15 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <div class="hero-left">
       <div class="trust-badge sr">
         <div class="trust-dot"></div>
-        Trusted by South African High Schools
+        Built for South African High Schools
       </div>
-      <h1 class="sr sr-d1">We help schools <span>elevate using</span><br>digital tools</h1>
+      <h1 class="sr sr-d1">The learning management system <span>South African schools</span><br>have been waiting for</h1>
     </div>
     <div class="hero-right">
-      <p class="sr sr-d2">Quizzes, assignments, syllabus tracking, real-time analytics, and AI invigilation — built from the ground up for the Schools.</p>
+      <p class="sr sr-d2">Quizzes with built-in AI invigilation. Assignments, gradebooks, syllabus tracking, and real-time analytics — all CAPS-aligned, all in one place. Made in South Africa, for South African classrooms.</p>
       <div class="hero-buttons sr sr-d3">
-        <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>See Demo</button>
-        <button class="btn btn-primary" onclick="openPilotForm()" type="button">Apply for Free Pilot &#8594;</button>
+        <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>Watch a 2-minute demo</button>
+        <button class="btn btn-primary" onclick="openPilotForm()" type="button">Start free pilot &#8594;</button>
       </div>
     </div>
   </div>
@@ -1060,63 +1060,63 @@ const features = [
     eyebrow: 'Quizzes',
     heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
     desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
-    bullets: ['Live learner progress tracked question by question', 'Tab-switch & browser exit detection built in', 'Auto-marked with instant results & reports']
+    bullets: ['See every learner\'s progress, question by question, in real time', 'Know immediately if a learner tried to leave the quiz', 'Results and integrity reports generated the moment the quiz closes']
   },
   {
     label: 'Assignments',
     eyebrow: 'Assignments',
     heading: 'Set, track and mark <span>assignments with ease</span>',
-    desc: "Create assignments, set deadlines, and track submission progress across all your classes in one place. Auto-marking saves you hours every week.",
-    bullets: ['Per-learner submission status at a glance', 'Late submission flagging built in', 'Auto-marked with instant feedback to learners']
+    desc: "Create assignments, set deadlines, and see submission progress across all your classes in one place. Stop chasing learners — iSkool tells you exactly who hasn't submitted.",
+    bullets: ['See at a glance who has submitted and who hasn\'t', 'Late submissions flagged automatically', 'Auto-marked with instant feedback sent to learners']
   },
   {
     label: 'AI Invigilator',
     eyebrow: 'AI Invigilator',
     heading: 'Every quiz watched in <span>real time</span>',
-    desc: "iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.",
-    bullets: ['Detects tab-switching & browser minimization', 'Flags anomalies per learner, per question', 'Full session audit log after each quiz closes']
+    desc: "Running a quiz? iSkool watches every learner's session in real time — catching tab switches, browser exits, and focus loss the moment they happen. You'll have a full integrity report before you've even closed the browser.",
+    bullets: ['Know immediately if a learner tried to leave the quiz', 'Every anomaly logged per learner, per question', 'Full session integrity report generated automatically']
   },
   {
     label: 'Gradebook',
     eyebrow: 'Gradebook',
     heading: 'Capture marks and <span>generate reports</span> in seconds',
-    desc: "No more spreadsheets. Enter marks once — iSkool calculates averages, assigns symbols, and generates printable report cards for every learner automatically.",
-    bullets: ['Mark entries auto-calculate class averages', 'Symbol assignment (A–F) based on CAPS thresholds', 'One-click PDF report cards per learner']
+    desc: "No more Excel. Enter marks once — iSkool calculates averages, assigns symbols based on CAPS thresholds, and generates printable report cards for every learner automatically.",
+    bullets: ['Mark entries auto-calculate class and term averages', 'Symbols (A–F) assigned automatically using CAPS thresholds', 'Download a learner\'s full report card in one click']
   },
   {
     label: 'Analytics',
     eyebrow: 'Deep Analytics',
     heading: "See every learner's story <span>at a glance</span>",
-    desc: "Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.",
-    bullets: ['Per-class pass rates with term-on-term trends', 'Question-by-question difficulty breakdown', 'Admin dashboard for principals & HODs']
+    desc: "After every quiz, iSkool calculates pass rates, class averages, and which questions tripped learners up — automatically. No Excel. No formulas. Just the numbers you need, exactly when you need them.",
+    bullets: ['See pass rates per class, with term-on-term trends', 'Spot exactly which questions your learners struggled with', 'Dedicated analytics dashboard for principals and HODs']
   },
   {
     label: 'Resources',
     eyebrow: 'Resources',
     heading: 'Upload notes, videos and worksheets <span>per topic</span>',
-    desc: "Link learning materials directly to CAPS topics. Learners find exactly what they need, when they need it — all organised by subject and grade.",
-    bullets: ['Upload PDFs, videos and documents', 'Linked directly to CAPS syllabus topics', 'Track which learners have viewed each resource']
+    desc: "Link learning materials directly to CAPS topics. Learners find exactly what they need, when they need it — all organised by subject and grade, exactly as the DBE intended.",
+    bullets: ['Upload PDFs, videos and documents in seconds', 'Materials linked directly to CAPS syllabus topics', 'See which learners have viewed each resource']
   },
   {
     label: 'Discussions',
     eyebrow: 'Discussions',
     heading: 'Foster class conversations <span>in a safe space</span>',
-    desc: "Run moderated class discussions where learners ask questions and teachers respond. No WhatsApp groups, no noise — just focused academic conversation.",
-    bullets: ['Threaded discussions per class or subject', 'Teacher moderation and pinned replies', 'Participation tracked per learner']
+    desc: "Run moderated class discussions where learners ask questions and teachers respond. No WhatsApp groups, no noise — just focused academic conversation that you control.",
+    bullets: ['Threaded discussions per class or subject', 'Teacher moderation and pinned replies', 'Learner participation tracked automatically']
   },
   {
     label: 'Announcements',
     eyebrow: 'Announcements',
     heading: 'Keep learners and parents <span>always in the loop</span>',
-    desc: "Post announcements to specific classes, grades, or the whole school. Track who has read them and follow up with those who haven't.",
-    bullets: ['Target by class, grade or school-wide', 'Read receipts so nothing gets missed', 'Pinned notices stay top-of-feed']
+    desc: "Post announcements to specific classes, grades, or the whole school. See exactly who has read them — and follow up with those who haven't.",
+    bullets: ['Target by class, grade, or school-wide', 'Read receipts so nothing gets missed', 'Pinned notices stay top-of-feed']
   },
   {
     label: 'Calendar',
     eyebrow: 'Calendar',
     heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
-    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Sync academic events to learner calendars and never fall behind the curriculum again.",
-    bullets: ['CAPS topic mapping for Grade 10–12', 'Events auto-synced to learner dashboards', 'Coverage progress tracked per class']
+    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Keep the whole school on the same page — and never fall behind the curriculum again.",
+    bullets: ['CAPS topic mapping for Grade 10–12', 'Events auto-synced to every learner\'s dashboard', 'Coverage progress tracked per class, per term']
   }
 ];
 
@@ -1327,9 +1327,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu();
 <section class="comparison-section">
   <div class="comparison-inner">
     <div class="comparison-header sr">
-      <div class="comp-eyebrow">COMPARISON</div>
-      <h2 class="comp-heading">Not All LMS Is Created Equal</h2>
-      <p class="comp-sub">Generic platforms give generic results. iSkool is purpose-built for one thing: To make schools thrive.</p>
+      <div class="comp-eyebrow">WHY ISKOOL</div>
+      <h2 class="comp-heading">Why iSkool, not just any LMS?</h2>
+      <p class="comp-sub">Canvas is built for universities. Google Classroom doesn't have a gradebook. Moodle needs an IT team. iSkool was built for one type of institution: yours.</p>
     </div>
     <div class="comp-table-wrap sr sr-d1">
       <table class="comp-table">
@@ -1384,12 +1384,12 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
           </tr>
         </thead>
         <tbody>
-          <tr><td class="feat-cell">Built for schools</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
-          <tr><td class="feat-cell">AI invigilation for quizzes</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
-          <tr><td class="feat-cell">Real-time learner analytics</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
-          <tr><td class="feat-cell">Progress Report card</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
-          <tr><td class="feat-cell">Syllabus feature</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
-          <tr><td class="feat-cell">Pilot Programme</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Designed specifically for SA schools</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">AI invigilation built in for every quiz</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Real-time learner analytics, per class</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">CAPS-aligned progress report cards</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">CAPS syllabus tracker, Grade 10–12</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
+          <tr><td class="feat-cell">Free pilot with full setup &amp; support</td><td class="td-iskool"><span class="ico-check">&#10003;</span></td><td class="td-other"><span class="ico-cross">&#10005;</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -1438,20 +1438,26 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
           </tr>
         </thead>
         <tbody>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Built for schools</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Designed specifically for SA schools</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation for quizzes</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">AI invigilation built in for every quiz</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Real-time learner analytics, per class</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Progress report cards</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">CAPS-aligned progress report cards</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Syllabus feature</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">CAPS syllabus tracker, Grade 10–12</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
-          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Pilot programme</td></tr>
+          <tr><td colspan="2" style="text-align:center;padding:10px 8px 4px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;">Free pilot with full setup &amp; support</td></tr>
           <tr><td class="mob-val-other"><span class="ico-cross">&#10005;</span></td><td class="mob-val-iskool"><span class="ico-check">&#10003;</span></td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="comp-cta-row">
+      <a class="comp-cta" href="#" onclick="openPilotForm();return false;">
+        See iSkool in action
+        <div class="comp-cta-arrow">&#8594;</div>
+      </a>
     </div>
     
   </div>
@@ -1584,21 +1590,21 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 <!-- ===================== FEATURES SECTION ===================== -->
 <section class="features-section">
   <div class="features-header sr">
-    <div class="feat-section-num">World-class features</div>
-    <h2>Built for the <span>classroom</span></h2>
-    <p>The tools that separate iSkool from every other platform — purpose-built for South African high schools.</p>
+    <div class="feat-section-num">What iSkool can do</div>
+    <h2>Everything your school needs.<br><span>Nothing it doesn't.</span></h2>
+    <p>The tools that make iSkool different from every other platform — purpose-built for South African high schools, not adapted from something built for universities.</p>
     <a href="features.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;color:rgba(255,255,255,0.25);font-size:13px;font-weight:400;text-decoration:none;transition:color 0.2s;font-family:'DM Sans',sans-serif;" onmouseover="this.style.color='rgba(255,255,255,0.6)';" onmouseout="this.style.color='rgba(255,255,255,0.25)';">Explore all 9 features →</a>
   </div>
   <div class="feat-row" id="feat-inv">
     <div class="feat-copy">
       <div class="feat-copy-eyebrow teal"><span class="eyebrow-line"></span>AI Invigilator</div>
       <h3>Every quiz watched<br>in <em class="teal">real time</em></h3>
-      <p>iSkool's AI invigilator monitors every learner throughout a quiz session — detecting tab switches, browser exits and focus loss as they happen, question by question.</p>
+      <p>Running a quiz? iSkool watches every learner's session in real time — catching tab switches, browser exits, and focus loss the moment they happen. You'll have a full integrity report before you've even closed the browser.</p>
       <div class="feat-bullets">
-        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Detects tab-switching &amp; browser minimization</div>
-        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Flags anomalies per learner, per question</div>
-        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Full session audit log after each quiz closes</div>
-        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>AI-verified &amp; tested on live learners</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Know immediately if a learner tried to leave the quiz</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Every anomaly logged per learner, per question</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>Full session integrity report generated automatically</div>
+        <div class="feat-bullet"><div class="bullet-dot teal">✓</div>AI-verified &amp; tested on live South African learners</div>
       </div>
       <a href="features.html#invigilator" class="feat-cta teal">Explore AI Invigilator →</a>
     </div>
@@ -1631,12 +1637,12 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <div class="feat-copy">
       <div class="feat-copy-eyebrow gold"><span class="eyebrow-line"></span>Deep Analytics</div>
       <h3>See every learner's<br>story <em class="gold">at a glance</em></h3>
-      <p>Class averages, pass rates, and question-level drop-off — all calculated and surfaced automatically after every quiz. No spreadsheets. No manual work.</p>
+      <p>After every quiz, iSkool calculates pass rates, class averages, and which questions tripped learners up — automatically. No Excel. No formulas. Just the numbers you need, exactly when you need them.</p>
       <div class="feat-bullets">
-        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Per-class pass rates with term-on-term trends</div>
-        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Question-by-question difficulty breakdown</div>
-        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>One-click PDF report cards per learner</div>
-        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Admin dashboard for principals &amp; HODs</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>See pass rates per class, with term-on-term trends</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Spot exactly which questions your learners struggled with</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Download a learner's full report card in one click</div>
+        <div class="feat-bullet"><div class="bullet-dot gold">✓</div>Dedicated dashboard for principals &amp; HODs</div>
       </div>
       <a href="features.html#analytics" class="feat-cta gold">Explore Deep Analytics →</a>
     </div>
@@ -1735,8 +1741,8 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
   <div class="hiw-inner">
     <div class="hiw-header sr">
       <div class="hiw-eyebrow">GET STARTED</div>
-      <h2 class="hiw-heading">Up and Running in Three Steps</h2>
-      <p class="hiw-sub">From application to your first live class — iSkool gets your school set up fast, with zero technical headaches.</p>
+      <h2 class="hiw-heading">Up and running in three steps</h2>
+      <p class="hiw-sub">From application to your first live class — iSkool gets your school set up fast, with zero IT headaches and full support from our team.</p>
     </div>
     <div class="hiw-grid">
 
@@ -1766,8 +1772,8 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         </div>
         <div class="hiw-step-body">
           <div class="hiw-step-num">1</div>
-          <div class="hiw-step-title">Apply for the Free Pilot</div>
-          <p class="hiw-step-text">Fill in a quick application — school name, province, and learner count. <strong>We review every application within 48 hours</strong> and reach out to confirm your pilot slot.</p>
+          <div class="hiw-step-title">Apply for the free pilot</div>
+          <p class="hiw-step-text">Fill in a quick application — school name, province, and learner count. <strong>We review every application within 48 hours</strong> and reach out personally to confirm your pilot slot.</p>
         </div>
       </div>
 
@@ -1796,8 +1802,8 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         </div>
         <div class="hiw-step-body">
           <div class="hiw-step-num">2</div>
-          <div class="hiw-step-title">Get Your Domain &amp; School Set Up</div>
-          <p class="hiw-step-text">We configure your custom iSkool domain, load your grades and subjects, and <strong>set up every class automatically</strong>. No IT department needed — we handle everything.</p>
+          <div class="hiw-step-title">We set everything up for you</div>
+          <p class="hiw-step-text">We configure your custom iSkool domain, load your grades and subjects, and <strong>set up every class automatically</strong>. No IT department needed — we handle the whole setup.</p>
         </div>
       </div>
 
@@ -1825,7 +1831,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         </div>
         <div class="hiw-step-body">
           <div class="hiw-step-num">3</div>
-          <div class="hiw-step-title">Share Access Codes &amp; Go Live</div>
+          <div class="hiw-step-title">Share access codes &amp; go live</div>
           <p class="hiw-step-text">Share unique class access codes with your learners. They sign in instantly — <strong>no email required, no app download</strong>. Your school is live and learning from day one.</p>
         </div>
       </div>
@@ -1971,16 +1977,16 @@ setTimeout(gsRunGoLive, 1400);
 
 <section class="faq-section" id="faq">
   <div class="faq-inner">
-    <div class="faq-header sr"><div class="faq-small">FAQ</div><h2 class="faq-title">Frequently Asked Questions</h2></div>
+    <div class="faq-header sr"><div class="faq-small">FAQ</div><h2 class="faq-title">Questions schools ask us</h2></div>
     <div class="faq-accordion sr sr-d1" id="faqAccordion">
-      <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. iSkool was built specifically for the South African curriculum. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines.</div></div>
-      <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No extensive training is required. The interface is intuitive. We provide a 45-minute onboarding session + video tutorials and ongoing support.</div></div>
-      <div class="faq-item"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer">Nope. iSkool is a complete standalone LMS. It includes quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics — everything your school needs in one place.</div></div>
-      <div class="faq-item"><button class="faq-question">Can parents access learner progress?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. Parents get their own secure login where they can view grades, upcoming assessments, attendance, and direct messages from teachers.</div></div>
-      <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All data is hosted on secure South African servers with daily backups. We are fully POPIA compliant.</div></div>
-      <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days after signing up for the pilot or subscription.</div></div>
+      <div class="faq-item"><button class="faq-question">Is iSkool compatible with the South African CAPS curriculum?<span class="faq-icon">+</span></button><div class="faq-answer">Yes — and that's the point. iSkool was built specifically around CAPS. All subjects, assessment types, and reporting formats follow DBE and CAPS guidelines. No configuration needed.</div></div>
+      <div class="faq-item"><button class="faq-question">Do teachers need training to use iSkool?<span class="faq-icon">+</span></button><div class="faq-answer">No lengthy training courses. The interface is built to be picked up in a lesson period. We run a 45-minute onboarding session with your teachers, leave video tutorials behind, and stay available whenever questions come up.</div></div>
+      <div class="faq-item"><button class="faq-question">Do I need to buy any other tools or software?<span class="faq-icon">+</span></button><div class="faq-answer">No. iSkool is a complete, standalone LMS. Quizzes, assignments, AI invigilation, parent communication, syllabus tracking, and analytics are all included. One platform, everything your school needs.</div></div>
+      <div class="faq-item"><button class="faq-question">Can parents access learner progress?<span class="faq-icon">+</span></button><div class="faq-answer">Yes. Parents get their own secure login where they can view grades, upcoming assessments, and direct messages from teachers — keeping them informed without disrupting the classroom.</div></div>
+      <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All school and learner data is stored on South African servers, backed up daily, and handled in full compliance with POPIA. Your data never leaves the country.</div></div>
+      <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days of joining the pilot. We handle the configuration — you just share the access codes with your learners and go.</div></div>
     </div>
-    <div class="faq-cta sr sr-d2"><button class="faq-button" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Apply for Free Pilot →</button></div>
+    <div class="faq-cta sr sr-d2"><button class="faq-button" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Start free pilot →</button></div>
   </div>
 </section>
 
@@ -2088,7 +2094,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/></g></svg>
         <span>iSkool</span>
       </a>
-      <p class="footer-brand-desc">The only LMS built from the ground up for South African schools — CAPS-aligned, educator-first, and built for every classroom.</p>
+      <p class="footer-brand-desc">A learning management system built specifically for South African schools. CAPS-aligned, simple for teachers, and powerful for principals and HODs.</p>
       <!-- A ENTHROPY product badge -->
       <span class="footer-sonnet-badge">A product of ENTHROPY</span>
     </div>
