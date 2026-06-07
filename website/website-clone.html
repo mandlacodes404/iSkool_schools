@@ -1236,8 +1236,44 @@ function switchFeature(dir) {
   goToFeature(newIndex, direction);
 }
 
+/* ── Autoplay ── */
+const SUB_SCREEN_DURATION  = 3000;  // ms per sub-screen
+const SINGLE_SCREEN_DURATION = 4000; // ms for single-screen features
+
+let autoplayTimer = null;
+let resumeTimer   = null;
+
+function getFeatureDuration(index) {
+  const screens = screenMap[index] || [];
+  return screens.length > 1
+    ? screens.length * SUB_SCREEN_DURATION
+    : SINGLE_SCREEN_DURATION;
+}
+
+function scheduleNextFeature() {
+  clearTimeout(autoplayTimer);
+  const duration = getFeatureDuration(currentIndex);
+  autoplayTimer = setTimeout(function() {
+    var nextIndex = (currentIndex + 1) % features.length;
+    goToFeature(nextIndex, 'right');
+    scheduleNextFeature();
+  }, duration);
+}
+
+/* ── Wrap switchFeature so manual clicks pause autoplay then resume after 8s ── */
+var _origSwitchFeature = switchFeature;
+switchFeature = function(dir) {
+  clearTimeout(autoplayTimer);
+  clearTimeout(resumeTimer);
+  _origSwitchFeature(dir);
+  resumeTimer = setTimeout(function() {
+    scheduleNextFeature();
+  }, 8000);
+};
+
 /* ── Init ── */
 startCardCycle(0);
+scheduleNextFeature();
 
 function toggleMenu() {
   const menu = document.getElementById('mobileMenu');
