@@ -420,6 +420,7 @@ function renderAssignmentCards(groupedData) {
                 cursor: pointer;
             }
             .las-mobile-row:last-child { border-bottom: none; }
+            .las-mobile-row:active { background: rgba(255,255,255,0.04); }
             .las-mobile-row-icon {
                 width: 32px;
                 height: 32px;

@@ -368,7 +368,7 @@ function renderResourceCards(data) {
             .lrs-mobile-video-title {
                 font-size: 14px;
                 font-weight: 700;
-                color: #ffffff;
+                color: #e2e8f0;
                 margin: 0 0 4px;
             }
             .lrs-mobile-video-meta {
@@ -451,7 +451,7 @@ function renderResourceCards(data) {
             .lrs-mobile-row-title {
                 font-size: 14px;
                 font-weight: 700;
-                color: #ffffff;
+                color: #e2e8f0;
                 margin: 0;
                 white-space: nowrap;
                 overflow: hidden;

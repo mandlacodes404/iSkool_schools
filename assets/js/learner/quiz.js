@@ -588,7 +588,7 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-row-action {
                 flex-shrink: 0;
                 font-size: 13px;
-                font-weight: 600;
+                font-weight: 700;
                 cursor: pointer;
             }
             .lqz-mobile-row-status-dot {

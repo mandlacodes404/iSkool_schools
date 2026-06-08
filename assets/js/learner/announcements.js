@@ -480,6 +480,7 @@ function renderAnnouncements(data) {
                 border-left: 3px solid rgba(242,140,56,0.5);
             }
             .lan-mobile-card:last-child { border-bottom: none; }
+            .lan-mobile-card:active { background: rgba(255,255,255,0.04); }
             .lan-mobile-card-icon {
                 width: 32px;
                 height: 32px;

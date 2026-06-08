@@ -86,7 +86,7 @@
 /* ── MOBILE CARD OVERRIDES ── */
 @media (max-width: 899px) {
     .quiz-card {
-        background: #0d1117;
+        background: #1a1919;
         border-radius: 0;
         border-left: none;
         border-right: none;
@@ -97,13 +97,42 @@
     }
 
     .quiz-card:hover {
-        background: rgba(253, 214, 99, 0.04);
+        background: rgba(253, 214, 99, 0.06);
         border-color: rgba(255, 255, 255, 0.05);
     }
 
     .quiz-card h4 {
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
+        color: #e2e8f0;
+    }
+
+    .quiz-info-text {
+        font-size: 12px;
+        color: #8b949e;
+    }
+
+    /* Wrap the cards inside a section in a container that matches grades style */
+    #api-content-area h3 {
+        margin-top: 20px;
+        margin-bottom: 0;
+        border-bottom: none;
+        background: #1a1919;
+        border-radius: 12px 12px 0 0;
+        padding: 16px 16px 14px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #e2e8f0;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    /* Section group container — matches grades lqz-mobile-list */
+    .quiz-section-group {
+        background: #1a1919;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0 0 16px;
     }
 }
 
