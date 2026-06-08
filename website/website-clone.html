@@ -742,12 +742,12 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <div class="hero-left">
       <div class="trust-badge sr">
         <div class="trust-dot"></div>
-        Built for South African Schools
+        Built for Schools
       </div>
-      <h1 class="sr sr-d1">The learning management system <span>South African schools</span><br>have been waiting for</h1>
+      <h1 class="sr sr-d1">The learning management system <span>Schools</span><br>have been waiting for</h1>
     </div>
     <div class="hero-right">
-      <p class="sr sr-d2">Quizzes with built-in AI invigilation. Assignments, gradebooks, syllabus tracking, and real-time analytics — all CAPS-aligned, all in one place. Made in South Africa, for South African classrooms.</p>
+      <p class="sr sr-d2">Quizzes with built-in AI invigilation. Assignments, gradebooks, syllabus tracking, and real-time analytics —  all in one place. Made in South Africa, for classrooms.</p>
       <div class="hero-buttons sr sr-d3">
         <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>Explore the demo</button>
         <button class="btn btn-primary" onclick="openPilotForm()" type="button">Start free pilot &#8594;</button>
@@ -1623,7 +1623,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <div class="feat-section-num">What iSkool can do</div>
     <h2>Everything your school needs.<br><span>Nothing it doesn't.</span></h2>
     <p>The tools that make iSkool different from every other platform — purpose-built for South African high schools, not adapted from something built for universities.</p>
-    <a href="features.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;color:rgba(255,255,255,0.25);font-size:13px;font-weight:400;text-decoration:none;transition:color 0.2s;font-family:'DM Sans',sans-serif;" onmouseover="this.style.color='rgba(255,255,255,0.6)';" onmouseout="this.style.color='rgba(255,255,255,0.25)';">Explore all 9 features →</a>
+    <a href="features.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;color:rgba(255,255,255,0.25);font-size:13px;font-weight:400;text-decoration:none;transition:color 0.2s;font-family:'DM Sans',sans-serif;" onmouseover="this.style.color='rgba(255,255,255,0.6)';" onmouseout="this.style.color='rgba(255,255,255,0.25)';">Explore features →</a>
   </div>
   <div class="feat-row" id="feat-inv">
     <div class="feat-copy">
@@ -2083,7 +2083,7 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
 <footer class="footer">
   <div class="footer-top">
 
-    <!-- Brand column -->
+      <!-- Brand column -->
     <div class="footer-brand">
       <a href="#" class="footer-brand-logo">
         <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 1254 1254" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,1254) scale(0.1,-0.1)" fill="#f50b0b" stroke="none"><path d="M6200 11494 c-273 -46 -467 -196 -557 -433 -131 -347 15 -731 337
@@ -2124,8 +2124,6 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/></g></svg>
         <span>iSkool</span>
       </a>
-      <!-- A ENTHROPY product badge -->
-      <span class="footer-sonnet-badge">A product by ENTHROPY</span>
     </div>
 
     <!-- Product column -->
@@ -2266,8 +2264,14 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 }
 .demo-card-locked:hover { transform: none; box-shadow: none; border-color: #eee; }
 .demo-card-icon {
-  font-size: 26px; line-height: 1;
+  width: 36px; height: 36px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: #f5f5f5; border-radius: 10px; flex-shrink: 0;
 }
+.demo-card-icon svg {
+  width: 20px; height: 20px; stroke: #444; flex-shrink: 0;
+}
+.demo-card-locked .demo-card-icon svg { stroke: #bbb; }
 .demo-card-name {
   font-family: 'Syne', sans-serif;
   font-size: 15px; font-weight: 800;
@@ -2342,7 +2346,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 
       <!-- Learner — LIVE -->
       <a href="https://sandbox.iskool.online" class="demo-card" target="_blank" rel="noopener noreferrer">
-        <div class="demo-card-icon">🎓</div>
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg></div>
         <div class="demo-card-name">Learner</div>
         <div class="demo-card-desc">Quizzes, assignments, results &amp; resources</div>
         <div class="demo-card-action">Explore &rarr;</div>
@@ -2350,28 +2354,26 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 
       <!-- Teacher — LIVE -->
       <a href="https://sandbox.iskool.online" class="demo-card" target="_blank" rel="noopener noreferrer">
-        <div class="demo-card-icon">🧑‍🏫</div>
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
         <div class="demo-card-name">Teacher</div>
         <div class="demo-card-desc">Set assessments, track class performance</div>
         <div class="demo-card-action">Explore &rarr;</div>
       </a>
 
-      <!-- Admin — LOCKED -->
-      <div class="demo-card demo-card-locked">
-        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
-        <div class="demo-card-icon">🏫</div>
+      <!-- Admin — LIVE -->
+      <a href="https://sandbox.iskool.online" class="demo-card" target="_blank" rel="noopener noreferrer">
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>
         <div class="demo-card-name">Admin</div>
         <div class="demo-card-desc">School-wide oversight &amp; management</div>
-        <div class="demo-card-action">Coming Soon</div>
-        <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
-      </div>
+        <div class="demo-card-action">Explore &rarr;</div>
+      </a>
 
-      <!-- Principal — LOCKED -->
+      <!-- Parent — LOCKED -->
       <div class="demo-card demo-card-locked">
-        <div class="demo-lock-badge"><span class="demo-lock-icon">🔒</span> Coming Soon</div>
-        <div class="demo-card-icon">👔</div>
-        <div class="demo-card-name">Principal</div>
-        <div class="demo-card-desc">Analytics, reports &amp; school performance</div>
+        <div class="demo-lock-badge"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px;margin-top:-1px"><rect width="11" height="11" x="6.5" y="11" rx="2"/><path d="M12 11V7a4 4 0 0 0-4-4 4 4 0 0 0-4 4v4"/><line x1="12" x2="12" y1="15" y2="17"/></svg> Coming Soon</div>
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="demo-card-name">Parent</div>
+        <div class="demo-card-desc">Monitor your child's progress &amp; stay informed</div>
         <div class="demo-card-action">Coming Soon</div>
         <div class="demo-card-tooltip">We&apos;re putting the finishing touches on this — check back soon</div>
       </div>
