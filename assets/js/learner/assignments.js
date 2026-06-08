@@ -370,25 +370,29 @@ function renderAssignmentCards(groupedData) {
                 background: #1a1919;
                 border-radius: 12px;
                 overflow: hidden;
-                margin: 0 0 16px;
+                margin: 0 0 14px;
             }
             .las-mobile-folder-header {
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                padding: 16px;
+                gap: 12px;
+                padding: 18px 20px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
                 user-select: none;
+                transition: background 0.2s;
             }
-            .las-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .las-mobile-folder-header:active { background: #1a1919; }
             .las-mobile-folder-icon { flex-shrink: 0; }
             .las-mobile-folder-name {
                 flex: 1;
                 font-size: 16px;
                 font-weight: 800;
                 color: #e2e8f0;
+                display: flex;
+                align-items: center;
+                gap: 8px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -405,7 +409,7 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-folder-chevron {
                 flex-shrink: 0;
                 color: #555e6a;
-                transition: transform 0.25s ease;
+                transition: transform 0.3s ease;
             }
             .las-mobile-folder-chevron.open { transform: rotate(90deg); }
             .las-mobile-folder-body { display: block; }
@@ -413,14 +417,18 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-row {
                 display: flex;
                 align-items: center;
-                gap: 14px;
-                padding: 14px 16px;
+                gap: 12px;
+                padding: 13px 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
                 cursor: pointer;
+                transition: border-color 0.2s, transform 0.2s;
             }
             .las-mobile-row:last-child { border-bottom: none; }
-            .las-mobile-row:active { background: rgba(255,255,255,0.04); }
+            .las-mobile-row:hover { border-color: rgba(167,139,250,0.2); transform: translateX(3px); }
             .las-mobile-row-icon {
                 width: 32px;
                 height: 32px;
@@ -443,7 +451,7 @@ function renderAssignmentCards(groupedData) {
                 text-overflow: ellipsis;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 6px;
             }
             .las-mobile-row-status-dot {
                 display: inline-block;
@@ -459,13 +467,13 @@ function renderAssignmentCards(groupedData) {
                 white-space: nowrap;
             }
             .las-mobile-row-meta {
-                font-size: 12px;
-                color: #8b949e;
-                margin-top: 3px;
+                font-size: 11px;
+                color: #555e6a;
+                margin-top: 2px;
             }
             .las-mobile-row-chevron {
                 flex-shrink: 0;
-                color: #30363d;
+                color: #555e6a;
             }
 
             /* ── MOBILE SEARCH BAR ── */
@@ -495,7 +503,7 @@ function renderAssignmentCards(groupedData) {
                     font-family: 'Nunito', sans-serif;
                     transition: border-color 0.2s;
                 }
-                .las-mobile-search:focus { outline: none; border-color: #a78bfa; }
+                .las-mobile-search:focus { outline: none; border-color: #68d391; }
                 .las-mobile-search::placeholder { color: #555e6a; }
             }
         </style>
