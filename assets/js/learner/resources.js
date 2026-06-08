@@ -363,17 +363,17 @@ function renderResourceCards(data) {
             .lrs-mobile-video-card {
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
-                padding: 14px 16px;
+                padding: 13px 16px;
             }
             .lrs-mobile-video-title {
                 font-size: 14px;
                 font-weight: 700;
                 color: #e2e8f0;
-                margin: 0 0 4px;
+                margin: 0 0 3px;
             }
             .lrs-mobile-video-meta {
-                font-size: 12px;
-                color: #8b949e;
+                font-size: 11px;
+                color: #555e6a;
                 margin: 0 0 10px;
                 display: flex;
                 align-items: center;
@@ -385,25 +385,29 @@ function renderResourceCards(data) {
                 background: #1a1919;
                 border-radius: 12px;
                 overflow: hidden;
-                margin: 0 0 16px;
+                margin: 0 0 14px;
             }
             .lrs-mobile-folder-header {
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                padding: 16px;
+                gap: 12px;
+                padding: 18px 20px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
                 user-select: none;
+                transition: background 0.2s;
             }
-            .lrs-mobile-folder-header:active { background: rgba(255,255,255,0.04); }
+            .lrs-mobile-folder-header:active { background: #1a1919; }
             .lrs-mobile-folder-icon { flex-shrink: 0; }
             .lrs-mobile-folder-name {
                 flex: 1;
                 font-size: 16px;
                 font-weight: 800;
                 color: #e2e8f0;
+                display: flex;
+                align-items: center;
+                gap: 8px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -420,7 +424,7 @@ function renderResourceCards(data) {
             .lrs-mobile-folder-chevron {
                 flex-shrink: 0;
                 color: #555e6a;
-                transition: transform 0.25s ease;
+                transition: transform 0.3s ease;
             }
             .lrs-mobile-folder-chevron.open { transform: rotate(90deg); }
             .lrs-mobile-folder-body { display: block; }
@@ -428,14 +432,18 @@ function renderResourceCards(data) {
             .lrs-mobile-row {
                 display: flex;
                 align-items: center;
-                gap: 14px;
-                padding: 14px 16px;
+                gap: 12px;
+                padding: 13px 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
                 cursor: pointer;
+                transition: border-color 0.2s, transform 0.2s;
             }
             .lrs-mobile-row:last-child { border-bottom: none; }
-            .lrs-mobile-row:active { background: rgba(255,255,255,0.04); }
+            .lrs-mobile-row:hover { border-color: rgba(242,140,56,0.2); transform: translateX(3px); }
             .lrs-mobile-row-icon {
                 width: 32px;
                 height: 32px;
@@ -458,13 +466,13 @@ function renderResourceCards(data) {
                 text-overflow: ellipsis;
             }
             .lrs-mobile-row-size {
-                font-size: 12px;
-                color: #8b949e;
-                margin-top: 3px;
+                font-size: 11px;
+                color: #555e6a;
+                margin-top: 2px;
             }
             .lrs-mobile-row-chevron {
                 flex-shrink: 0;
-                color: #30363d;
+                color: #555e6a;
             }
 
             /* ── MOBILE SEARCH BAR ── */
@@ -494,7 +502,7 @@ function renderResourceCards(data) {
                     font-family: 'Nunito', sans-serif;
                     transition: border-color 0.2s;
                 }
-                .lrs-mobile-search:focus { outline: none; border-color: #f28c38; }
+                .lrs-mobile-search:focus { outline: none; border-color: #68d391; }
                 .lrs-mobile-search::placeholder { color: #555e6a; }
             }
         </style>
