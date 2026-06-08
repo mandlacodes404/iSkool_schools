@@ -212,7 +212,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.2">
     <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2722,8 +2722,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=3.1"></script>
-<script src="assets/js/learner/quiz.js?v=6.2"></script>
-<script src="assets/js/learner/assignments.js?v=5.1"></script>
+<script src="assets/js/learner/quiz.js?v=6.3"></script>
+<script src="assets/js/learner/assignments.js?v=5.2"></script>
 <script src="assets/js/learner/resources.js?v=4.4"></script>
 <script src="assets/js/learner/announcements.js?v=4.3"></script>
 <script src="assets/js/learner/grades.js?v=3.0"></script>

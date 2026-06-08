@@ -560,14 +560,24 @@ function renderQuizCards(groupedData) {
                 gap: 12px;
                 padding: 13px 16px;
                 background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-bottom: 0;
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
                 cursor: pointer;
                 transition: border-color 0.2s, transform 0.2s;
+                position: relative;
             }
-            .lqz-mobile-row:last-child { border-bottom: none; }
+            .lqz-mobile-row::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 16px;
+                right: 16px;
+                height: 1px;
+                background: rgba(255,255,255,0.05);
+            }
+            .lqz-mobile-row:last-child::after { display: none; }
             .lqz-mobile-row:hover:not([style*="opacity"]) { border-color: rgba(104,211,145,0.2); transform: translateX(3px); }
             .lqz-mobile-row-icon {
                 width: 32px;
@@ -663,7 +673,7 @@ function renderQuizCards(groupedData) {
                     font-family: 'Nunito', sans-serif;
                     transition: border-color 0.2s;
                 }
-                .lqz-mobile-search:focus { outline: none; border-color: #68d391; }
+                .lqz-mobile-search:focus { outline: none; border-color: #fdd663; }
                 .lqz-mobile-search::placeholder { color: #555e6a; }
             }
         </style>
