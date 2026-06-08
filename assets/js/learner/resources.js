@@ -362,9 +362,20 @@ function renderResourceCards(data) {
             }
             .lrs-mobile-video-card {
                 background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-bottom: 0;
                 padding: 13px 16px;
+                position: relative;
             }
+            .lrs-mobile-video-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 16px;
+                right: 16px;
+                height: 1px;
+                background: rgba(255,255,255,0.05);
+            }
+            .lrs-mobile-video-card:last-child::after { display: none; }
             .lrs-mobile-video-title {
                 font-size: 14px;
                 font-weight: 700;
@@ -435,14 +446,24 @@ function renderResourceCards(data) {
                 gap: 12px;
                 padding: 13px 16px;
                 background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-bottom: 0;
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
                 cursor: pointer;
                 transition: border-color 0.2s, transform 0.2s;
+                position: relative;
             }
-            .lrs-mobile-row:last-child { border-bottom: none; }
+            .lrs-mobile-row::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 16px;
+                right: 16px;
+                height: 1px;
+                background: rgba(255,255,255,0.05);
+            }
+            .lrs-mobile-row:last-child::after { display: none; }
             .lrs-mobile-row:hover { border-color: rgba(242,140,56,0.2); transform: translateX(3px); }
             .lrs-mobile-row-icon {
                 width: 32px;
@@ -502,7 +523,7 @@ function renderResourceCards(data) {
                     font-family: 'Nunito', sans-serif;
                     transition: border-color 0.2s;
                 }
-                .lrs-mobile-search:focus { outline: none; border-color: #68d391; }
+                .lrs-mobile-search:focus { outline: none; border-color: #f28c38; }
                 .lrs-mobile-search::placeholder { color: #555e6a; }
             }
         </style>
