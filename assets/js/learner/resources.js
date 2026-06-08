@@ -367,7 +367,7 @@ function renderResourceCards(data) {
             }
             .lrs-mobile-video-title {
                 font-size: 14px;
-                font-weight: 600;
+                font-weight: 700;
                 color: #ffffff;
                 margin: 0 0 4px;
             }
@@ -391,7 +391,7 @@ function renderResourceCards(data) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 14px 16px;
+                padding: 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
@@ -401,16 +401,20 @@ function renderResourceCards(data) {
             .lrs-mobile-folder-icon { flex-shrink: 0; }
             .lrs-mobile-folder-name {
                 flex: 1;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: 16px;
+                font-weight: 800;
                 color: #e2e8f0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .lrs-mobile-folder-count {
-                font-size: 11px;
+                font-size: 12px;
                 color: #8b949e;
+                font-weight: 600;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 20px;
                 flex-shrink: 0;
             }
             .lrs-mobile-folder-chevron {
@@ -446,7 +450,7 @@ function renderResourceCards(data) {
             .lrs-mobile-row-body { flex: 1; min-width: 0; }
             .lrs-mobile-row-title {
                 font-size: 14px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #ffffff;
                 margin: 0;
                 white-space: nowrap;
@@ -456,7 +460,7 @@ function renderResourceCards(data) {
             .lrs-mobile-row-size {
                 font-size: 12px;
                 color: #8b949e;
-                margin-top: 2px;
+                margin-top: 3px;
             }
             .lrs-mobile-row-chevron {
                 flex-shrink: 0;

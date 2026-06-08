@@ -376,7 +376,7 @@ function renderAssignmentCards(groupedData) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 14px 16px;
+                padding: 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
@@ -386,16 +386,20 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-folder-icon { flex-shrink: 0; }
             .las-mobile-folder-name {
                 flex: 1;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: 16px;
+                font-weight: 800;
                 color: #e2e8f0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .las-mobile-folder-count {
-                font-size: 11px;
+                font-size: 12px;
                 color: #8b949e;
+                font-weight: 600;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 20px;
                 flex-shrink: 0;
             }
             .las-mobile-folder-chevron {
@@ -430,7 +434,7 @@ function renderAssignmentCards(groupedData) {
             .las-mobile-row-body { flex: 1; min-width: 0; }
             .las-mobile-row-title {
                 font-size: 14px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;
                 white-space: nowrap;
@@ -452,6 +456,11 @@ function renderAssignmentCards(groupedData) {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+            }
+            .las-mobile-row-meta {
+                font-size: 12px;
+                color: #8b949e;
+                margin-top: 3px;
             }
             .las-mobile-row-chevron {
                 flex-shrink: 0;
@@ -565,7 +574,7 @@ function renderAssignmentCards(groupedData) {
                         <div class="las-mobile-row-title">
                             <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
                         </div>
-                        <div class="las-mobile-row-meta" style="font-size:12px; color:${task.is_past_due ? '#6b7280' : (isDone ? '#a78bfa' : '#e67e22')}; margin-top:3px;">
+                        <div class="las-mobile-row-meta" style="color:${task.is_past_due ? '#6b7280' : (isDone ? '#a78bfa' : '#e67e22')};">
                             ${formatAssignmentDueDate(task.due_date)}
                         </div>
                     </div>

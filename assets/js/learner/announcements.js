@@ -433,7 +433,7 @@ function renderAnnouncements(data) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 14px 16px;
+                padding: 16px;
                 background: #1a1919;
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 cursor: pointer;
@@ -443,16 +443,20 @@ function renderAnnouncements(data) {
             .lan-mobile-folder-icon { flex-shrink: 0; }
             .lan-mobile-folder-name {
                 flex: 1;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: 16px;
+                font-weight: 800;
                 color: #e2e8f0;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .lan-mobile-folder-count {
-                font-size: 11px;
+                font-size: 12px;
                 color: #8b949e;
+                font-weight: 600;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 20px;
                 flex-shrink: 0;
             }
             .lan-mobile-folder-chevron {
@@ -494,7 +498,7 @@ function renderAnnouncements(data) {
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
                 font-size: 14px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;
                 line-height: 1.3;
