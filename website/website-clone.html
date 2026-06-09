@@ -744,12 +744,12 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
         <div class="trust-dot"></div>
         Built for Schools
       </div>
-      <h1 class="sr sr-d1">The learning management system <span>Schools</span><br>have been waiting for</h1>
+      <h1 class="sr sr-d1">Education, <span>beautifully</span><br>organised.</h1>
     </div>
     <div class="hero-right">
-      <p class="sr sr-d2">Quizzes with built-in AI invigilation. Assignments, gradebooks, syllabus tracking, and real-time analytics —  all in one place. Made in South Africa, for classrooms.</p>
+      <p class="sr sr-d2">Education deserves software that is simple, reliable, and built around the people who use it every day.</p>
       <div class="hero-buttons sr sr-d3">
-        <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>Explore the demo</button>
+        <button class="btn btn-outline" onclick="openDemoModal()" type="button"><span class="play-icon">&#9654;</span>Explore demo</button>
         <button class="btn btn-primary" onclick="openPilotForm()" type="button">Start free pilot &#8594;</button>
       </div>
     </div>
@@ -764,7 +764,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <div class="pill-switcher">
       <button class="pill-arrow" id="pill-prev" onclick="switchFeature(-1)" aria-label="Previous feature">&#8592;</button>
       <div class="pill-label-wrap">
-        <div class="pill-label" id="pill-label">Quizzes</div>
+        <div class="pill-label" id="pill-label">Assessment</div>
       </div>
       <button class="pill-arrow" id="pill-next" onclick="switchFeature(1)" aria-label="Next feature">&#8594;</button>
     </div>
@@ -1037,13 +1037,13 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 
     <!-- RIGHT COPY -->
     <div class="feature-copy">
-      <span class="copy-eyebrow" id="copy-eyebrow">Quizzes</span>
-      <h3 id="copy-heading">Run powerful quizzes with <span>AI watching over</span> every learner</h3>
-      <p id="copy-desc">Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.</p>
+      <span class="copy-eyebrow" id="copy-eyebrow">Confidence matters.</span>
+      <h3 id="copy-heading">Assessment is one of the most important <span>responsibilities in education.</span></h3>
+      <p id="copy-desc">We believe schools should be able to evaluate learning with consistency, integrity, and confidence — every time, for every learner.</p>
       <ul class="copy-bullets" id="copy-bullets">
-        <li><div class="bullet-check">✓</div>Live learner progress tracked question by question</li>
-        <li><div class="bullet-check">✓</div>Tab-switch &amp; browser exit detection built in</li>
-        <li><div class="bullet-check">✓</div>Auto-marked with instant results &amp; reports</li>
+        <li><div class="bullet-check">✓</div>Every assessment monitored in real time, question by question</li>
+        <li><div class="bullet-check">✓</div>Integrity built in, not bolted on</li>
+        <li><div class="bullet-check">✓</div>Results available the moment the last learner submits</li>
       </ul>
       
     </div>
@@ -1056,67 +1056,32 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 ═══════════════════════════════════════════ */
 const features = [
   {
-    label: 'Quizzes',
-    eyebrow: 'Quizzes',
-    heading: 'Run powerful quizzes with <span>AI watching over</span> every learner',
-    desc: "Build quizzes from your question bank, launch them live to your class, and let iSkool's AI invigilator handle integrity — so you can focus on what matters: teaching.",
-    bullets: ['See every learner\'s progress, question by question, in real time', 'Know immediately if a learner tried to leave the quiz', 'Results and integrity reports generated the moment the quiz closes']
+    label: 'Assessment',
+    eyebrow: 'Confidence matters.',
+    heading: 'Assessment is one of the most important <span>responsibilities in education.</span>',
+    desc: "We believe schools should be able to evaluate learning with consistency, integrity, and confidence — every time, for every learner.",
+    bullets: ['Every assessment monitored in real time, question by question', 'Integrity built in, not bolted on', 'Results available the moment the last learner submits']
   },
   {
-    label: 'Assignments',
-    eyebrow: 'Assignments',
-    heading: 'Set, track and mark <span>assignments with ease</span>',
-    desc: "Create assignments, set deadlines, and see submission progress across all your classes in one place. Stop chasing learners — iSkool tells you exactly who hasn't submitted.",
-    bullets: ['See at a glance who has submitted and who hasn\'t', 'Late submissions flagged automatically', 'Auto-marked with instant feedback sent to learners']
+    label: 'Teaching & Administration',
+    eyebrow: 'Time belongs in the classroom.',
+    heading: 'Educators already carry <span>enough administrative responsibility.</span>',
+    desc: "We believe technology should reduce repetitive work, giving teachers more time to focus on learners rather than paperwork.",
+    bullets: ['Submissions tracked automatically across every class', 'Marks calculated, symbols assigned, reports generated', 'Every record organised and always accessible']
   },
   {
-    label: 'AI Invigilator',
-    eyebrow: 'AI Invigilator',
-    heading: 'Every quiz watched in <span>real time</span>',
-    desc: "Running a quiz? iSkool watches every learner's session in real time — catching tab switches, browser exits, and focus loss the moment they happen. You'll have a full integrity report before you've even closed the browser.",
-    bullets: ['Know immediately if a learner tried to leave the quiz', 'Every anomaly logged per learner, per question', 'Full session integrity report generated automatically']
+    label: 'Visibility & Insights',
+    eyebrow: 'Better decisions begin with better visibility.',
+    heading: 'Schools generate valuable information <span>every day.</span>',
+    desc: "We believe educators should be able to understand what is happening across their classrooms without digging through spreadsheets and reports.",
+    bullets: ['Performance trends visible at a glance', 'Patterns that inform teaching, not just record it', 'A clear picture for teachers, HODs, and principals alike']
   },
   {
-    label: 'Gradebook',
-    eyebrow: 'Gradebook',
-    heading: 'Capture marks and <span>generate reports</span> in seconds',
-    desc: "No more Excel. Enter marks once — iSkool calculates averages, assigns symbols based on CAPS thresholds, and generates printable report cards for every learner automatically.",
-    bullets: ['Mark entries auto-calculate class and term averages', 'Symbols (A–F) assigned automatically using CAPS thresholds', 'Download a learner\'s full report card in one click']
-  },
-  {
-    label: 'Analytics',
-    eyebrow: 'Deep Analytics',
-    heading: "See every learner's story <span>at a glance</span>",
-    desc: "After every quiz, iSkool calculates pass rates, class averages, and which questions tripped learners up — automatically. No Excel. No formulas. Just the numbers you need, exactly when you need them.",
-    bullets: ['See pass rates per class, with term-on-term trends', 'Spot exactly which questions your learners struggled with', 'Dedicated analytics dashboard for principals and HODs']
-  },
-  {
-    label: 'Resources',
-    eyebrow: 'Resources',
-    heading: 'Upload notes, videos and worksheets <span>per topic</span>',
-    desc: "Link learning materials directly to CAPS topics. Learners find exactly what they need, when they need it — all organised by subject and grade, exactly as the DBE intended.",
-    bullets: ['Upload PDFs, videos and documents in seconds', 'Materials linked directly to CAPS syllabus topics', 'See which learners have viewed each resource']
-  },
-  {
-    label: 'Discussions',
-    eyebrow: 'Discussions',
-    heading: 'Foster class conversations <span>in a safe space</span>',
-    desc: "Run moderated class discussions where learners ask questions and teachers respond. No WhatsApp groups, no noise — just focused academic conversation that you control.",
-    bullets: ['Threaded discussions per class or subject', 'Teacher moderation and pinned replies', 'Learner participation tracked automatically']
-  },
-  {
-    label: 'Announcements',
-    eyebrow: 'Announcements',
-    heading: 'Keep learners and parents <span>always in the loop</span>',
-    desc: "Post announcements to specific classes, grades, or the whole school. See exactly who has read them — and follow up with those who haven't.",
-    bullets: ['Target by class, grade, or school-wide', 'Read receipts so nothing gets missed', 'Pinned notices stay top-of-feed']
-  },
-  {
-    label: 'Calendar',
-    eyebrow: 'Calendar',
-    heading: 'Stay on track with the <span>CAPS curriculum</span> all year',
-    desc: "Map every lesson, quiz, and assignment to the CAPS syllabus. Keep the whole school on the same page — and never fall behind the curriculum again.",
-    bullets: ['CAPS topic mapping for Grade 10–12', 'Events auto-synced to every learner\'s dashboard', 'Coverage progress tracked per class, per term']
+    label: 'Connected Learning',
+    eyebrow: 'Everything should work together.',
+    heading: 'Learning happens across people, <span>resources, and experiences.</span>',
+    desc: "We believe educational tools should feel connected rather than scattered across multiple systems that never quite speak to each other.",
+    bullets: ['Resources, discussions, and calendars in one place', 'Communication that reaches learners and parents reliably', 'A single environment the whole school can depend on']
   }
 ];
 
@@ -1132,17 +1097,12 @@ features.forEach((_, i) => {
   dotsWrap.appendChild(d);
 });
 
-/* ── Screen crossfade ── */
+/* ── Screen map: 4 pillars → existing animation panels ── */
 const screenMap = {
-  0: ['panel-0-a','panel-0-b','panel-0-c'],
-  1: ['panel-1-a','panel-1-b'],
-  2: ['panel-2-a'],
-  3: ['panel-3-a'],
-  4: ['panel-4-a'],
-  5: ['panel-5-a'],
-  6: ['panel-6-a'],
-  7: ['panel-7-a'],
-  8: ['panel-8-a']
+  0: ['panel-0-a','panel-0-b','panel-0-c','panel-2-a'],   // Assessment: Quizzes + AI Invigilator
+  1: ['panel-1-a','panel-1-b','panel-3-a'],                // Teaching & Admin: Assignments + Gradebook
+  2: ['panel-4-a'],                                         // Visibility & Insights: Analytics
+  3: ['panel-5-a','panel-6-a','panel-7-a','panel-8-a']     // Connected Learning: Resources + Discussions + Announcements + Calendar
 };
 
 function showScreen(ids, idx) {
@@ -1160,7 +1120,7 @@ function startCardCycle(panelIndex) {
   cycleTimers[panelIndex] = setInterval(() => {
     idx = (idx + 1) % ids.length;
     showScreen(ids, idx);
-  }, 3000);
+  }, 6000);
 }
 
 function stopCardCycle(panelIndex) {
@@ -1237,8 +1197,8 @@ function switchFeature(dir) {
 }
 
 /* ── Autoplay ── */
-const SUB_SCREEN_DURATION  = 3000;  // ms per sub-screen
-const SINGLE_SCREEN_DURATION = 4000; // ms for single-screen features
+const SUB_SCREEN_DURATION  = 6000;  // ms per sub-screen
+const SINGLE_SCREEN_DURATION = 6000; // ms for single-screen features
 
 let autoplayTimer = null;
 let resumeTimer   = null;
@@ -1273,6 +1233,7 @@ switchFeature = function(dir) {
 
 /* ── Init ── */
 startCardCycle(0);
+updateCopy(features[0]);
 scheduleNextFeature();
 
 function toggleMenu() {
@@ -2003,7 +1964,7 @@ setTimeout(gsRunGoLive, 1400);
       <div class="faq-item"><button class="faq-question">What about data security and backups?<span class="faq-icon">+</span></button><div class="faq-answer">All school and learner data is stored on South African servers, backed up daily, and handled in full compliance with POPIA. Your data never leaves the country.</div></div>
       <div class="faq-item"><button class="faq-question">How fast can we get started?<span class="faq-icon">+</span></button><div class="faq-answer">Most schools are fully set up and running within 5–7 working days of joining the pilot. We handle the configuration — you just share the access codes with your learners and go.</div></div>
     </div>
-    <div class="faq-cta sr sr-d2"><button class="faq-button" onclick="openPilotForm()" type="button" style="border:none;cursor:pointer;">Start free pilot →</button></div>
+    
   </div>
 </section>
 
