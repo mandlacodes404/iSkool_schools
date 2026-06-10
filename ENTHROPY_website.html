@@ -118,11 +118,15 @@
     opacity: 0;
   }
 
-  /* Mobile: hide text always */
+  /* Mobile: hide text always, make mark bigger */
   @media (max-width: 768px) {
     .logo-text-before,
     .logo-text-after {
       display: none;
+    }
+    .logo-mark {
+      width: 48px;
+      height: 48px;
     }
   }
 
@@ -874,8 +878,11 @@
       gap: 2.5rem;
     }
 
-    .smarties-card-left  { order: 2; }
+    .smarties-card-left  { order: 2; text-align: center; }
     .smarties-card-right { order: 1; }
+
+    .smarties-card-badge { margin-left: auto; margin-right: auto; }
+    .smarties-continue-reading { margin-left: auto; margin-right: auto; }
   }
 
   .smarties-card-badge {
