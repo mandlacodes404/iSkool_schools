@@ -1468,7 +1468,7 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
 }
 .footer-top {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 48px;
   max-width: 1100px;
   margin: 0 auto 64px;
@@ -1516,6 +1516,12 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
   text-align: center;
   width: 100%;
 }
+.footer-brand-link {
+  color: #8a8478;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-brand-link:hover { color: #ede8df; }
 .footer-bottom-row {
   display: flex;
   justify-content: center;
@@ -2060,6 +2066,16 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
       </ul>
     </div>
 
+    <!-- Research & Stories column -->
+    <div>
+      <p class="footer-col-title">Research &amp; Stories</p>
+      <ul class="footer-links">
+        <li><a href="story-dropout-crisis.html">South Africa's silent dropout crisis</a></li>
+        <li><a href="story-infrastructure.html">The digital divide in SA schools</a></li>
+        <li><a href="story-teacher-workload.html">The invisible teacher workload</a></li>
+      </ul>
+    </div>
+
   </div>
 
   <div class="footer-bottom">
@@ -2085,7 +2101,7 @@ document.querySelectorAll('.sr').forEach(el => srObserver.observe(el));
       </a>
     </div>
     <div class="footer-bottom-row">
-      <p class="footer-copy">© 2026 iSkool by ENTHROPY. All rights reserved.</p>
+      <p class="footer-copy">© 2026 iSkool by <a href="https://iskool.online/ENTHROPY_website.html" target="_blank" rel="noopener noreferrer" class="footer-brand-link">ENTHROPY</a>. All rights reserved.</p>
     </div>
   </div>
 </footer>
