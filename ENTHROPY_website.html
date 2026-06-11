@@ -1003,6 +1003,30 @@
     background: #EDE6D8;
   }
 
+  /* iSkool branded title — icon + wordmark */
+  .iskool-brand-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .iskool-brand-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .iskool-brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
   /* Smarties card — slightly different bg */
   .product-card.smarties {
     background: var(--ink);
@@ -1230,7 +1254,10 @@
       <a class="product-card iskool" href="#iskool" aria-label="Learn more about iSkool">
         <div>
           <div class="product-card-eyebrow">Flagship product · Currently piloting</div>
-          <h3 class="product-card-title"><em>iSkool</em></h3>
+          <h3 class="product-card-title iskool-brand-title">
+            <img src="icon.svg" alt="" class="iskool-brand-icon" aria-hidden="true" />
+            <span class="iskool-brand-name">iSkool</span>
+          </h3>
           <p class="product-card-desc">
             A learning management system built specifically for South African high schools — quizzes, assignments, resources, grades, and announcements, all in one place. Currently live at Landulwazi Comprehensive School.
           </p>
