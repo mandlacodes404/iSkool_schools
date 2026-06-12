@@ -974,8 +974,37 @@
     display: block;
   }
 
+  .iskool-animation-stage {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  .iskool-animation-stage .smarties-svg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  .iskool-animation-stage .smarties-svg-img.is-visible {
+    opacity: 1;
+  }
+
   @media (max-width: 768px) {
     .smarties-svg-img {
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .iskool-animation-stage {
       max-width: 320px;
       margin: 0 auto;
     }
@@ -1262,11 +1291,15 @@
 
         <!-- Right: animation placeholder -->
         <div class="smarties-card-right">
-          <img
-            src="iskool.svg"
-            alt="iSkool illustration"
-            class="smarties-svg-img"
-          />
+          <div class="iskool-animation-stage" aria-label="iSkool animated illustration">
+            <img
+              src="enthropy/africa.svg"
+              alt=""
+              class="smarties-svg-img"
+              id="iskool-animation-frame"
+              aria-hidden="true"
+            />
+          </div>
         </div>
 
       </div>
@@ -1545,6 +1578,111 @@
       cacheNaturalPos();
       updateCard();
     });
+  })();
+
+  /* ─── iSKOOL PRODUCT CARD SVG SEQUENCE ─── */
+  (function () {
+    var frame = document.getElementById('iskool-animation-frame');
+    if (!frame) return;
+
+    var entropyFrames = [
+      'africa.svg',
+      'backpacks.svg',
+      'bird.svg',
+      'boabab_tree.svg',
+      'books.svg',
+      'book_lightbulb.svg',
+      'book_wifi.svg',
+      'bulb_hat.svg',
+      'chalkboard.svg',
+      'classroom.svg',
+      'daughter_parents.svg',
+      'geometric_circles.svg',
+      'geometric_symbols.svg',
+      'graduation_hat.svg',
+      'holding_hands.svg',
+      'mountains.svg',
+      'pencil_ruler.svg',
+      'periodic_table.svg',
+      'plus_symbol.svg',
+      'sunrise.svg'
+    ].map(function (name) {
+      return 'enthropy/' + name;
+    });
+
+    var textLogo = 'enthropy/iskool_text.svg';
+    var markLogo = 'iskool.svg';
+    var fadeMs = 1000;
+    var textHoldMs = 3000;
+    var markVisibleMs = 23000;
+    var timers = [];
+
+    function wait(ms) {
+      return new Promise(function (resolve) {
+        timers.push(window.setTimeout(resolve, ms));
+      });
+    }
+
+    function setSource(src, restart) {
+      frame.src = restart ? src + '?v=' + Date.now() : src;
+    }
+
+    function show() {
+      frame.classList.add('is-visible');
+    }
+
+    function hide() {
+      frame.classList.remove('is-visible');
+    }
+
+    function frameDelay(index, total) {
+      var centre = (total - 1) / 2;
+      var distanceFromCentre = Math.abs(index - centre) / centre;
+      return 70 + Math.pow(distanceFromCentre, 1.8) * 260;
+    }
+
+    function preloadImages() {
+      entropyFrames.concat([textLogo, markLogo]).forEach(function (src) {
+        var img = new Image();
+        img.src = src;
+      });
+    }
+
+    async function runSequence() {
+      while (true) {
+        setSource(entropyFrames[0]);
+        show();
+        await wait(fadeMs);
+
+        for (var i = 1; i < entropyFrames.length; i++) {
+          await wait(frameDelay(i - 1, entropyFrames.length));
+          setSource(entropyFrames[i]);
+        }
+
+        await wait(frameDelay(entropyFrames.length - 1, entropyFrames.length));
+        hide();
+        await wait(fadeMs);
+
+        setSource(textLogo);
+        show();
+        await wait(fadeMs + textHoldMs);
+        hide();
+        await wait(fadeMs);
+
+        setSource(markLogo, true);
+        show();
+        await wait(markVisibleMs);
+        hide();
+        await wait(fadeMs);
+      }
+    }
+
+    window.addEventListener('beforeunload', function () {
+      timers.forEach(function (timer) { window.clearTimeout(timer); });
+    });
+
+    preloadImages();
+    runSequence();
   })();
 
 
