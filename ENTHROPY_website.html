@@ -207,7 +207,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: calc(var(--nav-h) + 4rem) 2rem 6rem;
+    padding: calc(var(--nav-h) + 1.5rem) 2rem 4rem;
     position: relative;
     overflow: hidden;
   }
@@ -377,7 +377,7 @@
 
   /* ─── SECTION WRAPPER ─── */
   .section {
-    padding: 8rem 2rem;
+    padding: 5rem 2rem;
     position: relative;
   }
 
@@ -658,7 +658,7 @@
   .mission-strip {
     background: var(--ink);
     color: var(--cream);
-    padding: 7rem 2rem;
+    padding: 5rem 2rem;
   }
 
   .mission-inner {
@@ -839,7 +839,7 @@
 
   /* ─── SMARTIES SCROLL-EXPAND SECTION ─── */
   .smarties-section {
-    padding: 6rem 0;
+    padding: 3.5rem 0;
     position: relative;
     background: transparent;
     overflow: visible;
@@ -893,6 +893,9 @@
 
     .smarties-card-badge { margin-left: auto; margin-right: auto; }
     .smarties-continue-reading { margin-left: auto; margin-right: auto; }
+
+    /* iSkool logo+name row: centre on mobile */
+    .smarties-card-title { justify-content: center; }
   }
 
   .smarties-card-badge {
@@ -1101,7 +1104,7 @@
     <!-- Nav links -->
     <nav aria-label="Main navigation">
       <ul class="nav-links" id="nav-links">
-        <li><a href="#products">Products</a></li>
+        <li><a href="#products">Our product</a></li>
         <li><a href="#research">Research</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#contact" class="nav-cta">Get in touch</a></li>
@@ -1153,7 +1156,7 @@
 
         <div class="hero-actions">
           <a href="#products" class="btn-primary">
-            Our products
+            Our product
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -1219,59 +1222,55 @@
 <section class="section" id="products" aria-labelledby="products-heading">
   <div class="section-inner">
 
-    <div class="section-label reveal">Our products</div>
+    <div class="section-label reveal">Our product</div>
 
     <div class="products-intro">
       <h2 class="products-headline reveal reveal-delay-1" id="products-heading">
-        Built for the classrooms and campuses of Africa
+        Built for the classrooms of Africa
       </h2>
       <p class="products-sub reveal reveal-delay-2">
-        Two products, one mission — giving every learner and institution the tools they deserve.
+        iSkool is our first product — a learning management system shaped around the real constraints and extraordinary potential of South African schools.
       </p>
     </div>
 
-    <div class="product-grid reveal reveal-delay-2">
+    <!-- iSkool single-product card (SMARTIES-style expand card) -->
+    <div class="smarties-expand-card reveal reveal-delay-2" id="iskool-product-card" style="background: #E8E0CC;">
+      <div class="smarties-bg-glow" aria-hidden="true"></div>
 
-      <!-- SMARTIES -->
-      <a class="product-card smarties" href="#smarties" aria-label="Learn more about SMARTIES">
-        <div>
-          <div class="product-card-eyebrow">Coming soon</div>
-          <div class="badge-coming">In development</div>
-          <h3 class="product-card-title"><em>SMARTIES</em></h3>
-          <p class="product-card-desc">
-            A private, institution-grade social and communications platform for universities. One space for faculties, student societies, sports clubs, and administration — no more scattered email chains or social media workarounds.
-          </p>
-        </div>
-        <span class="product-card-link" aria-hidden="true">
-          Learn more
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        <span class="card-number" aria-hidden="true">01</span>
-      </a>
+      <div class="smarties-expand-inner">
 
-      <!-- iSKOOL -->
-      <a class="product-card iskool" href="https://iskool.online" target="_blank" rel="noopener noreferrer" aria-label="Visit iSkool">
-        <div>
-          <div class="product-card-eyebrow">Flagship product · Currently piloting</div>
-          <h3 class="product-card-title iskool-brand-title">
-            <img src="icon.svg" alt="" class="iskool-brand-icon" aria-hidden="true" />
-            <span class="iskool-brand-name">iSkool</span>
-          </h3>
-          <p class="product-card-desc">
+        <!-- Left: identity & info -->
+        <div class="smarties-card-left">
+          <!-- iSkool logo lockup -->
+          <h2 class="smarties-card-title" style="font-style: normal; display: flex; align-items: center; gap: 12px;">
+            <img src="icon.svg" alt="" aria-hidden="true" style="width: 52px; height: 52px; flex-shrink: 0; display: block;" />
+            <span style="font-style: normal;">iSkool</span>
+          </h2>
+
+          <p class="smarties-card-subtitle">The classroom, connected.</p>
+
+          <p style="font-size: 0.95rem; color: var(--ink-soft); line-height: 1.75; max-width: 38ch; margin-bottom: 2rem;">
             A learning management system built specifically for South African high schools — quizzes, assignments, resources, grades, and announcements, all in one place. Currently live at Landulwazi Comprehensive School.
           </p>
-        </div>
-        <span class="product-card-link" aria-hidden="true">
-          Explore iSkool
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        <span class="card-number" aria-hidden="true">02</span>
-      </a>
 
+          <a href="https://iskool.online" target="_blank" rel="noopener noreferrer" class="smarties-continue-reading" aria-label="Explore iSkool">
+            Explore iSkool
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Right: animation placeholder -->
+        <div class="smarties-card-right">
+          <img
+            src="iskool.svg"
+            alt="iSkool illustration"
+            class="smarties-svg-img"
+          />
+        </div>
+
+      </div>
     </div>
   </div>
 </section>
@@ -1385,12 +1384,11 @@
         </ul>
       </div>
 
-      <!-- Products -->
+      <!-- Product -->
       <div class="footer-col">
-        <p class="footer-col-title">Products</p>
+        <p class="footer-col-title">Product</p>
         <ul>
           <li><a href="https://iskool.online" target="_blank" rel="noopener noreferrer">iSkool</a></li>
-          <li><a href="#smarties">SMARTIES</a></li>
           <li><a href="#">Request a pilot</a></li>
           <li><a href="#">For schools</a></li>
         </ul>
@@ -1495,7 +1493,62 @@
 
 })();
 
-  /* ─── SMARTIES SCROLL-EXPAND ─── */
+  /* ─── iSKOOL PRODUCT CARD SCROLL-EXPAND ─── */
+  (function () {
+    var card = document.getElementById('iskool-product-card');
+    if (!card) return;
+
+    var MAX_RADIUS = 24;
+    var ticking = false;
+    var naturalLeft  = null;
+    var naturalRight = null;
+
+    function cacheNaturalPos() {
+      card.style.marginLeft  = '0px';
+      card.style.marginRight = '0px';
+      var r = card.getBoundingClientRect();
+      naturalLeft  = r.left;
+      naturalRight = window.innerWidth - r.right;
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    function updateCard() {
+      if (naturalLeft === null) { cacheNaturalPos(); }
+      var cardRect = card.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var start = vh;
+      var end   = vh * 0.35;
+      var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
+      var t = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      var ml     = lerp(0, -naturalLeft,  t);
+      var mr     = lerp(0, -naturalRight, t);
+      var radius = lerp(MAX_RADIUS, 0, t);
+      card.style.marginLeft   = ml + 'px';
+      card.style.marginRight  = mr + 'px';
+      card.style.borderRadius = radius + 'px';
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+      if (!ticking) { requestAnimationFrame(updateCard); ticking = true; }
+    }, { passive: true });
+
+    window.addEventListener('resize', function () {
+      cacheNaturalPos();
+      requestAnimationFrame(updateCard);
+    }, { passive: true });
+
+    requestAnimationFrame(function () {
+      cacheNaturalPos();
+      updateCard();
+    });
+  })();
+
+
   (function () {
     var card = document.getElementById('smarties-card');
     if (!card) return;
