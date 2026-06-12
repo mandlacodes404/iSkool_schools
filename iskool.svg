@@ -8,75 +8,80 @@
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
 <style type="text/css">
-  g { fill: #E8E0CC; }
-  path {
-    fill: #E8E0CC;
-    animation-duration: 1s;
-    animation-fill-mode: forwards;
-    animation-timing-function: ease;
-    animation-iteration-count: 1;
+  :root {
+    --logo-initial: #E8E0CC;
+    --logo-red: #FF4C4C;
   }
-  path:nth-of-type(1) { animation-name: fill1; animation-delay: 0s; }
-  path:nth-of-type(2) { animation-name: fill2; animation-delay: 1s; }
-  path:nth-of-type(3) { animation-name: fill3; animation-delay: 2s; }
-  path:nth-of-type(4) { animation-name: fill4; animation-delay: 3s; }
-  path:nth-of-type(5) { animation-name: fill5; animation-delay: 4s; }
-  path:nth-of-type(6) { animation-name: fill6; animation-delay: 5s; }
-  path:nth-of-type(7) { animation-name: fill7; animation-delay: 6s; }
-  path:nth-of-type(8) { animation-name: fill8; animation-delay: 7s; }
-  path:nth-of-type(9) { animation-name: fill9; animation-delay: 8s; }
-  path:nth-of-type(10) { animation-name: fill10; animation-delay: 9s; }
-  path:nth-of-type(11) { animation-name: fill11; animation-delay: 10s; }
-  path:nth-of-type(12) { animation-name: fill12; animation-delay: 11s; }
-  path:nth-of-type(13) { animation-name: fill13; animation-delay: 12s; }
-  path:nth-of-type(14) { animation-name: fill14; animation-delay: 13s; }
-  path:nth-of-type(15) { animation-name: fill15; animation-delay: 14s; }
-  path:nth-of-type(16) { animation-name: fill16; animation-delay: 15s; }
-  path:nth-of-type(17) { animation-name: fill17; animation-delay: 16s; }
-  path:nth-of-type(18) { animation-name: fill18; animation-delay: 17s; }
-  path:nth-of-type(19) { animation-name: fill19; animation-delay: 18s; }
-  path:nth-of-type(20) { animation-name: fill20; animation-delay: 19s; }
-  path:nth-of-type(21) { animation-name: fill21; animation-delay: 20s; }
-  path:nth-of-type(22) { animation-name: fill22; animation-delay: 21s; }
-  path:nth-of-type(23) { animation-name: fill23; animation-delay: 22s; }
-  path:nth-of-type(24) { animation-name: fill24; animation-delay: 23s; }
-  path:nth-of-type(25) { animation-name: fill25; animation-delay: 24s; }
-  path:nth-of-type(26) { animation-name: fill26; animation-delay: 25s; }
-  path:nth-of-type(27) { animation-name: fill27; animation-delay: 26s; }
-  path:nth-of-type(28) { animation-name: fill28; animation-delay: 27s; }
-  path:nth-of-type(29) { animation-name: fill29; animation-delay: 28s; }
-  path:nth-of-type(30) { animation-name: fill30; animation-delay: 29s; }
+  g { fill: var(--logo-initial); }
+  path {
+    fill: var(--logo-initial);
+    animation-duration: 24s;
+    animation-fill-mode: both;
+    animation-timing-function: ease;
+    animation-iteration-count: infinite;
+  }
 
-  @keyframes fill1 { from { fill: #ffffff; } to { fill: #FF4C4C; } }
-  @keyframes fill2 { from { fill: #ffffff; } to { fill: #FF9A56; } }
-  @keyframes fill3 { from { fill: #ffffff; } to { fill: #FFD166; } }
-  @keyframes fill4 { from { fill: #ffffff; } to { fill: #06D6A0; } }
-  @keyframes fill5 { from { fill: #ffffff; } to { fill: #118AB2; } }
-  @keyframes fill6 { from { fill: #ffffff; } to { fill: #073B4C; } }
-  @keyframes fill7 { from { fill: #ffffff; } to { fill: #EF476F; } }
-  @keyframes fill8 { from { fill: #ffffff; } to { fill: #FFC43D; } }
-  @keyframes fill9 { from { fill: #ffffff; } to { fill: #06B6D4; } }
-  @keyframes fill10 { from { fill: #ffffff; } to { fill: #5F2EEA; } }
-  @keyframes fill11 { from { fill: #ffffff; } to { fill: #4CC9F0; } }
-  @keyframes fill12 { from { fill: #ffffff; } to { fill: #3A86FF; } }
-  @keyframes fill13 { from { fill: #ffffff; } to { fill: #8338EC; } }
-  @keyframes fill14 { from { fill: #ffffff; } to { fill: #FB5607; } }
-  @keyframes fill15 { from { fill: #ffffff; } to { fill: #FF006E; } }
-  @keyframes fill16 { from { fill: #ffffff; } to { fill: #8CE99A; } }
-  @keyframes fill17 { from { fill: #ffffff; } to { fill: #FFD43B; } }
-  @keyframes fill18 { from { fill: #ffffff; } to { fill: #40C057; } }
-  @keyframes fill19 { from { fill: #ffffff; } to { fill: #339AF0; } }
-  @keyframes fill20 { from { fill: #ffffff; } to { fill: #1C7ED6; } }
-  @keyframes fill21 { from { fill: #ffffff; } to { fill: #5B21B6; } }
-  @keyframes fill22 { from { fill: #ffffff; } to { fill: #D9480F; } }
-  @keyframes fill23 { from { fill: #ffffff; } to { fill: #F97316; } }
-  @keyframes fill24 { from { fill: #ffffff; } to { fill: #9333EA; } }
-  @keyframes fill25 { from { fill: #ffffff; } to { fill: #E11D48; } }
-  @keyframes fill26 { from { fill: #ffffff; } to { fill: #22C55E; } }
-  @keyframes fill27 { from { fill: #ffffff; } to { fill: #0EA5E9; } }
-  @keyframes fill28 { from { fill: #ffffff; } to { fill: #F59E0B; } }
-  @keyframes fill29 { from { fill: #ffffff; } to { fill: #F43F5E; } }
-  @keyframes fill30 { from { fill: #ffffff; } to { fill: #14B8A6; } }
+  path:nth-of-type(1) { animation-name: logo-loop-1; }
+  path:nth-of-type(2) { animation-name: logo-loop-2; }
+  path:nth-of-type(3) { animation-name: logo-loop-3; }
+  path:nth-of-type(4) { animation-name: logo-loop-4; }
+  path:nth-of-type(5) { animation-name: logo-loop-5; }
+  path:nth-of-type(6) { animation-name: logo-loop-6; }
+  path:nth-of-type(7) { animation-name: logo-loop-7; }
+  path:nth-of-type(8) { animation-name: logo-loop-8; }
+  path:nth-of-type(9) { animation-name: logo-loop-9; }
+  path:nth-of-type(10) { animation-name: logo-loop-10; }
+  path:nth-of-type(11) { animation-name: logo-loop-11; }
+  path:nth-of-type(12) { animation-name: logo-loop-12; }
+  path:nth-of-type(13) { animation-name: logo-loop-13; }
+  path:nth-of-type(14) { animation-name: logo-loop-14; }
+  path:nth-of-type(15) { animation-name: logo-loop-15; }
+  path:nth-of-type(16) { animation-name: logo-loop-16; }
+  path:nth-of-type(17) { animation-name: logo-loop-17; }
+  path:nth-of-type(18) { animation-name: logo-loop-18; }
+  path:nth-of-type(19) { animation-name: logo-loop-19; }
+  path:nth-of-type(20) { animation-name: logo-loop-20; }
+  path:nth-of-type(21) { animation-name: logo-loop-21; }
+  path:nth-of-type(22) { animation-name: logo-loop-22; }
+  path:nth-of-type(23) { animation-name: logo-loop-23; }
+  path:nth-of-type(24) { animation-name: logo-loop-24; }
+  path:nth-of-type(25) { animation-name: logo-loop-25; }
+  path:nth-of-type(26) { animation-name: logo-loop-26; }
+  path:nth-of-type(27) { animation-name: logo-loop-27; }
+  path:nth-of-type(28) { animation-name: logo-loop-28; }
+  path:nth-of-type(29) { animation-name: logo-loop-29; }
+  path:nth-of-type(30) { animation-name: logo-loop-30; }
+
+  @keyframes logo-loop-1 { 0% { fill: #ffffff; } 4.167%, 64.583% { fill: #FF4C4C; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-2 { 0%, 2.082% { fill: var(--logo-initial); } 2.083% { fill: #ffffff; } 6.250%, 64.583% { fill: #FF9A56; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-3 { 0%, 4.166% { fill: var(--logo-initial); } 4.167% { fill: #ffffff; } 8.333%, 64.583% { fill: #FFD166; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-4 { 0%, 6.249% { fill: var(--logo-initial); } 6.250% { fill: #ffffff; } 10.417%, 64.583% { fill: #06D6A0; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-5 { 0%, 8.332% { fill: var(--logo-initial); } 8.333% { fill: #ffffff; } 12.500%, 64.583% { fill: #118AB2; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-6 { 0%, 10.416% { fill: var(--logo-initial); } 10.417% { fill: #ffffff; } 14.583%, 64.583% { fill: #073B4C; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-7 { 0%, 12.499% { fill: var(--logo-initial); } 12.500% { fill: #ffffff; } 16.667%, 64.583% { fill: #EF476F; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-8 { 0%, 14.582% { fill: var(--logo-initial); } 14.583% { fill: #ffffff; } 18.750%, 64.583% { fill: #FFC43D; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-9 { 0%, 16.666% { fill: var(--logo-initial); } 16.667% { fill: #ffffff; } 20.833%, 64.583% { fill: #06B6D4; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-10 { 0%, 18.749% { fill: var(--logo-initial); } 18.750% { fill: #ffffff; } 22.917%, 64.583% { fill: #5F2EEA; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-11 { 0%, 20.832% { fill: var(--logo-initial); } 20.833% { fill: #ffffff; } 25.000%, 64.583% { fill: #4CC9F0; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-12 { 0%, 22.916% { fill: var(--logo-initial); } 22.917% { fill: #ffffff; } 27.083%, 64.583% { fill: #3A86FF; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-13 { 0%, 24.999% { fill: var(--logo-initial); } 25.000% { fill: #ffffff; } 29.167%, 64.583% { fill: #8338EC; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-14 { 0%, 27.082% { fill: var(--logo-initial); } 27.083% { fill: #ffffff; } 31.250%, 64.583% { fill: #FB5607; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-15 { 0%, 29.166% { fill: var(--logo-initial); } 29.167% { fill: #ffffff; } 33.333%, 64.583% { fill: #FF006E; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-16 { 0%, 31.249% { fill: var(--logo-initial); } 31.250% { fill: #ffffff; } 35.417%, 64.583% { fill: #8CE99A; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-17 { 0%, 33.332% { fill: var(--logo-initial); } 33.333% { fill: #ffffff; } 37.500%, 64.583% { fill: #FFD43B; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-18 { 0%, 35.416% { fill: var(--logo-initial); } 35.417% { fill: #ffffff; } 39.583%, 64.583% { fill: #40C057; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-19 { 0%, 37.499% { fill: var(--logo-initial); } 37.500% { fill: #ffffff; } 41.667%, 64.583% { fill: #339AF0; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-20 { 0%, 39.582% { fill: var(--logo-initial); } 39.583% { fill: #ffffff; } 43.750%, 64.583% { fill: #1C7ED6; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-21 { 0%, 41.666% { fill: var(--logo-initial); } 41.667% { fill: #ffffff; } 45.833%, 64.583% { fill: #5B21B6; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-22 { 0%, 43.749% { fill: var(--logo-initial); } 43.750% { fill: #ffffff; } 47.917%, 64.583% { fill: #D9480F; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-23 { 0%, 45.832% { fill: var(--logo-initial); } 45.833% { fill: #ffffff; } 50.000%, 64.583% { fill: #F97316; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-24 { 0%, 47.916% { fill: var(--logo-initial); } 47.917% { fill: #ffffff; } 52.083%, 64.583% { fill: #9333EA; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-25 { 0%, 49.999% { fill: var(--logo-initial); } 50.000% { fill: #ffffff; } 54.167%, 64.583% { fill: #E11D48; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-26 { 0%, 52.082% { fill: var(--logo-initial); } 52.083% { fill: #ffffff; } 56.250%, 64.583% { fill: #22C55E; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-27 { 0%, 54.166% { fill: var(--logo-initial); } 54.167% { fill: #ffffff; } 58.333%, 64.583% { fill: #0EA5E9; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-28 { 0%, 56.249% { fill: var(--logo-initial); } 56.250% { fill: #ffffff; } 60.417%, 64.583% { fill: #F59E0B; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-29 { 0%, 58.332% { fill: var(--logo-initial); } 58.333% { fill: #ffffff; } 62.500%, 64.583% { fill: #F43F5E; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
+  @keyframes logo-loop-30 { 0%, 60.416% { fill: var(--logo-initial); } 60.417% { fill: #ffffff; } 64.583% { fill: #14B8A6; } 70.833% { fill: var(--logo-initial); } 83.333%, 100% { fill: var(--logo-red); } }
 </style>
 <g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)"
 fill="#ffffff" stroke="none">
