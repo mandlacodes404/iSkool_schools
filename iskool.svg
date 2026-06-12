@@ -8,9 +8,9 @@
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
 <style type="text/css">
-  g { fill: #ffffff; }
+  g { fill: #E8E0CC; }
   path {
-    fill: #ffffff;
+    fill: #E8E0CC;
     animation-duration: 1s;
     animation-fill-mode: forwards;
     animation-timing-function: ease;
