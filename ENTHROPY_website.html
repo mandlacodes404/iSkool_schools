@@ -1601,6 +1601,7 @@
       'geometric_symbols.svg',
       'graduation_hat.svg',
       'holding_hands.svg',
+      'iskool_text.svg',
       'mountains.svg',
       'pencil_ruler.svg',
       'periodic_table.svg',
@@ -1610,11 +1611,10 @@
       return 'enthropy/' + name;
     });
 
-    var textLogo = 'enthropy/iskool_text.svg';
     var markLogo = 'iskool.svg';
     var fadeMs = 1000;
-    var textHoldMs = 3000;
-    var markVisibleMs = 23000;
+    var frameMs = 320;
+    var markVisibleMs = 8000;
     var timers = [];
 
     function wait(ms) {
@@ -1631,49 +1631,34 @@
       frame.classList.add('is-visible');
     }
 
-    function hide() {
-      frame.classList.remove('is-visible');
-    }
-
-    function frameDelay(index, total) {
-      var centre = (total - 1) / 2;
-      var distanceFromCentre = Math.abs(index - centre) / centre;
-      return 70 + Math.pow(distanceFromCentre, 1.8) * 260;
-    }
-
     function preloadImages() {
-      entropyFrames.concat([textLogo, markLogo]).forEach(function (src) {
+      entropyFrames.concat([markLogo]).forEach(function (src) {
         var img = new Image();
         img.src = src;
       });
     }
 
     async function runSequence() {
+      var hasFadedIn = false;
+
       while (true) {
         setSource(entropyFrames[0]);
-        show();
-        await wait(fadeMs);
+        if (!hasFadedIn) {
+          show();
+          await wait(fadeMs);
+          hasFadedIn = true;
+        } else {
+          await wait(frameMs);
+        }
 
         for (var i = 1; i < entropyFrames.length; i++) {
-          await wait(frameDelay(i - 1, entropyFrames.length));
+          await wait(frameMs);
           setSource(entropyFrames[i]);
         }
 
-        await wait(frameDelay(entropyFrames.length - 1, entropyFrames.length));
-        hide();
-        await wait(fadeMs);
-
-        setSource(textLogo);
-        show();
-        await wait(fadeMs + textHoldMs);
-        hide();
-        await wait(fadeMs);
-
+        await wait(frameMs);
         setSource(markLogo, true);
-        show();
         await wait(markVisibleMs);
-        hide();
-        await wait(fadeMs);
       }
     }
 
