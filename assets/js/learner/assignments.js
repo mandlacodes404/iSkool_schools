@@ -566,11 +566,11 @@ function renderAssignmentCards(groupedData) {
                 </div>
                 <span class="las-mobile-folder-name">${escapeLearnerAssignmentHtml(teacher)}</span>
                 <span class="las-mobile-folder-count">${tasks.length} assignment${tasks.length !== 1 ? 's' : ''}</span>
-                <svg class="las-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                <svg class="las-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </div>
-            <div class="las-mobile-folder-body" id="${gid}">`;
+            <div class="las-mobile-folder-body collapsed" id="${gid}">`;
         mobileGroupIdx++;
 
         tasks.forEach(task => {

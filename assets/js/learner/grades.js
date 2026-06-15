@@ -630,12 +630,12 @@ function renderGrades(data) {
                         ${escHtml(group.group)}
                         <span class="subject-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
                     </div>
-                    <svg class="subject-chevron open" id="scard-chev-${gi}"
+                    <svg class="subject-chevron" id="scard-chev-${gi}"
                          viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </div>
-                <div id="scard-body-${gi}">
+                <div id="scard-body-${gi}" style="display:none;">
                     <div class="view-toggle-bar">
                         <button class="view-toggle-btn active-view" id="vt-list-${gi}"
                                 onclick="switchGradesView(${gi},'list')">

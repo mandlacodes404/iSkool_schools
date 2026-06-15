@@ -631,11 +631,11 @@ function renderAnnouncements(data) {
                 </div>
                 <span class="lan-mobile-folder-name">School-wide</span>
                 <span class="lan-mobile-folder-count">${schoolWide.length} announcement${schoolWide.length !== 1 ? 's' : ''}</span>
-                <svg class="lan-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </div>
-            <div class="lan-mobile-folder-body" id="${swGid}">`;
+            <div class="lan-mobile-folder-body collapsed" id="${swGid}">`;
 
         schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
@@ -681,11 +681,11 @@ function renderAnnouncements(data) {
                     </div>
                     <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
                     <span class="lan-mobile-folder-count">${items.length} announcement${items.length !== 1 ? 's' : ''}</span>
-                    <svg class="lan-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </div>
-                <div class="lan-mobile-folder-body" id="${tGid}">`;
+                <div class="lan-mobile-folder-body collapsed" id="${tGid}">`;
             teacherGroupIdx++;
             items.forEach(ann => {
                 const isNew = new Date(ann.created_at) > sevenDaysAgo;

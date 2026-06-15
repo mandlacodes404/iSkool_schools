@@ -574,11 +574,11 @@ function renderResourceCards(data) {
                 </div>
                 <span class="lrs-mobile-folder-name">${teacher}</span>
                 <span class="lrs-mobile-folder-count">${files.length} file${files.length !== 1 ? 's' : ''}</span>
-                <svg class="lrs-mobile-folder-chevron open" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                <svg class="lrs-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </div>
-            <div class="lrs-mobile-folder-body" id="${gid}">`;
+            <div class="lrs-mobile-folder-body collapsed" id="${gid}">`;
         mobileGroupIdx++;
         files.forEach(file => {
             const isVideo = file.resource_type === 'video';
