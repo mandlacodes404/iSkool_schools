@@ -382,12 +382,19 @@
   }
   .product-preview-link:hover { background: var(--terra-dim); transform: translateY(-1px); }
   .product-placeholder-visual {
-    aspect-ratio: 1;
-    background: rgba(26,23,20,0.06);
-    border-radius: 12px;
+    aspect-ratio: 3 / 4;
+    background: transparent;
+    border-radius: 16px;
+    overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }
-  .product-placeholder-visual svg { opacity: 0.18; }
+  .product-placeholder-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+  }
 
   /* ─── VALUES ─── */
   .values-list {
@@ -766,20 +773,9 @@
           </svg>
         </a>
       </div>
-      <!-- Right: decorative mark -->
-      <div class="product-placeholder-visual" aria-hidden="true">
-        <svg viewBox="0 0 1254 1254" fill="none" xmlns="http://www.w3.org/2000/svg" width="200" height="200">
-          <g transform="translate(0,1254) scale(0.1,-0.1)" fill="var(--ink)">
-            <path d="M3620 10739 c-408 -51 -823 -276 -1108 -599 -267 -303 -441 -710 -459 -1077 l-6 -113 907 0 906 0 0 900 0 900 -87 -1 c-49 -1 -117 -5 -153 -10z"/>
-            <path d="M5090 10735 c-342 -69 -616 -338 -700 -687 -30 -123 -28 -295 5 -423 83 -328 312 -558 660 -662 56 -17 133 -18 1225 -18 l1165 0 78 23 c160 46 274 111 395 226 306 291 369 752 151 1118 -129 219 -342 368 -602 423 -96 21 -2276 20 -2377 0z"/>
-            <path d="M8690 9851 l0 -901 900 0 900 0 0 68 c0 89 -32 282 -69 412 -55 196 -127 352 -238 520 -179 270 -426 482 -733 629 -224 107 -418 159 -632 168 l-128 6 0 -902z"/>
-            <path d="M2783 8546 c-104 -20 -174 -44 -262 -88 -266 -137 -453 -408 -490 -713 -15 -122 -15 -2477 -1 -2594 68 -541 603 -908 1125 -771 275 73 505 273 615 536 67 162 64 80 68 1454 2 846 0 1281 -8 1358 -37 389 -284 689 -656 797 -111 32 -283 42 -391 21z"/>
-            <path d="M9465 8551 c-316 -53 -570 -244 -701 -526 -66 -142 -79 -210 -79 -400 1 -164 2 -173 33 -265 97 -290 340 -512 652 -594 36 -10 117 -20 180 -23 428 -19 800 262 916 693 28 103 26 339 -4 449 -86 313 -343 568 -652 645 -94 24 -265 34 -345 21z"/>
-            <path d="M5095 4015 c-190 -42 -340 -128 -476 -273 -219 -233 -303 -550 -227 -847 83 -322 321 -565 644 -657 114 -32 343 -32 459 0 438 121 728 545 676 986 -48 400 -329 707 -724 791 -84 18 -271 18 -352 0z"/>
-            <path d="M2045 3991 c-3 -6 -1 -61 5 -123 62 -657 452 -1215 1042 -1493 202 -94 424 -151 631 -162 l127 -6 0 896 0 897 -899 0 c-553 0 -902 -4 -906 -9z"/>
-            <path d="M8682 3103 l3 -898 95 3 c363 13 740 158 1036 397 389 316 638 798 671 1297 l6 98 -907 0 -906 0 2 -897z"/>
-          </g>
-        </svg>
+      <!-- Right: iSkool logo image -->
+      <div class="product-placeholder-visual">
+        <img src="about_iskool_logo.png" alt="iSkool — school management platform" />
       </div>
     </div>
 
