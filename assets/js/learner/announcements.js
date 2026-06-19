@@ -170,7 +170,7 @@ function renderAnnouncements(data) {
     if (hasSchoolWide) {
         sidebarHtml += `
             <div class="lan-sidebar-section-label lan-section-school">
-                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; shape-rendering:geometricPrecision">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
@@ -183,7 +183,7 @@ function renderAnnouncements(data) {
                 <div class="lan-sidebar-item lan-sidebar-item--school" id="lan-sidebar-${flatIdx}"
                     onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                     <div class="lan-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
@@ -202,7 +202,7 @@ function renderAnnouncements(data) {
     if (hasTeacher) {
         sidebarHtml += `
             <div class="lan-sidebar-section-label lan-section-teacher" style="margin-top:${hasSchoolWide ? '8px' : '0'}">
-                <svg viewBox="0 0 24 24" width="10" height="10" stroke="#4fd1c5" stroke-width="2.5" fill="none" style="flex-shrink:0;">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; shape-rendering:geometricPrecision">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                     <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                 </svg>
@@ -217,7 +217,7 @@ function renderAnnouncements(data) {
                     <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
                         onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                         <div class="lan-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>
@@ -593,7 +593,7 @@ function renderAnnouncements(data) {
             </div>
             <div class="lan-main-panel" id="lan-main-panel">
                 <div class="lan-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                     </svg>
@@ -607,7 +607,7 @@ function renderAnnouncements(data) {
     if (hasSchoolWide || hasTeacher) {
         html += `
         <div class="lan-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="lan-mobile-search" id="lanMobileSearch"
@@ -631,7 +631,7 @@ function renderAnnouncements(data) {
                 </div>
                 <span class="lan-mobile-folder-name">School-wide</span>
                 <span class="lan-mobile-folder-count">${schoolWide.length} announcement${schoolWide.length !== 1 ? 's' : ''}</span>
-                <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </div>
@@ -645,7 +645,7 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
@@ -657,7 +657,7 @@ function renderAnnouncements(data) {
                         <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
                     <div class="lan-mobile-card-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </div>
@@ -681,7 +681,7 @@ function renderAnnouncements(data) {
                     </div>
                     <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
                     <span class="lan-mobile-folder-count">${items.length} announcement${items.length !== 1 ? 's' : ''}</span>
-                    <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </div>
@@ -695,7 +695,7 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>
@@ -707,7 +707,7 @@ function renderAnnouncements(data) {
                             <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
                         <div class="lan-mobile-card-chevron">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </div>
@@ -796,11 +796,11 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const detailIcon = isSchool
-        ? `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
+        ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
            </svg>`
-        : `<svg viewBox="0 0 24 24" width="11" height="11" stroke="#f28c38" stroke-width="2.5" fill="none">
+        : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
            </svg>`;
@@ -909,7 +909,7 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
                 <div>
                     ${isSchool ? `
                         <div class="lan-school-wide-badge">
-                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#d29522" stroke-width="2.5" fill="none">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                                 <polyline points="9 22 9 12 15 12 15 22"/>
                             </svg>
