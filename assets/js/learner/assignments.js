@@ -585,8 +585,12 @@ function renderAssignmentCards(groupedData) {
                     style="${task.is_past_due ? 'opacity:0.65;' : ''}">
                     <div class="las-mobile-row-icon">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <rect x="4" y="3" width="11" height="18" rx="1.5"></rect>
+                            <rect x="7" y="6.3" width="5" height="3" rx="0.6"></rect>
+                            <line x1="7" y1="13" x2="11" y2="13"></line>
+                            <line x1="7" y1="16" x2="10" y2="16"></line>
+                            <path d="M20.6283 13.1654A1.2685 1.2685 0 0 0 18.8346 11.3713L12.8289 17.3783A0.9 0.9 0 0 0 12.6039 17.7518L12.0095 19.7102A0.225 0.225 0 0 0 12.2898 19.9901L14.2487 19.3961A0.9 0.9 0 0 0 14.6222 19.1725Z"></path>
+                            <path d="M17.85 12.35L19.65 14.15"></path>
                         </svg>
                     </div>
                     <div class="las-mobile-row-body">
