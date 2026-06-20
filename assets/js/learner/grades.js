@@ -1387,59 +1387,378 @@ function renderProgressReport(data) {
         const style = document.createElement('style');
         style.id = 'pr-styles';
         style.textContent = `
-            .pr-wrap { max-width: 860px; margin: 0 auto; padding-bottom: 60px; font-family: 'Nunito', sans-serif; }
-            .pr-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
-            .pr-back-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
+            /* ── PROGRESS REPORT WRAP ── */
+            .pr-wrap {
+                max-width: 680px;
+                margin: 0 auto;
+                padding-bottom: 60px;
+                font-family: 'Nunito', sans-serif;
+                box-sizing: border-box;
+            }
+
+            /* ── TOPBAR ── */
+            .pr-topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .pr-back-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #c9d1d9;
+                padding: 9px 16px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: 'Nunito', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
             .pr-back-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
-            .pr-print-btn { display: inline-flex; align-items: center; gap: 7px; background: rgba(104,211,145,0.1); border: 1px solid rgba(104,211,145,0.3); color: #68d391; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; }
+            .pr-print-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                background: rgba(104,211,145,0.1);
+                border: 1px solid rgba(104,211,145,0.3);
+                color: #68d391;
+                padding: 9px 16px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: 'Nunito', sans-serif;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
             .pr-print-btn:hover { background: rgba(104,211,145,0.2); }
-            .pr-hero { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 24px; position: relative; overflow: hidden; }
-            .pr-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #68d391, #22c55e, #4e79a7); }
-            .pr-logo { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; background: rgba(255,255,255,0.05); }
-            .pr-hero-info { flex: 1; }
-            .pr-school-name { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #68d391; margin-bottom: 6px; }
-            .pr-learner-name { font-size: 22px; font-weight: 900; color: #e2e8f0; margin-bottom: 4px; }
-            .pr-learner-meta { font-size: 13px; color: #8b949e; }
-            .pr-overall-badge { text-align: center; flex-shrink: 0; }
-            .pr-overall-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid; margin-bottom: 6px; }
-            .pr-overall-pct { font-size: 22px; font-weight: 900; line-height: 1; }
-            .pr-overall-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8b949e; margin-top: 2px; }
-            .pr-overall-sub { font-size: 11px; color: #8b949e; }
-            .pr-term-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-            .pr-term-tab { flex: 1; padding: 10px; text-align: center; background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
-            .pr-term-tab:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); }
-            .pr-term-tab.active { background: rgba(104,211,145,0.08); border-color: rgba(104,211,145,0.35); }
-            .pr-term-tab-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8b949e; margin-bottom: 4px; }
+
+            /* ── MAIN CARD ── */
+            .pr-card {
+                background: #161b22;
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 16px;
+                overflow: hidden;
+                margin-bottom: 20px;
+            }
+
+            /* ── SCHOOL BAND (coloured top strip) ── */
+            .pr-school-band {
+                background: #0d5c3a;
+                padding: 18px 22px;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+            .pr-logo-wrap {
+                width: 46px;
+                height: 46px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                overflow: hidden;
+                border: 2px solid rgba(255,255,255,0.2);
+            }
+            .pr-logo {
+                width: 46px;
+                height: 46px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            .pr-logo-fallback {
+                font-size: 20px;
+                color: rgba(255,255,255,0.9);
+            }
+            .pr-school-name {
+                font-size: 15px;
+                font-weight: 800;
+                color: #d1fae5;
+                margin: 0;
+                line-height: 1.2;
+            }
+            .pr-school-sub {
+                font-size: 12px;
+                color: #6ee7b7;
+                margin-top: 3px;
+            }
+
+            /* ── STUDENT ROW ── */
+            .pr-student-row {
+                padding: 18px 22px;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .pr-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: rgba(104,211,145,0.12);
+                border: 1px solid rgba(104,211,145,0.25);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 17px;
+                font-weight: 800;
+                color: #68d391;
+                flex-shrink: 0;
+                letter-spacing: -0.5px;
+            }
+            .pr-learner-name {
+                font-size: 17px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 3px;
+                line-height: 1.2;
+            }
+            .pr-learner-meta {
+                font-size: 13px;
+                color: #8b949e;
+            }
+            .pr-status-badge {
+                margin-left: auto;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: rgba(34,197,94,0.12);
+                border: 1px solid rgba(34,197,94,0.25);
+                color: #22c55e;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 5px 12px;
+                border-radius: 20px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            /* ── AVERAGE STRIP ── */
+            .pr-avg-strip {
+                padding: 16px 22px;
+                display: flex;
+                align-items: center;
+                gap: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+                flex-wrap: wrap;
+            }
+            .pr-avg-block { padding-right: 24px; }
+            .pr-avg-label { font-size: 12px; color: #8b949e; margin-bottom: 3px; }
+            .pr-avg-num {
+                font-size: 32px;
+                font-weight: 900;
+                color: #22c55e;
+                line-height: 1;
+            }
+            .pr-avg-denom { font-size: 13px; color: #555e6a; margin-left: 3px; }
+            .pr-strip-divider {
+                width: 1px;
+                height: 36px;
+                background: rgba(255,255,255,0.07);
+                margin: 0 24px 0 0;
+                flex-shrink: 0;
+            }
+            .pr-strip-item { padding-right: 24px; }
+            .pr-strip-label { font-size: 11px; color: #8b949e; margin-bottom: 3px; }
+            .pr-strip-val { font-size: 14px; font-weight: 700; color: #e2e8f0; }
+            .pr-strip-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                background: rgba(34,197,94,0.12);
+                border: 1px solid rgba(34,197,94,0.22);
+                color: #22c55e;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 3px 10px;
+                border-radius: 20px;
+                margin-top: 2px;
+            }
+
+            /* ── TERM TABS ── */
+            .pr-term-tabs {
+                display: flex;
+                gap: 8px;
+                padding: 16px 22px 0;
+                flex-wrap: wrap;
+            }
+            .pr-term-tab {
+                flex: 1;
+                min-width: 70px;
+                padding: 10px 8px;
+                text-align: center;
+                background: rgba(255,255,255,0.02);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+            }
+            .pr-term-tab:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); }
+            .pr-term-tab.active {
+                background: rgba(104,211,145,0.08);
+                border-color: rgba(104,211,145,0.35);
+            }
+            .pr-term-tab-label {
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #8b949e;
+                margin-bottom: 4px;
+            }
             .pr-term-tab.active .pr-term-tab-label { color: #68d391; }
-            .pr-term-tab-avg { font-size: 18px; font-weight: 900; color: #e2e8f0; }
+            .pr-term-tab-avg { font-size: 17px; font-weight: 900; color: #e2e8f0; }
             .pr-term-tab.active .pr-term-tab-avg { color: #68d391; }
             .pr-term-tab-sub { font-size: 10px; color: #555e6a; margin-top: 2px; }
-            .pr-current-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #68d391; }
-            .pr-subjects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-            .pr-subject-card { background: #161b22; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px 18px 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
-            .pr-subject-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
-            .pr-subject-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; background: var(--accent, #555e6a); }
-            .pr-subject-name { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 16px; padding-right: 70px; line-height: 1.3; min-height: 32px; }
-            .pr-subject-pct { position: absolute; top: 16px; right: 16px; font-size: 24px; font-weight: 900; line-height: 1; }
-            .pr-subject-bar-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; margin-bottom: 8px; }
-            .pr-subject-bar-fill { height: 100%; border-radius: 100px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
-            .pr-subject-meta { font-size: 11px; color: #555e6a; }
-            .pr-subject-no-data { font-size: 12px; color: #555e6a; font-style: italic; padding: 10px 0 4px; }
-            .pr-empty { text-align: center; color: #555e6a; padding: 60px 20px; font-size: 15px; }
+            .pr-current-dot {
+                position: absolute;
+                top: 7px;
+                right: 7px;
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #68d391;
+            }
+
+            /* ── SUBJECTS SECTION ── */
+            .pr-subjects-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 22px 10px;
+            }
+            .pr-subjects-title {
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #8b949e;
+            }
+            .pr-subjects-col-hint {
+                font-size: 11px;
+                color: #555e6a;
+            }
+
+            /* ── SUBJECT ROWS ── */
+            .pr-subjects-list { padding: 0 22px 6px; }
+            .pr-subject-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 13px 0;
+                border-top: 1px solid rgba(255,255,255,0.05);
+            }
+            .pr-subject-row:first-child { border-top: none; }
+            .pr-subject-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: rgba(104,211,145,0.1);
+                border: 1px solid rgba(104,211,145,0.18);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                font-size: 14px;
+                color: #68d391;
+                font-weight: 800;
+            }
+            .pr-subject-info { min-width: 0; flex: 0 0 130px; }
+            .pr-subject-name {
+                font-size: 13px;
+                font-weight: 800;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 2px;
+            }
+            .pr-subject-code { font-size: 11px; color: #555e6a; }
+            .pr-subject-bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+            .pr-bar-row { display: flex; align-items: center; gap: 8px; }
+            .pr-bar-tag { font-size: 10px; color: #555e6a; min-width: 46px; flex-shrink: 0; }
+            .pr-bar-bg {
+                flex: 1;
+                height: 5px;
+                background: rgba(255,255,255,0.06);
+                border-radius: 100px;
+                overflow: hidden;
+            }
+            .pr-bar-fill { height: 100%; border-radius: 100px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+            .pr-bar-pct { font-size: 11px; font-weight: 700; min-width: 32px; text-align: right; flex-shrink: 0; }
+            .pr-subject-grade {
+                width: 30px;
+                height: 26px;
+                border-radius: 7px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 800;
+                flex-shrink: 0;
+            }
+            .pr-grade-a { background: rgba(34,197,94,0.14);  color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+            .pr-grade-b { background: rgba(59,130,246,0.14); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+            .pr-grade-c { background: rgba(245,158,11,0.14); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+            .pr-grade-d { background: rgba(248,81,73,0.14);  color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
+            .pr-subject-no-data { font-size: 12px; color: #555e6a; font-style: italic; flex: 1; }
+
+            /* ── FOOTER LEGEND ── */
+            .pr-footer-legend {
+                padding: 12px 22px;
+                border-top: 1px solid rgba(255,255,255,0.06);
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+            .pr-legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #8b949e; }
+            .pr-legend-bar { width: 22px; height: 5px; border-radius: 100px; }
+            .pr-grade-pills { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+            .pr-grade-pill { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 6px; }
+
+            /* ── EMPTY STATE ── */
+            .pr-empty { text-align: center; color: #555e6a; padding: 50px 20px; font-size: 14px; }
+
+            /* ── PRINT ── */
             @media print {
                 .pr-topbar { display: none !important; }
                 .pr-term-tabs { display: none !important; }
-                .pr-wrap { padding: 0; }
-                .pr-hero { background: #f8f9fa !important; color: #000 !important; }
-                .pr-subjects-grid { grid-template-columns: repeat(2,1fr); }
-                .pr-subject-card { background: #fff !important; border: 1px solid #ddd !important; }
-                .pr-subject-name { color: #000 !important; }
+                .pr-wrap { padding: 0; max-width: 100%; }
+                .pr-card { background: #fff !important; border: 1px solid #ddd !important; }
+                .pr-school-band { background: #0d5c3a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .pr-learner-name, .pr-subject-name { color: #111 !important; }
+                .pr-avg-num { color: #16a34a !important; }
             }
+
+            /* ── MOBILE ── */
             @media (max-width: 600px) {
-                .pr-subjects-grid { grid-template-columns: 1fr; }
-                .pr-hero { flex-direction: column; text-align: center; }
-                .pr-term-tabs { flex-wrap: wrap; }
-                .pr-term-tab { min-width: calc(50% - 4px); flex: none; }
+                .pr-wrap { padding-bottom: 80px; }
+                .pr-school-band { padding: 14px 16px; gap: 12px; }
+                .pr-school-name { font-size: 14px; }
+                .pr-student-row { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+                .pr-status-badge { margin-left: 0; }
+                .pr-avg-strip { padding: 14px 16px; gap: 0; flex-wrap: wrap; row-gap: 10px; }
+                .pr-strip-divider { display: none; }
+                .pr-avg-block { width: 100%; padding-right: 0; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+                .pr-strip-item { flex: 1; min-width: 90px; padding-right: 0; }
+                .pr-term-tabs { padding: 14px 16px 0; gap: 6px; }
+                .pr-term-tab { min-width: calc(50% - 4px); flex: none; padding: 10px 6px; }
+                .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
+                .pr-subjects-list { padding: 0 16px 6px; }
+                .pr-subject-info { flex: 0 0 100px; }
+                .pr-subject-row { gap: 8px; }
+                .pr-bar-tag { font-size: 9px; min-width: 38px; }
+                .pr-footer-legend { padding: 12px 16px; gap: 12px; }
+                .pr-grade-pills { margin-left: 0; }
             }
         `;
         document.head.appendChild(style);
@@ -1481,31 +1800,74 @@ function renderProgressReport(data) {
             </div>`;
     }).join('');
 
+    function gradeLabel(pct) {
+        if (pct === null) return { letter: '?', cls: '' };
+        if (pct >= 80) return { letter: 'A', cls: 'pr-grade-a' };
+        if (pct >= 60) return { letter: 'B', cls: 'pr-grade-b' };
+        if (pct >= 50) return { letter: 'C', cls: 'pr-grade-c' };
+        return { letter: 'D', cls: 'pr-grade-d' };
+    }
+
+    function subjectInitial(name) {
+        return (name || '?')[0].toUpperCase();
+    }
+
     function buildSubjectCards(termNum) {
-        if (!subjects.length) return `<div class="pr-empty">No assessments found.</div>`;
-        return subjects.map(s => {
-            const td  = s.terms[termNum] || {};
-            const pct = td.pct ?? null;
-            const c   = pctColor(pct);
-            return `
-                <div class="pr-subject-card" style="--accent:${c.border};">
-                    <div class="pr-subject-name">${escHtmlPr(s.name)}</div>
-                    <div class="pr-subject-pct" style="color:${c.text};">${pct !== null ? pct + '%' : '—'}</div>
-                    ${pct !== null ? `
-                        <div class="pr-subject-bar-track">
-                            <div class="pr-subject-bar-fill" style="width:${pct}%;background:${c.text};"></div>
-                        </div>
-                        <div class="pr-subject-meta">
-                            ${td.count} of ${td.total_count} assessment${td.total_count !== 1 ? 's' : ''} counted
-                            ${td.remaining > 0 ? `· ${td.remaining}% still to come` : '· Complete'}
-                        </div>
-                    ` : `<div class="pr-subject-no-data">No assessments this term</div>`}
-                </div>`;
+        if (!subjects.length) return '<div class="pr-empty">No assessments found.</div>';
+        return subjects.map(function(s) {
+            const td      = s.terms[termNum] || {};
+            const pct     = td.pct != null ? td.pct : null;
+            const covered = td.remaining != null ? Math.round(100 - td.remaining) : null;
+            const c       = pctColor(pct);
+            const gl      = gradeLabel(pct);
+
+            if (pct === null) {
+                return '<div class="pr-subject-row">' +
+                    '<div class="pr-subject-icon">' + subjectInitial(s.name) + '</div>' +
+                    '<div class="pr-subject-info">' +
+                        '<div class="pr-subject-name">' + escHtmlPr(s.name) + '</div>' +
+                        '<div class="pr-subject-code">' + escHtmlPr(s.code || '') + '</div>' +
+                    '</div>' +
+                    '<div class="pr-subject-no-data">No assessments this term</div>' +
+                '</div>';
+            }
+
+            const coveredPct = covered !== null ? covered : 0;
+            const coveredTxt = covered !== null ? covered + '%' : '—';
+            const codeText   = escHtmlPr(s.code || (td.count + ' assessment' + (td.count !== 1 ? 's' : '')));
+
+            return '<div class="pr-subject-row">' +
+                '<div class="pr-subject-icon" style="background:' + c.bg + ';border-color:' + c.border + '30;color:' + c.text + ';">' +
+                    subjectInitial(s.name) +
+                '</div>' +
+                '<div class="pr-subject-info">' +
+                    '<div class="pr-subject-name">' + escHtmlPr(s.name) + '</div>' +
+                    '<div class="pr-subject-code">' + codeText + '</div>' +
+                '</div>' +
+                '<div class="pr-subject-bars">' +
+                    '<div class="pr-bar-row">' +
+                        '<span class="pr-bar-tag">Mark</span>' +
+                        '<div class="pr-bar-bg"><div class="pr-bar-fill" style="width:' + Math.round(pct) + '%;background:' + c.text + ';"></div></div>' +
+                        '<span class="pr-bar-pct" style="color:' + c.text + ';">' + Math.round(pct) + '%</span>' +
+                    '</div>' +
+                    '<div class="pr-bar-row">' +
+                        '<span class="pr-bar-tag">Covered</span>' +
+                        '<div class="pr-bar-bg"><div class="pr-bar-fill" style="width:' + coveredPct + '%;background:' + c.text + ';opacity:0.35;"></div></div>' +
+                        '<span class="pr-bar-pct" style="color:' + c.text + ';opacity:0.7;">' + coveredTxt + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="pr-subject-grade ' + gl.cls + '">' + gl.letter + '</div>' +
+            '</div>';
         }).join('');
+    }
+
+    function initials(name) {
+        return (name || '').split(' ').filter(Boolean).slice(0,2).map(function(w){ return w[0].toUpperCase(); }).join('');
     }
 
     apiArea.innerHTML = `
         <div class="pr-wrap" id="pr-wrap">
+
             <div class="pr-topbar">
                 <button class="pr-back-btn" onclick="prBackToGrades()">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
@@ -1522,27 +1884,98 @@ function renderProgressReport(data) {
                     Print Report
                 </button>
             </div>
-            <div class="pr-hero">
-                <img src="${escAttr(data.school_logo)}" alt="School Logo" class="pr-logo" onerror="this.style.display='none'">
-                <div class="pr-hero-info">
-                    <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
-                    <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
-                    <div class="pr-learner-meta">
-                        ${escHtmlPr(data.learner_class)} &nbsp;·&nbsp;
-                        Term ${currentTerm} Progress Report &nbsp;·&nbsp;
-                        ${escHtmlPr(data.date)}
+
+            <div class="pr-card">
+
+                <div class="pr-school-band">
+                    <div class="pr-logo-wrap">
+                        <img src="${escAttr(data.school_logo)}" alt="School Logo" class="pr-logo"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <span class="pr-logo-fallback" style="display:none;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="rgba(255,255,255,0.85)" stroke-width="1.8" fill="none">
+                                <path d="M22 10v12H2V10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M7 9.5v5M17 9.5v5M12 14.5v5"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div>
+                        <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
+                        <div class="pr-school-sub">Progress Report &nbsp;&middot;&nbsp; Term ${currentTerm}, ${escHtmlPr(data.date)}</div>
                     </div>
                 </div>
-                <div class="pr-overall-badge">
-                    <div class="pr-overall-circle" style="border-color:${oc.border};background:${oc.bg};">
-                        <div class="pr-overall-pct" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '—'}</div>
-                        <div class="pr-overall-label">Overall</div>
+
+                <div class="pr-student-row">
+                    <div class="pr-avatar">${initials(data.learner_name)}</div>
+                    <div>
+                        <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
+                        <div class="pr-learner-meta">${escHtmlPr(data.learner_class)}</div>
                     </div>
-                    <div class="pr-overall-sub">Term ${currentTerm} Average</div>
+                    <div class="pr-status-badge">
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                        On Track
+                    </div>
                 </div>
+
+                <div class="pr-avg-strip">
+                    <div class="pr-avg-block">
+                        <div class="pr-avg-label">Overall average</div>
+                        <div style="display:flex;align-items:baseline;gap:4px;">
+                            <div class="pr-avg-num" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '&mdash;'}</div>
+                            <span class="pr-avg-denom">/ 100</span>
+                        </div>
+                    </div>
+                    <div class="pr-strip-divider"></div>
+                    <div class="pr-strip-item">
+                        <div class="pr-strip-label">Term</div>
+                        <div class="pr-strip-val">Term ${currentTerm}</div>
+                    </div>
+                    <div class="pr-strip-divider"></div>
+                    <div class="pr-strip-item">
+                        <div class="pr-strip-label">Report date</div>
+                        <div class="pr-strip-val">${escHtmlPr(data.date)}</div>
+                    </div>
+                    <div class="pr-strip-divider"></div>
+                    <div class="pr-strip-item">
+                        <div class="pr-strip-label">Status</div>
+                        <div class="pr-strip-status">
+                            <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            </svg>
+                            On Track
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pr-term-tabs" id="pr-term-tabs">${termTabsHtml}</div>
+
+                <div class="pr-subjects-header">
+                    <span class="pr-subjects-title">Subject results</span>
+                    <span class="pr-subjects-col-hint">Mark earned &nbsp;&middot;&nbsp; Mark covered</span>
+                </div>
+
+                <div class="pr-subjects-list" id="pr-subjects-grid">${buildSubjectCards(currentTerm)}</div>
+
+                <div class="pr-footer-legend">
+                    <div class="pr-legend-item">
+                        <div class="pr-legend-bar" style="background:#22c55e;"></div>
+                        Mark earned so far
+                    </div>
+                    <div class="pr-legend-item">
+                        <div class="pr-legend-bar" style="background:rgba(34,197,94,0.3);"></div>
+                        % of mark covered this term
+                    </div>
+                    <div class="pr-grade-pills">
+                        <span class="pr-grade-pill pr-grade-a">A 80&ndash;100</span>
+                        <span class="pr-grade-pill pr-grade-b">B 60&ndash;79</span>
+                        <span class="pr-grade-pill pr-grade-c">C 50&ndash;59</span>
+                        <span class="pr-grade-pill pr-grade-d">D &lt;50</span>
+                    </div>
+                </div>
+
             </div>
-            <div class="pr-term-tabs" id="pr-term-tabs">${termTabsHtml}</div>
-            <div class="pr-subjects-grid" id="pr-subjects-grid">${buildSubjectCards(currentTerm)}</div>
         </div>`;
 
     apiArea._prData            = data;
