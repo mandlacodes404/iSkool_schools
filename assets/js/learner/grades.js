@@ -437,12 +437,48 @@ function renderGrades(data) {
     .score-circle-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: 800; color: #fff; }
     .score-out-of { font-size: 13px; color: #8b949e; margin-bottom: 16px; }
     .dist-bar-wrap { position: relative; height: 10px; background: rgba(255,255,255,0.06); border-radius: 100px; margin: 24px 0 8px; }
-    .dist-marker { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; transition: left 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
+    .dist-marker { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; transition: left 0.6s cubic-bezier(0.175,0.885,0.32,1.275); cursor: pointer; }
     .dist-marker.me { background: #fff; border: 3px solid #68d391; }
-    .dist-line { position: absolute; top: -8px; bottom: -4px; width: 2px; transform: translateX(-50%); }
+    .dist-line { position: absolute; top: -8px; bottom: -4px; width: 2px; transform: translateX(-50%); cursor: pointer; }
     .dist-line.low  { background: #f85149; }
     .dist-line.avg  { background: #f59e0b; }
     .dist-line.high { background: #22c55e; }
+    .dist-marker::before, .dist-line::before {
+        content: '';
+        position: absolute;
+        top: -10px; bottom: -10px; left: -10px; right: -10px;
+    }
+    .dist-tip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: #1a1919;
+        border: 1px solid rgba(255,255,255,0.12);
+        color: #e2e8f0;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        z-index: 10;
+    }
+    .dist-tip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #1a1919;
+    }
+    .dist-marker.active .dist-tip, .dist-line.active .dist-tip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
     .dist-labels { display: flex; justify-content: space-between; font-size: 11px; color: #555e6a; margin-bottom: 14px; }
     .dist-legend { text-align: left; font-size: 12px; color: #8b949e; line-height: 1.8; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 10px 14px; }
     .dist-legend span { font-weight: 700; }
@@ -752,10 +788,10 @@ function renderGrades(data) {
             </div>
             <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
             <div class="dist-legend">
-                <div><span style="color:#68d391">●</span> Blue dot — your score</div>
-                <div><span style="color:#f85149">|</span> Red line — lowest in class</div>
-                <div><span style="color:#f59e0b">|</span> Yellow line — class average</div>
-                <div><span style="color:#22c55e">|</span> Green line — highest in class</div>
+                <div><span style="color:#68d391">●</span> Your score</div>
+                <div><span style="color:#f85149">|</span> Lowest in class</div>
+                <div><span style="color:#f59e0b">|</span> Class average</div>
+                <div><span style="color:#22c55e">|</span> Highest in class</div>
             </div>
         </div>
     </div>`;
@@ -1253,6 +1289,13 @@ window.gradesSearch = function (val) {
 // ─────────────────────────────────────────────────────────────────────────────
 // INLINE PERFORMANCE OVERVIEW
 // ─────────────────────────────────────────────────────────────────────────────
+window.toggleDistTip = function(el) {
+    const wasActive = el.classList.contains('active');
+    el.parentElement.querySelectorAll('.dist-line.active, .dist-marker.active')
+        .forEach(sibling => sibling.classList.remove('active'));
+    if (!wasActive) el.classList.add('active');
+};
+
 function renderGradeStatsBox(box, data) {
     const pct    = data.user_score || 0;
     const offset = 314 - (314 * (pct / 100));
@@ -1272,17 +1315,25 @@ function renderGradeStatsBox(box, data) {
             <div style="width:100%;">
                 <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
                 <div class="dist-bar-wrap">
-                    <div class="dist-line low" style="left:${data.min || 0}%"></div>
-                    <div class="dist-line avg" style="left:${data.avg || 0}%"></div>
-                    <div class="dist-line high" style="left:${data.max || 0}%"></div>
-                    <div class="dist-marker me" style="left:${pct}%"></div>
+                    <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
+                        <span class="dist-tip">${data.min || 0}%</span>
+                    </div>
+                    <div class="dist-line avg" style="left:${data.avg || 0}%" onclick="toggleDistTip(this)">
+                        <span class="dist-tip">${data.avg || 0}%</span>
+                    </div>
+                    <div class="dist-line high" style="left:${data.max || 0}%" onclick="toggleDistTip(this)">
+                        <span class="dist-tip">${data.max || 0}%</span>
+                    </div>
+                    <div class="dist-marker me" style="left:${pct}%" onclick="toggleDistTip(this)">
+                        <span class="dist-tip">${pct}%</span>
+                    </div>
                 </div>
                 <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                 <div class="dist-legend">
-                    <div><span style="color:#68d391">●</span> Blue dot - your score</div>
-                    <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
-                    <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
-                    <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
+                    <div><span style="color:#68d391">●</span> Your score</div>
+                    <div><span style="color:#f85149">|</span> Lowest in class</div>
+                    <div><span style="color:#f59e0b">|</span> Class average</div>
+                    <div><span style="color:#22c55e">|</span> Highest in class</div>
                 </div>
             </div>
         </div>`;
@@ -1328,17 +1379,25 @@ async function loadGradeStatsInline(statsId) {
                 <div style="width:100%;">
                     <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
                     <div class="dist-bar-wrap">
-                        <div class="dist-line low" style="left:${data.min || 0}%"></div>
-                        <div class="dist-line avg" style="left:${data.avg || 0}%"></div>
-                        <div class="dist-line high" style="left:${data.max || 0}%"></div>
-                        <div class="dist-marker me" style="left:${pct}%"></div>
+                        <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
+                            <span class="dist-tip">${data.min || 0}%</span>
+                        </div>
+                        <div class="dist-line avg" style="left:${data.avg || 0}%" onclick="toggleDistTip(this)">
+                            <span class="dist-tip">${data.avg || 0}%</span>
+                        </div>
+                        <div class="dist-line high" style="left:${data.max || 0}%" onclick="toggleDistTip(this)">
+                            <span class="dist-tip">${data.max || 0}%</span>
+                        </div>
+                        <div class="dist-marker me" style="left:${pct}%" onclick="toggleDistTip(this)">
+                            <span class="dist-tip">${pct}%</span>
+                        </div>
                     </div>
                     <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                     <div class="dist-legend">
-                        <div><span style="color:#68d391">●</span> Blue dot - your score</div>
-                        <div><span style="color:#f85149">|</span> Red line - lowest in class</div>
-                        <div><span style="color:#f59e0b">|</span> Yellow line - class average</div>
-                        <div><span style="color:#22c55e">|</span> Green line - highest in class</div>
+                        <div><span style="color:#68d391">●</span> Your score</div>
+                        <div><span style="color:#f85149">|</span> Lowest in class</div>
+                        <div><span style="color:#f59e0b">|</span> Class average</div>
+                        <div><span style="color:#22c55e">|</span> Highest in class</div>
                     </div>
                 </div>
             </div>`;
