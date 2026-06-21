@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 31, 2026 at 07:22 AM
+-- Generation Time: Jun 21, 2026 at 06:52 AM
 -- Server version: 11.4.10-MariaDB-cll-lve
 -- PHP Version: 8.4.21
 
@@ -835,7 +835,15 @@ INSERT INTO `choices` (`id`, `question_id`, `choice_text`, `is_correct`) VALUES
 (545, 537, '1', 1),
 (546, 537, '2', 0),
 (547, 537, '3', 0),
-(548, 537, '4', 0);
+(548, 537, '4', 0),
+(549, 541, '1', 1),
+(550, 541, '2', 0),
+(551, 541, '3', 1),
+(552, 541, '4', 0),
+(553, 542, '1', 1),
+(554, 542, '2', 0),
+(555, 542, '3', 0),
+(556, 542, '4', 1);
 
 -- --------------------------------------------------------
 
@@ -1216,7 +1224,15 @@ INSERT INTO `evaluation_answers` (`id`, `response_id`, `statement_id`, `answer`)
 (21, 3, 175, 'strongly_agree'),
 (22, 3, 176, 'agree'),
 (23, 3, 177, 'disagree'),
-(24, 3, 178, 'disagree');
+(24, 3, 178, 'disagree'),
+(25, 4, 179, 'agree'),
+(26, 4, 180, 'strongly_agree'),
+(27, 4, 181, 'disagree'),
+(28, 4, 182, 'strongly_disagree'),
+(29, 4, 183, 'neutral'),
+(30, 4, 184, 'agree'),
+(31, 4, 185, 'strongly_agree'),
+(32, 4, 186, 'disagree');
 
 -- --------------------------------------------------------
 
@@ -1240,7 +1256,8 @@ CREATE TABLE `evaluation_responses` (
 INSERT INTO `evaluation_responses` (`id`, `evaluation_id`, `class_id`, `comments`, `submitted_at`, `unique_hash`) VALUES
 (1, 2, 5, 'The teacher is good overall but i think we can learn more if he arrives early for the periods', '2025-12-21 14:30:45', '4e15837522ec34eca88993164ebbd35d0cc64280ac8d91cdc61e5e7ebec0b44e'),
 (2, 10, 1, 'I don’t have anything to say', '2026-02-13 09:20:58', '0aa6795a00592bdb6ab566a8153dee1c03046e535a664fff2535d5a691811c04'),
-(3, 16, 1, 'I have nothing to say', '2026-05-05 09:54:00', 'f1955acc8bd3ef41b50e07b39ebf3d020f1c3e2f4afeedd798a8a698886747d5');
+(3, 16, 1, 'I have nothing to say', '2026-05-05 09:54:00', 'f1955acc8bd3ef41b50e07b39ebf3d020f1c3e2f4afeedd798a8a698886747d5'),
+(4, 17, 1, '', '2026-06-21 06:09:38', 'f99321b4cfed4321a9aa45dfd5edad56393761b89cdd891ea5227ca5db889e32');
 
 -- --------------------------------------------------------
 
@@ -1478,6 +1495,14 @@ CREATE TABLE `multiple_answer_questions` (
   `select_exactly` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `multiple_answer_questions`
+--
+
+INSERT INTO `multiple_answer_questions` (`id`, `question_id`, `scoring_mode`, `select_exactly`) VALUES
+(1, 541, 'exact_match', 2),
+(2, 542, 'partial_penalty', 2);
+
 -- --------------------------------------------------------
 
 --
@@ -1583,7 +1608,9 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`) VALUES
 (14, 'mandlasimphiwe99@gmail.com', 'b5d62a2cff1270cbfb9758e42e4e29eef9003be839fc0717ad7706ed188ce47b', '2026-05-04 13:26:46'),
 (15, 'johannesmahlangu101@gmail.com', '864c8ef909f8689111431be682a86e2632df79d3e62ddba18d0bbe59c4e79027', '2026-05-04 13:43:26'),
 (16, 'mandla_mahlangu@icloud.com', 'dcd202b082cdec885b5235abfbd8f89030047f0a04f20779f59e4ee00d806b8b', '2026-05-04 14:08:50'),
-(17, 'mandlasimphiwe99@gmail.com', '498bad35e5d739b61cf6fbb71b93fbab7423c6713306bf1fa613886bd1b0df98', '2026-05-24 22:15:53');
+(17, 'mandlasimphiwe99@gmail.com', '498bad35e5d739b61cf6fbb71b93fbab7423c6713306bf1fa613886bd1b0df98', '2026-05-24 22:15:53'),
+(18, 'mandlasimphiwe99@gmail.com', '702d60e794315fe1dd1e838d48c019bb3a7cd3eebdc5be088a3c35f7c66989cf', '2026-06-01 18:05:10'),
+(19, 'mandlasimphiwe99@gmail.com', '60fa7686048d29a9b2703e07b2864ef9e69b7d46e4313bc1ca743e3e56f3b74f', '2026-06-01 18:15:37');
 
 -- --------------------------------------------------------
 
@@ -2188,7 +2215,9 @@ INSERT INTO `quizquestions` (`id`, `quiz_id`, `question_text`, `image_path`, `po
 (537, 120, 'WHAT IS IN THE IMAGE', NULL, 1, 'mcq'),
 (538, 120, 'WHAT IS IN THE IMAGE', NULL, 1, 'open_ended'),
 (539, 120, 'The capital of France is {blank} and the language the speak is  {blank}.', NULL, 10, 'fill_in_blank'),
-(540, 120, 'The capital of France is {blank} and the language the speak is  {blank}.', NULL, 10, 'fill_in_blank');
+(540, 120, 'The capital of France is {blank} and the language the speak is  {blank}.', NULL, 10, 'fill_in_blank'),
+(541, 121, 'WHAT IS IN THE IMAGE', NULL, 6, 'multiple_answer'),
+(542, 121, 'WHAT IS IN THE IMAGE', NULL, 10, 'multiple_answer');
 
 -- --------------------------------------------------------
 
@@ -2342,7 +2371,8 @@ INSERT INTO `quizzes` (`id`, `title`, `duration`, `publish_marks`, `created_by`,
 (117, 'Maths II', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 13:34:17', 1, 5, 1, 1, '2026-05-26 15:36:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 1),
 (118, 'Exam', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-29 13:05:37', 1, 5, 1, 1, '2026-05-29 15:07:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0),
 (119, 'Physics', 25, 0, 'lerato.patel@iskool.demo', '2026-05-30 10:43:08', 1, 5, 1, 1, '2026-05-30 12:47:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0),
-(120, 'Exam', 25, 0, 'lerato.patel@iskool.demo', '2026-05-30 10:58:56', 1, 5, 1, 1, '2026-05-30 13:02:00', 0, 0, 'Scheduled', 0, NULL, 'multi_page', 1, 1, 1);
+(120, 'Exam', 25, 0, 'lerato.patel@iskool.demo', '2026-05-30 10:58:56', 1, 5, 1, 1, '2026-05-30 13:02:00', 0, 0, 'Scheduled', 0, NULL, 'multi_page', 1, 1, 1),
+(121, 'Exam 3', 30, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-31 11:36:47', 1, 5, 1, 1, '2026-05-31 13:40:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -3548,7 +3578,7 @@ INSERT INTO `quiz_attempts` (`attempt_id`, `id`, `user_email`, `quiz_id`, `attem
 (1174, 1174, 'mandlasimphiwe99@gmail.com', 105, 0, 1, '2026-03-30 09:57:52', '2026-03-30 11:57:52', 'submitted', 0, NULL, NULL),
 (1175, 1175, 'mandlasimphiwe99@gmail.com', 102, 0, 1, '2026-04-06 12:24:57', '2026-04-06 14:24:57', 'in_progress', 0, '[]', NULL),
 (1176, 1176, 'mandlasimphiwe99@gmail.com', 90, 0, 1, '2026-04-06 12:25:15', '2026-04-06 14:25:15', 'submitted', 0, NULL, NULL),
-(1177, 1177, 'mandlasimphiwe99@gmail.com', 109, 0, 1, '2026-05-01 22:20:30', '2026-05-02 00:20:30', 'in_progress', 0, NULL, NULL),
+(1177, 1177, 'mandlasimphiwe99@gmail.com', 109, 0, 1, '2026-05-01 22:20:30', '2026-05-02 00:20:30', 'submitted', 1, NULL, NULL),
 (1178, 0, 'mandlasimphiwe99@gmail.com', 114, 1, 1, '2026-05-25 20:13:22', '2026-05-25 22:13:22', 'submitted', 1, NULL, NULL),
 (1179, 0, 'mandlasimphiwe99@gmail.com', 116, 1, 1, '2026-05-26 12:13:27', '2026-05-26 14:13:27', 'submitted', 1, NULL, NULL),
 (1180, 0, 'mandlasimphiwe99@gmail.com', 115, 1, 1, '2026-05-26 12:16:48', '2026-05-26 14:16:48', 'submitted', 2, NULL, NULL),
@@ -3560,7 +3590,9 @@ INSERT INTO `quiz_attempts` (`attempt_id`, `id`, `user_email`, `quiz_id`, `attem
 (1186, 0, 'mandlasimphiwe99@gmail.com', 118, 1, 1, '2026-05-29 13:09:07', '2026-05-29 15:09:07', 'submitted', 2, NULL, NULL),
 (1187, 0, 'mandi.vava@iskool.demo', 118, 1, 1, '2026-05-29 13:38:54', '2026-05-29 15:38:54', 'submitted', 2, NULL, NULL),
 (1188, 0, 'zinhle.mkhathini@iskool.demo', 118, 1, 1, '2026-05-29 13:41:23', '2026-05-29 15:41:23', 'submitted', 2, NULL, NULL),
-(1189, 0, 'mandlasimphiwe99@gmail.com', 120, 1, 1, '2026-05-30 11:03:41', '2026-05-30 13:03:41', 'submitted', 4, '[539,540,538,537]', '{\"539\":[],\"540\":[],\"538\":[],\"537\":[546,548,545,547]}');
+(1189, 0, 'mandlasimphiwe99@gmail.com', 120, 1, 1, '2026-05-30 11:03:41', '2026-05-30 13:03:41', 'submitted', 4, '[539,540,538,537]', '{\"539\":[],\"540\":[],\"538\":[],\"537\":[546,548,545,547]}'),
+(1190, 0, 'mandlasimphiwe99@gmail.com', 121, 1, 1, '2026-05-31 11:41:02', '2026-05-31 13:41:02', 'submitted', 2, NULL, NULL),
+(1191, 0, 'mandi.vava@iskool.demo', 121, 1, 1, '2026-05-31 11:47:54', '2026-05-31 13:47:54', 'submitted', 2, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -4835,7 +4867,10 @@ INSERT INTO `quiz_results` (`id`, `user_email`, `quiz_id`, `attempt_id`, `academ
 (1188, 'mandlasimphiwe99@gmail.com', 118, 1186, 5, 0.00, 11.00, 181, '2026-05-29 09:12:08'),
 (1189, 'mandi.vava@iskool.demo', 118, 1187, 5, 11.00, 11.00, 42, '2026-05-29 09:39:36'),
 (1190, 'zinhle.mkhathini@iskool.demo', 118, 1188, 5, 6.00, 11.00, 20, '2026-05-29 09:41:43'),
-(1191, 'mandlasimphiwe99@gmail.com', 120, 1189, 5, 10.00, 22.00, 228, '2026-05-30 07:07:29');
+(1191, 'mandlasimphiwe99@gmail.com', 120, 1189, 5, 10.00, 22.00, 228, '2026-05-30 07:07:29'),
+(1192, 'mandlasimphiwe99@gmail.com', 121, 1190, 5, 10.00, 16.00, 145, '2026-05-31 07:43:27'),
+(1193, 'mandi.vava@iskool.demo', 121, 1191, 5, 0.00, 16.00, 115, '2026-05-31 07:49:49'),
+(1194, 'mandlasimphiwe99@gmail.com', 109, 1177, 5, 0.00, 1.00, 2746437, '2026-06-02 13:14:27');
 
 -- --------------------------------------------------------
 
@@ -5493,7 +5528,11 @@ INSERT INTO `user_answers` (`id`, `user_email`, `quiz_id`, `attempt_id`, `result
 (721, 'mandlasimphiwe99@gmail.com', 120, 1189, 1191, 539, NULL, '{\"1\":\"Paris\",\"2\":\"Portugese\"}'),
 (741, 'mandlasimphiwe99@gmail.com', 120, 1189, 1191, 540, NULL, '{\"1\":\"Paris\",\"2\":\"English\"}'),
 (753, 'mandlasimphiwe99@gmail.com', 120, 1189, 1191, 538, NULL, 'The blue ball and and a white ball'),
-(811, 'mandlasimphiwe99@gmail.com', 120, 1189, 1191, 537, 546, NULL);
+(811, 'mandlasimphiwe99@gmail.com', 120, 1189, 1191, 537, 546, NULL),
+(817, 'mandlasimphiwe99@gmail.com', 121, 1190, 1192, 541, NULL, '[549,552]'),
+(819, 'mandlasimphiwe99@gmail.com', 121, 1190, 1192, 542, NULL, '[553,556]'),
+(827, 'mandi.vava@iskool.demo', 121, 1191, 1193, 541, NULL, '[549,550]'),
+(829, 'mandi.vava@iskool.demo', 121, 1191, 1193, 542, NULL, '[553,554]');
 
 -- --------------------------------------------------------
 
@@ -5961,7 +6000,7 @@ ALTER TABLE `assignments`
 -- AUTO_INCREMENT for table `choices`
 --
 ALTER TABLE `choices`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=549;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=557;
 
 --
 -- AUTO_INCREMENT for table `classes`
@@ -6003,13 +6042,13 @@ ALTER TABLE `discussion_teachers`
 -- AUTO_INCREMENT for table `evaluation_answers`
 --
 ALTER TABLE `evaluation_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `evaluation_responses`
 --
 ALTER TABLE `evaluation_responses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `evaluation_statements`
@@ -6039,7 +6078,7 @@ ALTER TABLE `messages`
 -- AUTO_INCREMENT for table `multiple_answer_questions`
 --
 ALTER TABLE `multiple_answer_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `open_ended_grades`
@@ -6057,7 +6096,7 @@ ALTER TABLE `parent_links`
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
@@ -6081,19 +6120,19 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT for table `quizquestions`
 --
 ALTER TABLE `quizquestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=541;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=543;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
-  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1190;
+  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1192;
 
 --
 -- AUTO_INCREMENT for table `quiz_integrity_logs`
@@ -6105,7 +6144,7 @@ ALTER TABLE `quiz_integrity_logs`
 -- AUTO_INCREMENT for table `quiz_results`
 --
 ALTER TABLE `quiz_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1192;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1195;
 
 --
 -- AUTO_INCREMENT for table `resources`
@@ -6159,7 +6198,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_answers`
 --
 ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=817;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=833;
 
 --
 -- AUTO_INCREMENT for table `user_subscriptions`
