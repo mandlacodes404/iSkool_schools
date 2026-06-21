@@ -526,23 +526,39 @@ function renderMobileList(data) {
     } else {
         html += `<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">`;
         data.forEach(d => {
+            const avatarColor = discAvatarColor(d.creator_display || 'Learner');
+            const initial      = (d.creator_display || '?').charAt(0).toUpperCase();
             html += `
                 <div onclick="loadDiscussionThread(${d.id})"
                      style="background:transparent;border:1px solid rgba(255,255,255,0.09);
-                            padding:18px;border-radius:12px;cursor:pointer;transition:border-color 0.2s;"
+                            border-radius:14px;padding:14px;cursor:pointer;transition:border-color 0.2s;
+                            display:flex;gap:12px;align-items:flex-start;"
                      onmouseover="this.style.borderColor='rgba(79,209,197,0.3)'"
                      onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
-                    <h3 style="margin:0 0 8px 0;color:#e2e8f0;font-size:16px;">${escHtml(d.title)}</h3>
-                    <div style="font-size:12px;color:#8b949e;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                        <span>By ${escHtml(d.creator_display)}</span>
-                        <span>•</span>
-                        <span>${escHtml(d.display_date)}</span>
-                        <span style="background:rgba(79,209,197,0.1);color:#4fd1c5;
-                                     padding:2px 10px;border-radius:12px;font-weight:700;">
-                            ${d.reply_count} ${d.reply_count == 1 ? 'reply' : 'replies'}
-                        </span>
+                    <div style="width:38px;height:38px;border-radius:50%;background:${avatarColor.bg};
+                                color:${avatarColor.color};display:flex;align-items:center;justify-content:center;
+                                font-size:13px;font-weight:800;flex-shrink:0;text-transform:uppercase;
+                                letter-spacing:0.03em;font-family:'Nunito',sans-serif;">${initial}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <h3 style="flex:1;min-width:0;margin:0;font-size:15px;font-weight:700;color:#e2e8f0;
+                                       font-family:'Nunito',sans-serif;white-space:nowrap;overflow:hidden;
+                                       text-overflow:ellipsis;">${escHtml(d.title)}</h3>
+                            <span style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
+                                         font-weight:700;color:#4fd1c5;background:rgba(79,209,197,0.1);
+                                         padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
+                                <i class="fas fa-comment" style="font-size:10px;"></i>${d.reply_count}
+                            </span>
+                        </div>
+                        <p style="margin:4px 0 0;font-size:13px;color:#abb2bf;font-family:'Nunito',sans-serif;
+                                  line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            ${escHtml(d.preview)}
+                        </p>
+                        <div style="margin-top:6px;font-size:11px;color:#8b949e;font-family:'Nunito',sans-serif;
+                                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            ${escHtml(d.creator_display)} · ${escHtml(d.display_date)}
+                        </div>
                     </div>
-                    <p style="margin:0;font-size:13px;color:#abb2bf;line-height:1.5;">${escHtml(d.preview)}</p>
                 </div>`;
         });
         html += `</div>`;
