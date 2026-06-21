@@ -1,5 +1,18 @@
 # iSkool Changelog
 
+## [v1.1.2] - 2026-06-21
+### Changed
+- UI: Added Nunito font across the platform (78cc3f8).
+- Grades: Performance overview card (d458cf7) and grade title color set to white (380d903).
+- Left layout: added desktop search (fa36864); collapsible left layout (c12ebb7); default desktop initial state uncollapsed (fda54be).
+- Discussions: updated discussion type pill/background/placement and discussion box enhancements (7116f7c, cff6fe5, bff3cbf, 9a1d978); mobile discussion list box styles (f44bf36).
+
+### Removed
+- Discussions: removed teacher-specific logic and fixed related bugs (2568d40, 9e98658).
+
+### Database
+- Updated DB dump (38fa34c).
+
 ## [v1.1.0] - 2025-12-15
 ### Added
 - **Branded Progress Reports** — Now include school logo, school name, learner full name, class, and current date
