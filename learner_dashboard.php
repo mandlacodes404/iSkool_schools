@@ -551,7 +551,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (apiArea) apiArea.style.display = 'block';
         if (iframe) iframe.style.display = 'none';
         setTimeout(() => {
-            window.loadDiscussionThread(discId);
+            if (typeof window.fetchDiscussions === 'function') {
+                window.fetchDiscussions({ openDiscussionId: discId });
+            }
         }, 100);
     } else {
         if (apiArea) apiArea.style.display = 'block';
@@ -2728,7 +2730,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/announcements.js?v=4.7"></script>
 <script src="assets/js/learner/grades.js?v=3.2"></script>
 <script src="assets/js/learner/evaluations.js?v=2.2"></script>
-<script src="assets/js/learner/discussions.js?v=6.3"></script>
+<script src="assets/js/learner/discussions.js?v=6.4"></script>
 <script src="assets/js/learner/syllabus.js?v=1.8"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>

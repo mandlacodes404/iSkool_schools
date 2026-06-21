@@ -60,7 +60,7 @@ $stmt = $conn->prepare("
     FROM discussion_replies r
     LEFT JOIN users u ON r.replier_email = u.email
     WHERE r.discussion_id = ?
-    ORDER BY r.created_at ASC
+    ORDER BY r.created_at ASC, r.id ASC
 ");
 $stmt->bind_param("si", $user_email, $disc_id);
 $stmt->execute();

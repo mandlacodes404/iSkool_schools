@@ -79,6 +79,124 @@ function stopDiscPolling() {
     currentDiscId          = null;
 }
 
+function normaliseDiscId(discId) {
+    const id = parseInt(discId, 10);
+    return Number.isFinite(id) && id > 0 ? id : null;
+}
+
+function getDiscussionById(discId) {
+    if (!Array.isArray(window.discussionCache)) return null;
+    return window.discussionCache.find(d => String(d.id) === String(discId)) || null;
+}
+
+function formatReplyCount(count) {
+    const value = parseInt(count, 10) || 0;
+    return `${value} ${value === 1 ? 'reply' : 'replies'}`;
+}
+
+function updateThreadPostCount(discId) {
+    const meta = document.getElementById('discThreadPostCount');
+    if (!meta || String(currentDiscId) !== String(discId)) return;
+
+    const cached = window.discussionThreadCache?.[discId];
+    const replyCount = cached && Array.isArray(cached.replies)
+        ? cached.replies.length
+        : document.querySelectorAll('#discPostsScroll .disc-post-card[data-id]:not([data-id="0"])').length;
+    const posts = replyCount + 1;
+    const subject = cached?.discussion?.subject_name || '';
+    meta.textContent = `${subject ? subject + ' · ' : ''}${posts} post${posts === 1 ? '' : 's'}`;
+}
+
+function updateDiscussionListCount(discId, count) {
+    const value = parseInt(count, 10) || 0;
+    const disc = getDiscussionById(discId);
+    if (disc) disc.reply_count = value;
+
+    const desktopPill = document.querySelector(`.dsk-item[data-disc-id="${discId}"] .dsk-item-pill`);
+    if (desktopPill) desktopPill.textContent = formatReplyCount(value);
+
+    const mobilePill = document.querySelector(`[data-disc-mobile-count="${discId}"]`);
+    if (mobilePill) mobilePill.innerHTML = `<i class="fas fa-comment" style="font-size:10px;"></i>${value}`;
+}
+
+function bumpDiscussionListCount(discId, delta) {
+    const disc = getDiscussionById(discId);
+    const next = (parseInt(disc?.reply_count, 10) || 0) + delta;
+    updateDiscussionListCount(discId, next);
+}
+
+function addRepliesToThreadCache(discId, replies) {
+    if (!window.discussionThreadCache?.[discId] || !Array.isArray(replies) || replies.length === 0) return replies.length;
+
+    const cachedReplies = window.discussionThreadCache[discId].replies || [];
+    const knownIds = new Set(cachedReplies.map(r => String(r.id)));
+    let added = 0;
+    replies.forEach(reply => {
+        if (!knownIds.has(String(reply.id))) {
+            cachedReplies.push(reply);
+            knownIds.add(String(reply.id));
+            added++;
+        }
+    });
+    cachedReplies.sort((a, b) => (parseInt(a.id, 10) || 0) - (parseInt(b.id, 10) || 0));
+    window.discussionThreadCache[discId].replies = cachedReplies;
+    return added;
+}
+
+function appendReplyToDom(discId, reply, scrollToBottom = false) {
+    const scroll   = document.getElementById('discPostsScroll');
+    const bottomEl = document.getElementById('discBottom');
+    if (!scroll || !bottomEl || !reply) return false;
+
+    if (document.querySelector(`#discPostsScroll .disc-post-card[data-id="${reply.id}"]`)) {
+        lastReplyId = Math.max(lastReplyId, parseInt(reply.id, 10) || 0);
+        return false;
+    }
+
+    const dk = getDateKey(reply.created_at);
+    if (dk !== lastSeenDateKey) {
+        const sep = document.createElement('div');
+        sep.className = 'disc-date-sep';
+        sep.innerHTML = `<span>${getDateLabel(reply.created_at)}</span>`;
+        scroll.insertBefore(sep, bottomEl);
+        lastSeenDateKey = dk;
+    }
+
+    const card = document.createElement('div');
+    card.innerHTML = buildPostCard(reply, 'learner', true, discId).trim();
+    scroll.insertBefore(card.firstChild, bottomEl);
+    lastReplyId = Math.max(lastReplyId, parseInt(reply.id, 10) || 0);
+    if (scrollToBottom) scroll.scrollTop = scroll.scrollHeight;
+    return true;
+}
+
+function handleRepliesAdded(discId, replies, options = {}) {
+    const rows = Array.isArray(replies) ? replies : [replies].filter(Boolean);
+    if (rows.length === 0) return 0;
+
+    const newCount = addRepliesToThreadCache(discId, rows);
+
+    let addedToDom = 0;
+    if (String(currentDiscId) === String(discId)) {
+        rows.forEach(reply => {
+            if (appendReplyToDom(discId, reply, !!options.scrollToBottom)) addedToDom++;
+        });
+        updateThreadPostCount(discId);
+    } else {
+        rows.forEach(reply => {
+            lastReplyId = Math.max(lastReplyId, parseInt(reply.id, 10) || 0);
+        });
+    }
+
+    if (options.absoluteCount !== undefined) {
+        updateDiscussionListCount(discId, options.absoluteCount);
+    } else if (newCount > 0) {
+        bumpDiscussionListCount(discId, newCount);
+    }
+
+    return addedToDom;
+}
+
 // Returns true when the split layout should be active
 function isDesktop() { return window.innerWidth >= 768; }
 
@@ -171,8 +289,11 @@ window.prefetchDiscussions = function () {
         .finally(() => { window.discussionPrefetchPromise = null; });
 };
 
-window.fetchDiscussions = async function() {
+window.fetchDiscussions = async function(options = {}) {
     stopDiscPolling();
+    const openDiscussionId = normaliseDiscId(
+        typeof options === 'object' ? options.openDiscussionId : options
+    );
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
     sessionStorage.setItem("lastLearnerPage", "discussion_list.php");
@@ -200,7 +321,11 @@ window.fetchDiscussions = async function() {
     if (window.discussionCache) {
         renderDiscussions(window.discussionCache);
         if (loader) loader.style.display = 'none';
-        restoreDiscussionPageState();
+        if (openDiscussionId) {
+            await window.loadDiscussionThread(openDiscussionId, { forceRefresh: true });
+        } else {
+            restoreDiscussionPageState();
+        }
         return;
     }
 
@@ -212,7 +337,11 @@ window.fetchDiscussions = async function() {
         const data = await res.json();
         window.discussionCache = data;
         renderDiscussions(data);
-        restoreDiscussionPageState();
+        if (openDiscussionId) {
+            await window.loadDiscussionThread(openDiscussionId, { forceRefresh: true });
+        } else {
+            restoreDiscussionPageState();
+        }
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading discussions.</p>`;
     } finally {
@@ -524,7 +653,7 @@ function renderSidebarList(data) {
             <div class="dsk-item-meta">
                 <span>${escHtml(d.display_date)}</span>
                 <span class="dsk-item-type-pill">${escHtml(discTypeLabel(d))}</span>
-                <span class="dsk-item-pill">${d.reply_count} ${d.reply_count == 1 ? 'reply' : 'replies'}</span>
+                <span class="dsk-item-pill">${formatReplyCount(d.reply_count)}</span>
             </div>
             <div class="dsk-item-preview">${escHtml(d.preview)}</div>
         </div>`
@@ -576,7 +705,7 @@ function renderMobileList(data) {
                             <h3 style="flex:1;min-width:0;margin:0;font-size:15px;font-weight:700;color:#e2e8f0;
                                        font-family:'Nunito',sans-serif;white-space:nowrap;overflow:hidden;
                                        text-overflow:ellipsis;">${escHtml(d.title)}</h3>
-                            <span style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
+                            <span data-disc-mobile-count="${d.id}" style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
                                          font-weight:700;color:#4fd1c5;background:rgba(79,209,197,0.1);
                                          padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
                                 <i class="fas fa-comment" style="font-size:10px;"></i>${d.reply_count}
@@ -607,10 +736,23 @@ function renderMobileList(data) {
 // ─────────────────────────────────────────────
 // 2. THREAD VIEW
 // ─────────────────────────────────────────────
-window.loadDiscussionThread = async function(discId) {
+window.loadDiscussionThread = async function(discId, options = {}) {
+    discId = normaliseDiscId(discId);
+    if (!discId) return;
+
     stopDiscPolling();
     window._inDiscussionThread = true;
     saveDiscussionPageState({ activeDiscId: discId });
+
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe)  iframe.style.display  = 'none';
+
+    if (isDesktop() && apiArea && !document.getElementById('disc-split-wrap')) {
+        injectDesktopShell(apiArea);
+        if (window.discussionCache) renderSidebarList(window.discussionCache);
+    }
 
     if (isDesktop()) {
         if (window.configureHeader) window.configureHeader({ title: 'Discussions', mode: 'standard' });
@@ -623,9 +765,10 @@ window.loadDiscussionThread = async function(discId) {
 
     const loader = document.getElementById('loaderOverlay');
 
-    if (window.discussionThreadCache[discId]) {
+    if (window.discussionThreadCache[discId] && !options.forceRefresh) {
         renderThread(window.discussionThreadCache[discId]);
         currentDiscId          = discId;
+        window._currentDiscId  = discId;
         discPollInterval       = setInterval(() => pollNewReplies(discId), 4000);
         discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
         return;
@@ -642,6 +785,7 @@ window.loadDiscussionThread = async function(discId) {
         window.discussionThreadCache[discId] = data;
         currentDiscId          = discId;
         window._currentDiscId  = discId;   /* used by mobile sheet reply */
+        updateDiscussionListCount(discId, data.replies?.length || 0);
         discPollInterval       = setInterval(() => pollNewReplies(discId), 4000);
         discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
 
@@ -688,7 +832,9 @@ function renderThread(data) {
         postsHtml += buildPostCard(r, user_role, is_in_class, disc.id);
     });
 
-    lastReplyId     = replies.length > 0 ? replies[replies.length - 1].id : 0;
+    lastReplyId     = replies.length > 0
+        ? Math.max(...replies.map(r => parseInt(r.id, 10) || 0))
+        : 0;
     lastSeenDateKey = replies.length > 0
         ? getDateKey(replies[replies.length - 1].created_at)
         : getDateKey(disc.created_at);
@@ -865,7 +1011,7 @@ function renderThread(data) {
             ${isDesktop() ? `
             <div class="disc-thread-head">
                 <div class="disc-thread-head-title">${escHtml(disc.title)}</div>
-                <div class="disc-thread-head-meta">${escHtml(disc.subject_name || '')}${disc.subject_name ? ' · ' : ''}${replies.length + 1} post${replies.length !== 0 ? 's' : ''}</div>
+                <div class="disc-thread-head-meta" id="discThreadPostCount">${escHtml(disc.subject_name || '')}${disc.subject_name ? ' · ' : ''}${replies.length + 1} post${replies.length === 0 ? '' : 's'}</div>
             </div>` : ''}
             <div class="disc-posts-scroll" id="discPostsScroll">
                 ${postsHtml}
@@ -1371,30 +1517,7 @@ window.discSheetSubmitReply = async function(discId) {
         /* Close the sheet */
         discCloseMobileSheet();
 
-        /* Append the new post card */
-        const scroll   = document.getElementById('discPostsScroll');
-        const bottomEl = document.getElementById('discBottom');
-        if (scroll && data.reply) {
-            const dk = getDateKey(data.reply.created_at);
-            if (dk !== lastSeenDateKey) {
-                const sep = document.createElement('div');
-                sep.className = 'disc-date-sep';
-                sep.innerHTML = `<span>${getDateLabel(data.reply.created_at)}</span>`;
-                scroll.insertBefore(sep, bottomEl);
-                lastSeenDateKey = dk;
-            }
-            const card = document.createElement('div');
-            card.innerHTML = buildPostCard(data.reply, 'learner', true, discId).trim();
-            scroll.insertBefore(card.firstChild, bottomEl);
-            lastReplyId = Math.max(lastReplyId, data.reply.id);
-            scroll.scrollTop = scroll.scrollHeight;
-        }
-
-        /* Update cache */
-        if (window.discussionCache) {
-            const disc = window.discussionCache.find(d => d.id == discId);
-            if (disc) disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
-        }
+        handleRepliesAdded(discId, data.reply, { scrollToBottom: true });
 
     } catch (e) {
         alert(e.message || 'Failed to post reply');
@@ -1537,35 +1660,12 @@ async function pollNewReplies(discId) {
 
         const scroll   = document.getElementById('discPostsScroll');
         const bottom   = document.getElementById('discBottom');
+        if (!scroll || !bottom) return;
         const atBottom = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80;
 
-        rows.forEach(r => {
-            const dk = getDateKey(r.created_at);
-            if (dk !== lastSeenDateKey) {
-                const sep = document.createElement('div');
-                sep.className = 'disc-date-sep';
-                sep.innerHTML = `<span>${getDateLabel(r.created_at)}</span>`;
-                scroll.insertBefore(sep, bottom);
-                lastSeenDateKey = dk;
-            }
-            const card = document.createElement('div');
-            card.innerHTML = buildPostCard(r, 'learner', true, discId).trim();
-            scroll.insertBefore(card.firstChild, bottom);
-            lastReplyId = Math.max(lastReplyId, r.id);
-        });
+        handleRepliesAdded(discId, rows, { scrollToBottom: false });
 
         if (atBottom) scroll.scrollTop = scroll.scrollHeight;
-
-        if (window.discussionCache) {
-            const disc = window.discussionCache.find(d => d.id == discId);
-            if (disc) {
-                disc.reply_count = (parseInt(disc.reply_count) || 0) + rows.length;
-                if (isDesktop()) {
-                    const pill = document.querySelector(`.dsk-item[data-disc-id="${discId}"] .dsk-item-pill`);
-                    if (pill) pill.textContent = `${disc.reply_count} ${disc.reply_count == 1 ? 'reply' : 'replies'}`;
-                }
-            }
-        }
     } catch (e) {}
 }
 
@@ -1608,34 +1708,7 @@ window.discSubmitReply = async function(discId) {
         _discAudioChunks = [];
         document.getElementById('discVoicePreview')?.classList.remove('show');
 
-        const scroll   = document.getElementById('discPostsScroll');
-        const bottomEl = document.getElementById('discBottom');
-        if (scroll && data.reply) {
-            const dk = getDateKey(data.reply.created_at);
-            if (dk !== lastSeenDateKey) {
-                const sep = document.createElement('div');
-                sep.className = 'disc-date-sep';
-                sep.innerHTML = `<span>${getDateLabel(data.reply.created_at)}</span>`;
-                scroll.insertBefore(sep, bottomEl);
-                lastSeenDateKey = dk;
-            }
-            const card = document.createElement('div');
-            card.innerHTML = buildPostCard(data.reply, 'learner', true, discId).trim();
-            scroll.insertBefore(card.firstChild, bottomEl);
-            lastReplyId = Math.max(lastReplyId, data.reply.id);
-            scroll.scrollTop = scroll.scrollHeight;
-        }
-
-        if (window.discussionCache) {
-            const disc = window.discussionCache.find(d => d.id == discId);
-            if (disc) {
-                disc.reply_count = (parseInt(disc.reply_count) || 0) + 1;
-                if (isDesktop()) {
-                    const pill = document.querySelector(`.dsk-item[data-disc-id="${discId}"] .dsk-item-pill`);
-                    if (pill) pill.textContent = `${disc.reply_count} ${disc.reply_count == 1 ? 'reply' : 'replies'}`;
-                }
-            }
-        }
+        handleRepliesAdded(discId, data.reply, { scrollToBottom: true });
 
     } catch (e) {
         alert(e.message || 'Failed to post reply');
