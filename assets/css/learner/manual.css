@@ -1,4 +1,19 @@
 /* Exact preservation of Learner Manual Styles */
+
+/* ── GLOBAL NUNITO ENFORCEMENT ──
+   Ensures Nunito is used on all manual/home content across all screen sizes.
+   The body already sets Nunito in learner_dashboard.css, but these scoped
+   rules act as a safety net for any elements that might override it. */
+.manual-container,
+.learner-home-wrapper,
+.lh-mobile-wrapper,
+.learner-home-left,
+.learner-home-panel,
+.learner-home-activity-item,
+.learner-home-todo-item {
+    font-family: 'Nunito', sans-serif;
+}
+
 .manual-container {
     --bg-color: #0d1117;
     --card-bg: #1a1919;
@@ -209,10 +224,6 @@
 }
 
 @media (min-width: 769px) {
-    .learner-home-left {
-        font-family: 'Nunito', sans-serif;
-    }
-
     .learner-snap-panel-title {
         font-size: 11px;
         font-weight: 800;

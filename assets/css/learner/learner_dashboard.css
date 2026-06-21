@@ -40,6 +40,16 @@ body {
     overflow: hidden;
 }
 
+/* ── PLATFORM-WIDE NUNITO LOCK ──────────────────────────────────────────────
+   The body above sets Nunito as the base. This rule re-enforces it on the
+   main content area so no page-level stylesheet (quiz.css, announcements,
+   etc.) can accidentally override it with Inter or a system font stack.
+   Mobile already had this via quiz.css !important — now desktop matches.  */
+#api-content-area,
+.main-content {
+    font-family: 'Nunito', sans-serif;
+}
+
 .sidebar {
     width: var(--sidebar-width);
     background: #000000;
