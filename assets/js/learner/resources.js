@@ -164,6 +164,7 @@ function renderResourceCards(data) {
 
             sidebarHtml += `
                 <div class="lrs-sidebar-item" id="lrs-sidebar-${flatIdx}"
+                    data-title="${escapeResourceHtml(file.title || '').toLowerCase()}"
                     onclick="selectDesktopLearnerResource(${flatIdx})">
                     <div class="lrs-sidebar-item-icon">
                         ${getFileIcon(file.ext, isVideo)}
@@ -564,11 +565,52 @@ function renderResourceCards(data) {
                 .lrs-mobile-search:focus { outline: none; border-color: #f28c38; }
                 .lrs-mobile-search::placeholder { color: #555e6a; }
             }
+
+            /* ── DESKTOP SEARCH BAR ── */
+            .lrs-desktop-search-wrap {
+                display: none;
+                position: relative;
+                padding: 10px 10px 8px;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .lrs-desktop-search-wrap svg {
+                position: absolute;
+                left: 22px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                opacity: 0.4;
+            }
+            .lrs-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px 12px 8px 32px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #e2e8f0;
+                font-size: 12.5px;
+                font-family: 'Nunito', sans-serif;
+                transition: border-color 0.2s;
+            }
+            .lrs-desktop-search:focus { outline: none; border-color: #f28c38; }
+            .lrs-desktop-search::placeholder { color: #555e6a; }
+            @media (min-width: 900px) {
+                .lrs-desktop-search-wrap { display: block; }
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lrs-desktop-layout">
             <div class="lrs-sidebar">
+                <div class="lrs-desktop-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
+                        placeholder="Search resources..." oninput="lrsDesktopSearch(this.value)">
+                </div>
                 <div class="lrs-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lrs-main-panel" id="lrs-main-panel">
@@ -673,6 +715,39 @@ function renderResourceCards(data) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT RESOURCE (inline preview)
 // ─────────────────────────────────────────────
+window.lrsDesktopSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lrs-desktop-teacher-group').forEach(group => {
+        const header = group.querySelector('.lrs-desktop-teacher-header');
+        const body   = group.querySelector('.lrs-desktop-teacher-body');
+        const nameEl = group.querySelector('.lrs-desktop-teacher-name');
+        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
+        if (!header || !body) return;
+
+        const items = body.querySelectorAll('.lrs-sidebar-item');
+        let visible = 0;
+        items.forEach(item => {
+            const title = (item.dataset.title || '');
+            const show = !term || title.includes(term) || groupName.includes(term);
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const groupShow = visible > 0 || !term || groupName.includes(term);
+        group.style.display = groupShow ? '' : 'none';
+
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header.querySelector('.lrs-desktop-teacher-chevron');
+            if (chev) chev.classList.add('open');
+        } else if (!term) {
+            body.classList.add('collapsed');
+            const chev = header.querySelector('.lrs-desktop-teacher-chevron');
+            if (chev) chev.classList.remove('open');
+        }
+    });
+};
+
 window.toggleLrsMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
     if (!body) return;

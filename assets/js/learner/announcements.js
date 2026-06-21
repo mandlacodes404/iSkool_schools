@@ -186,6 +186,7 @@ function renderAnnouncements(data) {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
             sidebarHtml += `
                 <div class="lan-sidebar-item lan-sidebar-item--school" id="lan-sidebar-${flatIdx}"
+                    data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
                     onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                     <div class="lan-sidebar-item-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
@@ -226,6 +227,7 @@ function renderAnnouncements(data) {
                 const isNew = new Date(ann.created_at) > sevenDaysAgo;
                 sidebarHtml += `
                     <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
+                        data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
                         onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                         <div class="lan-sidebar-item-icon">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
@@ -603,11 +605,52 @@ function renderAnnouncements(data) {
                 .lan-mobile-search:focus { outline: none; border-color: #f28c38; }
                 .lan-mobile-search::placeholder { color: #555e6a; }
             }
+
+            /* ── DESKTOP SEARCH BAR ── */
+            .lan-desktop-search-wrap {
+                display: none;
+                position: relative;
+                padding: 10px 10px 8px;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .lan-desktop-search-wrap svg {
+                position: absolute;
+                left: 22px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                opacity: 0.4;
+            }
+            .lan-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px 12px 8px 32px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #e2e8f0;
+                font-size: 12.5px;
+                font-family: 'Nunito', sans-serif;
+                transition: border-color 0.2s;
+            }
+            .lan-desktop-search:focus { outline: none; border-color: #f28c38; }
+            .lan-desktop-search::placeholder { color: #555e6a; }
+            @media (min-width: 900px) {
+                .lan-desktop-search-wrap { display: block; }
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lan-desktop-layout">
             <div class="lan-sidebar">
+                <div class="lan-desktop-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
+                        placeholder="Search announcements..." oninput="lanDesktopSearch(this.value)">
+                </div>
                 <div class="lan-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lan-main-panel" id="lan-main-panel">
@@ -764,6 +807,39 @@ window.lanMobileSearch = function(val) {
             body.classList.remove('collapsed');
             const chev = header ? header.querySelector('.lan-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
+        }
+    });
+};
+
+window.lanDesktopSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lan-desktop-teacher-group').forEach(group => {
+        const header = group.querySelector('.lan-desktop-teacher-header');
+        const body   = group.querySelector('.lan-desktop-teacher-body');
+        const nameEl = group.querySelector('.lan-desktop-teacher-name');
+        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
+        if (!header || !body) return;
+
+        const items = body.querySelectorAll('.lan-sidebar-item');
+        let visible = 0;
+        items.forEach(item => {
+            const title = (item.dataset.title || '');
+            const show = !term || title.includes(term) || groupName.includes(term);
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const groupShow = visible > 0 || !term || groupName.includes(term);
+        group.style.display = groupShow ? '' : 'none';
+
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header.querySelector('.lan-desktop-teacher-chevron');
+            if (chev) chev.classList.add('open');
+        } else if (!term) {
+            body.classList.add('collapsed');
+            const chev = header.querySelector('.lan-desktop-teacher-chevron');
+            if (chev) chev.classList.remove('open');
         }
     });
 };

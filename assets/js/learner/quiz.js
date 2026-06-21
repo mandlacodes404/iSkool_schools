@@ -367,6 +367,7 @@ function renderQuizCards(groupedData) {
 
             sidebarHtml += `
                 <div class="lqz-sidebar-item" id="lqz-sidebar-${flatIdx}"
+                    data-title="${escapeHtml(quiz.title || '').toLowerCase()}"
                     onclick="selectDesktopLearnerQuiz(${flatIdx})">
                     <div class="lqz-sidebar-item-icon">
                         ${learnerQuizPencilSvg(16, 16, '#4fd1c5')}
@@ -719,11 +720,52 @@ function renderQuizCards(groupedData) {
                 .lqz-mobile-search:focus { outline: none; border-color: #fdd663; }
                 .lqz-mobile-search::placeholder { color: #555e6a; }
             }
+
+            /* ── DESKTOP SEARCH BAR ── */
+            .lqz-desktop-search-wrap {
+                display: none;
+                position: relative;
+                padding: 10px 10px 8px;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .lqz-desktop-search-wrap svg {
+                position: absolute;
+                left: 22px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                opacity: 0.4;
+            }
+            .lqz-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px 12px 8px 32px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #e2e8f0;
+                font-size: 12.5px;
+                font-family: 'Nunito', sans-serif;
+                transition: border-color 0.2s;
+            }
+            .lqz-desktop-search:focus { outline: none; border-color: #fdd663; }
+            .lqz-desktop-search::placeholder { color: #555e6a; }
+            @media (min-width: 900px) {
+                .lqz-desktop-search-wrap { display: block; }
+            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lqz-desktop-layout">
             <div class="lqz-sidebar">
+                <div class="lqz-desktop-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="lqz-desktop-search" id="lqzDesktopSearch"
+                        placeholder="Search quizzes..." oninput="lqzDesktopSearch(this.value)">
+                </div>
                 <div class="lqz-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lqz-main-panel" id="lqz-main-panel">
@@ -967,6 +1009,39 @@ window.lqzMobileSearch = function(val) {
             body.classList.remove('collapsed');
             const chev = header ? header.querySelector('.lqz-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
+        }
+    });
+};
+
+window.lqzDesktopSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lqz-desktop-teacher-group').forEach(group => {
+        const header = group.querySelector('.lqz-desktop-teacher-header');
+        const body   = group.querySelector('.lqz-desktop-teacher-body');
+        const nameEl = group.querySelector('.lqz-desktop-teacher-name');
+        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
+        if (!header || !body) return;
+
+        const items = body.querySelectorAll('.lqz-sidebar-item');
+        let visible = 0;
+        items.forEach(item => {
+            const title = (item.dataset.title || '');
+            const show = !term || title.includes(term) || groupName.includes(term);
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const groupShow = visible > 0 || !term || groupName.includes(term);
+        group.style.display = groupShow ? '' : 'none';
+
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header.querySelector('.lqz-desktop-teacher-chevron');
+            if (chev) chev.classList.add('open');
+        } else if (!term) {
+            body.classList.add('collapsed');
+            const chev = header.querySelector('.lqz-desktop-teacher-chevron');
+            if (chev) chev.classList.remove('open');
         }
     });
 };
