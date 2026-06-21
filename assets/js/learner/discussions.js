@@ -577,11 +577,6 @@ function renderMobileList(data) {
                             <h3 style="flex:1;min-width:0;margin:0;font-size:15px;font-weight:700;color:#e2e8f0;
                                        font-family:'Nunito',sans-serif;white-space:nowrap;overflow:hidden;
                                        text-overflow:ellipsis;">${escHtml(d.title)}</h3>
-                            <span style="flex-shrink:0;font-size:11px;font-weight:700;color:#8b949e;
-                                         background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
-                                         padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
-                                ${escHtml(discTypeLabel(d))}
-                            </span>
                             <span style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
                                          font-weight:700;color:#4fd1c5;background:rgba(79,209,197,0.1);
                                          padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
@@ -594,7 +589,7 @@ function renderMobileList(data) {
                         </p>
                         <div style="margin-top:6px;font-size:11px;color:#8b949e;font-family:'Nunito',sans-serif;
                                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                            ${escHtml(d.creator_display)} · ${escHtml(d.display_date)}
+                            <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:999px;margin-right:6px;">${escHtml(discTypeLabel(d))}</span>${escHtml(d.creator_display)} · ${escHtml(d.display_date)}
                         </div>
                     </div>
                 </div>`;
