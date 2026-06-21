@@ -289,9 +289,14 @@ function renderQuizCards(groupedData) {
 
     // ── Build flat list for desktop panel lookup ──
     window._allLearnerQuizzesFlat = [];
+    const desktopQuizzesByTeacher = {};
     for (const [subject, quizzes] of Object.entries(groupedData)) {
         quizzes.forEach(quiz => {
-            window._allLearnerQuizzesFlat.push({ ...quiz, subject });
+            const teacher = String(quiz.teacher || quiz.teacher_name || quiz.created_by_name || subject || 'Unknown Teacher').trim() || 'Unknown Teacher';
+            const desktopQuiz = { ...quiz, subject, teacher };
+            window._allLearnerQuizzesFlat.push(desktopQuiz);
+            if (!desktopQuizzesByTeacher[teacher]) desktopQuizzesByTeacher[teacher] = [];
+            desktopQuizzesByTeacher[teacher].push(desktopQuiz);
         });
     }
 
@@ -330,9 +335,21 @@ function renderQuizCards(groupedData) {
     // ── Build sidebar HTML ──
     let sidebarHtml = '';
     let flatIdx = 0;
-    for (const [subject, quizzes] of Object.entries(groupedData)) {
-        sidebarHtml += `<div class="lqz-sidebar-subject-label">${escapeHtml(subject)}</div>`;
+    let desktopGroupIdx = 0;
+    for (const [teacher, quizzes] of Object.entries(desktopQuizzesByTeacher)) {
+        const groupId = `lqz-dg-${desktopGroupIdx++}`;
+        sidebarHtml += `
+            <div class="lqz-desktop-teacher-group">
+                <button type="button" class="lqz-desktop-teacher-header" onclick="toggleLqzDesktopGroup('${groupId}', this)">
+                    <svg class="lqz-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <span class="lqz-desktop-teacher-name">${escapeHtml(teacher)}</span>
+                    <span class="lqz-desktop-teacher-count">${quizzes.length}</span>
+                </button>
+                <div class="lqz-desktop-teacher-body" id="${groupId}">`;
         quizzes.forEach(quiz => {
+            flatIdx = window._allLearnerQuizzesFlat.indexOf(quiz);
             const startTimeStr = quiz.start_time || "";
             let isScheduled = false;
             if (startTimeStr) {
@@ -357,8 +374,8 @@ function renderQuizCards(groupedData) {
                     </div>
                     <span class="lqz-sidebar-status-dot" style="background:${dotColor};"></span>
                 </div>`;
-            flatIdx++;
         });
+        sidebarHtml += `</div></div>`;
     }
 
     // ── Build full HTML ──
@@ -367,6 +384,7 @@ function renderQuizCards(groupedData) {
             @media (min-width: 900px) {
                 .lqz-desktop-layout { display: flex !important; }
                 .lqz-mobile-list    { display: none !important; }
+                .lqz-mobile-search-wrap { display: none !important; }
             }
             @media (max-width: 899px) {
                 .lqz-desktop-layout { display: none !important; }
@@ -394,16 +412,6 @@ function renderQuizCards(groupedData) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .lqz-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
             .lqz-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -413,14 +421,45 @@ function renderQuizCards(groupedData) {
             .lqz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lqz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .lqz-sidebar-subject-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 700;
+            .lqz-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+            .lqz-desktop-teacher-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                background: transparent;
+                border: 0;
                 color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
+                cursor: pointer;
+                font-family: inherit;
+                text-align: left;
             }
+            .lqz-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+            .lqz-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+            .lqz-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lqz-desktop-teacher-name {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+            }
+            .lqz-desktop-teacher-count {
+                flex-shrink: 0;
+                font-size: 10px;
+                font-weight: 800;
+                color: #fdd663;
+                background: rgba(253,214,99,0.1);
+                border: 1px solid rgba(253,214,99,0.25);
+                border-radius: 999px;
+                padding: 1px 7px;
+            }
+            .lqz-desktop-teacher-body.collapsed { display: none; }
             .lqz-sidebar-item {
                 display: flex;
                 align-items: center;
@@ -681,7 +720,6 @@ function renderQuizCards(groupedData) {
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lqz-desktop-layout">
             <div class="lqz-sidebar">
-                <div class="lqz-sidebar-header">All Quizzes</div>
                 <div class="lqz-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lqz-main-panel" id="lqz-main-panel">
@@ -937,6 +975,15 @@ window.toggleLqzMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveQuizPageState();
+};
+
+window.toggleLqzDesktopGroup = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.lqz-desktop-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
 };
 
 function startQuizCountdowns() {

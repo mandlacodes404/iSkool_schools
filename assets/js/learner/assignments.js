@@ -185,8 +185,19 @@ function renderAssignmentCards(groupedData) {
     // ── Build sidebar HTML ──
     let sidebarHtml = '';
     let flatIdx = 0;
+    let desktopGroupIdx = 0;
     for (const [teacher, tasks] of Object.entries(groupedData)) {
-        sidebarHtml += `<div class="las-sidebar-teacher-label">${teacher}</div>`;
+        const groupId = `las-dg-${desktopGroupIdx++}`;
+        sidebarHtml += `
+            <div class="las-desktop-teacher-group">
+                <button type="button" class="las-desktop-teacher-header" onclick="toggleLasDesktopGroup('${groupId}', this)">
+                    <svg class="las-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <span class="las-desktop-teacher-name">${escapeLearnerAssignmentHtml(teacher)}</span>
+                    <span class="las-desktop-teacher-count">${tasks.length}</span>
+                </button>
+                <div class="las-desktop-teacher-body" id="${groupId}">`;
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
             const dotColor = task.is_past_due ? '#6b7280'
@@ -209,6 +220,7 @@ function renderAssignmentCards(groupedData) {
                 </div>`;
             flatIdx++;
         });
+        sidebarHtml += `</div></div>`;
     }
 
     // ── Build full HTML ──
@@ -217,6 +229,7 @@ function renderAssignmentCards(groupedData) {
             @media (min-width: 900px) {
                 .las-desktop-layout { display: flex !important; }
                 .las-mobile-list    { display: none !important; }
+                .las-mobile-search-wrap { display: none !important; }
             }
             @media (max-width: 899px) {
                 .las-desktop-layout { display: none !important; }
@@ -244,16 +257,6 @@ function renderAssignmentCards(groupedData) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .las-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #a78bfa;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
             .las-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -263,14 +266,45 @@ function renderAssignmentCards(groupedData) {
             .las-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .las-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .las-sidebar-teacher-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 700;
+            .las-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+            .las-desktop-teacher-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                background: transparent;
+                border: 0;
                 color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
+                cursor: pointer;
+                font-family: inherit;
+                text-align: left;
             }
+            .las-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+            .las-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+            .las-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .las-desktop-teacher-name {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+            }
+            .las-desktop-teacher-count {
+                flex-shrink: 0;
+                font-size: 10px;
+                font-weight: 800;
+                color: #a78bfa;
+                background: rgba(167,139,250,0.1);
+                border: 1px solid rgba(167,139,250,0.25);
+                border-radius: 999px;
+                padding: 1px 7px;
+            }
+            .las-desktop-teacher-body.collapsed { display: none; }
             .las-sidebar-item {
                 display: flex;
                 align-items: center;
@@ -521,7 +555,6 @@ function renderAssignmentCards(groupedData) {
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="las-desktop-layout">
             <div class="las-sidebar">
-                <div class="las-sidebar-header">All Assignments</div>
                 <div class="las-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="las-main-panel" id="las-main-panel">
@@ -625,6 +658,15 @@ window.toggleLasMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAssignmentPageState();
+};
+
+window.toggleLasDesktopGroup = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.las-desktop-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
 };
 
 window.lasMobileSearch = function(val) {

@@ -169,13 +169,15 @@ function renderAnnouncements(data) {
     // School-wide section
     if (hasSchoolWide) {
         sidebarHtml += `
-            <div class="lan-sidebar-section-label lan-section-school">
-                <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; shape-rendering:geometricPrecision">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                School-wide
-            </div>`;
+            <div class="lan-desktop-teacher-group">
+                <button type="button" class="lan-desktop-teacher-header lan-desktop-teacher-header--school" onclick="toggleLanDesktopGroup('lan-dg-school', this)">
+                    <svg class="lan-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <span class="lan-desktop-teacher-name">School-wide</span>
+                    <span class="lan-desktop-teacher-count">${schoolWide.length}</span>
+                </button>
+                <div class="lan-desktop-teacher-body" id="lan-dg-school">`;
 
         schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
@@ -196,21 +198,24 @@ function renderAnnouncements(data) {
                 </div>`;
             flatIdx++;
         });
+        sidebarHtml += `</div></div>`;
     }
 
     // Teacher section
     if (hasTeacher) {
-        sidebarHtml += `
-            <div class="lan-sidebar-section-label lan-section-teacher" style="margin-top:${hasSchoolWide ? '8px' : '0'}">
-                <svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; shape-rendering:geometricPrecision">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-                From Teachers
-            </div>`;
-
+        let desktopGroupIdx = 0;
         for (const [teacher, items] of Object.entries(teacherData)) {
-            sidebarHtml += `<div class="lan-sidebar-teacher-label">${teacher}</div>`;
+            const groupId = `lan-dg-teacher-${desktopGroupIdx++}`;
+            sidebarHtml += `
+                <div class="lan-desktop-teacher-group">
+                    <button type="button" class="lan-desktop-teacher-header" onclick="toggleLanDesktopGroup('${groupId}', this)">
+                        <svg class="lan-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                        <span class="lan-desktop-teacher-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
+                        <span class="lan-desktop-teacher-count">${items.length}</span>
+                    </button>
+                    <div class="lan-desktop-teacher-body" id="${groupId}">`;
             items.forEach(ann => {
                 const isNew = new Date(ann.created_at) > sevenDaysAgo;
                 sidebarHtml += `
@@ -230,6 +235,7 @@ function renderAnnouncements(data) {
                     </div>`;
                 flatIdx++;
             });
+            sidebarHtml += `</div></div>`;
         }
     }
 
@@ -239,6 +245,7 @@ function renderAnnouncements(data) {
             @media (min-width: 900px) {
                 .lan-desktop-layout { display: flex !important; }
                 .lan-mobile-list    { display: none !important; }
+                .lan-mobile-search-wrap { display: none !important; }
             }
             @media (max-width: 899px) {
                 .lan-desktop-layout { display: none !important; }
@@ -266,16 +273,6 @@ function renderAnnouncements(data) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .lan-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
             .lan-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -285,30 +282,46 @@ function renderAnnouncements(data) {
             .lan-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lan-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            /* Section labels (School-wide / From Teachers) */
-            .lan-sidebar-section-label {
+            .lan-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+            .lan-desktop-teacher-header {
+                width: 100%;
                 display: flex;
                 align-items: center;
-                gap: 6px;
-                padding: 10px 16px 4px;
+                gap: 8px;
+                padding: 10px 14px;
+                background: transparent;
+                border: 0;
+                color: #8b949e;
+                cursor: pointer;
+                font-family: inherit;
+                text-align: left;
+            }
+            .lan-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+            .lan-desktop-teacher-header--school { color: #d29522; }
+            .lan-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+            .lan-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lan-desktop-teacher-name {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+            }
+            .lan-desktop-teacher-count {
+                flex-shrink: 0;
                 font-size: 10px;
                 font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+                color: #f28c38;
+                background: rgba(242,140,56,0.1);
+                border: 1px solid rgba(242,140,56,0.25);
+                border-radius: 999px;
+                padding: 1px 7px;
             }
-            .lan-section-school  { color: #d29522; border-top: 1px solid rgba(210,149,34,0.15); margin-top: 4px; }
-            .lan-section-school:first-child { border-top: none; margin-top: 0; }
-            .lan-section-teacher { color: #4fd1c5; border-top: 1px solid rgba(79,209,197,0.12); margin-top: 4px; }
-
-            /* Teacher sub-label */
-            .lan-sidebar-teacher-label {
-                padding: 6px 16px 2px 24px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #555e6a;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
+            .lan-desktop-teacher-body.collapsed { display: none; }
 
             .lan-sidebar-item {
                 display: flex;
@@ -588,7 +601,6 @@ function renderAnnouncements(data) {
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lan-desktop-layout">
             <div class="lan-sidebar">
-                <div class="lan-sidebar-header">All Announcements</div>
                 <div class="lan-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lan-main-panel" id="lan-main-panel">
@@ -757,6 +769,15 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAnnouncementPageState();
+};
+
+window.toggleLanDesktopGroup = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.lan-desktop-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
 };
 
 function escapeLearnerAnnouncementHtml(value) {

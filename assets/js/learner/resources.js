@@ -137,8 +137,19 @@ function renderResourceCards(data) {
     // ── Build sidebar HTML ──
     let sidebarHtml = '';
     let flatIdx = 0;
+    let desktopGroupIdx = 0;
     for (const [teacher, files] of Object.entries(data)) {
-        sidebarHtml += `<div class="lrs-sidebar-teacher-label">${teacher}</div>`;
+        const groupId = `lrs-dg-${desktopGroupIdx++}`;
+        sidebarHtml += `
+            <div class="lrs-desktop-teacher-group">
+                <button type="button" class="lrs-desktop-teacher-header" onclick="toggleLrsDesktopGroup('${groupId}', this)">
+                    <svg class="lrs-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <span class="lrs-desktop-teacher-name">${escapeResourceHtml(teacher)}</span>
+                    <span class="lrs-desktop-teacher-count">${files.length}</span>
+                </button>
+                <div class="lrs-desktop-teacher-body" id="${groupId}">`;
         files.forEach(file => {
             const isVideo = file.resource_type === 'video';
             const metaLabel = isVideo
@@ -161,6 +172,7 @@ function renderResourceCards(data) {
                 </div>`;
             flatIdx++;
         });
+        sidebarHtml += `</div></div>`;
     }
 
     // ── Build full HTML ──
@@ -169,6 +181,7 @@ function renderResourceCards(data) {
             @media (min-width: 900px) {
                 .lrs-desktop-layout { display: flex !important; }
                 .lrs-mobile-list    { display: none !important; }
+                .lrs-mobile-search-wrap { display: none !important; }
             }
             @media (max-width: 899px) {
                 .lrs-desktop-layout { display: none !important; }
@@ -196,16 +209,6 @@ function renderResourceCards(data) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .lrs-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
             .lrs-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -215,14 +218,45 @@ function renderResourceCards(data) {
             .lrs-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lrs-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .lrs-sidebar-teacher-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 700;
+            .lrs-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+            .lrs-desktop-teacher-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                background: transparent;
+                border: 0;
                 color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
+                cursor: pointer;
+                font-family: inherit;
+                text-align: left;
             }
+            .lrs-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+            .lrs-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+            .lrs-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lrs-desktop-teacher-name {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+            }
+            .lrs-desktop-teacher-count {
+                flex-shrink: 0;
+                font-size: 10px;
+                font-weight: 800;
+                color: #f28c38;
+                background: rgba(242,140,56,0.1);
+                border: 1px solid rgba(242,140,56,0.25);
+                border-radius: 999px;
+                padding: 1px 7px;
+            }
+            .lrs-desktop-teacher-body.collapsed { display: none; }
             .lrs-sidebar-item {
                 display: flex;
                 align-items: center;
@@ -531,7 +565,6 @@ function renderResourceCards(data) {
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lrs-desktop-layout">
             <div class="lrs-sidebar">
-                <div class="lrs-sidebar-header">All Resources</div>
                 <div class="lrs-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lrs-main-panel" id="lrs-main-panel">
@@ -644,6 +677,15 @@ window.toggleLrsMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveResourcePageState();
+};
+
+window.toggleLrsDesktopGroup = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.lrs-desktop-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
 };
 
 window.selectDesktopLearnerResource = function(flatIdx) {
@@ -949,6 +991,16 @@ function getFileIcon(ext, isVideo = false) {
     }
     // Word/Doc/Default Icon
     return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+}
+
+function escapeResourceHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
 }
 
 // Reuse your Menu Logic

@@ -56,6 +56,7 @@ $stmt = $conn->prepare("
         q.publish_marks,
         q.is_summative,
         COALESCE(ts.subject_name, CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher'))) AS display_group,
+        TRIM(CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher'))) AS teacher_display,
         qa.status AS attempt_status,
         COALESCE(qq.question_count, 0) AS question_count,
         COALESCE(qq.total_points, 0)   AS total_points
@@ -106,6 +107,7 @@ while ($row = $quizzesResult->fetch_assoc()) {
         'status'         => $row['quiz_db_status'] ?? 'Open',
         'publish_marks'  => (int)($row['publish_marks'] ?? 0),
         'is_summative'   => !empty($row['is_summative']),
+        'teacher'        => trim($row['teacher_display'] ?? '') ?: 'Unknown Teacher',
         'attempt_status'  => $row['attempt_status'],
         'question_count'  => (int)$row['question_count'],
         'total_points'    => (int)$row['total_points'],
