@@ -589,7 +589,7 @@ function renderMobileList(data) {
                         </p>
                         <div style="margin-top:6px;font-size:11px;color:#8b949e;font-family:'Nunito',sans-serif;
                                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                            <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:999px;margin-right:6px;">${escHtml(discTypeLabel(d))}</span>${escHtml(d.creator_display)} · ${escHtml(d.display_date)}
+                            <span style="background:#1b1b1b;color:#8b949e;padding:3px 10px;border-radius:999px;margin-right:6px;">${escHtml(discTypeLabel(d))}</span>${escHtml(d.creator_display)} · ${escHtml(d.display_date)}
                         </div>
                     </div>
                 </div>`;
