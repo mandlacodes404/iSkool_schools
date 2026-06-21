@@ -6,7 +6,7 @@ on:
       - main  # This ONLY runs when you push to the main branch
 
 env:
-  APP_VERSION: "1.1.2"   # ← ONLY change this when you release a new version
+  APP_VERSION: "1.1.3"   # ← ONLY change this when you release a new version
 
 jobs:
   web-deploy:
