@@ -160,14 +160,6 @@ function getCsrfToken() {
             <span>Upload Resource</span>
         </a>
 
-        <!-- Discussions -->
-        <a href="javascript:void(0)" data-page="teacher_discussions" onclick="fetchTeacherDiscussions()">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span>Discussions</span>
-        </a>
-
         <!-- Syllabus -->
         <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
@@ -993,7 +985,6 @@ window.removeTeacherProfilePicture = function() {
         { label: 'Announcements',  keywords: ['announce','announcements'],action: () => { fetchTeacherAnnouncements(); } },
         { label: 'Grades',         keywords: ['grade','grades','marks'], action: () => { fetchTeacherGrades(); } },
         { label: 'Resources',      keywords: ['resource','upload'],      action: () => { fetchTeacherResources(); } },
-        { label: 'Discussions',    keywords: ['discuss','discussions'],  action: () => { fetchTeacherDiscussions(); } },
         { label: 'Evaluations',    keywords: ['eval','evaluations'],     action: () => { fetchTeacherEvaluations(); setTopNavTab('tab-evaluations'); } },
         { label: 'Analytics',      keywords: ['analyt','analytics'],     action: () => { fetchTeacherAnalytics(); setTopNavTab('tab-analytics'); } },
         { label: 'Settings',       keywords: ['setting','settings'],     action: () => { loadTeacherSettings(); setTopNavTab('tab-settings'); } },
@@ -1095,7 +1086,7 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=4.8"></script>
+<script src="assets/js/teacher/dashboard.js?v=4.9"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=4.1"></script>
 <script src="assets/js/teacher/announcements.js?v=2.6"></script>
@@ -1103,7 +1094,6 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/resources.js?v=1.8"></script>
 <script src="assets/js/teacher/grades.js?v=2.0"></script>
 <script src="assets/js/teacher/assignments.js?v=2.0"></script>
-<script src="assets/js/teacher/discussions.js?v=1.1"></script>
 <script src="assets/js/teacher/sbo.js?v=1.9"></script>
 <script src="assets/js/teacher/analytics.js?v=1.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=1.3"></script>

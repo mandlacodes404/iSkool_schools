@@ -30,15 +30,14 @@ if (!$class_id) { echo json_encode(['error' => 'Not enrolled in a class']); exit
 $title           = trim($_POST['title'] ?? '');
 $message_text    = trim($_POST['message'] ?? '');
 $discussion_type = $_POST['type'] ?? 'general';
-$tagged_teachers = $_POST['teachers'] ?? [];
 $allowed_types   = ['homework', 'general', 'off_topic'];
 
 if (!in_array($discussion_type, $allowed_types, true)) {
     $discussion_type = 'general';
 }
 
-if (empty($title) || empty($message_text) || empty($tagged_teachers)) {
-    echo json_encode(['error' => 'Please fill all fields and tag at least one teacher.']); exit();
+if (empty($title) || empty($message_text)) {
+    echo json_encode(['error' => 'Please fill all required fields.']); exit();
 }
 
 // File upload
@@ -79,14 +78,6 @@ $stmt->execute();
 $disc_id = $stmt->insert_id;
 $stmt->close();
 
-// Tag teachers
-$stmt = $conn->prepare("INSERT IGNORE INTO discussion_teachers (discussion_id, teacher_email) VALUES (?, ?)");
-foreach ($tagged_teachers as $t) {
-    $stmt->bind_param("is", $disc_id, $t);
-    $stmt->execute();
-}
-$stmt->close();
-
 // Notifications (push + email) — same logic as create_discussion.php
 $schoolNameResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 $schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
@@ -95,26 +86,23 @@ $schoolName = ($schoolNameResult && $snRow = $schoolNameResult->fetch_assoc())
 
 $cleanBaseUrl            = rtrim(BASE_URL, '/');
 $learnerDiscussionLink = $cleanBaseUrl . '/learner_dashboard.php?page=discussion&id=' . $disc_id;
-$teacherDiscussionLink = $cleanBaseUrl . '/view_discussion.php?id=' . $disc_id;
 
-$emailTemplate = function($recipientName, $recipientRole) use ($title, $message_text, $creator_display, $learnerDiscussionLink, $teacherDiscussionLink, $schoolName) {
-    $viewLink  = $recipientRole === 'teacher' ? $teacherDiscussionLink : $learnerDiscussionLink;
-    $greeting  = $recipientRole === 'teacher' ? 'Dear Teacher' : 'Hi ' . htmlspecialchars($recipientName);
-    $introLine = $recipientRole === 'teacher' ? 'A learner tagged you in a new discussion:' : 'A new discussion has been started in your class:';
+$emailTemplate = function($recipientName) use ($title, $message_text, $creator_display, $learnerDiscussionLink, $schoolName) {
+    $greeting  = 'Hi ' . htmlspecialchars($recipientName);
     return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Verdana,sans-serif;background:#0d1117;color:#e2e8f0;padding:20px;">
         <div style="max-width:600px;margin:auto;background:#161b22;border-radius:12px;overflow:hidden;">
             <div style="background:#161b22;padding:20px;text-align:center;border-bottom:1px solid #30363d;">
                 <h1 style="color:#4fd1c5;margin:0;">iSkool</h1>
             </div>
             <div style="padding:30px;">
-                <p>' . $greeting . ',</p><p>' . $introLine . '</p>
+                <p>' . $greeting . ',</p><p>A new discussion has been started in your class:</p>
                 <div style="background:#0d1117;padding:20px;border-left:4px solid #4fd1c5;border-radius:8px;margin:20px 0;">
                     <strong>' . htmlspecialchars($title) . '</strong><br><br>
                     ' . nl2br(htmlspecialchars($message_text)) . '<br><br>
                     <em>— ' . htmlspecialchars($creator_display) . '</em>
                 </div>
                 <p style="text-align:center;">
-                    <a href="' . $viewLink . '" style="background:#4fd1c5;color:#000;padding:12px 25px;border-radius:25px;text-decoration:none;font-weight:bold;">View Discussion</a>
+                    <a href="' . $learnerDiscussionLink . '" style="background:#4fd1c5;color:#000;padding:12px 25px;border-radius:25px;text-decoration:none;font-weight:bold;">View Discussion</a>
                 </p>
             </div>
         </div>
@@ -145,39 +133,9 @@ foreach ($classmates as $cm) {
             $mail->setFrom($from_email, $schoolName);
             $mail->addAddress($cm['email']); $mail->isHTML(true);
             $mail->Subject = "New Discussion: $title";
-            $mail->Body = $emailTemplate($cm['name'], 'learner');
+            $mail->Body = $emailTemplate($cm['name']);
             $mail->send();
         } catch (Exception $e) { error_log("Email error: " . $e->getMessage()); }
-    }
-}
-
-// Notify tagged teachers
-if (!empty($tagged_teachers)) {
-    $placeholders = implode(',', array_fill(0, count($tagged_teachers), '?'));
-    $types        = str_repeat('s', count($tagged_teachers));
-    $tSql         = "SELECT email, COALESCE(name,'Teacher') AS name FROM users WHERE email IN ("
-        . $placeholders .
-        ") AND role = 'teacher'";
-    $tStmt        = $conn->prepare($tSql);
-    $tStmt->bind_param($types, ...$tagged_teachers);
-    $tStmt->execute();
-    $teachers = $tStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $tStmt->close();
-
-    foreach ($teachers as $t) {
-        sendPushToUser($conn, $t['email'], "Tagged in Discussion", "$creator_display tagged you.", $teacherDiscussionLink, $schoolName);
-        try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP(); $mail->Host = getenv('SMTP_HOST'); $mail->SMTPAuth = true;
-            $mail->Username = getenv('SMTP_USER'); $mail->Password = getenv('SMTP_PASSWORD');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = getenv('SMTP_PORT');
-            $from_email = getenv('SMTP_FROM');
-            $mail->setFrom($from_email, $schoolName);
-            $mail->addAddress($t['email']); $mail->isHTML(true);
-            $mail->Subject = "You've been tagged: $title";
-            $mail->Body = $emailTemplate($t['name'], 'teacher');
-            $mail->send();
-        } catch (Exception $e) { error_log("Teacher email error: " . $e->getMessage()); }
     }
 }
 

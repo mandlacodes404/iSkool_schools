@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['learner', 'teacher'])) {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['error' => 'Unauthorized']); exit();
 }
 
@@ -33,18 +33,13 @@ $discStmt->close();
 if (!$disc) { echo json_encode(['error' => 'Discussion not found']); exit(); }
 
 $class_id          = (int)$disc['class_id'];
-$taggedStmt = $conn->prepare("SELECT 1 FROM discussion_teachers WHERE discussion_id = ? AND teacher_email = ?");
-$taggedStmt->bind_param("is", $disc_id, $user_email);
-$taggedStmt->execute();
-$is_tagged_teacher = $user_role === 'teacher' && $taggedStmt->get_result()->num_rows > 0;
-$taggedStmt->close();
 $classStmt = $conn->prepare("SELECT 1 FROM class_students WHERE class_id = ? AND student_email = ?");
 $classStmt->bind_param("is", $class_id, $user_email);
 $classStmt->execute();
 $is_in_class = $user_role === 'learner' && $classStmt->get_result()->num_rows > 0;
 $classStmt->close();
 
-if (!$is_in_class && !$is_tagged_teacher) { echo json_encode(['error' => 'Access denied']); exit(); }
+if (!$is_in_class) { echo json_encode(['error' => 'Access denied']); exit(); }
 
 $creatorStmt = $conn->prepare("SELECT profile_picture, name, surname FROM users WHERE email = ?");
 $creatorStmt->bind_param("s", $disc['creator_email']);

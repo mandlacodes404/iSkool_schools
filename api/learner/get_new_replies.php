@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['learner', 'teacher'])) {
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode([]); exit();
 }
 
@@ -29,18 +29,13 @@ if (!$disc) { echo json_encode([]); exit(); }
 
 $class_id = (int)$disc['class_id'];
 
-$taggedStmt = $conn->prepare("SELECT 1 FROM discussion_teachers WHERE discussion_id = ? AND teacher_email = ?");
-$taggedStmt->bind_param("is", $disc_id, $user_email);
-$taggedStmt->execute();
-$is_tagged_teacher = $user_role === 'teacher' && $taggedStmt->get_result()->num_rows > 0;
-$taggedStmt->close();
 $classStmt = $conn->prepare("SELECT 1 FROM class_students WHERE class_id = ? AND student_email = ?");
 $classStmt->bind_param("is", $class_id, $user_email);
 $classStmt->execute();
 $is_in_class = $user_role === 'learner' && $classStmt->get_result()->num_rows > 0;
 $classStmt->close();
 
-if (!$is_in_class && !$is_tagged_teacher) { echo json_encode([]); exit(); }
+if (!$is_in_class) { echo json_encode([]); exit(); }
 
 // Fetch only new replies after the last known ID
 $stmt = $conn->prepare("

@@ -132,17 +132,6 @@ function renderSnapshotPanel(data) {
             empty:   'No announcements sent yet',
             meta:    data.announcement ? `${data.announcement.class_name} &bull; ${data.announcement.created_at}` : '',
             badge:   ''
-        },
-        {
-            key:     'discussion',
-            data:    data.discussion,
-            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#34d399" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-            label:   'Latest Discussion',
-            color:   '#34d399',
-            onclick: 'fetchTeacherDiscussions()',
-            empty:   'No discussions yet',
-            meta:    data.discussion ? `${data.discussion.class_name} &bull; ${data.discussion.created_at}` : '',
-            badge:   data.discussion ? `<span class="snap-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;">${data.discussion.reply_count} ${data.discussion.reply_count === 1 ? 'reply' : 'replies'}</span>` : ''
         }
     ];
 
@@ -190,8 +179,6 @@ function renderSnapshotPanel(data) {
         window.fetchTeacherAssignments();
     } else if (savedPage === "teacher_analytics") {
         window.fetchTeacherAnalytics();
-    } else if (savedPage === "teacher_discussions") {
-        window.fetchTeacherDiscussions();
     } else if (savedPage === "teacher_grades") {
         window.fetchTeacherGrades();
     } else if (savedPage === "teacher_syllabus") {

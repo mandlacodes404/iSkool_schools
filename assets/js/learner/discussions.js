@@ -6,7 +6,6 @@ function getCsrfToken() {
 
 window.discussionCache       = null;
 window.discussionThreadCache = {};
-window.teacherListCache      = null;
 window.discussionPrefetchPromise = null;
 let discPollInterval         = null;
 let discTypingPollInterval   = null;
@@ -1947,33 +1946,12 @@ window.loadCreateDiscussion = async function() {
         unlockMobileLayout();
     }
 
-    const loader = document.getElementById('loaderOverlay');
-    if (loader) loader.style.display = 'flex';
-
-    try {
-        if (!window.teacherListCache) {
-            const res  = await fetch('api/learner/get_teachers.php');
-            const data = await res.json();
-            window.teacherListCache = data;
-        }
-        renderCreateForm(window.teacherListCache);
-    } catch (e) {
-        const target = getThreadTarget();
-        if (target) target.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading form.</p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
-    }
+    renderCreateForm();
 };
 
-function renderCreateForm(teachers) {
+function renderCreateForm() {
     const target = getThreadTarget();
     if (!target) return;
-
-    const teacherOptions = teachers.map(t =>
-        `<div class="disc-teacher-option" data-email="${escHtml(t.email)}" onclick="discToggleTeacher(this)">
-            ${escHtml(t.display_name)}
-         </div>`
-    ).join('');
 
     target.innerHTML = `
         <style>
@@ -1984,10 +1962,6 @@ function renderCreateForm(teachers) {
             .disc-field input,.disc-field textarea,.disc-field select { width:100%; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#e2e8f0; font-family:'Nunito',sans-serif; font-size:14px; font-weight:600; padding:12px 14px; box-sizing:border-box; outline:none; transition:border-color 0.2s; }
             .disc-field input:focus,.disc-field textarea:focus,.disc-field select:focus { border-color:rgba(79,209,197,0.4); }
             .disc-field textarea { min-height:110px; resize:vertical; }
-            .disc-teachers-list { display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px; }
-            .disc-teacher-option { padding:10px 12px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; color:#c9d1d9; transition:0.15s; }
-            .disc-teacher-option:hover { background:rgba(255,255,255,0.06); }
-            .disc-teacher-option.selected { background:rgba(79,209,197,0.1); color:#4fd1c5; border:1px solid rgba(79,209,197,0.2); }
             .disc-attach-area { background:#1b1b1b; border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:14px; text-align:center; cursor:pointer; }
             .disc-attach-area:hover { border-color:rgba(79,209,197,0.3); }
             .disc-submit-btn { width:100%; background:#4fd1c5; color:#0d1117; border:none; padding:14px; border-radius:12px; font-family:'Nunito',sans-serif; font-size:16px; font-weight:800; cursor:pointer; margin-top:8px; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -2016,10 +1990,6 @@ function renderCreateForm(teachers) {
                 <textarea id="discMessage" placeholder="Explain what you need help with or want to discuss..."></textarea>
             </div>
             <div class="disc-field">
-                <label>Tag Teacher(s) * <span style="font-size:12px;color:#8b949e;font-weight:600;">(tap to select)</span></label>
-                <div class="disc-teachers-list">${teacherOptions}</div>
-            </div>
-            <div class="disc-field">
                 <label>Attachment <span style="color:#8b949e;font-weight:600;">(optional)</span></label>
                 <div class="disc-attach-area" onclick="document.getElementById('discCreateFile').click()">
                     <i class="fas fa-paperclip" style="color:#8b949e;margin-right:6px;"></i>
@@ -2034,10 +2004,6 @@ function renderCreateForm(teachers) {
         </div>`;
 }
 
-window.discToggleTeacher = function(el) {
-    el.classList.toggle('selected');
-};
-
 window.discSubmitCreate = async function() {
     const title     = document.getElementById('discTitle')?.value.trim();
     const type      = document.getElementById('discType')?.value || 'general';
@@ -2046,11 +2012,8 @@ window.discSubmitCreate = async function() {
     const errorEl   = document.getElementById('discFormError');
     const btn       = document.getElementById('discSubmitBtn');
 
-    const selectedTeachers = [...document.querySelectorAll('.disc-teacher-option.selected')]
-        .map(el => el.dataset.email);
-
-    if (!title || !message || selectedTeachers.length === 0) {
-        errorEl.textContent = 'Please fill all required fields and tag at least one teacher.';
+    if (!title || !message) {
+        errorEl.textContent = 'Please fill all required fields.';
         errorEl.style.display = 'block';
         return;
     }
@@ -2060,7 +2023,6 @@ window.discSubmitCreate = async function() {
     fd.append('title', title);
     fd.append('type', type);
     fd.append('message', message);
-    selectedTeachers.forEach(e => fd.append('teachers[]', e));
     if (fileInput?.files[0]) fd.append('attachment', fileInput.files[0]);
 
     btn.disabled = true;

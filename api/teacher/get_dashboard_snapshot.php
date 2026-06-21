@@ -9,7 +9,6 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 
-// Current academic year
 $yearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $current_year_id = (int)$yearResult->fetch_assoc()['id'];
 
@@ -17,7 +16,6 @@ if (!$current_year_id) {
     echo json_encode(['error' => 'No active academic year']); exit();
 }
 
-// ── Latest Quiz ──
 $stmt = $conn->prepare("
     SELECT q.id, q.title, q.status, q.start_time, c.name AS class_name
     FROM quizzes q
@@ -30,7 +28,6 @@ $stmt->execute();
 $quiz = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// ── Closest Due Assignment ──
 $stmt = $conn->prepare("
     SELECT a.id, a.title, a.due_date, c.name AS class_name
     FROM assignments a
@@ -44,7 +41,6 @@ $stmt->execute();
 $assignment = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// ── Latest Announcement ──
 $stmt = $conn->prepare("
     SELECT a.id, a.title, a.created_at, c.name AS class_name
     FROM announcements a
@@ -57,24 +53,6 @@ $stmt->execute();
 $announcement = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// ── Latest Discussion ──
-$stmt = $conn->prepare("
-    SELECT d.id, d.title, d.created_at, c.name AS class_name,
-           COUNT(r.id) AS reply_count
-    FROM class_discussions d
-    JOIN discussion_teachers dt ON d.id = dt.discussion_id
-    JOIN classes c ON d.class_id = c.id
-    LEFT JOIN discussion_replies r ON d.id = r.discussion_id
-    WHERE dt.teacher_email = ? AND d.academic_year_id = ?
-    GROUP BY d.id
-    ORDER BY d.created_at DESC LIMIT 1
-");
-$stmt->bind_param("si", $email, $current_year_id);
-$stmt->execute();
-$discussion = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
-// ── Format & Return ──
 echo json_encode([
     'quiz' => $quiz ? [
         'id'         => $quiz['id'],
@@ -97,14 +75,6 @@ echo json_encode([
         'title'      => $announcement['title'],
         'class_name' => $announcement['class_name'],
         'created_at' => date('d M Y', strtotime($announcement['created_at']))
-    ] : null,
-
-    'discussion' => $discussion ? [
-        'id'          => $discussion['id'],
-        'title'       => $discussion['title'],
-        'class_name'  => $discussion['class_name'],
-        'reply_count' => (int)$discussion['reply_count'],
-        'created_at'  => date('d M Y', strtotime($discussion['created_at']))
     ] : null
 ]);
 ?>
