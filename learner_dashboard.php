@@ -361,7 +361,7 @@ function getCsrfToken() {
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:15px;"><span><strong>iSkool v<?php echo APP_VERSION; ?></strong></span></div>
+    <div class="footer" style="font-size:15px;"><span><strong>iSkool v1.1.2</strong></span></div>
 </div>
 
 <div class="main-content">
