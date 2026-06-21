@@ -143,13 +143,16 @@ function renderResourceCards(data) {
         sidebarHtml += `
             <div class="lrs-desktop-teacher-group">
                 <button type="button" class="lrs-desktop-teacher-header" onclick="toggleLrsDesktopGroup('${groupId}', this)">
-                    <svg class="lrs-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="lrs-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <svg class="lrs-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span class="lrs-desktop-teacher-name">${escapeResourceHtml(teacher)}</span>
                     <span class="lrs-desktop-teacher-count">${files.length}</span>
                 </button>
-                <div class="lrs-desktop-teacher-body" id="${groupId}">`;
+                <div class="lrs-desktop-teacher-body collapsed" id="${groupId}">`;
         files.forEach(file => {
             const isVideo = file.resource_type === 'video';
             const metaLabel = isVideo
@@ -235,6 +238,7 @@ function renderResourceCards(data) {
             .lrs-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
             .lrs-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
             .lrs-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lrs-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
             .lrs-desktop-teacher-name {
                 flex: 1;
                 min-width: 0;

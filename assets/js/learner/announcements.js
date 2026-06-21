@@ -171,13 +171,16 @@ function renderAnnouncements(data) {
         sidebarHtml += `
             <div class="lan-desktop-teacher-group">
                 <button type="button" class="lan-desktop-teacher-header lan-desktop-teacher-header--school" onclick="toggleLanDesktopGroup('lan-dg-school', this)">
-                    <svg class="lan-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="lan-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <svg class="lan-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span class="lan-desktop-teacher-name">School-wide</span>
                     <span class="lan-desktop-teacher-count">${schoolWide.length}</span>
                 </button>
-                <div class="lan-desktop-teacher-body" id="lan-dg-school">`;
+                <div class="lan-desktop-teacher-body collapsed" id="lan-dg-school">`;
 
         schoolWide.forEach(ann => {
             const isNew = new Date(ann.created_at) > sevenDaysAgo;
@@ -209,13 +212,16 @@ function renderAnnouncements(data) {
             sidebarHtml += `
                 <div class="lan-desktop-teacher-group">
                     <button type="button" class="lan-desktop-teacher-header" onclick="toggleLanDesktopGroup('${groupId}', this)">
-                        <svg class="lan-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                        <svg class="lan-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                             <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                        <svg class="lan-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
                         <span class="lan-desktop-teacher-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
                         <span class="lan-desktop-teacher-count">${items.length}</span>
                     </button>
-                    <div class="lan-desktop-teacher-body" id="${groupId}">`;
+                    <div class="lan-desktop-teacher-body collapsed" id="${groupId}">`;
             items.forEach(ann => {
                 const isNew = new Date(ann.created_at) > sevenDaysAgo;
                 sidebarHtml += `
@@ -300,6 +306,7 @@ function renderAnnouncements(data) {
             .lan-desktop-teacher-header--school { color: #d29522; }
             .lan-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
             .lan-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lan-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
             .lan-desktop-teacher-name {
                 flex: 1;
                 min-width: 0;

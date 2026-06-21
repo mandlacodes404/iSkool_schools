@@ -191,13 +191,16 @@ function renderAssignmentCards(groupedData) {
         sidebarHtml += `
             <div class="las-desktop-teacher-group">
                 <button type="button" class="las-desktop-teacher-header" onclick="toggleLasDesktopGroup('${groupId}', this)">
-                    <svg class="las-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="las-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <svg class="las-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span class="las-desktop-teacher-name">${escapeLearnerAssignmentHtml(teacher)}</span>
                     <span class="las-desktop-teacher-count">${tasks.length}</span>
                 </button>
-                <div class="las-desktop-teacher-body" id="${groupId}">`;
+                <div class="las-desktop-teacher-body collapsed" id="${groupId}">`;
         tasks.forEach(task => {
             const isDone = !!task.submission_file;
             const dotColor = task.is_past_due ? '#6b7280'
@@ -283,6 +286,7 @@ function renderAssignmentCards(groupedData) {
             .las-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
             .las-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
             .las-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .las-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
             .las-desktop-teacher-name {
                 flex: 1;
                 min-width: 0;

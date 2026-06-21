@@ -341,13 +341,16 @@ function renderQuizCards(groupedData) {
         sidebarHtml += `
             <div class="lqz-desktop-teacher-group">
                 <button type="button" class="lqz-desktop-teacher-header" onclick="toggleLqzDesktopGroup('${groupId}', this)">
-                    <svg class="lqz-desktop-teacher-chevron open" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <svg class="lqz-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <svg class="lqz-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span class="lqz-desktop-teacher-name">${escapeHtml(teacher)}</span>
                     <span class="lqz-desktop-teacher-count">${quizzes.length}</span>
                 </button>
-                <div class="lqz-desktop-teacher-body" id="${groupId}">`;
+                <div class="lqz-desktop-teacher-body collapsed" id="${groupId}">`;
         quizzes.forEach(quiz => {
             flatIdx = window._allLearnerQuizzesFlat.indexOf(quiz);
             const startTimeStr = quiz.start_time || "";
@@ -438,6 +441,7 @@ function renderQuizCards(groupedData) {
             .lqz-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
             .lqz-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
             .lqz-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lqz-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
             .lqz-desktop-teacher-name {
                 flex: 1;
                 min-width: 0;
