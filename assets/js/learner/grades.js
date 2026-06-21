@@ -369,11 +369,14 @@ function renderGrades(data) {
     .quiz-row-title { flex: 1; font-size: 14px; font-weight: 700; color: #68d391; display: flex; align-items: center; gap: 6px; }
     .quiz-row-title a { color: #68d391; text-decoration: none; transition: color 0.2s; }
     .quiz-row-title a:hover { color: #22c55e; }
+    .quiz-title-link { color: #68d391; cursor: pointer; }
     .quiz-unpublished .quiz-row-title { color: #8b949e; }
     @media (max-width: 899px) {
         .quiz-row-title { color: #e2e8f0; }
         .quiz-row-title a { color: #e2e8f0; }
         .quiz-row-title a:hover { color: #fff; }
+        .quiz-title-link { color: #fff; }
+        .quiz-unpublished .quiz-row-title { color: #8b949e; }
     }
     .quiz-score-pill { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
     .quiz-score-pill.high { background: rgba(34,197,94,0.15); color: #22c55e; }
@@ -898,7 +901,7 @@ function buildQuizList(quizzes, gi) {
         const pillText   = published ? `${pct}%` : 'Pending';
         const gradingStatus = buildOpenEndedGradingStatus(q);
         const titleHtml  = published
-            ? `<span style="color:#68d391;cursor:pointer;" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
+            ? `<span class="quiz-title-link" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
             : escHtml(q.quiz_title);
 
         const summBadge = q.is_summative
@@ -906,7 +909,7 @@ function buildQuizList(quizzes, gi) {
                 <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2" fill="none">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>Term
+                </svg>
                </span>` : '';
 
         const iconHtml = published
