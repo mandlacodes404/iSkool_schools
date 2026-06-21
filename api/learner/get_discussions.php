@@ -10,6 +10,11 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 }
 
 $learner_email = $_SESSION['email'];
+$discussion_type_labels = [
+    'homework' => 'Homework help',
+    'general' => 'General',
+    'off_topic' => 'Off-topic',
+];
 
 // 1. Get current active academic year
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
@@ -32,8 +37,10 @@ $stmt = $conn->prepare("
     SELECT 
         d.id, 
         d.title, 
+        d.type,
         d.initial_message, 
         d.created_at,
+        d.creator_email,
         COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.name,''), ' ', COALESCE(u.surname,''))), ''), d.creator_name, 'Learner') AS creator_display,
         (SELECT COUNT(*) FROM discussion_replies WHERE discussion_id = d.id) AS reply_count
     FROM class_discussions d
@@ -49,6 +56,8 @@ $result = $stmt->get_result();
 
 $discussions = [];
 while ($row = $result->fetch_assoc()) {
+    $row['type'] = $row['type'] ?: 'general';
+    $row['type_label'] = $discussion_type_labels[$row['type']] ?? $discussion_type_labels['general'];
     $row['display_date'] = date('M j, Y', strtotime($row['created_at']));
     // Snip message for preview
     $row['preview'] = (strlen($row['initial_message']) > 150) 

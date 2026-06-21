@@ -103,6 +103,29 @@ function discAvatarColor(seed) {
     };
 }
 
+function discInitials(displayName) {
+    const parts = String(displayName || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function discAvatarSeed(email, displayName) {
+    return email || displayName || 'Learner';
+}
+
+function discTypeLabel(discussion) {
+    const labels = {
+        homework: 'Homework help',
+        general: 'General',
+        off_topic: 'Off-topic',
+    };
+    return discussion?.type_label || labels[discussion?.type] || labels.general;
+}
+
 // ─────────────────────────────────────────────
 // 1. DISCUSSION LIST
 // ─────────────────────────────────────────────
@@ -290,6 +313,15 @@ function injectDesktopShell(apiArea) {
             .dsk-item-pill {
                 background: rgba(79,209,197,0.1);
                 color: #4fd1c5;
+                padding: 1px 6px;
+                border-radius: 10px;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .dsk-item-type-pill {
+                background: rgba(255,255,255,0.05);
+                color: #8b949e;
+                border: 1px solid rgba(255,255,255,0.07);
                 padding: 1px 6px;
                 border-radius: 10px;
                 font-size: 9px;
@@ -492,6 +524,7 @@ function renderSidebarList(data) {
             <div class="dsk-item-title">${escHtml(d.title)}</div>
             <div class="dsk-item-meta">
                 <span>${escHtml(d.display_date)}</span>
+                <span class="dsk-item-type-pill">${escHtml(discTypeLabel(d))}</span>
                 <span class="dsk-item-pill">${d.reply_count} ${d.reply_count == 1 ? 'reply' : 'replies'}</span>
             </div>
             <div class="dsk-item-preview">${escHtml(d.preview)}</div>
@@ -526,8 +559,8 @@ function renderMobileList(data) {
     } else {
         html += `<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">`;
         data.forEach(d => {
-            const avatarColor = discAvatarColor(d.creator_display || 'Learner');
-            const initial      = (d.creator_display || '?').charAt(0).toUpperCase();
+            const avatarColor = discAvatarColor(discAvatarSeed(d.creator_email, d.creator_display));
+            const initial      = discInitials(d.creator_display);
             html += `
                 <div onclick="loadDiscussionThread(${d.id})"
                      style="background:transparent;border:1px solid rgba(255,255,255,0.09);
@@ -544,6 +577,11 @@ function renderMobileList(data) {
                             <h3 style="flex:1;min-width:0;margin:0;font-size:15px;font-weight:700;color:#e2e8f0;
                                        font-family:'Nunito',sans-serif;white-space:nowrap;overflow:hidden;
                                        text-overflow:ellipsis;">${escHtml(d.title)}</h3>
+                            <span style="flex-shrink:0;font-size:11px;font-weight:700;color:#8b949e;
+                                         background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+                                         padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
+                                ${escHtml(discTypeLabel(d))}
+                            </span>
                             <span style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
                                          font-weight:700;color:#4fd1c5;background:rgba(79,209,197,0.1);
                                          padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
@@ -642,6 +680,7 @@ function renderThread(data) {
         message: disc.initial_message,
         attachment: disc.attachment,
         created_at: disc.created_at,
+        replier_email: disc.creator_email,
         replier_display: disc.creator_display,
         profile_picture: disc.creator_pic,
         is_me: disc.is_op_me ? 1 : 0,
@@ -855,12 +894,12 @@ function renderThread(data) {
 function buildPostCard(r, user_role, is_in_class, discId) {
     const isOp    = r.is_op || false;
     const isMe    = r.is_me == 1;
-    const initial = (r.replier_display || '?').charAt(0).toUpperCase();
+    const initial = discInitials(r.replier_display);
     const picFolder = 'uploads/learners/';
 
     const dotClass = isOp ? 'is-op-dot' : (isMe ? '' : 'muted');
 
-    const avatarColor = discAvatarColor(r.replier_email || r.replier_display || initial);
+    const avatarColor = discAvatarColor(discAvatarSeed(r.replier_email, r.replier_display));
 
     // Always render the initials circle. If a real (non-default) profile pic exists,
     // swap it in on successful load — this avoids the grey default.png problem.
@@ -1947,8 +1986,8 @@ function renderCreateForm(teachers) {
             .disc-form-wrap h2 { color:#e2e8f0; font-size:20px; font-weight:800; margin:0 0 24px; }
             .disc-field { margin-bottom:20px; }
             .disc-field label { display:block; margin-bottom:8px; font-size:14px; font-weight:700; color:#c9d1d9; }
-            .disc-field input,.disc-field textarea { width:100%; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#e2e8f0; font-family:'Nunito',sans-serif; font-size:14px; font-weight:600; padding:12px 14px; box-sizing:border-box; outline:none; transition:border-color 0.2s; }
-            .disc-field input:focus,.disc-field textarea:focus { border-color:rgba(79,209,197,0.4); }
+            .disc-field input,.disc-field textarea,.disc-field select { width:100%; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#e2e8f0; font-family:'Nunito',sans-serif; font-size:14px; font-weight:600; padding:12px 14px; box-sizing:border-box; outline:none; transition:border-color 0.2s; }
+            .disc-field input:focus,.disc-field textarea:focus,.disc-field select:focus { border-color:rgba(79,209,197,0.4); }
             .disc-field textarea { min-height:110px; resize:vertical; }
             .disc-teachers-list { display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; background:#1b1b1b; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px; }
             .disc-teacher-option { padding:10px 12px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; color:#c9d1d9; transition:0.15s; }
@@ -1968,6 +2007,14 @@ function renderCreateForm(teachers) {
             <div class="disc-field">
                 <label>Discussion Title *</label>
                 <input type="text" id="discTitle" placeholder="e.g. Help with Quadratic Equations">
+            </div>
+            <div class="disc-field">
+                <label>Discussion Type</label>
+                <select id="discType">
+                    <option value="homework">Homework help</option>
+                    <option value="general" selected>General</option>
+                    <option value="off_topic">Off-topic</option>
+                </select>
             </div>
             <div class="disc-field">
                 <label>Your Message / Question *</label>
@@ -1998,6 +2045,7 @@ window.discToggleTeacher = function(el) {
 
 window.discSubmitCreate = async function() {
     const title     = document.getElementById('discTitle')?.value.trim();
+    const type      = document.getElementById('discType')?.value || 'general';
     const message   = document.getElementById('discMessage')?.value.trim();
     const fileInput = document.getElementById('discCreateFile');
     const errorEl   = document.getElementById('discFormError');
@@ -2015,6 +2063,7 @@ window.discSubmitCreate = async function() {
 
     const fd = new FormData();
     fd.append('title', title);
+    fd.append('type', type);
     fd.append('message', message);
     selectedTeachers.forEach(e => fd.append('teachers[]', e));
     if (fileInput?.files[0]) fd.append('attachment', fileInput.files[0]);

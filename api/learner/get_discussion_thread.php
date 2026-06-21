@@ -11,6 +11,11 @@ if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['learner', 'teac
 $user_email = $_SESSION['email'];
 $user_role  = $_SESSION['role'];
 $disc_id    = (int)($_GET['discussion_id'] ?? 0);
+$discussion_type_labels = [
+    'homework' => 'Homework help',
+    'general' => 'General',
+    'off_topic' => 'Off-topic',
+];
 
 if (!$disc_id) { echo json_encode(['error' => 'Missing discussion_id']); exit(); }
 
@@ -49,6 +54,7 @@ $creatorStmt->close();
 $creator_pic      = $creator_row['profile_picture'] ?? 'default.png';
 $creator_fullname = trim(($creator_row['name'] ?? '') . ' ' . ($creator_row['surname'] ?? ''));
 $creator_display  = $creator_fullname ?: ($disc['creator_name'] ?: 'Learner');
+$discussion_type  = $disc['type'] ?: 'general';
 
 $stmt = $conn->prepare("
     SELECT r.id, r.message, r.attachment, r.created_at,
@@ -103,9 +109,12 @@ echo json_encode([
         'id'              => $disc['id'],
         'title'           => $disc['title'],
         'initial_message' => $disc['initial_message'],
+        'type'            => $discussion_type,
+        'type_label'      => $discussion_type_labels[$discussion_type] ?? $discussion_type_labels['general'],
         'attachment'      => $disc['attachment'],
         'created_at'      => $disc['created_at'],
         'class_name'      => $disc['class_name'],
+        'creator_email'   => $disc['creator_email'],
         'creator_display' => $creator_display,
         'creator_pic'     => $creator_pic,
         'is_op_me'        => ($disc['creator_email'] === $user_email),

@@ -29,7 +29,13 @@ if (!$class_id) { echo json_encode(['error' => 'Not enrolled in a class']); exit
 
 $title           = trim($_POST['title'] ?? '');
 $message_text    = trim($_POST['message'] ?? '');
+$discussion_type = $_POST['type'] ?? 'general';
 $tagged_teachers = $_POST['teachers'] ?? [];
+$allowed_types   = ['homework', 'general', 'off_topic'];
+
+if (!in_array($discussion_type, $allowed_types, true)) {
+    $discussion_type = 'general';
+}
 
 if (empty($title) || empty($message_text) || empty($tagged_teachers)) {
     echo json_encode(['error' => 'Please fill all fields and tag at least one teacher.']); exit();
@@ -65,10 +71,10 @@ $show_creator_name = 0;
 
 $stmt = $conn->prepare("
     INSERT INTO class_discussions 
-    (title, initial_message, class_id, creator_email, creator_anonymous, creator_name, attachment, academic_year_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (title, initial_message, type, class_id, creator_email, creator_anonymous, creator_name, attachment, academic_year_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
-$stmt->bind_param("ssisissi", $title, $message_text, $class_id, $learner_email, $show_creator_name, $creator_fullname, $attachment_name, $current_year_id);
+$stmt->bind_param("sssisissi", $title, $message_text, $discussion_type, $class_id, $learner_email, $show_creator_name, $creator_fullname, $attachment_name, $current_year_id);
 $stmt->execute();
 $disc_id = $stmt->insert_id;
 $stmt->close();
