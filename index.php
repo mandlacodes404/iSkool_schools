@@ -99,7 +99,7 @@ function getCsrfToken() {
           <img id="splash-svg" src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
         </div>
         <div class="branding splash-version-footer">
-            iSkool v1.1.2
+            iSkool v<?php echo APP_VERSION; ?>
         </div>
     </div>
     <!-- Login/Register container -->

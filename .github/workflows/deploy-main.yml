@@ -5,6 +5,9 @@ on:
     branches:
       - main  # This ONLY runs when you push to the main branch
 
+env:
+  APP_VERSION: "1.1.2"   # ← ONLY change this when you release a new version
+
 jobs:
   web-deploy:
     name: 🎉 Sync to Live Site
@@ -12,6 +15,13 @@ jobs:
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v3
+
+      - name: 🏷️ Generate version.php
+        run: |
+          cat > version.php << PHP
+          <?php
+          if (!defined('APP_VERSION')) define('APP_VERSION', '${{ env.APP_VERSION }}');
+          PHP
 
       - name: 📂 Sync Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
