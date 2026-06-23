@@ -159,7 +159,7 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color
 /* ── HERO BANNER ── */
 .legal-hero {
   background: #f5f0eb;
-  padding: 90px 5% 56px;
+  padding: calc(var(--nav-h) + 5rem) 5% 56px;
   position: relative;
   overflow: hidden;
 }
@@ -307,25 +307,76 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color
 }
 .legal-contact-card p { font-size: 14px; color: #555; margin: 0; }
 
-/* ── FOOTER ── */
-.legal-footer {
-  background: var(--dark); color: #888;
-  padding: 48px 5%; text-align: center;
-  font-size: 14px;
+/* ── FOOTER (matches contacts.html) ── */
+.footer {
+  background: var(--ink);
+  color: rgba(245,240,232,0.55);
+  padding: 5rem 2rem 3rem;
+  font-size: 0.875rem;
 }
-.legal-footer a { color: var(--gold); text-decoration: none; }
-.legal-footer-links {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 24px; margin-bottom: 20px;
+.footer-inner { max-width: 1100px; margin: 0 auto; }
+.footer-brand { margin-bottom: 3rem; }
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-bottom: 4rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid rgba(245,240,232,0.08);
 }
-.legal-footer-links a { color: #666; text-decoration: none; transition: color 0.2s; }
-.legal-footer-links a:hover { color: var(--gold); }
+@media (max-width: 900px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 550px) { .footer-top { grid-template-columns: 1fr; gap: 2rem; } }
+.footer-brand p {
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: rgba(245,240,232,0.45);
+  max-width: 26ch;
+  margin-top: 1rem;
+}
+.footer-logo-mark-only { width: 44px; height: 44px; display: block; margin-bottom: 1rem; }
+.footer-col-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  margin-bottom: 1.25rem;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.footer-col ul a {
+  color: rgba(245,240,232,0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+.footer-col ul a:hover { color: var(--cream); }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-legal {
+  font-size: 0.78rem;
+  color: rgba(245,240,232,0.25);
+  line-height: 1.6;
+}
+.footer-legal a { color: rgba(245,240,232,0.4); text-decoration: none; transition: color 0.2s ease; }
+.footer-legal a:hover { color: rgba(245,240,232,0.7); }
+.footer-social { display: flex; gap: 1.25rem; }
+.footer-social a {
+  color: rgba(245,240,232,0.35);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-social a:hover { color: rgba(245,240,232,0.75); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .legal-wrap { grid-template-columns: 1fr; gap: 40px; }
   .legal-toc { position: static; display: none; }
-  .legal-hero { padding: 80px 5% 40px; }
+  .legal-hero { padding: calc(var(--nav-h) + 5rem) 5% 40px; }
 }
 @media (max-width: 480px) {
   .legal-hero h1 { letter-spacing: -0.02em; }
@@ -551,15 +602,86 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color
 </div>
 
 <!-- FOOTER -->
-<footer class="legal-footer">
-  <div class="legal-footer-links">
-    <a href="index.html">ENTHROPY Home</a>
-    <a href="privacy-policies.html">Privacy Policy</a>
-    <a href="terms-of-services.html">Terms of Service</a>
-    <a href="popia_compliances.html">POPIA Compliance</a>
-    <a href="contacts.html">Contact</a>
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      <svg class="footer-logo-mark-only" viewBox="0 0 1254 1254" xmlns="http://www.w3.org/2000/svg" aria-label="ENTHROPY">
+        <g transform="translate(0,1254) scale(0.1,-0.1)" fill="rgba(245,240,232,0.7)">
+          <path d="M3620 10739 c-408 -51 -823 -276 -1108 -599 -267 -303 -441 -710 -459 -1077 l-6 -113 907 0 906 0 0 900 0 900 -87 -1 c-49 -1 -117 -5 -153 -10z"/>
+          <path d="M5090 10735 c-342 -69 -616 -338 -700 -687 -30 -123 -28 -295 5 -423 83 -328 312 -558 660 -662 56 -17 133 -18 1225 -18 l1165 0 78 23 c160 46 274 111 395 226 306 291 369 752 151 1118 -129 219 -342 368 -602 423 -96 21 -2276 20 -2377 0z"/>
+          <path d="M8690 9851 l0 -901 900 0 900 0 0 68 c0 89 -32 282 -69 412 -55 196 -127 352 -238 520 -179 270 -426 482 -733 629 -224 107 -418 159 -632 168 l-128 6 0 -902z"/>
+          <path d="M2783 8546 c-104 -20 -174 -44 -262 -88 -266 -137 -453 -408 -490 -713 -15 -122 -15 -2477 -1 -2594 68 -541 603 -908 1125 -771 275 73 505 273 615 536 67 162 64 80 68 1454 2 846 0 1281 -8 1358 -37 389 -284 689 -656 797 -111 32 -283 42 -391 21z"/>
+          <path d="M9465 8551 c-316 -53 -570 -244 -701 -526 -66 -142 -79 -210 -79 -400 1 -164 2 -173 33 -265 97 -290 340 -512 652 -594 36 -10 117 -20 180 -23 428 -19 800 262 916 693 28 103 26 339 -4 449 -86 313 -343 568 -652 645 -94 24 -265 34 -345 21z"/>
+          <path d="M9421 6395 c-313 -71 -543 -257 -662 -535 -44 -103 -69 -201 -76 -297 l-6 -73 907 0 906 0 0 60 c0 83 -25 200 -63 290 -111 268 -315 453 -593 536 -111 33 -310 42 -413 19z"/>
+          <path d="M9485 5334 c-229 -37 -420 -134 -561 -287 -141 -152 -244 -390 -244 -564 l0 -63 905 0 905 0 0 61 c0 34 -9 103 -21 153 -76 330 -332 593 -657 677 -76 19 -265 33 -327 23z"/>
+          <path d="M5095 4015 c-190 -42 -340 -128 -476 -273 -219 -233 -303 -550 -227 -847 83 -322 321 -565 644 -657 114 -32 343 -32 459 0 438 121 728 545 676 986 -48 400 -329 707 -724 791 -84 18 -271 18 -352 0z"/>
+          <path d="M2045 3991 c-3 -6 -1 -61 5 -123 62 -657 452 -1215 1042 -1493 202 -94 424 -151 631 -162 l127 -6 0 896 0 897 -899 0 c-553 0 -902 -4 -906 -9z"/>
+          <path d="M8682 3103 l3 -898 95 3 c363 13 740 158 1036 397 389 316 638 798 671 1297 l6 98 -907 0 -906 0 2 -897z"/>
+          <path d="M6445 3978 c-3 -7 -4 -404 -3 -883 l3 -870 95 1 c69 0 116 7 170 23 563 172 803 855 477 1359 -123 189 -313 322 -527 367 -89 19 -209 20 -215 3z"/>
+          <path d="M7430 3105 l0 -885 73 0 c215 0 460 123 612 307 69 83 136 212 171 329 25 81 27 104 28 249 0 146 -2 168 -27 248 -82 266 -255 471 -484 572 -85 38 -207 65 -295 65 l-78 0 0 -885z"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="footer-top">
+      <div class="footer-col">
+        <p class="footer-col-title">Company</p>
+        <ul>
+          <li><a href="index.html#about">About ENTHROPY</a></li>
+          <li><a href="index.html#research">Research</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="contacts.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-title">Product</p>
+        <ul>
+          <li><a href="https://iskool.online" target="_blank" rel="noopener noreferrer">iSkool</a></li>
+          <li><a href="#">Request a pilot</a></li>
+          <li><a href="#">For schools</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-title">Legal</p>
+        <ul>
+          <li><a href="privacy-policies.html">Privacy policy</a></li>
+          <li><a href="terms-of-services.html">Terms of use</a></li>
+          <li><a href="popia_compliances.html">POPIA compliance</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-legal">
+        &copy; 2026 ENTHROPY (Pty) Ltd &middot; Registration No. 2023/260831/07 &middot; Johannesburg, South Africa
+      </p>
+      <div class="footer-social" aria-label="Social media links">
+        <a href="#" aria-label="LinkedIn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="X (Twitter)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
   </div>
-  <p>© 2026 ENTHROPY (Pty) Ltd. iSkool is a product of ENTHROPY (Pty) Ltd (Reg. No. 2023/260831/07). All rights reserved. Tokoza, South Africa.</p>
 </footer>
 
 <script>
