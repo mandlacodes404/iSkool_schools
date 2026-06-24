@@ -860,6 +860,12 @@
     position: relative;
   }
 
+  @media (max-width: 768px) {
+    .smarties-section-inner {
+      padding: 0;
+    }
+  }
+
   /* The card: JS drives margin-left/right as negative values to reach viewport edges */
   .smarties-expand-card {
     background: #E8E0CC;
@@ -873,6 +879,15 @@
   @media (max-width: 768px) {
     .smarties-expand-card {
       padding: 3rem 1.5rem;
+      margin-left: 12px !important;
+      margin-right: 12px !important;
+      border-radius: 24px !important;
+    }
+
+    /* Pull iSkool card (inside .section which has 2rem side padding) to match */
+    #iskool-product-card {
+      margin-left: calc(-2rem + 12px) !important;
+      margin-right: calc(-2rem + 12px) !important;
     }
   }
 
@@ -1558,6 +1573,7 @@
   (function () {
     var card = document.getElementById('iskool-product-card');
     if (!card) return;
+    if (window.innerWidth <= 768) return;
 
     var MAX_RADIUS = 24;
     var ticking = false;
@@ -1703,6 +1719,7 @@
   (function () {
     var card = document.getElementById('smarties-card');
     if (!card) return;
+    if (window.innerWidth <= 768) return;
 
     var MAX_RADIUS = 24;
     var ticking = false;
