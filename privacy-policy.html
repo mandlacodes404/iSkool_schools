@@ -149,14 +149,18 @@ nav {
   margin: 16px 0;
 }
 .legal-list li {
-  display: flex; align-items: flex-start; gap: 12px;
+  display: block;
   font-size: 15px; color: #444; line-height: 1.7;
+  padding-left: 18px;
+  position: relative;
 }
 .legal-list li::before {
   content: '';
   width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gold); flex-shrink: 0;
-  margin-top: 8px;
+  background: var(--gold);
+  position: absolute;
+  left: 0;
+  top: 9px;
 }
 
 .legal-highlight {
@@ -211,6 +215,55 @@ nav {
 }
 @media (max-width: 480px) {
   .legal-hero h1 { letter-spacing: -0.02em; }
+}
+
+/* ── PARAGRAPH & BOLD FIX ── */
+/* Remove bottom margin from standalone label paragraphs (bold-only <p>) */
+.legal-section p:has(> strong:only-child) {
+  margin-bottom: 6px;
+}
+/* Explicit class for label paragraphs — full browser support fallback */
+.legal-section p.legal-label {
+  margin-bottom: 6px;
+  margin-top: 18px;
+  font-weight: 600;
+  color: #111;
+  font-size: 15px;
+}
+/* First label in a section has no top margin */
+.legal-section h2 + .legal-list,
+.legal-section h2 + p.legal-label {
+  margin-top: 0;
+}
+/* Tighten gap when a label <p> is immediately followed by a list or paragraph */
+.legal-section p.legal-label + .legal-list,
+.legal-section p + .legal-list {
+  margin-top: 0;
+}
+/* Tighten gap when a label <p> is immediately followed by a body <p> */
+.legal-section p.legal-label + p {
+  margin-top: 0;
+}
+/* Bold text inside list items: keep inline, don't break alignment */
+.legal-list li strong {
+  display: inline;
+  font-weight: 600;
+  color: #111;
+}
+/* Mobile content padding so text doesn't hug screen edges */
+@media (max-width: 600px) {
+  .legal-content {
+    padding: 0 2px;
+  }
+  .legal-wrap {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+  .legal-section p,
+  .legal-list li {
+    font-size: 15px;
+    line-height: 1.75;
+  }
 }
 </style>
 </head>
@@ -282,22 +335,22 @@ nav {
       <h2>What Personal Information We Collect</h2>
       <p>We collect only the information necessary to provide the iSkool platform. This includes:</p>
 
-      <p><strong>From Schools and Administrators:</strong></p>
+      <p class="legal-label"><strong>From Schools and Administrators:</strong></p>
       <p>School name, contact details, administrator names and email addresses. We do not require a school's physical address to create an account.</p>
 
-      <p><strong>From Teachers:</strong></p>
+      <p class="legal-label"><strong>From Teachers:</strong></p>
       <p>Full name, staff email address, subject and grade assignments, and profile information entered during onboarding.</p>
 
-      <p><strong>From Learners:</strong></p>
+      <p class="legal-label"><strong>From Learners:</strong></p>
       <p>Full name, grade, class group, and learner number if provided by the school. We also record academic activity on the platform including quiz attempts, assignment submissions, scores, and any content submitted through the platform.</p>
 
-      <p><strong>From Parents (where applicable):</strong></p>
+      <p class="legal-label"><strong>From Parents (where applicable):</strong></p>
       <p>Name, email address, and relationship to the learner, for the purpose of accessing learner progress reports only.</p>
 
-      <p><strong>Automatically Collected Platform Data:</strong></p>
+      <p class="legal-label"><strong>Automatically Collected Platform Data:</strong></p>
       <p>As part of normal platform operation, iSkool's backend systems record standard activity data including login events, feature usage, and system performance metrics. This data is stored on iSkool's own servers, is used solely to maintain and improve the platform, and is never shared with third parties.</p>
 
-      <p><strong>AI Invigilator Data (during live quiz sessions only):</strong></p>
+      <p class="legal-label"><strong>AI Invigilator Data (during live quiz sessions only):</strong></p>
       <p>When a learner sits a quiz with the AI Invigilator enabled, the following events are recorded in real time:</p>
       <ul class="legal-list">
         <li><strong>Tab switch events</strong> — recorded when a learner switches to another browser tab during an active quiz, including which question they were on at the time.</li>

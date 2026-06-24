@@ -182,8 +182,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
 .legal-section p:last-child{margin-bottom:0;}
 .legal-section strong{color:#111;font-weight:600;}
 .legal-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px;margin:16px 0;}
-.legal-list li{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:#444;line-height:1.7;}
-.legal-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:8px;}
+.legal-list li{display:block;position:relative;padding-left:20px;font-size:15px;color:#444;line-height:1.7;}
+.legal-list li::before{content:'';position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold);}
 .legal-highlight{background:#FBF1EA;border:1px solid rgba(196,98,45,0.25);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:18px 20px;margin:20px 0;font-size:15px;color:#333;line-height:1.7;}
 .legal-info-box{background:#F3F1EC;border:1px solid rgba(232,137,92,0.25);border-left:4px solid var(--teal);border-radius:0 12px 12px 0;padding:18px 20px;margin:20px 0;font-size:15px;color:#333;line-height:1.7;}
 .legal-rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;}
@@ -310,7 +310,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
       <div class="legal-meta-item"><strong>Effective Date:</strong> 16 May 2026</div>
       <div class="legal-meta-item"><strong>Last Updated:</strong> 16 May 2026</div>
       <div class="legal-meta-item"><strong>Jurisdiction:</strong> Republic of South Africa</div>
-      <div class="legal-meta-item"><strong>Information Officer:</strong> Mandla Simphiwe Mahlangu</div>
     </div>
   </div>
 </div>
@@ -359,10 +358,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Entity</div>
           <p>Enthropy (Pty) Ltd (Reg. No. 2023/260831/07)</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Officer</div>
-          <p>Mandla Simphiwe Mahlangu</p>
         </div>
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Email</div>
@@ -425,7 +420,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
         <div class="condition-item">
           <div class="condition-num">01</div>
           <div class="condition-title">Accountability</div>
-          <p class="condition-desc">iSkool has a designated Information Officer responsible for ensuring POPIA compliance across the platform.</p>
+          <p class="condition-desc">iSkool has a designated responsible party ensuring POPIA compliance across the platform.</p>
         </div>
         <div class="condition-item">
           <div class="condition-num">02</div>
@@ -597,7 +592,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
     <div class="legal-section" id="s14">
       <div class="legal-section-num">Section 14</div>
       <h2>Exercising Your Rights</h2>
-      <p>To exercise any of your rights under POPIA (access, correction, deletion, objection, or withdrawal of consent), please submit a written request to our Information Officer. Requests must include:</p>
+      <p>To exercise any of your rights under POPIA (access, correction, deletion, objection, or withdrawal of consent), please submit a written request to us. Requests must include:</p>
       <ul class="legal-list">
         <li>Your full name and the email address associated with your iSkool account</li>
         <li>The name of your school</li>
@@ -611,12 +606,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f0eb;color:#111;li
     <div class="legal-section" id="s15">
       <div class="legal-section-num">Section 15</div>
       <h2>Contact Us & Complaints</h2>
-      <p>For any POPIA-related queries, concerns, or complaints, contact our Information Officer:</p>
+      <p>For any POPIA-related queries, concerns, or complaints, contact us:</p>
       <div class="legal-contact-grid">
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Officer</div>
-          <p>Mandla Simphiwe Mahlangu</p>
-        </div>
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Privacy Email</div>
           <a href="mailto:policy@iskool.online">policy@iskool.online</a>

@@ -267,14 +267,18 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color
   margin: 16px 0;
 }
 .legal-list li {
-  display: flex; align-items: flex-start; gap: 12px;
+  display: block;
+  position: relative;
+  padding-left: 20px;
   font-size: 15px; color: #444; line-height: 1.7;
 }
 .legal-list li::before {
   content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
   width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gold); flex-shrink: 0;
-  margin-top: 8px;
+  background: var(--gold);
 }
 
 .legal-highlight {
@@ -577,12 +581,8 @@ body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color
     <div class="legal-section" id="s11">
       <div class="legal-section-num">Section 11</div>
       <h2>Contact Us</h2>
-      <p>For any privacy-related queries, requests, or complaints, please contact our Information Officer:</p>
+      <p>For any privacy-related queries, requests, or complaints, please contact us:</p>
       <div class="legal-contact-grid">
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Officer</div>
-          <p>Mandla Simphiwe Mahlangu</p>
-        </div>
         <div class="legal-contact-card">
           <div class="legal-contact-card-label">Privacy Email</div>
           <a href="mailto:policy@iskool.online">policy@iskool.online</a>
