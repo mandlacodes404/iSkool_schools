@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Laura card — 3 directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --cream:        #F5F0E8;
+  --cream-dark:   #EDE6D8;
+  --parchment:    #E8E1D0;
+  --ink:          #1A1714;
+  --ink-soft:     #3D3830;
+  --ink-muted:    #7A7268;
+  --terra:        #C4622D;
+  --terra-light:  #E8895C;
+  --terra-dim:    #8C3F18;
+  --divider:      rgba(26,23,20,0.10);
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-serif:   'Source Serif 4', Georgia, serif;
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 6rem;
+}
+
+/* ─── PAGE CHROME (demo only, not part of deliverable) ─── */
+.demo-header {
+  padding: 3rem 2rem 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+.demo-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+.demo-header p { color: var(--ink-muted); font-size: 0.95rem; }
+.demo-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 2rem;
+}
+.demo-nav a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--divider);
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.demo-nav a:hover { border-color: var(--ink); color: var(--ink); }
+.demo-label {
+  max-width: 1100px;
+  margin: 0 auto 1rem;
+  padding: 0 2rem;
+}
+.demo-label .tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--terra-dim);
+  margin-bottom: 0.4rem;
+}
+.demo-label h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin-bottom: 0.25rem;
+}
+.demo-label p { color: var(--ink-muted); font-size: 0.9rem; max-width: 60ch; }
+.demo-spacer { height: 5rem; }
+
+/* ════════════════════════════════════════════
+   SHARED: expand-card shell + scroll mechanic
+   (identical to your existing .smarties-expand-card)
+   ════════════════════════════════════════════ */
+.section-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+}
+@media (max-width: 768px) {
+  .section-inner { padding: 0; }
+}
+.expand-card {
+  border-radius: 24px;
+  padding: 5rem 4rem;
+  position: relative;
+  overflow: hidden;
+  will-change: border-radius, margin-left, margin-right;
+}
+@media (max-width: 768px) {
+  .expand-card {
+    padding: 3rem 1.5rem;
+    margin-left: 12px !important;
+    margin-right: 12px !important;
+    border-radius: 24px !important;
+  }
+}
+.expand-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .expand-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+}
+.bg-glow {
+  position: absolute;
+  top: -20%;
+  right: -5%;
+  width: min(500px, 55vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ════════════════════════════════════════════
+   DIRECTION A — "Model card" (Anthropic-style restraint)
+   ════════════════════════════════════════════ */
+.card-a { background: var(--cream-dark); }
+.card-a .bg-glow { background: radial-gradient(circle, rgba(196,98,45,0.06) 0%, transparent 70%); }
+
+.a-left { order: 1; }
+@media (max-width: 768px) { .a-left { order: 2; text-align: left; } }
+
+.a-spec {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.a-spec .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--terra);
+  flex-shrink: 0;
+}
+.a-spec .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--divider);
+}
+
+.a-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 1.1rem;
+}
+
+.a-desc {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  margin-bottom: 2.25rem;
+}
+
+.a-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 2px;
+  transition: gap 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.a-link:hover { gap: 0.7rem; color: var(--terra-dim); border-color: var(--terra-dim); }
+
+.a-right { order: 2; display: flex; align-items: center; justify-content: center; }
+@media (max-width: 768px) { .a-right { order: 1; } }
+
+.a-frame {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  border: 1px solid var(--divider);
+  background: var(--cream);
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(26,23,20,0.04);
+}
+.a-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+@media (max-width: 768px) { .a-frame { max-width: 320px; margin: 0 auto; } }
+
+
+/* ════════════════════════════════════════════
+   DIRECTION B — "Capability tile" (OpenAI-style)
+   ════════════════════════════════════════════ */
+.card-b {
+  background: var(--ink);
+  padding-right: 0;
+}
+@media (min-width: 769px) { .card-b { padding: 0; } }
+.card-b .bg-glow { display: none; }
+
+.b-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  min-height: 480px;
+}
+@media (max-width: 768px) {
+  .b-inner { grid-template-columns: 1fr; min-height: 0; }
+}
+
+.b-left {
+  order: 1;
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  .b-left { order: 2; padding: 2.5rem 1.75rem; }
+}
+
+.b-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(245,240,232,0.1);
+  border: 1px solid rgba(245,240,232,0.18);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  width: fit-content;
+}
+
+.b-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 4.2vw, 3.6rem);
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+  margin-bottom: 1.1rem;
+}
+
+.b-desc {
+  font-family: var(--font-body);
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: rgba(245,240,232,0.65);
+  max-width: 36ch;
+  margin-bottom: 2.25rem;
+}
+
+.b-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  width: fit-content;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.b-cta:hover { background: var(--terra-light); color: var(--ink); transform: translateY(-1px); }
+
+.b-right {
+  order: 2;
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .b-right { order: 1; aspect-ratio: 4/3; }
+}
+.b-right img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.b-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(26,23,20,0.5) 0%, transparent 35%);
+}
+@media (max-width: 768px) {
+  .b-right::after { background: linear-gradient(180deg, transparent 60%, rgba(26,23,20,0.55) 100%); }
+}
+
+
+/* ════════════════════════════════════════════
+   DIRECTION C — "Editorial dossier"
+   ════════════════════════════════════════════ */
+.card-c { background: #EFE8D8; }
+.card-c .bg-glow { background: radial-gradient(circle, rgba(196,98,45,0.07) 0%, transparent 70%); }
+
+.c-left { order: 1; }
+@media (max-width: 768px) { .c-left { order: 2; text-align: left; } }
+
+.c-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terra-dim);
+  margin-bottom: 1.5rem;
+}
+
+.c-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.8rem, 5vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.c-desc {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 40ch;
+  margin-bottom: 2.25rem;
+}
+.c-desc em { font-style: italic; color: var(--terra-dim); }
+
+.c-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.c-link:hover { border-color: var(--terra-dim); color: var(--terra-dim); }
+
+.c-right { order: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+@media (max-width: 768px) { .c-right { order: 1; } }
+
+.c-figure { width: 100%; max-width: 420px; }
+.c-frame {
+  aspect-ratio: 3/4;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--cream);
+}
+.c-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.c-caption {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+.c-caption .fig-num { font-weight: 600; color: var(--ink); flex-shrink: 0; }
+@media (max-width: 768px) { .c-figure { max-width: 320px; margin: 0 auto; } }
+
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Laura card — three style directions</h1>
+  <p>Same expand-on-scroll behaviour as your current card. Scroll past each one on desktop to feel the edge-to-edge motion. Resize narrow to see the mobile collapse.</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#dir-a">A · Model card</a>
+  <a href="#dir-b">B · Capability tile</a>
+  <a href="#dir-c">C · Editorial dossier</a>
+</nav>
+
+<!-- ═══════════ DIRECTION A ═══════════ -->
+<div id="dir-a"></div>
+<div class="demo-label">
+  <div class="tag">Direction A</div>
+  <h2>Model card</h2>
+  <p>Anthropic-leaning. Quiet spec-sheet header, restrained serif/display title, one understated text link, image held in a thin bordered frame like a figure on paper.</p>
+</div>
+
+<section class="section-inner">
+  <div class="expand-card card-a" id="card-a">
+    <div class="bg-glow"></div>
+    <div class="expand-inner">
+
+      <div class="a-left">
+        <div class="a-spec">
+          <span class="dot"></span>
+          <span>In development</span>
+          <span class="rule"></span>
+        </div>
+        <h2 class="a-title">Laura</h2>
+        <p class="a-desc">The campus, connected. A single system for the people, schedules, and spaces that make a school run.</p>
+        <a href="#contact" class="a-link" aria-label="Continue reading about Laura">
+          Continue reading
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="a-right">
+        <div class="a-frame">
+          <img src="monalisa.png" alt="Laura — campus connection illustration" loading="lazy" />
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="demo-spacer"></div>
+
+<!-- ═══════════ DIRECTION B ═══════════ -->
+<div id="dir-b"></div>
+<div class="demo-label">
+  <div class="tag">Direction B</div>
+  <h2>Capability tile</h2>
+  <p>OpenAI-leaning. Dark surface, bold sans display type, status chip, image bleeds full-bleed to the card edge rather than sitting in a frame, solid CTA button.</p>
+</div>
+
+<section class="section-inner">
+  <div class="expand-card card-b" id="card-b">
+    <div class="b-inner">
+
+      <div class="b-left">
+        <div class="b-chip">In development</div>
+        <h2 class="b-title">Laura</h2>
+        <p class="b-desc">The campus, connected. A single system for the people, schedules, and spaces that make a school run.</p>
+        <a href="#contact" class="b-cta" aria-label="Continue reading about Laura">
+          Continue reading
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="b-right">
+        <img src="monalisa.png" alt="Laura — campus connection illustration" loading="lazy" />
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="demo-spacer"></div>
+
+<!-- ═══════════ DIRECTION C ═══════════ -->
+<div id="dir-c"></div>
+<div class="demo-label">
+  <div class="tag">Direction C</div>
+  <h2>Editorial dossier</h2>
+  <p>Closest to your current identity, refined. Eyebrow + italic serif title, image presented as a labelled figure with a caption beneath — like a research note.</p>
+</div>
+
+<section class="section-inner">
+  <div class="expand-card card-c" id="card-c">
+    <div class="bg-glow"></div>
+    <div class="expand-inner">
+
+      <div class="c-left">
+        <div class="c-eyebrow">In development — ENTHROPY</div>
+        <h2 class="c-title"><em>Laura</em></h2>
+        <p class="c-desc">The campus, connected. A single system for the people, schedules, and spaces that make a school run — <em>built for the rhythm of a real school day.</em></p>
+        <a href="#contact" class="c-link" aria-label="Continue reading about Laura">
+          Continue reading
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="c-right">
+        <div class="c-figure">
+          <div class="c-frame">
+            <img src="monalisa.png" alt="Laura — campus connection illustration" loading="lazy" />
+          </div>
+          <div class="c-caption">
+            <span class="fig-num">Fig. 1</span>
+            <span>Laura, in early development — campus illustration.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="demo-spacer"></div>
+<div class="demo-spacer"></div>
+
+<script>
+  // Identical scroll-expand mechanic for each card, applied to all three independently.
+  function attachExpand(id) {
+    var card = document.getElementById(id);
+    if (!card) return;
+    if (window.innerWidth <= 768) return;
+
+    var MAX_RADIUS = 24;
+    var ticking = false;
+    var naturalLeft = null, naturalRight = null;
+
+    function cacheNaturalPos() {
+      card.style.marginLeft = '0px';
+      card.style.marginRight = '0px';
+      var r = card.getBoundingClientRect();
+      naturalLeft = r.left;
+      naturalRight = window.innerWidth - r.right;
+    }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    function updateCard() {
+      if (naturalLeft === null) cacheNaturalPos();
+      var cardRect = card.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var start = vh, end = vh * 0.35;
+      var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
+      var t = progress < 0.5 ? 4*progress*progress*progress : 1 - Math.pow(-2*progress+2, 3)/2;
+      card.style.marginLeft   = lerp(0, -naturalLeft, t) + 'px';
+      card.style.marginRight  = lerp(0, -naturalRight, t) + 'px';
+      card.style.borderRadius = lerp(MAX_RADIUS, 0, t) + 'px';
+      ticking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { requestAnimationFrame(updateCard); ticking = true; }
+    }, { passive: true });
+    window.addEventListener('resize', function () { cacheNaturalPos(); requestAnimationFrame(updateCard); }, { passive: true });
+    requestAnimationFrame(function () { cacheNaturalPos(); updateCard(); });
+  }
+  ['card-a','card-b','card-c'].forEach(attachExpand);
+</script>
+
+</body>
+</html>
