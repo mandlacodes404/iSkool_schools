@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared-footer.css?v=1.1" />
 
 <style>
   /* ─── TOKENS ─── */
@@ -932,57 +933,6 @@
     flex-wrap: wrap;
   }
 
-  /* ─── FOOTER PLACEHOLDER ─── */
-  .footer-bar {
-    padding: 3rem 2rem;
-    border-top: 1px solid var(--divider);
-  }
-
-  .footer-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .footer-logo {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    text-decoration: none;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-  }
-
-  .footer-links a {
-    font-size: 0.8rem;
-    color: var(--ink-muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover { color: var(--terra); }
-
-  .footer-copy {
-    font-size: 0.8rem;
-    color: var(--ink-muted);
-  }
-
-  @media (max-width: 640px) {
-    .footer-inner { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
-    .footer-links { flex-wrap: wrap; gap: 1.25rem; }
-  }
-
   /* Scroll indicator */
   .hero-scroll {
     position: absolute;
@@ -1429,17 +1379,8 @@
 
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="footer-bar">
-  <div class="footer-inner">
-    <a href="ENTHROPY_website.html" class="footer-logo">Enthropy</a>
-    <ul class="footer-links">
-      <li><a href="ENTHROPY_website.html#products">Products</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="contacts.html">Contact</a></li>
-    </ul>
-    <span class="footer-copy">© 2025 Enthropy</span>
-  </div>
-</footer>
+<div id="site-footer"></div>
+<script src="shared-footer.js?v=1.1"></script>
 
 
 <script>
