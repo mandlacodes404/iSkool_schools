@@ -6,6 +6,7 @@
 <title>POPIA Compliance — iSkool</title>
 <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="iskool_footer.css?v=1.1" />
 <style>
 :root { --teal:#4fd1c5; --teal2:#00e5a0; --gold:#f5c842; --dark:#0f0f12; }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -70,13 +71,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(245,240,235
 .condition-num{font-size:11px;font-weight:600;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
 .condition-title{font-size:14px;font-weight:600;color:#111;margin-bottom:4px;}
 .condition-desc{font-size:13px;color:#666;line-height:1.6;}
-
-/* FOOTER */
-.legal-footer{background:var(--dark);color:#888;padding:48px 5%;text-align:center;font-size:14px;}
-.legal-footer a{color:var(--teal);text-decoration:none;}
-.legal-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:20px;}
-.legal-footer-links a{color:#666;text-decoration:none;transition:color 0.2s;}
-.legal-footer-links a:hover{color:var(--teal);}
 
 /* RESPONSIVE */
 @media(max-width:768px){.legal-wrap{grid-template-columns:1fr;gap:40px;}.legal-toc{position:static;display:none;}.legal-hero{padding:80px 5% 40px;}.legal-rights-grid{grid-template-columns:1fr;}.conditions-grid{grid-template-columns:1fr;}}
@@ -480,15 +474,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(245,240,235
 </div>
 
 <!-- FOOTER -->
-<footer class="legal-footer">
-  <div class="legal-footer-links">
-    <a href="iskool.html">iSkool Home</a>
-    <a href="privacy-policy.html">Privacy Policy</a>
-    <a href="terms-of-service.html">Terms of Service</a>
-    <a href="contact.html">Contact</a>
-  </div>
-  <p>© 2026 Enthropy (Pty) Ltd (Reg. No. 2023/260831/07). iSkool is a product of Enthropy (Pty) Ltd. Tokoza, South Africa. &nbsp;|&nbsp; Information Regulator: <a href="https://www.inforeg.org.za" target="_blank" rel="noopener">inforeg.org.za</a></p>
-</footer>
+<div id="iskool-footer"></div>
+<script src="iskool_footer.js?v=1.1"></script>
 
 <script>
 /* Active TOC on scroll */

@@ -6,6 +6,7 @@
 <title>Terms of Service — iSkool</title>
 <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="iskool_footer.css?v=1.1" />
 <style>
 :root {
   --teal: #4fd1c5;
@@ -192,20 +193,6 @@ nav {
   font-weight: 600; font-size: 14.5px;
 }
 .legal-contact-card p { font-size: 14px; color: #555; margin: 0; }
-
-/* ── FOOTER ── */
-.legal-footer {
-  background: var(--dark); color: #888;
-  padding: 48px 5%; text-align: center;
-  font-size: 14px;
-}
-.legal-footer a { color: var(--teal); text-decoration: none; }
-.legal-footer-links {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 24px; margin-bottom: 20px;
-}
-.legal-footer-links a { color: #666; text-decoration: none; transition: color 0.2s; }
-.legal-footer-links a:hover { color: var(--teal); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
@@ -473,15 +460,8 @@ nav {
 </div>
 
 <!-- FOOTER -->
-<footer class="legal-footer">
-  <div class="legal-footer-links">
-   
-    <a href="privacy-policy.html">Privacy Policy</a>
-    <a href="terms-of-service.html">Terms of Service</a>
-    <a href="contact.html">Contact</a>
-  </div>
-  <p>© 2026 Enthropy (Pty) Ltd. iSkool is a product of Enthropy (Pty) Ltd (Reg. No. 2023/260831/07). All rights reserved. Tokoza, South Africa.</p>
-</footer>
+<div id="iskool-footer"></div>
+<script src="iskool_footer.js?v=1.1"></script>
 
 <script>
 /* Active TOC link on scroll */
