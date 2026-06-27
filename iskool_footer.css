@@ -1,0 +1,124 @@
+/* ────────────────────────────────────────────────────────────
+   iSkool — Shared Footer Styles
+   This is the canonical footer CSS, lifted verbatim from the
+   iSkool main page (website-clone.html). Every page that
+   includes iskool_footer.js should also link this stylesheet
+   so the footer looks identical everywhere.
+
+   To change footer styling, edit ONLY this file.
+   ──────────────────────────────────────────────────────────── */
+
+/* ── FOOTER ── */
+.footer {
+  background: #000000;
+  color: #ede8df;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  border-radius: 0;
+  margin-top: 0;
+  padding: 64px 5% 48px;
+  position: relative;
+  z-index: 6;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1100px;
+  margin: 0 auto 16px;
+}
+.footer-col-title {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.footer-links a {
+  font-size: 11px;
+  color: #8a8478;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: #ede8df; }
+.footer-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(237,232,223,0.08);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.footer-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.footer-copy {
+  font-size: 13px;
+  color: #ffffff;
+  text-align: center;
+  width: 100%;
+}
+.footer-brand-link {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-brand-link:hover { color: #ede8df; }
+.footer-bottom-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Social icons */
+.footer-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.footer-social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+.footer-social-icon svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.footer-social-icon:hover {
+  color: #ede8df;
+  background: rgba(237,232,223,0.07);
+}
+@media (max-width: 768px) {
+  .footer { padding: 48px 5% 40px; }
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .footer-bottom { gap: 16px; }
+  .footer-social { gap: 4px; }
+}
+@media (max-width: 480px) {
+  .footer-top { grid-template-columns: 1fr; gap: 28px; }
+}
