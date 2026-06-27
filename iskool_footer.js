@@ -86,6 +86,187 @@
   </div>\
 </footer>';
 
+  /* ── Demo modal ─────────────────────────────────────────────
+     The modal lives here so it works on every page.
+     website-clone.html keeps its own copy; injectDemoModal()
+     checks first so we never double-inject.
+  ──────────────────────────────────────────────────────────── */
+  var DEMO_MODAL_CSS = '<style id="iskool-demo-modal-css">\
+.demo-modal-overlay{\
+  display:none;position:fixed;inset:0;z-index:9000;\
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);\
+  -webkit-backdrop-filter:blur(4px);\
+  align-items:center;justify-content:center;padding:20px;\
+}\
+.demo-modal-overlay.open{display:flex;animation:dmFadeIn 0.22s ease;}\
+@keyframes dmFadeIn{from{opacity:0}to{opacity:1}}\
+.demo-modal{\
+  background:#fff;border-radius:24px;padding:36px 32px 32px;\
+  max-width:560px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,0.3);\
+  position:relative;animation:dmSlideUp 0.28s cubic-bezier(0.34,1.2,0.64,1);\
+}\
+@keyframes dmSlideUp{\
+  from{opacity:0;transform:translateY(28px) scale(0.97)}\
+  to{opacity:1;transform:translateY(0) scale(1)}\
+}\
+.demo-modal-close{\
+  position:absolute;top:16px;right:16px;width:32px;height:32px;\
+  border-radius:50%;border:none;background:#f0f0f0;color:#555;\
+  font-size:18px;cursor:pointer;display:flex;\
+  align-items:center;justify-content:center;\
+  transition:background 0.18s;line-height:1;\
+}\
+.demo-modal-close:hover{background:#e0e0e0;}\
+.demo-modal-eyebrow{\
+  font-size:11px;font-weight:700;letter-spacing:2px;\
+  text-transform:uppercase;color:#4fd1c5;margin-bottom:10px;\
+}\
+.demo-modal-title{\
+  font-family:"Syne",sans-serif;\
+  font-size:clamp(20px,3vw,26px);font-weight:800;\
+  line-height:1.15;letter-spacing:-0.5px;color:#111;margin-bottom:6px;\
+}\
+.demo-modal-sub{font-size:14.5px;color:#777;margin-bottom:28px;line-height:1.55;}\
+.demo-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;}\
+.demo-card{\
+  border:2px solid #eee;border-radius:16px;padding:20px 18px;\
+  text-decoration:none;color:#111;\
+  display:flex;flex-direction:column;gap:8px;\
+  transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s;\
+  position:relative;cursor:pointer;background:#fff;\
+}\
+.demo-card:hover:not(.demo-card-locked){\
+  border-color:#4fd1c5;\
+  box-shadow:0 8px 28px rgba(79,209,197,0.18);\
+  transform:translateY(-3px);\
+}\
+.demo-card-locked{opacity:0.62;cursor:not-allowed;background:#fafafa;}\
+.demo-card-locked:hover{transform:none;box-shadow:none;border-color:#eee;}\
+.demo-card-icon{\
+  width:36px;height:36px;line-height:1;\
+  display:flex;align-items:center;justify-content:center;\
+  border-radius:10px;flex-shrink:0;\
+}\
+.demo-card-icon svg{width:20px;height:20px;flex-shrink:0;}\
+.demo-card--learner .demo-card-icon{background:#e8faf8;}\
+.demo-card--learner .demo-card-icon svg{stroke:#4fd1c5;}\
+.demo-card--teacher .demo-card-icon{background:#fff3ea;}\
+.demo-card--teacher .demo-card-icon svg{stroke:#f97316;}\
+.demo-card--admin .demo-card-icon{background:#eaeeff;}\
+.demo-card--admin .demo-card-icon svg{stroke:#6366f1;}\
+.demo-card--parent .demo-card-icon{background:#f5f5f5;}\
+.demo-card--parent .demo-card-icon svg{stroke:#bbb;}\
+.demo-card-name{\
+  font-family:"Syne",sans-serif;font-size:15px;\
+  font-weight:800;color:#111;line-height:1.2;\
+}\
+.demo-card-desc{font-size:12.5px;color:#888;line-height:1.5;}\
+.demo-card-action{\
+  display:inline-flex;align-items:center;gap:5px;\
+  font-size:12px;font-weight:700;color:#4fd1c5;margin-top:4px;\
+}\
+.demo-card-locked .demo-card-action{color:#bbb;}\
+.demo-lock-badge{\
+  position:absolute;top:12px;right:12px;\
+  background:#f5f5f5;border:1px solid #e8e8e8;border-radius:999px;\
+  padding:3px 10px;font-size:10.5px;font-weight:700;\
+  color:#999;letter-spacing:0.3px;\
+}\
+.demo-card-tooltip{\
+  display:none;position:absolute;\
+  bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);\
+  background:#111;color:#fff;font-size:12px;\
+  padding:8px 12px;border-radius:10px;white-space:nowrap;\
+  z-index:10;pointer-events:none;\
+  box-shadow:0 4px 16px rgba(0,0,0,0.25);\
+}\
+.demo-card-tooltip::after{\
+  content:"";position:absolute;top:100%;left:50%;\
+  transform:translateX(-50%);\
+  border:6px solid transparent;border-top-color:#111;\
+}\
+.demo-card-locked:hover .demo-card-tooltip{display:block;}\
+@media(max-width:480px){\
+  .demo-modal{padding:28px 20px 24px;border-radius:20px;}\
+  .demo-cards{grid-template-columns:1fr 1fr;gap:10px;}\
+  .demo-card{padding:16px 14px;}\
+  .demo-card-icon{width:32px;height:32px;border-radius:8px;}\
+  .demo-card-icon svg{width:17px;height:17px;}\
+  .demo-card-name{font-size:14px;}\
+}\
+</style>';
+
+  var DEMO_MODAL_HTML = '\
+<div class="demo-modal-overlay" id="demoModalOverlay" onclick="closeDemoModalOutside(event)">\
+  <div class="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demoModalTitle">\
+    <button class="demo-modal-close" onclick="closeDemoModal()" aria-label="Close">&times;</button>\
+    <div class="demo-modal-eyebrow">Live Demo</div>\
+    <div class="demo-modal-title" id="demoModalTitle">Which dashboard would you like to explore?</div>\
+    <p class="demo-modal-sub">Each role has its own experience. Pick yours and see iSkool in action.</p>\
+    <div class="demo-cards">\
+      <a href="https://sandbox.iskool.online" class="demo-card demo-card--learner" target="_blank" rel="noopener noreferrer">\
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg></div>\
+        <div class="demo-card-name">Learner</div>\
+        <div class="demo-card-desc">Quizzes, assignments, results &amp; resources</div>\
+        <div class="demo-card-action">Explore &rarr;</div>\
+      </a>\
+      <a href="https://sandbox.iskool.online" class="demo-card demo-card--teacher" target="_blank" rel="noopener noreferrer">\
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>\
+        <div class="demo-card-name">Teacher</div>\
+        <div class="demo-card-desc">Set assessments, track class performance</div>\
+        <div class="demo-card-action">Explore &rarr;</div>\
+      </a>\
+      <a href="https://sandbox.iskool.online" class="demo-card demo-card--admin" target="_blank" rel="noopener noreferrer">\
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>\
+        <div class="demo-card-name">Admin</div>\
+        <div class="demo-card-desc">School-wide oversight &amp; management</div>\
+        <div class="demo-card-action">Explore &rarr;</div>\
+      </a>\
+      <div class="demo-card demo-card-locked demo-card--parent">\
+        <div class="demo-lock-badge"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px;margin-top:-1px"><rect width="11" height="11" x="6.5" y="11" rx="2"/><path d="M12 11V7a4 4 0 0 0-4-4 4 4 0 0 0-4 4v4"/><line x1="12" x2="12" y1="15" y2="17"/></svg> Coming Soon</div>\
+        <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>\
+        <div class="demo-card-name">Parent</div>\
+        <div class="demo-card-desc">Monitor your child\'s progress &amp; stay informed</div>\
+        <div class="demo-card-action">Coming Soon</div>\
+        <div class="demo-card-tooltip">We\'re putting the finishing touches on this \u2014 check back soon</div>\
+      </div>\
+    </div>\
+  </div>\
+</div>';
+
+  function injectDemoModal() {
+    /* Skip if already on a page that has the modal built in (website-clone.html) */
+    if (document.getElementById('demoModalOverlay')) return;
+
+    /* Inject CSS into <head> */
+    if (!document.getElementById('iskool-demo-modal-css')) {
+      var styleEl = document.createElement('div');
+      styleEl.innerHTML = DEMO_MODAL_CSS;
+      document.head.appendChild(styleEl.firstChild);
+    }
+
+    /* Inject modal HTML before </body> */
+    var modalWrap = document.createElement('div');
+    modalWrap.innerHTML = DEMO_MODAL_HTML;
+    document.body.appendChild(modalWrap.firstChild);
+
+    /* Expose modal functions globally */
+    window.openDemoModal = function () {
+      var overlay = document.getElementById('demoModalOverlay');
+      if (overlay) { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    };
+    window.closeDemoModal = function () {
+      var overlay = document.getElementById('demoModalOverlay');
+      if (overlay) { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    };
+    window.closeDemoModalOutside = function (e) {
+      if (e.target === document.getElementById('demoModalOverlay')) window.closeDemoModal();
+    };
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') window.closeDemoModal();
+    });
+  }
+
   function injectFooter() {
     var mount = document.getElementById('iskool-footer');
     if (!mount) {
@@ -93,6 +274,7 @@
       return;
     }
     mount.outerHTML = FOOTER_HTML;
+    injectDemoModal();
     wireDemoLink();
     wireFaqLink();
   }
