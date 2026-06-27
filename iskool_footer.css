@@ -38,7 +38,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
 }
 .footer-links a {
   font-size: 11px;
