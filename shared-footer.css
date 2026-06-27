@@ -99,21 +99,22 @@
   text-align: center;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .footer-legal {
   font-size: 0.78rem;
-  color: #ffffff;
+  color: #8a8478;
   line-height: 1.6;
 }
 
 .footer-legal a {
-  color: #ffffff;
+  color: #8a8478;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.footer-legal a:hover { color: rgba(255,255,255,0.7); }
+.footer-legal a:hover { color: var(--cream); }
 
 .footer-social {
   display: flex;
@@ -121,9 +122,9 @@
 }
 
 .footer-social a {
-  color: #ffffff;
+  color: #8a8478;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.footer-social a:hover { color: rgba(255,255,255,0.7); }
+.footer-social a:hover { color: var(--cream); }
