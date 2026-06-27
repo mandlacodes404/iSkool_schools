@@ -8,7 +8,7 @@
 <meta name="description" content="Teachers in under-resourced South African schools carry a crushing administrative burden on top of overcrowded classes. iSkool was built to give those hours back."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <style>
 
   :root {
@@ -23,7 +23,7 @@
     --terra-dim:    #8C3F18;
     --divider:      rgba(26,23,20,0.10);
     --nav-h:        72px;
-    --font-display: 'Syne', system-ui, sans-serif;
+    --font-display: 'DM Sans', system-ui, sans-serif;
     --font-body:    'DM Sans', system-ui, sans-serif;
     --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -40,7 +40,7 @@
   .nav-inner { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
   .logo-wrap { display: flex; align-items: center; gap: 0; text-decoration: none; overflow: hidden; }
   .logo-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .logo-text-before, .logo-text-after { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.35rem; color: var(--ink); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; transition: opacity 0.4s var(--ease-out), max-width 0.5s var(--ease-out); overflow: hidden; }
+  .logo-text-before, .logo-text-after { font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 1.35rem; color: var(--ink); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; transition: opacity 0.4s var(--ease-out), max-width 0.5s var(--ease-out); overflow: hidden; }
   .logo-text-before { max-width: 120px; }
   .logo-text-after { max-width: 80px; }
   .nav.scrolled .logo-text-before, .nav.scrolled .logo-text-after { max-width: 0; opacity: 0; }
@@ -92,7 +92,6 @@
   .article-body h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); margin: 3rem 0 1rem; line-height: 1.25; }
   .article-body h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--ink); margin: 2rem 0 0.75rem; }
   .article-body blockquote { border-left: 3px solid var(--terra); padding: 0.25rem 0 0.25rem 1.5rem; margin: 2.5rem 0; }
-  .article-body blockquote p { font-size: 1.125rem; color: var(--ink); font-style: italic; margin: 0; line-height: 1.65; }
   .article-body blockquote cite { display: block; font-size: 0.8rem; color: var(--ink-muted); font-style: normal; margin-top: 0.5rem; letter-spacing: 0.02em; }
 
   /* Stat callout */
@@ -104,7 +103,6 @@
 
   /* Pull quote wide */
   .pull-quote { background: var(--ink); border-radius: 20px; padding: 3rem 3.5rem; margin: 3rem 0; }
-  .pull-quote p { font-family: var(--font-display); font-size: 1.35rem; font-style: italic; font-weight: 500; color: var(--cream); line-height: 1.45; margin: 0; }
   .pull-quote p em { color: var(--terra-light); }
   @media (max-width: 600px) { .pull-quote { padding: 2rem; } .pull-quote p { font-size: 1.1rem; } }
 

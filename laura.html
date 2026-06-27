@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="/enthropy_logo.svg?v=1.2">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="shared-footer.css?v=1.1" />
 
 <style>
@@ -25,12 +25,14 @@
     --terra-dim:    #8C3F18;
     --divider:      rgba(26,23,20,0.10);
     --nav-h:        72px;
-    --font-display: 'Syne', system-ui, sans-serif;
+    --font-display: 'DM Sans', system-ui, sans-serif;
     --font-body:    'DM Sans', system-ui, sans-serif;
     --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  em { font-style: normal; }
   html { scroll-behavior: smooth; }
 
   body {
@@ -91,7 +93,7 @@
 
   .logo-text-before,
   .logo-text-after {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-style: normal;
     font-weight: 500;
     font-size: 1.35rem;
@@ -343,7 +345,7 @@
     line-height: 1.0;
     letter-spacing: -0.025em;
     color: var(--ink);
-    font-style: italic;
+
     margin-bottom: 0.5rem;
   }
 
@@ -351,7 +353,7 @@
     font-family: var(--font-display);
     font-size: clamp(1rem, 1.5vw, 1.25rem);
     font-weight: 400;
-    font-style: italic;
+
     color: var(--ink-muted);
     margin-bottom: 2.5rem;
     letter-spacing: -0.01em;
@@ -543,7 +545,7 @@
   }
 
   .what-headline em {
-    font-style: italic;
+
     color: var(--terra);
   }
 
@@ -568,7 +570,7 @@
   }
 
   .pillars-headline em {
-    font-style: italic;
+
     color: var(--terra);
   }
 
@@ -706,7 +708,7 @@
     font-family: var(--font-display);
     font-size: clamp(1.6rem, 3.5vw, 3.2rem);
     font-weight: 400;
-    font-style: italic;
+
     line-height: 1.35;
     letter-spacing: -0.015em;
     color: var(--cream);
@@ -715,7 +717,7 @@
 
   .imagine-headline em {
     color: var(--terra-light);
-    font-style: italic;
+
   }
 
   .imagine-scenarios {
@@ -774,7 +776,7 @@
   }
 
   .spaces-headline em {
-    font-style: italic;
+
     color: var(--terra);
   }
 
@@ -914,7 +916,7 @@
   }
 
   .cta-headline em {
-    font-style: italic;
+
     color: var(--terra);
   }
 
