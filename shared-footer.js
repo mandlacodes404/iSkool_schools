@@ -43,7 +43,7 @@
         <p class="footer-col-title">Company</p>\
         <ul>\
           <li><a href="about.html">About Us</a></li>\
-          <li><a href="index.html#research">Article</a></li>\
+          <li><a href="ENTHROPY_website.html#research">Article</a></li>\
           <li><a href="contacts.html">Contact</a></li>\
         </ul>\
       </div>\
@@ -52,7 +52,7 @@
         <p class="footer-col-title">Product</p>\
         <ul>\
           <li><a href="https://iskool.online" target="_blank" rel="noopener noreferrer">iSkool</a></li>\
-          <li><a href="#" data-footer-pilot-link>Request a pilot</a></li>\
+          <li><a href="laura.html">Laura</a></li>\
         </ul>\
       </div>\
 \
@@ -103,25 +103,6 @@
       return;
     }
     mount.outerHTML = FOOTER_HTML;
-    wirePilotLink();
-  }
-
-  /* The "Request a pilot" link should open the pilot modal if this
-     page has one (currently only index.html / ENTHROPY_website.html).
-     On pages without the modal, send people to the homepage's pilot
-     form instead of calling a function that doesn't exist there. */
-  function wirePilotLink() {
-    var link = document.querySelector('[data-footer-pilot-link]');
-    if (!link) return;
-
-    link.addEventListener('click', function (e) {
-      e.preventDefault();
-      if (typeof window.openPilotForm === 'function') {
-        window.openPilotForm();
-      } else {
-        window.location.href = 'index.html#pilot';
-      }
-    });
   }
 
   if (document.readyState === 'loading') {
