@@ -252,9 +252,13 @@
   }
 
   @media (max-width: 768px) {
+    .hero {
+      min-height: unset;
+      padding: calc(var(--nav-h) + 0.75rem) 1.5rem 2.5rem;
+    }
     .hero-split {
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 1.5rem;
     }
     .hero-eyebrow {
       display: flex;
@@ -379,6 +383,12 @@
   .section {
     padding: 5rem 2rem;
     position: relative;
+  }
+
+  @media (max-width: 768px) {
+    .section {
+      padding: 2.5rem 1.5rem; /* was 5rem 2rem — halved vertical padding on mobile */
+    }
   }
 
   .section-inner {
