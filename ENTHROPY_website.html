@@ -761,15 +761,17 @@
   @media (max-width: 768px) {
     .smarties-expand-card {
       padding: 3rem 1.5rem;
-      margin-left: 12px !important;
-      margin-right: 12px !important;
-      border-radius: 24px !important;
+      /* Resting (pre-scroll) inset — JS animates from this value out to full-bleed
+         as the card is scrolled into view, then back when scrolled past. */
+      margin-left: 12px;
+      margin-right: 12px;
+      border-radius: 24px;
     }
 
     /* Pull iSkool card (inside .section which has 2rem side padding) to match */
     #iskool-product-card {
-      margin-left: calc(-2rem + 12px) !important;
-      margin-right: calc(-2rem + 12px) !important;
+      margin-left: calc(-2rem + 12px);
+      margin-right: calc(-2rem + 12px);
     }
   }
 
@@ -1361,44 +1363,80 @@
 
 })();
 
-  /* ─── iSKOOL PRODUCT CARD SCROLL-EXPAND ─── */
-  (function () {
-    var card = document.getElementById('iskool-product-card');
+  /* ─── SCROLL-EXPAND CARDS (Laura / smarties-card + iSkool product card) ───
+     Anthropic-style: the card's margins/radius are tied directly to scroll
+     position (not a one-shot "appear" animation), so it grows smoothly as
+     you scroll up to it and (optionally) settles back if you scroll past.
+     Works identically on desktop and mobile — the "resting" inset/radius is
+     read live from the CSS for the current breakpoint, so each card simply
+     animates from whatever its CSS defines at rest out to full-bleed. */
+  function initScrollExpandCard(cardId) {
+    var card = document.getElementById(cardId);
     if (!card) return;
-    if (window.innerWidth <= 768) return;
 
-    var MAX_RADIUS = 24;
     var ticking = false;
     var naturalLeft  = null;
     var naturalRight = null;
+    var restMarginLeft  = 0;
+    var restMarginRight = 0;
+    var restRadius      = 24;
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
     function cacheNaturalPos() {
+      // Clear any inline overrides so the CSS for the current breakpoint
+      // (desktop vs. mobile) defines the "resting" state again.
+      card.style.marginLeft   = '';
+      card.style.marginRight  = '';
+      card.style.borderRadius = '';
+
+      var computed = window.getComputedStyle(card);
+      restMarginLeft  = parseFloat(computed.marginLeft)  || 0;
+      restMarginRight = parseFloat(computed.marginRight) || 0;
+      restRadius      = parseFloat(computed.borderRadius) || 24;
+
+      // Now measure the "baseline" position assuming zero added margin —
+      // this is purely the inset created by the parent container/padding.
       card.style.marginLeft  = '0px';
       card.style.marginRight = '0px';
       var r = card.getBoundingClientRect();
       naturalLeft  = r.left;
       naturalRight = window.innerWidth - r.right;
-    }
 
-    function lerp(a, b, t) { return a + (b - a) * t; }
-    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+      // Restore resting margin immediately (avoids a one-frame flash at 0).
+      card.style.marginLeft  = restMarginLeft + 'px';
+      card.style.marginRight = restMarginRight + 'px';
+      card.style.borderRadius = restRadius + 'px';
+    }
 
     function updateCard() {
       if (naturalLeft === null) { cacheNaturalPos(); }
+
       var cardRect = card.getBoundingClientRect();
       var vh = window.innerHeight;
+
+      // Scroll progress: 0 = card just entering viewport bottom,
+      // 1 = card top has reached 35% down the viewport.
       var start = vh;
       var end   = vh * 0.35;
       var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
+
+      // Cubic ease-in-out — smooth, no abrupt snap.
       var t = progress < 0.5
         ? 4 * progress * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      var ml     = lerp(0, -naturalLeft,  t);
-      var mr     = lerp(0, -naturalRight, t);
-      var radius = lerp(MAX_RADIUS, 0, t);
+
+      // Interpolate from the CSS resting inset/radius out to full-bleed
+      // (negative margins exactly cancel the container's natural padding).
+      var ml     = lerp(restMarginLeft,  -naturalLeft,  t);
+      var mr     = lerp(restMarginRight, -naturalRight, t);
+      var radius = lerp(restRadius, 0, t);
+
       card.style.marginLeft   = ml + 'px';
       card.style.marginRight  = mr + 'px';
       card.style.borderRadius = radius + 'px';
+
       ticking = false;
     }
 
@@ -1406,87 +1444,28 @@
       if (!ticking) { requestAnimationFrame(updateCard); ticking = true; }
     }, { passive: true });
 
+    var resizeTimer;
     window.addEventListener('resize', function () {
-      cacheNaturalPos();
-      requestAnimationFrame(updateCard);
-    }, { passive: true });
-
-    requestAnimationFrame(function () {
-      cacheNaturalPos();
-      updateCard();
-    });
-  })();
-
-  (function () {
-    var card = document.getElementById('smarties-card');
-    if (!card) return;
-    if (window.innerWidth <= 768) return;
-
-    var MAX_RADIUS = 24;
-    var ticking = false;
-    var naturalLeft  = null;
-    var naturalRight = null;
-
-    function cacheNaturalPos() {
-      // Temporarily reset margins so we measure the true resting position
-      card.style.marginLeft  = '0px';
-      card.style.marginRight = '0px';
-      var r = card.getBoundingClientRect();
-      naturalLeft  = r.left;
-      naturalRight = window.innerWidth - r.right;
-    }
-
-    function lerp(a, b, t) { return a + (b - a) * t; }
-    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-
-    function updateCard() {
-      if (naturalLeft === null) { cacheNaturalPos(); }
-
-      var cardRect = card.getBoundingClientRect();
-      var vh = window.innerHeight;
-
-      // Scroll progress: 0 = card enters viewport bottom, 1 = card top at 35% down
-      var cardTop = cardRect.top + parseFloat(card.style.marginLeft || 0); // approx original top
-      var start = vh;
-      var end   = vh * 0.35;
-
-      var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
-
-      // Cubic ease-in-out
-      var t = progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-      // Negative margins push the card out to touch viewport edges exactly
-      var ml     = lerp(0, -naturalLeft,  t);
-      var mr     = lerp(0, -naturalRight, t);
-      var radius = lerp(MAX_RADIUS, 0, t);
-
-      card.style.marginLeft   = ml + 'px';
-      card.style.marginRight  = mr + 'px';
-      card.style.borderRadius = radius + 'px';
-
-      ticking = false;
-    }
-
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        cacheNaturalPos();
         requestAnimationFrame(updateCard);
-        ticking = true;
-      }
+      }, 100);
     }, { passive: true });
 
-    window.addEventListener('resize', function () {
-      cacheNaturalPos();
-      requestAnimationFrame(updateCard);
-    }, { passive: true });
-
-    // Wait for layout to settle before caching
     requestAnimationFrame(function () {
       cacheNaturalPos();
       updateCard();
     });
-  })();
+  }
+
+  var prefersReducedMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    initScrollExpandCard('smarties-card');
+    initScrollExpandCard('iskool-product-card');
+  }
 
 
 </script>
