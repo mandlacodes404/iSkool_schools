@@ -1,5 +1,9 @@
 # iSkool Changelog
 
+## [Unreleased]
+### Changed
+- UI: Removed borders from mobile home page cards (To Do, Recent, class card) under `manual.css` for a flatter, cleaner look on mobile.
+
 ## [v1.1.2] - 2026-06-21
 ### Changed
 - UI: Added Nunito font across the platform (78cc3f8).
@@ -33,4 +37,3 @@
 ### Fixed
 - Minor UI inconsistencies in loaders and modals
 - Improved security checks across teacher and learner pages
-
