@@ -603,7 +603,7 @@
     align-items: center;
     gap: 12px;
     background: #1a1919;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     border-radius: 14px;
     padding: 14px;
     margin-bottom: 24px;
@@ -692,7 +692,7 @@
 .lh-card {
     background: #1a1919;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     overflow: hidden;
 }
 
