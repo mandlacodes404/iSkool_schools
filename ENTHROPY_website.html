@@ -756,6 +756,11 @@
     position: relative;
     overflow: hidden;
     will-change: border-radius, margin-left, margin-right;
+    /* Resting (pre-scroll) inset on desktop — narrower than the container so
+       the scroll-expand growth out to full-bleed is clearly visible.
+       JS reads this value and animates it out to 0 as you scroll to the card. */
+    margin-left: 4rem;
+    margin-right: 4rem;
   }
 
   @media (max-width: 768px) {
@@ -763,15 +768,15 @@
       padding: 3rem 1.5rem;
       /* Resting (pre-scroll) inset — JS animates from this value out to full-bleed
          as the card is scrolled into view, then back when scrolled past. */
-      margin-left: 12px;
-      margin-right: 12px;
+      margin-left: 24px;
+      margin-right: 24px;
       border-radius: 24px;
     }
 
     /* Pull iSkool card (inside .section which has 2rem side padding) to match */
     #iskool-product-card {
-      margin-left: calc(-2rem + 12px);
-      margin-right: calc(-2rem + 12px);
+      margin-left: calc(-2rem + 24px);
+      margin-right: calc(-2rem + 24px);
     }
   }
 
@@ -1416,10 +1421,13 @@
       var cardRect = card.getBoundingClientRect();
       var vh = window.innerHeight;
 
-      // Scroll progress: 0 = card just entering viewport bottom,
-      // 1 = card top has reached 35% down the viewport.
-      var start = vh;
-      var end   = vh * 0.35;
+      // Scroll progress: 0 = card top has reached 80% down the viewport
+      // (i.e. it's already mostly on screen before anything starts moving),
+      // 1 = card top has reached 10% down the viewport.
+      // Lower the 0.80 to delay the START further; lower the 0.10 to delay
+      // the FINISH further (push it closer to/past the top of the screen).
+      var start = vh * 0.80;
+      var end   = vh * 0.10;
       var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
 
       // Cubic ease-in-out — smooth, no abrupt snap.
