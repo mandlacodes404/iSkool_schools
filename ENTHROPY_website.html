@@ -1421,13 +1421,13 @@
       var cardRect = card.getBoundingClientRect();
       var vh = window.innerHeight;
 
-      // Scroll progress: 0 = card top has reached 80% down the viewport
+      // Scroll progress: 0 = card top has reached 70% down the viewport
       // (i.e. it's already mostly on screen before anything starts moving),
-      // 1 = card top has reached 10% down the viewport.
-      // Lower the 0.80 to delay the START further; lower the 0.10 to delay
+      // 1 = card top has reached 0% down the viewport (top of screen).
+      // Lower the 0.70 to delay the START further; lower the 0.00 to delay
       // the FINISH further (push it closer to/past the top of the screen).
-      var start = vh * 0.80;
-      var end   = vh * 0.10;
+      var start = vh * 0.70;
+      var end   = vh * 0.00;
       var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
 
       // Cubic ease-in-out — smooth, no abrupt snap.
