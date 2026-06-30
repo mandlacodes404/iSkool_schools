@@ -1207,13 +1207,13 @@
           </a>
         </div>
 
-        <!-- Right: animation placeholder -->
+        <!-- Right: image -->
         <div class="smarties-card-right">
-          <div class="iskool-animation-stage" aria-label="iSkool animated illustration">
+          <div class="iskool-animation-stage" aria-label="iSkool illustration">
             <img
-              src="enthropy/africa.svg"
+              src="iskool_plant.png"
               alt=""
-              class="smarties-svg-img"
+              class="smarties-svg-img is-visible"
               id="iskool-animation-frame"
               aria-hidden="true"
             />
@@ -1414,97 +1414,6 @@
       updateCard();
     });
   })();
-
-  /* ─── iSKOOL PRODUCT CARD SVG SEQUENCE ─── */
-  (function () {
-    var frame = document.getElementById('iskool-animation-frame');
-    if (!frame) return;
-
-    var entropyFrames = [
-      'africa.svg',
-      'backpacks.svg',
-      'bird.svg',
-      'boabab_tree.svg',
-      'books.svg',
-      'book_lightbulb.svg',
-      'book_wifi.svg',
-      'bulb_hat.svg',
-      'chalkboard.svg',
-      'classroom.svg',
-      'daughter_parents.svg',
-      'geometric_circles.svg',
-      'geometric_symbols.svg',
-      'graduation_hat.svg',
-      'holding_hands.svg',
-      'iskool_text.svg',
-      'mountains.svg',
-      'pencil_ruler.svg',
-      'periodic_table.svg',
-      'plus_symbol.svg',
-      'sunrise.svg'
-    ].map(function (name) {
-      return 'enthropy/' + name;
-    });
-
-    var markLogo = 'iskool.svg';
-    var fadeMs = 1000;
-    var frameMs = 320;
-    var markVisibleMs = 8000;
-    var timers = [];
-
-    function wait(ms) {
-      return new Promise(function (resolve) {
-        timers.push(window.setTimeout(resolve, ms));
-      });
-    }
-
-    function setSource(src, restart) {
-      frame.src = restart ? src + '?v=' + Date.now() : src;
-    }
-
-    function show() {
-      frame.classList.add('is-visible');
-    }
-
-    function preloadImages() {
-      entropyFrames.concat([markLogo]).forEach(function (src) {
-        var img = new Image();
-        img.src = src;
-      });
-    }
-
-    async function runSequence() {
-      var hasFadedIn = false;
-
-      while (true) {
-        setSource(entropyFrames[0]);
-        if (!hasFadedIn) {
-          show();
-          await wait(fadeMs);
-          hasFadedIn = true;
-        } else {
-          await wait(frameMs);
-        }
-
-        for (var i = 1; i < entropyFrames.length; i++) {
-          await wait(frameMs);
-          setSource(entropyFrames[i]);
-        }
-
-        await wait(frameMs);
-        setSource(markLogo, true);
-        await wait(markVisibleMs);
-      }
-    }
-
-    window.addEventListener('beforeunload', function () {
-      timers.forEach(function (timer) { window.clearTimeout(timer); });
-    });
-
-    preloadImages();
-    runSequence();
-  })();
-
 
   (function () {
     var card = document.getElementById('smarties-card');
