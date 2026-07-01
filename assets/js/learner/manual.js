@@ -89,7 +89,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=2.8';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=2.9';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -183,7 +183,7 @@ function buildHomeLayout(data, manualHtml) {
             <div class="lh-section">
                 <div class="lh-section-header">
                     <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#4fd1c518;border:1px solid #4fd1c530;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <div style="width:22px;height:22px;border-radius:6px;background:#4fd1c518;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg viewBox="0 0 24 24" width="13" height="13" stroke="#4fd1c5" stroke-width="2.5" fill="none">
                                 <path d="M9 11l3 3L22 4"/>
                                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -202,7 +202,7 @@ function buildHomeLayout(data, manualHtml) {
             <div class="lh-section">
                 <div class="lh-section-header">
                     <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f28c3818;border:1px solid #f28c3830;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <div style="width:22px;height:22px;border-radius:6px;background:#f28c3818;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2.5" fill="none">
                                 <circle cx="12" cy="12" r="10"/>
                                 <polyline points="12 6 12 12 16 14"/>
@@ -220,7 +220,7 @@ function buildHomeLayout(data, manualHtml) {
             <div class="lh-section lh-events-section">
                 <div class="lh-section-header" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
                     <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;border:1px solid #f472b630;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f472b6" stroke-width="2.5" fill="none">
                                 <rect x="3" y="4" width="18" height="18" rx="2"/>
                                 <line x1="16" y1="2" x2="16" y2="6"/>
@@ -400,7 +400,7 @@ function buildMobileClassCard(myClass) {
         // Not joined yet — show a prompt card
         return `
             <div class="lh-class-card lh-class-empty" onclick="window.showMyClass ? showMyClass() : null">
-                <div class="lh-class-icon" style="background:#63b3ed18; border-color:#63b3ed30;">
+                <div class="lh-class-icon" style="background:#63b3ed18;">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="16"/>
@@ -419,7 +419,7 @@ function buildMobileClassCard(myClass) {
 
     return `
         <div class="lh-class-card">
-            <div class="lh-class-icon" style="background:#63b3ed18; border-color:#63b3ed30;">
+            <div class="lh-class-icon" style="background:#63b3ed18;">
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -482,7 +482,7 @@ function buildMobileTodo(todo) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
-                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
@@ -548,7 +548,7 @@ function buildMobileRecent(recent) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
-                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
@@ -577,7 +577,7 @@ function buildMobileEvents(events) {
     if (!events.length) {
         return `
             <div class="lh-empty-state">
-                <div class="lh-empty-icon" style="background:${sectionColor}14;border:1px solid ${sectionColor}26;">
+                <div class="lh-empty-icon" style="background:${sectionColor}14;">
                     <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <rect x="3" y="4" width="18" height="18" rx="2"/>
                         <line x1="16" y1="2" x2="16" y2="6"/>
@@ -631,7 +631,7 @@ function buildMobileEvents(events) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:pointer;${isPast ? 'opacity:0.5;' : ''}">
-                <div class="lh-row-icon" style="background:${sectionColor}18; border-color:${sectionColor}30;">
+                <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
