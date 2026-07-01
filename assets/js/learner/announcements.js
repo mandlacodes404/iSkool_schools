@@ -527,7 +527,6 @@ function renderAnnouncements(data) {
                 height: 32px;
                 border-radius: 8px;
                 background: #f28c3818;
-                border: 1px solid #f28c3830;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -535,7 +534,6 @@ function renderAnnouncements(data) {
             }
             .lan-mobile-card--school .lan-mobile-card-icon {
                 background: #f28c3818;
-                border-color: #f28c3830;
             }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {

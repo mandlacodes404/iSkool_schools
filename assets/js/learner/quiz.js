@@ -628,7 +628,6 @@ function renderQuizCards(groupedData) {
                 height: 32px;
                 border-radius: 8px;
                 background: #fdd66318;
-                border: 1px solid #fdd66330;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;

@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 ### Changed
-- UI: Removed borders from mobile home page cards (To Do, Recent, class card) under `manual.css` for a flatter, cleaner look on mobile.
+- UI: Removed borders from all SVG icon boxes on the mobile home page (`manual.js`, `manual.css`) — section-title icons (To Do, Recent, Upcoming Events), My Class icon, list row icons, and empty-state icons — for a flatter, cleaner look on mobile. Background colors kept.
 
 ## [v1.1.2] - 2026-06-21
 ### Changed

@@ -483,7 +483,6 @@ function renderAssignmentCards(groupedData) {
                 height: 32px;
                 border-radius: 8px;
                 background: #a78bfa18;
-                border: 1px solid #a78bfa30;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;

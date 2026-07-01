@@ -509,7 +509,6 @@ function renderResourceCards(data) {
                 height: 32px;
                 border-radius: 8px;
                 background: #f28c3818;
-                border: 1px solid #f28c3830;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
