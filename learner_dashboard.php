@@ -2039,7 +2039,6 @@ if (desktopToggle) {
             const box = document.createElement('div');
             box.className = 'sidebar-nav-box';
             box.style.background = color + '18';
-            box.style.border     = '1px solid ' + color + '30';
             svg.parentNode.insertBefore(box, svg);
             box.appendChild(svg);
         });
@@ -2580,7 +2579,7 @@ window.learnerPageState = {
 <nav id="mobileBottomNav">
 
       <a href="javascript:void(0)" onclick="loadManual()" data-page="partials/manual.html" id="nav-home">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#4fd1c518;border:1px solid #4fd1c530;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
+        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#4fd1c518;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>
@@ -2590,7 +2589,7 @@ window.learnerPageState = {
       </a>
 
     <a href="javascript:void(0)" onclick="fetchQuizzes()" data-page="quiz_list.php" id="nav-quiz">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#fdd66318;border:1px solid #fdd66330;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
+        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#fdd66318;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fdd663" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
           </svg>
@@ -2599,7 +2598,7 @@ window.learnerPageState = {
     </a>
 
     <a href="javascript:void(0)" onclick="fetchAssignments()" data-page="learner_assignments.php" id="nav-assignments">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#a78bfa18;border:1px solid #a78bfa30;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
+        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#a78bfa18;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/>
           </svg>
@@ -2608,7 +2607,7 @@ window.learnerPageState = {
     </a>
 
     <a href="javascript:void(0)" onclick="fetchResources()" data-page="view_resources_user.php" id="nav-resources">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#f28c3818;border:1px solid #f28c3830;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
+        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#f28c3818;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#f28c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
           </svg>
