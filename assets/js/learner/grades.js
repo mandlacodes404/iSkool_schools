@@ -582,7 +582,6 @@ function renderGrades(data) {
             height: 32px;
             border-radius: 8px;
             background: #68d39118;
-            border: 1px solid #68d39130;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -590,7 +589,6 @@ function renderGrades(data) {
         }
         .grades-mobile-layout .quiz-unpublished .quiz-row-icon {
             background: #f8514914;
-            border-color: #f8514926;
         }
         .grade-inline-grid {
             grid-template-columns: 1fr;
@@ -1724,7 +1722,6 @@ function renderProgressReport(data) {
                 height: 32px;
                 border-radius: 8px;
                 background: rgba(104,211,145,0.1);
-                border: 1px solid rgba(104,211,145,0.18);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1899,7 +1896,7 @@ function renderProgressReport(data) {
             const codeText   = escHtmlPr(s.code || (td.count + ' assessment' + (td.count !== 1 ? 's' : '')));
 
             return '<div class="pr-subject-row">' +
-                '<div class="pr-subject-icon" style="background:' + c.bg + ';border-color:' + c.border + '30;color:' + c.text + ';">' +
+                '<div class="pr-subject-icon" style="background:' + c.bg + ';color:' + c.text + ';">' +
                     subjectInitial(s.name) +
                 '</div>' +
                 '<div class="pr-subject-info">' +
