@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Changed
+- Learner: Sorted teacher folders by each teacher's latest uploaded content across Grades, Assignments, Quizzes, Resources, and Announcements on both mobile and desktop. Quiz mobile folders now match desktop by grouping under teacher names.
 - UI: Removed borders from all SVG icon boxes on the mobile home page (`manual.js`, `manual.css`) — section-title icons (To Do, Recent, Upcoming Events), My Class icon, list row icons, and empty-state icons — for a flatter, cleaner look on mobile. Background colors kept.
 - UI: Removed borders from mobile list-row icon boxes in Assignments, Quiz, Resources, and Announcements (`assignments.js`, `quiz.js`, `resources.js`, `announcements.js`), including the Announcements "school" card variant. Background colors kept.
 - UI: Removed borders from icon boxes in Grades (`grades.js`) — mobile quiz-row icons (including the unpublished-quiz state) and the printable Progress Report's subject icons (including the performance-colored variant). Background colors kept.

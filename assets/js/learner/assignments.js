@@ -165,6 +165,28 @@ function formatAssignmentDueDate(dueDateStr) {
     return `Due ${day} ${month}, ${hours}:${mins}`;
 }
 
+function parseLearnerAssignmentTime(value) {
+    if (!value) return 0;
+    const parsed = new Date(String(value).replace(/-/g, '/')).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getLearnerAssignmentTime(task) {
+    return parseLearnerAssignmentTime(task.created_at || task.raw_created_at || task.due_date);
+}
+
+function getSortedLearnerAssignmentEntries(groupedData) {
+    return Object.entries(groupedData || {})
+        .map(([teacher, tasks], index) => {
+            const sortedTasks = Array.isArray(tasks)
+                ? [...tasks].sort((a, b) => getLearnerAssignmentTime(b) - getLearnerAssignmentTime(a))
+                : [];
+            const latestTime = sortedTasks.reduce((latest, task) => Math.max(latest, getLearnerAssignmentTime(task)), 0);
+            return { teacher, tasks: sortedTasks, latestTime, index };
+        })
+        .sort((a, b) => (b.latestTime - a.latestTime) || (a.index - b.index));
+}
+
 function renderAssignmentCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -175,8 +197,10 @@ function renderAssignmentCards(groupedData) {
     }
 
     // ── Build flat list for desktop panel lookup ──
+    const teacherEntries = getSortedLearnerAssignmentEntries(groupedData);
+
     window._allLearnerAssignmentsFlat = [];
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
+    for (const { teacher, tasks } of teacherEntries) {
         tasks.forEach(task => {
             window._allLearnerAssignmentsFlat.push({ ...task, teacher });
         });
@@ -186,7 +210,7 @@ function renderAssignmentCards(groupedData) {
     let sidebarHtml = '';
     let flatIdx = 0;
     let desktopGroupIdx = 0;
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
+    for (const { teacher, tasks } of teacherEntries) {
         const groupId = `las-dg-${desktopGroupIdx++}`;
         sidebarHtml += `
             <div class="las-desktop-teacher-group">
@@ -617,7 +641,7 @@ function renderAssignmentCards(groupedData) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    if (Object.keys(groupedData).length > 0) {
+    if (teacherEntries.length > 0) {
         html += `
         <div class="las-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
@@ -633,7 +657,7 @@ function renderAssignmentCards(groupedData) {
     let mobileFlatIdx = 0;
 
     let mobileGroupIdx = 0;
-    for (const [teacher, tasks] of Object.entries(groupedData)) {
+    for (const { teacher, tasks } of teacherEntries) {
         const gid = `las-mg-${mobileGroupIdx}`;
         html += `
             <div class="las-mobile-folder-header" onclick="toggleLasMobileFolder('${gid}', this)">

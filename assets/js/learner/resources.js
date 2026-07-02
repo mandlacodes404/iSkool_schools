@@ -117,6 +117,28 @@ function restoreResourcePageState() {
     } catch (e) { /* ignore bad state */ }
 }
 
+function parseLearnerResourceTime(value) {
+    if (!value) return 0;
+    const parsed = new Date(String(value).replace(/-/g, '/')).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getLearnerResourceTime(file) {
+    return parseLearnerResourceTime(file.raw_uploaded_at || file.uploaded_at || file.created_at);
+}
+
+function getSortedLearnerResourceEntries(data) {
+    return Object.entries(data || {})
+        .map(([teacher, files], index) => {
+            const sortedFiles = Array.isArray(files)
+                ? [...files].sort((a, b) => getLearnerResourceTime(b) - getLearnerResourceTime(a))
+                : [];
+            const latestTime = sortedFiles.reduce((latest, file) => Math.max(latest, getLearnerResourceTime(file)), 0);
+            return { teacher, files: sortedFiles, latestTime, index };
+        })
+        .sort((a, b) => (b.latestTime - a.latestTime) || (a.index - b.index));
+}
+
 function renderResourceCards(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -127,8 +149,10 @@ function renderResourceCards(data) {
     }
 
     // ── Build flat list for desktop panel lookup ──
+    const teacherEntries = getSortedLearnerResourceEntries(data);
+
     window._allLearnerResourcesFlat = [];
-    for (const [teacher, files] of Object.entries(data)) {
+    for (const { teacher, files } of teacherEntries) {
         files.forEach(file => {
             window._allLearnerResourcesFlat.push({ ...file, teacher });
         });
@@ -138,7 +162,7 @@ function renderResourceCards(data) {
     let sidebarHtml = '';
     let flatIdx = 0;
     let desktopGroupIdx = 0;
-    for (const [teacher, files] of Object.entries(data)) {
+    for (const { teacher, files } of teacherEntries) {
         const groupId = `lrs-dg-${desktopGroupIdx++}`;
         sidebarHtml += `
             <div class="lrs-desktop-teacher-group">
@@ -627,7 +651,7 @@ function renderResourceCards(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    if (Object.keys(data).length > 0) {
+    if (teacherEntries.length > 0) {
         html += `
         <div class="lrs-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
@@ -641,7 +665,7 @@ function renderResourceCards(data) {
     html += `<div class="lrs-mobile-list">`;
 
     let mobileGroupIdx = 0;
-    for (const [teacher, files] of Object.entries(data)) {
+    for (const { teacher, files } of teacherEntries) {
         const gid = `lrs-mg-${mobileGroupIdx}`;
         html += `
             <div class="lrs-mobile-folder-header" onclick="toggleLrsMobileFolder('${gid}', this)">

@@ -125,6 +125,28 @@ function restoreAnnouncementPageState() {
     } catch (e) { /* ignore bad state */ }
 }
 
+function parseLearnerAnnouncementTime(value) {
+    if (!value) return 0;
+    const parsed = new Date(String(value).replace(/-/g, '/')).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getLearnerAnnouncementTime(ann) {
+    return parseLearnerAnnouncementTime(ann.created_at);
+}
+
+function getSortedLearnerAnnouncementEntries(teacherData) {
+    return Object.entries(teacherData || {})
+        .map(([teacher, items], index) => {
+            const sortedItems = Array.isArray(items)
+                ? [...items].sort((a, b) => getLearnerAnnouncementTime(b) - getLearnerAnnouncementTime(a))
+                : [];
+            const latestTime = sortedItems.reduce((latest, ann) => Math.max(latest, getLearnerAnnouncementTime(ann)), 0);
+            return { teacher, items: sortedItems, latestTime, index };
+        })
+        .sort((a, b) => (b.latestTime - a.latestTime) || (a.index - b.index));
+}
+
 function renderAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -137,9 +159,10 @@ function renderAnnouncements(data) {
 
     const schoolWide  = data.school_wide  || [];
     const teacherData = data.teacher      || {};
+    const teacherEntries = getSortedLearnerAnnouncementEntries(teacherData);
 
     const hasSchoolWide  = schoolWide.length > 0;
-    const hasTeacher     = Object.keys(teacherData).length > 0;
+    const hasTeacher     = teacherEntries.length > 0;
 
     if (!hasSchoolWide && !hasTeacher) {
         apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No announcements found.</p>";
@@ -156,7 +179,7 @@ function renderAnnouncements(data) {
         window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'school', teacher: ann.sender || 'School Admin' });
     });
 
-    for (const [teacher, items] of Object.entries(teacherData)) {
+    for (const { teacher, items } of teacherEntries) {
         items.forEach(ann => {
             window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'teacher', teacher });
         });
@@ -208,7 +231,7 @@ function renderAnnouncements(data) {
     // Teacher section
     if (hasTeacher) {
         let desktopGroupIdx = 0;
-        for (const [teacher, items] of Object.entries(teacherData)) {
+        for (const { teacher, items } of teacherEntries) {
             const groupId = `lan-dg-teacher-${desktopGroupIdx++}`;
             sidebarHtml += `
                 <div class="lan-desktop-teacher-group">
@@ -731,7 +754,7 @@ function renderAnnouncements(data) {
     // Mobile — Teacher section
     if (hasTeacher) {
         let teacherGroupIdx = 0;
-        for (const [teacher, items] of Object.entries(teacherData)) {
+        for (const { teacher, items } of teacherEntries) {
             const tGid = `lan-mg-teacher-${teacherGroupIdx}`;
             html += `
                 <div class="lan-mobile-folder-header" onclick="toggleLanMobileFolder('${tGid}', this)">

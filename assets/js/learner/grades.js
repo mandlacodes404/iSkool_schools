@@ -75,6 +75,25 @@ function saveGradesState(patch) {
     }
 }
 
+function parseLearnerGradeTime(value) {
+    if (!value) return 0;
+    const parsed = new Date(String(value).replace(/-/g, '/')).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function sortLearnerGradeGroups(groups) {
+    return [...(groups || [])]
+        .map((group, index) => {
+            const quizzes = Array.isArray(group.quizzes)
+                ? [...group.quizzes].sort((a, b) => parseLearnerGradeTime(b.submitted_at) - parseLearnerGradeTime(a.submitted_at))
+                : [];
+            const latestTime = quizzes.reduce((latest, quiz) => Math.max(latest, parseLearnerGradeTime(quiz.submitted_at)), 0);
+            return { ...group, quizzes, _latestTime: latestTime, _originalIndex: index };
+        })
+        .sort((a, b) => (b._latestTime - a._latestTime) || (a._originalIndex - b._originalIndex))
+        .map(({ _latestTime, _originalIndex, ...group }) => group);
+}
+
 async function loadGradesData() {
     if (window.learnerGradesCache) return window.learnerGradesCache;
     if (!window.learnerGradesCachePromise) {
@@ -151,7 +170,8 @@ function renderGrades(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    const groups      = data.groups       || [];
+    const groups      = sortLearnerGradeGroups(data.groups || []);
+    data.groups = groups;
     const currentTerm = data.current_term || 1;
     const viewerRole  = data.viewer_role  || 'learner';
     const targetEmail = data.target_email || '';

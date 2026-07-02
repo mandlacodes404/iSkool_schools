@@ -80,6 +80,7 @@ while ($row = $result->fetch_assoc()) {
         'id'            => $row['id'],
         'title'         => $row['resource_title'],
         'filename'      => $filename,
+        'raw_uploaded_at' => $row['uploaded_at'],
         'uploaded_at'   => date("F j, Y", strtotime($row['uploaded_at'])),
         'ext'           => $fileExt,
         'resource_type' => $resourceType,

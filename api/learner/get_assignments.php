@@ -23,7 +23,7 @@ $yearStmt->close();
 // 2. Get Assignments with Submission Status
 $sql = "
     SELECT DISTINCT
-        a.id, a.title, a.description, a.due_date, a.file_url,
+        a.id, a.title, a.description, a.due_date, a.file_url, a.created_at,
         c.name AS class_name,
         CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display,
         s.file_url AS submission_url
@@ -52,6 +52,7 @@ while ($row = $result->fetch_assoc()) {
         'title' => $row['title'],
         'description' => $row['description'],
         'due_date' => $row['due_date'] ? date('M j, Y, g:i A', strtotime($row['due_date'])) : 'No Due Date',
+        'created_at' => $row['created_at'],
         'is_past_due' => $isPastDue,
         'teacher_file' => $row['file_url'],
         'submission_file' => $row['submission_url'],

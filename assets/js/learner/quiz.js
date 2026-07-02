@@ -61,6 +61,28 @@ const formatQuizDate = (dateStr) => {
     });
 };
 
+function parseLearnerQuizTime(value) {
+    if (!value) return 0;
+    const parsed = new Date(String(value).replace(/-/g, "/")).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getLearnerQuizTime(quiz) {
+    return parseLearnerQuizTime(quiz.created_at || quiz.start_time);
+}
+
+function getSortedLearnerQuizTeacherEntries(quizzesByTeacher) {
+    return Object.entries(quizzesByTeacher || {})
+        .map(([teacher, quizzes], index) => {
+            const sortedQuizzes = Array.isArray(quizzes)
+                ? [...quizzes].sort((a, b) => getLearnerQuizTime(b) - getLearnerQuizTime(a))
+                : [];
+            const latestTime = sortedQuizzes.reduce((latest, quiz) => Math.max(latest, getLearnerQuizTime(quiz)), 0);
+            return { teacher, quizzes: sortedQuizzes, latestTime, index };
+        })
+        .sort((a, b) => (b.latestTime - a.latestTime) || (a.index - b.index));
+}
+
 window.fetchQuizzes = async function() {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastLearnerPage", "quiz_list.php");
@@ -288,17 +310,21 @@ function renderQuizCards(groupedData) {
     }
 
     // ── Build flat list for desktop panel lookup ──
-    window._allLearnerQuizzesFlat = [];
     const desktopQuizzesByTeacher = {};
     for (const [subject, quizzes] of Object.entries(groupedData)) {
         quizzes.forEach(quiz => {
             const teacher = String(quiz.teacher || quiz.teacher_name || quiz.created_by_name || subject || 'Unknown Teacher').trim() || 'Unknown Teacher';
             const desktopQuiz = { ...quiz, subject, teacher };
-            window._allLearnerQuizzesFlat.push(desktopQuiz);
             if (!desktopQuizzesByTeacher[teacher]) desktopQuizzesByTeacher[teacher] = [];
             desktopQuizzesByTeacher[teacher].push(desktopQuiz);
         });
     }
+    const teacherEntries = getSortedLearnerQuizTeacherEntries(desktopQuizzesByTeacher);
+
+    window._allLearnerQuizzesFlat = [];
+    teacherEntries.forEach(({ quizzes }) => {
+        quizzes.forEach(quiz => window._allLearnerQuizzesFlat.push(quiz));
+    });
 
     // ── Helper: build action button HTML for a quiz ──
     function buildActionBtn(quiz) {
@@ -336,7 +362,7 @@ function renderQuizCards(groupedData) {
     let sidebarHtml = '';
     let flatIdx = 0;
     let desktopGroupIdx = 0;
-    for (const [teacher, quizzes] of Object.entries(desktopQuizzesByTeacher)) {
+    for (const { teacher, quizzes } of teacherEntries) {
         const groupId = `lqz-dg-${desktopGroupIdx++}`;
         sidebarHtml += `
             <div class="lqz-desktop-teacher-group">
@@ -778,7 +804,7 @@ function renderQuizCards(groupedData) {
         <!-- ═══ MOBILE LIST (unchanged) ═══ -->`;
 
     // Mobile search bar (rendered outside the card so it spans full width)
-    if (Object.keys(groupedData).length > 0) {
+    if (teacherEntries.length > 0) {
         html += `
         <div class="lqz-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
@@ -792,7 +818,7 @@ function renderQuizCards(groupedData) {
     html += `<div class="lqz-mobile-list">`;
 
     let mobileGroupIdx = 0;
-    for (const [subject, quizzes] of Object.entries(groupedData)) {
+    for (const { teacher, quizzes } of teacherEntries) {
         const gid = `lqz-mg-${mobileGroupIdx}`;
         html += `
             <div class="lqz-mobile-folder-header" onclick="toggleLqzMobileFolder('${gid}', this)">
@@ -801,7 +827,7 @@ function renderQuizCards(groupedData) {
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
-                <span class="lqz-mobile-folder-name">${escapeHtml(subject)}</span>
+                <span class="lqz-mobile-folder-name">${escapeHtml(teacher)}</span>
                 <span class="lqz-mobile-folder-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
                 <svg class="lqz-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
                     <polyline points="9 18 15 12 9 6"/>
