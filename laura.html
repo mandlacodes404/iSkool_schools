@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Laura is a university platform where Vice-Chancellors, Deans, faculties, SRCs, and societies connect directly with students — no Instagram, no email chains." />
+<meta name="description" content="Laura is an education intelligence platform that transforms operational data from iSkool into real-time insight — for schools, districts, provinces, and national departments." />
 <title>Laura \ Enthropy</title>
 <link rel="icon" type="image/svg+xml" href="/enthropy_logo.svg?v=1.2">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -296,16 +296,17 @@
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
-  /* Ambient glow */
-  .laura-hero-bg {
+  /* Ambient network — connected points, flowing intelligence */
+  .hero-network {
     position: absolute;
-    top: -10%;
-    right: -5%;
-    width: min(600px, 60vw);
-    aspect-ratio: 1;
-    opacity: 0.045;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
     pointer-events: none;
   }
 
@@ -380,7 +381,7 @@
     flex-wrap: wrap;
   }
 
-  /* ─── HERO VISUAL: THE CAMPUS FEED ─── */
+  /* ─── HERO VISUAL: THE INTELLIGENCE FEED ─── */
   .campus-feed {
     background: var(--ink);
     border-radius: 20px;
@@ -469,11 +470,10 @@
     font-family: var(--font-display);
   }
 
-  .feed-avatar.vc    { background: rgba(196,98,45,0.25); color: var(--terra-light); }
-  .feed-avatar.dean  { background: rgba(245,240,232,0.12); color: rgba(245,240,232,0.7); }
-  .feed-avatar.src   { background: rgba(196,98,45,0.15); color: var(--terra-light); }
-  .feed-avatar.radio { background: rgba(245,240,232,0.07); color: rgba(245,240,232,0.5); }
-  .feed-avatar.soc   { background: rgba(196,98,45,0.10); color: var(--terra-light); }
+  .feed-avatar.sch  { background: rgba(196,98,45,0.25); color: var(--terra-light); }
+  .feed-avatar.dis  { background: rgba(245,240,232,0.12); color: rgba(245,240,232,0.7); }
+  .feed-avatar.prov { background: rgba(196,98,45,0.15); color: var(--terra-light); }
+  .feed-avatar.nat  { background: rgba(245,240,232,0.07); color: rgba(245,240,232,0.5); }
 
   .feed-post-author {
     font-family: var(--font-body);
@@ -584,7 +584,7 @@
 
   .pillars-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
   }
 
@@ -645,126 +645,8 @@
     line-height: 1.7;
   }
 
-  /* ─── IMAGINE STRIP ─── */
-  .imagine-strip {
-    background: var(--ink);
-    color: var(--cream);
-    padding: 6rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
 
-  .imagine-strip::before {
-    content: '';
-    position: absolute;
-    top: -20%;
-    left: -5%;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(196,98,45,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .imagine-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .imagine-label {
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--terra-light);
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-  }
-
-  .imagine-label::before {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 1px;
-    background: var(--terra-light);
-  }
-
-  .imagine-label::after {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 1px;
-    background: var(--terra-light);
-  }
-
-  .imagine-headline {
-    font-family: var(--font-display);
-    font-size: clamp(1.6rem, 3.5vw, 3.2rem);
-    font-weight: 400;
-
-    line-height: 1.35;
-    letter-spacing: -0.015em;
-    color: var(--cream);
-    margin-bottom: 3.5rem;
-  }
-
-  .imagine-headline em {
-    color: var(--terra-light);
-
-  }
-
-  .imagine-scenarios {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: rgba(245,240,232,0.08);
-    border-radius: 16px;
-    overflow: hidden;
-    text-align: left;
-  }
-
-  @media (max-width: 640px) {
-    .imagine-scenarios { grid-template-columns: 1fr; }
-  }
-
-  .imagine-item {
-    background: rgba(26,23,20,0.5);
-    padding: 1.75rem 2rem;
-    transition: background 0.25s ease;
-  }
-
-  .imagine-item:hover {
-    background: rgba(196,98,45,0.07);
-  }
-
-  .imagine-who {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--terra-light);
-    margin-bottom: 0.6rem;
-  }
-
-  .imagine-what {
-    font-size: 0.9rem;
-    color: rgba(245,240,232,0.6);
-    line-height: 1.65;
-  }
-
-  .imagine-what strong {
-    color: rgba(245,240,232,0.88);
-    font-weight: 500;
-  }
-
-  /* ─── SPACES / SOCIETIES ─── */
+  /* ─── SPACES / PRIVACY & GOVERNANCE ─── */
   .spaces-headline {
     font-family: var(--font-display);
     font-size: clamp(1.8rem, 3vw, 2.8rem);
@@ -958,6 +840,778 @@
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ═══════════════════════════════════════════
+     DATA JOURNEY
+     ═══════════════════════════════════════════ */
+  .journey-section {
+    background: var(--cream-dark);
+    position: relative;
+  }
+
+  .journey-intro {
+    padding: 6rem 2rem 3rem;
+    text-align: center;
+  }
+
+  .journey-headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3.2vw, 2.9rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    max-width: 24ch;
+    margin: 0 auto 1.1rem;
+  }
+
+  .journey-headline em { color: var(--terra); }
+
+  .journey-sub {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin: 0 auto;
+    line-height: 1.75;
+  }
+
+  .journey-track {
+    position: relative;
+    height: 520vh;
+  }
+
+  .journey-sticky {
+    position: sticky;
+    top: var(--nav-h);
+    height: calc(100vh - var(--nav-h));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(3rem, 7vw, 7rem);
+    padding: 0 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .journey-rail {
+    position: relative;
+    width: 2px;
+    height: min(58vh, 440px);
+    flex-shrink: 0;
+  }
+
+  .journey-rail-line {
+    position: absolute;
+    inset: 0;
+    background: var(--divider);
+    border-radius: 1px;
+  }
+
+  .journey-rail-fill {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 0%;
+    background: var(--terra);
+    border-radius: 1px;
+  }
+
+  .journey-dot {
+    position: absolute;
+    left: 1px;
+    bottom: 0%;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--terra);
+    box-shadow: 0 0 0 5px rgba(196,98,45,0.16);
+    transform: translate(-50%, 50%);
+    animation: pulse-dot 2.4s ease-in-out infinite;
+  }
+
+  .journey-stop {
+    position: absolute;
+    left: 0;
+    bottom: calc(var(--pos) * 100%);
+  }
+
+  .journey-stop::before {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cream-dark);
+    border: 1.5px solid var(--ink-muted);
+    transform: translate(-50%, -50%);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .journey-stop span {
+    position: absolute;
+    left: 19px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-muted);
+    transition: color 0.3s ease, font-weight 0.3s ease;
+  }
+
+  .journey-stop.is-active::before {
+    border-color: var(--terra);
+    background: var(--terra);
+  }
+
+  .journey-stop.is-active span {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .journey-panel { max-width: 380px; }
+
+  .journey-stage-count {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--terra);
+    margin-bottom: 1.1rem;
+  }
+
+  .journey-stage-name {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+  }
+
+  .journey-stage-desc {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+    max-width: 40ch;
+  }
+
+  .journey-stage-name.is-changing,
+  .journey-stage-desc.is-changing {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  @media (max-width: 768px) {
+    .journey-track { height: 480vh; }
+    .journey-sticky { gap: 2.25rem; }
+    .journey-rail { height: 52vh; }
+    .journey-stop span { font-size: 0.66rem; left: 16px; }
+    .journey-panel { max-width: 50vw; }
+    .journey-stage-name { font-size: clamp(1.5rem, 7vw, 2.1rem); margin-bottom: 0.75rem; }
+    .journey-stage-desc { font-size: 0.88rem; line-height: 1.65; }
+  }
+
+  /* ═══════════════════════════════════════════
+     INTERACTIVE PILLAR CARDS
+     ═══════════════════════════════════════════ */
+  .pillar-card {
+    cursor: pointer;
+  }
+
+  .pillar-card:hover,
+  .pillar-card:focus-visible,
+  .pillar-card.is-open {
+    background: var(--parchment);
+    border-color: var(--divider);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px -28px rgba(26,23,20,0.20);
+  }
+
+  .pillar-card {
+    transition: border-color 0.3s var(--ease-out), background 0.3s var(--ease-out),
+                transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+  }
+
+  .pillar-insights {
+    list-style: none;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    transition: max-height 0.4s var(--ease-out), opacity 0.3s ease, margin-top 0.4s var(--ease-out);
+  }
+
+  .pillar-card:hover .pillar-insights,
+  .pillar-card:focus-visible .pillar-insights,
+  .pillar-card.is-open .pillar-insights {
+    max-height: 220px;
+    opacity: 1;
+    margin-top: 1.1rem;
+  }
+
+  .pillar-insight {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--divider);
+    display: flex;
+    gap: 0.55rem;
+    line-height: 1.5;
+  }
+
+  .pillar-insight::before {
+    content: '→';
+    color: var(--terra);
+    flex-shrink: 0;
+  }
+
+  .pillar-hint {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  .pillar-card:hover .pillar-hint,
+  .pillar-card:focus-visible .pillar-hint,
+  .pillar-card.is-open .pillar-hint {
+    display: none;
+  }
+
+  /* ═══════════════════════════════════════════
+     ASK LAURA — CONSOLE
+     ═══════════════════════════════════════════ */
+  .ask-section {
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ask-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ask-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 4.5vw, 3.6rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1.1rem;
+  }
+
+  .ask-headline em { color: var(--terra); }
+
+  .ask-sub {
+    font-size: 1.03rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin: 0 auto 3.25rem;
+    line-height: 1.75;
+  }
+
+  .ask-console {
+    background: var(--ink);
+    border-radius: 24px;
+    padding: 1.75rem;
+    text-align: left;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 50px 100px -50px rgba(26,23,20,0.45);
+  }
+
+  .ask-console::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -12%;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,98,45,0.13) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .console-chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding-bottom: 1.15rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+    position: relative;
+    z-index: 1;
+  }
+
+  .console-mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(196,98,45,0.18);
+    color: var(--terra-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .console-label {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: rgba(245,240,232,0.55);
+    letter-spacing: 0.03em;
+  }
+
+  .console-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--terra-light);
+    margin-left: auto;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .console-status {
+    font-size: 0.68rem;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .console-input {
+    background: rgba(245,240,232,0.05);
+    border: 1px solid rgba(245,240,232,0.10);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    font-family: var(--font-body);
+    font-size: clamp(0.92rem, 2vw, 1.05rem);
+    min-height: 1.4em;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .console-placeholder {
+    color: rgba(245,240,232,0.32);
+  }
+
+  .console-input.has-text .console-placeholder { display: none; }
+  .console-input:not(.has-text) #console-input-text { display: none; }
+
+  #console-input-text { color: rgba(245,240,232,0.94); }
+
+  .console-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    background: var(--terra-light);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: caretBlink 0.9s steps(1) infinite;
+  }
+
+  @keyframes caretBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  .console-answer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(245,240,232,0.08);
+    padding-top: 1.4rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+    min-height: 5.5rem;
+  }
+
+  .console-answer.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .console-asked-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--terra-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .console-asked-q {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: rgba(245,240,232,0.48);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .console-answer-body {
+    font-size: clamp(0.9rem, 2vw, 0.98rem);
+    line-height: 1.75;
+    color: rgba(245,240,232,0.82);
+  }
+
+  .console-answer-body strong {
+    color: var(--cream);
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .ask-console { padding: 1.35rem; border-radius: 20px; }
+    .console-input { padding: 1rem 1.15rem; }
+  }
+
+  /* ═══════════════════════════════════════════
+     PRODUCT PREVIEW
+     ═══════════════════════════════════════════ */
+  .preview-section { overflow: hidden; }
+
+  .preview-headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 3.5vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .preview-headline em { color: var(--terra); }
+
+  .preview-sub {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 44ch;
+    margin: 0 auto;
+    line-height: 1.75;
+  }
+
+  .device-cluster {
+    max-width: 1000px;
+    margin: 5.5rem auto 0;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 460px;
+    padding: 0 2rem;
+  }
+
+  .device { position: relative; }
+
+  .device-browser {
+    width: min(700px, 82vw);
+    background: var(--cream);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    overflow: hidden;
+    z-index: 2;
+    box-shadow: 0 60px 110px -50px rgba(26,23,20,0.28);
+  }
+
+  .browser-chrome {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.75rem 1rem;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .chrome-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--divider);
+  }
+
+  .chrome-address {
+    margin-left: 0.75rem;
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+    background: var(--cream);
+    border-radius: 6px;
+    padding: 0.2rem 0.7rem;
+    font-family: var(--font-body);
+  }
+
+  .device-tablet {
+    width: min(210px, 30vw);
+    position: absolute;
+    left: 0;
+    bottom: -5%;
+    background: var(--ink);
+    border-radius: 18px;
+    padding: 9px;
+    z-index: 1;
+    box-shadow: 0 40px 80px -40px rgba(26,23,20,0.3);
+  }
+
+  .device-tablet .device-screen { border-radius: 11px; }
+
+  .device-mobile {
+    width: min(132px, 22vw);
+    position: absolute;
+    right: 2%;
+    bottom: -9%;
+    background: var(--ink);
+    border-radius: 22px;
+    padding: 7px;
+    z-index: 3;
+    box-shadow: 0 40px 80px -40px rgba(26,23,20,0.32);
+  }
+
+  .device-mobile .device-screen { border-radius: 16px; }
+
+  .device-tablet.reveal,
+  .device-tablet.reveal.visible { transform: translateY(24px) rotate(-3.5deg); }
+  .device-tablet.reveal.visible { transform: translateY(0) rotate(-3.5deg); }
+
+  .device-mobile.reveal { transform: translateY(24px) rotate(3.5deg); }
+  .device-mobile.reveal.visible { transform: translateY(0) rotate(3.5deg); }
+
+  .device-screen {
+    background: var(--cream);
+    padding: 1rem;
+  }
+
+  .mock-stats {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .mock-stat {
+    flex: 1;
+    background: var(--cream-dark);
+    border-radius: 8px;
+    padding: 0.55rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .mock-stat-num {
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .mock-stat-label {
+    font-size: 0.55rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mock-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 54px;
+    background: var(--cream-dark);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 0.7rem;
+  }
+
+  .mock-chart span {
+    flex: 1;
+    background: var(--terra);
+    opacity: 0.75;
+    border-radius: 2px;
+    min-height: 6%;
+  }
+
+  .mock-chart span:nth-child(even) { background: var(--ink); opacity: 0.18; }
+
+  .mock-lines { display: flex; flex-direction: column; gap: 6px; }
+
+  .mock-line {
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--cream-dark);
+  }
+
+  .device-tablet .mock-stat-label,
+  .device-mobile .mock-stat-label { display: none; }
+
+  .device-mobile .mock-stats { gap: 0.4rem; }
+  .device-mobile .mock-stat { padding: 0.4rem 0.45rem; }
+  .device-mobile .mock-stat-num { font-size: 0.72rem; }
+  .device-mobile .mock-chart { height: 38px; padding: 6px; }
+
+  @media (max-width: 640px) {
+    .device-cluster { min-height: 340px; margin-top: 4rem; }
+    .device-tablet { left: -2%; bottom: -3%; }
+    .device-mobile { right: -1%; bottom: -6%; }
+  }
+
+  /* ═══════════════════════════════════════════
+     PRINCIPLES
+     ═══════════════════════════════════════════ */
+  .principles-section { padding: 8rem 2rem; }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .principles-grid { grid-template-columns: 1fr 1fr; row-gap: 3.5rem; }
+  }
+
+  @media (max-width: 480px) {
+    .principles-grid { grid-template-columns: 1fr; }
+  }
+
+  .principle-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1.5rem;
+    border-radius: 10px;
+    background: rgba(196,98,45,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .principle-icon svg {
+    width: 19px;
+    height: 19px;
+    stroke: var(--terra);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .principle-title {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.6rem;
+  }
+
+  .principle-desc {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    max-width: 22ch;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════
+     FINALE
+     ═══════════════════════════════════════════ */
+  .finale-section {
+    background: var(--cream);
+    padding: 9rem 2rem 8rem;
+    text-align: center;
+  }
+
+  .finale-inner {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .finale-statement {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4.2vw, 3.3rem);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 3.5rem;
+  }
+
+  .finale-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .finale-brand-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--terra);
+  }
+
+  .finale-brand-tag {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* ═══════════════════════════════════════════
+     ACCESSIBILITY / MOTION
+     ═══════════════════════════════════════════ */
+  a:focus-visible,
+  button:focus-visible,
+  .pillar-card:focus-visible {
+    outline: 2px solid var(--terra);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .journey-stage-name,
+    .journey-stage-desc,
+    .console-answer,
+    .pillar-card,
+    .device-tablet,
+    .device-mobile {
+      transition-duration: 0.01ms !important;
+    }
+    .journey-dot,
+    .console-dot,
+    .campus-feed-dot {
+      animation: none !important;
+    }
+  }
 </style>
 </head>
 
@@ -1011,14 +1665,8 @@
 <!-- ═══ LAURA HERO ═══ -->
 <section class="laura-hero" aria-labelledby="laura-heading">
 
-  <!-- Ambient background -->
-  <svg class="laura-hero-bg" viewBox="0 0 1254 1254" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <g transform="translate(0,1254) scale(0.1,-0.1)" fill="var(--terra)">
-      <path d="M3620 10739 c-408 -51 -823 -276 -1108 -599 -267 -303 -441 -710 -459 -1077 l-6 -113 907 0 906 0 0 900 0 900 -87 -1 c-49 -1 -117 -5 -153 -10z"/>
-      <path d="M5090 10735 c-342 -69 -616 -338 -700 -687 -30 -123 -28 -295 5 -423 83 -328 312 -558 660 -662 56 -17 133 -18 1225 -18 l1165 0 78 23 c160 46 274 111 395 226 306 291 369 752 151 1118 -129 219 -342 368 -602 423 -96 21 -2276 20 -2377 0z"/>
-      <path d="M8690 9851 l0 -901 900 0 900 0 0 68 c0 89 -32 282 -69 412 -55 196 -127 352 -238 520 -179 270 -426 482 -733 629 -224 107 -418 159 -632 168 l-128 6 0 -902z"/>
-    </g>
-  </svg>
+  <!-- Ambient network — an extremely subtle web of connected points behind the hero -->
+  <canvas class="hero-network" id="hero-network" aria-hidden="true"></canvas>
 
   <div class="laura-hero-inner">
     <div class="laura-hero-split">
@@ -1027,15 +1675,15 @@
       <div>
         <div class="laura-badge reveal">Coming soon</div>
         <h1 class="laura-headline reveal reveal-delay-1" id="laura-heading">Laura</h1>
-        <p class="laura-tagline reveal reveal-delay-2">The campus, connected.</p>
+        <p class="laura-tagline reveal reveal-delay-2">Educational data, transformed into intelligence.</p>
       </div>
 
       <!-- Right -->
       <div class="laura-hero-right reveal reveal-delay-2">
         <p class="laura-hero-sub">
-          Laura is a university platform built for the people who run campus life — not for the world at large. Where the Vice-Chancellor posts directly to students, the SRC campaigns for elections, and societies find their members.
+          Laura is an education intelligence platform built on the operational data schools already generate through iSkool — attendance, assessments, assignments, classroom interactions, academic milestones.
           <br><br>
-          No Instagram. No email chains. One place, every voice.
+          It transforms that information into real-time insight for schools, districts, provinces, and national departments.
         </p>
         <div class="laura-hero-actions">
           <a href="#what" class="btn-primary">
@@ -1059,56 +1707,56 @@
     <div style="margin-top: 4rem; display: flex; justify-content: center;">
       <div class="campus-feed reveal reveal-delay-3" style="width: 100%; max-width: 640px;">
         <div class="campus-feed-header">
-          <span class="campus-feed-label">Live campus feed</span>
+          <span class="campus-feed-label">Live intelligence feed</span>
           <span class="campus-feed-dot" aria-hidden="true"></span>
         </div>
 
         <div class="feed-post">
           <div class="feed-post-meta">
-            <div class="feed-avatar vc">VC</div>
+            <div class="feed-avatar sch">SCH</div>
             <div>
-              <div class="feed-post-author">Vice-Chancellor's Office</div>
-              <div class="feed-post-role">University Leadership · 2 min ago</div>
+              <div class="feed-post-author">School Intelligence</div>
+              <div class="feed-post-role">Greenwood High · 2 min ago</div>
             </div>
           </div>
-          <p class="feed-post-body">Congratulations to our hockey team on yesterday's victory at the intervarsity tournament. <strong>Well done to every player and coach</strong> — you made us proud.</p>
-          <span class="feed-post-tag">Announcement</span>
+          <p class="feed-post-body">Mathematics results have declined across Grade 10 this term. <strong>4 classes flagged for intervention</strong> — attendance in two of them dropped below 85% over the same period.</p>
+          <span class="feed-post-tag">Academic risk</span>
         </div>
 
         <div class="feed-post">
           <div class="feed-post-meta">
-            <div class="feed-avatar dean">DOS</div>
+            <div class="feed-avatar dis">DIS</div>
             <div>
-              <div class="feed-post-author">Dean of Students</div>
-              <div class="feed-post-role">Student Affairs · 1 hr ago</div>
+              <div class="feed-post-author">District Intelligence</div>
+              <div class="feed-post-role">Regional overview · 1 hr ago</div>
             </div>
           </div>
-          <p class="feed-post-body">Semester exams begin Monday. <strong>Good luck to all students</strong> — the Student Support Centre is open extended hours through exam week. You've got this.</p>
-          <span class="feed-post-tag">Academic</span>
+          <p class="feed-post-body">3 schools in the district are showing early signs of teacher shortages in Science. <strong>Resource reallocation recommended</strong> before the new term begins.</p>
+          <span class="feed-post-tag">Resource planning</span>
         </div>
 
         <div class="feed-post">
           <div class="feed-post-meta">
-            <div class="feed-avatar src">SRC</div>
+            <div class="feed-avatar prov">PROV</div>
             <div>
-              <div class="feed-post-author">Student Representative Council</div>
-              <div class="feed-post-role">SRC Elections 2025 · 3 hrs ago</div>
+              <div class="feed-post-author">Provincial Intelligence</div>
+              <div class="feed-post-role">Curriculum tracking · 3 hrs ago</div>
             </div>
           </div>
-          <p class="feed-post-body">Nominations are open. <strong>Want to represent your peers?</strong> Submit your candidacy by Friday 17:00. Every student can stand and every student can vote — right here on Laura.</p>
-          <span class="feed-post-tag">Elections</span>
+          <p class="feed-post-body">Curriculum implementation is tracking ahead of schedule in 6 of 9 districts. <strong>The remaining 3 require infrastructure support</strong> — full comparison available now.</p>
+          <span class="feed-post-tag">Curriculum</span>
         </div>
 
         <div class="feed-post">
           <div class="feed-post-meta">
-            <div class="feed-avatar radio">📻</div>
+            <div class="feed-avatar nat">NAT</div>
             <div>
-              <div class="feed-post-author">Campus Radio</div>
-              <div class="feed-post-role">Student Media · 5 hrs ago</div>
+              <div class="feed-post-author">National Intelligence</div>
+              <div class="feed-post-role">System-wide view · 5 hrs ago</div>
             </div>
           </div>
-          <p class="feed-post-body">Tonight's show: <strong>Mental Health & Exam Stress</strong> with a campus counsellor live in studio. Tune in at 19:00 or catch the recap on the Radio society page.</p>
-          <span class="feed-post-tag">Media</span>
+          <p class="feed-post-body">Year-on-year academic performance is up across 7 of 9 provinces. <strong>Forecasting suggests continued improvement</strong> if current resource allocation holds through next year.</p>
+          <span class="feed-post-tag">National trend</span>
         </div>
 
       </div>
@@ -1126,6 +1774,48 @@
 </section>
 
 
+<!-- ═══ DATA JOURNEY ═══ -->
+<section class="journey-section" id="journey" aria-labelledby="journey-heading">
+
+  <div class="journey-intro section-inner">
+    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">How intelligence flows</div>
+    <h2 class="journey-headline reveal reveal-delay-1" id="journey-heading">
+      One learner. <em>A whole system, informed.</em>
+    </h2>
+    <p class="journey-sub reveal reveal-delay-2">
+      Scroll to follow a single record as it rises through the system — the same journey every piece of data in Laura takes.
+    </p>
+  </div>
+
+  <div class="journey-track" id="journey-track">
+    <div class="journey-sticky">
+
+      <div class="journey-rail" aria-hidden="true">
+        <div class="journey-rail-line"></div>
+        <div class="journey-rail-fill" id="journey-fill"></div>
+
+        <div class="journey-stop" style="--pos:0"><span>Learner</span></div>
+        <div class="journey-stop" style="--pos:0.2"><span>Classroom</span></div>
+        <div class="journey-stop" style="--pos:0.4"><span>School</span></div>
+        <div class="journey-stop" style="--pos:0.6"><span>District</span></div>
+        <div class="journey-stop" style="--pos:0.8"><span>Province</span></div>
+        <div class="journey-stop" style="--pos:1"><span>Nation</span></div>
+
+        <div class="journey-dot" id="journey-dot"></div>
+      </div>
+
+      <div class="journey-panel">
+        <div class="journey-stage-count" id="journey-count">Stage 01 / 06</div>
+        <h3 class="journey-stage-name" id="journey-name">Learner</h3>
+        <p class="journey-stage-desc" id="journey-desc">Every assignment, every assessment, every day of attendance — one learner's record begins the story.</p>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+
 <!-- ═══ WHAT IS LAURA ═══ -->
 <hr class="section-divider" />
 
@@ -1136,19 +1826,19 @@
       <div class="reveal">
         <div class="section-label">The idea</div>
         <h2 class="what-headline" id="what-heading">
-          A campus deserves its <em>own</em> platform
+          Turning operations into <em>intelligence</em>
         </h2>
       </div>
 
       <div class="reveal reveal-delay-1">
         <p class="what-body">
-          Universities are complex communities. The Vice-Chancellor, Deans, faculties, student societies, the SRC, and campus media all need to reach students — but today they do it on platforms built for everyone: Instagram, X, email. Messages get lost. Posts compete with noise from the whole world.
+          Education generates an extraordinary amount of information every day. Every attendance register, assessment, assignment, classroom interaction, and academic milestone tells part of a much larger story. Yet for most education systems, this information remains fragmented across schools, spreadsheets, and disconnected software.
         </p>
         <p class="what-body">
-          Laura is a closed, verified university platform. Every stakeholder posts to their own audience — the campus — not to the internet at large. Students receive communications from the people who actually shape their university life, in one organised, trusted space.
+          Laura was created to change that. Developed by Enthropy, Laura is an education intelligence platform that transforms operational data into meaningful, real-time insight — enabling every level of the education system, from individual schools to national departments, to understand performance, identify challenges, and make better-informed decisions.
         </p>
         <p class="what-body">
-          And beyond announcements, Laura is where university life happens: societies are built here, groups are formed, members communicate, elections are run, and campus radio and news has a home.
+          Laura does not replace existing school operations — it builds upon them. As schools use iSkool to manage teaching, learning, communication, and administration, Laura continuously transforms that operational data into intelligence that helps education leaders understand what is happening, why it is happening, and where action is needed.
         </p>
       </div>
 
@@ -1157,69 +1847,77 @@
 </section>
 
 
-<!-- ═══ STAKEHOLDER PILLARS ═══ -->
+<!-- ═══ INTELLIGENCE TIERS ═══ -->
 <hr class="section-divider" />
 
 <section class="section" id="stakeholders" aria-labelledby="stakeholders-heading">
   <div class="section-inner">
 
-    <div class="section-label reveal">Who Laura serves</div>
+    <div class="section-label reveal">One platform, multiple perspectives</div>
 
     <h2 class="pillars-headline reveal reveal-delay-1" id="stakeholders-heading">
-      Every voice on <em>campus</em>
+      Every level of the <em>system</em>
     </h2>
     <p class="pillars-sub reveal reveal-delay-2">
-      Laura gives every tier of university life its own verified presence — so messages land with authority, context, and the right audience.
+      Laura is a single intelligence platform that adapts to the responsibilities of each user — from a single classroom to an entire nation.
     </p>
 
     <div class="pillars-grid">
 
-      <div class="pillar-card reveal">
+      <div class="pillar-card reveal" tabindex="0">
         <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="3"/><path d="M3 17c0-3.866 3.134-7 7-7s7 3.134 7 7"/></svg>
+          <svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M6 2v4M14 2v4"/></svg>
         </div>
-        <h3 class="pillar-title">Vice-Chancellor & Leadership</h3>
-        <p class="pillar-desc">Post congratulations, policy updates, and major announcements directly to the entire university community — no PR intermediaries, no platform algorithms.</p>
+        <h3 class="pillar-title">School Intelligence</h3>
+        <p class="pillar-desc">Principals gain a complete, real-time understanding of their institution — which learners need intervention, which subjects are improving or declining, and how attendance is affecting performance.</p>
+        <ul class="pillar-insights">
+          <li class="pillar-insight">4 classes flagged for Mathematics intervention</li>
+          <li class="pillar-insight">Attendance below 85% in two Grade 10 classes</li>
+          <li class="pillar-insight">Real-time view of every classroom, every learner</li>
+        </ul>
+        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-1">
+      <div class="pillar-card reveal reveal-delay-1" tabindex="0">
         <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><path d="M2 17l4-4m0 0l6-6m-6 6l-2-2m8-4l4-4m0 0l2 2m-2-2l-2 2"/><circle cx="16" cy="4" r="2"/><circle cx="4" cy="16" r="2"/></svg>
+          <svg viewBox="0 0 20 20"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="12" y="2" width="6" height="6" rx="1"/><rect x="7" y="12" width="6" height="6" rx="1"/><path d="M5 8v2a2 2 0 002 2h1m5-4v2a2 2 0 01-2 2h-1"/></svg>
         </div>
-        <h3 class="pillar-title">Dean of Students</h3>
-        <p class="pillar-desc">Wish students luck before exams. Announce support services, wellness initiatives, and academic calendar events — every student sees it, immediately.</p>
+        <h3 class="pillar-title">District Intelligence</h3>
+        <p class="pillar-desc">District officials see across every school under their responsibility — performance trends, teacher allocation, attendance patterns, and which schools require intervention.</p>
+        <ul class="pillar-insights">
+          <li class="pillar-insight">3 schools show early Science teacher shortages</li>
+          <li class="pillar-insight">Reallocation recommended before next term</li>
+          <li class="pillar-insight">Every school in the district, compared side by side</li>
+        </ul>
+        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-2">
+      <div class="pillar-card reveal reveal-delay-2" tabindex="0">
         <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M7 7h6M7 11h4"/></svg>
+          <svg viewBox="0 0 20 20"><path d="M10 2L2 6l8 4 8-4-8-4z"/><path d="M2 10l8 4 8-4M2 14l8 4 8-4"/></svg>
         </div>
-        <h3 class="pillar-title">Faculties & Departments</h3>
-        <p class="pillar-desc">Engineering, Law, Commerce — each faculty has its own space to post to its students. Timetable changes, lecture cancellations, department news.</p>
+        <h3 class="pillar-title">Provincial Intelligence</h3>
+        <p class="pillar-desc">Provincial departments monitor performance across multiple districts from a single platform — district comparisons, teacher shortages, infrastructure needs, and curriculum implementation.</p>
+        <ul class="pillar-insights">
+          <li class="pillar-insight">6 of 9 districts ahead of curriculum schedule</li>
+          <li class="pillar-insight">3 districts need infrastructure support</li>
+          <li class="pillar-insight">Full district comparison, updated in real time</li>
+        </ul>
+        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-1">
+      <div class="pillar-card reveal reveal-delay-3" tabindex="0">
         <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><path d="M10 2L12.4 7.6H18L13.3 11.1L15.1 17L10 13.5L4.9 17L6.7 11.1L2 7.6H7.6L10 2Z"/></svg>
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5"/><path d="M10 2.5c-2.5 2-3.75 5-3.75 7.5s1.25 5.5 3.75 7.5c2.5-2 3.75-5 3.75-7.5S12.5 4.5 10 2.5zM2.5 10h15"/></svg>
         </div>
-        <h3 class="pillar-title">Student Representative Council</h3>
-        <p class="pillar-desc">Run elections on Laura. Campaign to your fellow students. Recruit. Announce outcomes. The SRC's voice reaches every student without a single flyer or Instagram post.</p>
-      </div>
-
-      <div class="pillar-card reveal reveal-delay-2">
-        <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><path d="M17 8c0 5-7 9-7 9S3 13 3 8a7 7 0 0114 0z"/><circle cx="10" cy="8" r="2.5"/></svg>
-        </div>
-        <h3 class="pillar-title">University Societies</h3>
-        <p class="pillar-desc">Build your society on Laura. Create a group, invite members, post updates, organise events. Members communicate within the society's own space — private, purposeful, campus-only.</p>
-      </div>
-
-      <div class="pillar-card reveal reveal-delay-3">
-        <div class="pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 3"/></svg>
-        </div>
-        <h3 class="pillar-title">Campus Radio & Media</h3>
-        <p class="pillar-desc">Campus news and radio have a home on Laura — not buried in a Facebook group. The editorial team posts. Students tune in. Campus media finally reaches its own audience.</p>
+        <h3 class="pillar-title">National Intelligence</h3>
+        <p class="pillar-desc">Education leaders see a real-time national view — provincial comparisons, long-term trends, policy impact, and the resource allocation decisions that shape a whole system.</p>
+        <ul class="pillar-insights">
+          <li class="pillar-insight">7 of 9 provinces trending upward year-on-year</li>
+          <li class="pillar-insight">Forecasting for next year's resource allocation</li>
+          <li class="pillar-insight">One system-wide view, from classroom to nation</li>
+        </ul>
+        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
 
     </div>
@@ -1227,47 +1925,36 @@
 </section>
 
 
-<!-- ═══ IMAGINE STRIP ═══ -->
-<section class="imagine-strip" id="imagine" aria-label="Imagine Laura in action">
-  <div class="imagine-inner">
+<!-- ═══ ASK LAURA ═══ -->
+<section class="ask-section" id="ask-laura" aria-labelledby="ask-heading">
+  <div class="ask-inner">
 
-    <div class="imagine-label reveal">Imagine this</div>
+    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">Ask Laura</div>
 
-    <h2 class="imagine-headline reveal reveal-delay-1">
-      A university where the right message reaches the right people —
-      <em>without leaving campus.</em>
+    <h2 class="ask-headline reveal reveal-delay-1" id="ask-heading">
+      Ask Laura <em>anything.</em>
     </h2>
+    <p class="ask-sub reveal reveal-delay-2">
+      No dashboards to learn, no reports to wait for. Ask a question in plain language, and Laura answers from the operational data your school already generates.
+    </p>
 
-    <div class="imagine-scenarios reveal reveal-delay-2">
+    <div class="ask-console reveal reveal-delay-3" id="ask-console" aria-hidden="true">
 
-      <div class="imagine-item">
-        <div class="imagine-who">Vice-Chancellor</div>
-        <p class="imagine-what">Wants to thank the hockey team after an intervarsity win. <strong>Opens Laura, posts to the university feed. Every student sees it — in 30 seconds.</strong> No PR team, no Instagram caption, no email list.</p>
+      <div class="console-chrome">
+        <div class="console-mark">L</div>
+        <span class="console-label">Laura Console</span>
+        <span class="console-dot"></span>
+        <span class="console-status">Live</span>
       </div>
 
-      <div class="imagine-item">
-        <div class="imagine-who">Dean of Students</div>
-        <p class="imagine-what">Wants to wish students luck before semester exams. <strong>Posts on Laura. Students get it. It feels personal</strong> — because it came directly from their Dean, on their campus platform.</p>
+      <div class="console-input" id="console-input">
+        <span class="console-placeholder">Ask Laura anything...</span><span id="console-input-text"></span><span class="console-caret"></span>
       </div>
 
-      <div class="imagine-item">
-        <div class="imagine-who">Student Representative Council</div>
-        <p class="imagine-what">SRC elections open. Candidates campaign. Students vote. <strong>All of it happens inside Laura</strong> — the whole campus participates without a single external link or flyer in sight.</p>
-      </div>
-
-      <div class="imagine-item">
-        <div class="imagine-who">Drama Society</div>
-        <p class="imagine-what">Needs new members for the spring production. Posts on Laura's open feed and the Drama Society group. <strong>Interested students join the group, read updates, RSVP to auditions</strong> — all in one place.</p>
-      </div>
-
-      <div class="imagine-item">
-        <div class="imagine-who">Campus Radio</div>
-        <p class="imagine-what">Uploads tonight's show notes and a listener poll. <strong>Students who follow Campus Radio on Laura see it immediately.</strong> The station has its first true campus audience.</p>
-      </div>
-
-      <div class="imagine-item">
-        <div class="imagine-who">Faculty of Law</div>
-        <p class="imagine-what">A moot court date changes. <strong>The faculty posts to Law students only.</strong> No mass email to the whole university. The right people are informed — instantly.</p>
+      <div class="console-answer" id="console-answer">
+        <div class="console-asked-label">Asked</div>
+        <div class="console-asked-q" id="console-asked-text"></div>
+        <div class="console-answer-body" id="console-answer-text"></div>
       </div>
 
     </div>
@@ -1276,57 +1963,179 @@
 </section>
 
 
-<!-- ═══ SPACES / COMMUNITIES ═══ -->
+<!-- ═══ PRODUCT PREVIEW ═══ -->
+<hr class="section-divider" />
+
+<section class="section preview-section" id="preview" aria-labelledby="preview-heading">
+  <div class="section-inner" style="text-align:center;">
+
+    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">The interface</div>
+    <h2 class="preview-headline reveal reveal-delay-1" id="preview-heading">
+      Intelligence, <em>wherever you are.</em>
+    </h2>
+    <p class="preview-sub reveal reveal-delay-2">
+      From a principal's phone between classes to a national dashboard — Laura is built for every screen.
+    </p>
+
+    <div class="device-cluster">
+
+      <div class="device device-browser reveal reveal-delay-3">
+        <div class="browser-chrome" aria-hidden="true">
+          <span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span>
+          <span class="chrome-address">app.laura.enthropy.co.za</span>
+        </div>
+        <div class="device-screen" aria-hidden="true">
+          <div class="mock-stats">
+            <div class="mock-stat"><span class="mock-stat-num">92%</span><span class="mock-stat-label">Attendance</span></div>
+            <div class="mock-stat"><span class="mock-stat-num">4</span><span class="mock-stat-label">Flagged</span></div>
+            <div class="mock-stat"><span class="mock-stat-num">↑ 12%</span><span class="mock-stat-label">Trend</span></div>
+          </div>
+          <div class="mock-chart">
+            <span style="height:35%"></span><span style="height:60%"></span><span style="height:48%"></span><span style="height:78%"></span><span style="height:55%"></span><span style="height:90%"></span><span style="height:70%"></span><span style="height:82%"></span>
+          </div>
+          <div class="mock-lines">
+            <span class="mock-line" style="width:88%"></span>
+            <span class="mock-line" style="width:64%"></span>
+            <span class="mock-line" style="width:74%"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="device device-tablet reveal reveal-delay-4" aria-hidden="true">
+        <div class="device-screen">
+          <div class="mock-stats">
+            <div class="mock-stat"><span class="mock-stat-num">6/9</span></div>
+            <div class="mock-stat"><span class="mock-stat-num">3</span></div>
+          </div>
+          <div class="mock-chart">
+            <span style="height:40%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:85%"></span><span style="height:60%"></span>
+          </div>
+          <div class="mock-lines">
+            <span class="mock-line" style="width:80%"></span>
+            <span class="mock-line" style="width:55%"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="device device-mobile reveal reveal-delay-4" aria-hidden="true">
+        <div class="device-screen">
+          <div class="mock-stats">
+            <div class="mock-stat"><span class="mock-stat-num">7/9</span></div>
+          </div>
+          <div class="mock-chart">
+            <span style="height:50%"></span><span style="height:75%"></span><span style="height:65%"></span><span style="height:88%"></span>
+          </div>
+          <div class="mock-lines">
+            <span class="mock-line" style="width:82%"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══ PRIVACY & RESPONSIBLE INTELLIGENCE ═══ -->
 <hr class="section-divider" />
 
 <section class="section" id="spaces" aria-labelledby="spaces-heading">
   <div class="section-inner">
 
-    <div class="section-label reveal">Community spaces</div>
+    <div class="section-label reveal">Privacy & responsible intelligence</div>
 
     <h2 class="spaces-headline reveal reveal-delay-1" id="spaces-heading">
-      Where campus <em>communities</em> live
+      Every user sees only what they're <em>authorised</em> to see
     </h2>
     <p class="spaces-intro reveal reveal-delay-2">
-      Laura isn't just a broadcast tool. It's where groups form, conversations happen, and communities sustain themselves — all verified, all campus-only.
+      Educational data belongs to the institutions that generate it. Laura is designed with role-based permissions and responsible data governance at its core — security, privacy, and institutional trust are foundational, not optional.
     </p>
 
     <div class="spaces-grid">
 
       <div class="space-tile reveal">
         <div class="space-tile-top">
-          <div class="space-tile-tag">Open feed</div>
-          <h3 class="space-tile-title">The Campus Timeline</h3>
-          <p class="space-tile-desc">A single, verified feed where leadership, faculties, and student bodies post to the whole university. Everything that matters — in one place.</p>
+          <div class="space-tile-tag">Classroom level</div>
+          <h3 class="space-tile-title">Teachers see their classrooms</h3>
+          <p class="space-tile-desc">Access is scoped to what a teacher is responsible for — their own learners, their own classroom data, nothing beyond it.</p>
         </div>
       </div>
 
       <div class="space-tile dark reveal reveal-delay-1">
         <div class="space-tile-top">
-          <div class="space-tile-tag">Groups</div>
-          <h3 class="space-tile-title">Society Spaces</h3>
-          <p class="space-tile-desc">Every society on campus has its own group. Members join, post, organise events, and communicate privately — like a WhatsApp group built for a real student community, with structure and history.</p>
+          <div class="space-tile-tag">School level</div>
+          <h3 class="space-tile-title">Principals see their schools</h3>
+          <p class="space-tile-desc">A complete view of the institution — every classroom, every trend — without visibility into other schools' data.</p>
         </div>
       </div>
 
       <div class="space-tile dark reveal reveal-delay-1">
         <div class="space-tile-top">
-          <div class="space-tile-tag">Governance</div>
-          <h3 class="space-tile-title">Elections & Campaigns</h3>
-          <p class="space-tile-desc">SRC elections run natively on Laura. Verified candidates, transparent campaigns, student voting — all inside the campus environment.</p>
+          <div class="space-tile-tag">District & provincial level</div>
+          <h3 class="space-tile-title">Officials see their jurisdiction</h3>
+          <p class="space-tile-desc">District officials see their districts. Provincial departments see their provinces. Each tier's intelligence is scoped to its responsibility.</p>
         </div>
       </div>
 
       <div class="space-tile reveal reveal-delay-2">
         <div class="space-tile-top">
-          <div class="space-tile-tag">Media</div>
-          <h3 class="space-tile-title">Campus Radio & News</h3>
-          <p class="space-tile-desc">University media finally has a campus home. Radio stations and student newspapers publish to followers on Laura — reaching the audience they were always meant to serve.</p>
+          <div class="space-tile-tag">National level</div>
+          <h3 class="space-tile-title">National departments see aggregated intelligence</h3>
+          <p class="space-tile-desc">A system-wide view built from aggregated data — informing national policy without compromising the privacy of any individual school or learner.</p>
         </div>
       </div>
 
     </div>
 
+  </div>
+</section>
+
+
+<!-- ═══ PRINCIPLES ═══ -->
+<hr class="section-divider" />
+
+<section class="principles-section" id="principles" aria-labelledby="principles-heading">
+  <div class="section-inner">
+
+    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center; margin-bottom:4rem;">What Laura stands for</div>
+    <h2 class="visually-hidden" id="principles-heading">Laura's core principles</h2>
+
+    <div class="principles-grid">
+
+      <div class="principle reveal">
+        <div class="principle-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><path d="M11 1.5L4 11.5h5.5L9 18.5l7-11h-5.5L11 1.5z"/></svg>
+        </div>
+        <h3 class="principle-title">Real-time</h3>
+        <p class="principle-desc">Living intelligence, not delayed reports.</p>
+      </div>
+
+      <div class="principle reveal reveal-delay-1">
+        <div class="principle-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><ellipse cx="10" cy="4.5" rx="6.5" ry="2.2"/><path d="M3.5 4.5v5c0 1.2 2.9 2.2 6.5 2.2s6.5-1 6.5-2.2v-5M3.5 9.5v5c0 1.2 2.9 2.2 6.5 2.2s6.5-1 6.5-2.2v-5"/></svg>
+        </div>
+        <h3 class="principle-title">Grounded</h3>
+        <p class="principle-desc">Built on real operational data, not assumptions.</p>
+      </div>
+
+      <div class="principle reveal reveal-delay-2">
+        <div class="principle-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><path d="M10 2.2l6.2 2.5v4.4c0 4-2.6 6.7-6.2 7.7-3.6-1-6.2-3.7-6.2-7.7V4.7L10 2.2z"/><path d="M7.3 9.8l2 2 3.4-3.8"/></svg>
+        </div>
+        <h3 class="principle-title">Governed</h3>
+        <p class="principle-desc">Every user sees only what they're authorised to see.</p>
+      </div>
+
+      <div class="principle reveal reveal-delay-3">
+        <div class="principle-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><rect x="7" y="7" width="6" height="6" rx="1"/></svg>
+        </div>
+        <h3 class="principle-title">Universal</h3>
+        <p class="principle-desc">One platform, every level of the system.</p>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -1334,12 +2143,12 @@
 <!-- ═══ CTA ═══ -->
 <section class="cta-section" id="contact" aria-labelledby="cta-heading">
   <div class="cta-inner">
-    <div class="cta-eyebrow reveal">Coming to universities</div>
+    <div class="cta-eyebrow reveal">Coming to education systems</div>
     <h2 class="cta-headline reveal reveal-delay-1" id="cta-heading">
-      Be the first campus to <em>go live</em> with Laura
+      Be the first to see education through <em>Laura</em>
     </h2>
     <p class="cta-sub reveal reveal-delay-2">
-      Laura is in development. If you're a university administrator, SRC member, or student leader who wants to bring this to your campus, we want to hear from you.
+      Laura is in development. If you lead a school, district, provincial, or national education department and want real-time intelligence instead of delayed reports, we want to hear from you.
     </p>
     <div class="cta-actions reveal reveal-delay-3">
       <a href="contacts.html" class="btn-primary">
@@ -1354,6 +2163,18 @@
           <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ FINALE ═══ -->
+<section class="finale-section" aria-label="Closing statement">
+  <div class="finale-inner">
+    <p class="finale-statement reveal">Education deserves intelligence worthy of its importance.</p>
+    <div class="finale-brand reveal reveal-delay-2">
+      <span class="finale-brand-name">Laura</span>
+      <span class="finale-brand-tag">The Intelligence Layer of Modern Education.</span>
     </div>
   </div>
 </section>
@@ -1415,6 +2236,325 @@
     setTimeout(function () { el.classList.add('visible'); }, 100);
   });
 
+})();
+
+
+/* ─── Hero ambient network: a subtle web of connected, drifting points ─── */
+(function () {
+  var canvas = document.getElementById('hero-network');
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d');
+  var hero = canvas.closest('.laura-hero');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var width, height, dpr, nodes = [];
+  var running = false, rafId = null;
+
+  function nodeCount() {
+    var area = width * height;
+    return Math.max(16, Math.min(55, Math.round(area / 28000)));
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
+    if (!width || !height) return;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var count = nodeCount();
+    nodes = [];
+    for (var i = 0; i < count; i++) {
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: (Math.random() - 0.5) * 0.16
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    var maxDist = Math.min(width, height) * 0.17;
+
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > width) { n.vx *= -1; n.x = Math.max(0, Math.min(width, n.x)); }
+      if (n.y < 0 || n.y > height) { n.vy *= -1; n.y = Math.max(0, Math.min(height, n.y)); }
+    }
+
+    for (var a = 0; a < nodes.length; a++) {
+      for (var b = a + 1; b < nodes.length; b++) {
+        var dx = nodes[a].x - nodes[b].x;
+        var dy = nodes[a].y - nodes[b].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < maxDist) {
+          var o = (1 - dist / maxDist) * 0.09;
+          ctx.strokeStyle = 'rgba(26,23,20,' + o.toFixed(3) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(nodes[a].x, nodes[a].y);
+          ctx.lineTo(nodes[b].x, nodes[b].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (var c = 0; c < nodes.length; c++) {
+      ctx.fillStyle = 'rgba(196,98,45,0.15)';
+      ctx.beginPath();
+      ctx.arc(nodes[c].x, nodes[c].y, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function step() {
+    draw();
+    if (running) rafId = window.requestAnimationFrame(step);
+  }
+
+  function start() {
+    if (running || reduceMotion) return;
+    running = true;
+    rafId = window.requestAnimationFrame(step);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) window.cancelAnimationFrame(rafId);
+  }
+
+  resize();
+
+  if (reduceMotion) {
+    draw();
+  } else {
+    if (hero && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) start(); else stop();
+        });
+      }, { threshold: 0.01 });
+      io.observe(hero);
+    }
+    start();
+  }
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(function () {
+      resize();
+      if (reduceMotion) draw();
+    }, 200);
+  });
+})();
+
+
+/* ─── Data journey: scroll-linked ascent from learner to nation ─── */
+(function () {
+  var track = document.getElementById('journey-track');
+  if (!track) return;
+  var fillEl = document.getElementById('journey-fill');
+  var dotEl = document.getElementById('journey-dot');
+  var stops = Array.prototype.slice.call(document.querySelectorAll('.journey-stop'));
+  var nameEl = document.getElementById('journey-name');
+  var descEl = document.getElementById('journey-desc');
+  var countEl = document.getElementById('journey-count');
+  if (!fillEl || !dotEl || !nameEl || !descEl || !countEl) return;
+
+  var stages = [
+    { name: 'Learner', desc: "Every assignment, every assessment, every day of attendance \u2014 one learner's record begins the story." },
+    { name: 'Classroom', desc: "In the classroom, that record meets a teacher's daily reality \u2014 who needs support, right now." },
+    { name: 'School', desc: 'Across the school, patterns emerge \u2014 which subjects are thriving, and which need intervention.' },
+    { name: 'District', desc: 'The district sees every school at once \u2014 where teachers are needed, where results are shifting.' },
+    { name: 'Province', desc: 'The province compares districts side by side \u2014 curriculum progress, infrastructure, resourcing.' },
+    { name: 'Nation', desc: "At a national level, one learner's data has become part of the intelligence shaping an entire system." }
+  ];
+
+  var currentStage = -1;
+  var changeTimer = null;
+
+  function setStage(i) {
+    if (i === currentStage) return;
+    currentStage = i;
+    nameEl.classList.add('is-changing');
+    descEl.classList.add('is-changing');
+    countEl.textContent = 'Stage 0' + (i + 1) + ' / 06';
+    window.clearTimeout(changeTimer);
+    changeTimer = window.setTimeout(function () {
+      nameEl.textContent = stages[i].name;
+      descEl.textContent = stages[i].desc;
+      nameEl.classList.remove('is-changing');
+      descEl.classList.remove('is-changing');
+    }, 180);
+    stops.forEach(function (stop, idx) {
+      stop.classList.toggle('is-active', idx <= i);
+    });
+  }
+
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var rect = track.getBoundingClientRect();
+    var total = rect.height - window.innerHeight;
+    var progress = total > 0 ? (-rect.top) / total : 0;
+    progress = Math.max(0, Math.min(1, progress));
+    var pct = (progress * 100).toFixed(2) + '%';
+    fillEl.style.height = pct;
+    dotEl.style.bottom = pct;
+    var stageIndex = Math.min(5, Math.floor(progress * 6));
+    setStage(stageIndex);
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
+})();
+
+
+/* ─── Intelligence tier cards: tap-to-reveal for touch devices ─── */
+(function () {
+  var cards = document.querySelectorAll('.pillar-card');
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      var wasOpen = card.classList.contains('is-open');
+      cards.forEach(function (c) { c.classList.remove('is-open'); });
+      if (!wasOpen) card.classList.add('is-open');
+    });
+  });
+})();
+
+
+/* ─── Ask Laura: looping realistic conversation demo ─── */
+(function () {
+  var section = document.getElementById('ask-laura');
+  var inputWrap = document.getElementById('console-input');
+  var inputText = document.getElementById('console-input-text');
+  var answerPanel = document.getElementById('console-answer');
+  var askedText = document.getElementById('console-asked-text');
+  var answerText = document.getElementById('console-answer-text');
+  if (!section || !inputWrap || !inputText || !answerPanel || !askedText || !answerText) return;
+
+  var qa = [
+    {
+      q: 'Which schools require intervention this term?',
+      a: '<strong>4 schools</strong> are flagged for intervention this term \u2014 each showing a decline in Mathematics results alongside falling attendance in at least two classes.'
+    },
+    {
+      q: 'Why are Mathematics results declining?',
+      a: 'Across flagged schools, the pattern traces back to attendance. <strong>Grade 10 classes below 85% attendance</strong> show the sharpest drop in assessment scores.'
+    },
+    {
+      q: 'Predict which districts may require additional Mathematics teachers next year.',
+      a: '<strong>3 districts</strong> show early signs of a Mathematics shortfall, based on current allocation against projected enrolment growth.'
+    },
+    {
+      q: 'Is curriculum implementation on track?',
+      a: '<strong>6 of 9 districts</strong> are ahead of schedule \u2014 the remaining 3 need infrastructure support to catch up.'
+    },
+    {
+      q: 'What should national leadership prepare for next year?',
+      a: '<strong>7 of 9 provinces</strong> are trending upward. If current resourcing holds, forecasts suggest the improvement continues.'
+    }
+  ];
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var idx = 0, cycleToken = 0, isVisible = false, timers = [];
+
+  function schedule(fn, ms) {
+    var id = window.setTimeout(fn, ms);
+    timers.push(id);
+    return id;
+  }
+
+  function clearTimers() {
+    timers.forEach(function (id) { window.clearTimeout(id); });
+    timers = [];
+  }
+
+  function typeQuestion(text, token, done) {
+    inputWrap.classList.add('has-text');
+    inputText.textContent = '';
+
+    if (reduceMotion) {
+      inputText.textContent = text;
+      schedule(function () { if (token === cycleToken) done(); }, 400);
+      return;
+    }
+
+    var i = 0;
+    function step() {
+      if (token !== cycleToken) return;
+      if (i <= text.length) {
+        inputText.textContent = text.slice(0, i);
+        i++;
+        schedule(step, 26 + Math.random() * 34);
+      } else {
+        done();
+      }
+    }
+    step();
+  }
+
+  function runCycle() {
+    var token = cycleToken;
+    var item = qa[idx % qa.length];
+
+    typeQuestion(item.q, token, function () {
+      if (token !== cycleToken) return;
+      schedule(function () {
+        if (token !== cycleToken) return;
+
+        askedText.textContent = item.q;
+        answerText.innerHTML = item.a;
+        answerPanel.classList.remove('is-in');
+        void answerPanel.offsetWidth;
+        answerPanel.classList.add('is-in');
+
+        inputWrap.classList.remove('has-text');
+        inputText.textContent = '';
+
+        idx++;
+        schedule(runCycle, reduceMotion ? 2200 : 3600);
+      }, 450);
+    });
+  }
+
+  function start() {
+    if (isVisible) return;
+    isVisible = true;
+    cycleToken++;
+    runCycle();
+  }
+
+  function stop() {
+    isVisible = false;
+    cycleToken++;
+    clearTimers();
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) start(); else stop();
+      });
+    }, { threshold: 0.4 });
+    io.observe(section);
+  } else {
+    start();
+  }
 })();
 </script>
 
