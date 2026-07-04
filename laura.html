@@ -601,12 +601,18 @@
     border-radius: 16px;
     padding: 2rem;
     border: 1px solid transparent;
-    transition: border-color 0.25s ease, background 0.25s ease;
+    cursor: pointer;
+    transition: border-color 0.3s var(--ease-out), background 0.3s var(--ease-out),
+                transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
   }
 
-  .pillar-card:hover {
+  .pillar-card:hover,
+  .pillar-card:focus-visible,
+  .pillar-card.is-open {
     background: var(--parchment);
     border-color: var(--divider);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px -28px rgba(26,23,20,0.20);
   }
 
   .pillar-icon {
@@ -703,8 +709,6 @@
   }
 
   .space-tile.dark:hover { background: var(--ink-soft); }
-
-  .space-tile-top {}
 
   .space-tile-tag {
     font-size: 0.7rem;
@@ -1007,35 +1011,30 @@
 
   @media (max-width: 768px) {
     .journey-track { height: 480vh; }
-    .journey-sticky { gap: 2.25rem; }
-    .journey-rail { height: 52vh; }
+
+    .journey-sticky {
+      flex-direction: column;
+      justify-content: center;
+      gap: 2rem;
+      padding: 0 1.5rem;
+    }
+
+    .journey-rail { height: 34vh; }
     .journey-stop span { font-size: 0.66rem; left: 16px; }
-    .journey-panel { max-width: 50vw; }
+
+    .journey-panel {
+      max-width: 100%;
+      width: 100%;
+      text-align: center;
+    }
+
     .journey-stage-name { font-size: clamp(1.5rem, 7vw, 2.1rem); margin-bottom: 0.75rem; }
-    .journey-stage-desc { font-size: 0.88rem; line-height: 1.65; }
+    .journey-stage-desc { font-size: 0.88rem; line-height: 1.65; margin: 0 auto; }
   }
 
   /* ═══════════════════════════════════════════
      INTERACTIVE PILLAR CARDS
      ═══════════════════════════════════════════ */
-  .pillar-card {
-    cursor: pointer;
-  }
-
-  .pillar-card:hover,
-  .pillar-card:focus-visible,
-  .pillar-card.is-open {
-    background: var(--parchment);
-    border-color: var(--divider);
-    transform: translateY(-6px);
-    box-shadow: 0 24px 48px -28px rgba(26,23,20,0.20);
-  }
-
-  .pillar-card {
-    transition: border-color 0.3s var(--ease-out), background 0.3s var(--ease-out),
-                transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
-  }
-
   .pillar-insights {
     list-style: none;
     max-height: 0;
