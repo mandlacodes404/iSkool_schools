@@ -8,11 +8,16 @@
 <link rel="icon" type="image/svg+xml" href="/enthropy_logo.svg?v=1.2">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="shared-footer.css?v=1.2" />
 
 <style>
-  /* ─── TOKENS ─── */
+  /* ─── TOKENS ───
+     Palette is fixed by brief: warm cream base, no new hues added.
+     Signal-blue becomes the single "data in motion" accent — used only for
+     live/flowing/active states, distinct from terra which stays as the
+     institutional/warmth tone (badges, static emphasis). This split gives
+     the accent an actual job tied to the subject rather than decoration. */
   :root {
     --cream:        #F5F0E8;
     --cream-dark:   #EDE6D8;
@@ -23,17 +28,35 @@
     --terra:        #C4622D;
     --terra-light:  #E8895C;
     --terra-dim:    #8C3F18;
+
+    /* signal — the "data in motion" accent */
+    --signal:       #2B4C6F;
+    --signal-light: #5C87AC;
+    --signal-dim:   #1E3650;
+
     --divider:      rgba(26,23,20,0.10);
     --nav-h:        72px;
     --font-display: 'DM Sans', system-ui, sans-serif;
     --font-body:    'DM Sans', system-ui, sans-serif;
+    --font-mono:    'DM Mono', 'SF Mono', monospace;
     --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-signal:  cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   em { font-style: normal; }
   html { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 
   body {
     background: var(--cream);
@@ -47,6 +70,12 @@
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--cream-dark); }
   ::-webkit-scrollbar-thumb { background: var(--parchment); border-radius: 3px; }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 
   /* ─── NAV ─── */
   .nav {
@@ -137,7 +166,7 @@
     transition: color 0.2s ease;
   }
 
-  .nav-links a:hover { color: var(--terra); }
+  .nav-links a:hover { color: var(--signal); }
 
   .nav-cta {
     font-family: var(--font-body);
@@ -205,7 +234,7 @@
 
   /* ─── SECTION WRAPPERS ─── */
   .section {
-    padding: 5rem 2rem;
+    padding: 8rem 2rem;
     position: relative;
   }
 
@@ -242,6 +271,9 @@
     background: var(--terra);
   }
 
+  .section-label.is-signal { color: var(--signal); }
+  .section-label.is-signal::before { background: var(--signal); }
+
   /* ─── BUTTONS ─── */
   .btn-primary {
     display: inline-flex;
@@ -260,8 +292,8 @@
   }
 
   .btn-primary:hover {
-    background: var(--terra-dim);
-    border-color: var(--terra-dim);
+    background: var(--signal-dim);
+    border-color: var(--signal-dim);
     transform: translateY(-1px);
   }
 
@@ -277,11 +309,15 @@
     transition: color 0.2s ease;
   }
 
-  .btn-ghost:hover { color: var(--terra); }
+  .btn-ghost:hover { color: var(--signal); }
   .btn-ghost svg { transition: transform 0.2s ease; }
   .btn-ghost:hover svg { transform: translateX(3px); }
 
-  /* ─── LAURA HERO ─── */
+  /* ─── LAURA HERO ───
+     The network canvas is the "elegant intelligence flowing through a
+     connected system" moment the brief asks for — a fixed constellation
+     of nodes with a handful of pulses traveling along edges, opacity kept
+     very low so it reads as texture, not decoration. */
   .laura-hero {
     min-height: 100vh;
     display: flex;
@@ -292,22 +328,69 @@
     overflow: hidden;
   }
 
-  .laura-hero-inner {
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Ambient network — connected points, flowing intelligence */
   .hero-network {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
-    pointer-events: none;
+  }
+
+  .hero-network .net-edge {
+    stroke: var(--ink);
+    stroke-width: 1;
+    opacity: 0.05;
+  }
+
+  .hero-network .net-node {
+    fill: var(--ink);
+    opacity: 0.08;
+  }
+
+  .hero-network .net-pulse-edge {
+    stroke: var(--signal);
+    stroke-width: 1.2;
+    fill: none;
+    opacity: 0.55;
+    stroke-dasharray: 6 220;
+    stroke-linecap: round;
+    animation: pulseTravel 7s linear infinite;
+  }
+
+  .hero-network .net-pulse-edge:nth-of-type(2) { animation-delay: -2.3s; stroke-dasharray: 5 260; }
+  .hero-network .net-pulse-edge:nth-of-type(3) { animation-delay: -4.6s; stroke-dasharray: 4 190; }
+
+  @keyframes pulseTravel {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -1000; }
+  }
+
+  .hero-network .net-node.is-lit {
+    fill: var(--signal);
+    opacity: 0.5;
+    animation: nodeBreathe 5s ease-in-out infinite;
+  }
+
+  @keyframes nodeBreathe {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 0.75; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-network .net-pulse-edge { animation: none; opacity: 0; }
+    .hero-network .net-node.is-lit { animation: none; }
+  }
+
+  @media (max-width: 640px) {
+    .hero-network { opacity: 0.6; }
+  }
+
+  .laura-hero-inner {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   .laura-hero-split {
@@ -325,18 +408,33 @@
   }
 
   .laura-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--terra);
-    background: rgba(196, 98, 45, 0.10);
-    border: 1px solid rgba(196, 98, 45, 0.25);
+    color: var(--signal);
+    background: rgba(43, 76, 111, 0.08);
+    border: 1px solid rgba(43, 76, 111, 0.20);
     padding: 0.3rem 0.9rem;
     border-radius: 999px;
     margin-bottom: 1.75rem;
     font-family: var(--font-body);
+  }
+
+  .laura-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
   }
 
   .laura-headline {
@@ -346,7 +444,6 @@
     line-height: 1.0;
     letter-spacing: -0.025em;
     color: var(--ink);
-
     margin-bottom: 0.5rem;
   }
 
@@ -354,7 +451,6 @@
     font-family: var(--font-display);
     font-size: clamp(1rem, 1.5vw, 1.25rem);
     font-weight: 400;
-
     color: var(--ink-muted);
     margin-bottom: 2.5rem;
     letter-spacing: -0.01em;
@@ -381,139 +477,225 @@
     flex-wrap: wrap;
   }
 
-  /* ─── HERO VISUAL: THE INTELLIGENCE FEED ─── */
-  .campus-feed {
-    background: var(--ink);
-    border-radius: 20px;
-    padding: 1.5rem;
+  /* Scroll indicator */
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
-    position: relative;
-    overflow: hidden;
-    max-width: 420px;
-  }
-
-  .campus-feed::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    right: -10%;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(196,98,45,0.15) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .campus-feed-header {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(245,240,232,0.08);
-    margin-bottom: 0.25rem;
+    gap: 8px;
+    opacity: 0.35;
+    animation: bounce 2s ease-in-out infinite;
+    z-index: 1;
   }
 
-  .campus-feed-label {
-    font-family: var(--font-body);
+  .hero-scroll span {
     font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(245,240,232,0.35);
-  }
-
-  .campus-feed-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--terra-light);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.85); }
-  }
-
-  .feed-post {
-    background: rgba(245,240,232,0.05);
-    border: 1px solid rgba(245,240,232,0.08);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    transition: background 0.2s ease;
-  }
-
-  .feed-post:hover {
-    background: rgba(245,240,232,0.09);
-  }
-
-  .feed-post-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .feed-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    flex-shrink: 0;
-    font-family: var(--font-display);
-  }
-
-  .feed-avatar.sch  { background: rgba(196,98,45,0.25); color: var(--terra-light); }
-  .feed-avatar.dis  { background: rgba(245,240,232,0.12); color: rgba(245,240,232,0.7); }
-  .feed-avatar.prov { background: rgba(196,98,45,0.15); color: var(--terra-light); }
-  .feed-avatar.nat  { background: rgba(245,240,232,0.07); color: rgba(245,240,232,0.5); }
-
-  .feed-post-author {
-    font-family: var(--font-body);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: rgba(245,240,232,0.85);
-    line-height: 1.2;
-  }
-
-  .feed-post-role {
-    font-size: 0.68rem;
-    color: rgba(245,240,232,0.35);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-  }
-
-  .feed-post-body {
-    font-family: var(--font-body);
-    font-size: 0.82rem;
-    color: rgba(245,240,232,0.6);
-    line-height: 1.6;
-  }
-
-  .feed-post-body strong {
-    color: rgba(245,240,232,0.88);
-    font-weight: 500;
-  }
-
-  .feed-post-tag {
-    display: inline-block;
-    font-size: 0.63rem;
-    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--terra-light);
-    margin-top: 0.5rem;
+    color: var(--ink-muted);
+    font-family: var(--font-body);
   }
 
-  @media (max-width: 768px) {
-    .campus-feed { max-width: 100%; }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scroll { animation: none; }
+  }
+
+  /* ─── DATA JOURNEY ───
+     Signature element: a single point travels up a connected path through
+     six levels as the visitor scrolls. Desktop uses a sticky two-column
+     layout (path pinned left, copy scrolls right); mobile collapses to a
+     single centered column with a dot indicator per stop instead of the
+     pinned rail, since there's no room to pin anything on narrow screens. */
+  .journey-section {
+    background: var(--cream-dark);
+    padding: 0;
+    position: relative;
+  }
+
+  .journey-intro {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+  }
+
+  .journey-headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    max-width: 22ch;
+    margin-bottom: 1rem;
+  }
+
+  .journey-headline em { color: var(--signal); }
+
+  .journey-sub {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    max-width: 52ch;
+  }
+
+  .journey-track {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 8rem;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+  }
+
+  .journey-rail {
+    position: sticky;
+    top: calc(var(--nav-h) + 3rem);
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+  }
+
+  .journey-rail svg { width: 100%; max-width: 220px; height: auto; overflow: visible; }
+
+  .journey-rail .rail-line {
+    stroke: var(--divider);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .journey-rail .rail-progress {
+    stroke: var(--signal);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.1s linear;
+  }
+
+  .journey-rail .rail-node {
+    fill: var(--cream-dark);
+    stroke: var(--ink-muted);
+    stroke-width: 1.5;
+    transition: fill 0.4s var(--ease-signal), stroke 0.4s var(--ease-signal), r 0.4s var(--ease-signal);
+  }
+
+  .journey-rail .rail-node.is-active {
+    fill: var(--signal);
+    stroke: var(--signal);
+    r: 7;
+  }
+
+  .journey-rail .rail-node.is-passed {
+    fill: var(--signal-light);
+    stroke: var(--signal-light);
+  }
+
+  .journey-rail .rail-label {
+    font-family: var(--font-body);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    fill: var(--ink-muted);
+    transition: fill 0.4s var(--ease-signal);
+  }
+
+  .journey-rail .rail-label.is-active,
+  .journey-rail .rail-label.is-passed { fill: var(--ink); font-weight: 600; }
+
+  .journey-rail .rail-traveler {
+    fill: var(--signal);
+    filter: drop-shadow(0 0 6px rgba(43,76,111,0.5));
+    transition: cy 0.15s linear;
+  }
+
+  @media (max-width: 860px) {
+    .journey-track { grid-template-columns: 1fr; }
+    .journey-rail { display: none; }
+  }
+
+  .journey-stops {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .journey-stop {
+    min-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0;
+    opacity: 0.35;
+    transform: translateX(8px);
+    transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+  }
+
+  .journey-stop.is-active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .journey-stop:last-child { min-height: 40vh; }
+
+  .journey-stop-mobile-node {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .journey-stop-mobile-node .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--divider);
+    flex-shrink: 0;
+    transition: background 0.4s var(--ease-signal);
+  }
+
+  .journey-stop.is-active .journey-stop-mobile-node .dot {
+    background: var(--signal);
+    box-shadow: 0 0 0 4px rgba(43,76,111,0.15);
+  }
+
+  @media (max-width: 860px) {
+    .journey-stop { min-height: 0; padding: 2.5rem 0; opacity: 1; transform: none; }
+    .journey-stop-mobile-node { display: flex; }
+  }
+
+  .journey-stop-level {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.6rem;
+    transition: color 0.4s var(--ease-signal);
+  }
+
+  .journey-stop.is-active .journey-stop-level { color: var(--signal); }
+
+  .journey-stop-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.3vw, 1.9rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.65rem;
+    color: var(--ink);
+  }
+
+  .journey-stop-desc {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.75;
+    max-width: 42ch;
   }
 
   /* ─── WHAT IS LAURA ─── */
@@ -544,10 +726,7 @@
     margin-bottom: 1.5rem;
   }
 
-  .what-headline em {
-
-    color: var(--terra);
-  }
+  .what-headline em { color: var(--terra); }
 
   .what-body {
     font-size: 1rem;
@@ -558,8 +737,12 @@
 
   .what-body:last-of-type { margin-bottom: 0; }
 
-  /* ─── STAKEHOLDER PILLARS ─── */
-  .pillars-headline {
+  /* ─── ONE PLATFORM. EVERY LEVEL. ───
+     Interactive hover cards per the brief: elevation lift, revealed
+     description, and a short list of example insights available at
+     that tier. Built as CSS-only reveals (max-height + opacity) so it
+     degrades gracefully and works identically on touch via :focus-within. */
+  .levels-headline {
     font-family: var(--font-display);
     font-size: clamp(1.8rem, 3vw, 2.8rem);
     font-weight: 500;
@@ -569,12 +752,9 @@
     max-width: 20ch;
   }
 
-  .pillars-headline em {
+  .levels-headline em { color: var(--terra); }
 
-    color: var(--terra);
-  }
-
-  .pillars-sub {
+  .levels-sub {
     font-size: 1rem;
     color: var(--ink-soft);
     line-height: 1.75;
@@ -582,77 +762,770 @@
     margin-bottom: 3.5rem;
   }
 
-  .pillars-grid {
+  .levels-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
   }
 
   @media (max-width: 900px) {
-    .pillars-grid { grid-template-columns: 1fr 1fr; }
+    .levels-grid { grid-template-columns: 1fr 1fr; }
   }
 
   @media (max-width: 580px) {
-    .pillars-grid { grid-template-columns: 1fr; }
+    .levels-grid { grid-template-columns: 1fr; }
   }
 
-  .pillar-card {
+  .level-card {
     background: var(--cream-dark);
     border-radius: 16px;
-    padding: 2rem;
+    padding: 1.75rem;
     border: 1px solid transparent;
-    cursor: pointer;
+    cursor: default;
     transition: border-color 0.3s var(--ease-out), background 0.3s var(--ease-out),
-                transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+                transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
   }
 
-  .pillar-card:hover,
-  .pillar-card:focus-visible,
-  .pillar-card.is-open {
-    background: var(--parchment);
+  .level-card:hover,
+  .level-card:focus-within {
+    background: var(--cream);
     border-color: var(--divider);
-    transform: translateY(-6px);
-    box-shadow: 0 24px 48px -28px rgba(26,23,20,0.20);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px -12px rgba(26,23,20,0.14);
   }
 
-  .pillar-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(196,98,45,0.10);
+  .level-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(43,76,111,0.09);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.1rem;
+    transition: background 0.3s var(--ease-out);
   }
 
-  .pillar-icon svg {
-    width: 20px;
-    height: 20px;
-    stroke: var(--terra);
+  .level-card:hover .level-icon,
+  .level-card:focus-within .level-icon { background: rgba(43,76,111,0.16); }
+
+  .level-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--signal);
     stroke-width: 1.5;
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
-  .pillar-title {
+  .level-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    line-height: 1.25;
+  }
+
+  .level-tagline {
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin-bottom: 0;
+    max-height: 3em;
+    transition: max-height 0.35s var(--ease-out), margin-bottom 0.35s var(--ease-out), opacity 0.25s ease;
+    overflow: hidden;
+  }
+
+  .level-detail {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s var(--ease-out), opacity 0.3s ease 0.05s, margin-top 0.4s var(--ease-out);
+    margin-top: 0;
+  }
+
+  .level-card:hover .level-tagline,
+  .level-card:focus-within .level-tagline {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+  }
+
+  .level-card:hover .level-detail,
+  .level-card:focus-within .level-detail {
+    max-height: 220px;
+    opacity: 1;
+    margin-top: 0.85rem;
+  }
+
+  .level-detail-desc {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    margin-bottom: 0.9rem;
+  }
+
+  .level-detail-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    margin-bottom: 0.5rem;
+  }
+
+  .level-detail-insights {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .level-detail-insights li {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    padding-left: 0.9rem;
+    position: relative;
+  }
+
+  .level-detail-insights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--signal-light);
+  }
+
+  @media (hover: none) {
+    /* Touch devices: keep detail content statically visible rather than
+       relying on a hover state that may never trigger. */
+    .level-tagline { max-height: none; opacity: 1; margin-bottom: 0.85rem; }
+    .level-detail { max-height: none; opacity: 1; margin-top: 0; }
+  }
+
+  /* ─── ASK LAURA — CENTREPIECE ───
+     Dark "intelligence console" rather than a chat-app clone: monospace
+     meta text, a persistent command-line style input row, and answers
+     that render as structured readouts (label + short stat line + note)
+     instead of speech bubbles. This is deliberately not ChatGPT's
+     rounded-bubble-on-white pattern. */
+  .ask-section {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 9rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ask-section::before {
+    content: '';
+    position: absolute;
+    top: -15%;
+    right: -8%;
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(43,76,111,0.16) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .ask-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ask-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--signal-light);
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .ask-label::before,
+  .ask-label::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--signal-light);
+  }
+
+  .ask-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 5vw, 4.2rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+
+  .ask-sub {
+    font-size: 1.0625rem;
+    font-weight: 300;
+    color: rgba(245,240,232,0.55);
+    line-height: 1.75;
+    max-width: 46ch;
+    margin: 0 auto 3.5rem;
+  }
+
+  /* Console */
+  .ask-console {
+    background: rgba(245,240,232,0.03);
+    border: 1px solid rgba(245,240,232,0.10);
+    border-radius: 20px;
+    padding: 0;
+    text-align: left;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  .ask-console-chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+  }
+
+  .ask-console-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(245,240,232,0.15);
+  }
+
+  .ask-console-title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: rgba(245,240,232,0.35);
+    letter-spacing: 0.04em;
+    margin-left: 0.5rem;
+  }
+
+  .ask-console-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: rgba(245,240,232,0.35);
+    letter-spacing: 0.03em;
+  }
+
+  .ask-console-status .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--signal-light);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .ask-console-body {
+    min-height: 300px;
+    max-height: 420px;
+    padding: 1.75rem 1.75rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .ask-console-body::-webkit-scrollbar { width: 5px; }
+  .ask-console-body::-webkit-scrollbar-thumb { background: rgba(245,240,232,0.1); border-radius: 3px; }
+
+  .ask-turn {
+    animation: askTurnIn 0.4s var(--ease-out) both;
+  }
+
+  @keyframes askTurnIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ask-query-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+  }
+
+  .ask-query-prompt {
+    color: var(--signal-light);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .ask-query-text {
+    font-size: 0.9rem;
+    color: rgba(245,240,232,0.92);
+    line-height: 1.5;
+  }
+
+  .ask-caret {
+    display: inline-block;
+    width: 7px;
+    height: 15px;
+    background: var(--signal-light);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: caretBlink 1s step-end infinite;
+  }
+
+  @keyframes caretBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .ask-answer {
+    margin-left: 1.55rem;
+    padding: 0.95rem 1.1rem;
+    background: rgba(245,240,232,0.035);
+    border-left: 2px solid var(--signal);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .ask-answer-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .ask-answer-text {
+    font-size: 0.87rem;
+    color: rgba(245,240,232,0.78);
+    line-height: 1.65;
+  }
+
+  .ask-answer-text strong {
+    color: rgba(245,240,232,0.96);
+    font-weight: 500;
+  }
+
+  .ask-thinking {
+    margin-left: 1.55rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.6rem 0;
+  }
+
+  .ask-thinking span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(245,240,232,0.35);
+    animation: thinkBounce 1.1s ease-in-out infinite;
+  }
+
+  .ask-thinking span:nth-child(2) { animation-delay: 0.15s; }
+  .ask-thinking span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes thinkBounce {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .ask-console-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(245,240,232,0.08);
+    background: rgba(0,0,0,0.12);
+  }
+
+  .ask-console-input-row svg { flex-shrink: 0; opacity: 0.3; }
+
+  .ask-console-placeholder {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: rgba(245,240,232,0.28);
+    letter-spacing: 0.01em;
+  }
+
+  @media (max-width: 640px) {
+    .ask-console-body { min-height: 260px; max-height: 360px; padding: 1.25rem 1.25rem 1rem; }
+    .ask-answer { margin-left: 0; }
+    .ask-thinking { margin-left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ask-caret { animation: none; opacity: 1; }
+    .ask-thinking span { animation: none; }
+  }
+
+  /* ─── PRODUCT PREVIEW ───
+     Real device chrome (not literal screenshots — none were provided —
+     but structurally accurate frames showing representative UI) staged
+     at different depths so the section reads as a single considered
+     composition rather than four stacked images. */
+  .preview-section {
+    background: var(--cream-dark);
+    overflow: hidden;
+  }
+
+  .preview-intro {
+    max-width: 640px;
+    margin: 0 auto 5rem;
+    text-align: center;
+  }
+
+  .preview-headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-bottom: 1rem;
+  }
+
+  .preview-headline em { color: var(--signal); }
+
+  .preview-sub {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.75;
+  }
+
+  .preview-stage {
+    position: relative;
+    max-width: 980px;
+    margin: 0 auto;
+    height: 560px;
+  }
+
+  .preview-frame {
+    position: absolute;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  }
+
+  .preview-frame.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Browser window — primary, back layer */
+  .preview-browser {
+    left: 0;
+    top: 20px;
+    width: 640px;
+    max-width: 74vw;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--cream);
+    box-shadow: 0 40px 70px -24px rgba(26,23,20,0.22);
+    border: 1px solid var(--divider);
+    transition-delay: 0.05s;
+  }
+
+  .browser-chrome {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.65rem 0.9rem;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .browser-chrome .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--divider); }
+  .browser-chrome .url-bar {
+    flex: 1;
+    margin-left: 0.6rem;
+    height: 18px;
+    border-radius: 5px;
+    background: rgba(26,23,20,0.05);
+  }
+
+  .browser-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .browser-body .row {
+    height: 12px;
+    border-radius: 4px;
+    background: rgba(26,23,20,0.06);
+  }
+  .browser-body .row.w60 { width: 60%; }
+  .browser-body .row.w80 { width: 80%; }
+  .browser-body .row.w40 { width: 40%; }
+
+  .browser-body .cards { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+  .browser-body .card {
+    flex: 1;
+    height: 78px;
+    border-radius: 8px;
+    background: var(--cream-dark);
+    border: 1px solid var(--divider);
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .browser-body .card .stat { width: 55%; height: 8px; border-radius: 3px; background: var(--signal); opacity: 0.55; }
+  .browser-body .card .label { width: 75%; height: 6px; border-radius: 3px; background: rgba(26,23,20,0.08); }
+
+  /* Laptop — mid layer, right */
+  .preview-laptop {
+    right: 20px;
+    top: 90px;
+    width: 320px;
+    max-width: 46vw;
+    transition-delay: 0.18s;
+  }
+
+  .laptop-screen {
+    background: var(--ink);
+    border-radius: 10px 10px 2px 2px;
+    padding: 8px 8px 4px;
+    box-shadow: 0 30px 60px -20px rgba(26,23,20,0.3);
+  }
+
+  .laptop-screen-inner {
+    background: var(--ink-soft);
+    border-radius: 4px;
+    aspect-ratio: 16/10;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .laptop-screen-inner .row { height: 8px; border-radius: 3px; background: rgba(245,240,232,0.14); }
+  .laptop-screen-inner .row.w50 { width: 50%; }
+  .laptop-screen-inner .row.w70 { width: 70%; background: rgba(43,76,111,0.5); }
+
+  .laptop-base {
+    height: 8px;
+    background: var(--ink-soft);
+    border-radius: 0 0 8px 8px;
+    margin: 0 -6px;
+  }
+
+  /* Tablet — front layer, lower left */
+  .preview-tablet {
+    left: 80px;
+    bottom: 0;
+    width: 190px;
+    max-width: 34vw;
+    transition-delay: 0.3s;
+  }
+
+  .tablet-frame {
+    background: var(--ink);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 24px 50px -18px rgba(26,23,20,0.3);
+  }
+
+  .tablet-screen {
+    background: var(--cream);
+    border-radius: 8px;
+    aspect-ratio: 4/3;
+    padding: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .tablet-screen .row { height: 6px; border-radius: 3px; background: rgba(26,23,20,0.08); }
+  .tablet-screen .row.w60 { width: 60%; background: var(--terra); opacity: 0.55; }
+
+  /* Mobile — front layer, right, lowest */
+  .preview-mobile {
+    right: 100px;
+    bottom: -10px;
+    width: 118px;
+    max-width: 26vw;
+    transition-delay: 0.42s;
+  }
+
+  .mobile-frame {
+    background: var(--ink);
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: 0 20px 44px -16px rgba(26,23,20,0.32);
+  }
+
+  .mobile-screen {
+    background: var(--cream);
+    border-radius: 13px;
+    aspect-ratio: 9/18;
+    padding: 0.55rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .mobile-screen .notch {
+    width: 32%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--ink);
+    margin: 0 auto 0.3rem;
+  }
+
+  .mobile-screen .row { height: 5px; border-radius: 3px; background: rgba(26,23,20,0.08); }
+  .mobile-screen .row.w70 { width: 70%; }
+  .mobile-screen .pill { height: 22px; border-radius: 6px; background: rgba(43,76,111,0.12); margin-top: 0.25rem; }
+
+  @media (max-width: 760px) {
+    .preview-stage {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+      padding-bottom: 2rem;
+    }
+    .preview-frame { position: static !important; max-width: 300px; width: 100% !important; }
+    .preview-browser { max-width: 340px; }
+  }
+
+  /* ─── PRINCIPLES ─── */
+  .principles-section {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+
+  .principles-intro {
+    max-width: 640px;
+    margin: 0 auto 5rem;
+    text-align: center;
+  }
+
+  .principles-headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  .principles-headline em { color: var(--terra); }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3.5rem 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 720px) {
+    .principles-grid { grid-template-columns: 1fr; gap: 3rem; max-width: 420px; }
+  }
+
+  .principle-item { text-align: center; }
+
+  .principle-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .principle-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: var(--ink);
+    stroke-width: 1.3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .principle-title {
     font-family: var(--font-display);
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--ink);
     margin-bottom: 0.5rem;
-    line-height: 1.25;
   }
 
-  .pillar-desc {
-    font-size: 0.875rem;
+  .principle-desc {
+    font-size: 0.85rem;
     color: var(--ink-soft);
-    line-height: 1.7;
+    line-height: 1.6;
+    max-width: 24ch;
+    margin: 0 auto;
   }
 
+  /* ─── FINAL STATEMENT ───
+     Deliberately the quietest section on the page: no card, no button,
+     no competing element — per the brief, an emotional close rather
+     than a promotional one. */
+  .final-section {
+    padding: 11rem 2rem 9rem;
+    text-align: center;
+  }
 
-  /* ─── SPACES / PRIVACY & GOVERNANCE ─── */
+  .final-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .final-statement {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4vw, 3.1rem);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin-bottom: 3.5rem;
+  }
+
+  .final-signature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .final-signature-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--signal);
+    letter-spacing: -0.01em;
+  }
+
+  .final-signature-tag {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.01em;
+  }
+
+  /* ─── SPACES / PRIVACY (retained from prior build) ─── */
   .spaces-headline {
     font-family: var(--font-display);
     font-size: clamp(1.8rem, 3vw, 2.8rem);
@@ -663,10 +1536,7 @@
     max-width: 22ch;
   }
 
-  .spaces-headline em {
-
-    color: var(--terra);
-  }
+  .spaces-headline em { color: var(--terra); }
 
   .spaces-intro {
     font-size: 1rem;
@@ -784,10 +1654,7 @@
     color: var(--ink);
   }
 
-  .cta-headline em {
-
-    color: var(--terra);
-  }
+  .cta-headline em { color: var(--terra); }
 
   .cta-sub {
     font-size: 1rem;
@@ -803,817 +1670,8 @@
     gap: 1.5rem;
     flex-wrap: wrap;
   }
-
-  /* Scroll indicator */
-  .hero-scroll {
-    position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    opacity: 0.35;
-    animation: bounce 2s ease-in-out infinite;
-  }
-
-  .hero-scroll span {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    font-family: var(--font-body);
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(6px); }
-  }
-
-  /* Animated feed entries */
-  .feed-post {
-    animation: feedIn 0.5s var(--ease-out) both;
-  }
-
-  .feed-post:nth-child(2) { animation-delay: 0.15s; }
-  .feed-post:nth-child(3) { animation-delay: 0.3s; }
-  .feed-post:nth-child(4) { animation-delay: 0.45s; }
-
-  @keyframes feedIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ═══════════════════════════════════════════
-     DATA JOURNEY
-     ═══════════════════════════════════════════ */
-  .journey-section {
-    background: var(--cream-dark);
-    position: relative;
-  }
-
-  .journey-intro {
-    padding: 6rem 2rem 3rem;
-    text-align: center;
-  }
-
-  .journey-headline {
-    font-family: var(--font-display);
-    font-size: clamp(1.8rem, 3.2vw, 2.9rem);
-    font-weight: 500;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    max-width: 24ch;
-    margin: 0 auto 1.1rem;
-  }
-
-  .journey-headline em { color: var(--terra); }
-
-  .journey-sub {
-    font-size: 1rem;
-    color: var(--ink-soft);
-    max-width: 46ch;
-    margin: 0 auto;
-    line-height: 1.75;
-  }
-
-  .journey-track {
-    position: relative;
-    height: 520vh;
-  }
-
-  .journey-sticky {
-    position: sticky;
-    top: var(--nav-h);
-    height: calc(100vh - var(--nav-h));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(3rem, 7vw, 7rem);
-    padding: 0 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .journey-rail {
-    position: relative;
-    width: 2px;
-    height: min(58vh, 440px);
-    flex-shrink: 0;
-  }
-
-  .journey-rail-line {
-    position: absolute;
-    inset: 0;
-    background: var(--divider);
-    border-radius: 1px;
-  }
-
-  .journey-rail-fill {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 0%;
-    background: var(--terra);
-    border-radius: 1px;
-  }
-
-  .journey-dot {
-    position: absolute;
-    left: 1px;
-    bottom: 0%;
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    background: var(--terra);
-    box-shadow: 0 0 0 5px rgba(196,98,45,0.16);
-    transform: translate(-50%, 50%);
-    animation: pulse-dot 2.4s ease-in-out infinite;
-  }
-
-  .journey-stop {
-    position: absolute;
-    left: 0;
-    bottom: calc(var(--pos) * 100%);
-  }
-
-  .journey-stop::before {
-    content: '';
-    position: absolute;
-    left: 1px;
-    top: 50%;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--cream-dark);
-    border: 1.5px solid var(--ink-muted);
-    transform: translate(-50%, -50%);
-    transition: background 0.3s ease, border-color 0.3s ease;
-  }
-
-  .journey-stop span {
-    position: absolute;
-    left: 19px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    color: var(--ink-muted);
-    transition: color 0.3s ease, font-weight 0.3s ease;
-  }
-
-  .journey-stop.is-active::before {
-    border-color: var(--terra);
-    background: var(--terra);
-  }
-
-  .journey-stop.is-active span {
-    color: var(--ink);
-    font-weight: 600;
-  }
-
-  .journey-panel { max-width: 380px; }
-
-  .journey-stage-count {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--terra);
-    margin-bottom: 1.1rem;
-  }
-
-  .journey-stage-name {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    margin-bottom: 1rem;
-    transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
-  }
-
-  .journey-stage-desc {
-    font-size: 1.02rem;
-    color: var(--ink-soft);
-    line-height: 1.8;
-    transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
-    max-width: 40ch;
-  }
-
-  .journey-stage-name.is-changing,
-  .journey-stage-desc.is-changing {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  @media (max-width: 768px) {
-    .journey-track { height: 480vh; }
-
-    .journey-sticky {
-      flex-direction: column;
-      justify-content: center;
-      gap: 2rem;
-      padding: 0 1.5rem;
-    }
-
-    .journey-rail { height: 34vh; }
-    .journey-stop span { font-size: 0.66rem; left: 16px; }
-
-    .journey-panel {
-      max-width: 100%;
-      width: 100%;
-      text-align: center;
-    }
-
-    .journey-stage-name { font-size: clamp(1.5rem, 7vw, 2.1rem); margin-bottom: 0.75rem; }
-    .journey-stage-desc { font-size: 0.88rem; line-height: 1.65; margin: 0 auto; }
-  }
-
-  /* ═══════════════════════════════════════════
-     INTERACTIVE PILLAR CARDS
-     ═══════════════════════════════════════════ */
-  .pillar-insights {
-    list-style: none;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    margin-top: 0;
-    transition: max-height 0.4s var(--ease-out), opacity 0.3s ease, margin-top 0.4s var(--ease-out);
-  }
-
-  .pillar-card:hover .pillar-insights,
-  .pillar-card:focus-visible .pillar-insights,
-  .pillar-card.is-open .pillar-insights {
-    max-height: 220px;
-    opacity: 1;
-    margin-top: 1.1rem;
-  }
-
-  .pillar-insight {
-    font-size: 0.78rem;
-    color: var(--ink-soft);
-    padding: 0.55rem 0;
-    border-top: 1px solid var(--divider);
-    display: flex;
-    gap: 0.55rem;
-    line-height: 1.5;
-  }
-
-  .pillar-insight::before {
-    content: '→';
-    color: var(--terra);
-    flex-shrink: 0;
-  }
-
-  .pillar-hint {
-    font-size: 0.7rem;
-    color: var(--ink-muted);
-    margin-top: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    letter-spacing: 0.02em;
-  }
-
-  .pillar-card:hover .pillar-hint,
-  .pillar-card:focus-visible .pillar-hint,
-  .pillar-card.is-open .pillar-hint {
-    display: none;
-  }
-
-  /* ═══════════════════════════════════════════
-     ASK LAURA — CONSOLE
-     ═══════════════════════════════════════════ */
-  .ask-section {
-    padding: 8rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ask-inner {
-    max-width: 760px;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .ask-headline {
-    font-family: var(--font-display);
-    font-size: clamp(2.1rem, 4.5vw, 3.6rem);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    margin-bottom: 1.1rem;
-  }
-
-  .ask-headline em { color: var(--terra); }
-
-  .ask-sub {
-    font-size: 1.03rem;
-    color: var(--ink-soft);
-    max-width: 46ch;
-    margin: 0 auto 3.25rem;
-    line-height: 1.75;
-  }
-
-  .ask-console {
-    background: var(--ink);
-    border-radius: 24px;
-    padding: 1.75rem;
-    text-align: left;
-    max-width: 640px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 50px 100px -50px rgba(26,23,20,0.45);
-  }
-
-  .ask-console::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    right: -12%;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(196,98,45,0.13) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .console-chrome {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding-bottom: 1.15rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(245,240,232,0.08);
-    position: relative;
-    z-index: 1;
-  }
-
-  .console-mark {
-    width: 22px;
-    height: 22px;
-    border-radius: 7px;
-    background: rgba(196,98,45,0.18);
-    color: var(--terra-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 0.7rem;
-    flex-shrink: 0;
-  }
-
-  .console-label {
-    font-size: 0.76rem;
-    font-weight: 500;
-    color: rgba(245,240,232,0.55);
-    letter-spacing: 0.03em;
-  }
-
-  .console-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--terra-light);
-    margin-left: auto;
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  .console-status {
-    font-size: 0.68rem;
-    color: rgba(245,240,232,0.35);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .console-input {
-    background: rgba(245,240,232,0.05);
-    border: 1px solid rgba(245,240,232,0.10);
-    border-radius: 16px;
-    padding: 1.2rem 1.4rem;
-    font-family: var(--font-body);
-    font-size: clamp(0.92rem, 2vw, 1.05rem);
-    min-height: 1.4em;
-    display: flex;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-    margin-bottom: 1.5rem;
-  }
-
-  .console-placeholder {
-    color: rgba(245,240,232,0.32);
-  }
-
-  .console-input.has-text .console-placeholder { display: none; }
-  .console-input:not(.has-text) #console-input-text { display: none; }
-
-  #console-input-text { color: rgba(245,240,232,0.94); }
-
-  .console-caret {
-    display: inline-block;
-    width: 2px;
-    height: 1.05em;
-    background: var(--terra-light);
-    margin-left: 2px;
-    vertical-align: text-bottom;
-    animation: caretBlink 0.9s steps(1) infinite;
-  }
-
-  @keyframes caretBlink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-  }
-
-  .console-answer {
-    position: relative;
-    z-index: 1;
-    border-top: 1px solid rgba(245,240,232,0.08);
-    padding-top: 1.4rem;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
-    min-height: 5.5rem;
-  }
-
-  .console-answer.is-in {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .console-asked-label {
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--terra-light);
-    margin-bottom: 0.5rem;
-  }
-
-  .console-asked-q {
-    font-size: 0.9rem;
-    font-style: italic;
-    color: rgba(245,240,232,0.48);
-    margin-bottom: 1rem;
-    line-height: 1.5;
-  }
-
-  .console-answer-body {
-    font-size: clamp(0.9rem, 2vw, 0.98rem);
-    line-height: 1.75;
-    color: rgba(245,240,232,0.82);
-  }
-
-  .console-answer-body strong {
-    color: var(--cream);
-    font-weight: 600;
-  }
-
-  @media (max-width: 640px) {
-    .ask-console { padding: 1.35rem; border-radius: 20px; }
-    .console-input { padding: 1rem 1.15rem; }
-  }
-
-  /* ═══════════════════════════════════════════
-     PRODUCT PREVIEW
-     ═══════════════════════════════════════════ */
-  .preview-section { overflow: hidden; }
-
-  .preview-headline {
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 3.5vw, 3rem);
-    font-weight: 500;
-    letter-spacing: -0.018em;
-    line-height: 1.15;
-    margin-bottom: 1rem;
-  }
-
-  .preview-headline em { color: var(--terra); }
-
-  .preview-sub {
-    font-size: 1.02rem;
-    color: var(--ink-soft);
-    max-width: 44ch;
-    margin: 0 auto;
-    line-height: 1.75;
-  }
-
-  .device-cluster {
-    max-width: 1000px;
-    margin: 5.5rem auto 0;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    min-height: 460px;
-    padding: 0 2rem;
-  }
-
-  .device { position: relative; }
-
-  .device-browser {
-    width: min(700px, 82vw);
-    background: var(--cream);
-    border: 1px solid var(--divider);
-    border-radius: 14px;
-    overflow: hidden;
-    z-index: 2;
-    box-shadow: 0 60px 110px -50px rgba(26,23,20,0.28);
-  }
-
-  .browser-chrome {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0.75rem 1rem;
-    background: var(--cream-dark);
-    border-bottom: 1px solid var(--divider);
-  }
-
-  .chrome-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--divider);
-  }
-
-  .chrome-address {
-    margin-left: 0.75rem;
-    font-size: 0.68rem;
-    color: var(--ink-muted);
-    background: var(--cream);
-    border-radius: 6px;
-    padding: 0.2rem 0.7rem;
-    font-family: var(--font-body);
-  }
-
-  .device-tablet {
-    width: min(210px, 30vw);
-    position: absolute;
-    left: 0;
-    bottom: -5%;
-    background: var(--ink);
-    border-radius: 18px;
-    padding: 9px;
-    z-index: 1;
-    box-shadow: 0 40px 80px -40px rgba(26,23,20,0.3);
-  }
-
-  .device-tablet .device-screen { border-radius: 11px; }
-
-  .device-mobile {
-    width: min(132px, 22vw);
-    position: absolute;
-    right: 2%;
-    bottom: -9%;
-    background: var(--ink);
-    border-radius: 22px;
-    padding: 7px;
-    z-index: 3;
-    box-shadow: 0 40px 80px -40px rgba(26,23,20,0.32);
-  }
-
-  .device-mobile .device-screen { border-radius: 16px; }
-
-  .device-tablet.reveal,
-  .device-tablet.reveal.visible { transform: translateY(24px) rotate(-3.5deg); }
-  .device-tablet.reveal.visible { transform: translateY(0) rotate(-3.5deg); }
-
-  .device-mobile.reveal { transform: translateY(24px) rotate(3.5deg); }
-  .device-mobile.reveal.visible { transform: translateY(0) rotate(3.5deg); }
-
-  .device-screen {
-    background: var(--cream);
-    padding: 1rem;
-  }
-
-  .mock-stats {
-    display: flex;
-    gap: 0.6rem;
-    margin-bottom: 0.85rem;
-  }
-
-  .mock-stat {
-    flex: 1;
-    background: var(--cream-dark);
-    border-radius: 8px;
-    padding: 0.55rem 0.6rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .mock-stat-num {
-    font-family: var(--font-display);
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .mock-stat-label {
-    font-size: 0.55rem;
-    color: var(--ink-muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .mock-chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 54px;
-    background: var(--cream-dark);
-    border-radius: 8px;
-    padding: 8px;
-    margin-bottom: 0.7rem;
-  }
-
-  .mock-chart span {
-    flex: 1;
-    background: var(--terra);
-    opacity: 0.75;
-    border-radius: 2px;
-    min-height: 6%;
-  }
-
-  .mock-chart span:nth-child(even) { background: var(--ink); opacity: 0.18; }
-
-  .mock-lines { display: flex; flex-direction: column; gap: 6px; }
-
-  .mock-line {
-    display: block;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--cream-dark);
-  }
-
-  .device-tablet .mock-stat-label,
-  .device-mobile .mock-stat-label { display: none; }
-
-  .device-mobile .mock-stats { gap: 0.4rem; }
-  .device-mobile .mock-stat { padding: 0.4rem 0.45rem; }
-  .device-mobile .mock-stat-num { font-size: 0.72rem; }
-  .device-mobile .mock-chart { height: 38px; padding: 6px; }
-
-  @media (max-width: 640px) {
-    .device-cluster { min-height: 340px; margin-top: 4rem; }
-    .device-tablet { left: -2%; bottom: -3%; }
-    .device-mobile { right: -1%; bottom: -6%; }
-  }
-
-  /* ═══════════════════════════════════════════
-     PRINCIPLES
-     ═══════════════════════════════════════════ */
-  .principles-section { padding: 8rem 2rem; }
-
-  .principles-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 3rem;
-    max-width: 1000px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  @media (max-width: 860px) {
-    .principles-grid { grid-template-columns: 1fr 1fr; row-gap: 3.5rem; }
-  }
-
-  @media (max-width: 480px) {
-    .principles-grid { grid-template-columns: 1fr; }
-  }
-
-  .principle-icon {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 1.5rem;
-    border-radius: 10px;
-    background: rgba(196,98,45,0.10);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .principle-icon svg {
-    width: 19px;
-    height: 19px;
-    stroke: var(--terra);
-    stroke-width: 1.5;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .principle-title {
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 0.6rem;
-  }
-
-  .principle-desc {
-    font-size: 0.88rem;
-    color: var(--ink-soft);
-    line-height: 1.65;
-    max-width: 22ch;
-    margin: 0 auto;
-  }
-
-  /* ═══════════════════════════════════════════
-     FINALE
-     ═══════════════════════════════════════════ */
-  .finale-section {
-    background: var(--cream);
-    padding: 9rem 2rem 8rem;
-    text-align: center;
-  }
-
-  .finale-inner {
-    max-width: 780px;
-    margin: 0 auto;
-  }
-
-  .finale-statement {
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 4.2vw, 3.3rem);
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    color: var(--ink);
-    margin-bottom: 3.5rem;
-  }
-
-  .finale-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .finale-brand-name {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--terra);
-  }
-
-  .finale-brand-tag {
-    font-size: 0.85rem;
-    color: var(--ink-muted);
-    letter-spacing: 0.02em;
-  }
-
-  /* ═══════════════════════════════════════════
-     ACCESSIBILITY / MOTION
-     ═══════════════════════════════════════════ */
-  a:focus-visible,
-  button:focus-visible,
-  .pillar-card:focus-visible {
-    outline: 2px solid var(--terra);
-    outline-offset: 3px;
-    border-radius: 4px;
-  }
-
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .reveal,
-    .journey-stage-name,
-    .journey-stage-desc,
-    .console-answer,
-    .pillar-card,
-    .device-tablet,
-    .device-mobile {
-      transition-duration: 0.01ms !important;
-    }
-    .journey-dot,
-    .console-dot,
-    .campus-feed-dot {
-      animation: none !important;
-    }
-  }
 </style>
 </head>
-
 <body>
 
 <!-- ═══ NAV ═══ -->
@@ -1664,15 +1722,89 @@
 <!-- ═══ LAURA HERO ═══ -->
 <section class="laura-hero" aria-labelledby="laura-heading">
 
-  <!-- Ambient network — an extremely subtle web of connected points behind the hero -->
-  <canvas class="hero-network" id="hero-network" aria-hidden="true"></canvas>
+  <svg class="hero-network" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g class="net-edges">
+      <line class="net-edge" x1="328.6" y1="454.4" x2="255.7" y2="351.2"/>
+      <line class="net-edge" x1="254.7" y1="331.3" x2="255.7" y2="351.2"/>
+      <line class="net-edge" x1="780.8" y1="627.1" x2="802.1" y2="617.7"/>
+      <line class="net-edge" x1="933.2" y1="771.6" x2="943.7" y2="731.1"/>
+      <line class="net-edge" x1="884.0" y1="60.5" x2="819.5" y2="66.1"/>
+      <line class="net-edge" x1="912.9" y1="673.9" x2="943.7" y2="731.1"/>
+      <line class="net-edge" x1="328.6" y1="454.4" x2="331.0" y2="523.2"/>
+      <line class="net-edge" x1="331.0" y1="523.2" x2="255.7" y2="351.2"/>
+      <line class="net-edge" x1="174.9" y1="351.5" x2="144.0" y2="280.4"/>
+      <line class="net-edge" x1="174.9" y1="351.5" x2="1041.6" y2="170.9"/>
+      <line class="net-edge" x1="174.9" y1="351.5" x2="254.7" y2="331.3"/>
+      <line class="net-edge" x1="780.8" y1="627.1" x2="406.9" y2="561.3"/>
+      <line class="net-edge" x1="363.3" y1="154.4" x2="569.5" y2="94.3"/>
+      <line class="net-edge" x1="912.9" y1="673.9" x2="331.0" y2="523.2"/>
+      <line class="net-edge" x1="1158.7" y1="535.1" x2="1003.2" y2="479.7"/>
+      <line class="net-edge" x1="912.9" y1="673.9" x2="174.9" y2="351.5"/>
+      <line class="net-edge" x1="363.3" y1="154.4" x2="489.1" y2="167.5"/>
+      <line class="net-edge" x1="1041.6" y1="170.9" x2="844.1" y2="180.3"/>
+      <line class="net-edge" x1="884.0" y1="60.5" x2="1041.6" y2="170.9"/>
+      <line class="net-edge" x1="912.9" y1="673.9" x2="912.9" y2="673.9"/>
+      <line class="net-edge" x1="363.3" y1="154.4" x2="228.6" y2="154.5"/>
+      <line class="net-edge" x1="569.5" y1="94.3" x2="342.3" y2="66.3"/>
+      <line class="net-edge" x1="1003.2" y1="479.7" x2="1026.1" y2="391.3"/>
+      <line class="net-edge" x1="328.6" y1="454.4" x2="320.7" y2="449.4"/>
+      <line class="net-edge" x1="0.0" y1="0.0" x2="0.0" y2="0.0" opacity="0"/>
+      <line class="net-edge" x1="1003.2" y1="479.7" x2="1158.7" y2="535.1"/>
+      <line class="net-edge" x1="884.0" y1="60.5" x2="819.5" y2="66.1"/>
+      <line class="net-edge" x1="342.3" y1="66.3" x2="569.5" y2="94.3"/>
+      <line class="net-edge" x1="342.3" y1="66.3" x2="228.6" y2="154.5"/>
+      <line class="net-edge" x1="144.0" y1="280.4" x2="1169.0" y2="750.5"/>
+      <line class="net-edge" x1="780.8" y1="627.1" x2="1169.0" y2="750.5"/>
+      <line class="net-edge" x1="819.5" y1="66.1" x2="569.5" y2="94.3"/>
+      <line class="net-edge" x1="331.0" y1="523.2" x2="406.9" y2="561.3"/>
+      <line class="net-edge" x1="144.0" y1="280.4" x2="1169.0" y2="750.5" opacity="0.4"/>
+    </g>
+    <g class="net-nodes">
+      <circle class="net-node" cx="884.0" cy="60.5" r="2.5"/>
+      <circle class="net-node is-lit" cx="363.3" cy="154.4" r="2"/>
+      <circle class="net-node" cx="933.2" cy="771.6" r="2"/>
+      <circle class="net-node" cx="819.5" cy="66.1" r="2"/>
+      <circle class="net-node is-lit" cx="328.6" cy="454.4" r="2"/>
+      <circle class="net-node" cx="780.8" cy="627.1" r="3"/>
+      <circle class="net-node" cx="331.0" cy="523.2" r="2"/>
+      <circle class="net-node" cx="1041.6" cy="170.9" r="3"/>
+      <circle class="net-node" cx="489.1" cy="167.5" r="2.5"/>
+      <circle class="net-node is-lit" cx="174.9" cy="351.5" r="2.5"/>
+      <circle class="net-node" cx="1158.7" cy="535.1" r="2"/>
+      <circle class="net-node" cx="1003.2" cy="479.7" r="3"/>
+      <circle class="net-node" cx="144.0" cy="280.4" r="2.5"/>
+      <circle class="net-node" cx="802.1" cy="617.7" r="2"/>
+      <circle class="net-node" cx="912.9" cy="673.9" r="2"/>
+      <circle class="net-node" cx="1169.0" cy="750.5" r="3"/>
+      <circle class="net-node" cx="406.9" cy="561.3" r="2.5"/>
+      <circle class="net-node" cx="254.7" cy="331.3" r="2.5"/>
+      <circle class="net-node" cx="966.4" cy="600.5" r="2"/>
+      <circle class="net-node" cx="844.1" cy="180.3" r="2"/>
+      <circle class="net-node" cx="255.7" cy="351.2" r="2"/>
+      <circle class="net-node is-lit" cx="943.7" cy="731.1" r="2"/>
+      <circle class="net-node" cx="342.3" cy="66.3" r="2.5"/>
+      <circle class="net-node" cx="569.5" cy="94.3" r="2.5"/>
+      <circle class="net-node" cx="320.7" cy="449.4" r="3"/>
+      <circle class="net-node" cx="228.6" cy="154.5" r="2.5"/>
+      <circle class="net-node" cx="1026.1" cy="391.3" r="3"/>
+      <circle class="net-node" cx="517.8" cy="857.8" r="2"/>
+    </g>
+    <g class="net-pulses">
+      <path class="net-pulse-edge" d="M174.9,351.5 L1041.6,170.9"/>
+      <path class="net-pulse-edge" d="M912.9,673.9 L331.0,523.2"/>
+      <path class="net-pulse-edge" d="M144.0,280.4 L1169.0,750.5"/>
+    </g>
+  </svg>
 
   <div class="laura-hero-inner">
     <div class="laura-hero-split">
 
       <!-- Left -->
       <div>
-        <div class="laura-badge reveal">Coming soon</div>
+        <div class="laura-badge reveal">
+          <span class="laura-badge-dot" aria-hidden="true"></span>
+          Coming soon
+        </div>
         <h1 class="laura-headline reveal reveal-delay-1" id="laura-heading">Laura</h1>
         <p class="laura-tagline reveal reveal-delay-2">Educational data, transformed into intelligence.</p>
       </div>
@@ -1685,8 +1817,8 @@
           It transforms that information into real-time insight for schools, districts, provinces, and national departments.
         </p>
         <div class="laura-hero-actions">
-          <a href="#what" class="btn-primary">
-            How it works
+          <a href="#ask" class="btn-primary">
+            Ask Laura
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -1701,66 +1833,6 @@
       </div>
 
     </div>
-
-    <!-- Live feed preview -->
-    <div style="margin-top: 4rem; display: flex; justify-content: center;">
-      <div class="campus-feed reveal reveal-delay-3" style="width: 100%; max-width: 640px;">
-        <div class="campus-feed-header">
-          <span class="campus-feed-label">Live intelligence feed</span>
-          <span class="campus-feed-dot" aria-hidden="true"></span>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-meta">
-            <div class="feed-avatar sch">SCH</div>
-            <div>
-              <div class="feed-post-author">School Intelligence</div>
-              <div class="feed-post-role">Greenwood High · 2 min ago</div>
-            </div>
-          </div>
-          <p class="feed-post-body">Mathematics results have declined across Grade 10 this term. <strong>4 classes flagged for intervention</strong> — attendance in two of them dropped below 85% over the same period.</p>
-          <span class="feed-post-tag">Academic risk</span>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-meta">
-            <div class="feed-avatar dis">DIS</div>
-            <div>
-              <div class="feed-post-author">District Intelligence</div>
-              <div class="feed-post-role">Regional overview · 1 hr ago</div>
-            </div>
-          </div>
-          <p class="feed-post-body">3 schools in the district are showing early signs of teacher shortages in Science. <strong>Resource reallocation recommended</strong> before the new term begins.</p>
-          <span class="feed-post-tag">Resource planning</span>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-meta">
-            <div class="feed-avatar prov">PROV</div>
-            <div>
-              <div class="feed-post-author">Provincial Intelligence</div>
-              <div class="feed-post-role">Curriculum tracking · 3 hrs ago</div>
-            </div>
-          </div>
-          <p class="feed-post-body">Curriculum implementation is tracking ahead of schedule in 6 of 9 districts. <strong>The remaining 3 require infrastructure support</strong> — full comparison available now.</p>
-          <span class="feed-post-tag">Curriculum</span>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-meta">
-            <div class="feed-avatar nat">NAT</div>
-            <div>
-              <div class="feed-post-author">National Intelligence</div>
-              <div class="feed-post-role">System-wide view · 5 hrs ago</div>
-            </div>
-          </div>
-          <p class="feed-post-body">Year-on-year academic performance is up across 7 of 9 provinces. <strong>Forecasting suggests continued improvement</strong> if current resource allocation holds through next year.</p>
-          <span class="feed-post-tag">National trend</span>
-        </div>
-
-      </div>
-    </div>
-
   </div>
 
   <div class="hero-scroll" aria-hidden="true">
@@ -1768,48 +1840,6 @@
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <path d="M8 3v10M4 9l4 4 4-4" stroke="var(--ink-muted)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-  </div>
-
-</section>
-
-
-<!-- ═══ DATA JOURNEY ═══ -->
-<section class="journey-section" id="journey" aria-labelledby="journey-heading">
-
-  <div class="journey-intro section-inner">
-    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">How intelligence flows</div>
-    <h2 class="journey-headline reveal reveal-delay-1" id="journey-heading">
-      One learner. <em>A whole system, informed.</em>
-    </h2>
-    <p class="journey-sub reveal reveal-delay-2">
-      Scroll to follow a single record as it rises through the system — the same journey every piece of data in Laura takes.
-    </p>
-  </div>
-
-  <div class="journey-track" id="journey-track">
-    <div class="journey-sticky">
-
-      <div class="journey-rail" aria-hidden="true">
-        <div class="journey-rail-line"></div>
-        <div class="journey-rail-fill" id="journey-fill"></div>
-
-        <div class="journey-stop" style="--pos:0"><span>Learner</span></div>
-        <div class="journey-stop" style="--pos:0.2"><span>Classroom</span></div>
-        <div class="journey-stop" style="--pos:0.4"><span>School</span></div>
-        <div class="journey-stop" style="--pos:0.6"><span>District</span></div>
-        <div class="journey-stop" style="--pos:0.8"><span>Province</span></div>
-        <div class="journey-stop" style="--pos:1"><span>Nation</span></div>
-
-        <div class="journey-dot" id="journey-dot"></div>
-      </div>
-
-      <div class="journey-panel">
-        <div class="journey-stage-count" id="journey-count">Stage 01 / 06</div>
-        <h3 class="journey-stage-name" id="journey-name">Learner</h3>
-        <p class="journey-stage-desc" id="journey-desc">Every assignment, every assessment, every day of attendance — one learner's record begins the story.</p>
-      </div>
-
-    </div>
   </div>
 
 </section>
@@ -1846,77 +1876,180 @@
 </section>
 
 
-<!-- ═══ INTELLIGENCE TIERS ═══ -->
+<!-- ═══ DATA JOURNEY ═══ -->
 <hr class="section-divider" />
 
-<section class="section" id="stakeholders" aria-labelledby="stakeholders-heading">
+<section class="journey-section" id="journey" aria-labelledby="journey-heading">
+
+  <div class="journey-intro">
+    <div class="section-label is-signal reveal">One learner, one journey</div>
+    <h2 class="journey-headline reveal reveal-delay-1" id="journey-heading">
+      Follow a single learner's data <em>upward</em>
+    </h2>
+    <p class="journey-sub reveal reveal-delay-2">
+      Every register taken, every assessment marked, every assignment submitted becomes part of a picture that grows larger at every level — until it reaches the people shaping an entire education system.
+    </p>
+  </div>
+
+  <div class="journey-track">
+
+    <!-- Desktop sticky rail -->
+    <div class="journey-rail" aria-hidden="true">
+      <svg viewBox="0 0 120 620">
+        <line class="rail-line" x1="60" y1="20" x2="60" y2="600"/>
+        <line class="rail-progress" id="railProgress" x1="60" y1="20" x2="60" y2="600" stroke-dasharray="580" stroke-dashoffset="580"/>
+
+        <circle class="rail-node" data-stop="0" cx="60" cy="20"  r="5"/>
+        <circle class="rail-node" data-stop="1" cx="60" cy="136" r="5"/>
+        <circle class="rail-node" data-stop="2" cx="60" cy="252" r="5"/>
+        <circle class="rail-node" data-stop="3" cx="60" cy="368" r="5"/>
+        <circle class="rail-node" data-stop="4" cx="60" cy="484" r="5"/>
+        <circle class="rail-node" data-stop="5" cx="60" cy="600" r="5"/>
+
+        <text class="rail-label" data-stop="0" x="74" y="24">Learner</text>
+        <text class="rail-label" data-stop="1" x="74" y="140">Classroom</text>
+        <text class="rail-label" data-stop="2" x="74" y="256">School</text>
+        <text class="rail-label" data-stop="3" x="74" y="372">District</text>
+        <text class="rail-label" data-stop="4" x="74" y="488">Province</text>
+        <text class="rail-label" data-stop="5" x="74" y="604">Nation</text>
+
+        <circle class="rail-traveler" id="railTraveler" cx="60" cy="20" r="4"/>
+      </svg>
+    </div>
+
+    <!-- Scroll-driven copy stops -->
+    <div class="journey-stops" id="journeyStops">
+
+      <div class="journey-stop" data-stop="0">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">Learner</span></div>
+        <div class="journey-stop-level">01 · Learner</div>
+        <h3 class="journey-stop-title">A single interaction is logged</h3>
+        <p class="journey-stop-desc">A register is marked. An assessment is captured. An assignment is submitted through iSkool. On its own, it's one small moment in one learner's day.</p>
+      </div>
+
+      <div class="journey-stop" data-stop="1">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">Classroom</span></div>
+        <div class="journey-stop-level">02 · Classroom</div>
+        <h3 class="journey-stop-title">Patterns emerge across the class</h3>
+        <p class="journey-stop-desc">Laura places that moment alongside every other learner in the room — surfacing which topics are landing, and which learners may need support before a report card ever says so.</p>
+      </div>
+
+      <div class="journey-stop" data-stop="2">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">School</span></div>
+        <div class="journey-stop-level">03 · School</div>
+        <h3 class="journey-stop-title">A principal sees the whole institution</h3>
+        <p class="journey-stop-desc">Classroom trends combine into a real-time view of the school — attendance, performance, and risk, understood as a single connected picture rather than isolated reports.</p>
+      </div>
+
+      <div class="journey-stop" data-stop="3">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">District</span></div>
+        <div class="journey-stop-level">04 · District</div>
+        <h3 class="journey-stop-title">Officials compare across schools</h3>
+        <p class="journey-stop-desc">The same signal now sits beside every other school in the district — informing where teachers are needed, where support should be prioritised, and where results are quietly declining.</p>
+      </div>
+
+      <div class="journey-stop" data-stop="4">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">Province</span></div>
+        <div class="journey-stop-level">05 · Province</div>
+        <h3 class="journey-stop-title">Departments track systemic trends</h3>
+        <p class="journey-stop-desc">Aggregated across every district, the picture becomes provincial — curriculum implementation, infrastructure need, and multi-year trends visible at a glance.</p>
+      </div>
+
+      <div class="journey-stop" data-stop="5">
+        <div class="journey-stop-mobile-node"><span class="dot"></span><span class="journey-stop-level" style="margin:0;">Nation</span></div>
+        <div class="journey-stop-level">06 · Nation</div>
+        <h3 class="journey-stop-title">Leadership plans for the system</h3>
+        <p class="journey-stop-desc">What began as one learner's morning register has become part of the intelligence that shapes national policy, resourcing, and long-term planning — in real time, not delayed reports.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ ONE PLATFORM. EVERY LEVEL. ═══ -->
+<hr class="section-divider" />
+
+<section class="section" id="levels" aria-labelledby="levels-heading">
   <div class="section-inner">
 
-    <div class="section-label reveal">One platform, multiple perspectives</div>
+    <div class="section-label reveal">One platform, every level</div>
 
-    <h2 class="pillars-headline reveal reveal-delay-1" id="stakeholders-heading">
-      Every level of the <em>system</em>
+    <h2 class="levels-headline reveal reveal-delay-1" id="levels-heading">
+      Built for every seat in the <em>system</em>
     </h2>
-    <p class="pillars-sub reveal reveal-delay-2">
-      Laura is a single intelligence platform that adapts to the responsibilities of each user — from a single classroom to an entire nation.
+    <p class="levels-sub reveal reveal-delay-2">
+      Laura is a single intelligence platform that adapts to the responsibilities of each user. Hover a level to see what it surfaces.
     </p>
 
-    <div class="pillars-grid">
+    <div class="levels-grid">
 
-      <div class="pillar-card reveal" tabindex="0">
-        <div class="pillar-icon" aria-hidden="true">
+      <div class="level-card reveal" tabindex="0">
+        <div class="level-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M6 2v4M14 2v4"/></svg>
         </div>
-        <h3 class="pillar-title">School Intelligence</h3>
-        <p class="pillar-desc">Principals gain a complete, real-time understanding of their institution — which learners need intervention, which subjects are improving or declining, and how attendance is affecting performance.</p>
-        <ul class="pillar-insights">
-          <li class="pillar-insight">4 classes flagged for Mathematics intervention</li>
-          <li class="pillar-insight">Attendance below 85% in two Grade 10 classes</li>
-          <li class="pillar-insight">Real-time view of every classroom, every learner</li>
-        </ul>
-        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 class="level-title">School</h3>
+        <p class="level-tagline">A complete, real-time view of one institution.</p>
+        <div class="level-detail">
+          <p class="level-detail-desc">Principals see across every classroom under their roof — who needs intervention, and why, before it shows up on a report card.</p>
+          <div class="level-detail-label">Example insights</div>
+          <ul class="level-detail-insights">
+            <li>Learners flagged for academic intervention this term</li>
+            <li>Attendance trends by grade and subject</li>
+            <li>Classes tracking below expected performance</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-1" tabindex="0">
-        <div class="pillar-icon" aria-hidden="true">
+      <div class="level-card reveal reveal-delay-1" tabindex="0">
+        <div class="level-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20"><rect x="2" y="2" width="6" height="6" rx="1"/><rect x="12" y="2" width="6" height="6" rx="1"/><rect x="7" y="12" width="6" height="6" rx="1"/><path d="M5 8v2a2 2 0 002 2h1m5-4v2a2 2 0 01-2 2h-1"/></svg>
         </div>
-        <h3 class="pillar-title">District Intelligence</h3>
-        <p class="pillar-desc">District officials see across every school under their responsibility — performance trends, teacher allocation, attendance patterns, and which schools require intervention.</p>
-        <ul class="pillar-insights">
-          <li class="pillar-insight">3 schools show early Science teacher shortages</li>
-          <li class="pillar-insight">Reallocation recommended before next term</li>
-          <li class="pillar-insight">Every school in the district, compared side by side</li>
-        </ul>
-        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 class="level-title">District</h3>
+        <p class="level-tagline">Every school under one jurisdiction, compared.</p>
+        <div class="level-detail">
+          <p class="level-detail-desc">District officials compare performance and resourcing across every school they're responsible for, from a single view.</p>
+          <div class="level-detail-label">Example insights</div>
+          <ul class="level-detail-insights">
+            <li>Schools requiring intervention, ranked by urgency</li>
+            <li>Teacher allocation vs. attendance and performance</li>
+            <li>Early warning signs across the district</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-2" tabindex="0">
-        <div class="pillar-icon" aria-hidden="true">
+      <div class="level-card reveal reveal-delay-2" tabindex="0">
+        <div class="level-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20"><path d="M10 2L2 6l8 4 8-4-8-4z"/><path d="M2 10l8 4 8-4M2 14l8 4 8-4"/></svg>
         </div>
-        <h3 class="pillar-title">Provincial Intelligence</h3>
-        <p class="pillar-desc">Provincial departments monitor performance across multiple districts from a single platform — district comparisons, teacher shortages, infrastructure needs, and curriculum implementation.</p>
-        <ul class="pillar-insights">
-          <li class="pillar-insight">6 of 9 districts ahead of curriculum schedule</li>
-          <li class="pillar-insight">3 districts need infrastructure support</li>
-          <li class="pillar-insight">Full district comparison, updated in real time</li>
-        </ul>
-        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 class="level-title">Province</h3>
+        <p class="level-tagline">Multiple districts, one connected picture.</p>
+        <div class="level-detail">
+          <p class="level-detail-desc">Provincial departments monitor performance across many districts at once — without waiting on delayed, disconnected reporting.</p>
+          <div class="level-detail-label">Example insights</div>
+          <ul class="level-detail-insights">
+            <li>District-by-district performance comparison</li>
+            <li>Curriculum implementation progress</li>
+            <li>Infrastructure and resourcing gaps</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="pillar-card reveal reveal-delay-3" tabindex="0">
-        <div class="pillar-icon" aria-hidden="true">
+      <div class="level-card reveal reveal-delay-3" tabindex="0">
+        <div class="level-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5"/><path d="M10 2.5c-2.5 2-3.75 5-3.75 7.5s1.25 5.5 3.75 7.5c2.5-2 3.75-5 3.75-7.5S12.5 4.5 10 2.5zM2.5 10h15"/></svg>
         </div>
-        <h3 class="pillar-title">National Intelligence</h3>
-        <p class="pillar-desc">Education leaders see a real-time national view — provincial comparisons, long-term trends, policy impact, and the resource allocation decisions that shape a whole system.</p>
-        <ul class="pillar-insights">
-          <li class="pillar-insight">7 of 9 provinces trending upward year-on-year</li>
-          <li class="pillar-insight">Forecasting for next year's resource allocation</li>
-          <li class="pillar-insight">One system-wide view, from classroom to nation</li>
-        </ul>
-        <div class="pillar-hint">See example insights <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 class="level-title">National</h3>
+        <p class="level-tagline">A real-time view of the whole system.</p>
+        <div class="level-detail">
+          <p class="level-detail-desc">Education leaders see a live national picture — the trends, comparisons, and forecasts that inform policy and resource allocation.</p>
+          <div class="level-detail-label">Example insights</div>
+          <ul class="level-detail-insights">
+            <li>Provincial comparisons and long-term trends</li>
+            <li>Policy impact tracking over time</li>
+            <li>Forecasted resourcing needs by region</li>
+          </ul>
+        </div>
       </div>
 
     </div>
@@ -1925,37 +2058,33 @@
 
 
 <!-- ═══ ASK LAURA ═══ -->
-<section class="ask-section" id="ask-laura" aria-labelledby="ask-heading">
+<section class="ask-section" id="ask" aria-labelledby="ask-heading">
   <div class="ask-inner">
 
-    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">Ask Laura</div>
+    <div class="ask-label reveal">Ask Laura</div>
 
-    <h2 class="ask-headline reveal reveal-delay-1" id="ask-heading">
-      Ask Laura <em>anything.</em>
-    </h2>
+    <h2 class="ask-headline reveal reveal-delay-1" id="ask-heading">Ask Laura</h2>
     <p class="ask-sub reveal reveal-delay-2">
-      No dashboards to learn, no reports to wait for. Ask a question in plain language, and Laura answers from the operational data your school already generates.
+      No dashboards to configure, no reports to wait on. Ask a question in plain language, and Laura answers from what's actually happening across the system.
     </p>
 
-    <div class="ask-console reveal reveal-delay-3" id="ask-console" aria-hidden="true">
-
-      <div class="console-chrome">
-        <div class="console-mark">L</div>
-        <span class="console-label">Laura Console</span>
-        <span class="console-dot"></span>
-        <span class="console-status">Live</span>
+    <div class="ask-console reveal reveal-delay-3">
+      <div class="ask-console-chrome">
+        <span class="ask-console-dot"></span>
+        <span class="ask-console-dot"></span>
+        <span class="ask-console-dot"></span>
+        <span class="ask-console-title">laura — intelligence console</span>
+        <span class="ask-console-status"><span class="live-dot"></span>Live</span>
       </div>
 
-      <div class="console-input" id="console-input">
-        <span class="console-placeholder">Ask Laura anything...</span><span id="console-input-text"></span><span class="console-caret"></span>
+      <div class="ask-console-body" id="askConsoleBody" aria-live="polite">
+        <!-- populated by JS -->
       </div>
 
-      <div class="console-answer" id="console-answer">
-        <div class="console-asked-label">Asked</div>
-        <div class="console-asked-q" id="console-asked-text"></div>
-        <div class="console-answer-body" id="console-answer-text"></div>
+      <div class="ask-console-input-row">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5v10M2.5 9l5 5 5-5" stroke="var(--cream)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 7.5 7.5)"/></svg>
+        <span class="ask-console-placeholder" id="askPlaceholder">Ask Laura anything...</span>
       </div>
-
     </div>
 
   </div>
@@ -1963,73 +2092,62 @@
 
 
 <!-- ═══ PRODUCT PREVIEW ═══ -->
-<hr class="section-divider" />
+<section class="section preview-section" aria-labelledby="preview-heading">
+  <div class="preview-intro">
+    <div class="section-label is-signal reveal" style="justify-content:center;">See it in place</div>
+    <h2 class="preview-headline reveal reveal-delay-1" id="preview-heading">Wherever the work <em>happens</em></h2>
+    <p class="preview-sub reveal reveal-delay-2">One platform, built to fit the desk, the classroom, and the pocket.</p>
+  </div>
 
-<section class="section preview-section" id="preview" aria-labelledby="preview-heading">
-  <div class="section-inner" style="text-align:center;">
+  <div class="preview-stage" id="previewStage">
 
-    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center;">The interface</div>
-    <h2 class="preview-headline reveal reveal-delay-1" id="preview-heading">
-      Intelligence, <em>wherever you are.</em>
-    </h2>
-    <p class="preview-sub reveal reveal-delay-2">
-      From a principal's phone between classes to a national dashboard — Laura is built for every screen.
-    </p>
-
-    <div class="device-cluster">
-
-      <div class="device device-browser reveal reveal-delay-3">
-        <div class="browser-chrome" aria-hidden="true">
-          <span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span>
-          <span class="chrome-address">app.laura.enthropy.co.za</span>
-        </div>
-        <div class="device-screen" aria-hidden="true">
-          <div class="mock-stats">
-            <div class="mock-stat"><span class="mock-stat-num">92%</span><span class="mock-stat-label">Attendance</span></div>
-            <div class="mock-stat"><span class="mock-stat-num">4</span><span class="mock-stat-label">Flagged</span></div>
-            <div class="mock-stat"><span class="mock-stat-num">↑ 12%</span><span class="mock-stat-label">Trend</span></div>
-          </div>
-          <div class="mock-chart">
-            <span style="height:35%"></span><span style="height:60%"></span><span style="height:48%"></span><span style="height:78%"></span><span style="height:55%"></span><span style="height:90%"></span><span style="height:70%"></span><span style="height:82%"></span>
-          </div>
-          <div class="mock-lines">
-            <span class="mock-line" style="width:88%"></span>
-            <span class="mock-line" style="width:64%"></span>
-            <span class="mock-line" style="width:74%"></span>
-          </div>
+    <div class="preview-frame preview-browser" data-preview>
+      <div class="browser-chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="url-bar"></div>
+      </div>
+      <div class="browser-body">
+        <div class="row w40"></div>
+        <div class="row w80"></div>
+        <div class="row w60"></div>
+        <div class="cards">
+          <div class="card"><div class="stat"></div><div class="label"></div></div>
+          <div class="card"><div class="stat"></div><div class="label"></div></div>
+          <div class="card"><div class="stat"></div><div class="label"></div></div>
         </div>
       </div>
+    </div>
 
-      <div class="device device-tablet reveal reveal-delay-4" aria-hidden="true">
-        <div class="device-screen">
-          <div class="mock-stats">
-            <div class="mock-stat"><span class="mock-stat-num">6/9</span></div>
-            <div class="mock-stat"><span class="mock-stat-num">3</span></div>
-          </div>
-          <div class="mock-chart">
-            <span style="height:40%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:85%"></span><span style="height:60%"></span>
-          </div>
-          <div class="mock-lines">
-            <span class="mock-line" style="width:80%"></span>
-            <span class="mock-line" style="width:55%"></span>
-          </div>
+    <div class="preview-frame preview-laptop" data-preview>
+      <div class="laptop-screen">
+        <div class="laptop-screen-inner">
+          <div class="row w70"></div>
+          <div class="row w50"></div>
+          <div class="row"></div>
         </div>
       </div>
+      <div class="laptop-base"></div>
+    </div>
 
-      <div class="device device-mobile reveal reveal-delay-4" aria-hidden="true">
-        <div class="device-screen">
-          <div class="mock-stats">
-            <div class="mock-stat"><span class="mock-stat-num">7/9</span></div>
-          </div>
-          <div class="mock-chart">
-            <span style="height:50%"></span><span style="height:75%"></span><span style="height:65%"></span><span style="height:88%"></span>
-          </div>
-          <div class="mock-lines">
-            <span class="mock-line" style="width:82%"></span>
-          </div>
+    <div class="preview-frame preview-tablet" data-preview>
+      <div class="tablet-frame">
+        <div class="tablet-screen">
+          <div class="row w60"></div>
+          <div class="row"></div>
+          <div class="row"></div>
         </div>
       </div>
+    </div>
 
+    <div class="preview-frame preview-mobile" data-preview>
+      <div class="mobile-frame">
+        <div class="mobile-screen">
+          <div class="notch"></div>
+          <div class="row w70"></div>
+          <div class="pill"></div>
+          <div class="row"></div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2054,7 +2172,7 @@
     <div class="spaces-grid">
 
       <div class="space-tile reveal">
-        <div class="space-tile-top">
+        <div>
           <div class="space-tile-tag">Classroom level</div>
           <h3 class="space-tile-title">Teachers see their classrooms</h3>
           <p class="space-tile-desc">Access is scoped to what a teacher is responsible for — their own learners, their own classroom data, nothing beyond it.</p>
@@ -2062,7 +2180,7 @@
       </div>
 
       <div class="space-tile dark reveal reveal-delay-1">
-        <div class="space-tile-top">
+        <div>
           <div class="space-tile-tag">School level</div>
           <h3 class="space-tile-title">Principals see their schools</h3>
           <p class="space-tile-desc">A complete view of the institution — every classroom, every trend — without visibility into other schools' data.</p>
@@ -2070,7 +2188,7 @@
       </div>
 
       <div class="space-tile dark reveal reveal-delay-1">
-        <div class="space-tile-top">
+        <div>
           <div class="space-tile-tag">District & provincial level</div>
           <h3 class="space-tile-title">Officials see their jurisdiction</h3>
           <p class="space-tile-desc">District officials see their districts. Provincial departments see their provinces. Each tier's intelligence is scoped to its responsibility.</p>
@@ -2078,7 +2196,7 @@
       </div>
 
       <div class="space-tile reveal reveal-delay-2">
-        <div class="space-tile-top">
+        <div>
           <div class="space-tile-tag">National level</div>
           <h3 class="space-tile-title">National departments see aggregated intelligence</h3>
           <p class="space-tile-desc">A system-wide view built from aggregated data — informing national policy without compromising the privacy of any individual school or learner.</p>
@@ -2094,46 +2212,48 @@
 <!-- ═══ PRINCIPLES ═══ -->
 <hr class="section-divider" />
 
-<section class="principles-section" id="principles" aria-labelledby="principles-heading">
-  <div class="section-inner">
+<section class="section principles-section" aria-labelledby="principles-heading">
+  <div class="principles-intro">
+    <h2 class="principles-headline reveal" id="principles-heading">What Laura is built <em>on</em></h2>
+  </div>
 
-    <div class="section-label reveal" style="margin-left:auto; margin-right:auto; justify-content:center; margin-bottom:4rem;">What Laura stands for</div>
-    <h2 class="visually-hidden" id="principles-heading">Laura's core principles</h2>
+  <div class="principles-grid">
 
-    <div class="principles-grid">
-
-      <div class="principle reveal">
-        <div class="principle-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><path d="M11 1.5L4 11.5h5.5L9 18.5l7-11h-5.5L11 1.5z"/></svg>
-        </div>
-        <h3 class="principle-title">Real-time</h3>
-        <p class="principle-desc">Living intelligence, not delayed reports.</p>
+    <div class="principle-item reveal">
+      <div class="principle-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16"/><path d="M9 4v6"/></svg>
       </div>
+      <h3 class="principle-title">Grounded in reality</h3>
+      <p class="principle-desc">Every answer traces back to real operational data — never a guess.</p>
+    </div>
 
-      <div class="principle reveal reveal-delay-1">
-        <div class="principle-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><ellipse cx="10" cy="4.5" rx="6.5" ry="2.2"/><path d="M3.5 4.5v5c0 1.2 2.9 2.2 6.5 2.2s6.5-1 6.5-2.2v-5M3.5 9.5v5c0 1.2 2.9 2.2 6.5 2.2s6.5-1 6.5-2.2v-5"/></svg>
-        </div>
-        <h3 class="principle-title">Grounded</h3>
-        <p class="principle-desc">Built on real operational data, not assumptions.</p>
+    <div class="principle-item reveal reveal-delay-1">
+      <div class="principle-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3l7 3.5v5c0 4.5-3 8-7 9.5-4-1.5-7-5-7-9.5v-5L12 3z"/></svg>
       </div>
+      <h3 class="principle-title">Private by design</h3>
+      <p class="principle-desc">Role-based access, built in from the start — not added later.</p>
+    </div>
 
-      <div class="principle reveal reveal-delay-2">
-        <div class="principle-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><path d="M10 2.2l6.2 2.5v4.4c0 4-2.6 6.7-6.2 7.7-3.6-1-6.2-3.7-6.2-7.7V4.7L10 2.2z"/><path d="M7.3 9.8l2 2 3.4-3.8"/></svg>
-        </div>
-        <h3 class="principle-title">Governed</h3>
-        <p class="principle-desc">Every user sees only what they're authorised to see.</p>
+    <div class="principle-item reveal reveal-delay-2">
+      <div class="principle-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
       </div>
+      <h3 class="principle-title">Real time, always</h3>
+      <p class="principle-desc">Insight as it happens — not a report that arrives next term.</p>
+    </div>
 
-      <div class="principle reveal reveal-delay-3">
-        <div class="principle-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><rect x="7" y="7" width="6" height="6" rx="1"/></svg>
-        </div>
-        <h3 class="principle-title">Universal</h3>
-        <p class="principle-desc">One platform, every level of the system.</p>
-      </div>
+  </div>
+</section>
 
+
+<!-- ═══ FINAL STATEMENT ═══ -->
+<section class="final-section" aria-labelledby="final-heading">
+  <div class="final-inner">
+    <p class="final-statement reveal" id="final-heading">Education deserves intelligence worthy of its importance.</p>
+    <div class="final-signature reveal reveal-delay-1">
+      <span class="final-signature-name">Laura</span>
+      <span class="final-signature-tag">The Intelligence Layer of Modern Education.</span>
     </div>
   </div>
 </section>
@@ -2162,18 +2282,6 @@
           <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══ FINALE ═══ -->
-<section class="finale-section" aria-label="Closing statement">
-  <div class="finale-inner">
-    <p class="finale-statement reveal">Education deserves intelligence worthy of its importance.</p>
-    <div class="finale-brand reveal reveal-delay-2">
-      <span class="finale-brand-name">Laura</span>
-      <span class="finale-brand-tag">The Intelligence Layer of Modern Education.</span>
     </div>
   </div>
 </section>
@@ -2219,341 +2327,307 @@
   /* ─── Scroll reveal ─── */
   const reveals = document.querySelectorAll('.reveal');
 
-  const observer = new IntersectionObserver(function (entries) {
+  const revealObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
+        revealObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.10, rootMargin: '0px 0px -40px 0px' });
 
-  reveals.forEach(function (el) { observer.observe(el); });
+  reveals.forEach(function (el) { revealObserver.observe(el); });
 
   /* Hero reveals immediately */
   document.querySelectorAll('.laura-hero .reveal').forEach(function (el) {
     setTimeout(function () { el.classList.add('visible'); }, 100);
   });
 
-})();
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
-/* ─── Hero ambient network: a subtle web of connected, drifting points ─── */
-(function () {
-  var canvas = document.getElementById('hero-network');
-  if (!canvas || !canvas.getContext) return;
-  var ctx = canvas.getContext('2d');
-  var hero = canvas.closest('.laura-hero');
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ══════════════════════════════════════════════════════════
+     DATA JOURNEY — scroll-bound traveling point
+     Maps scroll progress through .journey-stops to: (1) the sticky
+     rail's progress stroke + traveler dot position, (2) which node
+     is marked active/passed, (3) which copy stop is highlighted.
+     ══════════════════════════════════════════════════════════ */
+  (function initJourney() {
+    const track = document.querySelector('.journey-track');
+    if (!track) return;
 
-  var width, height, dpr, nodes = [];
-  var running = false, rafId = null;
+    const stops = Array.from(document.querySelectorAll('.journey-stop'));
+    const railProgress = document.getElementById('railProgress');
+    const railTraveler  = document.getElementById('railTraveler');
+    const railNodes  = document.querySelectorAll('.rail-node');
+    const railLabels = document.querySelectorAll('.rail-label');
 
-  function nodeCount() {
-    var area = width * height;
-    return Math.max(16, Math.min(55, Math.round(area / 28000)));
-  }
+    // Node Y-positions match the SVG markup (viewBox 0 0 120 620)
+    const nodeYs = [20, 136, 252, 368, 484, 600];
+    const railStart = 20, railEnd = 600, railLength = 580;
 
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = canvas.clientWidth;
-    height = canvas.clientHeight;
-    if (!width || !height) return;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var count = nodeCount();
-    nodes = [];
-    for (var i = 0; i < count; i++) {
-      nodes.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.16,
-        vy: (Math.random() - 0.5) * 0.16
+    let ticking = false;
+
+    function update() {
+      ticking = false;
+      const viewportH = window.innerHeight;
+      const activationLine = viewportH * 0.45;
+
+      // Find the stop whose vertical center is closest to the activation
+      // line — this is driven per-stop rather than off the track's total
+      // height, so it stays correct regardless of section padding or
+      // how tall any individual stop happens to be.
+      let activeIdx = 0;
+      let closestDist = Infinity;
+      const stopCenters = stops.map(function (stop) {
+        const r = stop.getBoundingClientRect();
+        return r.top + r.height / 2;
+      });
+
+      stopCenters.forEach(function (center, i) {
+        const dist = Math.abs(center - activationLine);
+        if (dist < closestDist) {
+          closestDist = dist;
+          activeIdx = i;
+        }
+      });
+
+      // Fine progress WITHIN the active range, for the traveler dot + line,
+      // interpolated between the active stop and its neighbour based on
+      // which side of the activation line it falls.
+      let fineProgress = activeIdx / (stops.length - 1);
+      const activeCenter = stopCenters[activeIdx];
+      const neighborIdx = activeCenter > activationLine
+        ? Math.max(0, activeIdx - 1)
+        : Math.min(stops.length - 1, activeIdx + 1);
+
+      if (neighborIdx !== activeIdx) {
+        const neighborCenter = stopCenters[neighborIdx];
+        const span = neighborCenter - activeCenter;
+        if (span !== 0) {
+          const t = (activationLine - activeCenter) / span;
+          const tClamped = Math.max(-1, Math.min(1, t));
+          const idxDelta = neighborIdx - activeIdx;
+          fineProgress = (activeIdx + tClamped * idxDelta) / (stops.length - 1);
+        }
+      }
+      fineProgress = Math.max(0, Math.min(1, fineProgress));
+
+      // Before the first stop's center has reached the activation line at
+      // all (page just entered the section), keep the traveler pinned at
+      // the very start rather than extrapolating negative.
+      if (stopCenters[0] > activationLine) fineProgress = 0;
+      // After the last stop's center has passed the activation line,
+      // pin at the very end.
+      if (stopCenters[stops.length - 1] < activationLine) fineProgress = 1;
+
+      const offset = railLength * (1 - fineProgress);
+      if (railProgress) railProgress.style.strokeDashoffset = offset;
+      const travelerY = railStart + (railEnd - railStart) * fineProgress;
+      if (railTraveler) railTraveler.setAttribute('cy', travelerY.toFixed(1));
+
+      stops.forEach(function (stop, i) {
+        stop.classList.toggle('is-active', i === activeIdx);
+      });
+
+      railNodes.forEach(function (node) {
+        const i = parseInt(node.dataset.stop, 10);
+        node.classList.toggle('is-active', i === activeIdx);
+        node.classList.toggle('is-passed', i < activeIdx);
+      });
+      railLabels.forEach(function (label) {
+        const i = parseInt(label.dataset.stop, 10);
+        label.classList.toggle('is-active', i === activeIdx);
+        label.classList.toggle('is-passed', i < activeIdx);
       });
     }
-  }
 
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
-    var maxDist = Math.min(width, height) * 0.17;
-
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      n.x += n.vx;
-      n.y += n.vy;
-      if (n.x < 0 || n.x > width) { n.vx *= -1; n.x = Math.max(0, Math.min(width, n.x)); }
-      if (n.y < 0 || n.y > height) { n.vy *= -1; n.y = Math.max(0, Math.min(height, n.y)); }
-    }
-
-    for (var a = 0; a < nodes.length; a++) {
-      for (var b = a + 1; b < nodes.length; b++) {
-        var dx = nodes[a].x - nodes[b].x;
-        var dy = nodes[a].y - nodes[b].y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < maxDist) {
-          var o = (1 - dist / maxDist) * 0.09;
-          ctx.strokeStyle = 'rgba(26,23,20,' + o.toFixed(3) + ')';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(nodes[a].x, nodes[a].y);
-          ctx.lineTo(nodes[b].x, nodes[b].y);
-          ctx.stroke();
-        }
+    function onScrollJourney() {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
       }
     }
 
-    for (var c = 0; c < nodes.length; c++) {
-      ctx.fillStyle = 'rgba(196,98,45,0.15)';
-      ctx.beginPath();
-      ctx.arc(nodes[c].x, nodes[c].y, 1.6, 0, Math.PI * 2);
-      ctx.fill();
+    window.addEventListener('scroll', onScrollJourney, { passive: true });
+    window.addEventListener('resize', onScrollJourney);
+    update();
+  })();
+
+
+  /* ══════════════════════════════════════════════════════════
+     PRODUCT PREVIEW — staggered scroll-in
+     ══════════════════════════════════════════════════════════ */
+  (function initPreview() {
+    const stage = document.getElementById('previewStage');
+    if (!stage) return;
+
+    const frames = stage.querySelectorAll('[data-preview]');
+    const previewObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          previewObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -60px 0px' });
+
+    frames.forEach(function (f) { previewObserver.observe(f); });
+  })();
+
+
+  /* ══════════════════════════════════════════════════════════
+     ASK LAURA — auto-typing console
+     Cycles through a fixed script of question/answer pairs, typing the
+     question character-by-character, pausing, showing a brief "thinking"
+     state, then revealing the answer. Loops continuously while the
+     section is in view; pauses when scrolled away or on reduced motion.
+     ══════════════════════════════════════════════════════════ */
+  (function initAskLaura() {
+    const body = document.getElementById('askConsoleBody');
+    const askSection = document.getElementById('ask');
+    if (!body || !askSection) return;
+
+    const script = [
+      {
+        q: "Which schools require intervention this term?",
+        a: "3 schools are flagged for intervention — all showing Mathematics attendance below 85% alongside declining assessment scores. <strong>Greenwood High</strong> and two others in the same district."
+      },
+      {
+        q: "Why are Mathematics results declining?",
+        a: "The trend traces to Grade 10, where <strong>4 classes lost a teacher mid-term</strong>. Attendance in those classes dropped 12% over the same period — the two are strongly correlated."
+      },
+      {
+        q: "Predict which districts may require additional Mathematics teachers next year.",
+        a: "Based on enrolment growth and current staffing ratios, <strong>2 districts</strong> are projected to fall below recommended teacher-to-learner ratios by next year."
+      },
+      {
+        q: "How is attendance trending across the province?",
+        a: "Attendance is <strong>up 3% year-on-year</strong> across the province, with the strongest gains in districts that adopted early-warning alerts this term."
+      },
+      {
+        q: "What should national leadership prepare for next year?",
+        a: "Forecasts point to continued improvement in 7 of 9 provinces — <strong>if current resource allocation holds</strong>. The remaining 2 need infrastructure investment to keep pace."
+      }
+    ];
+
+    let scriptIdx = 0;
+    let running = false;
+    let cancelled = false;
+    let sectionVisible = false;
+
+    function sleep(ms) {
+      return new Promise(function (resolve) {
+        window._askTimeouts = window._askTimeouts || [];
+        const id = setTimeout(resolve, ms);
+        window._askTimeouts.push(id);
+      });
     }
-  }
 
-  function step() {
-    draw();
-    if (running) rafId = window.requestAnimationFrame(step);
-  }
-
-  function start() {
-    if (running || reduceMotion) return;
-    running = true;
-    rafId = window.requestAnimationFrame(step);
-  }
-
-  function stop() {
-    running = false;
-    if (rafId) window.cancelAnimationFrame(rafId);
-  }
-
-  resize();
-
-  if (reduceMotion) {
-    draw();
-  } else {
-    if (hero && 'IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) start(); else stop();
-        });
-      }, { threshold: 0.01 });
-      io.observe(hero);
+    function clearBodyIfTooLong() {
+      // Keep at most 2 prior turns visible so the console doesn't grow forever
+      while (body.children.length > 2) {
+        body.removeChild(body.firstChild);
+      }
     }
-    start();
-  }
 
-  var resizeTimer;
-  window.addEventListener('resize', function () {
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(function () {
-      resize();
-      if (reduceMotion) draw();
-    }, 200);
-  });
-})();
+    async function typeText(el, text, speed) {
+      el.innerHTML = '';
+      const caret = document.createElement('span');
+      caret.className = 'ask-caret';
+      el.appendChild(caret);
 
-
-/* ─── Data journey: scroll-linked ascent from learner to nation ─── */
-(function () {
-  var track = document.getElementById('journey-track');
-  if (!track) return;
-  var fillEl = document.getElementById('journey-fill');
-  var dotEl = document.getElementById('journey-dot');
-  var stops = Array.prototype.slice.call(document.querySelectorAll('.journey-stop'));
-  var nameEl = document.getElementById('journey-name');
-  var descEl = document.getElementById('journey-desc');
-  var countEl = document.getElementById('journey-count');
-  if (!fillEl || !dotEl || !nameEl || !descEl || !countEl) return;
-
-  var stages = [
-    { name: 'Learner', desc: "Every assignment, every assessment, every day of attendance \u2014 one learner's record begins the story." },
-    { name: 'Classroom', desc: "In the classroom, that record meets a teacher's daily reality \u2014 who needs support, right now." },
-    { name: 'School', desc: 'Across the school, patterns emerge \u2014 which subjects are thriving, and which need intervention.' },
-    { name: 'District', desc: 'The district sees every school at once \u2014 where teachers are needed, where results are shifting.' },
-    { name: 'Province', desc: 'The province compares districts side by side \u2014 curriculum progress, infrastructure, resourcing.' },
-    { name: 'Nation', desc: "At a national level, one learner's data has become part of the intelligence shaping an entire system." }
-  ];
-
-  var currentStage = -1;
-  var changeTimer = null;
-
-  function setStage(i) {
-    if (i === currentStage) return;
-    currentStage = i;
-    nameEl.classList.add('is-changing');
-    descEl.classList.add('is-changing');
-    countEl.textContent = 'Stage 0' + (i + 1) + ' / 06';
-    window.clearTimeout(changeTimer);
-    changeTimer = window.setTimeout(function () {
-      nameEl.textContent = stages[i].name;
-      descEl.textContent = stages[i].desc;
-      nameEl.classList.remove('is-changing');
-      descEl.classList.remove('is-changing');
-    }, 180);
-    stops.forEach(function (stop, idx) {
-      stop.classList.toggle('is-active', idx <= i);
-    });
-  }
-
-  var ticking = false;
-  function update() {
-    ticking = false;
-    var rect = track.getBoundingClientRect();
-    var total = rect.height - window.innerHeight;
-    var progress = total > 0 ? (-rect.top) / total : 0;
-    progress = Math.max(0, Math.min(1, progress));
-    var pct = (progress * 100).toFixed(2) + '%';
-    fillEl.style.height = pct;
-    dotEl.style.bottom = pct;
-    var stageIndex = Math.min(5, Math.floor(progress * 6));
-    setStage(stageIndex);
-  }
-
-  function onScroll() {
-    if (!ticking) {
-      ticking = true;
-      window.requestAnimationFrame(update);
+      for (let i = 0; i < text.length; i++) {
+        if (cancelled) return;
+        caret.insertAdjacentText('beforebegin', text[i]);
+        // Vary speed slightly for a more natural feel
+        const jitter = speed + (Math.random() * 24 - 12);
+        await sleep(Math.max(14, jitter));
+      }
+      caret.remove();
     }
-  }
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  update();
-})();
+    async function runTurn(turn) {
+      clearBodyIfTooLong();
 
+      const turnEl = document.createElement('div');
+      turnEl.className = 'ask-turn';
 
-/* ─── Intelligence tier cards: tap-to-reveal for touch devices ─── */
-(function () {
-  var cards = document.querySelectorAll('.pillar-card');
-  cards.forEach(function (card) {
-    card.addEventListener('click', function () {
-      var wasOpen = card.classList.contains('is-open');
-      cards.forEach(function (c) { c.classList.remove('is-open'); });
-      if (!wasOpen) card.classList.add('is-open');
-    });
-  });
-})();
+      const queryRow = document.createElement('div');
+      queryRow.className = 'ask-query-row';
+      queryRow.innerHTML = '<span class="ask-query-prompt">›</span>';
+      const queryText = document.createElement('span');
+      queryText.className = 'ask-query-text';
+      queryRow.appendChild(queryText);
+      turnEl.appendChild(queryRow);
+      body.appendChild(turnEl);
+      body.scrollTop = body.scrollHeight;
 
+      await typeText(queryText, turn.q, 34);
+      if (cancelled) return;
 
-/* ─── Ask Laura: looping realistic conversation demo ─── */
-(function () {
-  var section = document.getElementById('ask-laura');
-  var inputWrap = document.getElementById('console-input');
-  var inputText = document.getElementById('console-input-text');
-  var answerPanel = document.getElementById('console-answer');
-  var askedText = document.getElementById('console-asked-text');
-  var answerText = document.getElementById('console-answer-text');
-  if (!section || !inputWrap || !inputText || !answerPanel || !askedText || !answerText) return;
+      await sleep(500);
+      if (cancelled) return;
 
-  var qa = [
-    {
-      q: 'Which schools require intervention this term?',
-      a: '<strong>4 schools</strong> are flagged for intervention this term \u2014 each showing a decline in Mathematics results alongside falling attendance in at least two classes.'
-    },
-    {
-      q: 'Why are Mathematics results declining?',
-      a: 'Across flagged schools, the pattern traces back to attendance. <strong>Grade 10 classes below 85% attendance</strong> show the sharpest drop in assessment scores.'
-    },
-    {
-      q: 'Predict which districts may require additional Mathematics teachers next year.',
-      a: '<strong>3 districts</strong> show early signs of a Mathematics shortfall, based on current allocation against projected enrolment growth.'
-    },
-    {
-      q: 'Is curriculum implementation on track?',
-      a: '<strong>6 of 9 districts</strong> are ahead of schedule \u2014 the remaining 3 need infrastructure support to catch up.'
-    },
-    {
-      q: 'What should national leadership prepare for next year?',
-      a: '<strong>7 of 9 provinces</strong> are trending upward. If current resourcing holds, forecasts suggest the improvement continues.'
+      const thinking = document.createElement('div');
+      thinking.className = 'ask-thinking';
+      thinking.innerHTML = '<span></span><span></span><span></span>';
+      turnEl.appendChild(thinking);
+      body.scrollTop = body.scrollHeight;
+
+      await sleep(900);
+      if (cancelled) return;
+      thinking.remove();
+
+      const answer = document.createElement('div');
+      answer.className = 'ask-answer';
+      answer.innerHTML =
+        '<div class="ask-answer-eyebrow">Laura</div>' +
+        '<div class="ask-answer-text">' + turn.a + '</div>';
+      turnEl.appendChild(answer);
+      body.scrollTop = body.scrollHeight;
+
+      await sleep(3600);
     }
-  ];
 
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var idx = 0, cycleToken = 0, isVisible = false, timers = [];
+    async function loop() {
+      if (running) return;
+      running = true;
+      cancelled = false;
 
-  function schedule(fn, ms) {
-    var id = window.setTimeout(fn, ms);
-    timers.push(id);
-    return id;
-  }
+      while (!cancelled) {
+        if (!sectionVisible || prefersReducedMotion) {
+          await sleep(400);
+          continue;
+        }
+        await runTurn(script[scriptIdx]);
+        scriptIdx = (scriptIdx + 1) % script.length;
+        await sleep(700);
+      }
+      running = false;
+    }
 
-  function clearTimers() {
-    timers.forEach(function (id) { window.clearTimeout(id); });
-    timers = [];
-  }
-
-  function typeQuestion(text, token, done) {
-    inputWrap.classList.add('has-text');
-    inputText.textContent = '';
-
-    if (reduceMotion) {
-      inputText.textContent = text;
-      schedule(function () { if (token === cycleToken) done(); }, 400);
+    if (prefersReducedMotion) {
+      // Show a single static example turn instead of animating.
+      const turn = script[0];
+      body.innerHTML =
+        '<div class="ask-turn">' +
+        '<div class="ask-query-row"><span class="ask-query-prompt">›</span><span class="ask-query-text">' + turn.q + '</span></div>' +
+        '<div class="ask-answer"><div class="ask-answer-eyebrow">Laura</div><div class="ask-answer-text">' + turn.a + '</div></div>' +
+        '</div>';
       return;
     }
 
-    var i = 0;
-    function step() {
-      if (token !== cycleToken) return;
-      if (i <= text.length) {
-        inputText.textContent = text.slice(0, i);
-        i++;
-        schedule(step, 26 + Math.random() * 34);
-      } else {
-        done();
-      }
-    }
-    step();
-  }
-
-  function runCycle() {
-    var token = cycleToken;
-    var item = qa[idx % qa.length];
-
-    typeQuestion(item.q, token, function () {
-      if (token !== cycleToken) return;
-      schedule(function () {
-        if (token !== cycleToken) return;
-
-        askedText.textContent = item.q;
-        answerText.innerHTML = item.a;
-        answerPanel.classList.remove('is-in');
-        void answerPanel.offsetWidth;
-        answerPanel.classList.add('is-in');
-
-        inputWrap.classList.remove('has-text');
-        inputText.textContent = '';
-
-        idx++;
-        schedule(runCycle, reduceMotion ? 2200 : 3600);
-      }, 450);
-    });
-  }
-
-  function start() {
-    if (isVisible) return;
-    isVisible = true;
-    cycleToken++;
-    runCycle();
-  }
-
-  function stop() {
-    isVisible = false;
-    cycleToken++;
-    clearTimers();
-  }
-
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
+    const askObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (entry.isIntersecting) start(); else stop();
+        sectionVisible = entry.isIntersecting;
+        if (sectionVisible) loop();
       });
-    }, { threshold: 0.4 });
-    io.observe(section);
-  } else {
-    start();
-  }
+    }, { threshold: 0.25 });
+
+    askObserver.observe(askSection);
+  })();
+
 })();
 </script>
 
