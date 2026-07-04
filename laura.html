@@ -666,7 +666,7 @@
   }
 
   @media (max-width: 860px) {
-    .journey-stop { min-height: 0; padding: 2.5rem 0; opacity: 1; transform: none; }
+    .journey-stop { min-height: 0; padding: 2.5rem 0; }
     .journey-stop-mobile-node { display: flex; }
   }
 
@@ -903,10 +903,30 @@
   }
 
   @media (hover: none) {
-    /* Touch devices: keep detail content statically visible rather than
-       relying on a hover state that may never trigger. */
-    .level-tagline { max-height: none; opacity: 1; margin-bottom: 0.85rem; }
-    .level-detail { max-height: none; opacity: 1; margin-top: 0; }
+    /* Touch devices: no hover state, so expand/collapse is driven by
+       scroll position instead — see initLevelCardsScroll(). Cards start
+       collapsed (tagline visible, detail hidden) and only the
+       .is-expanded state (toggled by JS as each card crosses into/out
+       of view) reveals the detail, mirroring the desktop hover effect. */
+    .level-card.is-expanded .level-tagline {
+      max-height: 0;
+      opacity: 0;
+      margin-bottom: 0;
+    }
+
+    .level-card.is-expanded .level-detail {
+      max-height: 220px;
+      opacity: 1;
+      margin-top: 0.85rem;
+    }
+
+    .level-card.is-expanded {
+      background: var(--cream);
+      border-color: var(--divider);
+      box-shadow: 0 16px 32px -12px rgba(26,23,20,0.14);
+    }
+
+    .level-card.is-expanded .level-icon { background: rgba(43,76,111,0.16); }
   }
 
   /* ─── ASK LAURA — CENTREPIECE ───
@@ -974,6 +994,22 @@
     letter-spacing: -0.02em;
     color: var(--cream);
     margin-bottom: 1rem;
+  }
+
+  .ask-headline-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+  }
+
+  .ask-headline-logo {
+    height: 0.78em;
+    width: auto;
+    flex-shrink: 0;
+    /* Source mark is dark-ink; this section has a dark background, so
+       invert it to read as light against it, matching --cream. */
+    filter: brightness(0) invert(1);
   }
 
   .ask-sub {
@@ -1402,11 +1438,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2.5rem;
+      gap: 3rem;
       padding-bottom: 2rem;
     }
     .preview-frame { position: static !important; max-width: 300px; width: 100% !important; }
     .preview-browser { max-width: 340px; }
+
+    /* Phone drawing dropped on mobile — showing a phone frame inside a
+       page the person is already viewing on their phone reads as
+       redundant. Browser/laptop/tablet stack cleanly as the remaining
+       three; gap above is opened up slightly to fill the space that
+       used to belong to the fourth frame. */
+    .preview-mobile { display: none; }
   }
 
   /* ─── PRINCIPLES ─── */
@@ -1509,6 +1552,18 @@
     flex-direction: column;
     align-items: center;
     gap: 0.4rem;
+  }
+
+  .final-signature-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .final-signature-logo {
+    height: 1.15em;
+    width: auto;
+    flex-shrink: 0;
   }
 
   .final-signature-name {
@@ -2063,7 +2118,10 @@
 
     <div class="ask-label reveal">Ask Laura</div>
 
-    <h2 class="ask-headline reveal reveal-delay-1" id="ask-heading">Ask Laura</h2>
+    <h2 class="ask-headline ask-headline-brand reveal reveal-delay-1" id="ask-heading" aria-label="Ask Laura">
+      <img src="laura_logo.svg" alt="" class="ask-headline-logo" />
+      <span>Laura</span>
+    </h2>
     <p class="ask-sub reveal reveal-delay-2">
       No dashboards to configure, no reports to wait on. Ask a question in plain language, and Laura answers from what's actually happening across the system.
     </p>
@@ -2252,7 +2310,10 @@
   <div class="final-inner">
     <p class="final-statement reveal" id="final-heading">Education deserves intelligence worthy of its importance.</p>
     <div class="final-signature reveal reveal-delay-1">
-      <span class="final-signature-name">Laura</span>
+      <div class="final-signature-brand">
+        <img src="laura_logo.svg" alt="" class="final-signature-logo" />
+        <span class="final-signature-name">Laura</span>
+      </div>
       <span class="final-signature-tag">The Intelligence Layer of Modern Education.</span>
     </div>
   </div>
@@ -2451,6 +2512,49 @@
 
     window.addEventListener('scroll', onScrollJourney, { passive: true });
     window.addEventListener('resize', onScrollJourney);
+    update();
+  })();
+
+
+  /* ══════════════════════════════════════════════════════════
+     LEVEL CARDS — scroll-driven expand on touch devices
+     Desktop expands .level-card on :hover/:focus-within. Touch devices
+     have no hover, so instead each card is expanded when it crosses an
+     activation line partway down the viewport, and collapsed again once
+     it scrolls back out past that line in either direction — mirroring
+     the reveal-on-scroll feel used elsewhere on the page.
+     ══════════════════════════════════════════════════════════ */
+  (function initLevelCardsScroll() {
+    if (!window.matchMedia('(hover: none)').matches) return;
+
+    const cards = Array.from(document.querySelectorAll('.level-card'));
+    if (!cards.length) return;
+
+    let ticking = false;
+
+    function update() {
+      ticking = false;
+      const viewportH = window.innerHeight;
+      const activationTop = viewportH * 0.15;
+      const activationBottom = viewportH * 0.85;
+
+      cards.forEach(function (card) {
+        const r = card.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        const inView = center > activationTop && center < activationBottom;
+        card.classList.toggle('is-expanded', inView);
+      });
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     update();
   })();
 
