@@ -359,23 +359,21 @@ function renderTeacherQuizzes(data) {
             }
         </style>
 
-        <div class="teacher-resources-header">
-            <h2 class="teacher-resources-title">Quizzes</h2>
-            <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateQuiz()">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Create Quiz
-            </button>
-        </div>
-        <div class="teacher-year-badge">${escapeHtml(yearName)} &bull; Term ${currentTerm} Active</div>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="qz-desktop-layout">
             <!-- Left Sidebar -->
             <div class="qz-sidebar">
-                <div class="qz-sidebar-header">All Quizzes</div>
+                <div class="qz-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <span>All Quizzes</span>
+                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateQuiz()"
+                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Create Quiz
+                    </button>
+                </div>
                 <div class="qz-sidebar-scroll">${sidebarHtml}</div>
             </div>
 
@@ -1395,8 +1393,18 @@ window.openCreateQuiz = async function() {
                     </button>
 
                     <div class="cq-preview-card">
-                        <div class="cq-preview-label">Full Learner Preview</div>
-                        <div id="cqFullPreview" class="cq-full-preview"></div>
+                        <div class="cq-preview-label" onclick="toggleCqFullPreview()"
+                            style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0;">
+                            <span>Full Learner Preview</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"
+                                class="cq-full-preview-chevron" id="cqFullPreviewChevron"
+                                style="transform:rotate(90deg);transition:transform .2s;flex-shrink:0;">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                        <div id="cqFullPreviewWrap" style="margin-top:10px;">
+                            <div id="cqFullPreview" class="cq-full-preview"></div>
+                        </div>
                     </div>
                     </div>
 
@@ -2054,6 +2062,15 @@ function updateCqPreview() {
         ${previews.join('') || '<div style="color:#8b949e;font-size:13px;">Add a question to preview the learner view.</div>'}
     `;
 }
+
+window.toggleCqFullPreview = function() {
+    const wrap = document.getElementById('cqFullPreviewWrap');
+    const chevron = document.getElementById('cqFullPreviewChevron');
+    if (!wrap || !chevron) return;
+    const isOpen = wrap.style.display !== 'none';
+    wrap.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+};
 
 // ─────────────────────────────────────────────
 // FIX 4: Status / start time coupling
