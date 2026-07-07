@@ -1,7 +1,11 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Added
+- Teacher Quizzes: Added live learner previews to the create quiz flow, including per-question previews and a full quiz preview before submission.
+
 ### Changed
+- Teacher Quizzes: Reworked the create quiz form into clearer beginner-friendly steps, added visible attempt-limit setup, and reordered question creation so teachers choose the question type before writing the question.
 - Learner: Sorted teacher folders by each teacher's latest uploaded content across Grades, Assignments, Quizzes, Resources, and Announcements on both mobile and desktop. Quiz mobile folders now match desktop by grouping under teacher names.
 - UI: Removed borders from all SVG icon boxes on the mobile home page (`manual.js`, `manual.css`) — section-title icons (To Do, Recent, Upcoming Events), My Class icon, list row icons, and empty-state icons — for a flatter, cleaner look on mobile. Background colors kept.
 - UI: Removed borders from mobile list-row icon boxes in Assignments, Quiz, Resources, and Announcements (`assignments.js`, `quiz.js`, `resources.js`, `announcements.js`), including the Announcements "school" card variant. Background colors kept.

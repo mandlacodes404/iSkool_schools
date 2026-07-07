@@ -1201,44 +1201,88 @@ window.openCreateQuiz = async function() {
         const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
 
         target.innerHTML = `
-            <div style="max-width:${isDesktop ? '560px' : '700px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
+            <div style="max-width:${isDesktop ? '920px' : '760px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
                 <h2 style="color:#4fd1c5;font-size:${titleSize};margin:${titleMargin};font-weight:800;">Create a New Quiz</h2>
+                <style>
+                    .cq-section { background:#1a1919; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:18px; margin-bottom:16px; }
+                    .cq-section-title { display:flex; align-items:center; gap:10px; color:#e2e8f0; font-size:15px; font-weight:900; margin:0 0 14px; }
+                    .cq-step { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; background:rgba(79,209,197,0.13); color:#4fd1c5; border:1px solid rgba(79,209,197,0.28); font-size:12px; font-weight:900; flex-shrink:0; }
+                    .cq-section-help { color:#8b949e; font-size:13px; line-height:1.5; margin:-6px 0 14px; }
+                    .cq-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+                    .cq-preview-card { background:#0d1117; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; }
+                    .cq-preview-label { color:#8b949e; font-size:11px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; margin-bottom:10px; }
+                    .cq-learner-card { background:#161b22; border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px; margin-bottom:12px; }
+                    .cq-learner-meta { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:12px; color:#94a3b8; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; }
+                    .cq-learner-question { color:#e2e8f0; font-size:15px; font-weight:800; line-height:1.55; margin-bottom:14px; }
+                    .cq-learner-choice { display:flex; align-items:center; gap:12px; color:#e2e8f0; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:11px 13px; margin-top:8px; font-size:13px; font-weight:700; }
+                    .cq-learner-radio { width:18px; height:18px; border:2px solid rgba(255,255,255,0.22); border-radius:50%; flex-shrink:0; }
+                    .cq-learner-checkbox { border-radius:5px; }
+                    .cq-preview-textarea { width:100%; min-height:110px; resize:vertical; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#8b949e; padding:12px; font-family:inherit; line-height:1.5; }
+                    .cq-full-preview { max-height:560px; overflow:auto; padding-right:4px; }
+                    @media (max-width: 760px) { .cq-grid { grid-template-columns:1fr; } .cq-section { padding:15px; } }
+                </style>
 
                 <form id="createQuizForm" enctype="multipart/form-data">
 
+                    <div class="cq-section">
+                        <div class="cq-section-title"><span class="cq-step">1</span>Quiz Basics</div>
+                        <div class="cq-section-help">Start with the information learners and teachers need to recognise the quiz.</div>
+
                     <label class="teacher-modal-label">Quiz Title *</label>
                     <input type="text" name="quiz_title" class="teacher-modal-input"
-                        placeholder="e.g. Chapter 3 Test" required>
+                        placeholder="e.g. Chapter 3: Fractions Quiz" required>
 
-                    <label class="teacher-modal-label">Assign to Class *</label>
+                    <label class="teacher-modal-label">Class *</label>
                     <div id="quizClassPicker"></div>
 
-                    <label class="teacher-modal-label">Duration (minutes) *</label>
-                    <input type="number" name="duration" class="teacher-modal-input"
-                        min="1" max="180" placeholder="e.g. 60" required style="max-width:160px;">
+                    <div class="cq-grid">
+                        <div>
+                            <label class="teacher-modal-label">Time Limit *</label>
+                            <input type="number" name="duration" class="teacher-modal-input"
+                                min="1" max="180" placeholder="e.g. 45" required>
+                            <div style="font-size:12px;color:#8b949e;margin-top:5px;">How long learners have after they press Start.</div>
+                        </div>
+                        <div>
+                            <label class="teacher-modal-label">Attempts Allowed</label>
+                            <input type="number" name="attempt_limit" class="teacher-modal-input"
+                                min="1" max="10" value="1">
+                            <div style="font-size:12px;color:#8b949e;margin-top:5px;">Use 1 for a normal test. Increase only when learners may retry.</div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="cq-section">
+                        <div class="cq-section-title"><span class="cq-step">2</span>When Learners Can Access It</div>
+                        <div class="cq-section-help">Most teachers should leave this as Scheduled, then choose the date and time.</div>
 
                     <!-- FIX 8: Start time with default + helper text -->
                     <div id="cqStartTimeWrapper">
-                        <label class="teacher-modal-label">Start Time *</label>
+                        <label class="teacher-modal-label">Start Date and Time *</label>
                         <input type="datetime-local" name="start_time" id="cqStartTime" class="teacher-modal-input" required>
                         <span id="cqStartTimeHelper" style="display:block;margin-top:5px;font-size:12px;color:#8b949e;">You can change this — learners won't see the quiz until this time.</span>
                         <span id="cqStartTimeIgnored" style="display:none;margin-top:5px;font-size:12px;color:#8b949e;font-style:italic;"><i class="fas fa-info-circle"></i> Start time is ignored when quiz is set to Open.</span>
                     </div>
 
                     <!-- FIX 4: Status with clearer label + conditional start time -->
-                    <label class="teacher-modal-label">Quiz Status</label>
+                    <label class="teacher-modal-label">Availability</label>
                     <select name="status" id="cqStatus" class="teacher-modal-input" onchange="handleCqStatusChange(this.value)">
-                        <option value="Scheduled">Scheduled (Opens at start time)</option>
-                        <option value="Open">Open (Available immediately)</option>
-                        <option value="Closed">Closed (Not accessible)</option>
+                        <option value="Scheduled">Scheduled - opens at the start time</option>
+                        <option value="Open">Open now - learners can start immediately</option>
+                        <option value="Closed">Closed - hidden from learners for now</option>
                     </select>
+
+                    </div>
+
+                    <div class="cq-section">
+                        <div class="cq-section-title"><span class="cq-step">3</span>Marks, Term and Notifications</div>
+                        <div class="cq-section-help">Choose how marks are released, whether this quiz affects term marks, and whether to send email.</div>
 
                     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
                         <div id="cqPublishMarksWrap">
                             <label id="cqPublishMarksLabel" style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
                                 <input type="checkbox" name="publish_marks" value="1"
                                     style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
-                                Publish marks immediately after submission
+                                Show learners their marks immediately after they submit
                             </label>
                             <div id="cqPublishMarksOpenMessage" style="display:none;background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;">
                                 Marks cannot be auto-released when the quiz contains open-ended questions. You must grade all responses manually before releasing marks.
@@ -1249,7 +1293,7 @@ window.openCreateQuiz = async function() {
                             <input type="checkbox" name="is_summative" value="1" id="cqSummative"
                                 style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;"
                                 onchange="toggleCqWeight()">
-                            Counts toward official term mark
+                            This counts toward the official term mark
                         </label>
 
                         <div id="cqWeightContainer" style="display:none;margin-left:28px;">
@@ -1266,9 +1310,14 @@ window.openCreateQuiz = async function() {
                                     style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;flex-shrink:0;">
                                 Also send email notifications
                             </label>
-                            <p style="margin:6px 0 0 28px;font-size:12px;color:#8b949e;line-height:1.5;">Mobile push notifications are sent automatically. Email is optional and uses more server resources.</p>
+                            <p style="margin:6px 0 0 28px;font-size:12px;color:#8b949e;line-height:1.5;">Push notifications are sent automatically. Email is optional.</p>
                         </div>
                     </div>
+                    </div>
+
+                    <div class="cq-section">
+                        <div class="cq-section-title"><span class="cq-step">4</span>Learner Experience</div>
+                        <div class="cq-section-help">Single Page is easiest for normal class quizzes. Multi-Page is better for controlled tests.</div>
 
                     <!-- Term Info -->
                     <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
@@ -1319,6 +1368,11 @@ window.openCreateQuiz = async function() {
                             <span><strong>Linear Progression</strong> — learners cannot go back to previous questions.</span>
                         </label>
                     </div>
+                    </div>
+
+                    <div class="cq-section">
+                        <div class="cq-section-title"><span class="cq-step">5</span>Questions and Learner Preview</div>
+                        <div class="cq-section-help">Add each question, then check the preview to see what learners will see before you create the quiz.</div>
 
                     <!-- FIX 3: Live summary bar -->
                     <div id="cqSummaryBar" style="display:flex;align-items:center;justify-content:center;gap:16px;background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 16px;margin:16px 0 8px;font-size:13px;font-weight:700;color:#4fd1c5;">
@@ -1340,6 +1394,12 @@ window.openCreateQuiz = async function() {
                         + Add Question
                     </button>
 
+                    <div class="cq-preview-card">
+                        <div class="cq-preview-label">Full Learner Preview</div>
+                        <div id="cqFullPreview" class="cq-full-preview"></div>
+                    </div>
+                    </div>
+
                     <div id="cqError" style="color:#ff5555;font-size:14px;margin-top:8px;display:none;"></div>
 
                     <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;">
@@ -1360,6 +1420,7 @@ window.openCreateQuiz = async function() {
         window.renderClassPicker('quizClassPicker', classes, function() {});
 
         // Add first question
+        cqQuestionIndex = 0;
         window.cqQuestionIndex = 0;
         addCqQuestion();
 
@@ -1383,9 +1444,18 @@ window.openCreateQuiz = async function() {
 
         // FIX 3: Init summary bar
         updateCqSummaryBar();
+        updateCqPreview();
 
         // Handle submit
         const form = document.getElementById('createQuizForm');
+        form.addEventListener('input', function() {
+            updateCqSummaryBar();
+            updateCqPreview();
+        });
+        form.addEventListener('change', function() {
+            updateCqSummaryBar();
+            updateCqPreview();
+        });
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             const errorDiv  = document.getElementById('cqError');
@@ -1486,7 +1556,19 @@ window.addCqQuestion = function() {
             </div>
         </div>
 
-        <label class="teacher-modal-label">Question Text *</label>
+        <label class="teacher-modal-label">Question Type</label>
+        <select name="question_type[]" class="teacher-modal-input cq-qtype-select" data-action="change-question-type" style="max-width:260px;">
+            <option value="mcq" selected>Multiple Choice - one correct answer</option>
+            <option value="multiple_answer">Multiple Answer - more than one correct answer</option>
+            <option value="open_ended">Open Ended - teacher marks the response</option>
+            <option value="fill_in_blank">Fill in the Blank - learners type missing words</option>
+        </select>
+        <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Best for quick checks: learners choose one correct answer from the options you provide.</div>
+        <div class="cq-qtype-helper cq-ma-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this when two or more options are correct.</div>
+        <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this for explanations, paragraphs, calculations, or evidence-based answers. You will mark it manually.</div>
+        <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> where the learner should type an answer.</div>
+
+        <label class="teacher-modal-label" style="margin-top:12px;">Question Text *</label>
 
         <!-- FIX 2: FITB callout shown when fill_in_blank selected -->
         <div class="cq-fitb-callout" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.35);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#a0aec0;line-height:1.6;">
@@ -1503,19 +1585,6 @@ window.addCqQuestion = function() {
         <div class="cq-blank-counter" style="display:none;margin-top:5px;font-size:12px;color:#8b949e;">
             <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> blank<span class="cq-blank-plural">s</span> detected → <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> answer<span class="cq-blank-plural">s</span> required
         </div>
-
-        <!-- FIX 1: Question type with inline description -->
-        <label class="teacher-modal-label" style="margin-top:12px;">Question Type</label>
-        <select name="question_type[]" class="teacher-modal-input cq-qtype-select" data-action="change-question-type" style="max-width:220px;">
-            <option value="mcq" selected>Multiple Choice</option>
-            <option value="multiple_answer">Multiple Answer</option>
-            <option value="open_ended">Open Ended</option>
-            <option value="fill_in_blank">Fill in the Blank</option>
-        </select>
-        <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students choose the correct answer from a list of options you provide.</div>
-        <div class="cq-qtype-helper cq-ma-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students can tick more than one correct answer.</div>
-        <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students write a free-text response. You will grade these manually.</div>
-        <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Students type answers into blanks. Write <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> in your question where you want a gap.</div>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
         <input type="file" name="question_images[]" accept="image/*"
@@ -1566,7 +1635,12 @@ window.addCqQuestion = function() {
         <label class="teacher-modal-label" style="margin-top:12px;">Points</label>
         <input type="number" name="points[]" min="1" value="1"
             class="teacher-modal-input cq-points-input" style="max-width:100px;"
-            oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : ''); updateCqSummaryBar();">`;
+            oninput="document.getElementById('cq-pts-display-${i}').textContent = (this.value || 1) + ' pt' + (this.value > 1 ? 's' : ''); updateCqSummaryBar(); updateCqPreview();">
+
+        <div class="cq-preview-card" style="margin-top:14px;">
+            <div class="cq-preview-label">Learner Preview for this Question</div>
+            <div class="cq-question-preview"></div>
+        </div>`;
 
     container.appendChild(div);
     setQuestionTypeFields(div, 'mcq');
@@ -1586,6 +1660,7 @@ window.addCqQuestion = function() {
         div.querySelector('.cq-fitb-callout').style.display  = val === 'fill_in_blank' ? 'block' : 'none';
         div.querySelector('.cq-blank-counter').style.display = val === 'fill_in_blank' ? 'block' : 'none';
         updateOpenEndedBanner();
+        updateCqPreview();
     });
 
     // FIX 2: Bind live blank counter on question text input
@@ -1594,6 +1669,7 @@ window.addCqQuestion = function() {
         const count = (this.value.match(/\{blank\}/gi) || []).length;
         div.querySelectorAll('.cq-blank-count').forEach(el => el.textContent = count);
         div.querySelectorAll('.cq-blank-plural').forEach(el => el.textContent = count === 1 ? '' : 's');
+        updateCqPreview();
     });
 
     // FIX 6: Mirror choice text into correct-answer select
@@ -1606,11 +1682,13 @@ window.addCqQuestion = function() {
             }
             const maLabel = div.querySelectorAll('.cq-ma-correct-list span')[idx];
             if (maLabel) maLabel.textContent = input.value.trim() || ('Choice ' + (idx + 1));
+            updateCqPreview();
         });
     });
 
     // FIX 3: Update summary bar after adding question
     updateCqSummaryBar();
+    updateCqPreview();
 };
 
 window.removeCqQuestion = function(i) {
@@ -1618,6 +1696,7 @@ window.removeCqQuestion = function(i) {
     if (el) el.remove();
     updateOpenEndedBanner();
     updateCqSummaryBar();
+    updateCqPreview();
 };
 
 function countFitbMarkers(text) {
@@ -1893,6 +1972,87 @@ function updateCqSummaryBar() {
     if (qPluralEl) qPluralEl.textContent = qCount === 1 ? '' : 's';
     if (marksEl) marksEl.textContent = totalMarks;
     if (mPluralEl) mPluralEl.textContent = totalMarks === 1 ? '' : 's';
+}
+
+function getCqQuestionBlocks() {
+    return Array.from(document.querySelectorAll('#cqQuestionsContainer [id^="cq-question-"]'));
+}
+
+function getCqQuestionData(block, index) {
+    const questionText = block.querySelector('.cq-question-text')?.value.trim() || '';
+    const questionType = block.querySelector('.cq-qtype-select')?.value || 'mcq';
+    const points = parseInt(block.querySelector('.cq-points-input')?.value, 10) || 1;
+    const rawChoices = Array.from(block.querySelectorAll('.cq-choice-input'))
+        .map(input => input.value.trim())
+        .filter(Boolean);
+    const choices = rawChoices.length ? rawChoices : ['Choice 1', 'Choice 2'];
+    const fitbSubType = block.querySelector('.fitb-sub-type')?.value || 'free_type';
+    const wordBankWords = Array.from(block.querySelectorAll('.fitb-answer-chips input[type="hidden"], .fitb-distractor-chips input[type="hidden"]'))
+        .map(input => input.value)
+        .filter(Boolean);
+    return { index, questionText, questionType, points, choices, fitbSubType, wordBankWords };
+}
+
+function buildCqLearnerQuestionPreview(data) {
+    const questionText = data.questionText || 'Your question text will appear here.';
+    let answerHtml = '';
+
+    if (data.questionType === 'open_ended') {
+        answerHtml = `<textarea class="cq-preview-textarea" disabled placeholder="Learner types their answer here..."></textarea>`;
+    } else if (data.questionType === 'fill_in_blank') {
+        answerHtml = `
+            <div style="color:#e2e8f0;font-size:15px;line-height:2;margin-top:4px;">${fitbPreviewHtml(questionText)}</div>
+            ${data.fitbSubType === 'word_bank' ? `
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+                    ${(data.wordBankWords.length ? data.wordBankWords : ['word', 'extra']).map(word => `
+                        <span style="border:1px solid rgba(79,209,197,0.28);background:rgba(79,209,197,0.08);color:#4fd1c5;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:900;">${escapeHtml(word)}</span>
+                    `).join('')}
+                </div>` : ''}
+        `;
+    } else {
+        const isMultiple = data.questionType === 'multiple_answer';
+        const visibleChoices = data.choices.length ? data.choices : ['Choice 1', 'Choice 2'];
+        answerHtml = visibleChoices.map(choice => `
+            <div class="cq-learner-choice">
+                <span class="cq-learner-radio ${isMultiple ? 'cq-learner-checkbox' : ''}"></span>
+                <span>${escapeHtml(choice)}</span>
+            </div>
+        `).join('');
+    }
+
+    return `
+        <div class="cq-learner-card">
+            <div class="cq-learner-meta">
+                <span>Question ${data.index + 1}</span>
+                <span>${escapeHtml(data.points)} point${data.points === 1 ? '' : 's'}</span>
+            </div>
+            ${data.questionType === 'fill_in_blank' ? '' : `<div class="cq-learner-question">${escapeHtml(questionText)}</div>`}
+            ${answerHtml}
+        </div>`;
+}
+
+function updateCqPreview() {
+    const blocks = getCqQuestionBlocks();
+    const previews = [];
+    blocks.forEach((block, index) => {
+        const data = getCqQuestionData(block, index);
+        const html = buildCqLearnerQuestionPreview(data);
+        const target = block.querySelector('.cq-question-preview');
+        if (target) target.innerHTML = html;
+        previews.push(html);
+    });
+
+    const fullPreview = document.getElementById('cqFullPreview');
+    if (!fullPreview) return;
+    const title = document.querySelector('#createQuizForm input[name="quiz_title"]')?.value.trim() || 'Untitled Quiz';
+    const duration = document.querySelector('#createQuizForm input[name="duration"]')?.value || '0';
+    fullPreview.innerHTML = `
+        <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:12px;">
+            <div style="color:#e2e8f0;font-size:18px;font-weight:900;margin-bottom:6px;">${escapeHtml(title)}</div>
+            <div style="color:#8b949e;font-size:13px;">${escapeHtml(duration)} minutes &bull; ${blocks.length} question${blocks.length === 1 ? '' : 's'}</div>
+        </div>
+        ${previews.join('') || '<div style="color:#8b949e;font-size:13px;">Add a question to preview the learner view.</div>'}
+    `;
 }
 
 // ─────────────────────────────────────────────
@@ -2455,6 +2615,7 @@ document.addEventListener('click', function(e) {
             row.querySelector('.fitb-answer-chips').insertAdjacentHTML('beforeend', buildChipInputs(`fitb_accepted_answers[${index}][${blankIndex}][]`, [input.value.trim()]));
             input.value = '';
             if (builder) updateFitbBankCount(builder);
+            updateCqPreview();
         }
     } else if (action === 'add-fitb-distractor') {
         const builder = actionEl.closest('.fitb-builder');
@@ -2465,12 +2626,14 @@ document.addEventListener('click', function(e) {
             builder.querySelector('.fitb-distractor-chips').insertAdjacentHTML('beforeend', buildChipInputs(`fitb_distractors[${index}][]`, [input.value.trim()]));
             input.value = '';
             updateFitbBankCount(builder);
+            updateCqPreview();
         }
     } else if (action === 'remove-fitb-chip') {
         const builder = actionEl.closest('.fitb-builder');
         const chip = actionEl.closest('.fitb-chip-tag');
         if (chip) chip.remove();
         if (builder) updateFitbBankCount(builder);
+        updateCqPreview();
     }
 });
 
@@ -2499,6 +2662,7 @@ document.addEventListener('change', function(e) {
         const distractors = builder ? builder.querySelector('.fitb-distractors') : null;
         if (distractors) distractors.style.display = e.target.value === 'word_bank' ? 'block' : 'none';
         if (builder) updateFitbBankCount(builder);
+        updateCqPreview();
     }
 });
 
@@ -2507,6 +2671,7 @@ document.addEventListener('input', function(e) {
     const question = e.target.closest('.eq-question') || e.target.closest('[id^="cq-question-"]');
     const type = question ? question.querySelector('[name="question_type[]"]') : null;
     if (type && type.value === 'fill_in_blank') syncFitbBuilder(question);
+    if (question && question.id && question.id.startsWith('cq-question-')) updateCqPreview();
 });
 
 let activeIntegrityQuizId = null;
