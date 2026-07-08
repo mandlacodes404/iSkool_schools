@@ -16,6 +16,33 @@ window.analyticsActiveTerm        = 1;
     const style = document.createElement('style');
     style.id = 'analytics-styles';
     style.textContent = `
+        /* ── PALETTE (single source of truth) ──
+           Scoped to :root rather than .an-shell so the subject modal — which
+           renders as a sibling of .an-shell, not a descendant — can use these
+           too. Names are namespaced (--an-*) to avoid clashing with the rest
+           of the app's styles. */
+        :root {
+            --an-bg: #0d1117;
+            --an-panel: #161b22;
+            --an-panel-alt: #1a2030;
+            --an-accent: #4fd1c5;
+            --an-accent-rgb: 79,209,197;
+            --an-green: #22c55e;
+            --an-green-rgb: 34,197,94;
+            --an-orange: #f59e0b;
+            --an-orange-rgb: 245,158,11;
+            --an-red: #f85149;
+            --an-red-rgb: 248,81,73;
+            --an-blue: #4e79a7;
+            --an-blue-rgb: 78,121,167;
+            --an-purple: #af7aa1;
+            --an-purple-rgb: 175,122,161;
+            --an-text: #e2e8f0;
+            --an-text-dim: #8b949e;
+            --an-text-dimmer: #4a5568;
+            --an-card-pad: 18px;
+        }
+
         /* ── SHELL ── */
         .an-shell {
             display: flex;
@@ -29,7 +56,7 @@ window.analyticsActiveTerm        = 1;
         .an-left {
             width: 260px;
             min-width: 260px;
-            background: #0d1117;
+            background: var(--an-bg);
             border-right: 1px solid rgba(255,255,255,0.06);
             display: flex;
             flex-direction: column;
@@ -46,7 +73,7 @@ window.analyticsActiveTerm        = 1;
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #4fd1c5;
+            color: var(--an-accent);
             margin-bottom: 14px;
         }
 
@@ -66,20 +93,29 @@ window.analyticsActiveTerm        = 1;
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.08);
             background: rgba(255,255,255,0.03);
-            color: #8b949e;
+            color: var(--an-text-dim);
             transition: all 0.2s;
             position: relative;
         }
 
         .an-term-tab:hover {
             background: rgba(255,255,255,0.07);
-            color: #e2e8f0;
+            color: var(--an-text);
         }
 
         .an-term-tab.active {
-            background: rgba(79,209,197,0.12);
-            border-color: rgba(79,209,197,0.4);
-            color: #4fd1c5;
+            background: rgba(var(--an-accent-rgb),0.12);
+            border-color: rgba(var(--an-accent-rgb),0.4);
+            color: var(--an-accent);
+        }
+
+        .an-term-tab:focus-visible {
+            outline: 2px solid var(--an-accent);
+            outline-offset: 2px;
+        }
+
+        .an-term-tab[aria-disabled="true"] {
+            cursor: default;
         }
 
         .an-term-tab .active-dot {
@@ -89,7 +125,7 @@ window.analyticsActiveTerm        = 1;
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #4fd1c5;
+            background: var(--an-accent);
             display: none;
         }
 
@@ -123,8 +159,13 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-class-item.active {
-            background: rgba(79,209,197,0.08);
-            border-color: rgba(79,209,197,0.25);
+            background: rgba(var(--an-accent-rgb),0.08);
+            border-color: rgba(var(--an-accent-rgb),0.25);
+        }
+
+        .an-class-item:focus-visible {
+            outline: 2px solid var(--an-accent);
+            outline-offset: 2px;
         }
 
         .an-class-item-top {
@@ -137,7 +178,7 @@ window.analyticsActiveTerm        = 1;
         .an-class-subject {
             font-size: 13px;
             font-weight: 800;
-            color: #e2e8f0;
+            color: var(--an-text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -145,22 +186,10 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-class-subject.unset {
-            color: #4fd1c5;
+            color: var(--an-accent);
             font-style: italic;
             font-size: 12px;
         }
-
-        .an-class-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .an-class-dot.green  { background: #22c55e; }
-        .an-class-dot.orange { background: #f59e0b; }
-        .an-class-dot.red    { background: #f85149; }
-        .an-class-dot.gray   { background: #4a5568; }
 
         .an-class-meta {
             display: flex;
@@ -170,7 +199,7 @@ window.analyticsActiveTerm        = 1;
 
         .an-class-name {
             font-size: 11px;
-            color: #8b949e;
+            color: var(--an-text-dim);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -184,10 +213,10 @@ window.analyticsActiveTerm        = 1;
             flex-shrink: 0;
         }
 
-        .an-class-avg-badge.green  { background: rgba(34,197,94,0.12);  color: #22c55e; }
-        .an-class-avg-badge.orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
-        .an-class-avg-badge.red    { background: rgba(248,81,73,0.12);  color: #f85149; }
-        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: #8b949e; }
+        .an-class-avg-badge.green  { background: rgba(var(--an-green-rgb),0.12);  color: var(--an-green); }
+        .an-class-avg-badge.orange { background: rgba(var(--an-orange-rgb),0.12); color: var(--an-orange); }
+        .an-class-avg-badge.red    { background: rgba(var(--an-red-rgb),0.12);  color: var(--an-red); }
+        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: var(--an-text-dim); }
 
         .an-class-edit-btn {
             position: absolute;
@@ -195,7 +224,7 @@ window.analyticsActiveTerm        = 1;
             right: 8px;
             background: none;
             border: none;
-            color: #4a5568;
+            color: var(--an-text-dimmer);
             cursor: pointer;
             padding: 2px;
             border-radius: 4px;
@@ -203,12 +232,19 @@ window.analyticsActiveTerm        = 1;
             transition: opacity 0.2s;
         }
 
-        .an-class-item:hover .an-class-edit-btn { opacity: 1; }
-        .an-class-edit-btn:hover { color: #4fd1c5; }
+        .an-class-item:hover .an-class-edit-btn,
+        .an-class-item:focus-visible .an-class-edit-btn { opacity: 1; }
+        .an-class-edit-btn:hover { color: var(--an-accent); }
+
+        .an-class-edit-btn:focus-visible {
+            opacity: 1;
+            outline: 2px solid var(--an-accent);
+            outline-offset: 2px;
+        }
 
         .an-empty-term {
             text-align: center;
-            color: #4a5568;
+            color: var(--an-text-dimmer);
             font-size: 13px;
             padding: 30px 16px;
             font-style: italic;
@@ -218,8 +254,15 @@ window.analyticsActiveTerm        = 1;
         .an-right {
             flex: 1;
             overflow-y: auto;
-            background: #0d1117;
+            background: var(--an-bg);
             padding: 24px 28px 40px;
+        }
+
+        .an-fade-in { animation: an-fade-in 0.25s ease; }
+
+        @keyframes an-fade-in {
+            from { opacity: 0; transform: translateY(4px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .an-right::-webkit-scrollbar { width: 4px; }
@@ -238,8 +281,25 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-empty-state svg { opacity: 0.3; }
-        .an-empty-state h3 { font-size: 16px; color: #8b949e; margin: 0; }
+        .an-empty-state h3 { font-size: 16px; color: var(--an-text-dim); margin: 0; }
         .an-empty-state p  { font-size: 13px; margin: 0; }
+
+        .an-retry-btn {
+            margin-top: 6px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(var(--an-accent-rgb),0.4);
+            background: rgba(var(--an-accent-rgb),0.12);
+            color: var(--an-accent);
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .an-retry-btn:hover { background: rgba(var(--an-accent-rgb),0.2); }
+        .an-retry-btn:focus-visible { outline: 2px solid var(--an-accent); outline-offset: 2px; }
 
         /* Dashboard header */
         .an-dash-header {
@@ -252,13 +312,13 @@ window.analyticsActiveTerm        = 1;
         .an-dash-title {
             font-size: 20px;
             font-weight: 800;
-            color: #e2e8f0;
+            color: var(--an-text);
             margin: 0 0 4px;
         }
 
         .an-dash-meta {
             font-size: 12px;
-            color: #8b949e;
+            color: var(--an-text-dim);
         }
 
         .an-dash-term-badge {
@@ -267,9 +327,9 @@ window.analyticsActiveTerm        = 1;
             letter-spacing: 1px;
             padding: 5px 12px;
             border-radius: 20px;
-            background: rgba(79,209,197,0.1);
-            border: 1px solid rgba(79,209,197,0.3);
-            color: #4fd1c5;
+            background: rgba(var(--an-accent-rgb),0.1);
+            border: 1px solid rgba(var(--an-accent-rgb),0.3);
+            color: var(--an-accent);
         }
 
         /* ── KPI CARDS ── */
@@ -281,35 +341,45 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-kpi-card {
-            background: #161b22;
+            background: var(--an-panel);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
-            padding: 16px;
+            padding: var(--an-card-pad);
             position: relative;
             overflow: hidden;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
         }
 
-        .an-kpi-card:hover { border-color: rgba(255,255,255,0.12); }
+        .an-kpi-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: var(--an-panel-alt);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+
+        /* Each variant sets ONE custom property on the card itself. ::before and
+           .an-kpi-value both just read it — so a dynamic inline override on the
+           card (used by the Gender Gap card) automatically keeps the top-border
+           accent and the value text in sync, instead of drifting apart. */
+        .an-kpi-card.teal  { --an-kpi-accent: var(--an-accent); }
+        .an-kpi-card.green { --an-kpi-accent: var(--an-green); }
+        .an-kpi-card.blue  { --an-kpi-accent: var(--an-blue); }
+        .an-kpi-card.pink  { --an-kpi-accent: var(--an-purple); }
 
         .an-kpi-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 2px;
+            background: var(--an-kpi-accent, transparent);
         }
-
-        .an-kpi-card.teal::before  { background: #4fd1c5; }
-        .an-kpi-card.green::before { background: #22c55e; }
-        .an-kpi-card.blue::before  { background: #4e79a7; }
-        .an-kpi-card.pink::before  { background: #e15759; }
 
         .an-kpi-label {
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: #8b949e;
+            color: var(--an-text-dim);
             margin-bottom: 10px;
         }
 
@@ -318,16 +388,12 @@ window.analyticsActiveTerm        = 1;
             font-weight: 900;
             line-height: 1;
             margin-bottom: 6px;
+            color: var(--an-kpi-accent, var(--an-text));
         }
-
-        .an-kpi-card.teal  .an-kpi-value { color: #4fd1c5; }
-        .an-kpi-card.green .an-kpi-value { color: #22c55e; }
-        .an-kpi-card.blue  .an-kpi-value { color: #4e79a7; }
-        .an-kpi-card.pink  .an-kpi-value { color: #e15759; }
 
         .an-kpi-sub {
             font-size: 11px;
-            color: #8b949e;
+            color: var(--an-text-dim);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -344,10 +410,10 @@ window.analyticsActiveTerm        = 1;
         .an-chart-row.one-col { grid-template-columns: 1fr; }
 
         .an-chart-card {
-            background: #161b22;
+            background: var(--an-panel);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
-            padding: 18px;
+            padding: var(--an-card-pad);
             position: relative;
         }
 
@@ -356,7 +422,7 @@ window.analyticsActiveTerm        = 1;
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
-            color: #8b949e;
+            color: var(--an-text-dim);
             margin-bottom: 16px;
         }
 
@@ -372,7 +438,7 @@ window.analyticsActiveTerm        = 1;
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #4a5568;
+            color: var(--an-text-dimmer);
             font-size: 13px;
             font-style: italic;
         }
@@ -386,10 +452,10 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-performers-card {
-            background: #161b22;
+            background: var(--an-panel);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
-            padding: 18px;
+            padding: var(--an-card-pad);
         }
 
         .an-performers-title {
@@ -417,7 +483,7 @@ window.analyticsActiveTerm        = 1;
         .an-performer-rank {
             font-size: 11px;
             font-weight: 800;
-            color: #4a5568;
+            color: var(--an-text-dimmer);
             width: 16px;
             flex-shrink: 0;
         }
@@ -426,7 +492,7 @@ window.analyticsActiveTerm        = 1;
             flex: 1;
             font-size: 13px;
             font-weight: 700;
-            color: #e2e8f0;
+            color: var(--an-text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -439,7 +505,7 @@ window.analyticsActiveTerm        = 1;
 
         /* ── LOADING SKELETON ── */
         .an-skeleton {
-            background: linear-gradient(90deg, #161b22 25%, #1a2030 50%, #161b22 75%);
+            background: linear-gradient(90deg, var(--an-panel) 25%, var(--an-panel-alt) 50%, var(--an-panel) 75%);
             background-size: 200% 100%;
             animation: an-shimmer 1.5s infinite;
             border-radius: 8px;
@@ -464,16 +530,25 @@ window.analyticsActiveTerm        = 1;
 
         .an-pass-bar-track {
             height: 8px;
-            background: rgba(248,81,73,0.2);
+            background: rgba(var(--an-red-rgb),0.2);
             border-radius: 100px;
             overflow: hidden;
         }
 
         .an-pass-bar-fill {
             height: 100%;
-            background: #22c55e;
+            background: var(--an-green);
             border-radius: 100px;
             transition: width 0.6s ease;
+        }
+
+        /* ── REDUCED MOTION ── */
+        @media (prefers-reduced-motion: reduce) {
+            .an-fade-in { animation: none; }
+            .an-skeleton { animation: none; }
+            .an-kpi-card, .an-class-item, .an-performer-item,
+            .an-term-tab, .an-pass-bar-fill { transition: none; }
+            .an-kpi-card:hover { transform: none; }
         }
 
         /* ── RESPONSIVE ── */
@@ -517,7 +592,15 @@ window.fetchTeacherAnalytics = async function () {
         window.teacherAnalyticsCache = data;
         renderTeacherAnalytics(data);
     } catch (e) {
-        if (apiArea) apiArea.innerHTML = `<p style="color:#f85149;text-align:center;margin-top:60px;">Error loading analytics.</p>`;
+        if (apiArea) apiArea.innerHTML = `
+            <div class="an-empty-state" style="height:auto;padding:60px 20px;">
+                <svg viewBox="0 0 24 24" width="40" height="40" stroke="var(--an-red)" stroke-width="1.5" fill="none">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/>
+                </svg>
+                <h3>Couldn't load analytics</h3>
+                <p>Check your connection and try again.</p>
+                <button class="an-retry-btn" onclick="window.teacherAnalyticsCache=null;window.fetchTeacherAnalytics();">Retry</button>
+            </div>`;
     } finally {
         if (loader) loader.style.display = 'none';
     }
@@ -543,7 +626,7 @@ function renderTeacherAnalytics(data) {
                 <h2 class="teacher-resources-title">Analytics</h2>
             </div>
             <p class="teacher-empty-state" style="margin-top:60px;">
-                No published summative assessments yet.
+                No published summative assessments yet — analytics will appear here once you publish one.
             </p>`;
         return;
     }
@@ -555,6 +638,8 @@ function renderTeacherAnalytics(data) {
         return `
             <div class="an-term-tab ${t === window.analyticsActiveTerm ? 'active' : ''} ${isCurrent ? 'is-current-term' : ''}"
                  onclick="switchAnalyticsTerm(${t})"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
+                 role="button" tabindex="${hasData ? '0' : '-1'}" aria-disabled="${!hasData}"
                  style="${!hasData ? 'opacity:0.35;pointer-events:none;' : ''}">
                 T${t}
                 <span class="active-dot"></span>
@@ -565,7 +650,7 @@ function renderTeacherAnalytics(data) {
         <div class="teacher-resources-header" style="margin-bottom:16px;">
             <h2 class="teacher-resources-title">Analytics</h2>
         </div>
-        <div class="an-shell">
+        <div class="an-shell an-fade-in">
             <!-- LEFT -->
             <div class="an-left">
                 <div class="an-left-header">
@@ -577,7 +662,7 @@ function renderTeacherAnalytics(data) {
             <!-- RIGHT -->
             <div class="an-right" id="an-right">
                 <div class="an-empty-state">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" style="stroke:var(--an-accent);" stroke-width="1.5" fill="none">
                         <path d="M18 20V10M12 20V4M6 20v-6"/>
                     </svg>
                     <h3>Select a class to view analytics</h3>
@@ -594,9 +679,9 @@ function renderTeacherAnalytics(data) {
                     <button onclick="closeSubjectModal()" class="teacher-modal-close">&times;</button>
                 </div>
                 <div class="teacher-modal-body">
-                    <p style="color:#8b949e;font-size:14px;margin:0 0 16px;">
+                    <p style="color:var(--an-text-dim);font-size:14px;margin:0 0 16px;">
                         What subject do you teach in
-                        <strong id="subjectModalClassName" style="color:#e2e8f0;"></strong>?
+                        <strong id="subjectModalClassName" style="color:var(--an-text);"></strong>?
                     </p>
                     <label class="teacher-modal-label">Subject Name</label>
                     <input type="text" id="subjectInput" class="teacher-modal-input"
@@ -636,12 +721,13 @@ function renderClassList(term) {
         return `
             <div class="an-class-item ${isActive ? 'active' : ''}"
                  id="an-cls-${cls.id}-${term}"
-                 onclick="selectAnalyticsClass(${cls.id}, ${term})">
+                 role="button" tabindex="0"
+                 onclick="selectAnalyticsClass(${cls.id}, ${term})"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                 <div class="an-class-item-top">
                     <span class="an-class-subject ${!subject ? 'unset' : ''}">
                         ${subject || 'Set Subject'}
                     </span>
-                    <span class="an-class-dot gray" id="an-dot-${cls.id}-${term}"></span>
                 </div>
                 <div class="an-class-meta">
                     <span class="an-class-name">${cls.name} · ${cls.student_count} students</span>
@@ -684,8 +770,8 @@ window.switchAnalyticsTerm = function (term) {
     const right = document.getElementById('an-right');
     if (right) {
         right.innerHTML = `
-            <div class="an-empty-state">
-                <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+            <div class="an-empty-state an-fade-in">
+                <svg viewBox="0 0 24 24" width="48" height="48" style="stroke:var(--an-accent);" stroke-width="1.5" fill="none">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
                 <h3>Select a class to view analytics</h3>
@@ -731,7 +817,15 @@ window.selectAnalyticsClass = async function (classId, term) {
         if (data.error) throw new Error(data.error);
         renderDashboard(cls, term, data);
     } catch (e) {
-        right.innerHTML = `<p style="color:#f85149;text-align:center;margin-top:60px;">Failed to load analytics.</p>`;
+        right.innerHTML = `
+            <div class="an-empty-state an-fade-in" style="height:auto;padding:60px 20px;">
+                <svg viewBox="0 0 24 24" width="40" height="40" stroke="var(--an-red)" stroke-width="1.5" fill="none">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/>
+                </svg>
+                <h3>Couldn't load this class</h3>
+                <p>Check your connection and try again.</p>
+                <button class="an-retry-btn" onclick="selectAnalyticsClass(${classId}, ${term});">Retry</button>
+            </div>`;
     }
 };
 
@@ -740,6 +834,7 @@ window.selectAnalyticsClass = async function (classId, term) {
 // ─────────────────────────────────────────────
 function renderDashboardSkeleton(cls, term) {
     return `
+        <div class="an-fade-in">
         <div class="an-dash-header">
             <div>
                 <div class="an-dash-title">${cls.subject || cls.name}</div>
@@ -749,7 +844,7 @@ function renderDashboardSkeleton(cls, term) {
         </div>
         <div class="an-kpi-row">
             ${[1,2,3,4].map(() => `
-                <div class="an-kpi-card" style="background:#161b22;">
+                <div class="an-kpi-card">
                     <div class="an-skeleton" style="height:10px;width:60%;margin-bottom:12px;"></div>
                     <div class="an-skeleton" style="height:28px;width:50%;margin-bottom:8px;"></div>
                     <div class="an-skeleton" style="height:10px;width:80%;"></div>
@@ -767,6 +862,7 @@ function renderDashboardSkeleton(cls, term) {
                 <div class="an-skeleton" style="height:10px;width:40%;margin-bottom:16px;"></div>
                 <div class="an-skeleton" style="height:240px;border-radius:8px;"></div>
             </div>
+        </div>
         </div>`;
 }
 
@@ -798,12 +894,13 @@ function renderDashboard(cls, term, data) {
     const boysAvg  = genderData.length ? genderData.reduce((s, d) => s + (d.boys  || 0), 0) / genderData.filter(d => d.boys  !== null).length : null;
     const girlsAvg = genderData.length ? genderData.reduce((s, d) => s + (d.girls || 0), 0) / genderData.filter(d => d.girls !== null).length : null;
 
-    let gapLabel = '—', gapColor = '#8b949e';
+    let gapValue = '—', gapSub = 'Based on quiz averages', gapColor = 'var(--an-text-dim)';
     if (boysAvg !== null && girlsAvg !== null) {
         const diff = Math.abs(boysAvg - girlsAvg).toFixed(1);
         const leader = boysAvg >= girlsAvg ? 'Boys' : 'Girls';
-        gapLabel = `+${diff}% ${leader}`;
-        gapColor  = boysAvg >= girlsAvg ? '#4e79a7' : '#e15759';
+        gapValue = `${diff}%`;
+        gapSub   = `${leader} leading`;
+        gapColor = boysAvg >= girlsAvg ? 'var(--an-blue)' : 'var(--an-purple)';
     }
 
     // Pass/fail per quiz
@@ -820,14 +917,13 @@ function renderDashboard(cls, term, data) {
         return 'red';
     }
 
-    // Update left panel badge + dot
+    // Update left panel badge (the single source of performance signal per class now)
     const badge = document.getElementById(`an-badge-${cls.id}-${term}`);
-    const dot   = document.getElementById(`an-dot-${cls.id}-${term}`);
     const col   = avgColor(classAvg);
     if (badge) { badge.textContent = classAvg !== null ? classAvg + '%' : '—'; badge.className = `an-class-avg-badge ${col}`; }
-    if (dot)   { dot.className = `an-class-dot ${col}`; }
 
     right.innerHTML = `
+        <div class="an-fade-in">
         <!-- HEADER -->
         <div class="an-dash-header">
             <div>
@@ -851,13 +947,13 @@ function renderDashboard(cls, term, data) {
             </div>
             <div class="an-kpi-card blue">
                 <div class="an-kpi-label">Top Performer</div>
-                <div class="an-kpi-value" style="font-size:18px;padding-top:4px;">${topOverall ? topOverall.avg + '%' : '—'}</div>
+                <div class="an-kpi-value">${topOverall ? topOverall.avg + '%' : '—'}</div>
                 <div class="an-kpi-sub">${topOverall ? topOverall.name : 'No data'}</div>
             </div>
-            <div class="an-kpi-card pink">
+            <div class="an-kpi-card pink" style="--an-kpi-accent:${gapColor};">
                 <div class="an-kpi-label">Gender Gap</div>
-                <div class="an-kpi-value" style="color:${gapColor};font-size:20px;padding-top:6px;">${gapLabel}</div>
-                <div class="an-kpi-sub">Based on quiz averages</div>
+                <div class="an-kpi-value">${gapValue}</div>
+                <div class="an-kpi-sub">${gapSub}</div>
             </div>
         </div>
 
@@ -906,7 +1002,7 @@ function renderDashboard(cls, term, data) {
         <!-- ROW 5: Top Performers -->
         <div class="an-performers-row">
             <div class="an-performers-card">
-                <div class="an-performers-title" style="color:#e15759;">
+                <div class="an-performers-title" style="color:var(--an-purple);">
                     Top 5 Girls
                 </div>
                 ${topGirls.length
@@ -914,12 +1010,12 @@ function renderDashboard(cls, term, data) {
                         <div class="an-performer-item">
                             <span class="an-performer-rank">${i + 1}</span>
                             <span class="an-performer-name">${p.name}</span>
-                            <span class="an-performer-avg" style="color:#e15759;">${p.avg}%</span>
+                            <span class="an-performer-avg" style="color:var(--an-purple);">${p.avg}%</span>
                         </div>`).join('')
-                    : '<p style="color:#4a5568;font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
+                    : '<p style="color:var(--an-text-dimmer);font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
             </div>
             <div class="an-performers-card">
-                <div class="an-performers-title" style="color:#4e79a7;">
+                <div class="an-performers-title" style="color:var(--an-blue);">
                     Top 5 Boys
                 </div>
                 ${topBoys.length
@@ -927,10 +1023,11 @@ function renderDashboard(cls, term, data) {
                         <div class="an-performer-item">
                             <span class="an-performer-rank">${i + 1}</span>
                             <span class="an-performer-name">${p.name}</span>
-                            <span class="an-performer-avg" style="color:#4e79a7;">${p.avg}%</span>
+                            <span class="an-performer-avg" style="color:var(--an-blue);">${p.avg}%</span>
                         </div>`).join('')
-                    : '<p style="color:#4a5568;font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
+                    : '<p style="color:var(--an-text-dimmer);font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
             </div>
+        </div>
         </div>`;
 
     // ── Render charts ──
@@ -1010,8 +1107,8 @@ function renderDashboard(cls, term, data) {
                         {
                             label: 'Girls %',
                             data: genderData.map(d => d.girls),
-                            backgroundColor: 'rgba(225,87,89,0.7)',
-                            borderColor: '#e15759',
+                            backgroundColor: 'rgba(175,122,161,0.7)',
+                            borderColor: '#af7aa1',
                             borderWidth: 2,
                             borderRadius: 6
                         }
@@ -1070,10 +1167,10 @@ function renderDashboard(cls, term, data) {
                         {
                             label: 'Girls',
                             data: byTerm.girls,
-                            borderColor: '#e15759',
-                            backgroundColor: 'rgba(225,87,89,0.08)',
+                            borderColor: '#af7aa1',
+                            backgroundColor: 'rgba(175,122,161,0.08)',
                             tension: 0.4, fill: true,
-                            pointBackgroundColor: '#e15759',
+                            pointBackgroundColor: '#af7aa1',
                             pointRadius: 6, pointHoverRadius: 9, spanGaps: true
                         }
                     ]
@@ -1090,12 +1187,12 @@ function renderDashboard(cls, term, data) {
             wrap.innerHTML = passData.map(q => `
                 <div class="an-pass-bar-wrap">
                     <div class="an-pass-bar-label">
-                        <span style="color:#e2e8f0;font-size:12px;">${q.title}</span>
-                        <span style="color:${q.passing >= 100 ? '#22c55e' : q.passing >= 60 ? '#f59e0b' : '#f85149'};font-weight:800;font-size:12px;">${q.passing}%</span>
+                        <span style="color:var(--an-text);font-size:12px;">${q.title}</span>
+                        <span style="color:${q.passing >= 100 ? 'var(--an-green)' : q.passing >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};font-weight:800;font-size:12px;">${q.passing}%</span>
                     </div>
                     <div class="an-pass-bar-track">
                         <div class="an-pass-bar-fill"
-                            style="width:${q.passing}%;background:${q.passing >= 100 ? '#22c55e' : q.passing >= 60 ? '#f59e0b' : '#f85149'};">
+                            style="width:${q.passing}%;background:${q.passing >= 100 ? 'var(--an-green)' : q.passing >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};">
                         </div>
                     </div>
                 </div>`).join('');
