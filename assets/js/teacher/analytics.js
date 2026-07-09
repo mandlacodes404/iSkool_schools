@@ -893,6 +893,7 @@ function renderDashboard(cls, term, data) {
     const byTerm     = data.boys_vs_girls_by_term      || { boys: [null,null,null,null], girls: [null,null,null,null] };
     const classTrend = data.class_performance_by_term  || [null,null,null,null];
     const medianScore = (typeof data.median_score === 'number') ? data.median_score : null;
+    const scoreDistribution = data.score_distribution || [];
 
     // ── KPI calculations ──
     const classAvg = quizAvgs.length
@@ -1011,7 +1012,20 @@ function renderDashboard(cls, term, data) {
             </div>
         </div>
 
-        <!-- ROW 3: Class Performance by Term (full width) -->
+        <!-- ROW 3: Score Distribution (full width) -->
+        <div class="an-chart-row one-col">
+            <div class="an-chart-card">
+                <div class="an-chart-title">
+                    <span>Score Distribution</span>
+                    ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} students</span>` : ''}
+                </div>
+                <div class="an-chart-wrap">
+                    ${scoreDistribution.some(b => b.student_count > 0) ? `<canvas id="chart-score-dist-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 4: Class Performance by Term (full width) -->
         <div class="an-chart-row one-col">
             <div class="an-chart-card">
                 <div class="an-chart-title">
@@ -1024,7 +1038,7 @@ function renderDashboard(cls, term, data) {
             </div>
         </div>
 
-        <!-- ROW 4: Boys vs Girls by Term + Pass/Fail -->
+        <!-- ROW 5: Boys vs Girls by Term + Pass/Fail -->
         <div class="an-chart-row two-col">
             <div class="an-chart-card">
                 <div class="an-chart-title">Boys vs Girls by Term</div>
@@ -1040,7 +1054,7 @@ function renderDashboard(cls, term, data) {
             </div>
         </div>
 
-        <!-- ROW 5: Top Performers -->
+        <!-- ROW 6: Top Performers -->
         <div class="an-performers-row">
             <div class="an-performers-card">
                 <div class="an-performers-title" style="color:var(--an-purple);">
@@ -1094,6 +1108,30 @@ function renderDashboard(cls, term, data) {
         }
     };
 
+    // Separate options for count-based charts (Score Distribution) — chartOpts above assumes a
+    // 0-100% axis, which would mislabel a "number of students" axis as a percentage.
+    const histogramOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: { label: ctx => ` ${ctx.parsed.y} student${ctx.parsed.y === 1 ? '' : 's'}` }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#8b949e', precision: 0 },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            x: {
+                ticks: { color: '#8b949e' },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+        }
+    };
+
     // Quiz Average bar
     if (quizAvgs.length) {
         const ctx = document.getElementById(`chart-quiz-avg-${cls.id}-${term}`)?.getContext('2d');
@@ -1124,6 +1162,36 @@ function renderDashboard(cls, term, data) {
                         legend: { display: false }
                     }
                 }
+            });
+        }
+    }
+
+    // Score Distribution histogram — bucket colours match the same 60%/40% cutoffs as the
+    // Quiz Average bars above, so "red" and "green" mean the same thing everywhere on this page.
+    if (scoreDistribution.some(b => b.student_count > 0)) {
+        const ctx = document.getElementById(`chart-score-dist-${cls.id}-${term}`)?.getContext('2d');
+        if (ctx) {
+            window.analyticsCharts[`sd-${cls.id}-${term}`] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: scoreDistribution.map(b => b.bucket + '%'),
+                    datasets: [{
+                        label: 'Students',
+                        data: scoreDistribution.map(b => b.student_count),
+                        backgroundColor: scoreDistribution.map(b =>
+                            b.bucket === '0-39'  ? 'rgba(248,81,73,0.6)' :
+                            b.bucket === '40-59' ? 'rgba(245,158,11,0.6)' :
+                                                    'rgba(34,197,94,0.6)'),
+                        borderColor: scoreDistribution.map(b =>
+                            b.bucket === '0-39'  ? '#f85149' :
+                            b.bucket === '40-59' ? '#f59e0b' :
+                                                    '#22c55e'),
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: histogramOpts
             });
         }
     }
