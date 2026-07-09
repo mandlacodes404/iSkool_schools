@@ -956,13 +956,15 @@ function renderDashboard(cls, term, data) {
                 min,
                 max,
                 midpoint: (min + max) / 2,
-                width: Math.max(1, max - min + 1),
                 count: Number(b.student_count) || 0
             };
         }).filter(b => Number.isFinite(b.midpoint));
 
         const total = buckets.reduce((sum, b) => sum + b.count, 0);
         if (total < 2) return null;
+
+        const maxCount = Math.max(...buckets.map(b => b.count));
+        if (maxCount <= 0) return null;
 
         const mean = buckets.reduce((sum, b) => sum + b.midpoint * b.count, 0) / total;
         const variance = buckets.reduce((sum, b) => sum + Math.pow(b.midpoint - mean, 2) * b.count, 0) / total;
@@ -974,11 +976,18 @@ function renderDashboard(cls, term, data) {
             return Math.exp(-0.5 * z * z) / (stdDev * Math.sqrt(2 * Math.PI));
         };
 
-        const points = buckets.map(b => Math.round(normalPdf(b.midpoint) * total * b.width * 10) / 10);
+        const rawPoints = buckets.map(b => normalPdf(b.midpoint));
+        const maxRaw = Math.max(...rawPoints);
+        if (!Number.isFinite(maxRaw) || maxRaw <= 0) return null;
+
+        const points = rawPoints.map(v => Math.round((v / maxRaw) * maxCount * 10) / 10);
         return points.some(v => v > 0) ? points : null;
     }
 
     const normalCurve = buildNormalCurve(scoreDistribution);
+    const distributionCounts = scoreDistribution.map(b => Number(b.student_count) || 0);
+    const distributionPeak = Math.max(...distributionCounts, ...(normalCurve || []), 1);
+    const distributionSuggestedMax = Math.ceil(distributionPeak * 1.25);
 
     // Colour helper
     function avgColor(v) {
@@ -1052,9 +1061,9 @@ function renderDashboard(cls, term, data) {
             <div class="an-chart-card">
                 <div class="an-chart-title">
                     <span>Score Distribution</span>
-                    ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} students</span>` : ''}
+                    ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} learners</span>` : ''}
                 </div>
-                <div class="an-chart-wrap">
+                <div class="an-chart-wrap tall">
                     ${scoreDistribution.some(b => b.student_count > 0) ? `<canvas id="chart-score-dist-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
                 </div>
             </div>
@@ -1154,8 +1163,9 @@ function renderDashboard(cls, term, data) {
                 labels: {
                     color: '#e2e8f0',
                     font: { family: 'Nunito', size: 12 },
-                    usePointStyle: true,
-                    boxWidth: 10
+                    boxWidth: 16,
+                    boxHeight: 8,
+                    padding: 14
                 }
             },
             tooltip: {
@@ -1175,8 +1185,9 @@ function renderDashboard(cls, term, data) {
         scales: {
             y: {
                 beginAtZero: true,
+                suggestedMax: distributionSuggestedMax,
                 title: { display: true, text: 'Learners', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
-                ticks: { color: '#8b949e', precision: 0, stepSize: 1 },
+                ticks: { color: '#8b949e', precision: 0 },
                 grid: { color: 'rgba(255,255,255,0.05)' }
             },
             x: {
