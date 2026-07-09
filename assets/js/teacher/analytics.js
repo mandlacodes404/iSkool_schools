@@ -947,6 +947,39 @@ function renderDashboard(cls, term, data) {
         passing: q.avg >= 50 ? 100 : Math.round((q.avg / 50) * 100)
     }));
 
+    function buildNormalCurve(distribution) {
+        const buckets = distribution.map(b => {
+            const parts = String(b.bucket).split('-').map(Number);
+            const min = parts[0];
+            const max = parts[1];
+            return {
+                min,
+                max,
+                midpoint: (min + max) / 2,
+                width: Math.max(1, max - min + 1),
+                count: Number(b.student_count) || 0
+            };
+        }).filter(b => Number.isFinite(b.midpoint));
+
+        const total = buckets.reduce((sum, b) => sum + b.count, 0);
+        if (total < 2) return null;
+
+        const mean = buckets.reduce((sum, b) => sum + b.midpoint * b.count, 0) / total;
+        const variance = buckets.reduce((sum, b) => sum + Math.pow(b.midpoint - mean, 2) * b.count, 0) / total;
+        const stdDev = Math.sqrt(variance);
+        if (!Number.isFinite(stdDev) || stdDev < 0.5) return null;
+
+        const normalPdf = value => {
+            const z = (value - mean) / stdDev;
+            return Math.exp(-0.5 * z * z) / (stdDev * Math.sqrt(2 * Math.PI));
+        };
+
+        const points = buckets.map(b => Math.round(normalPdf(b.midpoint) * total * b.width * 10) / 10);
+        return points.some(v => v > 0) ? points : null;
+    }
+
+    const normalCurve = buildNormalCurve(scoreDistribution);
+
     // Colour helper
     function avgColor(v) {
         if (v === null) return 'gray';
@@ -1116,11 +1149,25 @@ function renderDashboard(cls, term, data) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
+            legend: {
+                display: true,
+                labels: {
+                    color: '#e2e8f0',
+                    font: { family: 'Nunito', size: 12 },
+                    usePointStyle: true,
+                    boxWidth: 10
+                }
+            },
             tooltip: {
                 callbacks: {
                     title: items => items.length ? `${items[0].label} score range` : '',
-                    label: ctx => ` ${ctx.parsed.y} learner${ctx.parsed.y === 1 ? '' : 's'} in this range`
+                    label: ctx => {
+                        const value = ctx.parsed.y;
+                        if (ctx.dataset.type === 'line') {
+                            return ` Normal curve: about ${value} learner${value === 1 ? '' : 's'}`;
+                        }
+                        return ` ${value} learner${value === 1 ? '' : 's'} in this range`;
+                    }
                 }
             },
             datalabels: false
@@ -1183,23 +1230,40 @@ function renderDashboard(cls, term, data) {
                 type: 'bar',
                 data: {
                     labels: scoreDistribution.map(b => b.bucket + '%'),
-                    datasets: [{
-                        label: 'Students',
-                        data: scoreDistribution.map(b => b.student_count),
-                        backgroundColor: scoreDistribution.map(b =>
-                            b.bucket === '0-39'  ? 'rgba(248,81,73,0.6)' :
-                            b.bucket === '40-59' ? 'rgba(245,158,11,0.6)' :
-                                                    'rgba(34,197,94,0.6)'),
-                        borderColor: scoreDistribution.map(b =>
-                            b.bucket === '0-39'  ? '#f85149' :
-                            b.bucket === '40-59' ? '#f59e0b' :
-                                                    '#22c55e'),
-                        borderWidth: 1,
-                        borderRadius: 0,
-                        borderSkipped: false,
-                        barPercentage: 1,
-                        categoryPercentage: 1
-                    }]
+                    datasets: [
+                        {
+                            label: 'Learners',
+                            data: scoreDistribution.map(b => b.student_count),
+                            backgroundColor: scoreDistribution.map(b =>
+                                b.bucket === '0-39'  ? 'rgba(248,81,73,0.58)' :
+                                b.bucket === '40-59' ? 'rgba(245,158,11,0.58)' :
+                                                        'rgba(34,197,94,0.58)'),
+                            borderColor: scoreDistribution.map(b =>
+                                b.bucket === '0-39'  ? '#f85149' :
+                                b.bucket === '40-59' ? '#f59e0b' :
+                                                        '#22c55e'),
+                            borderWidth: 1,
+                            borderRadius: 0,
+                            borderSkipped: false,
+                            barPercentage: 1,
+                            categoryPercentage: 1,
+                            order: 2
+                        },
+                        ...(normalCurve ? [{
+                            type: 'line',
+                            label: 'Normal curve',
+                            data: normalCurve,
+                            borderColor: '#f8fafc',
+                            backgroundColor: 'rgba(248,250,252,0.12)',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointBackgroundColor: '#f8fafc',
+                            tension: 0.45,
+                            fill: false,
+                            order: 1
+                        }] : [])
+                    ]
                 },
                 options: histogramOpts
             });
