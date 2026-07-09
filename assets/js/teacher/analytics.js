@@ -1118,18 +1118,24 @@ function renderDashboard(cls, term, data) {
         plugins: {
             legend: { display: false },
             tooltip: {
-                callbacks: { label: ctx => ` ${ctx.parsed.y} student${ctx.parsed.y === 1 ? '' : 's'}` }
-            }
+                callbacks: {
+                    title: items => items.length ? `${items[0].label} score range` : '',
+                    label: ctx => ` ${ctx.parsed.y} learner${ctx.parsed.y === 1 ? '' : 's'} in this range`
+                }
+            },
+            datalabels: false
         },
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { color: '#8b949e', precision: 0 },
+                title: { display: true, text: 'Learners', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
+                ticks: { color: '#8b949e', precision: 0, stepSize: 1 },
                 grid: { color: 'rgba(255,255,255,0.05)' }
             },
             x: {
+                title: { display: true, text: 'Average score range', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
                 ticks: { color: '#8b949e' },
-                grid: { color: 'rgba(255,255,255,0.05)' }
+                grid: { display: false }
             }
         }
     };
@@ -1188,9 +1194,11 @@ function renderDashboard(cls, term, data) {
                             b.bucket === '0-39'  ? '#f85149' :
                             b.bucket === '40-59' ? '#f59e0b' :
                                                     '#22c55e'),
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        barPercentage: 0.7
+                        borderWidth: 1,
+                        borderRadius: 0,
+                        borderSkipped: false,
+                        barPercentage: 1,
+                        categoryPercentage: 1
                     }]
                 },
                 options: histogramOpts
