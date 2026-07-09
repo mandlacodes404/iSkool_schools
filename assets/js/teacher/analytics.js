@@ -418,12 +418,25 @@ window.analyticsActiveTerm        = 1;
         }
 
         .an-chart-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--an-text-dim);
             margin-bottom: 16px;
+        }
+
+        .an-chart-title-note {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: normal;
+            text-transform: none;
+            color: var(--an-text-dimmer);
+            white-space: nowrap;
         }
 
         .an-chart-wrap {
@@ -876,9 +889,10 @@ function renderDashboard(cls, term, data) {
     const quizAvgs   = data.quiz_averages             || [];
     const genderData = data.quiz_gender_averages       || [];
     const topGirls   = data.top_girls                  || [];
-    const topBoys    = data.top_boys                   || [];
+    const topBoys    = data.top_boys                    || [];
     const byTerm     = data.boys_vs_girls_by_term      || { boys: [null,null,null,null], girls: [null,null,null,null] };
     const classTrend = data.class_performance_by_term  || [null,null,null,null];
+    const medianScore = (typeof data.median_score === 'number') ? data.median_score : null;
 
     // ── KPI calculations ──
     const classAvg = quizAvgs.length
@@ -887,6 +901,27 @@ function renderDashboard(cls, term, data) {
 
     const highestQuiz = quizAvgs.length
         ? quizAvgs.reduce((max, q) => q.avg > max.avg ? q : max, quizAvgs[0])
+        : null;
+
+    // Lowest-averaging quiz this term — paired with highestQuiz for the "hardest / easiest" callout
+    const lowestQuiz = quizAvgs.length
+        ? quizAvgs.reduce((min, q) => q.avg < min.avg ? q : min, quizAvgs[0])
+        : null;
+
+    // Only worth flagging as "hardest / easiest" if there's more than one quiz and a real spread —
+    // otherwise it's just relabelling the single quiz you already see in the chart.
+    const quizSpread = (highestQuiz && lowestQuiz) ? highestQuiz.avg - lowestQuiz.avg : 0;
+    const showQuizExtremes = quizAvgs.length > 1 && quizSpread >= 15;
+
+    // Term-over-term delta — this class's own average this term vs. its own average last term.
+    // (Comparing against the immediately preceding term, not a fixed Term-1 baseline — that's a
+    // judgment call worth revisiting if a "progress toward a fixed goal" framing is wanted instead.)
+    const termIdx = term - 1;
+    const priorTermAvg = termIdx > 0 ? classTrend[termIdx - 1] : null;
+    const currentTermAvg = classTrend[termIdx];
+    const termDelta = (currentTermAvg !== null && currentTermAvg !== undefined &&
+                        priorTermAvg   !== null && priorTermAvg   !== undefined)
+        ? Math.round((currentTermAvg - priorTermAvg) * 10) / 10
         : null;
 
     const topOverall = [...topGirls, ...topBoys].sort((a, b) => b.avg - a.avg)[0] || null;
@@ -938,7 +973,7 @@ function renderDashboard(cls, term, data) {
             <div class="an-kpi-card teal">
                 <div class="an-kpi-label">Class Average</div>
                 <div class="an-kpi-value">${classAvg !== null ? classAvg + '%' : '—'}</div>
-                <div class="an-kpi-sub">${quizAvgs.length} assessment${quizAvgs.length !== 1 ? 's' : ''} this term</div>
+                <div class="an-kpi-sub">${quizAvgs.length} assessment${quizAvgs.length !== 1 ? 's' : ''}${medianScore !== null ? ` · Median ${medianScore}%` : ' this term'}</div>
             </div>
             <div class="an-kpi-card green">
                 <div class="an-kpi-label">Highest Quiz</div>
@@ -960,7 +995,10 @@ function renderDashboard(cls, term, data) {
         <!-- ROW 2: Quiz Average + Boys vs Girls per Quiz -->
         <div class="an-chart-row two-col">
             <div class="an-chart-card">
-                <div class="an-chart-title">Quiz Average</div>
+                <div class="an-chart-title">
+                    <span>Quiz Average</span>
+                    ${showQuizExtremes ? `<span class="an-chart-title-note">Toughest: ${lowestQuiz.title} (${lowestQuiz.avg}%)</span>` : ''}
+                </div>
                 <div class="an-chart-wrap">
                     ${quizAvgs.length ? `<canvas id="chart-quiz-avg-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
                 </div>
@@ -976,7 +1014,10 @@ function renderDashboard(cls, term, data) {
         <!-- ROW 3: Class Performance by Term (full width) -->
         <div class="an-chart-row one-col">
             <div class="an-chart-card">
-                <div class="an-chart-title">Class Performance by Term</div>
+                <div class="an-chart-title">
+                    <span>Class Performance by Term</span>
+                    ${termDelta !== null ? `<span class="an-chart-title-note" style="color:${termDelta >= 0 ? 'var(--an-green)' : 'var(--an-red)'};">${termDelta >= 0 ? '+' : ''}${termDelta}% vs Term ${termIdx}</span>` : ''}
+                </div>
                 <div class="an-chart-wrap tall">
                     ${classTrend.some(v => v !== null) ? `<canvas id="chart-class-trend-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">More terms needed to show trend</div>'}
                 </div>
