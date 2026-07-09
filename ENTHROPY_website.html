@@ -1392,17 +1392,27 @@
 })();
 
   /* ─── SCROLL-EXPAND CARDS (Laura / smarties-card + iSkool product card) ───
-     Anthropic-style: the card's margins/radius are tied directly to scroll
-     position (not a one-shot "appear" animation), so it grows smoothly as
-     you scroll up to it and (optionally) settles back if you scroll past.
-     Works identically on desktop and mobile — the "resting" inset/radius is
-     read live from the CSS for the current breakpoint, so each card simply
-     animates from whatever its CSS defines at rest out to full-bleed. */
+     Desktop: unchanged — continuous scroll-linked margin/radius interpolation,
+     the card grows smoothly as you scroll up to it (Anthropic-style).
+
+     Mobile (≤768px): "pin and expand". The card scrolls up normally until its
+     top edge arrives just under the nav — i.e. it's now fully in view — at
+     which point scrolling is briefly held (wheel/touch/keys are intercepted)
+     while the card eases open to full-bleed on its own timer, then scrolling
+     is released and carries on as normal. Scrolling back up through an
+     already-expanded card pauses the same way while it eases shut. This is
+     the same "pin, expand, release" pattern used by the mobile scroll-expand
+     cards on anthropic.com. */
+
+  // Only one card may hold the scroll lock at a time (shared across both
+  // initScrollExpandCard() calls below).
+  var scrollLockOwner = null;
+
   function initScrollExpandCard(cardId) {
     var card = document.getElementById(cardId);
     if (!card) return;
 
-    var ticking = false;
+    /* ---------- geometry shared by both desktop + mobile modes ---------- */
     var naturalLeft  = null;
     var naturalRight = null;
     var restMarginLeft  = 0;
@@ -1411,6 +1421,9 @@
 
     function lerp(a, b, t) { return a + (b - a) * t; }
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
 
     function cacheNaturalPos() {
       // Clear any inline overrides so the CSS for the current breakpoint
@@ -1433,60 +1446,249 @@
       naturalRight = window.innerWidth - r.right;
 
       // Restore resting margin immediately (avoids a one-frame flash at 0).
-      card.style.marginLeft  = restMarginLeft + 'px';
-      card.style.marginRight = restMarginRight + 'px';
+      card.style.marginLeft   = restMarginLeft + 'px';
+      card.style.marginRight  = restMarginRight + 'px';
       card.style.borderRadius = restRadius + 'px';
     }
 
-    function updateCard() {
-      if (naturalLeft === null) { cacheNaturalPos(); }
+    // Renders a 0→1 progress value (eased internally) to margin/radius.
+    function render(rawProgress) {
+      var t = easeInOutCubic(clamp(rawProgress, 0, 1));
+      card.style.marginLeft   = lerp(restMarginLeft,  -naturalLeft,  t) + 'px';
+      card.style.marginRight  = lerp(restMarginRight, -naturalRight, t) + 'px';
+      card.style.borderRadius = lerp(restRadius, 0, t) + 'px';
+    }
 
+    /* ================= DESKTOP: continuous scroll-link ================= */
+    var deskTicking = false;
+
+    function updateDesktop() {
+      if (naturalLeft === null) { cacheNaturalPos(); }
       var cardRect = card.getBoundingClientRect();
       var vh = window.innerHeight;
 
-      // Scroll progress: 0 = card top has reached 70% down the viewport
-      // (i.e. it's already mostly on screen before anything starts moving),
+      // Scroll progress: 0 = card top has reached 70% down the viewport,
       // 1 = card top has reached 0% down the viewport (top of screen).
-      // Lower the 0.70 to delay the START further; lower the 0.00 to delay
-      // the FINISH further (push it closer to/past the top of the screen).
       var start = vh * 0.70;
       var end   = vh * 0.00;
       var progress = clamp((start - cardRect.top) / (start - end), 0, 1);
 
-      // Cubic ease-in-out — smooth, no abrupt snap.
-      var t = progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-      // Interpolate from the CSS resting inset/radius out to full-bleed
-      // (negative margins exactly cancel the container's natural padding).
-      var ml     = lerp(restMarginLeft,  -naturalLeft,  t);
-      var mr     = lerp(restMarginRight, -naturalRight, t);
-      var radius = lerp(restRadius, 0, t);
-
-      card.style.marginLeft   = ml + 'px';
-      card.style.marginRight  = mr + 'px';
-      card.style.borderRadius = radius + 'px';
-
-      ticking = false;
+      render(progress);
+      deskTicking = false;
     }
 
-    window.addEventListener('scroll', function () {
-      if (!ticking) { requestAnimationFrame(updateCard); ticking = true; }
-    }, { passive: true });
+    function onScrollDesktop() {
+      if (!deskTicking) { requestAnimationFrame(updateDesktop); deskTicking = true; }
+    }
+
+    /* ========== MOBILE: pin at nav edge, lock scroll, ease, release ========== */
+    var settledAt       = 0;      // 0 = resting, 1 = expanded — where the card is currently parked
+    var locked          = false;
+    var lastScrollY     = window.scrollY;
+    var mobTicking      = false;
+    var lockListenersOn = false;
+    var safetyTimer     = null;
+    var scrollHoldHandler = null; // secondary safety net — see startScrollHold() below
+    var lockedScrollY    = 0;
+
+    var PIN_GAP          = 16;   // breathing room below the fixed nav, px
+    var LOCK_DURATION     = 650;  // length of the paused expand/collapse, ms — raise for a slower, more deliberate pause
+    var JUMP_THRESHOLD_VH = 1.4;  // scrollY jumps bigger than this (anchor links etc.) snap instantly instead of locking
+
+    function navHeight() {
+      var v = getComputedStyle(document.documentElement).getPropertyValue('--nav-h');
+      return parseFloat(v) || 72;
+    }
+
+    function preventScroll(e) { e.preventDefault(); }
+    function preventKeyScroll(e) {
+      var activeTag = document.activeElement && document.activeElement.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' ||
+          (document.activeElement && document.activeElement.isContentEditable)) { return; }
+      var blocked = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'End', 'Home', ' '];
+      if (blocked.indexOf(e.key) !== -1) { e.preventDefault(); }
+    }
+
+    function addLockListeners() {
+      if (lockListenersOn) return;
+      window.addEventListener('wheel', preventScroll, { passive: false });
+      window.addEventListener('touchmove', preventScroll, { passive: false });
+      window.addEventListener('keydown', preventKeyScroll, { passive: false });
+      lockListenersOn = true;
+    }
+
+    function removeLockListeners() {
+      if (!lockListenersOn) return;
+      window.removeEventListener('wheel', preventScroll, { passive: false });
+      window.removeEventListener('touchmove', preventScroll, { passive: false });
+      window.removeEventListener('keydown', preventKeyScroll, { passive: false });
+      lockListenersOn = false;
+    }
+
+    // Belt-and-suspenders: wheel/touchmove/keydown interception stops new
+    // scroll *input*, but a fast flick started just before the lock engages
+    // can leave the browser still playing out native momentum/fling scroll —
+    // that momentum isn't carried by touchmove events, so preventDefault()
+    // alone can't catch it. While locked, snap scrollY straight back the
+    // instant it drifts, so momentum from a hard flick can't sneak through.
+    function startScrollHold() {
+      lockedScrollY = window.scrollY;
+      scrollHoldHandler = function () {
+        if (window.scrollY !== lockedScrollY) {
+          var prevBehavior = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = 'auto'; // avoid an animated CSS smooth-scroll snap-back
+          window.scrollTo(0, lockedScrollY);
+          document.documentElement.style.scrollBehavior = prevBehavior;
+        }
+      };
+      window.addEventListener('scroll', scrollHoldHandler, { passive: true });
+    }
+
+    function stopScrollHold() {
+      if (scrollHoldHandler) {
+        window.removeEventListener('scroll', scrollHoldHandler, { passive: true });
+        scrollHoldHandler = null;
+      }
+    }
+
+    function finishLock(target) {
+      if (!locked) return; // already settled — rAF completion + safety timer can race; stay idempotent
+      locked = false;
+      settledAt = target;
+      render(target);
+      removeLockListeners();
+      stopScrollHold();
+      if (scrollLockOwner === card) { scrollLockOwner = null; }
+      clearTimeout(safetyTimer);
+      lastScrollY = window.scrollY;
+    }
+
+    function runLockTween(target) {
+      locked = true;
+      scrollLockOwner = card;
+      addLockListeners();
+      startScrollHold();
+
+      var from = settledAt; // 0 or 1 — guaranteed to be the opposite of target by the caller's guard
+      var t0 = null;
+
+      function step(ts) {
+        if (!locked || scrollLockOwner !== card) return; // aborted elsewhere (e.g. resized to desktop)
+        if (t0 === null) { t0 = ts; }
+        var raw = clamp((ts - t0) / LOCK_DURATION, 0, 1);
+        render(lerp(from, target, raw));
+        if (raw < 1) { requestAnimationFrame(step); }
+        else { finishLock(target); }
+      }
+      requestAnimationFrame(step);
+
+      // Safety net: always release the lock even if a tab is backgrounded
+      // mid-tween and rAF stalls — scrolling must never get stuck.
+      clearTimeout(safetyTimer);
+      safetyTimer = setTimeout(function () { finishLock(target); }, LOCK_DURATION + 500);
+    }
+
+    function checkMobileTrigger() {
+      if (locked || scrollLockOwner) { lastScrollY = window.scrollY; return; }
+      if (naturalLeft === null) { cacheNaturalPos(); }
+
+      var currentY = window.scrollY;
+      var deltaY   = currentY - lastScrollY;
+      var vh       = window.innerHeight;
+      var pinPoint = navHeight() + PIN_GAP;
+      var cardRect = card.getBoundingClientRect();
+
+      // Big jump (anchor link, orientation change, etc.) — snap instantly, no lock.
+      if (Math.abs(deltaY) > vh * JUMP_THRESHOLD_VH) {
+        settledAt = cardRect.top <= pinPoint ? 1 : 0;
+        render(settledAt);
+        lastScrollY = currentY;
+        return;
+      }
+
+      if (deltaY > 0 && settledAt !== 1 && cardRect.top <= pinPoint) {
+        runLockTween(1); // scrolling down into the card, now fully in view — expand
+      } else if (deltaY < 0 && settledAt !== 0 && cardRect.top >= pinPoint) {
+        runLockTween(0); // scrolling up back out of the card — collapse
+      }
+
+      lastScrollY = currentY;
+    }
+
+    function onScrollMobile() {
+      if (!mobTicking) {
+        mobTicking = true;
+        requestAnimationFrame(function () { checkMobileTrigger(); mobTicking = false; });
+      }
+    }
+
+    /* ================= mode switching (desktop ↔ mobile) ================= */
+    var mobileQuery = window.matchMedia('(max-width: 768px)');
+    var mode = null; // 'desktop' | 'mobile'
+
+    function teardownMobile() {
+      window.removeEventListener('scroll', onScrollMobile, { passive: true });
+      removeLockListeners();
+      stopScrollHold();
+      clearTimeout(safetyTimer);
+      locked = false;
+      if (scrollLockOwner === card) { scrollLockOwner = null; }
+    }
+
+    function enterDesktop() {
+      if (mode === 'desktop') return;
+      teardownMobile();
+      mode = 'desktop';
+      window.addEventListener('scroll', onScrollDesktop, { passive: true });
+      requestAnimationFrame(updateDesktop);
+    }
+
+    function enterMobile() {
+      if (mode === 'mobile') return;
+      window.removeEventListener('scroll', onScrollDesktop, { passive: true });
+      mode = 'mobile';
+      lastScrollY = window.scrollY;
+
+      // Sync instantly to whatever the current scroll position implies —
+      // only a scroll gesture that crosses the pin point triggers a lock.
+      var pinPoint = navHeight() + PIN_GAP;
+      var cardRect = card.getBoundingClientRect();
+      settledAt = cardRect.top <= pinPoint ? 1 : 0;
+      render(settledAt);
+
+      window.addEventListener('scroll', onScrollMobile, { passive: true });
+    }
+
+    function applyMode(mq) {
+      cacheNaturalPos();
+      if (mq.matches) { enterMobile(); } else { enterDesktop(); }
+    }
+
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener('change', applyMode);
+    } else {
+      mobileQuery.addListener(applyMode); // Safari <14 fallback
+    }
 
     var resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         cacheNaturalPos();
-        requestAnimationFrame(updateCard);
+        if (mode === 'desktop') {
+          requestAnimationFrame(updateDesktop);
+        } else if (!locked) {
+          var pinPoint = navHeight() + PIN_GAP;
+          var cardRect = card.getBoundingClientRect();
+          settledAt = cardRect.top <= pinPoint ? 1 : 0;
+          render(settledAt);
+        }
       }, 100);
     }, { passive: true });
 
     requestAnimationFrame(function () {
       cacheNaturalPos();
-      updateCard();
+      applyMode(mobileQuery);
     });
   }
 
