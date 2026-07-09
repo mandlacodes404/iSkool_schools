@@ -18,7 +18,7 @@
  * @author      mandlasimphiwe99@gmail.com
  * @copyright   2025 iSkool EdTech. All rights reserved.
  * @license     Proprietary - Unauthorized use prohibited
- * @version     1.0.0
+ * @version     1.1.3
  * @since       2025-12-14
  * @link        https://iskool.online
  */
@@ -26,6 +26,7 @@
 require_once __DIR__ . '/auth/session_guard.php';
 
 require_once 'config.php'; 
+require_once __DIR__ . '/includes/app_version.php';
 require_once 'check_remember_me.php';     
 
 $errors = [
@@ -99,7 +100,7 @@ function getCsrfToken() {
           <img id="splash-svg" src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
         </div>
         <div class="branding splash-version-footer">
-            iSkool v1.1.2
+            <?= htmlspecialchars(iskool_app_version_label()) ?>
         </div>
     </div>
     <!-- Login/Register container -->
@@ -425,7 +426,7 @@ function getCsrfToken() {
                 </div>
 
             </div>
-            <div class="brand-panel-footer">&copy; <?= date('Y') ?> iSkool v1.1.2</div>
+            <div class="brand-panel-footer">&copy; <?= date('Y') ?> <?= htmlspecialchars(iskool_app_version_label()) ?></div>
         </div>
 
         <!-- RIGHT: Form panel -->

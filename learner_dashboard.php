@@ -19,7 +19,7 @@
  * @author      mandlasimphiwe99@gmail.com
  * @copyright   2025 iSkool EdTech. All rights reserved.
  * @license     Proprietary - Unauthorized use prohibited
- * @version     1.0.0
+ * @version     1.1.3
  * @since       2025-12-14
  * @link        https://iskool.online
  */
@@ -34,6 +34,7 @@ ini_set('error_log', 'php_errors.log');
 
 require_once __DIR__ . '/auth/session_guard.php';
 require_once 'config.php';
+require_once __DIR__ . '/includes/app_version.php';
 
 // ──────────────────────────────────────────────────────────────────
 //        Security: Only logged in + correct role 
@@ -361,7 +362,7 @@ function getCsrfToken() {
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:15px;"><span><strong>iSkool v1.1.2</strong></span></div>
+    <div class="footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
 </div>
 
 <div class="main-content">
@@ -500,7 +501,7 @@ function getCsrfToken() {
         <div class="loader-dot3"></div>
         <div class="loader-dot4"></div>
     </div>
-    <div class="loader-version">iSkool v1.1.2</div>
+    <div class="loader-version"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
 </div>
 </div>
 

@@ -6,6 +6,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 require_once __DIR__ . '/auth/session_guard.php';
 include("config.php");
+require_once __DIR__ . '/includes/app_version.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
@@ -210,9 +211,6 @@ function getCsrfToken() {
         </a>
     </div>
 
-    <div class="sidebar-footer">
-        <span>iSkool v1.1.2</span>
-    </div>
 </div>
 
 <div id="mobileOverlay"></div>
@@ -421,7 +419,7 @@ function getCsrfToken() {
             <div class="loader-dot3"></div>
             <div class="loader-dot4"></div>
         </div>
-        <div class="loader-version">iSkool v1.1.2</div>
+        <div class="loader-version"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
     </div>
 </div>
 
