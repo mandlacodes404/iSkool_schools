@@ -94,6 +94,10 @@
     transition: transform 0.5s var(--ease-out);
   }
 
+  .logo-wrap:hover .logo-mark {
+    transform: rotate(-8deg) scale(1.06);
+  }
+
   .logo-text-before,
   .logo-text-after {
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -184,10 +188,7 @@
   .nav-toggle svg { display: block; }
 
   @media (max-width: 768px) {
-    .nav-links { display: none; }
-    .nav-toggle { display: block; }
-
-    .nav-links.open {
+    .nav-links {
       display: flex;
       flex-direction: column;
       position: fixed;
@@ -198,9 +199,21 @@
       padding: 1.5rem 2rem 2rem;
       gap: 1.5rem;
       border-bottom: 1px solid var(--divider);
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out);
     }
 
-    .nav-links.open a {
+    .nav-toggle { display: block; }
+
+    .nav-links.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .nav-links a {
       font-size: 1.1rem;
     }
   }
@@ -598,13 +611,15 @@
     text-decoration: none;
     color: inherit;
     border: 1px solid transparent;
-    transition: border-color 0.25s ease, background 0.25s ease;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
     cursor: pointer;
   }
 
   .story-card:hover {
     background: var(--parchment);
     border-color: var(--divider);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px -18px rgba(26,23,20,0.18);
   }
 
   .story-card-top {}
@@ -668,7 +683,7 @@
   .story-card.featured .story-title { color: var(--cream); }
   .story-card.featured .story-excerpt { color: rgba(245,240,232,0.65); }
   .story-card.featured .story-read { color: var(--terra-light); }
-  .story-card.featured:hover { background: var(--ink-soft); border-color: rgba(245,240,232,0.1); }
+  .story-card.featured:hover { background: var(--ink-soft); border-color: rgba(245,240,232,0.1); box-shadow: 0 16px 32px -18px rgba(0,0,0,0.45); }
 
   /* ─── MISSION STRIP ─── */
   .mission-strip {
@@ -723,6 +738,23 @@
   .reveal-delay-2 { transition-delay: 0.2s; }
   .reveal-delay-3 { transition-delay: 0.3s; }
   .reveal-delay-4 { transition-delay: 0.45s; }
+
+  /* Soft entrance for ambient glows, once per page load */
+  @keyframes glow-in {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .smarties-bg-glow {
+    animation: glow-in 1.6s var(--ease-out) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .story-card:hover { transform: none; }
+    .smarties-bg-glow { animation: none; }
+    * { scroll-behavior: auto !important; }
+  }
 
   /* ─── UTILITIES ─── */
   .sr-only {
@@ -1139,6 +1171,12 @@
     </div>
   </div>
 
+  <div class="hero-scroll" aria-hidden="true">
+    <span>Scroll</span>
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+      <path d="M1 1l6 6 6-6M1 13l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
 
 </section>
 
@@ -1167,7 +1205,7 @@
 
         <!-- Right: image illustration -->
         <div class="smarties-card-right">
-          <div class="smarties-img-holder">
+          <div class="smarties-img-holder reveal">
             <img
               src="laura.png?v=1.2"
               alt="SMARTIES — campus connection illustration"
