@@ -2,9 +2,12 @@
 
 ## [Unreleased]
 ### Added
+- Teacher Analytics: Added a median score alongside the class average, a term-over-term delta on the Class Performance by Term chart, and an automatic hardest/easiest quiz callout on the Quiz Average chart (`analytics.js`, `get_analytics_data.php`).
 - Teacher Quizzes: Added live learner previews to the create quiz flow, including per-question previews and a full quiz preview before submission.
 
 ### Changed
+- Teacher Analytics: Visual and consistency pass on the analytics dashboard (`analytics.js`) — unified KPI card value sizing across all four cards, fixed a colour clash between the girls' data series and the existing fail/error red by moving girls to purple, removed a redundant duplicate status dot in the class list (the average badge already carries the same signal), and moved the colour palette into CSS custom properties so the whole dashboard themes from one place.
+- Teacher Analytics: Added hover lift and shadow to KPI cards, fade-in transitions when switching class or term, and visible keyboard focus states on class items and term tabs; error and empty states now show a retry action instead of plain text, and motion respects reduced-motion settings.
 - Teacher Quizzes: Reworked the create quiz form into clearer beginner-friendly steps, added visible attempt-limit setup, and reordered question creation so teachers choose the question type before writing the question.
 - Learner: Sorted teacher folders by each teacher's latest uploaded content across Grades, Assignments, Quizzes, Resources, and Announcements on both mobile and desktop. Quiz mobile folders now match desktop by grouping under teacher names.
 - UI: Removed borders from all SVG icon boxes on the mobile home page (`manual.js`, `manual.css`) — section-title icons (To Do, Recent, Upcoming Events), My Class icon, list row icons, and empty-state icons — for a flatter, cleaner look on mobile. Background colors kept.
