@@ -602,6 +602,7 @@ window.fetchTeacherAnalytics = async function () {
     try {
         const res  = await fetch('api/teacher/get_analytics.php');
         const data = await res.json();
+        if (data.error) throw new Error(data.error);
         window.teacherAnalyticsCache = data;
         renderTeacherAnalytics(data);
     } catch (e) {
@@ -629,7 +630,8 @@ function renderTeacherAnalytics(data) {
     const terms       = data.terms || [];
     const currentTerm = data.current_term || 1;
 
-    window.analyticsActiveTerm = currentTerm;
+    const currentTermData = terms.find(t => t.term === currentTerm);
+    window.analyticsActiveTerm = currentTermData ? currentTerm : terms[0]?.term || currentTerm;
     window._analyticsAllTerms  = terms;
     window._analyticsCurrentGlobalTerm = currentTerm;
 
