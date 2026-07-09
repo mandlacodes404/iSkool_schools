@@ -209,6 +209,31 @@ try {
             : round($student_averages[$mid], 1);
     }
 
+    $score_distribution = [
+        ['bucket' => '0-39',   'student_count' => 0],
+        ['bucket' => '40-59',  'student_count' => 0],
+        ['bucket' => '60-69',  'student_count' => 0],
+        ['bucket' => '70-79',  'student_count' => 0],
+        ['bucket' => '80-89',  'student_count' => 0],
+        ['bucket' => '90-100', 'student_count' => 0],
+    ];
+
+    foreach ($student_averages as $avg) {
+        if ($avg < 40) {
+            $score_distribution[0]['student_count']++;
+        } elseif ($avg < 60) {
+            $score_distribution[1]['student_count']++;
+        } elseif ($avg < 70) {
+            $score_distribution[2]['student_count']++;
+        } elseif ($avg < 80) {
+            $score_distribution[3]['student_count']++;
+        } elseif ($avg < 90) {
+            $score_distribution[4]['student_count']++;
+        } else {
+            $score_distribution[5]['student_count']++;
+        }
+    }
+
     echo json_encode([
         'quiz_averages'             => $quiz_averages,
         'quiz_gender_averages'      => $quiz_gender_averages,
@@ -216,7 +241,8 @@ try {
         'top_boys'                  => $top_boys,
         'boys_vs_girls_by_term'     => ['boys' => $boys_by_term, 'girls' => $girls_by_term],
         'class_performance_by_term' => $class_by_term,
-        'median_score'              => $median_score
+        'median_score'              => $median_score,
+        'score_distribution'        => $score_distribution
     ]);
 
     ob_end_flush();
