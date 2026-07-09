@@ -177,13 +177,46 @@ try {
     }
     $stmt->close();
 
+    // 6. Median Score (this term) — every student's own average, then take the middle value.
+    // Same roster/result filters as the quiz averages and top-5 queries above, just no LIMIT
+    // and no gender split, since every student needs to be in the pool for a median to mean anything.
+    $stmt = $conn->prepare("
+        SELECT u.email, AVG((r.score / r.total) * 100) AS avg_percent
+        FROM quiz_results r
+        JOIN quizzes q ON r.quiz_id = q.id
+        JOIN users u ON r.user_email = u.email AND u.is_deleted = 0
+        JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
+        WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
+          AND q.term_number = ? AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
+        GROUP BY u.email
+    ");
+    $stmt->bind_param("siii", $teacher_email, $class_id, $current_year_id, $term);
+    $stmt->execute();
+
+    $student_averages = array_map(
+        fn($row) => (float)$row['avg_percent'],
+        $stmt->get_result()->fetch_all(MYSQLI_ASSOC)
+    );
+    $stmt->close();
+
+    $median_score = null;
+    $n = count($student_averages);
+    if ($n > 0) {
+        sort($student_averages);
+        $mid = (int)floor(($n - 1) / 2);
+        $median_score = ($n % 2 === 0)
+            ? round(($student_averages[$mid] + $student_averages[$mid + 1]) / 2, 1)
+            : round($student_averages[$mid], 1);
+    }
+
     echo json_encode([
         'quiz_averages'             => $quiz_averages,
         'quiz_gender_averages'      => $quiz_gender_averages,
         'top_girls'                 => $top_girls,
         'top_boys'                  => $top_boys,
         'boys_vs_girls_by_term'     => ['boys' => $boys_by_term, 'girls' => $girls_by_term],
-        'class_performance_by_term' => $class_by_term
+        'class_performance_by_term' => $class_by_term,
+        'median_score'              => $median_score
     ]);
 
     ob_end_flush();
