@@ -268,22 +268,21 @@ function renderTeacherAssignments(data) {
             }
         </style>
 
-        <div class="teacher-resources-header">
-            <h2 class="teacher-resources-title">Assignments</h2>
-            <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateAssignment()">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Create Assignment
-            </button>
-        </div>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="as-desktop-layout">
             <!-- Left Sidebar -->
             <div class="as-sidebar">
-                <div class="as-sidebar-header">All Assignments</div>
+                <div class="as-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <span>All Assignments</span>
+                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateAssignment()"
+                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Create Assignment
+                    </button>
+                </div>
                 <div class="as-sidebar-scroll">${sidebarHtml}</div>
             </div>
 

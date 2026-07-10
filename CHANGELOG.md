@@ -1,6 +1,9 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Changed
+- Teacher Dashboard: Consolidated the separate top page title/create button into the left sidebar header — the section title and its create action (Release Evaluation, Add Quiz, Upload Resource, Release Syllabus, New Announcement, Create Assignment) now sit together in the sidebar, matching the Quizzes layout (`evaluations.js`, `grades.js`, `resources.js`, `sbo.js`, `announcements.js`, `assignments.js`).
+
 ### Fixed
 - Learner Calendar: Fixed the mobile layout so the calendar panel stretches to fill the full width of the screen instead of being cramped on the left with empty space on the right (`learner_calendar.js`).
 

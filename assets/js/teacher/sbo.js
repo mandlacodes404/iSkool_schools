@@ -278,22 +278,21 @@ function renderTeacherSyllabus(data) {
             }
         </style>
 
-        <div class="teacher-resources-header">
-            <h2 class="teacher-resources-title">Syllabus</h2>
-            <button class="teacher-upload-btn teacher-desktop-create" onclick="openSBOForm()">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Release Syllabus
-            </button>
-        </div>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="sbo-desktop-layout">
             <!-- Left Sidebar -->
             <div class="sbo-sidebar">
-                <div class="sbo-sidebar-header">All Syllabus</div>
+                <div class="sbo-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <span>All Syllabus</span>
+                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openSBOForm()"
+                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Release Syllabus
+                    </button>
+                </div>
                 <div class="sbo-sidebar-scroll">
                     ${sidebarHtml}
                 </div>
