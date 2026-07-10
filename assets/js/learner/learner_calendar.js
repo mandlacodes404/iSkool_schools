@@ -499,6 +499,7 @@ function buildLearnerCalShell(month, year, events) {
             /* ── RESPONSIVE ── */
             @media (max-width: 900px) {
                 .lcal-body { flex-direction: column; }
+                .lcal-main { width: 100%; }
                 .lcal-upcoming { width: 100%; }
             }
 
@@ -506,6 +507,9 @@ function buildLearnerCalShell(month, year, events) {
                 .lcal-cell { min-height: 56px; padding: 4px; }
                 .lcal-pill { display: none; }
                 .lcal-topbar { flex-direction: column; align-items: flex-start; }
+                .lcal-main { width: 100%; }
+                .lcal-grid,
+                .lcal-cells { width: 100%; }
             }
         </style>
 

@@ -1,6 +1,8 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Fixed
+- Learner Calendar: Fixed the mobile layout so the calendar panel stretches to fill the full width of the screen instead of being cramped on the left with empty space on the right (`learner_calendar.js`).
 
 ## [v1.1.3] - 2026-07-09
 ### Added
