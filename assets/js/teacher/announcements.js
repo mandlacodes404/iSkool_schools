@@ -70,21 +70,9 @@ function renderTeacherAnnouncements(data) {
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No announcements yet.</p>`;
     } else {
-        data.forEach(group => {
-            // Label — school group gets a distinct teal label, class groups get the muted style
-            if (group.is_school) {
-                sidebarHtml += `
-                    <div class="an-sidebar-class-label an-sidebar-school-label">
-                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                            <polyline points="9 22 9 12 15 12 15 22"/>
-                        </svg>
-                        From School
-                    </div>`;
-            } else {
-                sidebarHtml += `<div class="an-sidebar-class-label">${group.class_name}</div>`;
-            }
-
+        data.forEach((group, groupIdx) => {
+            const classGroupId = `an-class-group-${groupIdx}`;
+            let itemsHtml = '';
             group.items.forEach(ann => {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 60
@@ -94,7 +82,7 @@ function renderTeacherAnnouncements(data) {
                 // School items get a slightly different icon colour (orange = school broadcast)
                 const iconStroke = group.is_school ? '#f59e0b' : '#4fd1c5';
 
-                sidebarHtml += `
+                itemsHtml += `
                     <div class="an-sidebar-item${group.is_school ? ' an-school-item' : ''}" id="an-sidebar-${flatIndex}"
                         onclick="selectDesktopAnnouncement(${flatIndex})">
                         <div class="an-sidebar-item-icon">
@@ -109,6 +97,25 @@ function renderTeacherAnnouncements(data) {
                         </div>
                     </div>`;
             });
+
+            // Label — school group gets a distinct teal label, class groups get the muted style
+            const labelInnerHtml = group.is_school
+                ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    From School`
+                : group.class_name;
+            const labelClass = group.is_school
+                ? 'an-sidebar-class-label an-sidebar-school-label'
+                : 'an-sidebar-class-label';
+
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                labelClass,
+                labelInnerHtml,
+                itemsHtml
+            );
         });
     }
 
@@ -153,6 +160,10 @@ function renderTeacherAnnouncements(data) {
                 font-size: 10px; font-weight: 700;
                 color: #8b949e; text-transform: uppercase; letter-spacing: 0.8px;
             }
+            .an-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
+            }
 
             /* School label — distinct from class labels */
             .an-sidebar-school-label {
@@ -163,6 +174,10 @@ function renderTeacherAnnouncements(data) {
             }
             .an-sidebar-scroll > .an-sidebar-school-label:first-child {
                 border-top: none; margin-top: 0;
+            }
+            /* Keep the orange tint on hover instead of the shared muted-gray hover */
+            .an-sidebar-school-label.tchr-sidebar-class-label--toggle:hover {
+                color: #fbbf24;
             }
 
             .an-sidebar-item {

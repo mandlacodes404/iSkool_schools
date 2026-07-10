@@ -78,10 +78,11 @@ function renderTeacherGrades(data) {
     } else {
         data.forEach(termData => {
             sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
-            termData.classes.forEach(cls => {
-                sidebarHtml += `<div class="gr-sidebar-class-label">${escapeHtml(cls.class_name)}</div>`;
+            termData.classes.forEach((cls, clsIdx) => {
+                const classGroupId = `gr-class-group-${termData.term}-${clsIdx}`;
+                let itemsHtml = '';
                 cls.quizzes.forEach(quiz => {
-                    sidebarHtml += `
+                    itemsHtml += `
                         <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
                             onclick="selectDesktopGradeQuiz(${quiz.id})">
                             <div class="gr-sidebar-item-icon">
@@ -96,6 +97,12 @@ function renderTeacherGrades(data) {
                             </div>
                         </div>`;
                 });
+                sidebarHtml += window.buildCollapsibleClassGroup(
+                    classGroupId,
+                    'gr-sidebar-class-label',
+                    escapeHtml(cls.class_name),
+                    itemsHtml
+                );
             });
         });
     }
@@ -168,6 +175,10 @@ function renderTeacherGrades(data) {
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
+            }
+            .gr-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
             }
             .gr-sidebar-item {
                 display: flex;

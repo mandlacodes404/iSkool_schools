@@ -94,12 +94,13 @@ function renderTeacherQuizzes(data) {
                         TERM ${termData.term}
                         ${isActive ? '<span class="qz-sidebar-term-active">ACTIVE</span>' : ''}
                     </div>`;
-            termData.classes.forEach(cls => {
-                sidebarHtml += `<div class="qz-sidebar-class-label">${escapeHtml(cls.class_name)}</div>`;
+            termData.classes.forEach((cls, clsIdx) => {
+                const classGroupId = `qz-class-group-${termData.term}-${clsIdx}`;
+                let itemsHtml = '';
                 cls.quizzes.forEach(quiz => {
                     const statusColor = quiz.status === 'Open' ? '#f28c38'
                         : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
-                    sidebarHtml += `
+                    itemsHtml += `
                         <div class="qz-sidebar-item" id="qz-sidebar-${quiz.id}"
                             onclick="selectDesktopQuiz(${quiz.id})">
                             <div class="qz-sidebar-item-icon">
@@ -116,6 +117,12 @@ function renderTeacherQuizzes(data) {
                             <span class="qz-sidebar-status-dot" style="background:${statusColor};"></span>
                         </div>`;
                 });
+                sidebarHtml += window.buildCollapsibleClassGroup(
+                    classGroupId,
+                    'qz-sidebar-class-label',
+                    escapeHtml(cls.class_name),
+                    itemsHtml
+                );
             });
             sidebarHtml += `</div>`;
         });
@@ -202,6 +209,11 @@ function renderTeacherQuizzes(data) {
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
+            }
+            /* Extra vertical breathing room for the toggle row specifically */
+            .qz-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
             }
             .qz-sidebar-item {
                 display: flex;
@@ -574,6 +586,9 @@ function renderTeacherQuizzes(data) {
 
     apiArea.innerHTML = html;
 }
+
+// Note: class-group collapsing is handled by the shared
+// window.toggleSidebarClassGroup (see dashboard.js)
 
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT QUIZ

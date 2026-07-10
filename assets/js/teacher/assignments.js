@@ -58,28 +58,49 @@ function renderTeacherAssignments(data) {
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No assignments created yet.</p>`;
     } else {
+        // Group by class_name for display, but keep each item's original
+        // index into window._allAssignmentsFlat so selectDesktopAssignment(index)
+        // and mobile-list logic (which use that flat array) keep working unchanged.
+        const groupsByClass = new Map();
         data.forEach((assignment, index) => {
-            const subPercent = assignment.total_learners > 0
-                ? Math.round((assignment.submitted_count / assignment.total_learners) * 100)
-                : 0;
-            const dotColor = subPercent === 100 ? '#22c55e'
-                : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+            const key = assignment.class_name || 'Other';
+            if (!groupsByClass.has(key)) groupsByClass.set(key, []);
+            groupsByClass.get(key).push({ assignment, index });
+        });
 
-            sidebarHtml += `
-                <div class="as-sidebar-item" id="as-sidebar-${index}"
-                    onclick="selectDesktopAssignment(${index})">
-                    <div class="as-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                    </div>
-                    <div class="as-sidebar-item-info">
-                        <div class="as-sidebar-item-title">${assignment.title}</div>
-                        <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
-                    </div>
-                    <span class="as-sidebar-status-dot" style="background:${dotColor};"></span>
-                </div>`;
+        let classGroupIdx = 0;
+        groupsByClass.forEach((entries, className) => {
+            const classGroupId = `as-class-group-${classGroupIdx++}`;
+            let itemsHtml = '';
+            entries.forEach(({ assignment, index }) => {
+                const subPercent = assignment.total_learners > 0
+                    ? Math.round((assignment.submitted_count / assignment.total_learners) * 100)
+                    : 0;
+                const dotColor = subPercent === 100 ? '#22c55e'
+                    : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+
+                itemsHtml += `
+                    <div class="as-sidebar-item" id="as-sidebar-${index}"
+                        onclick="selectDesktopAssignment(${index})">
+                        <div class="as-sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                        </div>
+                        <div class="as-sidebar-item-info">
+                            <div class="as-sidebar-item-title">${assignment.title}</div>
+                            <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
+                        </div>
+                        <span class="as-sidebar-status-dot" style="background:${dotColor};"></span>
+                    </div>`;
+            });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'as-sidebar-class-label',
+                className,
+                itemsHtml
+            );
         });
     }
 
@@ -136,6 +157,19 @@ function renderTeacherAssignments(data) {
             .as-sidebar-scroll::-webkit-scrollbar { width: 4px; }
             .as-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .as-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+            .as-sidebar-class-label {
+                padding: 8px 16px 4px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .as-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
+            }
 
             .as-sidebar-item {
                 display: flex;

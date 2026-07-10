@@ -58,12 +58,13 @@ function renderTeacherResources(data) {
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No resources uploaded yet.</p>`;
     } else {
-        data.forEach(group => {
-            sidebarHtml += `<div class="rs-sidebar-class-label">${group.class_name}</div>`;
+        data.forEach((group, groupIdx) => {
+            const classGroupId = `rs-class-group-${groupIdx}`;
+            let itemsHtml = '';
             group.items.forEach(item => {
                 const isVideo  = item.resource_type === 'video';
                 const flatIndex = window._allResourcesFlat.findIndex(r => r.id === item.id);
-                sidebarHtml += `
+                itemsHtml += `
                     <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
                         onclick="selectDesktopResource(${flatIndex})">
                         <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext, isVideo)}</div>
@@ -73,6 +74,12 @@ function renderTeacherResources(data) {
                         </div>
                     </div>`;
             });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'rs-sidebar-class-label',
+                group.class_name,
+                itemsHtml
+            );
         });
     }
 
@@ -135,6 +142,10 @@ function renderTeacherResources(data) {
                 color: #8b949e;
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
+            }
+            .rs-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
             }
             .rs-sidebar-item {
                 display: flex;

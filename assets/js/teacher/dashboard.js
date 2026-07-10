@@ -44,6 +44,88 @@ window.showTeacherScopedLoader = function(panel, message = 'Working...') {
     };
 };
 
+// ─────────────────────────────────────────────
+// SHARED: COLLAPSIBLE SIDEBAR CLASS GROUPS
+// Reusable across quizzes/grades/resources/announcements/
+// assignments (or any teacher page with a left sidebar
+// grouped by class). Injects one shared stylesheet + one
+// shared toggle function so every page's sidebar behaves
+// the same way without duplicating CSS/JS per file.
+// ─────────────────────────────────────────────
+(function () {
+    if (document.getElementById('teacher-collapsible-sidebar-style')) return;
+    const style = document.createElement('style');
+    style.id = 'teacher-collapsible-sidebar-style';
+    style.textContent = `
+        .tchr-sidebar-class-label--toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.15s ease;
+        }
+        .tchr-sidebar-class-label--toggle:hover {
+            color: #c9d1d9;
+        }
+        .tchr-sidebar-class-chevron {
+            flex-shrink: 0;
+            transition: transform 0.18s ease;
+            transform: rotate(0deg);
+        }
+        .tchr-sidebar-class-label--toggle.collapsed .tchr-sidebar-class-chevron {
+            transform: rotate(-90deg);
+        }
+        .tchr-sidebar-class-group {
+            overflow: hidden;
+            max-height: 2000px;
+            transition: max-height 0.22s ease;
+        }
+        .tchr-sidebar-class-group.collapsed {
+            max-height: 0;
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+/**
+ * Builds the markup for one collapsible class group in a sidebar.
+ * @param {string} groupId       - unique DOM id for the collapsible content wrapper
+ * @param {string} labelClass    - page-specific label class, e.g. "qz-sidebar-class-label"
+ * @param {string} labelInnerHtml - the label's contents (name, icons, badges, etc.)
+ * @param {string} itemsHtml     - the already-built HTML for the items inside this class
+ * @returns {string}
+ */
+window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml, itemsHtml) {
+    return `
+        <div class="${labelClass} tchr-sidebar-class-label--toggle"
+            onclick="toggleSidebarClassGroup(this)"
+            data-target="${groupId}"
+            role="button"
+            aria-expanded="true">
+            <svg class="tchr-sidebar-class-chevron" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span>${labelInnerHtml}</span>
+        </div>
+        <div class="tchr-sidebar-class-group" id="${groupId}">${itemsHtml}</div>`;
+};
+
+/**
+ * Generic toggle handler for any collapsible class-group label.
+ * Default state (no click yet) is always expanded.
+ */
+window.toggleSidebarClassGroup = function(labelEl) {
+    if (!labelEl) return;
+    const targetId = labelEl.getAttribute('data-target');
+    const group = targetId ? document.getElementById(targetId) : null;
+    if (!group) return;
+
+    const isCollapsed = group.classList.toggle('collapsed');
+    labelEl.classList.toggle('collapsed', isCollapsed);
+    labelEl.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     const sidebar  = document.querySelector('.sidebar');
     const overlay  = document.getElementById('mobileOverlay');
