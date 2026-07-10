@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/index.css?v=2.2">
     <style>
     #loader-logo svg,
     #loader-logo img {
@@ -459,7 +459,13 @@ function getCsrfToken() {
                   <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer;">
                   <label for="remember_me" style="font-size: 13px; color: #ccc; cursor: pointer; user-select: none;">Keep me logged in</label>
                 </div>
-                <button type="submit" id="login-btn">Login</button>
+                <button type="submit" id="login-btn">
+                    <span class="btn-label">Login</span>
+                    <span class="btn-spinner" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                    </span>
+                </button>
                 <p>Don't have an account? 
                    <a href="#" onclick="showForm('register-form'); return false;">Register</a>
                 </p>
@@ -1164,8 +1170,8 @@ function getCsrfToken() {
         errorBox.textContent   = '';
 
         // Show loading state
-        btn.disabled    = true;
-        btn.textContent = 'Logging in…';
+        btn.disabled = true;
+        btn.classList.add('is-loading');
 
         const formData = new FormData(this);
         // Pass the remember_me checkbox value explicitly
@@ -1178,7 +1184,7 @@ function getCsrfToken() {
             const data = await res.json();
 
             if (data.success) {
-                btn.textContent = 'Redirecting…';
+                // Keep the dimmed + spinner state going right up until the redirect fires
                 window.location.href = data.redirect;
             } else {
                 // Show error inline — no page reload
@@ -1186,14 +1192,14 @@ function getCsrfToken() {
                 errorBox.style.display = 'block';
                 // Scroll error into view on mobile
                 errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                btn.disabled    = false;
-                btn.textContent = 'Login';
+                btn.disabled = false;
+                btn.classList.remove('is-loading');
             }
         } catch (err) {
             errorBox.textContent   = 'Network error. Please check your connection and try again.';
             errorBox.style.display = 'block';
-            btn.disabled    = false;
-            btn.textContent = 'Login';
+            btn.disabled = false;
+            btn.classList.remove('is-loading');
         }
     });
 

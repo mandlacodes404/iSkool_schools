@@ -888,6 +888,76 @@ button:hover {
     background: #F1F1F1;
 }
 
+/* ── Login button loading state ── */
+button#login-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button#login-btn.is-loading {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+}
+
+button#login-btn .btn-spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+}
+
+button#login-btn.is-loading .btn-label {
+    visibility: hidden;
+}
+
+button#login-btn.is-loading .btn-spinner {
+    display: block;
+}
+
+/* Circular "pill" loader — 8 rounded bars arranged in a ring, each
+   fading in turn to create a spinning effect (the classic
+   ChatGPT-style loading indicator). */
+.btn-spinner span {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2.5px;
+    height: 7px;
+    margin-left: -1.25px;
+    border-radius: 2px;
+    background: #131314;
+    transform-origin: 1.25px 10px;
+    animation: btn-spinner-fade 1s linear infinite;
+}
+
+.btn-spinner span:nth-child(1) { transform: rotate(0deg);   animation-delay: -1s; }
+.btn-spinner span:nth-child(2) { transform: rotate(45deg);  animation-delay: -0.875s; }
+.btn-spinner span:nth-child(3) { transform: rotate(90deg);  animation-delay: -0.75s; }
+.btn-spinner span:nth-child(4) { transform: rotate(135deg); animation-delay: -0.625s; }
+.btn-spinner span:nth-child(5) { transform: rotate(180deg); animation-delay: -0.5s; }
+.btn-spinner span:nth-child(6) { transform: rotate(225deg); animation-delay: -0.375s; }
+.btn-spinner span:nth-child(7) { transform: rotate(270deg); animation-delay: -0.25s; }
+.btn-spinner span:nth-child(8) { transform: rotate(315deg); animation-delay: -0.125s; }
+
+@keyframes btn-spinner-fade {
+    0%   { opacity: 1; }
+    100% { opacity: 0.15; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-spinner span {
+        animation: none;
+        opacity: 0.6;
+    }
+}
+
     a {
         color: white;
         text-decoration: none;
