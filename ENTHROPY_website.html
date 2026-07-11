@@ -1430,12 +1430,13 @@
 
      Mobile (≤768px): "pin and expand". The card scrolls up normally until its
      top edge arrives just under the nav — i.e. it's now fully in view — at
-     which point scrolling is briefly held (wheel/touch/keys are intercepted)
-     while the card eases open to full-bleed on its own timer, then scrolling
-     is released and carries on as normal. Scrolling back up through an
-     already-expanded card pauses the same way while it eases shut. This is
-     the same "pin, expand, release" pattern used by the mobile scroll-expand
-     cards on anthropic.com. */
+     which point scrolling is held (wheel/touch/keys are intercepted) while
+     the card eases open to full-bleed on a slow, gentle timer (see
+     LOCK_DURATION / SETTLE_PAUSE below), then scrolling is released and
+     carries on as normal. Scrolling back up through an already-expanded card
+     pauses the same way while it eases shut. This is the same "pin, expand,
+     release" pattern used by the mobile scroll-expand cards on
+     anthropic.com, tuned here to feel slower and more deliberate. */
 
   // Only one card may hold the scroll lock at a time (shared across both
   // initScrollExpandCard() calls below).
@@ -1456,6 +1457,11 @@
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
     function easeInOutCubic(x) {
       return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+    // Gentler than easeInOutCubic — softer approach at both ends so the
+    // paused mobile expand/collapse doesn't read as an abrupt snap.
+    function easeInOutQuint(x) {
+      return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
     }
 
     function cacheNaturalPos() {
@@ -1487,6 +1493,16 @@
     // Renders a 0→1 progress value (eased internally) to margin/radius.
     function render(rawProgress) {
       var t = easeInOutCubic(clamp(rawProgress, 0, 1));
+      card.style.marginLeft   = lerp(restMarginLeft,  -naturalLeft,  t) + 'px';
+      card.style.marginRight  = lerp(restMarginRight, -naturalRight, t) + 'px';
+      card.style.borderRadius = lerp(restRadius, 0, t) + 'px';
+    }
+
+    // Same as render(), but with the gentler quint curve baked in directly
+    // (instead of render()'s built-in cubic) — used only by the mobile lock
+    // tween so the two easings don't compound.
+    function renderEased(rawProgress) {
+      var t = easeInOutQuint(clamp(rawProgress, 0, 1));
       card.style.marginLeft   = lerp(restMarginLeft,  -naturalLeft,  t) + 'px';
       card.style.marginRight  = lerp(restMarginRight, -naturalRight, t) + 'px';
       card.style.borderRadius = lerp(restRadius, 0, t) + 'px';
@@ -1525,7 +1541,8 @@
     var lockedScrollY    = 0;
 
     var PIN_GAP          = 16;   // breathing room below the fixed nav, px
-    var LOCK_DURATION     = 650;  // length of the paused expand/collapse, ms — raise for a slower, more deliberate pause
+    var LOCK_DURATION     = 1100; // length of the paused expand/collapse, ms — raise for a slower, more deliberate pause
+    var SETTLE_PAUSE      = 150;  // brief hold once fully open/closed before scroll is handed back, ms
     var JUMP_THRESHOLD_VH = 1.4;  // scrollY jumps bigger than this (anchor links etc.) snap instantly instead of locking
 
     function navHeight() {
@@ -1605,20 +1622,30 @@
       var from = settledAt; // 0 or 1 — guaranteed to be the opposite of target by the caller's guard
       var t0 = null;
 
+      var settled = false;
+
       function step(ts) {
         if (!locked || scrollLockOwner !== card) return; // aborted elsewhere (e.g. resized to desktop)
         if (t0 === null) { t0 = ts; }
-        var raw = clamp((ts - t0) / LOCK_DURATION, 0, 1);
-        render(lerp(from, target, raw));
-        if (raw < 1) { requestAnimationFrame(step); }
-        else { finishLock(target); }
+        var elapsed = ts - t0;
+        var raw = clamp(elapsed / LOCK_DURATION, 0, 1);
+        // renderEased applies its own easing (no double-easing with render()).
+        renderEased(lerp(from, target, raw));
+        if (raw < 1) {
+          requestAnimationFrame(step);
+        } else if (!settled) {
+          // Brief hold once fully open/closed before handing scroll back —
+          // avoids the jarring "instantly free" feeling right as motion stops.
+          settled = true;
+          setTimeout(function () { finishLock(target); }, SETTLE_PAUSE);
+        }
       }
       requestAnimationFrame(step);
 
       // Safety net: always release the lock even if a tab is backgrounded
       // mid-tween and rAF stalls — scrolling must never get stuck.
       clearTimeout(safetyTimer);
-      safetyTimer = setTimeout(function () { finishLock(target); }, LOCK_DURATION + 500);
+      safetyTimer = setTimeout(function () { finishLock(target); }, LOCK_DURATION + SETTLE_PAUSE + 500);
     }
 
     function checkMobileTrigger() {

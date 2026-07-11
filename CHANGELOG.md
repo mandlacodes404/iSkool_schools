@@ -2,12 +2,14 @@
 
 ## [Unreleased]
 ### Changed
+- Teacher Grades: Renamed "quiz" to "assessment" throughout the learner-facing labels (sidebar header, empty states, "Add Quiz Manually" modal, form labels, buttons, and error/result messages) since marks can come from assignments as well as quizzes; internal code (function/variable names, element IDs, API endpoints) left unchanged (`grades.js`).
 - Login: Replaced the "Logging in…" / "Redirecting…" text states on the login button with a dimmed button and a circular pill-dot spinner (matching the label until success/error), including a reduced-motion fallback (`index.php`, `index.css`).
 - Teacher Dashboard: Left sidebar class groups are now collapsible (click a class label to expand/collapse its items), defaulting to expanded; added a shared, reusable toggle helper in `dashboard.js` so the behavior is consistent across Quizzes, Grades, Resources, Announcements, and Assignments; Assignments' sidebar is now also grouped by class instead of a flat list (`dashboard.js`, `quizzes.js`, `grades.js`, `resources.js`, `announcements.js`, `assignments.js`). Desktop only.
 - Teacher Dashboard: Simplified sidebar create buttons to a consistent "+ New" label across Evaluations, Quizzes (Grades), Resources, Announcements, and Assignments, and dropped the "All" prefix from sidebar titles (Evaluations, Quizzes, Resources, Assignments) for a cleaner look; Syllabus sidebar title kept as "All Syllabus" (`evaluations.js`, `grades.js`, `resources.js`, `announcements.js`, `assignments.js`).
 - Teacher Dashboard: Consolidated the separate top page title/create button into the left sidebar header — the section title and its create action now sit together in the sidebar, matching the Quizzes layout (`evaluations.js`, `grades.js`, `resources.js`, `sbo.js`, `announcements.js`, `assignments.js`).
 
 ### Fixed
+- Learner Dashboard (Mobile): Fixed the mobile bottom nav sometimes loading a blank page when tapped mid-scroll — momentum scrolling is now stopped and the content scroll position reset before the next page loads, with the header/bottom nav state refreshed on the next animation frame; also fixed the bottom nav active-state keys for Assignments (`assignment_list.php`) and Resources (`resource_list.php`) (`learner_dashboard.php`).
 - Learner Calendar: Fixed the mobile layout so the calendar panel stretches to fill the full width of the screen instead of being cramped on the left with empty space on the right (`learner_calendar.js`).
 
 ## [v1.1.3] - 2026-07-09
