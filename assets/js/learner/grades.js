@@ -514,13 +514,17 @@ function renderGrades(data) {
     #gradesReportFrame { flex: 1; width: 100%; border: none; background: #0d1117; }
 
     @media (max-width: 768px) {
+        .grades-mobile-layout {
+            margin-left: -18px;
+            margin-right: -18px;
+        }
         .grades-wrap {
             max-width: none;
             padding: 0 0 64px;
         }
         .grades-header {
             margin: 0 0 12px;
-            padding: 0 2px;
+            padding: 0 18px;
         }
         .grades-header-right {
             width: 100%;
@@ -561,41 +565,54 @@ function renderGrades(data) {
             padding: 9px 14px;
         }
         .grades-mobile-layout .subject-card {
-            background: #1a1919;
-            border-color: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            margin: 0 0 14px;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin: 0;
+        }
+        .grades-mobile-layout .subject-card:last-of-type {
+            border-bottom: 0;
         }
         .grades-mobile-layout .subject-header {
-            background: #1a1919;
-            border-bottom-color: rgba(255,255,255,0.05);
-            padding: 16px;
+            background: transparent;
+            border-bottom: 0;
+            padding: 16px 18px;
         }
         .grades-mobile-layout .subject-header:hover {
-            background: #1a1919;
+            background: rgba(255,255,255,0.03);
         }
         .grades-mobile-layout .view-toggle-bar {
-            background: #1a1919;
-            padding: 10px 16px 8px;
+            background: transparent;
+            padding: 10px 18px 8px;
         }
         .grades-mobile-layout .quiz-list,
         .grades-mobile-layout .term-marks-view {
-            background: #1a1919;
-            padding: 8px 16px 16px;
+            background: transparent;
+            padding: 8px 18px 16px;
         }
         .grades-mobile-layout .quiz-row {
-            background: #1a1919;
-            border-color: rgba(255,255,255,0.05);
+            background: transparent;
+            border: 0;
             border-radius: 0;
-            border-left: 0;
-            border-right: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             margin-bottom: 0;
+            position: relative;
         }
-        .grades-mobile-layout .quiz-row + .quiz-row {
-            border-top: 0;
+        .grades-mobile-layout .quiz-row:last-child {
+            border-bottom: 0;
+        }
+        .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) {
+            transform: none;
+            border-color: rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
         }
         .grades-mobile-layout .quiz-row-details {
-            background: #151515;
+            background: rgba(255,255,255,0.02);
+            padding: 12px 0 14px;
+        }
+        .grades-mobile-layout .quiz-row-header {
+            padding: 13px 0;
         }
         .grades-mobile-layout .quiz-row-icon {
             width: 32px;

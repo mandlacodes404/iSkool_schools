@@ -424,19 +424,19 @@ function renderResourceCards(data) {
                 display: block;
             }
             .lrs-mobile-video-card {
-                background: #1a1919;
+                background: transparent;
                 border-bottom: 0;
-                padding: 13px 16px;
+                padding: 13px 18px;
                 position: relative;
             }
             .lrs-mobile-video-card::after {
                 content: '';
                 position: absolute;
                 bottom: 0;
-                left: 16px;
-                right: 16px;
+                left: 18px;
+                right: 18px;
                 height: 1px;
-                background: rgba(255,255,255,0.05);
+                background: rgba(255,255,255,0.06);
             }
             .lrs-mobile-video-card:last-child::after { display: none; }
             .lrs-mobile-video-title {
@@ -454,25 +454,31 @@ function renderResourceCards(data) {
                 gap: 6px;
             }
 
-            /* ── MOBILE LIST STYLES ── */
+            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lrs-mobile-list {
-                background: #1a1919;
-                border-radius: 12px;
-                overflow: hidden;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
                 margin: 0 0 14px;
+            }
+            @media (max-width: 899px) {
+                .lrs-mobile-list {
+                    margin-left: -18px;
+                    margin-right: -18px;
+                }
             }
             .lrs-mobile-folder-header {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 18px 20px;
-                background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding: 16px 18px;
+                background: transparent;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
                 cursor: pointer;
                 user-select: none;
                 transition: background 0.2s;
             }
-            .lrs-mobile-folder-header:active { background: #1a1919; }
+            .lrs-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
             .lrs-mobile-folder-icon { flex-shrink: 0; }
             .lrs-mobile-folder-name {
                 flex: 1;
@@ -507,27 +513,27 @@ function renderResourceCards(data) {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 13px 16px;
-                background: #1a1919;
+                padding: 13px 18px;
+                background: transparent;
                 border-bottom: 0;
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
                 cursor: pointer;
-                transition: border-color 0.2s, transform 0.2s;
+                transition: background 0.15s;
                 position: relative;
             }
             .lrs-mobile-row::after {
                 content: '';
                 position: absolute;
                 bottom: 0;
-                left: 16px;
-                right: 16px;
+                left: 18px;
+                right: 18px;
                 height: 1px;
-                background: rgba(255,255,255,0.05);
+                background: rgba(255,255,255,0.06);
             }
             .lrs-mobile-row:last-child::after { display: none; }
-            .lrs-mobile-row:hover { border-color: rgba(242,140,56,0.2); transform: translateX(3px); }
+            .lrs-mobile-row:active { background: rgba(255,255,255,0.03); }
             .lrs-mobile-row-icon {
                 width: 32px;
                 height: 32px;
