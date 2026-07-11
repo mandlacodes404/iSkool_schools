@@ -637,7 +637,7 @@ window.openSBODrawer = async function() {
 
             <!-- Header -->
             <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-weight:900;font-size:16px;color:#e2e8f0;">📚 Release Syllabus</span>
+                <span style="font-weight:900;font-size:16px;color:#e2e8f0;">Release Syllabus</span>
                 <button onclick="closeSBODrawer()"
                         style="background:none;border:none;color:#8b949e;font-size:22px;cursor:pointer;">&times;</button>
             </div>

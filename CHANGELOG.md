@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Changed
+- Login: Replaced the "Logging in…" / "Redirecting…" text states on the login button with a dimmed button and a circular pill-dot spinner (matching the label until success/error), including a reduced-motion fallback (`index.php`, `index.css`).
+- Teacher Dashboard: Left sidebar class groups are now collapsible (click a class label to expand/collapse its items), defaulting to expanded; added a shared, reusable toggle helper in `dashboard.js` so the behavior is consistent across Quizzes, Grades, Resources, Announcements, and Assignments; Assignments' sidebar is now also grouped by class instead of a flat list (`dashboard.js`, `quizzes.js`, `grades.js`, `resources.js`, `announcements.js`, `assignments.js`). Desktop only.
 - Teacher Dashboard: Simplified sidebar create buttons to a consistent "+ New" label across Evaluations, Quizzes (Grades), Resources, Announcements, and Assignments, and dropped the "All" prefix from sidebar titles (Evaluations, Quizzes, Resources, Assignments) for a cleaner look; Syllabus sidebar title kept as "All Syllabus" (`evaluations.js`, `grades.js`, `resources.js`, `announcements.js`, `assignments.js`).
 - Teacher Dashboard: Consolidated the separate top page title/create button into the left sidebar header — the section title and its create action now sit together in the sidebar, matching the Quizzes layout (`evaluations.js`, `grades.js`, `resources.js`, `sbo.js`, `announcements.js`, `assignments.js`).
 
