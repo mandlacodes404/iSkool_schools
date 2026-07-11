@@ -467,25 +467,25 @@ function renderAnnouncements(data) {
                 line-height: 1.8;
             }
 
-            /* ── MOBILE LIST STYLES ── */
+            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lan-mobile-list {
-                background: #1a1919;
-                border-radius: 12px;
-                overflow: hidden;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
                 margin: 0 0 14px;
             }
             .lan-mobile-folder-header {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 18px 20px;
-                background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding: 16px 4px;
+                background: transparent;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
                 cursor: pointer;
                 user-select: none;
                 transition: background 0.2s;
             }
-            .lan-mobile-folder-header:active { background: #1a1919; }
+            .lan-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
             .lan-mobile-folder-icon { flex-shrink: 0; }
             .lan-mobile-folder-name {
                 flex: 1;
@@ -520,31 +520,30 @@ function renderAnnouncements(data) {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 13px 16px;
-                background: #1a1919;
+                padding: 13px 4px;
+                background: transparent;
                 border-bottom: 0;
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
                 cursor: pointer;
-                transition: border-color 0.2s, transform 0.2s;
+                transition: background 0.15s;
                 position: relative;
             }
             .lan-mobile-card::after {
                 content: '';
                 position: absolute;
                 bottom: 0;
-                left: 16px;
-                right: 16px;
+                left: 4px;
+                right: 4px;
                 height: 1px;
-                background: rgba(255,255,255,0.05);
+                background: rgba(255,255,255,0.06);
             }
             .lan-mobile-card:last-child::after { display: none; }
             .lan-mobile-card--school {
-                border-left: 3px solid rgba(242,140,56,0.5) !important;
+                border-left: 0 !important;
             }
-            .lan-mobile-card:hover { border-color: rgba(242,140,56,0.2); transform: translateX(3px); }
-            .lan-mobile-card--school:hover { border-left-color: rgba(242,140,56,0.5) !important; }
+            .lan-mobile-card:active { background: rgba(255,255,255,0.03); }
             .lan-mobile-card-icon {
                 width: 32px;
                 height: 32px;
