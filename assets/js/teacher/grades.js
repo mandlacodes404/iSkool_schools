@@ -74,7 +74,7 @@ function renderTeacherGrades(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No quizzes found.</p>`;
+        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No assessments found.</p>`;
     } else {
         data.forEach(termData => {
             sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
@@ -259,7 +259,7 @@ function renderTeacherGrades(data) {
             <!-- Left Sidebar -->
             <div class="gr-sidebar">
                 <div class="gr-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                    <span>Quizzes</span>
+                    <span>Assessments</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openAddQuizModal()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
@@ -283,7 +283,7 @@ function renderTeacherGrades(data) {
                         <line x1="16" y1="13" x2="8" y2="13"></line>
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
-                    <p>Select a quiz to view learner grades</p>
+                    <p>Select an assessment to view learner grades</p>
                 </div>
             </div>
         </div>
@@ -296,11 +296,11 @@ function renderTeacherGrades(data) {
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                <span>Click any quiz to view learner grades.</span>
+                <span>Click any assessment to view learner grades.</span>
             </div>`;
 
     if (!data || data.length === 0) {
-        html += `<p class="teacher-empty-state">No quizzes found.</p>`;
+        html += `<p class="teacher-empty-state">No assessments found.</p>`;
     } else {
         data.forEach(termData => {
             html += `<div class="teacher-term-divider">Term ${termData.term}</div>`;
@@ -343,7 +343,7 @@ function renderTeacherGrades(data) {
         <div id="addQuizModal" class="teacher-modal-overlay" style="display:none;">
             <div class="teacher-modal-box" style="max-width:440px;">
                 <div class="teacher-modal-header">
-                    <span>Add Quiz Manually</span>
+                    <span>Add Assessment Manually</span>
                     <button onclick="closeAddQuizModal()" class="teacher-modal-close">&times;</button>
                 </div>
                 <div class="teacher-modal-body">
@@ -353,10 +353,10 @@ function renderTeacherGrades(data) {
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
-                        <span>After adding, find the quiz in the list and click it to enter each learner's marks.</span>
+                        <span>After adding, find the assessment in the list and click it to enter each learner's marks.</span>
                     </div>
 
-                    <label class="teacher-modal-label">Quiz Title *</label>
+                    <label class="teacher-modal-label">Assessment Title *</label>
                     <input type="text" id="quizTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Test">
 
                     <label class="teacher-modal-label">Select Class *</label>
@@ -379,7 +379,7 @@ function renderTeacherGrades(data) {
                 </div>
                 <div class="teacher-modal-footer">
                     <button onclick="closeAddQuizModal()" class="teacher-modal-cancel">Cancel</button>
-                    <button onclick="submitAddQuiz()" class="teacher-modal-submit" id="addQuizSubmitBtn">Add Quiz</button>
+                    <button onclick="submitAddQuiz()" class="teacher-modal-submit" id="addQuizSubmitBtn">Add Assessment</button>
                 </div>
             </div>
         </div>`;
@@ -682,7 +682,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
             ${!isPanel ? `<div class="teacher-resources-header">${backButton}</div>` : ''}
             <div class="gr-panel-header">
                 <div>
-                    <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Quiz Results')}</div>
+                    <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
                     <div class="gr-panel-meta">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
@@ -697,7 +697,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
             </div>`;
 
     if (results.length === 0) {
-        html += `<p class="teacher-empty-state">No submitted attempts found for this quiz.</p>`;
+        html += `<p class="teacher-empty-state">No submitted attempts found for this assessment.</p>`;
     } else {
         results.forEach(learner => {
             const openQuestions = learner.open_ended || [];
@@ -1050,7 +1050,7 @@ window.submitAddQuiz = async function() {
 
     errorDiv.style.display = 'none';
 
-    if (!title)   { errorDiv.textContent = 'Please enter a quiz title.'; errorDiv.style.display = 'block'; return; }
+    if (!title)   { errorDiv.textContent = 'Please enter an assessment title.'; errorDiv.style.display = 'block'; return; }
     if (!classId) { errorDiv.textContent = 'Please select a class.';     errorDiv.style.display = 'block'; return; }
 
     const fd = new FormData();
@@ -1074,7 +1074,7 @@ window.submitAddQuiz = async function() {
             window.teacherGradesCache = null;
             fetchTeacherGrades();
         } else {
-            errorDiv.textContent = data.error || 'Failed to add quiz.';
+            errorDiv.textContent = data.error || 'Failed to add assessment.';
             errorDiv.style.display = 'block';
         }
     } catch (e) {
@@ -1082,7 +1082,7 @@ window.submitAddQuiz = async function() {
         errorDiv.style.display = 'block';
     } finally {
         submitBtn.disabled    = false;
-        submitBtn.textContent = 'Add Quiz';
+        submitBtn.textContent = 'Add Assessment';
         if (loader) loader.style.display = 'none';
     }
 };
