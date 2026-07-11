@@ -474,11 +474,17 @@ function renderAnnouncements(data) {
                 overflow: visible;
                 margin: 0 0 14px;
             }
+            @media (max-width: 899px) {
+                .lan-mobile-list {
+                    margin-left: -18px;
+                    margin-right: -18px;
+                }
+            }
             .lan-mobile-folder-header {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 16px 4px;
+                padding: 16px 18px;
                 background: transparent;
                 border-bottom: 1px solid rgba(255,255,255,0.08);
                 cursor: pointer;
@@ -520,7 +526,7 @@ function renderAnnouncements(data) {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 13px 4px;
+                padding: 13px 18px;
                 background: transparent;
                 border-bottom: 0;
                 border-radius: 0;
@@ -534,8 +540,8 @@ function renderAnnouncements(data) {
                 content: '';
                 position: absolute;
                 bottom: 0;
-                left: 4px;
-                right: 4px;
+                left: 18px;
+                right: 18px;
                 height: 1px;
                 background: rgba(255,255,255,0.06);
             }
