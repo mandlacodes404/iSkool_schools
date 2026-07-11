@@ -283,14 +283,14 @@ function renderTeacherSyllabus(data) {
             <!-- Left Sidebar -->
             <div class="sbo-sidebar">
                 <div class="sbo-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                    <span>All Syllabus</span>
+                    <span>Syllabus</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openSBOForm()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        Release Syllabus
+                        New
                     </button>
                 </div>
                 <div class="sbo-sidebar-scroll">
@@ -539,7 +539,7 @@ async function openSBOPanel(panel) {
         <div class="sbo-panel-content">
             <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.07);
                         display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">📚 Release Syllabus</div>
+                <div style="font-size:18px;font-weight:800;color:#e2e8f0;"> Release Syllabus</div>
                 <button onclick="fetchTeacherSyllabus()"
                     style="background:none;border:none;color:#8b949e;font-size:22px;
                            cursor:pointer;line-height:1;padding:0;">&times;</button>
