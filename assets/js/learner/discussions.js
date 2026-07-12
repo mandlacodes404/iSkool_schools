@@ -272,6 +272,9 @@ function unlockMobileLayout() {
     document.getElementById('discMobileSheet')?.remove();
     document.getElementById('discMobileTrigger')?.remove();
     document.getElementById('discMobileOverlay')?.remove();
+    /* Remove the long-press action popup if it exists */
+    document.getElementById('discLongPressMenu')?.remove();
+    document.getElementById('discLongPressOverlay')?.remove();
 }
 
 // ─────────────────────────────────────────────
@@ -886,6 +889,8 @@ function renderThread(data) {
                 /* Transparent on mobile only — lets the chat/thread area show the real page background */
                 .disc-thread-wrap { background: transparent; }
                 .disc-posts-scroll { background: transparent; }
+                /* Reply/Report buttons are replaced by the long-press action popup on mobile */
+                .disc-footer { display: none !important; }
             }
 
             /* ── DATE CHIP ── */
@@ -947,6 +952,33 @@ function renderThread(data) {
             .disc-action-btn:hover { background:rgba(255,255,255,0.05); color:#e2e8f0; }
             .disc-action-btn.reply:hover { color:#4fd1c5; }
             .disc-action-btn.report:hover { color:#f85149; }
+
+            /* ── MOBILE LONG-PRESS ACTION POPUP ── */
+            @media (max-width: 767px) {
+                .disc-body-wrap.disc-pressed { background: rgba(255,255,255,0.06); }
+                #discLongPressOverlay {
+                    position:fixed; inset:0; background:rgba(0,0,0,0.55);
+                    z-index:5500; display:none; backdrop-filter:blur(2px);
+                    -webkit-backdrop-filter:blur(2px); transition:opacity 0.25s ease; opacity:0;
+                }
+                #discLongPressMenu {
+                    position:fixed; z-index:5600; background:#272726;
+                    border:1px solid rgba(255,255,255,0.08); border-radius:12px;
+                    overflow:hidden; min-width:150px;
+                    box-shadow:0 8px 28px rgba(0,0,0,0.45);
+                    opacity:0; transform:scale(0.92); transition:opacity 0.15s ease, transform 0.15s ease;
+                }
+                #discLongPressMenu.show { opacity:1; transform:scale(1); }
+                #discLongPressMenu button {
+                    display:flex; align-items:center; gap:10px; width:100%;
+                    background:none; border:none; color:#e2e8f0;
+                    font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+                    padding:12px 16px; cursor:pointer; text-align:left;
+                }
+                #discLongPressMenu button:not(:last-child) { border-bottom:1px solid rgba(255,255,255,0.06); }
+                #discLongPressMenu button.report { color:#f85149; }
+                #discLongPressMenu button i { font-size:13px; width:16px; text-align:center; }
+            }
 
             /* ── NESTED REPLY ── */
             .disc-nested-reply { display:flex; gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.05); }
@@ -1040,6 +1072,7 @@ function renderThread(data) {
     if (!isDesktop() && is_in_class) {
         injectMobileComposer(disc.id);
     }
+    wireLongPress();
 }
 
 function buildPostCard(r, user_role, is_in_class, discId) {
@@ -1108,17 +1141,25 @@ function buildPostCard(r, user_role, is_in_class, discId) {
         }
     }
 
-    const replyBtn  = is_in_class && r.id !== undefined
+    const canReply  = is_in_class && r.id !== undefined;
+    const canReport = user_role === 'learner' && !isMe && r.id;
+
+    const replyBtn  = canReply
         ? `<button class="disc-action-btn reply" onclick="discSetReply(${r.id || 0},'${escHtml(r.replier_display)}','${escHtml((r.message||'').substring(0,80))}')"><i class="fas fa-reply"></i> Reply</button>`
         : '';
-    const reportBtn = user_role === 'learner' && !isMe && r.id
+    const reportBtn = canReport
         ? `<button class="disc-action-btn report" onclick="discShowReport(${r.id},${discId})"><i class="fas fa-flag"></i> Report</button>`
         : '';
 
     const bodyWrapClass = `disc-body-wrap${isOp ? ' is-op' : ''}${isMe ? ' is-me' : ''}`;
 
     return `
-        <div class="disc-post-card" data-id="${r.id || 0}">
+        <div class="disc-post-card" data-id="${r.id || 0}"
+             data-disc-id="${discId}"
+             data-can-reply="${canReply ? '1' : '0'}"
+             data-can-report="${canReport ? '1' : '0'}"
+             data-author="${escHtml(r.replier_display || 'Learner')}"
+             data-preview="${escHtml((r.message||'').substring(0,80))}">
             <div class="disc-spine">
                 <div class="disc-spine-dot ${dotClass}"></div>
                 <div class="disc-spine-line"></div>
@@ -1435,6 +1476,107 @@ function injectMobileComposer(discId) {
         sheetTa.addEventListener('blur',   () => sheetBox.style.borderColor = 'rgba(255,255,255,0.08)');
     }
 }
+
+// ─────────────────────────────────────────────
+// MOBILE LONG-PRESS ACTION POPUP (Reply / Report)
+// Uses event delegation on #discPostsScroll so it keeps working for
+// posts appended later (e.g. via live polling), not just the initial render.
+// ─────────────────────────────────────────────
+let discLongPressTimer  = null;
+let discLongPressCard   = null;
+let discLongPressMoved  = false;
+
+function wireLongPress() {
+    if (isDesktop()) return;
+    const scroll = document.getElementById('discPostsScroll');
+    if (!scroll || scroll.dataset.longPressWired === '1') return;
+    scroll.dataset.longPressWired = '1';
+
+    scroll.addEventListener('touchstart', e => {
+        const card = e.target.closest('.disc-post-card');
+        if (!card) return;
+        discLongPressCard  = card;
+        discLongPressMoved = false;
+        discLongPressTimer = setTimeout(() => {
+            if (!discLongPressMoved) {
+                const touch = e.touches[0];
+                discOpenLongPressMenu(card, touch.clientX, touch.clientY);
+            }
+        }, 450);
+    }, { passive: true });
+
+    scroll.addEventListener('touchmove', () => {
+        discLongPressMoved = true;
+        clearTimeout(discLongPressTimer);
+    }, { passive: true });
+
+    scroll.addEventListener('touchend', () => {
+        clearTimeout(discLongPressTimer);
+    }, { passive: true });
+}
+
+window.discOpenLongPressMenu = function(card, x, y) {
+    document.getElementById('discLongPressMenu')?.remove();
+    document.getElementById('discLongPressOverlay')?.remove();
+
+    const canReply  = card.dataset.canReply === '1';
+    const canReport = card.dataset.canReport === '1';
+    if (!canReply && !canReport) return; // nothing to show, e.g. not in class
+
+    const replyId = card.dataset.id;
+    const discId  = card.dataset.discId;
+    const author  = card.dataset.author;
+    const preview = card.dataset.preview;
+
+    /* Haptic-style feedback via a quick highlight on the bubble */
+    const bubble = card.querySelector('.disc-body-wrap');
+    if (bubble) {
+        bubble.classList.add('disc-pressed');
+        setTimeout(() => bubble.classList.remove('disc-pressed'), 200);
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+
+    /* ── Dim overlay, same look as the reply-composer sheet ── */
+    const overlay = document.createElement('div');
+    overlay.id = 'discLongPressOverlay';
+    document.body.appendChild(overlay);
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+    overlay.addEventListener('click', discCloseLongPressMenu);
+
+    /* ── Popup menu near the press point ── */
+    const menu = document.createElement('div');
+    menu.id = 'discLongPressMenu';
+    menu.innerHTML = `
+        ${canReply  ? `<button onclick="discCloseLongPressMenu();discSetReply(${replyId || 0},'${author.replace(/'/g,"\\'")}','${preview.replace(/'/g,"\\'")}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+        ${canReport ? `<button class="report" onclick="discCloseLongPressMenu();discShowReport(${replyId},${discId})"><i class="fas fa-flag"></i> Report</button>` : ''}`;
+    document.body.appendChild(menu);
+
+    /* Position near the touch point, keeping it on-screen */
+    const menuWidth  = 170;
+    const menuHeight = (canReply && canReport) ? 92 : 46;
+    let left = x - menuWidth / 2;
+    let top  = y - menuHeight - 14;
+    left = Math.max(10, Math.min(left, window.innerWidth - menuWidth - 10));
+    if (top < 10) top = y + 14; // flip below the finger if too close to the top
+    menu.style.left = left + 'px';
+    menu.style.top  = top + 'px';
+
+    requestAnimationFrame(() => menu.classList.add('show'));
+};
+
+window.discCloseLongPressMenu = function() {
+    const menu    = document.getElementById('discLongPressMenu');
+    const overlay = document.getElementById('discLongPressOverlay');
+    if (menu) {
+        menu.classList.remove('show');
+        setTimeout(() => menu.remove(), 150);
+    }
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 250);
+    }
+};
 
 /* Open the sheet */
 window.discOpenMobileSheet = function(discId, mode) {
