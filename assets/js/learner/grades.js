@@ -392,7 +392,7 @@ function renderGrades(data) {
     .quiz-title-link { color: #68d391; cursor: pointer; }
     .quiz-unpublished .quiz-row-title { color: #8b949e; }
     @media (max-width: 899px) {
-        .quiz-row-title { color: #e2e8f0; }
+        .quiz-row-title { color: #e2e8f0; font-size: 15px; }
         .quiz-row-title a { color: #e2e8f0; }
         .quiz-row-title a:hover { color: #fff; }
         .quiz-title-link { color: #fff; }

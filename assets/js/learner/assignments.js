@@ -520,7 +520,7 @@ function renderAssignmentCards(groupedData) {
             }
             .las-mobile-row-body { flex: 1; min-width: 0; }
             .las-mobile-row-title {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;

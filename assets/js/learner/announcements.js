@@ -565,7 +565,7 @@ function renderAnnouncements(data) {
             }
             .lan-mobile-card-body { flex: 1; min-width: 0; }
             .lan-mobile-card-title {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;

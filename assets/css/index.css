@@ -631,6 +631,9 @@ body {
     #animation-wrapper {
         background: #20201f;
     }
+    .splash-version-footer {
+        font-size: 15px;
+    }
 }
 
 /* ── Desktop ── */

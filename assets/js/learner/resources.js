@@ -440,7 +440,7 @@ function renderResourceCards(data) {
             }
             .lrs-mobile-video-card:last-child::after { display: none; }
             .lrs-mobile-video-title {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #e2e8f0;
                 margin: 0 0 3px;
@@ -546,7 +546,7 @@ function renderResourceCards(data) {
             }
             .lrs-mobile-row-body { flex: 1; min-width: 0; }
             .lrs-mobile-row-title {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;
