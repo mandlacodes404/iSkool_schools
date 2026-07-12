@@ -623,6 +623,13 @@ body {
     max-width: 400px;
 }
 
+/* ── Mobile: match the dashboard's flat surface colour ── */
+@media (max-width: 899px) {
+    body, html {
+        background: #1a1919;
+    }
+}
+
 /* ── Desktop ── */
 @media (min-width: 900px) {
     body { padding: 0; }

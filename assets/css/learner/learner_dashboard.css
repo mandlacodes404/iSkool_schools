@@ -1278,6 +1278,7 @@ iframe {
 @media (max-width: 768px) {
     body {
         overflow-x: hidden;
+        background-color: #1a1919;
     }
 
     @keyframes mobileHorizontalFlip {
