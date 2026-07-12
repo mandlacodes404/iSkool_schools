@@ -213,18 +213,18 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=4.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=4.6">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.9">
-    <meta name="theme-color" content="#1a1919">
+    <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="msapplication-navbutton-color" content="#1a1919">
+    <meta name="msapplication-navbutton-color" content="#20201f">
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.6">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -545,7 +545,7 @@ window.prepareLearnerMobileNavigation = function() {
         bottomNav.classList.add('nav-scrolled');
     }
 
-    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
+    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
 };
 
 window.handleLearnerMobileBottomNav = function(event, loaderFn) {
@@ -2128,19 +2128,19 @@ if (desktopToggle) {
 
                 // Header: solid when scrolled down, transparent at top
                 if (scrollTop > SCROLL_THRESHOLD) {
-                    const pageColor = window.learnerCurrentPageColor || '#1a1919';
+                    const pageColor = window.learnerCurrentPageColor || '#20201f';
                     const isHome = !mainHeader.getAttribute('data-page-color');
                     // Home stays dark glass; other pages match the browser bar colour
                     const headerBg = isHome
-                        ? '#1a1919'
+                        ? '#20201f'
                         : pageColor;
                     mainHeader.classList.add('header-scrolled');
                     mainHeader.style.background = headerBg;
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#1a1919' : pageColor);
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#20201f' : pageColor);
                 } else {
                     mainHeader.classList.remove('header-scrolled');
                     mainHeader.style.background = '';
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
                 }
 
                 if (mainHeader.classList.contains('mobile-detail-mode')) {
@@ -2353,7 +2353,7 @@ function toggleJoinClassForm() {
 // --- DYNAMIC UI COMMAND CENTER ---
 // Tracks the current page accent colour so the scroll handler can keep
 // the browser bar in sync without resetting it to black on every scroll.
-window.learnerCurrentPageColor = '#1a1919';
+window.learnerCurrentPageColor = '#20201f';
 
 window.configureHeader = function(config) {
     let { title, mode, color } = config;
@@ -2366,14 +2366,14 @@ window.configureHeader = function(config) {
 
         if (color) {
             window.learnerCurrentPageColor = color;
-            if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
             if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
         } else {
             // Home or no colour — reset to dark surface/default
-            window.learnerCurrentPageColor = '#1a1919';
-            if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
+            window.learnerCurrentPageColor = '#20201f';
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             if (mainHeader)     mainHeader.style.borderBottom = '';
             if (mainHeader)     mainHeader.removeAttribute('data-page-color');
         }

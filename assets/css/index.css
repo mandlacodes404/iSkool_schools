@@ -626,10 +626,10 @@ body {
 /* ── Mobile: match the dashboard's flat surface colour ── */
 @media (max-width: 899px) {
     body, html {
-        background: #1a1919;
+        background: #20201f;
     }
     #animation-wrapper {
-        background: #1a1919;
+        background: #20201f;
     }
 }
 

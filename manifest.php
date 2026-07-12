@@ -18,8 +18,8 @@ echo json_encode([
     "description"      => "Learning Management system",
     "start_url"        => "/",
     "display"          => "standalone",
-    "background_color" => "#1a1919",
-    "theme_color"      => "#1a1919",
+    "background_color" => "#20201f",
+    "theme_color"      => "#20201f",
     "orientation"      => "any",
     "icons"            => [
         [

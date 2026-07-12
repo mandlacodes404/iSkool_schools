@@ -825,7 +825,7 @@ iframe {
         padding: 16px 18px;
         transition: left var(--transition-speed) ease;
         border-right: 1px solid #555555;
-        background: #1a1919;
+        background: #20201f;
     }
 
     .mobile-only-calendar {
@@ -1279,11 +1279,11 @@ iframe {
 @media (max-width: 768px) {
     body {
         overflow-x: hidden;
-        background-color: #1a1919;
+        background-color: #20201f;
     }
 
     .main-content {
-        background-color: #1a1919;
+        background-color: #20201f;
     }
 
     @keyframes mobileHorizontalFlip {
@@ -1469,7 +1469,7 @@ iframe {
    Desktop is NEVER affected — every rule here is inside max-width:768px.
 ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    /* Base state: solid #1a1919 to match the page background, no border.
+    /* Base state: solid #20201f to match the page background, no border.
        No !important on background so JS inline style can override it
        when configureHeader sets a page colour. */
     .main-header {
@@ -1480,7 +1480,7 @@ iframe {
         width: 100%;
         min-height: calc(56px + env(safe-area-inset-top, 0));
         padding: calc(8px + env(safe-area-inset-top, 0)) calc(16px + env(safe-area-inset-right, 0)) 8px calc(16px + env(safe-area-inset-left, 0));
-        background: #1a1919;
+        background: #20201f;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
