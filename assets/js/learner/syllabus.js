@@ -357,6 +357,17 @@ function renderSyllabusPage(data) {
                 transition: border-color 0.2s ease;
             }
             .syl-card:hover { border-color: rgba(79,209,197,0.3); }
+
+            /* Mobile: match the home page box treatment — flat colour, no border */
+            @media (max-width: 899px) {
+                .syl-card {
+                    background: #272726;
+                    border: none;
+                }
+                .syl-card:hover {
+                    border-color: transparent;
+                }
+            }
             .syl-card-header {
                 display: flex;
                 justify-content: space-between;
