@@ -883,6 +883,9 @@ function renderThread(data) {
                 .disc-posts-scroll { padding-bottom: 100px; }
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
+                /* Match the chat/thread background to the discussion list card colour on mobile only */
+                .disc-thread-wrap { background: #272726; }
+                .disc-posts-scroll { background: #272726; }
             }
 
             /* ── DATE CHIP ── */
