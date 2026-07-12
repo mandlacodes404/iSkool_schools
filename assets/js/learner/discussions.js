@@ -886,6 +886,12 @@ function renderThread(data) {
                 /* Transparent on mobile only — lets the chat/thread area show the real page background */
                 .disc-thread-wrap { background: transparent; }
                 .disc-posts-scroll { background: transparent; }
+
+                /* Chat bubbles on mobile: match the discussion list card colour,
+                   and drop the border unless the message is from "you" (is-me). */
+                .disc-body-wrap { background: #272726; border-color: transparent; }
+                .disc-body-wrap.is-op { background: #272726; border-color: transparent; }
+                .disc-body-wrap.is-me { border-color: rgba(79,209,197,0.2); }
             }
 
             /* ── DATE CHIP ── */
