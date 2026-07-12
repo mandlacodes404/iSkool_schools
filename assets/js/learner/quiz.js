@@ -742,13 +742,13 @@ function renderQuizCards(groupedData) {
                     padding: 9px 14px 9px 36px;
                     border-radius: 10px;
                     background: rgba(255,255,255,0.05);
-                    border: 1px solid rgba(255,255,255,0.08);
+                    border: none;
                     color: #e2e8f0;
                     font-size: 13px;
                     font-family: 'Nunito', sans-serif;
-                    transition: border-color 0.2s;
+                    transition: background 0.2s;
                 }
-                .lqz-mobile-search:focus { outline: none; border-color: #fdd663; }
+                .lqz-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
                 .lqz-mobile-search::placeholder { color: #555e6a; }
             }
 

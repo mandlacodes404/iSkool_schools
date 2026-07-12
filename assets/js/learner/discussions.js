@@ -686,7 +686,7 @@ function renderMobileList(data) {
         <div style="padding:16px 16px 0 16px;display:flex;justify-content:flex-end;">
             <button onclick="loadCreateDiscussion()"
                     style="background:rgba(79,209,197,0.1);color:#4fd1c5;
-                           border:1px solid rgba(79,209,197,0.3);padding:10px 20px;
+                           border:none;padding:10px 20px;
                            border-radius:10px;cursor:pointer;font-weight:700;
                            font-family:'Nunito',sans-serif;font-size:14px;transition:0.2s;"
                     onmouseover="this.style.background='rgba(79,209,197,0.2)'"

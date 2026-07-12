@@ -549,13 +549,13 @@ function renderGrades(data) {
             padding: 9px 14px 9px 36px;
             border-radius: 10px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: none;
             color: #e2e8f0;
             font-size: 13px;
             font-family: 'Nunito', sans-serif;
-            transition: border-color 0.2s;
+            transition: background 0.2s;
         }
-        .grades-mobile-search-wrap .grades-search:focus { outline: none; border-color: #68d391; }
+        .grades-mobile-search-wrap .grades-search:focus { outline: none; background: rgba(255,255,255,0.08); }
         .grades-mobile-search-wrap .grades-search::placeholder { color: #555e6a; }
         .grades-report-btn {
             width: 100%;
@@ -1838,6 +1838,7 @@ function renderProgressReport(data) {
             /* ── MOBILE ── */
             @media (max-width: 600px) {
                 .pr-wrap { padding-bottom: 80px; }
+                .pr-card { border: none; }
                 .pr-school-band { padding: 14px 16px; gap: 12px; }
                 .pr-school-name { font-size: 14px; }
                 .pr-student-row { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
