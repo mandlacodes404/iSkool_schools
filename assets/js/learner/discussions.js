@@ -214,6 +214,16 @@ function discAvatarColor(seed) {
         hash |= 0;
     }
     const hue = Math.abs(hash) % 360;
+
+    /* Mobile: softer, less saturated tint (rgba-style translucency via hsla).
+       Desktop keeps the original solid, more saturated colour untouched. */
+    if (!isDesktop()) {
+        return {
+            bg: `hsla(${hue}, 45%, 55%, 0.55)`,
+            color: '#ffffff',
+        };
+    }
+
     return {
         bg: `hsl(${hue} 68% 38%)`,
         color: '#ffffff',
