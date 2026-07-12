@@ -825,6 +825,7 @@ iframe {
         padding: 16px 18px;
         transition: left var(--transition-speed) ease;
         border-right: 1px solid #555555;
+        background: #1a1919;
     }
 
     .mobile-only-calendar {
@@ -1501,7 +1502,7 @@ iframe {
        which now wins because the base rule above has no !important.
        Border matches the bottom nav's scrolled border exactly. */
     .main-header.header-scrolled {
-        border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
     }
@@ -1530,7 +1531,7 @@ iframe {
     /* Scrolled-up state: glass locks in */
     #mobileBottomNav.nav-scrolled {
         background: rgba(27, 27, 27, 0.85) !important;
-        border-top-color: rgba(255, 255, 255, 0.05) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
