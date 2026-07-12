@@ -602,7 +602,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #1a1919;
+    background: #272726;
     border: none;
     border-radius: 14px;
     padding: 14px;
@@ -689,7 +689,7 @@
 
 /* Card container */
 .lh-card {
-    background: #1a1919;
+    background: #272726;
     border-radius: 14px;
     border: none;
     overflow: hidden;
