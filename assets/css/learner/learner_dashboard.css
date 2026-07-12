@@ -1282,6 +1282,10 @@ iframe {
         background-color: #1a1919;
     }
 
+    .main-content {
+        background-color: #1a1919;
+    }
+
     @keyframes mobileHorizontalFlip {
         0% {
             /* Start rotated 180 degrees sideways and slightly smaller */
