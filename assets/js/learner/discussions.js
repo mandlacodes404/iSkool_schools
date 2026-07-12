@@ -691,11 +691,11 @@ function renderMobileList(data) {
             const initial      = discInitials(d.creator_display);
             html += `
                 <div onclick="loadDiscussionThread(${d.id})"
-                     style="background:transparent;border:1px solid rgba(255,255,255,0.09);
-                            border-radius:14px;padding:14px;cursor:pointer;transition:border-color 0.2s;
+                     style="background:#272726;border:none;
+                            border-radius:14px;padding:14px;cursor:pointer;transition:background 0.2s;
                             display:flex;gap:12px;align-items:flex-start;"
-                     onmouseover="this.style.borderColor='rgba(79,209,197,0.3)'"
-                     onmouseout="this.style.borderColor='rgba(255,255,255,0.09)'">
+                     onmouseover="this.style.background='rgba(79,209,197,0.06)'"
+                     onmouseout="this.style.background='#272726'">
                     <div style="width:38px;height:38px;border-radius:50%;background:${avatarColor.bg};
                                 color:${avatarColor.color};display:flex;align-items:center;justify-content:center;
                                 font-size:13px;font-weight:800;flex-shrink:0;text-transform:uppercase;
