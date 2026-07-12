@@ -1464,7 +1464,7 @@ iframe {
    Desktop is NEVER affected — every rule here is inside max-width:768px.
 ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    /* Base state: transparent, no border.
+    /* Base state: solid #1a1919 to match the page background, no border.
        No !important on background so JS inline style can override it
        when configureHeader sets a page colour. */
     .main-header {
@@ -1475,7 +1475,7 @@ iframe {
         width: 100%;
         min-height: calc(56px + env(safe-area-inset-top, 0));
         padding: calc(8px + env(safe-area-inset-top, 0)) calc(16px + env(safe-area-inset-right, 0)) 8px calc(16px + env(safe-area-inset-left, 0));
-        background: transparent;
+        background: #1a1919;
         border-bottom-color: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
@@ -1498,9 +1498,10 @@ iframe {
     /* Scrolled state: glass effect locks in.
        background is intentionally NOT set here — it comes from
        mainHeader.style.background (set by the scroll handler in JS),
-       which now wins because the base rule above has no !important. */
+       which now wins because the base rule above has no !important.
+       Border matches the bottom nav's scrolled border exactly. */
     .main-header.header-scrolled {
-        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.05) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
     }

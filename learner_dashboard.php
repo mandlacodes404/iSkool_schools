@@ -213,7 +213,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=4.1">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=4.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=2.9">
     <meta name="theme-color" content="#1a1919">
     <meta name="mobile-web-app-capable" content="yes">
@@ -224,7 +224,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.2">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.3">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2132,7 +2132,7 @@ if (desktopToggle) {
                     const isHome = !mainHeader.getAttribute('data-page-color');
                     // Home stays dark glass; other pages match the browser bar colour
                     const headerBg = isHome
-                        ? 'rgba(26, 25, 25, 0.92)'
+                        ? '#1a1919'
                         : pageColor;
                     mainHeader.classList.add('header-scrolled');
                     mainHeader.style.background = headerBg;

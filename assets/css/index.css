@@ -628,6 +628,9 @@ body {
     body, html {
         background: #1a1919;
     }
+    #animation-wrapper {
+        background: #1a1919;
+    }
 }
 
 /* ── Desktop ── */
