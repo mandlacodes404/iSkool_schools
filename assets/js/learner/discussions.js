@@ -219,7 +219,7 @@ function discAvatarColor(seed) {
        Desktop keeps the original solid, more saturated colour untouched. */
     if (!isDesktop()) {
         return {
-            bg: `hsla(${hue}, 45%, 55%, 0.55)`,
+            bg: `hsla(${hue}, 35%, 65%, 0.4)`,
             color: '#ffffff',
         };
     }
