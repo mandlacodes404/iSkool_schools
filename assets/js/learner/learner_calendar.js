@@ -510,6 +510,20 @@ function buildLearnerCalShell(month, year, events) {
                 .lcal-main { width: 100%; }
                 .lcal-grid,
                 .lcal-cells { width: 100%; }
+
+                /* Mobile: lighter flat surface, no border, matching the rest of the app */
+                .lcal-main {
+                    background: #272726;
+                    border: none;
+                }
+                .lcal-upcoming-card,
+                .lcal-upcoming-empty {
+                    background: #272726;
+                    border: none;
+                }
+                .lcal-upcoming-card:hover {
+                    border-color: transparent;
+                }
             }
         </style>
 

@@ -294,7 +294,7 @@ function renderEvaluationsUI(data) {
             .lev-panel-content { padding: 28px 32px; overflow-y: auto; }
 
             .lev-mobile-list {
-                background: #1a1919;
+                background: #272726;
                 border-radius: 12px;
                 overflow: hidden;
                 margin: 0 0 16px;
@@ -305,8 +305,8 @@ function renderEvaluationsUI(data) {
                 gap: 14px;
                 min-height: 54px;
                 padding: 14px 16px;
-                background: #1a1919;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
+                background: #272726;
+                border-bottom: none;
                 cursor: pointer;
             }
             .lev-mobile-card:last-child { border-bottom: none; }
