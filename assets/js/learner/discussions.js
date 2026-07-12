@@ -955,6 +955,13 @@ function renderThread(data) {
 
             /* ── MOBILE LONG-PRESS ACTION POPUP ── */
             @media (max-width: 767px) {
+                /* Stop the native text-selection callout (Copy/Look Up/Translate)
+                   from appearing underneath our custom long-press popup. */
+                .disc-post-card {
+                    -webkit-user-select: none;
+                    user-select: none;
+                    -webkit-touch-callout: none;
+                }
                 .disc-body-wrap.disc-pressed { background: rgba(255,255,255,0.06); }
                 #discLongPressOverlay {
                     position:fixed; inset:0; background:rgba(0,0,0,0.55);
@@ -1513,11 +1520,25 @@ function wireLongPress() {
     scroll.addEventListener('touchend', () => {
         clearTimeout(discLongPressTimer);
     }, { passive: true });
+
+    /* Backstop: some browsers still fire the native text-selection callout
+       (Copy/Look Up/Translate) despite user-select:none. Block it outright
+       on post cards and clear any selection it may have already started. */
+    scroll.addEventListener('contextmenu', e => {
+        if (e.target.closest('.disc-post-card')) e.preventDefault();
+    });
 }
 
 window.discOpenLongPressMenu = function(card, x, y) {
     document.getElementById('discLongPressMenu')?.remove();
     document.getElementById('discLongPressOverlay')?.remove();
+
+    /* Clear any native text selection the browser may have started —
+       stops the Copy/Look Up/Translate callout from lingering underneath. */
+    if (window.getSelection) {
+        const sel = window.getSelection();
+        if (sel && sel.removeAllRanges) sel.removeAllRanges();
+    }
 
     const canReply  = card.dataset.canReply === '1';
     const canReport = card.dataset.canReport === '1';
