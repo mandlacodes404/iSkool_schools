@@ -886,12 +886,6 @@ function renderThread(data) {
                 /* Transparent on mobile only — lets the chat/thread area show the real page background */
                 .disc-thread-wrap { background: transparent; }
                 .disc-posts-scroll { background: transparent; }
-
-                /* Chat bubbles on mobile: match the discussion list card colour,
-                   and drop the border unless the message is from "you" (is-me). */
-                .disc-body-wrap { background: #272726; border-color: transparent; }
-                .disc-body-wrap.is-op { background: #272726; border-color: transparent; }
-                .disc-body-wrap.is-me { border-color: rgba(79,209,197,0.2); }
             }
 
             /* ── DATE CHIP ── */
@@ -926,6 +920,14 @@ function renderThread(data) {
             .disc-body-wrap { background:rgba(20,18,18,0.82); border:1px solid rgba(255,255,255,0.07); border-radius:0 12px 12px 12px; padding:11px 14px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
             .disc-body-wrap.is-op { background:rgba(79,209,197,0.06); border-color:rgba(79,209,197,0.15); }
             .disc-body-wrap.is-me { border-color:rgba(79,209,197,0.2); }
+
+            /* Mobile-only bubble overrides — placed after the base rules above so they
+               win the cascade on mobile without needing !important or touching desktop. */
+            @media (max-width: 767px) {
+                .disc-body-wrap { background: #272726; border-color: transparent; }
+                .disc-body-wrap.is-op { background: #272726; border-color: transparent; }
+                .disc-body-wrap.is-me { border-color: rgba(79,209,197,0.2); }
+            }
 
             /* ── QUOTE ── */
             .disc-quote { background:rgba(255,255,255,0.03); border-left:2px solid #4fd1c5; border-radius:0 6px 6px 0; padding:7px 11px; margin-bottom:9px; font-size:12px; color:#8b949e; }
