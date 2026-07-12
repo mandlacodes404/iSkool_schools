@@ -563,6 +563,7 @@ function renderGrades(data) {
             box-sizing: border-box;
             justify-content: center;
             padding: 9px 14px;
+            border: none;
         }
         .grades-mobile-layout .subject-card {
             background: transparent;
