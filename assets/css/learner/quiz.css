@@ -29,6 +29,12 @@
         font-family: 'Nunito', sans-serif !important;
         background-color: #20201f !important;
     }
+
+    /* Discussion thread view: match the list's background instead of
+       falling through to the base #000000 #api-content-area rule. */
+    #api-content-area.disc-thread-active {
+        background-color: #20201f !important;
+    }
 }
 
 /* 2. Make the scrollbar look professional (Matches Chrome/Edge/Safari) */
