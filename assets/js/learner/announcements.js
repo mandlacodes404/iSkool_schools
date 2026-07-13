@@ -176,12 +176,12 @@ function renderAnnouncements(data) {
     window._allLearnerAnnouncementsFlat = [];
 
     schoolWide.forEach(ann => {
-        window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'school', teacher: ann.sender || 'School Admin' });
+        window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'school', teacher: ann.sender || 'School Admin', initials: ann.sender_initials || null });
     });
 
     for (const { teacher, items } of teacherEntries) {
         items.forEach(ann => {
-            window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'teacher', teacher });
+            window._allLearnerAnnouncementsFlat.push({ ...ann, _type: 'teacher', teacher, initials: ann.teacher_initials || null });
         });
     }
 
@@ -936,7 +936,7 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const roleLabel = isSchool ? 'School Admin' : 'Teacher';
-    const initials = getLearnerAnnouncementInitials(sender);
+    const initials = ann.initials || getLearnerAnnouncementInitials(sender);
 
     apiArea.innerHTML = `
         <style>

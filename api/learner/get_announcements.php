@@ -24,6 +24,45 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 
 $email = $_SESSION['email'];
 
+/**
+ * Build a display name like "Mr SK.Mahlangu" (name=Sipho, second_name=Kagiso, surname=Mahlangu)
+ * or "Mr S.Mahlangu" when there's no second_name.
+ * Also returns 2-letter avatar initials: always first-name-initial + surname-initial (e.g. "SM").
+ */
+function buildTeacherNameParts(?string $title, ?string $name, ?string $secondName, ?string $surname): array {
+    $name = trim((string)$name);
+    $secondName = trim((string)$secondName);
+    $surname = trim((string)$surname);
+    $title = trim((string)$title);
+
+    if ($name === '' && $surname === '') {
+        return ['display' => 'Teacher', 'initials' => 'T'];
+    }
+
+    $firstInitial = $name !== '' ? mb_strtoupper(mb_substr($name, 0, 1)) : '';
+    $secondInitial = $secondName !== '' ? mb_strtoupper(mb_substr($secondName, 0, 1)) : '';
+    $surnameForDisplay = $surname !== '' ? $surname : 'Teacher';
+
+    $initialsBlock = $firstInitial . $secondInitial;
+    $display = trim(($title !== '' ? $title . ' ' : '') . $initialsBlock . '.' . $surnameForDisplay);
+
+    // Avatar initials: always just first-name initial + surname initial
+    $surnameInitial = $surname !== '' ? mb_strtoupper(mb_substr($surname, 0, 1)) : '';
+    $avatarInitials = ($firstInitial . $surnameInitial) ?: 'T';
+
+    return ['display' => $display, 'initials' => $avatarInitials];
+}
+
+function getInitials(string $text): string {
+    $text = trim($text);
+    if ($text === '') return '?';
+    $words = preg_split('/\s+/', $text);
+    if (count($words) === 1) {
+        return mb_strtoupper(mb_substr($words[0], 0, 1));
+    }
+    return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr(end($words), 0, 1));
+}
+
 // ── Active academic year ──
 $yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $current_academic_year_id = ($yearRes && $yearRes->num_rows > 0)
@@ -73,12 +112,13 @@ $schoolRes = $schoolStmt->get_result();
 
 while ($row = $schoolRes->fetch_assoc()) {
     $schoolAnnouncements[] = [
-        'id'           => (int)$row['id'],
-        'title'        => $row['title']   ?? '(No Title)',
-        'message'      => $row['message'] ?? '',
-        'created_at'   => $row['created_at'],
-        'display_date' => date('j M \a\t H:i', strtotime($row['created_at'])),
-        'sender'       => $schoolName,
+        'id'              => (int)$row['id'],
+        'title'           => $row['title']   ?? '(No Title)',
+        'message'         => $row['message'] ?? '',
+        'created_at'      => $row['created_at'],
+        'display_date'    => date('j M \a\t H:i', strtotime($row['created_at'])),
+        'sender'          => $schoolName,
+        'sender_initials' => getInitials($schoolName),
     ];
 }
 $schoolStmt->close();
@@ -96,10 +136,10 @@ if ($classId) {
             a.title,
             a.message,
             a.created_at,
-            CONCAT(
-                COALESCE(u.title, ''), ' ',
-                COALESCE(u.surname, 'Teacher')
-            ) AS teacher_display
+            u.title       AS t_title,
+            u.name        AS t_name,
+            u.second_name AS t_second_name,
+            u.surname     AS t_surname
         FROM announcements a
         LEFT JOIN users u ON a.created_by = u.email AND u.role = 'teacher'
         WHERE a.class_id = ?
@@ -112,13 +152,21 @@ if ($classId) {
     $teacherRes = $teacherStmt->get_result();
 
     while ($row = $teacherRes->fetch_assoc()) {
-        $teacher = trim($row['teacher_display']) ?: 'Unknown Teacher';
+        $nameParts = buildTeacherNameParts(
+            $row['t_title'],
+            $row['t_name'],
+            $row['t_second_name'],
+            $row['t_surname']
+        );
+        $teacher = $nameParts['display'];
+        $teacherGrouped[$teacher] = $teacherGrouped[$teacher] ?? [];
         $teacherGrouped[$teacher][] = [
-            'id'           => (int)$row['id'],
-            'title'        => $row['title']   ?? '(No Title)',
-            'message'      => $row['message'] ?? '',
-            'created_at'   => $row['created_at'],
-            'display_date' => date('j M \a\t H:i', strtotime($row['created_at'])),
+            'id'              => (int)$row['id'],
+            'title'           => $row['title']   ?? '(No Title)',
+            'message'         => $row['message'] ?? '',
+            'created_at'      => $row['created_at'],
+            'display_date'    => date('j M \a\t H:i', strtotime($row['created_at'])),
+            'teacher_initials'=> $nameParts['initials'],
         ];
     }
     $teacherStmt->close();
