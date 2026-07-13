@@ -13,6 +13,35 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 $studentEmail = $_SESSION['email'];
 $currentDateTime = date('Y-m-d H:i:s');
 
+/**
+ * Build a display name like "Mr SK.Mahlangu" (name=Sipho, second_name=Kagiso, surname=Mahlangu)
+ * or "Mr S.Mahlangu" when there's no second_name.
+ * Also returns 2-letter avatar initials: always first-name-initial + surname-initial (e.g. "SM").
+ */
+function buildTeacherNameParts(?string $title, ?string $name, ?string $secondName, ?string $surname): array {
+    $name = trim((string)$name);
+    $secondName = trim((string)$secondName);
+    $surname = trim((string)$surname);
+    $title = trim((string)$title);
+
+    if ($name === '' && $surname === '') {
+        return ['display' => 'Teacher', 'initials' => 'T'];
+    }
+
+    $firstInitial = $name !== '' ? mb_strtoupper(mb_substr($name, 0, 1)) : '';
+    $secondInitial = $secondName !== '' ? mb_strtoupper(mb_substr($secondName, 0, 1)) : '';
+    $surnameForDisplay = $surname !== '' ? $surname : 'Teacher';
+
+    $initialsBlock = $firstInitial . $secondInitial;
+    $display = trim(($title !== '' ? $title . ' ' : '') . $initialsBlock . '.' . $surnameForDisplay);
+
+    // Avatar initials: always just first-name initial + surname initial
+    $surnameInitial = $surname !== '' ? mb_strtoupper(mb_substr($surname, 0, 1)) : '';
+    $avatarInitials = ($firstInitial . $surnameInitial) ?: 'T';
+
+    return ['display' => $display, 'initials' => $avatarInitials];
+}
+
 // 1. Get Academic Year
 $yearStmt = $conn->prepare("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $yearStmt->execute();
@@ -25,7 +54,10 @@ $sql = "
     SELECT DISTINCT
         a.id, a.title, a.description, a.due_date, a.file_url, a.created_at,
         c.name AS class_name,
-        CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'Teacher')) AS teacher_display,
+        u.title       AS t_title,
+        u.name        AS t_name,
+        u.second_name AS t_second_name,
+        u.surname     AS t_surname,
         s.file_url AS submission_url
     FROM assignments a
     JOIN classes c ON a.class_id = c.id
@@ -46,8 +78,16 @@ $result = $stmt->get_result();
 $grouped = [];
 while ($row = $result->fetch_assoc()) {
     $isPastDue = (!empty($row['due_date']) && $row['due_date'] < $currentDateTime);
-    
-    $grouped[$row['teacher_display']][] = [
+
+    $nameParts = buildTeacherNameParts(
+        $row['t_title'],
+        $row['t_name'],
+        $row['t_second_name'],
+        $row['t_surname']
+    );
+    $teacherDisplay = $nameParts['display'];
+
+    $grouped[$teacherDisplay][] = [
         'id' => $row['id'],
         'title' => $row['title'],
         'description' => $row['description'],
@@ -56,7 +96,8 @@ while ($row = $result->fetch_assoc()) {
         'is_past_due' => $isPastDue,
         'teacher_file' => $row['file_url'],
         'submission_file' => $row['submission_url'],
-        'class_name' => $row['class_name']
+        'class_name' => $row['class_name'],
+        'teacher_initials' => $nameParts['initials']
     ];
 }
 echo json_encode($grouped);

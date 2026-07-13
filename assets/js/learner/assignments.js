@@ -202,7 +202,7 @@ function renderAssignmentCards(groupedData) {
     window._allLearnerAssignmentsFlat = [];
     for (const { teacher, tasks } of teacherEntries) {
         tasks.forEach(task => {
-            window._allLearnerAssignmentsFlat.push({ ...task, teacher });
+            window._allLearnerAssignmentsFlat.push({ ...task, teacher, initials: task.teacher_initials || null });
         });
     }
 
@@ -815,6 +815,24 @@ function escapeLearnerAssignmentJsString(value) {
     return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
 }
 
+function getLearnerAssignmentInitials(name) {
+    const clean = String(name ?? '').trim();
+    if (!clean) return '?';
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function formatLearnerAssignmentPostedDate(rawDate) {
+    const d = new Date(String(rawDate).replace(/-/g, '/'));
+    if (Number.isNaN(d.getTime())) return '';
+    const day = d.getDate();
+    const month = d.toLocaleString('en-US', { month: 'short' });
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day} ${month} at ${hours}:${mins}`;
+}
+
 window.openMobileLearnerAssignment = function(flatIdx) {
     if (window.innerWidth > 899) return;
 
@@ -841,11 +859,65 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
     const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
 
+    const sender = task.teacher || 'Teacher';
+    const initials = task.initials || getLearnerAssignmentInitials(sender);
+
     apiArea.innerHTML = `
         <style>
             .las-mobile-detail {
                 min-height: calc(100vh - 74px);
                 padding: 18px 16px 96px;
+            }
+            .las-mobile-detail-author-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .las-mobile-detail-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(167,139,250,0.35);
+                background: rgba(167,139,250,0.08);
+                color: #a78bfa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .las-mobile-detail-author-info {
+                min-width: 0;
+            }
+            .las-mobile-detail-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .las-mobile-detail-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+            .las-mobile-detail-role-badge {
+                color: #a78bfa;
+            }
+            .las-mobile-detail-role-sep {
+                color: #5a6472;
+                margin: 0 6px;
+            }
+            .las-mobile-detail-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
             }
             .las-mobile-detail-status {
                 display: inline-flex;
@@ -931,13 +1003,23 @@ window.openMobileLearnerAssignment = function(flatIdx) {
             }
         </style>
         <article class="las-mobile-detail">
+            <div class="las-mobile-detail-author-row">
+                <div class="las-mobile-detail-avatar">${escapeLearnerAssignmentHtml(initials)}</div>
+                <div class="las-mobile-detail-author-info">
+                    <div class="las-mobile-detail-author-name">${escapeLearnerAssignmentHtml(sender)}</div>
+                    <div class="las-mobile-detail-author-role">
+                        <span>Author</span><span class="las-mobile-detail-role-sep">|</span><span class="las-mobile-detail-role-badge">Teacher</span>
+                    </div>
+                    <div class="las-mobile-detail-posted">Posted ${escapeLearnerAssignmentHtml(task.created_at ? formatLearnerAssignmentPostedDate(task.created_at) : '')}</div>
+                </div>
+            </div>
             <div class="las-mobile-detail-status">
                 <span class="las-mobile-row-status-dot" style="background:${statusDotColor};"></span>
                 ${statusLabel}
             </div>
             <h1 class="las-mobile-detail-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</h1>
             <div class="las-mobile-detail-meta">
-                ${escapeLearnerAssignmentHtml(task.teacher || 'Teacher')} &bull; Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}
+                Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}
             </div>
             <div class="las-mobile-detail-desc">
                 ${task.description ? escapeLearnerAssignmentHtml(task.description).replace(/\n/g, '<br>') : 'No description provided.'}
