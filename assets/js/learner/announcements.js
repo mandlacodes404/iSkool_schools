@@ -903,6 +903,14 @@ function formatLearnerAnnouncementMessage(message) {
     return escapeLearnerAnnouncementHtml(message).replace(/\n/g, '<br>');
 }
 
+function getLearnerAnnouncementInitials(name) {
+    const clean = String(name ?? '').trim();
+    if (!clean) return '?';
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (window.innerWidth > 899) return;
 
@@ -927,15 +935,8 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
 
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
-    const detailIcon = isSchool
-        ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-           </svg>`
-        : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
-                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-           </svg>`;
+    const roleLabel = isSchool ? 'School Admin' : 'Teacher';
+    const initials = getLearnerAnnouncementInitials(sender);
 
     apiArea.innerHTML = `
         <style>
@@ -943,43 +944,66 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
                 min-height: calc(100vh - 74px);
                 padding: 18px 16px 96px;
             }
-            .lan-mobile-detail-badge {
-                display: inline-flex;
+            .lan-mobile-detail-author-row {
+                display: flex;
                 align-items: center;
-                gap: 6px;
-                padding: 4px 9px;
-                border-radius: 6px;
-                font-size: 10px;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .lan-mobile-detail-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(242,140,56,0.35);
+                background: rgba(242,140,56,0.1);
+                color: #f28c38;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
                 font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .lan-mobile-detail-author-info {
+                min-width: 0;
+            }
+            .lan-mobile-detail-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .lan-mobile-detail-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
-                margin-bottom: 12px;
+                margin-top: 2px;
             }
-            .lan-mobile-detail-badge--school {
+            .lan-mobile-detail-role-badge {
                 color: #f28c38;
-                border: 1px solid rgba(242,140,56,0.35);
-                background: rgba(242,140,56,0.1);
             }
-            .lan-mobile-detail-badge--teacher {
-                color: #f28c38;
-                border: 1px solid rgba(242,140,56,0.35);
-                background: rgba(242,140,56,0.1);
+            .lan-mobile-detail-role-sep {
+                color: #5a6472;
+                margin: 0 6px;
+            }
+            .lan-mobile-detail-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
             }
             .lan-mobile-detail-title {
-                margin: 0 0 10px;
+                margin: 0 0 18px;
                 color: #e2e8f0;
                 font-size: 28px;
                 line-height: 1.28;
                 font-weight: 800;
                 letter-spacing: 0;
-            }
-            .lan-mobile-detail-meta {
-                color: #8b949e;
-                font-size: 12px;
-                line-height: 1.5;
                 padding-bottom: 18px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
-                margin-bottom: 18px;
             }
             .lan-mobile-detail-message {
                 color: #e2e8f0;
@@ -993,12 +1017,17 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
             }
         </style>
         <article class="lan-mobile-detail">
-            <div class="lan-mobile-detail-badge ${isSchool ? 'lan-mobile-detail-badge--school' : 'lan-mobile-detail-badge--teacher'}">
-                ${detailIcon}
-                ${isSchool ? 'School-wide' : 'Teacher'}
+            <div class="lan-mobile-detail-author-row">
+                <div class="lan-mobile-detail-avatar">${escapeLearnerAnnouncementHtml(initials)}</div>
+                <div class="lan-mobile-detail-author-info">
+                    <div class="lan-mobile-detail-author-name">${escapeLearnerAnnouncementHtml(sender)}</div>
+                    <div class="lan-mobile-detail-author-role">
+                        <span>Author</span><span class="lan-mobile-detail-role-sep">|</span><span class="lan-mobile-detail-role-badge">${escapeLearnerAnnouncementHtml(roleLabel)}</span>
+                    </div>
+                    <div class="lan-mobile-detail-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                </div>
             </div>
             <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
-            <div class="lan-mobile-detail-meta">${escapeLearnerAnnouncementHtml(sender)} &bull; ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
             <div class="lan-mobile-detail-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
         </article>`;
 
