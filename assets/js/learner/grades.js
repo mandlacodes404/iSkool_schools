@@ -194,9 +194,9 @@ function renderGrades(data) {
         gap: 0;
         height: calc(100vh - 140px);
         min-height: 500px;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 14px;
-        overflow: hidden;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
         margin-top: 4px;
     }
 
@@ -217,7 +217,7 @@ function renderGrades(data) {
         width: 240px;
         min-width: 210px;
         max-width: 260px;
-        background: #0d1117;
+        background: transparent;
         border-right: 1px solid rgba(255,255,255,0.07);
         display: flex;
         flex-direction: column;
@@ -281,7 +281,7 @@ function renderGrades(data) {
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        background: #0d1117;
+        background: transparent;
     }
     .grades-dt-panel-scroll {
         flex: 1;

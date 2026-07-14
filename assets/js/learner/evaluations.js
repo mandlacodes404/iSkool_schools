@@ -189,9 +189,9 @@ function renderEvaluationsUI(data) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
+                border: none;
+                border-radius: 0;
+                overflow: visible;
                 margin-top: 12px;
             }
 
@@ -199,7 +199,7 @@ function renderEvaluationsUI(data) {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: #0d1117;
+                background: transparent;
                 border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
@@ -269,7 +269,7 @@ function renderEvaluationsUI(data) {
 
             .lev-main-panel {
                 flex: 1;
-                background: #0d1117;
+                background: transparent;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
