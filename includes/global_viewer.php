@@ -25,6 +25,12 @@
         background: rgba(22, 27, 34, 0.5);
     }
 
+    @media (max-width: 899px) {
+        .viewer-header {
+            background: #20201f;
+        }
+    }
+
     .back-btn {
         background: none; 
         border: none; 
