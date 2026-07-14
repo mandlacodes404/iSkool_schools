@@ -551,7 +551,7 @@ function renderGrades(data) {
             background: rgba(255,255,255,0.05);
             border: none;
             color: #e2e8f0;
-            font-size: 13px;
+            font-size: 15px;
             font-family: 'Nunito', sans-serif;
             transition: background 0.2s;
         }
@@ -564,6 +564,7 @@ function renderGrades(data) {
             justify-content: center;
             padding: 9px 14px;
             border: none;
+            font-size: 15px;
         }
         .grades-mobile-layout .subject-card {
             background: transparent;

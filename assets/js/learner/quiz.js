@@ -744,7 +744,7 @@ function renderQuizCards(groupedData) {
                     background: rgba(255,255,255,0.05);
                     border: none;
                     color: #e2e8f0;
-                    font-size: 13px;
+                    font-size: 15px;
                     font-family: 'Nunito', sans-serif;
                     transition: background 0.2s;
                 }
