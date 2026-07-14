@@ -224,7 +224,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.7">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=4.8">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -2783,15 +2783,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=3.8"></script>
-<script src="assets/js/learner/quiz.js?v=7.5"></script>
-<script src="assets/js/learner/assignments.js?v=6.9"></script>
-<script src="assets/js/learner/resources.js?v=5.8"></script>
-<script src="assets/js/learner/announcements.js?v=6.3"></script>
-<script src="assets/js/learner/grades.js?v=4.4"></script>
-<script src="assets/js/learner/evaluations.js?v=2.7"></script>
+<script src="assets/js/learner/manual.js?v=3.9"></script>
+<script src="assets/js/learner/quiz.js?v=7.6"></script>
+<script src="assets/js/learner/assignments.js?v=7.0"></script>
+<script src="assets/js/learner/resources.js?v=5.9"></script>
+<script src="assets/js/learner/announcements.js?v=6.4"></script>
+<script src="assets/js/learner/grades.js?v=4.5"></script>
+<script src="assets/js/learner/evaluations.js?v=2.8"></script>
 <script src="assets/js/learner/discussions.js?v=7.5"></script>
-<script src="assets/js/learner/syllabus.js?v=2.1"></script>
+<script src="assets/js/learner/syllabus.js?v=2.2"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.6"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

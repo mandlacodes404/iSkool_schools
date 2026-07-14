@@ -26,6 +26,7 @@
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 80px;
     --transition-speed: 0.3s;
+    --border-color: rgba(255, 255, 255, 0.07);
 }
 html {
   touch-action: manipulation;
@@ -411,9 +412,8 @@ iframe {
 
 .main-header {
     padding: 10px 18px;
-    border-bottom: 1px solid var(--border-color);          /* faint rim like sidebar */
-    background: rgba(26, 25, 25, 0.92);                    /* almost exact sidebar bg #1a1919 with slight transparency */
-    backdrop-filter: blur(10px);                           /* glass effect – premium dim look */
+    border-bottom: 1px solid var(--border-color);          /* flat divider line, matches sidebar/panel dividers */
+    background: transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;

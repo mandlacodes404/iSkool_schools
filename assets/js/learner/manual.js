@@ -898,6 +898,16 @@ function buildTodoList(todo) {
 // from the header's bottom border all the way to the bottom of the
 // viewport.
 //
+// Height is no longer a calc(100vh - Npx) guess (that magic number
+// drifted out of sync with the real header height and left the
+// divider stopping short of the bottom, and the sidebar undersized
+// so its scrollbar appeared before content actually filled it).
+// Instead #api-content-area and .lqz-flat-layout simply fill 100% of
+// whatever real space .main-content's flexbox gives them below the
+// header, so the divider always reaches the true bottom of the
+// viewport and the sidebar only scrolls once its content genuinely
+// overflows its real height.
+//
 // Usage: call injectSharedDesktopLayoutStyles() once when a page's
 // HTML is built, then add these classes alongside each page's own
 // prefixed classes:
@@ -914,6 +924,10 @@ function injectSharedDesktopLayoutStyles() {
         @media (min-width: 900px) {
             #api-content-area {
                 padding: 0 !important;
+                height: auto !important;
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
             }
         }
 
@@ -922,15 +936,21 @@ function injectSharedDesktopLayoutStyles() {
             border-radius: 0 !important;
             overflow: visible !important;
             margin-top: 0 !important;
+            height: 100% !important;
+            min-height: 0 !important;
         }
 
         .lqz-flat-sidebar {
             background: transparent !important;
             border-right: 1px solid rgba(255,255,255,0.07) !important;
+            height: 100% !important;
+            min-height: 0 !important;
         }
 
         .lqz-flat-panel {
             background: transparent !important;
+            height: 100% !important;
+            min-height: 0 !important;
         }
 
         /* Restores the breathing room #api-content-area used to give,

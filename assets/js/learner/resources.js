@@ -219,7 +219,6 @@ function renderResourceCards(data) {
             .lrs-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
             }
 
