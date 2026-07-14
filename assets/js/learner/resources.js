@@ -221,18 +221,12 @@ function renderResourceCards(data) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: none;
-                border-radius: 0;
-                overflow: visible;
-                margin-top: 12px;
             }
 
             .lrs-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: transparent;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -315,7 +309,6 @@ function renderResourceCards(data) {
 
             .lrs-main-panel {
                 flex: 1;
-                background: transparent;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -631,8 +624,8 @@ function renderResourceCards(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lrs-desktop-layout">
-            <div class="lrs-sidebar">
+        <div class="lrs-desktop-layout lqz-flat-layout">
+            <div class="lrs-sidebar lqz-flat-sidebar">
                 <div class="lrs-desktop-search-wrap">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -642,7 +635,7 @@ function renderResourceCards(data) {
                 </div>
                 <div class="lrs-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="lrs-main-panel" id="lrs-main-panel">
+            <div class="lrs-main-panel lqz-flat-panel" id="lrs-main-panel">
                 <div class="lrs-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -739,6 +732,7 @@ function renderResourceCards(data) {
     html += `</div>`; // close .lrs-mobile-list
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
 }
 
 // ─────────────────────────────────────────────

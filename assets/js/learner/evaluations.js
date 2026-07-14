@@ -189,18 +189,12 @@ function renderEvaluationsUI(data) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: none;
-                border-radius: 0;
-                overflow: visible;
-                margin-top: 12px;
             }
 
             .lev-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: transparent;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -269,7 +263,6 @@ function renderEvaluationsUI(data) {
 
             .lev-main-panel {
                 flex: 1;
-                background: transparent;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -343,12 +336,12 @@ function renderEvaluationsUI(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lev-desktop-layout">
-            <div class="lev-sidebar">
+        <div class="lev-desktop-layout lqz-flat-layout">
+            <div class="lev-sidebar lqz-flat-sidebar">
                 <div class="lev-sidebar-header">All Evaluations</div>
                 <div class="lev-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="lev-main-panel" id="lev-main-panel">
+            <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                 <div class="lev-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M9 11l3 3L22 4"></path>
@@ -363,6 +356,7 @@ function renderEvaluationsUI(data) {
         <div class="lev-mobile-list">
             ${mobileHtml}
         </div>`;
+    if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
 }
 
 // ─────────────────────────────────────────────

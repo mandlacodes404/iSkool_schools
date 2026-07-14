@@ -426,18 +426,12 @@ function renderQuizCards(groupedData) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: none;
-                border-radius: 0;
-                overflow: visible;
-                margin-top: 12px;
             }
 
             .lqz-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: transparent;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -525,7 +519,6 @@ function renderQuizCards(groupedData) {
 
             .lqz-main-panel {
                 flex: 1;
-                background: transparent;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -788,8 +781,8 @@ function renderQuizCards(groupedData) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lqz-desktop-layout">
-            <div class="lqz-sidebar">
+        <div class="lqz-desktop-layout lqz-flat-layout">
+            <div class="lqz-sidebar lqz-flat-sidebar">
                 <div class="lqz-desktop-search-wrap">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -799,7 +792,7 @@ function renderQuizCards(groupedData) {
                 </div>
                 <div class="lqz-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="lqz-main-panel" id="lqz-main-panel">
+            <div class="lqz-main-panel lqz-flat-panel" id="lqz-main-panel">
                 <div class="lqz-panel-empty">
                     ${learnerQuizPencilSvg(48, 48, '#fdd663').replace('stroke-width="2"', 'stroke-width="1.5"')}
                     <p>Select a quiz from the left</p>
@@ -931,6 +924,7 @@ function renderQuizCards(groupedData) {
     html += `</div>`; // close .lqz-mobile-list
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
     startQuizCountdowns();
 }
 

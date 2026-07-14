@@ -881,3 +881,70 @@ function buildTodoList(todo) {
             </div>`;
     }).join('');
 }
+
+// ─────────────────────────────────────────────
+// SHARED DESKTOP "FLAT LAYOUT" STYLES
+// One injected copy, reused by every learner page that renders a
+// sidebar + main-panel split (quiz, announcements, assignments,
+// resources, syllabus, evaluations, grades).
+//
+// Replaces the old per-page boxed-card look (border + border-radius +
+// solid #0d1117 panel backgrounds) with a flat, VS-Code/GitHub style:
+// no outer card, panels transparent, single 1px divider between
+// sidebar and main panel. #api-content-area no longer carries desktop
+// padding — the sidebar's top padding is restored via its existing
+// -sidebar-scroll class, and each page's own -panel-content class
+// already carries its own padding, so the divider line runs flush
+// from the header's bottom border all the way to the bottom of the
+// viewport.
+//
+// Usage: call injectSharedDesktopLayoutStyles() once when a page's
+// HTML is built, then add these classes alongside each page's own
+// prefixed classes:
+//   .lqz-flat-layout   → on the outer sidebar+panel flex wrapper
+//   .lqz-flat-sidebar  → on the sidebar column
+//   .lqz-flat-panel    → on the main (right-hand) panel column
+// ─────────────────────────────────────────────
+function injectSharedDesktopLayoutStyles() {
+    if (document.getElementById('lqz-shared-desktop-layout-style')) return;
+
+    const style = document.createElement('style');
+    style.id = 'lqz-shared-desktop-layout-style';
+    style.textContent = `
+        @media (min-width: 900px) {
+            #api-content-area {
+                padding: 0 !important;
+            }
+        }
+
+        .lqz-flat-layout {
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            margin-top: 0 !important;
+        }
+
+        .lqz-flat-sidebar {
+            background: transparent !important;
+            border-right: 1px solid rgba(255,255,255,0.07) !important;
+        }
+
+        .lqz-flat-panel {
+            background: transparent !important;
+        }
+
+        /* Restores the breathing room #api-content-area used to give,
+           now scoped to just the sidebar's scrollable list and the
+           panel's inner content, so the divider itself stays flush. */
+        .lqz-flat-sidebar .lqz-sidebar-scroll,
+        .lqz-flat-sidebar .lan-sidebar-scroll,
+        .lqz-flat-sidebar .las-sidebar-scroll,
+        .lqz-flat-sidebar .lrs-sidebar-scroll,
+        .lqz-flat-sidebar .syl-dt-sidebar-scroll,
+        .lqz-flat-sidebar .lev-sidebar-scroll,
+        .lqz-flat-sidebar .grades-dt-sidebar-scroll {
+            padding-top: 25px !important;
+        }
+    `;
+    document.head.appendChild(style);
+}

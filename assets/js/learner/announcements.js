@@ -288,18 +288,12 @@ function renderAnnouncements(data) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: none;
-                border-radius: 0;
-                overflow: visible;
-                margin-top: 12px;
             }
 
             .lan-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: transparent;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -401,7 +395,6 @@ function renderAnnouncements(data) {
 
             .lan-main-panel {
                 flex: 1;
-                background: transparent;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -668,8 +661,8 @@ function renderAnnouncements(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lan-desktop-layout">
-            <div class="lan-sidebar">
+        <div class="lan-desktop-layout lqz-flat-layout">
+            <div class="lan-sidebar lqz-flat-sidebar">
                 <div class="lan-desktop-search-wrap">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -679,7 +672,7 @@ function renderAnnouncements(data) {
                 </div>
                 <div class="lan-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="lan-main-panel" id="lan-main-panel">
+            <div class="lan-main-panel lqz-flat-panel" id="lan-main-panel">
                 <div class="lan-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                         <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -811,6 +804,7 @@ function renderAnnouncements(data) {
     html += `</div>`; // close .lan-mobile-list
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
 }
 
 window.lanMobileSearch = function(val) {

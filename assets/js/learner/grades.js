@@ -194,10 +194,6 @@ function renderGrades(data) {
         gap: 0;
         height: calc(100vh - 140px);
         min-height: 500px;
-        border: none;
-        border-radius: 0;
-        overflow: visible;
-        margin-top: 4px;
     }
 
     .grades-desktop-topbar {
@@ -217,8 +213,6 @@ function renderGrades(data) {
         width: 240px;
         min-width: 210px;
         max-width: 260px;
-        background: transparent;
-        border-right: 1px solid rgba(255,255,255,0.07);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -281,7 +275,6 @@ function renderGrades(data) {
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        background: transparent;
     }
     .grades-dt-panel-scroll {
         flex: 1;
@@ -760,9 +753,9 @@ function renderGrades(data) {
 
     // Desktop layout
     html += `
-    <div class="grades-desktop-layout">
+    <div class="grades-desktop-layout lqz-flat-layout">
         <!-- Sidebar -->
-        <div class="grades-dt-sidebar">
+        <div class="grades-dt-sidebar lqz-flat-sidebar">
             <div class="grades-dt-sidebar-header">Subjects</div>
             <div class="grades-dt-sidebar-scroll">
                 ${sidebarItemsHtml}
@@ -782,7 +775,7 @@ function renderGrades(data) {
         </div>
 
         <!-- Main panel -->
-        <div class="grades-dt-main">
+        <div class="grades-dt-main lqz-flat-panel">
             ${groups.length > 0 ? `
             <div class="grades-desktop-topbar">
                 <span style="font-size:13px;font-weight:700;color:#8b949e;">Select a subject</span>
@@ -834,6 +827,7 @@ function renderGrades(data) {
     </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
     apiArea._gradesData = data;
     restoreGradesStateAfterRender();
     wireGradesScrollState();

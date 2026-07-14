@@ -41,6 +41,7 @@ window.fetchSyllabus = async function() {
     // Serve from cache instantly
     if (window.syllabusCache) {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
+        if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
         if (loader) loader.style.display = 'none';
         restoreSyllabusPageState();
         return;
@@ -56,6 +57,7 @@ window.fetchSyllabus = async function() {
 
         window.syllabusCache = data;
         apiArea.innerHTML = renderSyllabusPage(data);
+        if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
         restoreSyllabusPageState();
 
     } catch (err) {
@@ -194,10 +196,6 @@ function renderSyllabusPage(data) {
                 gap: 0;
                 height: calc(100vh - 140px);
                 min-height: 500px;
-                border: none;
-                border-radius: 0;
-                overflow: visible;
-                margin-top: 12px;
             }
 
             /* ── Left sidebar ── */
@@ -205,8 +203,6 @@ function renderSyllabusPage(data) {
                 width: 220px;
                 min-width: 200px;
                 max-width: 240px;
-                background: transparent;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -260,7 +256,6 @@ function renderSyllabusPage(data) {
             /* ── Right panel ── */
             .syl-dt-main-panel {
                 flex: 1;
-                background: transparent;
                 overflow-y: auto;
             }
             .syl-dt-main-panel::-webkit-scrollbar { width: 5px; }
@@ -459,10 +454,10 @@ function renderSyllabusPage(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="syl-desktop-layout">
+        <div class="syl-desktop-layout lqz-flat-layout">
 
             <!-- Left Sidebar: term list -->
-            <div class="syl-dt-sidebar">
+            <div class="syl-dt-sidebar lqz-flat-sidebar">
                 <div class="syl-dt-sidebar-header">Terms</div>
                 <div class="syl-dt-sidebar-scroll">
                     ${desktopSidebarHtml}
@@ -470,7 +465,7 @@ function renderSyllabusPage(data) {
             </div>
 
             <!-- Right Panel: subject cards -->
-            <div class="syl-dt-main-panel">
+            <div class="syl-dt-main-panel lqz-flat-panel">
                 ${desktopPanelsHtml}
             </div>
         </div>
