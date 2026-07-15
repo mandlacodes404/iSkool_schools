@@ -3,6 +3,7 @@ function getCsrfToken() {
     return meta ? meta.getAttribute('content') : '';
 }
 window.teacherResourceCache = null;
+window.teacherResourceCachePromise = null;
 
 window.fetchTeacherResources = async function() {
     clearTimeout(window.loaderTimeout);
@@ -24,10 +25,19 @@ window.fetchTeacherResources = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/teacher/get_resources.php');
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        window.teacherResourceCache = data;
+        if (!window.teacherResourceCachePromise) {
+            window.teacherResourceCachePromise = fetch('api/teacher/get_resources.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return response.json();
+                })
+                .then(data => {
+                    window.teacherResourceCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherResourceCachePromise = null; });
+        }
+        const data = await window.teacherResourceCachePromise;
         renderTeacherResources(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `

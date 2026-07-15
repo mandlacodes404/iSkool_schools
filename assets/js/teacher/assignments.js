@@ -3,6 +3,7 @@ function getCsrfToken() {
     return meta ? meta.getAttribute('content') : '';
 }
 window.teacherAssignmentsCache = null;
+window.teacherAssignmentsCachePromise = null;
 
 // ─────────────────────────────────────────────
 // ASSIGNMENTS LIST
@@ -24,17 +25,22 @@ window.fetchTeacherAssignments = async function() {
         return;
     }
 
-    const panel = document.getElementById('as-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideInitialLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
-        : null;
-    if (!hideInitialLoader && loader) loader.style.display = 'flex';
+    if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/get_assignments.php');
-        const data = await res.json();
-        window.teacherAssignmentsCache = data;
+        if (!window.teacherAssignmentsCachePromise) {
+            window.teacherAssignmentsCachePromise = fetch('api/teacher/get_assignments.php')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    return res.json();
+                })
+                .then(data => {
+                    window.teacherAssignmentsCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherAssignmentsCachePromise = null; });
+        }
+        const data = await window.teacherAssignmentsCachePromise;
         renderTeacherAssignments(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `

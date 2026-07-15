@@ -10,6 +10,7 @@ function getCsrfToken() {
  */
 
 window.teacherAnnouncementCache = null;
+window.teacherAnnouncementCachePromise = null;
 
 window.fetchTeacherAnnouncements = async function() {
     clearTimeout(window.loaderTimeout);
@@ -31,10 +32,19 @@ window.fetchTeacherAnnouncements = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/teacher/get_announcements.php');
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        window.teacherAnnouncementCache = data;
+        if (!window.teacherAnnouncementCachePromise) {
+            window.teacherAnnouncementCachePromise = fetch('api/teacher/get_announcements.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return response.json();
+                })
+                .then(data => {
+                    window.teacherAnnouncementCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherAnnouncementCachePromise = null; });
+        }
+        const data = await window.teacherAnnouncementCachePromise;
         renderTeacherAnnouncements(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `

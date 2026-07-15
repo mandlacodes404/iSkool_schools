@@ -3,6 +3,7 @@ function getCsrfToken() {
     return meta ? meta.getAttribute('content') : '';
 }
 window.teacherEvaluationCache = null;
+window.teacherEvaluationCachePromise = null;
 
 window.fetchTeacherEvaluations = async function() {
     clearTimeout(window.loaderTimeout);
@@ -24,10 +25,19 @@ window.fetchTeacherEvaluations = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/teacher/get_evaluations.php');
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        window.teacherEvaluationCache = data;
+        if (!window.teacherEvaluationCachePromise) {
+            window.teacherEvaluationCachePromise = fetch('api/teacher/get_evaluations.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return response.json();
+                })
+                .then(data => {
+                    window.teacherEvaluationCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherEvaluationCachePromise = null; });
+        }
+        const data = await window.teacherEvaluationCachePromise;
         renderTeacherEvaluations(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `

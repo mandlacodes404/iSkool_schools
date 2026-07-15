@@ -16,6 +16,7 @@ function formatPts(value) {
     return Number.isInteger(num) ? String(num) : String(Math.round(num * 100) / 100);
 }
 window.teacherQuizzesCache = null;
+window.teacherQuizzesCachePromise = null;
 window.currentQuizResultsData = null;
 
 // ─────────────────────────────────────────────
@@ -38,17 +39,22 @@ window.fetchTeacherQuizzes = async function() {
         return;
     }
 
-    const panel = document.getElementById('qz-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideInitialLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
-        : null;
-    if (!hideInitialLoader && loader) loader.style.display = 'flex';
+    if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/get_quizzes.php');
-        const data = await res.json();
-        window.teacherQuizzesCache = data;
+        if (!window.teacherQuizzesCachePromise) {
+            window.teacherQuizzesCachePromise = fetch('api/teacher/get_quizzes.php')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    return res.json();
+                })
+                .then(data => {
+                    window.teacherQuizzesCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherQuizzesCachePromise = null; });
+        }
+        const data = await window.teacherQuizzesCachePromise;
         renderTeacherQuizzes(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `

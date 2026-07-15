@@ -5,6 +5,7 @@ function getCsrfToken() {
 // ── TEACHER SYLLABUS PAGE ────────────────────────────────────────────────────
 
 window.teacherSBOCache = null;
+window.teacherSBOCachePromise = null;
 
 window.fetchTeacherSyllabus = async function() {
     clearTimeout(window.loaderTimeout);
@@ -26,9 +27,19 @@ window.fetchTeacherSyllabus = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/get_sbo.php');
-        const data = await res.json();
-        window.teacherSBOCache = data;
+        if (!window.teacherSBOCachePromise) {
+            window.teacherSBOCachePromise = fetch('api/teacher/get_sbo.php')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    return res.json();
+                })
+                .then(data => {
+                    window.teacherSBOCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherSBOCachePromise = null; });
+        }
+        const data = await window.teacherSBOCachePromise;
         renderTeacherSyllabus(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `

@@ -3,6 +3,7 @@ function getCsrfToken() {
     return meta ? meta.getAttribute('content') : '';
 }
 window.teacherAnalyticsCache     = null;
+window.teacherAnalyticsCachePromise = null;
 window.analyticsCharts            = {};
 window.analyticsCurrentClassId    = null;
 window.analyticsCurrentTerm       = null;
@@ -600,10 +601,20 @@ window.fetchTeacherAnalytics = async function () {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const res  = await fetch('api/teacher/get_analytics.php');
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        window.teacherAnalyticsCache = data;
+        if (!window.teacherAnalyticsCachePromise) {
+            window.teacherAnalyticsCachePromise = fetch('api/teacher/get_analytics.php')
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    window.teacherAnalyticsCache = data;
+                    return data;
+                })
+                .finally(() => { window.teacherAnalyticsCachePromise = null; });
+        }
+        const data = await window.teacherAnalyticsCachePromise;
         renderTeacherAnalytics(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
