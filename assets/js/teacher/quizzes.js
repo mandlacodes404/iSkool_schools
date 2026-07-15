@@ -375,7 +375,7 @@ function renderTeacherQuizzes(data) {
             <div class="qz-sidebar tchr-flat-sidebar">
                 <div class="qz-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Quizzes</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateQuiz()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="qz-new-btn" onclick="openCreateQuiz()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -600,6 +600,8 @@ function renderTeacherQuizzes(data) {
 window.selectDesktopQuiz = function(quizId) {
     // Update sidebar active state
     document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('qz-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`qz-sidebar-${quizId}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
@@ -1210,6 +1212,8 @@ window.openCreateQuiz = async function() {
         // Clear sidebar active state on desktop
         if (isDesktop) {
             document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
+            const newBtn = document.getElementById('qz-new-btn');
+            if (newBtn) newBtn.classList.add('active');
         }
 
         const headerPad = isDesktop ? 'padding:20px 32px 0;' : '';
@@ -1219,7 +1223,14 @@ window.openCreateQuiz = async function() {
 
         target.innerHTML = `
             <div style="max-width:${isDesktop ? '920px' : '760px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
-                <h2 style="color:#4fd1c5;font-size:${titleSize};margin:${titleMargin};font-weight:800;">Create a New Quiz</h2>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin:${titleMargin};">
+                    <h2 style="color:#4fd1c5;font-size:${titleSize};margin:0;font-weight:800;">Create a New Quiz</h2>
+                    ${isDesktop ? `
+                        <button onclick="fetchTeacherQuizzes()"
+                            style="background:none;border:none;color:#8b949e;font-size:22px;
+                                   cursor:pointer;line-height:1;padding:0;">&times;</button>
+                    ` : ''}
+                </div>
                 <style>
                     .cq-section { background:#1a1919; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:18px; margin-bottom:16px; }
                     .cq-section-title { display:flex; align-items:center; gap:10px; color:#e2e8f0; font-size:15px; font-weight:900; margin:0 0 14px; }

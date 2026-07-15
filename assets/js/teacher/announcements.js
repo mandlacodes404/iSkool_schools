@@ -157,15 +157,6 @@ function renderTeacherAnnouncements(data) {
                 font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
                 color: #4fd1c5; text-transform: uppercase; flex-shrink: 0;
             }
-            /* Shows the New button as "in progress" while the create form
-               is open in the right panel, so the sidebar always reflects
-               what's actually showing on the right — even when that's a
-               blank compose form rather than a selected item. */
-            .teacher-desktop-create.active {
-                background: #1a6b2e;
-                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
-            }
-            .teacher-desktop-create.active:hover { background: #1a6b2e; }
             .an-sidebar-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
             .an-sidebar-scroll::-webkit-scrollbar { width: 4px; }
             .an-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }

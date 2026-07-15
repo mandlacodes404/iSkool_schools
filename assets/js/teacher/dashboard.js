@@ -147,6 +147,17 @@ function injectSharedTeacherDesktopLayoutStyles() {
             min-height: 0 !important;
         }
 
+        /* Shows a page's "+ New" button as "in progress" while its create
+           form is open in the right panel, so the sidebar always reflects
+           what's actually showing on the right — even when that's a blank
+           compose form rather than a selected item. Shared across any
+           page's teacher-desktop-create button. */
+        .teacher-desktop-create.active {
+            background: #1a6b2e;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+        }
+        .teacher-desktop-create.active:hover { background: #1a6b2e; }
+
         /* Restores the breathing room #api-content-area used to give,
            now scoped to just the sidebar's scrollable list, so the
            divider itself stays flush. */

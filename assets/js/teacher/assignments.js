@@ -306,7 +306,7 @@ function renderTeacherAssignments(data) {
             <div class="as-sidebar tchr-flat-sidebar">
                 <div class="as-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Assignments</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateAssignment()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="as-new-btn" onclick="openCreateAssignment()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -479,6 +479,8 @@ function renderTeacherAssignments(data) {
 window.selectDesktopAssignment = function(index) {
     // Update sidebar active state
     document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('as-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`as-sidebar-${index}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
@@ -633,6 +635,8 @@ window.openCreateAssignment = async function() {
         // Clear sidebar active state on desktop
         if (isDesktop) {
             document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
+            const newBtn = document.getElementById('as-new-btn');
+            if (newBtn) newBtn.classList.add('active');
         }
 
         const backFn    = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
@@ -641,9 +645,16 @@ window.openCreateAssignment = async function() {
 
         target.innerHTML = `
             <div style="max-width:560px;margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
-                <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:${isDesktop ? '0 0 20px' : '0 0 24px'};font-weight:800;">
-                    Create New Assignment
-                </h2>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin:${isDesktop ? '0 0 20px' : '0 0 24px'};">
+                    <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:0;font-weight:800;">
+                        Create New Assignment
+                    </h2>
+                    ${isDesktop ? `
+                        <button onclick="fetchTeacherAssignments()"
+                            style="background:none;border:none;color:#8b949e;font-size:22px;
+                                   cursor:pointer;line-height:1;padding:0;">&times;</button>
+                    ` : ''}
+                </div>
 
                 <form id="createAssignmentForm" enctype="multipart/form-data">
 
