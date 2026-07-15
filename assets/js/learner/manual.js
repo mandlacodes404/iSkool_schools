@@ -2,6 +2,7 @@ window.manualCache       = null;
 window.homeDataCache     = null;
 window.learnerCalState   = { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
 window.learnerCalEvents  = [];
+window.learnerCalEventsCache = window.learnerCalEventsCache || {}; // per-month cache: { "YYYY-M": events[] }
 
 function saveManualPageState(patch = {}) {
     const mainContent = document.querySelector('.main-content');
@@ -661,12 +662,30 @@ window.loadLearnerCalendar = async function(month, year) {
     if (!panel || !container) return;
 
     panel.style.display = 'block';
-    container.innerHTML = `<div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>`;
+
+    const cacheKey = `${year}-${month}`;
+
+    // Already fetched this month this session — render instantly, no re-fetch, no spinner
+    if (window.learnerCalEventsCache[cacheKey]) {
+        window.learnerCalEvents = window.learnerCalEventsCache[cacheKey];
+        renderLearnerCalendar(month, year, window.learnerCalEvents);
+        return;
+    }
+
+    container.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;color:#8b949e;font-size:13px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none"
+                style="animation:spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
+            </svg>
+            Loading...
+        </div>`;
 
     try {
         const res  = await fetch(`api/learner/get_calendar_events.php?month=${month}&year=${year}`);
         const data = await res.json();
         window.learnerCalEvents = data.events || [];
+        window.learnerCalEventsCache[cacheKey] = window.learnerCalEvents;
         renderLearnerCalendar(month, year, window.learnerCalEvents);
     } catch(e) {
         container.innerHTML = `<div style="color:#ff5555;font-size:13px;text-align:center;">Failed to load calendar</div>`;

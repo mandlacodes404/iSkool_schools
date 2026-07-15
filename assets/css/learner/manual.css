@@ -792,3 +792,8 @@
 }
 
 } /* end @media (max-width: 768px) */
+/* Small inline spinner used by the calendar widget when switching months */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
