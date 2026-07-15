@@ -330,6 +330,11 @@ function renderTeacherAssignments(data) {
                     <p>Select an assignment from the left to view it</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Assignments', `
+                <p>The submissions table shows every learner in the class, even those who haven't submitted yet, so you can see who's still missing.</p>
+                <p>Use <strong>Download Submissions</strong> to export all files for a single assignment in one go.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST (unchanged) ═══ -->

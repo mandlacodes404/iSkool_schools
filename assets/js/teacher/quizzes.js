@@ -398,6 +398,11 @@ function renderTeacherQuizzes(data) {
                     <p>Select a quiz from the left to manage it</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Quizzes', `
+                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> — closing a quiz doesn't publish its results automatically.</p>
+                <p>The <strong>Integrity Report</strong> uses AI to flag unusual patterns in submissions, like identical wrong answers across learners.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST (unchanged) ═══ -->

@@ -157,9 +157,64 @@ function injectSharedTeacherDesktopLayoutStyles() {
         .tchr-flat-sidebar .gr-sidebar-scroll {
             padding-top: 20px !important;
         }
+
+        /* Right info rail — fixed width, always visible, shared across
+           any page that calls buildInfoRail(). Same flat-divider
+           convention as the sidebar (border, not a boxed card). Hidden
+           below 1250px so it never crowds the main panel on smaller
+           desktop windows. */
+        .tchr-info-rail {
+            width: 260px; min-width: 220px; max-width: 280px;
+            flex-shrink: 0;
+            border-left: 1px solid rgba(255,255,255,0.07);
+            overflow-y: auto;
+            padding: 20px 22px;
+        }
+        .tchr-info-rail-header {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; color: #8b949e;
+            margin-bottom: 14px; padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .tchr-info-rail-body p {
+            font-size: 12.5px; line-height: 1.65; color: #8b949e;
+            margin: 0 0 14px 0;
+        }
+        .tchr-info-rail-body p:last-child { margin-bottom: 0; }
+        .tchr-info-rail-body strong { color: #c9d1d9; font-weight: 600; }
+        @media (max-width: 1250px) {
+            .tchr-info-rail { display: none; }
+        }
     `;
     document.head.appendChild(style);
 }
+
+/**
+ * Builds the markup for the shared right-hand info rail — a fixed,
+ * always-visible third column reserved for contextual help text (and
+ * later, potentially, an AI/chat assistant). Call
+ * injectSharedTeacherDesktopLayoutStyles() once per page load (already
+ * required for the flat layout) before using this; it owns the rail's
+ * CSS too.
+ * @param {string} title    - header label, e.g. "About Quizzes"
+ * @param {string} bodyHtml - one or more <p> elements (can include <strong>)
+ * @returns {string}
+ */
+window.buildInfoRail = function(title, bodyHtml) {
+    return `
+        <div class="tchr-info-rail">
+            <div class="tchr-info-rail-header">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                ${title}
+            </div>
+            <div class="tchr-info-rail-body">${bodyHtml}</div>
+        </div>`;
+};
 
 /**
  * Builds the markup for one collapsible class group in a sidebar.
@@ -216,57 +271,40 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
 
-    const renderTeacherHome = function(manualHtml, snapshot) {
-        if (window.innerWidth <= 768) {
-            apiArea.innerHTML = manualHtml;
-            return;
-        }
-
-        apiArea.innerHTML = `
-            <div class="dashboard-home-layout">
-                <div class="dashboard-snapshot-panel">
-                    ${renderSnapshotPanel(snapshot)}
-                </div>
-                <div class="dashboard-manual-panel">
-                    ${manualHtml}
-                </div>
-            </div>`;
-        window.loadCalendar(window.calendarState.month, window.calendarState.year);
-    };
-
-    // Revisit Home from cache, with no loading overlay or additional request.
-    if (window.teacherManualCache && window.teacherDashboardSnapshotCache) {
-        renderTeacherHome(window.teacherManualCache, window.teacherDashboardSnapshotCache);
-        return;
-    }
-
-    if (loader) loader.style.display = 'flex';
-
     try {
-        if (!window.teacherHomeCachePromise) {
-            window.teacherHomeCachePromise = Promise.all([
-                fetch('partials/teacher_manual.html'),
-                fetch('api/teacher/get_dashboard_snapshot.php')
-            ])
-                .then(async ([manualRes, snapshotRes]) => {
-                    if (!manualRes.ok || !snapshotRes.ok) throw new Error('Failed to load home');
-                    const [manualHtml, snapshot] = await Promise.all([manualRes.text(), snapshotRes.json()]);
-                    window.teacherManualCache = manualHtml;
-                    window.teacherDashboardSnapshotCache = snapshot;
-                    return { manualHtml, snapshot };
-                })
-                .finally(() => {
-                    window.teacherHomeCachePromise = null;
-                });
-        }
+        const [manualRes, snapshotRes] = await Promise.all([
+            fetch('partials/teacher_manual.html'),
+            fetch('api/teacher/get_dashboard_snapshot.php')
+        ]);
+        const manualHtml = await manualRes.text();
+        const snapshot   = await snapshotRes.json();
 
-        const { manualHtml, snapshot } = await window.teacherHomeCachePromise;
-        renderTeacherHome(manualHtml, snapshot);
+        // Desktop: two column layout. Mobile: manual only
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            apiArea.innerHTML = manualHtml;
+        } else {
+            apiArea.innerHTML = `
+                <div class="dashboard-home-layout">
+                    <div class="dashboard-snapshot-panel">
+                        ${renderSnapshotPanel(snapshot)}
+                    </div>
+                    <div class="dashboard-manual-panel">
+                        ${manualHtml}
+                    </div>
+                </div>`;
+                
+    window.loadCalendar(window.calendarState.month, window.calendarState.year);
+
+        }
     } catch(e) {
         console.error('Home load error:', e);
-        if (apiArea) apiArea.innerHTML = '<p style="color:#ff5555;text-align:center;margin-top:50px;">Could not load home.</p>';
-    } finally {
-        if (loader) loader.style.display = 'none';
+        const res = await fetch('partials/teacher_manual.html');
+        const html = await res.text();
+        if (apiArea) apiArea.innerHTML = html;
+        // Load calendar after DOM is ready
+
     }
 };
 

@@ -233,33 +233,6 @@ function renderTeacherAnnouncements(data) {
             .an-main-panel::-webkit-scrollbar-track { background: transparent; }
             .an-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            /* Right info rail — fixed width, always visible, test on
-               Announcements only for now. Matches the sidebar's flat
-               divider convention (border instead of a boxed card). */
-            .an-info-rail {
-                width: 260px; min-width: 220px; max-width: 280px;
-                flex-shrink: 0;
-                border-left: 1px solid rgba(255,255,255,0.07);
-                overflow-y: auto;
-                padding: 20px 22px;
-            }
-            .an-info-rail-header {
-                display: flex; align-items: center; gap: 8px;
-                font-size: 11px; font-weight: 800; letter-spacing: 1px;
-                text-transform: uppercase; color: #8b949e;
-                margin-bottom: 14px; padding-bottom: 12px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .an-info-rail-body p {
-                font-size: 12.5px; line-height: 1.65; color: #8b949e;
-                margin: 0 0 14px 0;
-            }
-            .an-info-rail-body p:last-child { margin-bottom: 0; }
-            .an-info-rail-body strong { color: #c9d1d9; font-weight: 600; }
-            @media (max-width: 1250px) {
-                .an-info-rail { display: none; }
-            }
-
             .an-panel-empty {
                 flex: 1; display: flex; flex-direction: column;
                 align-items: center; justify-content: center;
@@ -336,25 +309,14 @@ function renderTeacherAnnouncements(data) {
                 </div>
             </div>
 
-            <!-- ═══ RIGHT INFO RAIL (test) ═══
-                 Reserved space for contextual help text now; could later
-                 hold an AI/chat assistant once Resources or similar exists
-                 to ground it. Deliberately minimal for now — this is a
-                 layout test, not a finished feature. -->
-            <div class="an-info-rail">
-                <div class="an-info-rail-header">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    About Announcements
-                </div>
-                <div class="an-info-rail-body">
-                    <p>Announcements go to everyone in the selected class. Use <strong>Send To</strong> when creating one to reach learners, parents, or both.</p>
-                    <p>School-wide announcements come from admin and appear at the top of your list — you can't edit or delete those from here.</p>
-                </div>
-            </div>
+            <!-- ═══ RIGHT INFO RAIL ═══
+                 Shared across pages via buildInfoRail() in dashboard.js.
+                 Could later hold an AI/chat assistant once Resources or
+                 similar exists to ground it. -->
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Announcements', `
+                <p>Announcements go to everyone in the selected class. Use <strong>Send To</strong> when creating one to reach learners, parents, or both.</p>
+                <p>School-wide announcements come from admin and appear at the top of your list — you can't edit or delete those from here.</p>
+            `) : ''}
 
         </div>
 
