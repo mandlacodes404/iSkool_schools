@@ -99,12 +99,7 @@ function renderTeacherEvaluations(data) {
             .ev-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                margin-top: 12px;
             }
 
             /* Left sidebar */
@@ -112,8 +107,6 @@ function renderTeacherEvaluations(data) {
                 width: 260px;
                 min-width: 220px;
                 max-width: 280px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -175,7 +168,6 @@ function renderTeacherEvaluations(data) {
             /* Right panel */
             .ev-main-panel {
                 flex: 1;
-                background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -217,9 +209,9 @@ function renderTeacherEvaluations(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="ev-desktop-layout">
+        <div class="ev-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
-            <div class="ev-sidebar">
+            <div class="ev-sidebar tchr-flat-sidebar">
                 <div class="ev-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Evaluations</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openReleaseEvaluationForm()"
@@ -237,7 +229,7 @@ function renderTeacherEvaluations(data) {
             </div>
 
             <!-- Right Panel -->
-            <div class="ev-main-panel" id="ev-main-panel">
+            <div class="ev-main-panel tchr-flat-panel" id="ev-main-panel">
                 <div class="ev-panel-empty">
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -354,6 +346,7 @@ function renderTeacherEvaluations(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
     loadEvalClasses();
 }

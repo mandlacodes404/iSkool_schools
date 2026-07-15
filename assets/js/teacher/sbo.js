@@ -104,12 +104,7 @@ function renderTeacherSyllabus(data) {
             .sbo-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                margin-top: 12px;
             }
 
             /* Left sidebar */
@@ -117,8 +112,6 @@ function renderTeacherSyllabus(data) {
                 width: 260px;
                 min-width: 220px;
                 max-width: 280px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -180,7 +173,6 @@ function renderTeacherSyllabus(data) {
             /* Right panel */
             .sbo-main-panel {
                 flex: 1;
-                background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -279,9 +271,9 @@ function renderTeacherSyllabus(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="sbo-desktop-layout">
+        <div class="sbo-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
-            <div class="sbo-sidebar">
+            <div class="sbo-sidebar tchr-flat-sidebar">
                 <div class="sbo-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Syllabus</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openSBOForm()"
@@ -299,7 +291,7 @@ function renderTeacherSyllabus(data) {
             </div>
 
             <!-- Right Panel -->
-            <div class="sbo-main-panel" id="sbo-main-panel">
+            <div class="sbo-main-panel tchr-flat-panel" id="sbo-main-panel">
                 <div class="sbo-panel-empty">
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -343,6 +335,7 @@ function renderTeacherSyllabus(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
     // Store briefs globally for desktop panel and mobile filter
     window._allSBOBriefs = briefs;
