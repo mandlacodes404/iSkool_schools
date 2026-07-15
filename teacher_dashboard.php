@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#161b22">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.6">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.7">
     <title>Dashboard - iSkool</title>
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1086,7 +1086,7 @@ window.removeTeacherProfilePicture = function() {
 
 <script src="assets/js/teacher/dashboard.js?v=5.0"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=4.6"></script>
+<script src="assets/js/teacher/quizzes.js?v=4.7"></script>
 <script src="assets/js/teacher/announcements.js?v=3.0"></script>
 <script src="assets/js/teacher/evaluations.js?v=2.4"></script>
 <script src="assets/js/teacher/resources.js?v=2.2"></script>

@@ -368,7 +368,7 @@ function renderTeacherQuizzes(data) {
             <!-- Left Sidebar -->
             <div class="qz-sidebar tchr-flat-sidebar">
                 <div class="qz-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                    <span>All Quizzes</span>
+                    <span>Quizzes</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateQuiz()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
