@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#161b22">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.7">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.8">
     <title>Dashboard - iSkool</title>
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
