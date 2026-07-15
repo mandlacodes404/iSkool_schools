@@ -2792,7 +2792,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/evaluations.js?v=2.8"></script>
 <script src="assets/js/learner/discussions.js?v=7.5"></script>
 <script src="assets/js/learner/syllabus.js?v=2.2"></script>
-<script src="assets/js/learner/learner_calendar.js?v=1.6"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.7"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

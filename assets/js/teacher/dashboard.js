@@ -216,40 +216,57 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
 
-    try {
-        const [manualRes, snapshotRes] = await Promise.all([
-            fetch('partials/teacher_manual.html'),
-            fetch('api/teacher/get_dashboard_snapshot.php')
-        ]);
-        const manualHtml = await manualRes.text();
-        const snapshot   = await snapshotRes.json();
-
-        // Desktop: two column layout. Mobile: manual only
-        const isMobile = window.innerWidth <= 768;
-
-        if (isMobile) {
+    const renderTeacherHome = function(manualHtml, snapshot) {
+        if (window.innerWidth <= 768) {
             apiArea.innerHTML = manualHtml;
-        } else {
-            apiArea.innerHTML = `
-                <div class="dashboard-home-layout">
-                    <div class="dashboard-snapshot-panel">
-                        ${renderSnapshotPanel(snapshot)}
-                    </div>
-                    <div class="dashboard-manual-panel">
-                        ${manualHtml}
-                    </div>
-                </div>`;
-                
-    window.loadCalendar(window.calendarState.month, window.calendarState.year);
-
+            return;
         }
+
+        apiArea.innerHTML = `
+            <div class="dashboard-home-layout">
+                <div class="dashboard-snapshot-panel">
+                    ${renderSnapshotPanel(snapshot)}
+                </div>
+                <div class="dashboard-manual-panel">
+                    ${manualHtml}
+                </div>
+            </div>`;
+        window.loadCalendar(window.calendarState.month, window.calendarState.year);
+    };
+
+    // Revisit Home from cache, with no loading overlay or additional request.
+    if (window.teacherManualCache && window.teacherDashboardSnapshotCache) {
+        renderTeacherHome(window.teacherManualCache, window.teacherDashboardSnapshotCache);
+        return;
+    }
+
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        if (!window.teacherHomeCachePromise) {
+            window.teacherHomeCachePromise = Promise.all([
+                fetch('partials/teacher_manual.html'),
+                fetch('api/teacher/get_dashboard_snapshot.php')
+            ])
+                .then(async ([manualRes, snapshotRes]) => {
+                    if (!manualRes.ok || !snapshotRes.ok) throw new Error('Failed to load home');
+                    const [manualHtml, snapshot] = await Promise.all([manualRes.text(), snapshotRes.json()]);
+                    window.teacherManualCache = manualHtml;
+                    window.teacherDashboardSnapshotCache = snapshot;
+                    return { manualHtml, snapshot };
+                })
+                .finally(() => {
+                    window.teacherHomeCachePromise = null;
+                });
+        }
+
+        const { manualHtml, snapshot } = await window.teacherHomeCachePromise;
+        renderTeacherHome(manualHtml, snapshot);
     } catch(e) {
         console.error('Home load error:', e);
-        const res = await fetch('partials/teacher_manual.html');
-        const html = await res.text();
-        if (apiArea) apiArea.innerHTML = html;
-        // Load calendar after DOM is ready
-
+        if (apiArea) apiArea.innerHTML = '<p style="color:#ff5555;text-align:center;margin-top:50px;">Could not load home.</p>';
+    } finally {
+        if (loader) loader.style.display = 'none';
     }
 };
 

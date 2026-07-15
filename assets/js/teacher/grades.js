@@ -11,8 +11,9 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-window.teacherGradesCache  = null;
-window.currentQuizData     = null;
+window.teacherGradesCache        = null;
+window.teacherGradesCachePromise = null;
+window.currentQuizData           = null;
 
 // ─────────────────────────────────────────────
 // GRADES LIST
@@ -37,10 +38,23 @@ window.fetchTeacherGrades = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        const response = await fetch('api/teacher/get_grades.php');
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        window.teacherGradesCache = data;
+        // Keep one request in flight so repeated taps cannot fetch Grades twice.
+        if (!window.teacherGradesCachePromise) {
+            window.teacherGradesCachePromise = fetch('api/teacher/get_grades.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return response.json();
+                })
+                .then(data => {
+                    window.teacherGradesCache = data;
+                    return data;
+                })
+                .finally(() => {
+                    window.teacherGradesCachePromise = null;
+                });
+        }
+
+        const data = await window.teacherGradesCachePromise;
         renderTeacherGrades(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `

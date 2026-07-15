@@ -9,6 +9,34 @@ window.learnerCalendarPageState = {
     year:  new Date().getFullYear(),
     events: []
 };
+window.learnerCalendarEventsCache = window.learnerCalendarEventsCache || {};
+window.learnerCalendarEventsPromises = window.learnerCalendarEventsPromises || {};
+
+function learnerCalendarCacheKey(month, year) {
+    return `${year}-${month}`;
+}
+
+async function loadLearnerCalendarEvents(month, year) {
+    const key = learnerCalendarCacheKey(month, year);
+    if (window.learnerCalendarEventsCache[key]) return window.learnerCalendarEventsCache[key];
+
+    if (!window.learnerCalendarEventsPromises[key]) {
+        window.learnerCalendarEventsPromises[key] = fetch(`api/learner/get_calendar_events.php?month=${month}&year=${year}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch calendar events');
+                return res.json();
+            })
+            .then(data => {
+                window.learnerCalendarEventsCache[key] = data.events || [];
+                return window.learnerCalendarEventsCache[key];
+            })
+            .finally(() => {
+                delete window.learnerCalendarEventsPromises[key];
+            });
+    }
+
+    return window.learnerCalendarEventsPromises[key];
+}
 
 function saveLearnerCalendarState() {
     const mainContent = document.querySelector('.main-content');
@@ -57,7 +85,15 @@ window.fetchLearnerCalendar = async function () {
     const savedState = getSavedLearnerCalendarState();
     const month = savedState.month || window.learnerCalendarPageState.month;
     const year = savedState.year || window.learnerCalendarPageState.year;
-    await renderLearnerCalendarPage(month, year);
+    const loader = document.getElementById('loaderOverlay');
+    const isCached = Boolean(window.learnerCalendarEventsCache[learnerCalendarCacheKey(month, year)]);
+    if (!isCached && loader) loader.style.display = 'flex';
+
+    try {
+        await renderLearnerCalendarPage(month, year);
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
     requestAnimationFrame(() => {
         const mainContent = document.querySelector('.main-content');
         if (mainContent && Number.isFinite(savedState.scrollTop)) mainContent.scrollTop = savedState.scrollTop;
@@ -74,9 +110,7 @@ async function renderLearnerCalendarPage(month, year) {
     bindLearnerCalNav();
 
     try {
-        const res  = await fetch(`api/learner/get_calendar_events.php?month=${month}&year=${year}`);
-        const data = await res.json();
-        window.learnerCalendarPageState.events = data.events || [];
+        window.learnerCalendarPageState.events = await loadLearnerCalendarEvents(month, year);
         window.learnerCalendarPageState.month  = month;
         window.learnerCalendarPageState.year   = year;
         saveLearnerCalendarState();

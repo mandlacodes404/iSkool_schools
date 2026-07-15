@@ -13,6 +13,34 @@ window.calendarPageState = {
     year:  new Date().getFullYear(),
     events: []
 };
+window.teacherCalendarEventsCache = window.teacherCalendarEventsCache || {};
+window.teacherCalendarEventsPromises = window.teacherCalendarEventsPromises || {};
+
+function teacherCalendarCacheKey(month, year) {
+    return `${year}-${month}`;
+}
+
+async function loadTeacherCalendarEvents(month, year) {
+    const key = teacherCalendarCacheKey(month, year);
+    if (window.teacherCalendarEventsCache[key]) return window.teacherCalendarEventsCache[key];
+
+    if (!window.teacherCalendarEventsPromises[key]) {
+        window.teacherCalendarEventsPromises[key] = fetch(`api/teacher/get_calendar_events.php?month=${month}&year=${year}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch calendar events');
+                return res.json();
+            })
+            .then(data => {
+                window.teacherCalendarEventsCache[key] = data.events || [];
+                return window.teacherCalendarEventsCache[key];
+            })
+            .finally(() => {
+                delete window.teacherCalendarEventsPromises[key];
+            });
+    }
+
+    return window.teacherCalendarEventsPromises[key];
+}
 
 // ── ENTRY POINT — called by sidebar "Calendar" link ──
 window.fetchTeacherCalendar = async function () {
@@ -25,7 +53,15 @@ window.fetchTeacherCalendar = async function () {
     if (iframe)  iframe.style.display  = 'none';
 
     const { month, year } = window.calendarPageState;
-    await renderFullCalendarPage(month, year);
+    const loader = document.getElementById('loaderOverlay');
+    const isCached = Boolean(window.teacherCalendarEventsCache[teacherCalendarCacheKey(month, year)]);
+    if (!isCached && loader) loader.style.display = 'flex';
+
+    try {
+        await renderFullCalendarPage(month, year);
+    } finally {
+        if (loader) loader.style.display = 'none';
+    }
 };
 
 // ── MAIN RENDER ──
@@ -38,9 +74,7 @@ async function renderFullCalendarPage(month, year) {
     bindCalendarPageNav();
 
     try {
-        const res  = await fetch(`api/teacher/get_calendar_events.php?month=${month}&year=${year}`);
-        const data = await res.json();
-        window.calendarPageState.events = data.events || [];
+        window.calendarPageState.events = await loadTeacherCalendarEvents(month, year);
         window.calendarPageState.month  = month;
         window.calendarPageState.year   = year;
     } catch (e) {
@@ -834,6 +868,10 @@ window.saveFullCalReminder = async function () {
         const data = await res.json();
         if (data.success) {
             closeFullCalModal();
+            delete window.teacherCalendarEventsCache[teacherCalendarCacheKey(
+                window.calendarPageState.month,
+                window.calendarPageState.year
+            )];
             await renderFullCalendarPage(
                 window.calendarPageState.month,
                 window.calendarPageState.year
@@ -875,6 +913,10 @@ window.saveFullCalAcademic = async function () {
         const data = await res.json();
         if (data.success) {
             closeFullCalModal();
+            delete window.teacherCalendarEventsCache[teacherCalendarCacheKey(
+                window.calendarPageState.month,
+                window.calendarPageState.year
+            )];
             await renderFullCalendarPage(
                 window.calendarPageState.month,
                 window.calendarPageState.year
