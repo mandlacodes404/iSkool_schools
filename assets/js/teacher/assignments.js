@@ -471,6 +471,7 @@ function renderTeacherAssignments(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
+    if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
 }
 
 // ─────────────────────────────────────────────
