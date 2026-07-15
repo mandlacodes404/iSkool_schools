@@ -209,27 +209,32 @@ function injectSharedTeacherDesktopLayoutStyles() {
             overflow: hidden !important;
         }
 
-        /* Toggle tab — sits on the divider line, near the top. Stays
-           put whether the rail is open or collapsed so it's always
-           the same click target. */
+        /* Toggle tab — a small pill straddling the divider line, high
+           enough to clear the rail header text entirely. Half of it
+           sits over the main panel, half over the rail, like a grab
+           handle rather than a rectangle glued to the rail's edge. */
         .tchr-rail-toggle {
-            position: absolute; top: 16px; right: 260px;
-            width: 20px; height: 40px;
+            position: absolute; top: 14px; right: 260px;
+            transform: translateX(50%);
+            width: 22px; height: 22px;
             display: flex; align-items: center; justify-content: center;
             background: #161b22;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-right: none;
-            border-radius: 6px 0 0 6px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 50%;
             color: #8b949e;
             cursor: pointer;
-            z-index: 5;
-            transition: right 0.2s ease, color 0.15s ease, background 0.15s ease;
+            z-index: 6;
+            padding: 0;
+            transition: right 0.2s ease, color 0.15s ease,
+                        background 0.15s ease, border-color 0.15s ease;
         }
-        .tchr-rail-toggle:hover { background: #1c2229; color: #c9d1d9; }
+        .tchr-rail-toggle:hover {
+            background: #1c2229; color: #4fd1c5;
+            border-color: rgba(79,209,197,0.4);
+        }
         .tchr-rail-toggle svg { transition: transform 0.2s ease; }
         .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle {
             right: 0;
-            border-radius: 6px 0 0 6px;
         }
         .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle svg {
             transform: rotate(180deg);
