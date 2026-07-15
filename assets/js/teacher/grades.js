@@ -14,6 +14,7 @@ function escapeHtml(str) {
 window.teacherGradesCache        = null;
 window.teacherGradesCachePromise = null;
 window.currentQuizData           = null;
+window._teacherGradeQuizCache    = {}; // per-quiz cache: { [quizId]: { type: 'standard'|'open_ended', data } }
 
 // ─────────────────────────────────────────────
 // GRADES LIST
@@ -407,6 +408,19 @@ window.selectDesktopGradeQuiz = async function(quizId) {
     const loader = document.getElementById('loaderOverlay');
     if (!panel) return;
 
+    // Already fetched this quiz this session — render instantly, no re-fetch, no spinner
+    const cached = window._teacherGradeQuizCache[quizId];
+    if (cached) {
+        if (cached.type === 'open_ended') {
+            window.currentOpenEndedQuizData = cached.data;
+            renderOpenEndedGrades(cached.data, panel, true);
+        } else {
+            window.currentQuizData = cached.data;
+            renderGradesInPanel(cached.data, panel);
+        }
+        return;
+    }
+
     // Show a loading state inside the panel
     panel.innerHTML = `
         <div class="gr-panel-empty">
@@ -428,9 +442,11 @@ window.selectDesktopGradeQuiz = async function(quizId) {
         const resultData = normalizeQuizResultsPayload(resultPayload);
         if (resultData && resultData.has_open_ended == 1) {
             window.currentOpenEndedQuizData = resultData;
+            window._teacherGradeQuizCache[quizId] = { type: 'open_ended', data: resultData };
             renderOpenEndedGrades(resultData, panel, true);
         } else {
             window.currentQuizData = data;
+            window._teacherGradeQuizCache[quizId] = { type: 'standard', data: data };
             renderGradesInPanel(data, panel);
         }
     } catch (e) {
@@ -781,6 +797,7 @@ async function refreshOpenEndedGrades(quizId, targetMode) {
     const data = normalizeQuizResultsPayload(payload);
     if (!data) throw new Error(payload.message || payload.error || 'Unable to reload open-ended results.');
     window.currentOpenEndedQuizData = data;
+    window._teacherGradeQuizCache[quizId] = { type: 'open_ended', data: data };
     const panel = document.getElementById('gr-main-panel');
     const apiArea = document.getElementById('api-content-area');
     renderOpenEndedGrades(data, targetMode === 'panel' && panel ? panel : apiArea, targetMode === 'panel');
@@ -974,10 +991,12 @@ window.saveMarks = async function(email, quizId) {
 
             // Update the cached quiz data so when we go back the table is fresh
             window.currentQuizData = null;
+            delete window._teacherGradeQuizCache[quizId];
             setTimeout(async () => {
                 const res2  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
                 const fresh = await res2.json();
                 window.currentQuizData = fresh;
+                window._teacherGradeQuizCache[quizId] = { type: 'standard', data: fresh };
 
                 // Refresh whichever view is active
                 const panel = document.getElementById('gr-main-panel');
