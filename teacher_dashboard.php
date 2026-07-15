@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#161b22">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=3.9">
     <title>Dashboard - iSkool</title>
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1084,14 +1084,14 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=5.4"></script>
+<script src="assets/js/teacher/dashboard.js?v=5.5"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=5.1"></script>
-<script src="assets/js/teacher/announcements.js?v=3.6"></script>
+<script src="assets/js/teacher/quizzes.js?v=5.2"></script>
+<script src="assets/js/teacher/announcements.js?v=3.7"></script>
 <script src="assets/js/teacher/evaluations.js?v=2.5"></script>
 <script src="assets/js/teacher/resources.js?v=2.3"></script>
 <script src="assets/js/teacher/grades.js?v=2.8"></script>
-<script src="assets/js/teacher/assignments.js?v=2.8"></script>
+<script src="assets/js/teacher/assignments.js?v=2.9"></script>
 <script src="assets/js/teacher/sbo.js?v=2.4"></script>
 <script src="assets/js/teacher/analytics.js?v=2.1"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=1.5"></script>

@@ -132,6 +132,7 @@ function injectSharedTeacherDesktopLayoutStyles() {
             margin-top: 0 !important;
             height: 100% !important;
             min-height: 0 !important;
+            position: relative !important;
         }
 
         .tchr-flat-sidebar {
@@ -197,23 +198,96 @@ function injectSharedTeacherDesktopLayoutStyles() {
         @media (max-width: 1250px) {
             .tchr-info-rail { display: none; }
         }
+
+        /* Collapsed state — driven by a class on .tchr-flat-layout so the
+           same toggle works no matter which page injected the rail.
+           Width collapses to 0 and the main panel reclaims the space
+           since both share the same flex row. */
+        .tchr-flat-layout.tchr-rail-collapsed .tchr-info-rail {
+            width: 0 !important; min-width: 0 !important;
+            padding: 0 !important; border-left: none !important;
+            overflow: hidden !important;
+        }
+
+        /* Toggle tab — sits on the divider line, near the top. Stays
+           put whether the rail is open or collapsed so it's always
+           the same click target. */
+        .tchr-rail-toggle {
+            position: absolute; top: 16px; right: 260px;
+            width: 20px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: #161b22;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            color: #8b949e;
+            cursor: pointer;
+            z-index: 5;
+            transition: right 0.2s ease, color 0.15s ease, background 0.15s ease;
+        }
+        .tchr-rail-toggle:hover { background: #1c2229; color: #c9d1d9; }
+        .tchr-rail-toggle svg { transition: transform 0.2s ease; }
+        .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle {
+            right: 0;
+            border-radius: 6px 0 0 6px;
+        }
+        .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle svg {
+            transform: rotate(180deg);
+        }
+        @media (max-width: 1250px) {
+            .tchr-rail-toggle { display: none; }
+        }
     `;
     document.head.appendChild(style);
 }
 
 /**
+ * Reads the teacher's last-chosen info rail state for this session.
+ * Shared across every page that uses buildInfoRail(), so collapsing
+ * it on Quizzes keeps it collapsed when switching to Announcements.
+ */
+window.getTeacherRailCollapsed = function() {
+    return sessionStorage.getItem('tchrRailCollapsed') === '1';
+};
+
+/**
+ * Toggles the info rail open/closed and persists the choice. Expects
+ * to be called from a button inside .tchr-flat-layout (the toggle's
+ * own onclick already passes the right element via closest()).
+ */
+window.toggleTeacherRail = function(btn) {
+    const layout = btn.closest('.tchr-flat-layout');
+    if (!layout) return;
+    const collapsed = layout.classList.toggle('tchr-rail-collapsed');
+    sessionStorage.setItem('tchrRailCollapsed', collapsed ? '1' : '0');
+};
+
+/**
  * Builds the markup for the shared right-hand info rail — a fixed,
- * always-visible third column reserved for contextual help text (and
+ * collapsible third column reserved for contextual help text (and
  * later, potentially, an AI/chat assistant). Call
  * injectSharedTeacherDesktopLayoutStyles() once per page load (already
  * required for the flat layout) before using this; it owns the rail's
  * CSS too.
+ *
+ * Also renders the collapse/expand toggle tab. The toggle sits on
+ * .tchr-flat-layout itself (not inside the rail), so it stays visible
+ * and clickable even when the rail is collapsed to width:0. Whichever
+ * page calls this must apply applyTeacherRailCollapsedState() once
+ * after inserting the HTML into the DOM, so the remembered session
+ * state (open/closed) is restored on load.
  * @param {string} title    - header label, e.g. "About Quizzes"
  * @param {string} bodyHtml - one or more <p> elements (can include <strong>)
  * @returns {string}
  */
 window.buildInfoRail = function(title, bodyHtml) {
     return `
+        <button type="button" class="tchr-rail-toggle" onclick="toggleTeacherRail(this)"
+            aria-label="Toggle info panel" title="Toggle info panel">
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
         <div class="tchr-info-rail">
             <div class="tchr-info-rail-header">
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
@@ -225,6 +299,22 @@ window.buildInfoRail = function(title, bodyHtml) {
             </div>
             <div class="tchr-info-rail-body">${bodyHtml}</div>
         </div>`;
+};
+
+/**
+ * Restores the remembered open/closed state of the info rail. Call
+ * once, right after a page's HTML (built with buildInfoRail() inside
+ * a .tchr-flat-layout) is inserted into the DOM — same moment the
+ * page would normally call injectSharedTeacherDesktopLayoutStyles().
+ * Safe to call even if the page has no info rail (no-op).
+ */
+window.applyTeacherRailCollapsedState = function() {
+    if (!window.getTeacherRailCollapsed()) return;
+    document.querySelectorAll('.tchr-flat-layout').forEach(layout => {
+        if (layout.querySelector('.tchr-rail-toggle')) {
+            layout.classList.add('tchr-rail-collapsed');
+        }
+    });
 };
 
 /**

@@ -589,6 +589,7 @@ function renderTeacherQuizzes(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
+    if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
 }
 
 // Note: class-group collapsing is handled by the shared
