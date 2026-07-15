@@ -218,7 +218,7 @@ function renderTeacherQuizzes(data) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                padding: 10px 16px 10px 32px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
