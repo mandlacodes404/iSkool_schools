@@ -144,12 +144,7 @@ function renderTeacherQuizzes(data) {
             .qz-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                margin-top: 12px;
             }
 
             /* Left sidebar */
@@ -157,8 +152,6 @@ function renderTeacherQuizzes(data) {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -252,7 +245,6 @@ function renderTeacherQuizzes(data) {
             /* Right panel */
             .qz-main-panel {
                 flex: 1;
-                background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -372,9 +364,9 @@ function renderTeacherQuizzes(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="qz-desktop-layout">
+        <div class="qz-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
-            <div class="qz-sidebar">
+            <div class="qz-sidebar tchr-flat-sidebar">
                 <div class="qz-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>All Quizzes</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateQuiz()"
@@ -390,7 +382,7 @@ function renderTeacherQuizzes(data) {
             </div>
 
             <!-- Right Main Panel -->
-            <div class="qz-main-panel" id="qz-main-panel">
+            <div class="qz-main-panel tchr-flat-panel" id="qz-main-panel">
                 <div class="qz-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -585,6 +577,7 @@ function renderTeacherQuizzes(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 }
 
 // Note: class-group collapsing is handled by the shared

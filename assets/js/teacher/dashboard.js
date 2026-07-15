@@ -88,6 +88,79 @@ window.showTeacherScopedLoader = function(panel, message = 'Working...') {
     document.head.appendChild(style);
 })();
 
+// ─────────────────────────────────────────────
+// SHARED: DESKTOP "FLAT LAYOUT" STYLES
+// One injected copy, reused by every teacher page that renders a
+// sidebar + main-panel split (Quizzes, Announcements, Assignments,
+// Resources, Grades).
+//
+// Replaces the old per-page boxed-card look (border + border-radius +
+// solid #0d1117 panel backgrounds) with a flat, VS-Code/GitHub style:
+// no outer card, panels transparent, single 1px divider between
+// sidebar and main panel. #api-content-area's inline 20px padding is
+// overridden to 0 on desktop, and each page's own -panel-content-style
+// padding (already present per page) keeps panel content readable, so
+// the divider line runs flush from the top nav all the way to the
+// bottom of the viewport. The layout height is filled via 100% rather
+// than each page's own calc(100vh - 140px) guess, since
+// #api-content-area is already flex:1 inside .main-content — a fixed
+// guess on top of that just risks drifting out of sync again.
+//
+// Usage: call injectSharedTeacherDesktopLayoutStyles() once when a
+// page's HTML is built, then add these classes alongside each page's
+// own prefixed classes:
+//   .tchr-flat-layout   → on the outer sidebar+panel flex wrapper
+//   .tchr-flat-sidebar  → on the sidebar column
+//   .tchr-flat-panel    → on the main (right-hand) panel column
+// ─────────────────────────────────────────────
+function injectSharedTeacherDesktopLayoutStyles() {
+    if (document.getElementById('tchr-shared-desktop-layout-style')) return;
+
+    const style = document.createElement('style');
+    style.id = 'tchr-shared-desktop-layout-style';
+    style.textContent = `
+        @media (min-width: 900px) {
+            #api-content-area {
+                padding: 0 !important;
+            }
+        }
+
+        .tchr-flat-layout {
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            margin-top: 0 !important;
+            height: 100% !important;
+            min-height: 0 !important;
+        }
+
+        .tchr-flat-sidebar {
+            background: transparent !important;
+            border-right: 1px solid rgba(255,255,255,0.07) !important;
+            height: 100% !important;
+            min-height: 0 !important;
+        }
+
+        .tchr-flat-panel {
+            background: transparent !important;
+            height: 100% !important;
+            min-height: 0 !important;
+        }
+
+        /* Restores the breathing room #api-content-area used to give,
+           now scoped to just the sidebar's scrollable list, so the
+           divider itself stays flush. */
+        .tchr-flat-sidebar .qz-sidebar-scroll,
+        .tchr-flat-sidebar .an-sidebar-scroll,
+        .tchr-flat-sidebar .as-sidebar-scroll,
+        .tchr-flat-sidebar .rs-sidebar-scroll,
+        .tchr-flat-sidebar .gr-sidebar-scroll {
+            padding-top: 20px !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 /**
  * Builds the markup for one collapsible class group in a sidebar.
  * @param {string} groupId       - unique DOM id for the collapsible content wrapper

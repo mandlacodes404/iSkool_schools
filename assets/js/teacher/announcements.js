@@ -134,15 +134,12 @@ function renderTeacherAnnouncements(data) {
 
             .an-desktop-layout {
                 display: flex; gap: 0;
-                height: calc(100vh - 140px); min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px; overflow: hidden; margin-top: 12px;
+                min-height: 500px;
             }
 
             /* Left sidebar */
             .an-sidebar {
                 width: 280px; min-width: 240px; max-width: 300px;
-                background: #0d1117; border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex; flex-direction: column; overflow: hidden;
             }
             .an-sidebar-header {
@@ -210,7 +207,7 @@ function renderTeacherAnnouncements(data) {
 
             /* Right panel */
             .an-main-panel {
-                flex: 1; background: #0d1117; overflow-y: auto;
+                flex: 1; overflow-y: auto;
                 display: flex; flex-direction: column;
             }
             .an-main-panel::-webkit-scrollbar { width: 5px; }
@@ -264,9 +261,9 @@ function renderTeacherAnnouncements(data) {
         </style>
 
         <!-- DESKTOP -->
-        <div class="an-desktop-layout">
+        <div class="an-desktop-layout tchr-flat-layout">
 
-            <div class="an-sidebar">
+            <div class="an-sidebar tchr-flat-sidebar">
                 <div class="an-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Announcements</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openCreateAnnouncementForm()"
@@ -283,7 +280,7 @@ function renderTeacherAnnouncements(data) {
                 </div>
             </div>
 
-            <div class="an-main-panel" id="an-main-panel">
+            <div class="an-main-panel tchr-flat-panel" id="an-main-panel">
                 <div class="an-panel-empty">
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -321,6 +318,7 @@ function renderTeacherAnnouncements(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 }
 
 // ─────────────────────────────────────────────

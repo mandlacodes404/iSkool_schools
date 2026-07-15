@@ -98,20 +98,13 @@ function renderTeacherResources(data) {
             .rs-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                margin-top: 12px;
             }
 
             .rs-sidebar {
                 width: 280px;
                 min-width: 240px;
                 max-width: 300px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -176,7 +169,6 @@ function renderTeacherResources(data) {
 
             .rs-main-panel {
                 flex: 1;
-                background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -277,8 +269,8 @@ function renderTeacherResources(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="rs-desktop-layout">
-            <div class="rs-sidebar">
+        <div class="rs-desktop-layout tchr-flat-layout">
+            <div class="rs-sidebar tchr-flat-sidebar">
                 <div class="rs-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Resources</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openUploadResourceForm()"
@@ -292,7 +284,7 @@ function renderTeacherResources(data) {
                 </div>
                 <div class="rs-sidebar-scroll">${sidebarHtml}</div>
             </div>
-            <div class="rs-main-panel" id="rs-main-panel">
+            <div class="rs-main-panel tchr-flat-panel" id="rs-main-panel">
                 <div class="rs-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -431,6 +423,7 @@ function renderTeacherResources(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
     // Wire up file drop for mobile modal
     const dropArea = document.getElementById('teacherFileDropArea');

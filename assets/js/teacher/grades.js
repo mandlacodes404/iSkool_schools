@@ -122,12 +122,7 @@ function renderTeacherGrades(data) {
             .gr-desktop-layout {
                 display: flex;
                 gap: 0;
-                height: calc(100vh - 140px);
                 min-height: 500px;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 14px;
-                overflow: hidden;
-                margin-top: 12px;
             }
 
             /* Left sidebar */
@@ -135,8 +130,6 @@ function renderTeacherGrades(data) {
                 width: 260px;
                 min-width: 220px;
                 max-width: 280px;
-                background: #0d1117;
-                border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
@@ -210,7 +203,6 @@ function renderTeacherGrades(data) {
             /* Right panel */
             .gr-main-panel {
                 flex: 1;
-                background: #0d1117;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
@@ -255,9 +247,9 @@ function renderTeacherGrades(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="gr-desktop-layout">
+        <div class="gr-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
-            <div class="gr-sidebar">
+            <div class="gr-sidebar tchr-flat-sidebar">
                 <div class="gr-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Assessments</span>
                     <button class="teacher-upload-btn teacher-desktop-create" onclick="openAddQuizModal()"
@@ -275,7 +267,7 @@ function renderTeacherGrades(data) {
             </div>
 
             <!-- Right Panel -->
-            <div class="gr-main-panel" id="gr-main-panel">
+            <div class="gr-main-panel tchr-flat-panel" id="gr-main-panel">
                 <div class="gr-panel-empty">
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -385,6 +377,7 @@ function renderTeacherGrades(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     loadGradesClasses();
 }
 
