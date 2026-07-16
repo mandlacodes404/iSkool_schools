@@ -154,7 +154,7 @@ function renderTeacherResources(data) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                padding: 10px 16px 10px 32px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
@@ -283,7 +283,7 @@ function renderTeacherResources(data) {
             <div class="rs-sidebar tchr-flat-sidebar">
                 <div class="rs-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Resources</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openUploadResourceForm()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="rs-new-btn" onclick="openUploadResourceForm()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -305,6 +305,11 @@ function renderTeacherResources(data) {
                     <p>Select a resource from the left to view it</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Resources', `
+                <p>Files and YouTube videos are both supported — learners can stream videos directly without leaving the page.</p>
+                <p>Resources are grouped by class here, but every resource still belongs to only one class at a time.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST (unchanged) ═══ -->
@@ -457,6 +462,8 @@ function renderTeacherResources(data) {
 // ─────────────────────────────────────────────
 window.selectDesktopResource = function(flatIndex) {
     document.querySelectorAll('.rs-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('rs-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`rs-sidebar-${flatIndex}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
@@ -573,6 +580,8 @@ window.openUploadResourceForm = function() {
 // ─────────────────────────────────────────────
 function openUploadResourcePanel(panel) {
     document.querySelectorAll('.rs-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('rs-new-btn');
+    if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
         <div class="rs-panel-content">
