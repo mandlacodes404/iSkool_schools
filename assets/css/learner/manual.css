@@ -309,23 +309,31 @@
         box-shadow: none;
     }
 
+    /* Panel wrapper is now just a grouping container — no shared box,
+       matching the teacher side where each card floats independently
+       against the page background. */
     .learner-home-panel {
-        background: #161b22;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 12px;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
         box-shadow: none;
     }
 
+    /* Section label — matches teacher .snap-panel-title */
     .learner-home-panel-title {
-        min-height: 20px;
-        padding: 14px 16px 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 0;
+        padding: 0;
+        margin-bottom: 12px;
         border-bottom: 0;
-        color: #4fd1c5;
+        color: #8b949e;
         font-size: 11px;
         font-weight: 800;
-        letter-spacing: 0.9px;
+        letter-spacing: 1.5px;
         line-height: 1.2;
-        text-transform: none;
+        text-transform: uppercase;
     }
 
     .learner-home-panel-title svg {
@@ -334,18 +342,28 @@
         flex-shrink: 0;
     }
 
+    /* Standalone pill-cards — matches teacher .snap-card */
     .learner-home-activity-item,
     .learner-home-todo-item {
-        padding: 12px 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.045);
-        background: transparent;
-        transition: background 0.2s, border-color 0.2s;
+        background: #1a1919;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .learner-home-activity-item:last-child,
+    .learner-home-todo-item:last-child {
+        margin-bottom: 0;
     }
 
     .learner-home-activity-item:hover,
     .learner-home-todo-item:hover {
-        background: rgba(255,255,255,0.035);
-        border-color: rgba(255,255,255,0.07);
+        transform: translateY(-2px);
+        border-color: rgba(255,255,255,0.12);
+        background: #1a1919;
     }
 
     .learner-home-activity-icon {
@@ -380,7 +398,8 @@
     .learner-home-empty {
         color: #555e6a;
         font-size: 13px;
-        padding: 18px 16px;
+        text-align: center;
+        padding: 16px 0;
     }
 }
 
