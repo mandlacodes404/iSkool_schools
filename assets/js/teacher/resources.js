@@ -680,7 +680,7 @@ function openUploadResourcePanel(panel) {
     });
     fileInput?.addEventListener('change', updateFileName);
 
-    loadResourceClasses();
+    loadResourceClasses(panel, true);
 }
 
 function updateFileName() {
@@ -691,13 +691,18 @@ function updateFileName() {
     }
 }
 
-async function loadResourceClasses() {
+async function loadResourceClasses(panel = null, showLoader = false) {
+    const hideInitialLoader = showLoader && window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(panel, 'Loading...')
+        : null;
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
         window.renderClassPicker('resourceClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
+    } finally {
+        if (hideInitialLoader) hideInitialLoader();
     }
 }
 

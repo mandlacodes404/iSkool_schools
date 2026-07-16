@@ -390,13 +390,18 @@ window.selectDesktopAnnouncement = function(flatIndex) {
         </div>`;
 };
 
-async function loadAnnouncementClasses() {
+async function loadAnnouncementClasses(panel) {
+    const hideInitialLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(panel, 'Loading...')
+        : null;
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
         window.renderClassPicker('annClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
+    } finally {
+        if (hideInitialLoader) hideInitialLoader();
     }
 }
 
@@ -468,7 +473,7 @@ function openCreateAnnouncementPanel(panel) {
             </div>
         </div>`;
 
-    loadAnnouncementClasses();
+    loadAnnouncementClasses(panel);
 }
 
 window.openCreateAnnouncementModal = function() {

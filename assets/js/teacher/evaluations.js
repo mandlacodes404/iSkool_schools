@@ -596,7 +596,7 @@ function openReleaseEvaluationPanel(panel) {
             </div>
         </div>`;
 
-    loadEvalClasses();
+    loadEvalClasses(panel, true);
 }
 
 window.openReleaseEvaluationModal = function() {
@@ -624,13 +624,18 @@ window.closeReleaseEvaluationModal = function() {
     if (errorDiv) errorDiv.style.display = 'none';
 };
 
-async function loadEvalClasses() {
+async function loadEvalClasses(panel = null, showLoader = false) {
+    const hideInitialLoader = showLoader && window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(panel, 'Loading...')
+        : null;
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
         window.renderClassPicker('evalClassPicker', data, function() {});
     } catch (e) {
         console.error('Failed to load classes', e);
+    } finally {
+        if (hideInitialLoader) hideInitialLoader();
     }
 }
 
