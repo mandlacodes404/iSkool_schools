@@ -691,14 +691,14 @@ function renderTeacherAnalytics(data) {
                     <p>Choose a class from the left to explore performance insights</p>
                 </div>
             </div>
-        </div>
 
-        ${typeof buildInfoRail === 'function' ? buildInfoRail('About Analytics', `
-            <p><strong>Class Average / Highest Quiz / Top Performer / Gender Gap</strong> — quick snapshot cards for the selected class and term.</p>
-            <p><strong>Quiz Average</strong> shows how the class did on each assessment; <strong>Boys vs Girls per Quiz</strong> compares performance by gender per assessment.</p>
-            <p><strong>Score Distribution</strong> shows how many learners landed in each score range for the term.</p>
-            <p><strong>Class Performance by Term</strong> tracks the class average across terms, so you can see whether it's improving.</p>
-        `) : ''}
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Analytics', `
+                <p><strong>Class Average / Highest Quiz / Top Performer / Gender Gap</strong> — quick snapshot cards for the selected class and term.</p>
+                <p><strong>Quiz Average</strong> shows how the class did on each assessment; <strong>Boys vs Girls per Quiz</strong> compares performance by gender per assessment.</p>
+                <p><strong>Score Distribution</strong> shows how many learners landed in each score range for the term.</p>
+                <p><strong>Class Performance by Term</strong> tracks the class average across terms, so you can see whether it's improving.</p>
+            `) : ''}
+        </div>
 
         <!-- Subject Modal -->
         <div id="subjectModal" class="teacher-modal-overlay" style="display:none;">
