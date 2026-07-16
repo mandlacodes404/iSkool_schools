@@ -934,9 +934,14 @@ button#login-btn.is-loading .btn-spinner {
     display: block;
 }
 
-/* Circular "pill" loader — 8 rounded bars arranged in a ring, each
-   fading in turn to create a spinning effect (the classic
-   ChatGPT-style loading indicator). */
+/* Circular "pill" loader — 8 rounded bars arranged in a ring. Each
+   pill keeps a fixed brightness step around the ring (so it still
+   reads as a "trail"), while the whole ring physically rotates like
+   a clock hand sweeping around — the classic ChatGPT-style spinner. */
+.btn-spinner {
+    animation: btn-spinner-rotate 1s linear infinite;
+}
+
 .btn-spinner span {
     position: absolute;
     top: 0;
@@ -947,26 +952,27 @@ button#login-btn.is-loading .btn-spinner {
     border-radius: 2px;
     background: #131314;
     transform-origin: 1.25px 10px;
-    animation: btn-spinner-fade 1s linear infinite;
 }
 
-.btn-spinner span:nth-child(1) { transform: rotate(0deg);   animation-delay: -1s; }
-.btn-spinner span:nth-child(2) { transform: rotate(45deg);  animation-delay: -0.875s; }
-.btn-spinner span:nth-child(3) { transform: rotate(90deg);  animation-delay: -0.75s; }
-.btn-spinner span:nth-child(4) { transform: rotate(135deg); animation-delay: -0.625s; }
-.btn-spinner span:nth-child(5) { transform: rotate(180deg); animation-delay: -0.5s; }
-.btn-spinner span:nth-child(6) { transform: rotate(225deg); animation-delay: -0.375s; }
-.btn-spinner span:nth-child(7) { transform: rotate(270deg); animation-delay: -0.25s; }
-.btn-spinner span:nth-child(8) { transform: rotate(315deg); animation-delay: -0.125s; }
+.btn-spinner span:nth-child(1) { transform: rotate(0deg);   opacity: 1;    }
+.btn-spinner span:nth-child(2) { transform: rotate(45deg);  opacity: 0.87; }
+.btn-spinner span:nth-child(3) { transform: rotate(90deg);  opacity: 0.74; }
+.btn-spinner span:nth-child(4) { transform: rotate(135deg); opacity: 0.61; }
+.btn-spinner span:nth-child(5) { transform: rotate(180deg); opacity: 0.48; }
+.btn-spinner span:nth-child(6) { transform: rotate(225deg); opacity: 0.35; }
+.btn-spinner span:nth-child(7) { transform: rotate(270deg); opacity: 0.22; }
+.btn-spinner span:nth-child(8) { transform: rotate(315deg); opacity: 0.15; }
 
-@keyframes btn-spinner-fade {
-    0%   { opacity: 1; }
-    100% { opacity: 0.15; }
+@keyframes btn-spinner-rotate {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .btn-spinner span {
+    .btn-spinner {
         animation: none;
+    }
+    .btn-spinner span {
         opacity: 0.6;
     }
 }
