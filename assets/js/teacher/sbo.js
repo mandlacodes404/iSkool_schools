@@ -7,6 +7,19 @@ function getCsrfToken() {
 window.teacherSBOCache = null;
 window.teacherSBOCachePromise = null;
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherSyllabus = function () {
+    if (window.teacherSBOCache) return;
+    if (window.teacherSBOCachePromise) return;
+    window.teacherSBOCachePromise = fetch('api/teacher/get_sbo.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherSBOCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherSBOCachePromise = null; });
+};
+
 window.fetchTeacherSyllabus = async function() {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_syllabus");

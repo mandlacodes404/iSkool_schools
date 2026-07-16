@@ -6,6 +6,19 @@ window.teacherAssignmentsCache = null;
 window.teacherAssignmentsCachePromise = null;
 
 // ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherAssignments = function () {
+    if (window.teacherAssignmentsCache) return;
+    if (window.teacherAssignmentsCachePromise) return;
+    window.teacherAssignmentsCachePromise = fetch('api/teacher/get_assignments.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherAssignmentsCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherAssignmentsCachePromise = null; });
+};
+
+// ─────────────────────────────────────────────
 // ASSIGNMENTS LIST
 // ─────────────────────────────────────────────
 window.fetchTeacherAssignments = async function() {

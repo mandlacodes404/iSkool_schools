@@ -42,6 +42,15 @@ async function loadTeacherCalendarEvents(month, year) {
     return window.teacherCalendarEventsPromises[key];
 }
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// Warms the current month so the first click into Calendar is instant.
+// ─────────────────────────────────────────────
+window.prefetchTeacherCalendar = function () {
+    const { month, year } = window.calendarPageState;
+    loadTeacherCalendarEvents(month, year).catch(() => {});
+};
+
 // ── ENTRY POINT — called by sidebar "Calendar" link ──
 window.fetchTeacherCalendar = async function () {
     sessionStorage.setItem('lastTeacherPage', 'teacher_calendar');

@@ -12,6 +12,19 @@ function getCsrfToken() {
 window.teacherAnnouncementCache = null;
 window.teacherAnnouncementCachePromise = null;
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherAnnouncements = function () {
+    if (window.teacherAnnouncementCache) return;
+    if (window.teacherAnnouncementCachePromise) return;
+    window.teacherAnnouncementCachePromise = fetch('api/teacher/get_announcements.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherAnnouncementCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherAnnouncementCachePromise = null; });
+};
+
 window.fetchTeacherAnnouncements = async function() {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_announcements");

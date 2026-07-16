@@ -17,6 +17,19 @@ window.currentQuizData           = null;
 window._teacherGradeQuizCache    = {}; // per-quiz cache: { [quizId]: { type: 'standard'|'open_ended', data } }
 
 // ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherGrades = function () {
+    if (window.teacherGradesCache) return;
+    if (window.teacherGradesCachePromise) return;
+    window.teacherGradesCachePromise = fetch('api/teacher/get_grades.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherGradesCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherGradesCachePromise = null; });
+};
+
+// ─────────────────────────────────────────────
 // GRADES LIST
 // ─────────────────────────────────────────────
 window.fetchTeacherGrades = async function() {

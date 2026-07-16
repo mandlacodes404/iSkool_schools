@@ -10,6 +10,22 @@ window.analyticsCurrentTerm       = null;
 window.analyticsActiveTerm        = 1;
 
 // ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherAnalytics = function () {
+    if (window.teacherAnalyticsCache) return;
+    if (window.teacherAnalyticsCachePromise) return;
+    window.teacherAnalyticsCachePromise = fetch('api/teacher/get_analytics.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            window.teacherAnalyticsCache = data;
+        })
+        .catch(() => {})
+        .finally(() => { window.teacherAnalyticsCachePromise = null; });
+};
+
+// ─────────────────────────────────────────────
 // TAP-TO-EXPLAIN: card/chart explanations shown in the info rail
 // ─────────────────────────────────────────────
 window.analyticsCardInfo = {
@@ -655,7 +671,6 @@ window.fetchTeacherAnalytics = async function () {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -664,8 +679,6 @@ window.fetchTeacherAnalytics = async function () {
         renderTeacherAnalytics(window.teacherAnalyticsCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherAnalyticsCachePromise) {
@@ -693,8 +706,6 @@ window.fetchTeacherAnalytics = async function () {
                 <p>Check your connection and try again.</p>
                 <button class="an-retry-btn" onclick="window.teacherAnalyticsCache=null;window.fetchTeacherAnalytics();">Retry</button>
             </div>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 

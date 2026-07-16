@@ -304,6 +304,32 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
 
+    // Serve from cache instantly — same short-circuit the learner
+    // side uses in loadManual() (manual.js), so a cached repeat visit
+    // never shows the loader at all.
+    if (window.teacherManualCache && window.teacherSnapshotCache) {
+        const isMobileCached = window.innerWidth <= 768;
+        if (isMobileCached) {
+            apiArea.innerHTML = window.teacherManualCache;
+        } else {
+            apiArea.innerHTML = `
+                <div class="dashboard-home-layout">
+                    <div class="dashboard-snapshot-panel">
+                        ${renderSnapshotPanel(window.teacherSnapshotCache)}
+                    </div>
+                    <div class="dashboard-manual-panel">
+                        ${window.teacherManualCache}
+                    </div>
+                </div>`;
+
+            window.loadCalendar(window.calendarState.month, window.calendarState.year);
+        }
+        afterTeacherHomeRender();
+        return;
+    }
+
+    if (loader) loader.style.display = 'flex';
+
     try {
         const [manualRes, snapshotRes] = await Promise.all([
             fetch('partials/teacher_manual.html'),
@@ -311,6 +337,9 @@ document.addEventListener('DOMContentLoaded', function () {
         ]);
         const manualHtml = await manualRes.text();
         const snapshot   = await snapshotRes.json();
+
+        window.teacherManualCache   = manualHtml;
+        window.teacherSnapshotCache = snapshot;
 
         // Desktop: two column layout. Mobile: manual only
         const isMobile = window.innerWidth <= 768;
@@ -331,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.loadCalendar(window.calendarState.month, window.calendarState.year);
 
         }
+        afterTeacherHomeRender();
     } catch(e) {
         console.error('Home load error:', e);
         const res = await fetch('partials/teacher_manual.html');
@@ -338,8 +368,35 @@ document.addEventListener('DOMContentLoaded', function () {
         if (apiArea) apiArea.innerHTML = html;
         // Load calendar after DOM is ready
 
+    } finally {
+        if (loader) loader.style.display = 'none';
+        clearTimeout(window.loaderTimeout);
     }
 };
+
+// Called after teacher Home has rendered (cached or freshly fetched) —
+// silently warms every other section's cache in staggered waves so it
+// doesn't compete with Home's own network traffic. Mirrors the learner
+// side's afterHomeRender() in manual.js.
+function afterTeacherHomeRender() {
+    setTimeout(() => {
+        if (typeof window.prefetchTeacherQuizzes     === 'function') window.prefetchTeacherQuizzes();
+        if (typeof window.prefetchTeacherAssignments === 'function') window.prefetchTeacherAssignments();
+    }, 1500);
+    setTimeout(() => {
+        if (typeof window.prefetchTeacherGrades         === 'function') window.prefetchTeacherGrades();
+        if (typeof window.prefetchTeacherAnnouncements   === 'function') window.prefetchTeacherAnnouncements();
+    }, 3000);
+    setTimeout(() => {
+        if (typeof window.prefetchTeacherResources    === 'function') window.prefetchTeacherResources();
+        if (typeof window.prefetchTeacherEvaluations   === 'function') window.prefetchTeacherEvaluations();
+        if (typeof window.prefetchTeacherSyllabus      === 'function') window.prefetchTeacherSyllabus();
+    }, 4500);
+    setTimeout(() => {
+        if (typeof window.prefetchTeacherAnalytics  === 'function') window.prefetchTeacherAnalytics();
+        if (typeof window.prefetchTeacherCalendar   === 'function') window.prefetchTeacherCalendar();
+    }, 6000);
+}
 
 function renderSnapshotPanel(data) {
     const cards = [
@@ -605,8 +662,13 @@ function renderSnapshotPanel(data) {
         }
     }
 
-    if (loader) loader.style.display = 'none';
-    clearTimeout(window.loaderTimeout);
+    // NOTE: no unconditional loader-hide here anymore. Previously this ran
+    // synchronously right after loadTeacherManual() was kicked off above,
+    // which hid the loader before that async function's own fetch had a
+    // chance to resolve — undoing the 'flex' it had just set. Each function
+    // that shows the loader (loadTeacherManual, the settings button handler,
+    // the iframe 'load' listener) is responsible for hiding it again itself,
+    // the same way the learner dashboard already does it.
 });
 
 // ── CALENDAR ──

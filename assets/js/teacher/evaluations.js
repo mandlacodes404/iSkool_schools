@@ -5,6 +5,19 @@ function getCsrfToken() {
 window.teacherEvaluationCache = null;
 window.teacherEvaluationCachePromise = null;
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherEvaluations = function () {
+    if (window.teacherEvaluationCache) return;
+    if (window.teacherEvaluationCachePromise) return;
+    window.teacherEvaluationCachePromise = fetch('api/teacher/get_evaluations.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherEvaluationCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherEvaluationCachePromise = null; });
+};
+
 window.fetchTeacherEvaluations = async function() {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_evaluations");

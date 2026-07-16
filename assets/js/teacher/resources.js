@@ -5,6 +5,19 @@ function getCsrfToken() {
 window.teacherResourceCache = null;
 window.teacherResourceCachePromise = null;
 
+// ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// ─────────────────────────────────────────────
+window.prefetchTeacherResources = function () {
+    if (window.teacherResourceCache) return;
+    if (window.teacherResourceCachePromise) return;
+    window.teacherResourceCachePromise = fetch('api/teacher/get_resources.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherResourceCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherResourceCachePromise = null; });
+};
+
 window.fetchTeacherResources = async function() {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastTeacherPage", "teacher_resources");

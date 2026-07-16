@@ -20,6 +20,21 @@ window.teacherQuizzesCachePromise = null;
 window.currentQuizResultsData = null;
 
 // ─────────────────────────────────────────────
+// SILENT BACKGROUND PREFETCH
+// Warms window.teacherQuizzesCache so the first real click into
+// Quizzes is instant, same pattern as the learner side's prefetchX().
+// ─────────────────────────────────────────────
+window.prefetchTeacherQuizzes = function () {
+    if (window.teacherQuizzesCache) return;
+    if (window.teacherQuizzesCachePromise) return;
+    window.teacherQuizzesCachePromise = fetch('api/teacher/get_quizzes.php')
+        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
+        .then(data => { window.teacherQuizzesCache = data; })
+        .catch(() => {})
+        .finally(() => { window.teacherQuizzesCachePromise = null; });
+};
+
+// ─────────────────────────────────────────────
 // QUIZ LIST
 // ─────────────────────────────────────────────
 window.fetchTeacherQuizzes = async function() {
