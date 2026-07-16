@@ -48,8 +48,6 @@ window.analyticsActiveTerm        = 1;
         .an-shell {
             display: flex;
             gap: 0;
-            height: calc(100vh - 120px);
-            overflow: hidden;
             font-family: 'Nunito', sans-serif;
         }
 
@@ -57,7 +55,6 @@ window.analyticsActiveTerm        = 1;
         .an-left {
             width: 260px;
             min-width: 260px;
-            background: var(--an-bg);
             border-right: 1px solid rgba(255,255,255,0.06);
             display: flex;
             flex-direction: column;
@@ -255,7 +252,6 @@ window.analyticsActiveTerm        = 1;
         .an-right {
             flex: 1;
             overflow-y: auto;
-            background: var(--an-bg);
             padding: 24px 28px 40px;
         }
 
@@ -676,9 +672,9 @@ function renderTeacherAnalytics(data) {
         <div class="teacher-resources-header" style="margin-bottom:16px;">
             <h2 class="teacher-resources-title">Analytics</h2>
         </div>
-        <div class="an-shell an-fade-in">
+        <div class="an-shell an-fade-in tchr-flat-layout">
             <!-- LEFT -->
-            <div class="an-left">
+            <div class="an-left tchr-flat-sidebar">
                 <div class="an-left-header">
                     <div class="an-left-title">Classes</div>
                     <div class="an-term-tabs">${termTabs}</div>
@@ -686,7 +682,7 @@ function renderTeacherAnalytics(data) {
                 <div class="an-class-list" id="an-class-list"></div>
             </div>
             <!-- RIGHT -->
-            <div class="an-right" id="an-right">
+            <div class="an-right tchr-flat-panel" id="an-right">
                 <div class="an-empty-state">
                     <svg viewBox="0 0 24 24" width="48" height="48" style="stroke:var(--an-accent);" stroke-width="1.5" fill="none">
                         <path d="M18 20V10M12 20V4M6 20v-6"/>
@@ -696,6 +692,13 @@ function renderTeacherAnalytics(data) {
                 </div>
             </div>
         </div>
+
+        ${typeof buildInfoRail === 'function' ? buildInfoRail('About Analytics', `
+            <p><strong>Class Average / Highest Quiz / Top Performer / Gender Gap</strong> — quick snapshot cards for the selected class and term.</p>
+            <p><strong>Quiz Average</strong> shows how the class did on each assessment; <strong>Boys vs Girls per Quiz</strong> compares performance by gender per assessment.</p>
+            <p><strong>Score Distribution</strong> shows how many learners landed in each score range for the term.</p>
+            <p><strong>Class Performance by Term</strong> tracks the class average across terms, so you can see whether it's improving.</p>
+        `) : ''}
 
         <!-- Subject Modal -->
         <div id="subjectModal" class="teacher-modal-overlay" style="display:none;">
@@ -720,6 +723,7 @@ function renderTeacherAnalytics(data) {
             </div>
         </div>`;
 
+    if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     renderClassList(window.analyticsActiveTerm);
 }
 
