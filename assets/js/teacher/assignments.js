@@ -15,7 +15,6 @@ window.fetchTeacherAssignments = async function() {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -24,8 +23,6 @@ window.fetchTeacherAssignments = async function() {
         renderTeacherAssignments(window.teacherAssignmentsCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherAssignmentsCachePromise) {
@@ -47,8 +44,6 @@ window.fetchTeacherAssignments = async function() {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading assignments.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 

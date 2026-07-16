@@ -12,7 +12,6 @@ window.fetchTeacherResources = async function() {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -21,8 +20,6 @@ window.fetchTeacherResources = async function() {
         renderTeacherResources(window.teacherResourceCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherResourceCachePromise) {
@@ -44,8 +41,6 @@ window.fetchTeacherResources = async function() {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading resources.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -836,7 +831,12 @@ window.closeDeleteResourceModal = function() {
 window.executeDeleteResource = async function() {
     if (!resourceToDelete) return;
     const loader = document.getElementById('loaderOverlay');
-    if (loader) loader.style.display = 'flex';
+    const panel  = document.getElementById('rs-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Deleting...')
+        : null;
+    if (!hideLoader && loader) loader.style.display = 'flex';
     closeDeleteResourceModal();
 
     try {
@@ -854,7 +854,8 @@ window.executeDeleteResource = async function() {
     } catch (e) {
         alert('Connection error.');
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 

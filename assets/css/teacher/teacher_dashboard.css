@@ -351,16 +351,20 @@
             pointer-events: all;
         }
 
-        /* Orbital dots container */
+        /* Pill ring loader — reuses the existing 4-element markup
+           (.loader + its ::before/::after pseudo-elements, plus
+           .loader-dot3 / .loader-dot4) but styles each as a solid
+           rounded bar arranged in a ring, with the whole ring
+           physically rotating — matching assets/css/pill-loader.css. */
         .loader {
-            width: 48px;
-            height: 48px;
+            width: 24px;
+            height: 24px;
             position: relative;
-            animation: none;
+            margin: 0;
+            background: none;
             border: none;
             border-radius: 0;
-            background: none;
-            margin: 0;
+            animation: loader-pill-rotate 1s linear infinite;
         }
 
         .loader::before,
@@ -369,20 +373,20 @@
         .loader-dot4 {
             content: '';
             position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4fd1c5;
-            top: 50%;
+            top: 0;
             left: 50%;
-            margin: -4px 0 0 -4px;
-            transform-origin: 0 0;
+            width: 3px;
+            height: 8px;
+            margin-left: -1.5px;
+            border-radius: 2px;
+            background: #4fd1c5;
+            transform-origin: 1.5px 12px;
         }
 
-        .loader::before  { animation: orbit 1.55s linear infinite 0s;       opacity: 1;    background: #4fd1c5; }
-        .loader::after   { animation: orbit 1.55s linear infinite -0.3875s; opacity: 0.75; background: #4fd1c5; }
-        .loader-dot3     { animation: orbit 1.55s linear infinite -0.775s;  opacity: 0.5;  background: #4fd1c5; }
-        .loader-dot4     { animation: orbit 1.55s linear infinite -1.1625s; opacity: 0.25; background: #4fd1c5; }
+        .loader::before  { transform: rotate(0deg);   }
+        .loader::after   { transform: rotate(90deg);  }
+        .loader-dot3     { transform: rotate(180deg); }
+        .loader-dot4     { transform: rotate(270deg); }
 
         .loader-version {
             position: absolute;
@@ -393,9 +397,9 @@
             font-family: 'Nunito', sans-serif;
         }
 
-        @keyframes orbit {
-            0%   { transform: rotate(0deg)   translateX(18px) rotate(0deg);   }
-            100% { transform: rotate(360deg) translateX(18px) rotate(-360deg); }
+        @keyframes loader-pill-rotate {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }

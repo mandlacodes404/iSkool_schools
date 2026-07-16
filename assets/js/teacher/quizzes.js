@@ -29,7 +29,6 @@ window.fetchTeacherQuizzes = async function() {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -38,8 +37,6 @@ window.fetchTeacherQuizzes = async function() {
         renderTeacherQuizzes(window.teacherQuizzesCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherQuizzesCachePromise) {
@@ -61,8 +58,6 @@ window.fetchTeacherQuizzes = async function() {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading quizzes.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -763,7 +758,12 @@ window.toggleQuizDetails = function(quizId) {
 // ─────────────────────────────────────────────
 window.togglePublishMarks = async function(quizId) {
     const loader = document.getElementById('loaderOverlay');
-    if (loader) loader.style.display = 'flex';
+    const panel  = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Updating...')
+        : null;
+    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/toggle_publish_marks.php', {
@@ -804,7 +804,8 @@ window.togglePublishMarks = async function(quizId) {
     } catch (e) {
         alert('Connection error');
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 
@@ -818,7 +819,12 @@ window.toggleQuizStatusFromElement = function(el) {
 window.toggleQuizStatus = async function(quizId, currentStatus) {
     const newStatus = currentStatus === 'Closed' ? 'Open' : 'Closed';
     const loader    = document.getElementById('loaderOverlay');
-    if (loader) loader.style.display = 'flex';
+    const panel     = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Updating...')
+        : null;
+    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/toggle_quiz_status.php', {
@@ -879,7 +885,8 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
     } catch (e) {
         alert('Connection error');
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 
@@ -888,9 +895,6 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
 // ─────────────────────────────────────────────
 window.openQuizResults = async function(quizId, quizTitle) {
     const apiArea = document.getElementById('api-content-area');
-    const loader  = document.getElementById('loaderOverlay');
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
@@ -903,8 +907,6 @@ window.openQuizResults = async function(quizId, quizTitle) {
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading results.</p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -999,9 +1001,6 @@ function getGradeBadgeClass(percentage) {
 // ─────────────────────────────────────────────
 window.openQuizReview = async function(resultId, quizTitle) {
     const apiArea = document.getElementById('api-content-area');
-    const loader  = document.getElementById('loaderOverlay');
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch(`api/teacher/get_quiz_review.php?result_id=${resultId}`);
@@ -1012,8 +1011,6 @@ window.openQuizReview = async function(resultId, quizTitle) {
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
             <p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading review.</p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -2405,7 +2402,10 @@ window.openEditQuiz = async function(quizId) {
     const target = getQuizFormTarget();
     const panel = document.getElementById('qz-main-panel');
     const isDesktop = target === panel;
-    if (loader) loader.style.display = 'flex';
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Loading...')
+        : null;
+    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         const res = await fetch(`api/teacher/get_quiz_edit_data.php?quiz_id=${quizId}`, {
@@ -2503,7 +2503,8 @@ window.openEditQuiz = async function(quizId) {
     } catch (e) {
         if (target) target.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">${escapeHtml(e.message || 'Error loading quiz.')}</p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 
@@ -2513,10 +2514,15 @@ async function submitEditQuiz(e) {
     const errorDiv = document.getElementById('eqError');
     const submitBtn = document.getElementById('eqSubmitBtn');
     const loader = document.getElementById('loaderOverlay');
+    const panel = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
     errorDiv.style.display = 'none';
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving...';
-    if (loader) loader.style.display = 'flex';
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
+        : null;
+    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         refreshEditQuestionIndexes();
@@ -2540,7 +2546,8 @@ async function submitEditQuiz(e) {
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Save Quiz';
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 }
 
@@ -2564,8 +2571,13 @@ window.confirmDeleteQuiz = async function() {
     if (!activeDeleteQuizId) return;
     const error = document.getElementById('deleteQuizError');
     const loader = document.getElementById('loaderOverlay');
+    const panel = document.getElementById('qz-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
+    const hideLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Deleting...')
+        : null;
     if (error) error.style.display = 'none';
-    if (loader) loader.style.display = 'flex';
+    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         const res = await fetch('api/teacher/delete_quiz.php', {
@@ -2590,7 +2602,8 @@ window.confirmDeleteQuiz = async function() {
             error.style.display = 'block';
         }
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (hideLoader) hideLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 

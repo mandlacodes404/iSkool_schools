@@ -53,15 +53,8 @@ window.fetchTeacherCalendar = async function () {
     if (iframe)  iframe.style.display  = 'none';
 
     const { month, year } = window.calendarPageState;
-    const loader = document.getElementById('loaderOverlay');
-    const isCached = Boolean(window.teacherCalendarEventsCache[teacherCalendarCacheKey(month, year)]);
-    if (!isCached && loader) loader.style.display = 'flex';
 
-    try {
-        await renderFullCalendarPage(month, year);
-    } finally {
-        if (loader) loader.style.display = 'none';
-    }
+    await renderFullCalendarPage(month, year);
 };
 
 // ── MAIN RENDER ──

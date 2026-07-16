@@ -26,7 +26,6 @@ window.fetchTeacherGrades = async function() {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -35,8 +34,6 @@ window.fetchTeacherGrades = async function() {
         renderTeacherGrades(window.teacherGradesCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         // Keep one request in flight so repeated taps cannot fetch Grades twice.
@@ -62,8 +59,6 @@ window.fetchTeacherGrades = async function() {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading grades.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -410,7 +405,6 @@ window.selectDesktopGradeQuiz = async function(quizId) {
     window._activeDesktopGradeQuizId = quizId;
 
     const panel  = document.getElementById('gr-main-panel');
-    const loader = document.getElementById('loaderOverlay');
     if (!panel) return;
 
     // Already fetched this quiz this session — render instantly, no re-fetch, no spinner
@@ -569,9 +563,6 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
 // ─────────────────────────────────────────────
 window.openQuizGrades = async function(quizId, quizTitle) {
     const apiArea = document.getElementById('api-content-area');
-    const loader  = document.getElementById('loaderOverlay');
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
@@ -596,8 +587,6 @@ window.openQuizGrades = async function(quizId, quizTitle) {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading grades.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -969,6 +958,8 @@ window.saveMarks = async function(email, quizId) {
     const successDiv = document.getElementById('editMarksSuccess');
     const saveBtn   = document.getElementById('saveMarksBtn');
     const loader    = document.getElementById('loaderOverlay');
+    const panel     = document.getElementById('gr-main-panel');
+    const isDesktop = window.innerWidth >= 900 && panel;
 
     errorDiv.style.display   = 'none';
     successDiv.style.display = 'none';
@@ -984,7 +975,10 @@ window.saveMarks = async function(email, quizId) {
 
     saveBtn.disabled    = true;
     saveBtn.textContent = 'Saving...';
-    if (loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherScopedLoader
+        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
+        : null;
+    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
 
     try {
         const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -1021,7 +1015,8 @@ window.saveMarks = async function(email, quizId) {
     } finally {
         saveBtn.disabled    = false;
         saveBtn.textContent = 'Save Marks';
-        if (loader) loader.style.display = 'none';
+        if (hideSubmitLoader) hideSubmitLoader();
+        else if (loader) loader.style.display = 'none';
     }
 };
 

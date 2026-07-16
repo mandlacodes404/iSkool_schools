@@ -64,7 +64,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.6">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -1086,14 +1086,14 @@ window.removeTeacherProfilePicture = function() {
 
 <script src="assets/js/teacher/dashboard.js?v=5.9"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=5.2"></script>
-<script src="assets/js/teacher/announcements.js?v=3.7"></script>
-<script src="assets/js/teacher/evaluations.js?v=2.6"></script>
-<script src="assets/js/teacher/resources.js?v=2.4"></script>
-<script src="assets/js/teacher/grades.js?v=2.9"></script>
-<script src="assets/js/teacher/assignments.js?v=3.0"></script>
-<script src="assets/js/teacher/sbo.js?v=2.5"></script>
+<script src="assets/js/teacher/quizzes.js?v=5.3"></script>
+<script src="assets/js/teacher/announcements.js?v=3.8"></script>
+<script src="assets/js/teacher/evaluations.js?v=2.7"></script>
+<script src="assets/js/teacher/resources.js?v=2.5"></script>
+<script src="assets/js/teacher/grades.js?v=3.0"></script>
+<script src="assets/js/teacher/assignments.js?v=3.1"></script>
+<script src="assets/js/teacher/sbo.js?v=2.6"></script>
 <script src="assets/js/teacher/analytics.js?v=2.4"></script>
-<script src="assets/js/teacher/teacher_calendar.js?v=1.5"></script>
+<script src="assets/js/teacher/teacher_calendar.js?v=1.6"></script>
 </body>
 </html>

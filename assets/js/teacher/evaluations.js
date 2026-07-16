@@ -12,7 +12,6 @@ window.fetchTeacherEvaluations = async function() {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
-    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -21,8 +20,6 @@ window.fetchTeacherEvaluations = async function() {
         renderTeacherEvaluations(window.teacherEvaluationCache);
         return;
     }
-
-    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherEvaluationCachePromise) {
@@ -44,8 +41,6 @@ window.fetchTeacherEvaluations = async function() {
             <p style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading evaluations.
             </p>`;
-    } finally {
-        if (loader) loader.style.display = 'none';
     }
 };
 
