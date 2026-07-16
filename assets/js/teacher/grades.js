@@ -192,7 +192,7 @@ function renderTeacherGrades(data) {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                padding: 10px 16px 10px 32px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
@@ -267,7 +267,7 @@ function renderTeacherGrades(data) {
             <div class="gr-sidebar tchr-flat-sidebar">
                 <div class="gr-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Assessments</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openAddQuizModal()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="gr-new-btn" onclick="openAddQuizModal()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -293,6 +293,11 @@ function renderTeacherGrades(data) {
                     <p>Select an assessment to view learner grades</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Grades', `
+                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> for that assessment.</p>
+                <p>Use <strong>Progress Report</strong> in the sidebar footer to generate a printable term summary for the whole class.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
@@ -1053,11 +1058,15 @@ window.toggleWeightField = function() {
 window.openAddQuizModal = function() {
     const modal = document.getElementById('addQuizModal');
     if (modal) modal.style.display = 'flex';
+    const newBtn = document.getElementById('gr-new-btn');
+    if (newBtn) newBtn.classList.add('active');
 };
 
 window.closeAddQuizModal = function() {
     const modal = document.getElementById('addQuizModal');
     if (modal) modal.style.display = 'none';
+    const newBtn = document.getElementById('gr-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     document.getElementById('quizTitle').value       = '';
     document.getElementById('quizClass').value       = '';
     document.getElementById('quizSummative').checked  = false;

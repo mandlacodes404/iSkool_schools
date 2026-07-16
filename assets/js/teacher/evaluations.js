@@ -72,10 +72,11 @@ function renderTeacherEvaluations(data) {
         sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No evaluations released yet.</p>`;
     } else {
         data.forEach((group, gIdx) => {
-            sidebarHtml += `<div class="ev-sidebar-class-label">${group.class_name}</div>`;
+            const classGroupId = `ev-class-group-${gIdx}`;
+            let itemsHtml = '';
             group.evaluations.forEach((ev, eIdx) => {
                 const key = `${gIdx}-${eIdx}`;
-                sidebarHtml += `
+                itemsHtml += `
                     <div class="ev-sidebar-item" id="ev-sidebar-${key}"
                         onclick="selectDesktopEval(${gIdx}, ${eIdx})">
                         <div class="ev-sidebar-item-icon">
@@ -91,6 +92,12 @@ function renderTeacherEvaluations(data) {
                         </div>
                     </div>`;
             });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'ev-sidebar-class-label',
+                group.class_name,
+                itemsHtml
+            );
         });
     }
 
@@ -141,18 +148,22 @@ function renderTeacherEvaluations(data) {
             .ev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
             .ev-sidebar-class-label {
-                padding: 8px 16px 4px;
+                padding: 4px 16px 2px;
                 font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 1px;
-                color: #555e6a;
+                font-weight: 700;
+                color: #8b949e;
                 text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .ev-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
             }
             .ev-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                padding: 10px 16px 10px 32px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
@@ -224,7 +235,7 @@ function renderTeacherEvaluations(data) {
             <div class="ev-sidebar tchr-flat-sidebar">
                 <div class="ev-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Evaluations</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openReleaseEvaluationForm()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="ev-new-btn" onclick="openReleaseEvaluationForm()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -249,6 +260,11 @@ function renderTeacherEvaluations(data) {
                     <p>Select an evaluation to view results</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Evaluations', `
+                <p>Responses are always anonymous — you'll see the breakdown of answers per statement, but never which learner gave which response.</p>
+                <p>Comments are optional for learners, so a low response count doesn't necessarily mean few learners completed the evaluation.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
@@ -366,6 +382,8 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
     const key = `${groupIndex}-${evIndex}`;
 
     document.querySelectorAll('.ev-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('ev-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`ev-sidebar-${key}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
@@ -501,6 +519,8 @@ window.openReleaseEvaluationForm = function() {
 // ─────────────────────────────────────────────
 function openReleaseEvaluationPanel(panel) {
     document.querySelectorAll('.ev-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('ev-new-btn');
+    if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
         <div class="ev-panel-content">

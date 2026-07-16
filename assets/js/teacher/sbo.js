@@ -71,31 +71,47 @@ function renderTeacherSyllabus(data) {
     if (!briefs.length) {
         sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No syllabus briefs found.</p>`;
     } else {
-        // Group by term
+        // Group by term, then by class within each term
         const byTerm = {};
         briefs.forEach((brief, idx) => {
             const t = brief.term || 0;
-            if (!byTerm[t]) byTerm[t] = [];
-            byTerm[t].push({ brief, idx });
+            if (!byTerm[t]) byTerm[t] = {};
+            const classKey = brief.class_id;
+            if (!byTerm[t][classKey]) byTerm[t][classKey] = { class_name: brief.class_name, items: [] };
+            byTerm[t][classKey].items.push({ brief, idx });
         });
 
         Object.keys(byTerm).sort((a,b) => a - b).forEach(term => {
             sidebarHtml += `<div class="sbo-sidebar-term-label">TERM ${term}</div>`;
-            byTerm[term].forEach(({ brief, idx }) => {
-                sidebarHtml += `
-                    <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
-                        onclick="selectDesktopSBO(${idx})">
-                        <div class="sbo-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                            </svg>
-                        </div>
-                        <div class="sbo-sidebar-item-info">
-                            <div class="sbo-sidebar-item-title">${brief.subject}</div>
-                            <div class="sbo-sidebar-item-meta">${brief.class_name}</div>
-                        </div>
-                    </div>`;
+
+            const classesInTerm = Object.values(byTerm[term])
+                .sort((a, b) => a.class_name.localeCompare(b.class_name));
+
+            classesInTerm.forEach((clsGroup, clsIdx) => {
+                const classGroupId = `sbo-class-group-${term}-${clsIdx}`;
+                let itemsHtml = '';
+                clsGroup.items.forEach(({ brief, idx }) => {
+                    itemsHtml += `
+                        <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
+                            onclick="selectDesktopSBO(${idx})">
+                            <div class="sbo-sidebar-item-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                </svg>
+                            </div>
+                            <div class="sbo-sidebar-item-info">
+                                <div class="sbo-sidebar-item-title">${brief.subject}</div>
+                                <div class="sbo-sidebar-item-meta">${brief.updated_at || ''}</div>
+                            </div>
+                        </div>`;
+                });
+                sidebarHtml += window.buildCollapsibleClassGroup(
+                    classGroupId,
+                    'sbo-sidebar-class-label',
+                    clsGroup.class_name,
+                    itemsHtml
+                );
             });
         });
     }
@@ -154,11 +170,23 @@ function renderTeacherSyllabus(data) {
                 color: #555e6a;
                 text-transform: uppercase;
             }
+            .sbo-sidebar-class-label {
+                padding: 4px 16px 2px;
+                font-size: 10px;
+                font-weight: 700;
+                color: #8b949e;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+            .sbo-sidebar-class-label.tchr-sidebar-class-label--toggle {
+                padding-top: 8px;
+                padding-bottom: 6px;
+            }
             .sbo-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                padding: 10px 16px 10px 32px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
@@ -287,7 +315,7 @@ function renderTeacherSyllabus(data) {
             <div class="sbo-sidebar tchr-flat-sidebar">
                 <div class="sbo-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                     <span>Syllabus</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" onclick="openSBOForm()"
+                    <button class="teacher-upload-btn teacher-desktop-create" id="sbo-new-btn" onclick="openSBOForm()"
                         style="text-transform:none;letter-spacing:normal;font-size:12px;">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -311,6 +339,11 @@ function renderTeacherSyllabus(data) {
                     <p>Select a syllabus to view details</p>
                 </div>
             </div>
+
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Syllabus', `
+                <p>Each syllabus brief is tied to one class and term — release a new one per class if you teach the same subject across grades.</p>
+                <p>Learners see topics, assessments, and notes exactly as written here, so keep entries current as the term progresses.</p>
+            `) : ''}
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
@@ -452,6 +485,8 @@ function buildSBOCards(briefs) {
 // ── DESKTOP PANEL: SELECT BRIEF ──────────────────────────────────────────────
 window.selectDesktopSBO = function(idx) {
     document.querySelectorAll('.sbo-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('sbo-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`sbo-sidebar-${idx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
@@ -538,6 +573,8 @@ window.openSBOForm = function() {
 // ── DESKTOP PANEL FORM ───────────────────────────────────────────────────────
 async function openSBOPanel(panel) {
     document.querySelectorAll('.sbo-sidebar-item').forEach(el => el.classList.remove('active'));
+    const newBtn = document.getElementById('sbo-new-btn');
+    if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
         <div class="sbo-panel-content">
