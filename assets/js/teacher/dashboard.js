@@ -132,7 +132,6 @@ function injectSharedTeacherDesktopLayoutStyles() {
             margin-top: 0 !important;
             height: 100% !important;
             min-height: 0 !important;
-            position: relative !important;
         }
 
         .tchr-flat-sidebar {
@@ -198,123 +197,56 @@ function injectSharedTeacherDesktopLayoutStyles() {
         @media (max-width: 1250px) {
             .tchr-info-rail { display: none; }
         }
-
-        /* Collapsed state — driven by a class on .tchr-flat-layout so the
-           same toggle works no matter which page injected the rail.
-           Width collapses to 0 and the main panel reclaims the space
-           since both share the same flex row. */
-        .tchr-flat-layout.tchr-rail-collapsed .tchr-info-rail {
-            width: 0 !important; min-width: 0 !important;
-            padding: 0 !important; border-left: none !important;
-            overflow: hidden !important;
-        }
-
-        /* Toggle tab — sits on the divider line, near the top. Stays
-           put whether the rail is open or collapsed so it's always
-           the same click target. */
-        .tchr-rail-toggle {
-            position: absolute; top: 16px; right: 260px;
-            width: 20px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            background: #161b22;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-right: none;
-            border-radius: 6px 0 0 6px;
-            color: #8b949e;
-            cursor: pointer;
-            z-index: 5;
-            transition: right 0.2s ease, color 0.15s ease, background 0.15s ease;
-        }
-        .tchr-rail-toggle:hover { background: #1c2229; color: #c9d1d9; }
-        .tchr-rail-toggle svg { transition: transform 0.2s ease; }
-        .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle {
-            right: 0;
-            border-radius: 6px 0 0 6px;
-        }
-        .tchr-flat-layout.tchr-rail-collapsed .tchr-rail-toggle svg {
-            transform: rotate(180deg);
-        }
-        @media (max-width: 1250px) {
-            .tchr-rail-toggle { display: none; }
-        }
     `;
     document.head.appendChild(style);
 }
 
 /**
- * Reads the teacher's last-chosen info rail state for this session.
- * Shared across every page that uses buildInfoRail(), so collapsing
- * it on Quizzes keeps it collapsed when switching to Announcements.
- */
-window.getTeacherRailCollapsed = function() {
-    return sessionStorage.getItem('tchrRailCollapsed') === '1';
-};
-
-/**
- * Toggles the info rail open/closed and persists the choice. Expects
- * to be called from a button inside .tchr-flat-layout (the toggle's
- * own onclick already passes the right element via closest()).
- */
-window.toggleTeacherRail = function(btn) {
-    const layout = btn.closest('.tchr-flat-layout');
-    if (!layout) return;
-    const collapsed = layout.classList.toggle('tchr-rail-collapsed');
-    sessionStorage.setItem('tchrRailCollapsed', collapsed ? '1' : '0');
-};
-
-/**
  * Builds the markup for the shared right-hand info rail — a fixed,
- * collapsible third column reserved for contextual help text (and
+ * always-visible third column reserved for contextual help text (and
  * later, potentially, an AI/chat assistant). Call
  * injectSharedTeacherDesktopLayoutStyles() once per page load (already
  * required for the flat layout) before using this; it owns the rail's
  * CSS too.
- *
- * Also renders the collapse/expand toggle tab. The toggle sits on
- * .tchr-flat-layout itself (not inside the rail), so it stays visible
- * and clickable even when the rail is collapsed to width:0. Whichever
- * page calls this must apply applyTeacherRailCollapsedState() once
- * after inserting the HTML into the DOM, so the remembered session
- * state (open/closed) is restored on load.
  * @param {string} title    - header label, e.g. "About Quizzes"
  * @param {string} bodyHtml - one or more <p> elements (can include <strong>)
+ * @param {string} [railId] - optional id on the header/body elements, so a
+ *                            page can target and update the rail's content
+ *                            dynamically (e.g. in response to a tap
+ *                            elsewhere on the page). Omit for a static rail.
  * @returns {string}
  */
-window.buildInfoRail = function(title, bodyHtml) {
+window.buildInfoRail = function(title, bodyHtml, railId) {
+    const headerId = railId ? ` id="${railId}-header"` : '';
+    const bodyId    = railId ? ` id="${railId}-body"`   : '';
     return `
-        <button type="button" class="tchr-rail-toggle" onclick="toggleTeacherRail(this)"
-            aria-label="Toggle info panel" title="Toggle info panel">
-            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        </button>
         <div class="tchr-info-rail">
-            <div class="tchr-info-rail-header">
+            <div class="tchr-info-rail-header"${headerId}>
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                ${title}
+                <span${railId ? ` id="${railId}-header-text"` : ''}>${title}</span>
             </div>
-            <div class="tchr-info-rail-body">${bodyHtml}</div>
+            <div class="tchr-info-rail-body"${bodyId}>${bodyHtml}</div>
         </div>`;
 };
 
 /**
- * Restores the remembered open/closed state of the info rail. Call
- * once, right after a page's HTML (built with buildInfoRail() inside
- * a .tchr-flat-layout) is inserted into the DOM — same moment the
- * page would normally call injectSharedTeacherDesktopLayoutStyles().
- * Safe to call even if the page has no info rail (no-op).
+ * Updates an info rail built with buildInfoRail(title, bodyHtml, railId)
+ * in place — swaps its header text and body content without re-rendering
+ * anything else on the page. Used for tap-to-explain: clicking a card or
+ * chart calls this to show that item's explanation in the rail.
+ * @param {string} railId   - the same railId passed to buildInfoRail()
+ * @param {string} title    - new header label
+ * @param {string} bodyHtml - new body content (one or more <p> elements)
  */
-window.applyTeacherRailCollapsedState = function() {
-    if (!window.getTeacherRailCollapsed()) return;
-    document.querySelectorAll('.tchr-flat-layout').forEach(layout => {
-        if (layout.querySelector('.tchr-rail-toggle')) {
-            layout.classList.add('tchr-rail-collapsed');
-        }
-    });
+window.updateInfoRail = function(railId, title, bodyHtml) {
+    const headerText = document.getElementById(`${railId}-header-text`);
+    const body        = document.getElementById(`${railId}-body`);
+    if (headerText) headerText.textContent = title;
+    if (body) body.innerHTML = bodyHtml;
 };
 
 /**
@@ -372,31 +304,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
 
-    // Serve from cache instantly — same short-circuit the learner
-    // side uses in loadManual() (manual.js), so a cached repeat visit
-    // never shows the loader at all.
-    if (window.teacherManualCache && window.teacherSnapshotCache) {
-        const isMobileCached = window.innerWidth <= 768;
-        if (isMobileCached) {
-            apiArea.innerHTML = window.teacherManualCache;
-        } else {
-            apiArea.innerHTML = `
-                <div class="dashboard-home-layout">
-                    <div class="dashboard-snapshot-panel">
-                        ${renderSnapshotPanel(window.teacherSnapshotCache)}
-                    </div>
-                    <div class="dashboard-manual-panel">
-                        ${window.teacherManualCache}
-                    </div>
-                </div>`;
-
-            window.loadCalendar(window.calendarState.month, window.calendarState.year);
-        }
-        return;
-    }
-
-    if (loader) loader.style.display = 'flex';
-
     try {
         const [manualRes, snapshotRes] = await Promise.all([
             fetch('partials/teacher_manual.html'),
@@ -404,9 +311,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ]);
         const manualHtml = await manualRes.text();
         const snapshot   = await snapshotRes.json();
-
-        window.teacherManualCache   = manualHtml;
-        window.teacherSnapshotCache = snapshot;
 
         // Desktop: two column layout. Mobile: manual only
         const isMobile = window.innerWidth <= 768;
@@ -434,9 +338,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (apiArea) apiArea.innerHTML = html;
         // Load calendar after DOM is ready
 
-    } finally {
-        if (loader) loader.style.display = 'none';
-        clearTimeout(window.loaderTimeout);
     }
 };
 
@@ -704,13 +605,8 @@ function renderSnapshotPanel(data) {
         }
     }
 
-    // NOTE: no unconditional loader-hide here anymore. Previously this ran
-    // synchronously right after loadTeacherManual() was kicked off above,
-    // which hid the loader before that async function's own fetch had a
-    // chance to resolve — undoing the 'flex' it had just set. Each function
-    // that shows the loader (loadTeacherManual, the settings button handler,
-    // the iframe 'load' listener) is responsible for hiding it again itself,
-    // the same way the learner dashboard already does it.
+    if (loader) loader.style.display = 'none';
+    clearTimeout(window.loaderTimeout);
 });
 
 // ── CALENDAR ──

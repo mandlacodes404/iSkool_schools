@@ -10,6 +10,68 @@ window.analyticsCurrentTerm       = null;
 window.analyticsActiveTerm        = 1;
 
 // ─────────────────────────────────────────────
+// TAP-TO-EXPLAIN: card/chart explanations shown in the info rail
+// ─────────────────────────────────────────────
+window.analyticsCardInfo = {
+    'kpi-class-avg': {
+        title: 'Class Average',
+        body: `<p>The average score across every published summative assessment for this class and term.</p>`
+    },
+    'kpi-highest-quiz': {
+        title: 'Highest Quiz',
+        body: `<p>The single assessment with the highest class average this term.</p>`
+    },
+    'kpi-top-performer': {
+        title: 'Top Performer',
+        body: `<p>The learner with the highest overall average across all assessments this term.</p>`
+    },
+    'kpi-gender-gap': {
+        title: 'Gender Gap',
+        body: `<p>The difference between boys' and girls' average scores this term. A larger gap may be worth a closer look.</p>`
+    },
+    'chart-quiz-avg': {
+        title: 'Quiz Average',
+        body: `<p>Shows how the class did on each assessment this term, so you can spot which topics need review.</p>`
+    },
+    'chart-quiz-gender': {
+        title: 'Boys vs Girls per Quiz',
+        body: `<p>Compares boys' and girls' average scores on each assessment, so you can see if the gap is consistent or specific to certain topics.</p>`
+    },
+    'chart-score-dist': {
+        title: 'Score Distribution',
+        body: `<p>Shows how many learners landed in each score range for the term — useful for spotting whether most learners are clustered high, low, or spread out.</p>`
+    },
+    'chart-class-trend': {
+        title: 'Class Performance by Term',
+        body: `<p>Tracks the class average across terms, so you can see whether performance is improving, declining, or holding steady.</p>`
+    },
+    'chart-term-gender': {
+        title: 'Boys vs Girls by Term',
+        body: `<p>Tracks boys' and girls' averages across terms, so you can see whether a gender gap is widening, narrowing, or new.</p>`
+    },
+    'chart-pass-fail': {
+        title: 'Pass Rate per Quiz',
+        body: `<p>Shows what share of the class passed each assessment, using a 50% threshold.</p>`
+    },
+    'performers-girls': {
+        title: 'Top 5 Girls',
+        body: `<p>The five highest-scoring girls in this class this term, by overall average.</p>`
+    },
+    'performers-boys': {
+        title: 'Top 5 Boys',
+        body: `<p>The five highest-scoring boys in this class this term, by overall average.</p>`
+    }
+};
+
+window.analyticsShowInfo = function(key, el) {
+    const info = window.analyticsCardInfo[key];
+    if (!info) return;
+    document.querySelectorAll('.an-tappable.an-tapped').forEach(node => node.classList.remove('an-tapped'));
+    if (el) el.classList.add('an-tapped');
+    if (typeof updateInfoRail === 'function') updateInfoRail('an-info-rail', info.title, info.body);
+};
+
+// ─────────────────────────────────────────────
 // INJECT STYLES
 // ─────────────────────────────────────────────
 (function injectAnalyticsStyles() {
@@ -354,6 +416,15 @@ window.analyticsActiveTerm        = 1;
             box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         }
 
+        /* ── TAP-TO-EXPLAIN ── shared across KPI cards, chart cards,
+           and performer cards. Signals a card/chart is clickable and
+           marks the currently-selected one to match the info rail. */
+        .an-tappable { cursor: pointer; }
+        .an-tapped {
+            border-color: var(--an-accent) !important;
+            box-shadow: 0 0 0 1px var(--an-accent) inset;
+        }
+
         /* Each variant sets ONE custom property on the card itself. ::before and
            .an-kpi-value both just read it — so a dynamic inline override on the
            card (used by the Gender Gap card) automatically keeps the top-border
@@ -692,12 +763,9 @@ function renderTeacherAnalytics(data) {
                 </div>
             </div>
 
-            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Analytics', `
-                <p><strong>Class Average / Highest Quiz / Top Performer / Gender Gap</strong> — quick snapshot cards for the selected class and term.</p>
-                <p><strong>Quiz Average</strong> shows how the class did on each assessment; <strong>Boys vs Girls per Quiz</strong> compares performance by gender per assessment.</p>
-                <p><strong>Score Distribution</strong> shows how many learners landed in each score range for the term.</p>
-                <p><strong>Class Performance by Term</strong> tracks the class average across terms, so you can see whether it's improving.</p>
-            `) : ''}
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('Card Info', `
+                <p>Tap any card or chart to learn more about what it shows.</p>
+            `, 'an-info-rail') : ''}
         </div>
 
         <!-- Subject Modal -->
@@ -1030,22 +1098,22 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 1: KPI CARDS -->
         <div class="an-kpi-row">
-            <div class="an-kpi-card teal">
+            <div class="an-kpi-card teal an-tappable" onclick="analyticsShowInfo('kpi-class-avg', this)">
                 <div class="an-kpi-label">Class Average</div>
                 <div class="an-kpi-value">${classAvg !== null ? classAvg + '%' : '—'}</div>
                 <div class="an-kpi-sub">${quizAvgs.length} assessment${quizAvgs.length !== 1 ? 's' : ''}${medianScore !== null ? ` · Median ${medianScore}%` : ' this term'}</div>
             </div>
-            <div class="an-kpi-card green">
+            <div class="an-kpi-card green an-tappable" onclick="analyticsShowInfo('kpi-highest-quiz', this)">
                 <div class="an-kpi-label">Highest Quiz</div>
                 <div class="an-kpi-value">${highestQuiz ? highestQuiz.avg + '%' : '—'}</div>
                 <div class="an-kpi-sub">${highestQuiz ? highestQuiz.title : 'No data'}</div>
             </div>
-            <div class="an-kpi-card blue">
+            <div class="an-kpi-card blue an-tappable" onclick="analyticsShowInfo('kpi-top-performer', this)">
                 <div class="an-kpi-label">Top Performer</div>
                 <div class="an-kpi-value">${topOverall ? topOverall.avg + '%' : '—'}</div>
                 <div class="an-kpi-sub">${topOverall ? topOverall.name : 'No data'}</div>
             </div>
-            <div class="an-kpi-card pink" style="--an-kpi-accent:${gapColor};">
+            <div class="an-kpi-card pink an-tappable" style="--an-kpi-accent:${gapColor};" onclick="analyticsShowInfo('kpi-gender-gap', this)">
                 <div class="an-kpi-label">Gender Gap</div>
                 <div class="an-kpi-value">${gapValue}</div>
                 <div class="an-kpi-sub">${gapSub}</div>
@@ -1054,7 +1122,7 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 2: Quiz Average + Boys vs Girls per Quiz -->
         <div class="an-chart-row two-col">
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-quiz-avg', this)">
                 <div class="an-chart-title">
                     <span>Quiz Average</span>
                     ${showQuizExtremes ? `<span class="an-chart-title-note">Toughest: ${lowestQuiz.title} (${lowestQuiz.avg}%)</span>` : ''}
@@ -1063,7 +1131,7 @@ function renderDashboard(cls, term, data) {
                     ${quizAvgs.length ? `<canvas id="chart-quiz-avg-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
                 </div>
             </div>
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-quiz-gender', this)">
                 <div class="an-chart-title">Boys vs Girls per Quiz</div>
                 <div class="an-chart-wrap">
                     ${genderData.length ? `<canvas id="chart-quiz-gender-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No gender data yet</div>'}
@@ -1073,7 +1141,7 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 3: Score Distribution (full width) -->
         <div class="an-chart-row one-col">
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-score-dist', this)">
                 <div class="an-chart-title">
                     <span>Score Distribution</span>
                     ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} learners</span>` : ''}
@@ -1086,7 +1154,7 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 4: Class Performance by Term (full width) -->
         <div class="an-chart-row one-col">
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-class-trend', this)">
                 <div class="an-chart-title">
                     <span>Class Performance by Term</span>
                     ${termDelta !== null ? `<span class="an-chart-title-note" style="color:${termDelta >= 0 ? 'var(--an-green)' : 'var(--an-red)'};">${termDelta >= 0 ? '+' : ''}${termDelta}% vs Term ${termIdx}</span>` : ''}
@@ -1099,13 +1167,13 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 5: Boys vs Girls by Term + Pass/Fail -->
         <div class="an-chart-row two-col">
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-term-gender', this)">
                 <div class="an-chart-title">Boys vs Girls by Term</div>
                 <div class="an-chart-wrap">
                     ${(byTerm.boys.some(v=>v!==null)||byTerm.girls.some(v=>v!==null)) ? `<canvas id="chart-term-gender-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">More terms needed</div>'}
                 </div>
             </div>
-            <div class="an-chart-card">
+            <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-pass-fail', this)">
                 <div class="an-chart-title">Pass Rate per Quiz (50% threshold)</div>
                 <div class="an-chart-wrap" style="overflow-y:auto;">
                     ${passData.length ? `<div id="pass-fail-${cls.id}-${term}"></div>` : '<div class="an-no-data">No data yet</div>'}
@@ -1115,7 +1183,7 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 6: Top Performers -->
         <div class="an-performers-row">
-            <div class="an-performers-card">
+            <div class="an-performers-card an-tappable" onclick="analyticsShowInfo('performers-girls', this)">
                 <div class="an-performers-title" style="color:var(--an-purple);">
                     Top 5 Girls
                 </div>
@@ -1128,7 +1196,7 @@ function renderDashboard(cls, term, data) {
                         </div>`).join('')
                     : '<p style="color:var(--an-text-dimmer);font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
             </div>
-            <div class="an-performers-card">
+            <div class="an-performers-card an-tappable" onclick="analyticsShowInfo('performers-boys', this)">
                 <div class="an-performers-title" style="color:var(--an-blue);">
                     Top 5 Boys
                 </div>
