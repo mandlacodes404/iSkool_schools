@@ -1,0 +1,108 @@
+/* ==========================================================================
+   Pill Spinner Loader (ChatGPT-style spinning ring)
+   --------------------------------------------------------------------------
+   Reusable loading indicator: 8 solid pill/bar shapes arranged in a ring,
+   the whole ring physically rotates like a clock hand sweeping around.
+
+   HOW TO USE
+   --------------------------------------------------------------------------
+   1. Include this CSS file on any page.
+   2. Give your button/element this markup inside it:
+
+        <button type="button" class="btn-loadable" id="my-btn">
+            <span class="btn-label">Submit</span>
+            <span class="btn-spinner" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+            </span>
+        </button>
+
+   3. Toggle the loading state from JS:
+
+        const btn = document.getElementById('my-btn');
+        btn.classList.add('is-loading');    // start loading
+        btn.classList.remove('is-loading'); // stop loading
+
+   NOTES
+   --------------------------------------------------------------------------
+   - Works on any element (button, div, a, etc.) — just add the
+     ".btn-loadable" class (or apply ".is-loading" / the inner spans
+     directly to your own element/class if you don't want to use
+     ".btn-loadable").
+   - The pill color is controlled by the "background" on ".btn-spinner span"
+     — change it to match the button it's placed on.
+   - Spin speed is controlled by the "1s" in the animation on ".btn-spinner".
+   ========================================================================== */
+
+.btn-loadable {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-loadable.is-loading {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+}
+
+.btn-loadable .btn-spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+}
+
+.btn-loadable.is-loading .btn-label {
+    visibility: hidden;
+}
+
+.btn-loadable.is-loading .btn-spinner {
+    display: block;
+}
+
+/* Circular "pill" loader — 8 solid rounded bars arranged in a ring.
+   The whole ring physically rotates (clock-hand sweep). */
+.btn-spinner {
+    animation: btn-spinner-rotate 1s linear infinite;
+}
+
+.btn-spinner span {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2.5px;
+    height: 7px;
+    margin-left: -1.25px;
+    border-radius: 2px;
+    background: #131314;
+    transform-origin: 1.25px 10px;
+}
+
+.btn-spinner span:nth-child(1) { transform: rotate(0deg);   }
+.btn-spinner span:nth-child(2) { transform: rotate(45deg);  }
+.btn-spinner span:nth-child(3) { transform: rotate(90deg);  }
+.btn-spinner span:nth-child(4) { transform: rotate(135deg); }
+.btn-spinner span:nth-child(5) { transform: rotate(180deg); }
+.btn-spinner span:nth-child(6) { transform: rotate(225deg); }
+.btn-spinner span:nth-child(7) { transform: rotate(270deg); }
+.btn-spinner span:nth-child(8) { transform: rotate(315deg); }
+
+@keyframes btn-spinner-rotate {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-spinner {
+        animation: none;
+    }
+    .btn-spinner span {
+        opacity: 0.6;
+    }
+}
