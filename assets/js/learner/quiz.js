@@ -396,7 +396,7 @@ function renderQuizCards(groupedData) {
                     data-title="${escapeHtml(quiz.title || '').toLowerCase()}"
                     onclick="selectDesktopLearnerQuiz(${flatIdx})">
                     <div class="lqz-sidebar-item-icon">
-                        ${learnerQuizPencilSvg(16, 16, '#4fd1c5')}
+                        ${learnerQuizPencilSvg(16, 16, '#fdd663')}
                     </div>
                     <div class="lqz-sidebar-item-info">
                         <div class="lqz-sidebar-item-title">${escapeHtml(quiz.title)}</div>

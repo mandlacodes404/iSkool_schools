@@ -253,7 +253,7 @@ function renderAnnouncements(data) {
                         data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
                         onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                         <div class="lan-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>

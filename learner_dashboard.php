@@ -2784,10 +2784,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=4.2"></script>
-<script src="assets/js/learner/quiz.js?v=7.6"></script>
+<script src="assets/js/learner/quiz.js?v=7.7"></script>
 <script src="assets/js/learner/assignments.js?v=7.0"></script>
 <script src="assets/js/learner/resources.js?v=5.9"></script>
-<script src="assets/js/learner/announcements.js?v=6.4"></script>
+<script src="assets/js/learner/announcements.js?v=6.5"></script>
 <script src="assets/js/learner/grades.js?v=4.5"></script>
 <script src="assets/js/learner/evaluations.js?v=2.8"></script>
 <script src="assets/js/learner/discussions.js?v=7.5"></script>
