@@ -49,7 +49,7 @@
 /* ── DESCRIPTION ── */
 .eval-description {
     background: rgba(255,255,255,0.03);
-    border-left: 3px solid #4fd1c5;
+    border-left: 3px solid #4fa8fd;
     border-radius: 0 8px 8px 0;
     padding: 12px 14px;
     margin-bottom: 20px;
@@ -70,7 +70,7 @@
     color: #e2e8f0;
     margin-bottom: 12px;
     padding-left: 12px;
-    border-left: 3px solid #4fd1c5;
+    border-left: 3px solid #4fa8fd;
     line-height: 1.5;
 }
 
@@ -121,26 +121,26 @@
 }
 
 .option-label:hover span {
-    border-color: rgba(79,209,197,0.3);
-    background: rgba(79,209,197,0.05);
+    border-color: rgba(79,168,253,0.3);
+    background: rgba(79,168,253,0.05);
     color: #e2e8f0;
 }
 
 .option-label:hover span::before {
-    border-color: #4fd1c5;
+    border-color: #4fa8fd;
 }
 
 /* Selected */
 .option-label input[type="radio"]:checked + span {
-    border-color: #4fd1c5;
-    background: rgba(79,209,197,0.1);
+    border-color: #4fa8fd;
+    background: rgba(79,168,253,0.1);
     color: #e2e8f0;
 }
 
 .option-label input[type="radio"]:checked + span::before {
-    background: #4fd1c5;
-    border-color: #4fd1c5;
-    box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+    background: #4fa8fd;
+    border-color: #4fa8fd;
+    box-shadow: 0 0 0 3px rgba(79,168,253,0.15);
 }
 
 /* ── SUBMIT ── */
@@ -150,7 +150,7 @@
     max-width: 320px;
     margin: 28px auto 0;
     padding: 13px 20px;
-    background: #4fd1c5;
+    background: #4fa8fd;
     color: #0d1117;
     font-size: 14px;
     font-weight: 800;
@@ -161,7 +161,7 @@
     transition: background 0.2s;
 }
 
-.eval-submit-btn:hover { background: #3ab8ae; }
+.eval-submit-btn:hover { background: #2f8ee0; }
 
 .lev-comments-field {
     margin-top: 35px;
@@ -270,9 +270,9 @@
         gap: 6px;
         padding: 4px 9px;
         border-radius: 6px;
-        color: #4fd1c5;
-        border: 1px solid rgba(79,209,197,0.35);
-        background: rgba(79,209,197,0.1);
+        color: #4fa8fd;
+        border: 1px solid rgba(79,168,253,0.35);
+        background: rgba(79,168,253,0.1);
         font-size: 10px;
         font-weight: 800;
         letter-spacing: 0.6px;

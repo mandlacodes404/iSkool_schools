@@ -58,7 +58,7 @@ window.fetchEvaluations = async function() {
     }
 
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Evaluations', mode: 'standard' });
+        window.configureHeader({ title: 'Evaluations', mode: 'standard', color: '#4fa8fd' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -69,7 +69,7 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.3';
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.4';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -134,7 +134,7 @@ function renderEvaluationsUI(data) {
             <div class="lev-sidebar-item" id="lev-sidebar-${idx}"
                 onclick="selectDesktopLearnerEvaluation(${idx})">
                 <div class="lev-sidebar-item-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fa8fd" stroke-width="2" fill="none">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -157,7 +157,7 @@ function renderEvaluationsUI(data) {
                 onclick="openMobileLearnerEvaluation(${idx})"
                 onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${idx}); }">
                 <div class="lev-mobile-card-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fd1c5" stroke-width="2" fill="none">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -204,7 +204,7 @@ function renderEvaluationsUI(data) {
                 font-size: 11px;
                 font-weight: 800;
                 letter-spacing: 1.5px;
-                color: #4fd1c5;
+                color: #4fa8fd;
                 text-transform: uppercase;
                 flex-shrink: 0;
             }
@@ -228,8 +228,8 @@ function renderEvaluationsUI(data) {
             }
             .lev-sidebar-item:hover { background: rgba(255,255,255,0.04); }
             .lev-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
+                background: rgba(79,168,253,0.08);
+                border-left-color: #4fa8fd;
             }
             .lev-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
             .lev-sidebar-item-info { flex: 1; min-width: 0; }
@@ -342,7 +342,7 @@ function renderEvaluationsUI(data) {
             </div>
             <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                 <div class="lev-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -427,13 +427,13 @@ window.openMobileLearnerEvaluation = function(idx) {
 
     sessionStorage.setItem("lastLearnerPage", "evaluation_list.php");
     if (window.configureHeader) {
-        window.configureHeader({ title: evaluation.title || 'Evaluation', mode: 'detail', detailType: 'Evaluation' });
+        window.configureHeader({ title: evaluation.title || 'Evaluation', mode: 'detail', detailType: 'Evaluation', color: '#4fa8fd' });
     }
 
     apiArea.innerHTML = `
         <article class="lev-mobile-detail">
             <div class="lev-mobile-detail-badge">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fd1c5" stroke-width="2.5" fill="none">
+                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fa8fd" stroke-width="2.5" fill="none">
                     <path d="M9 11l3 3L22 4"></path>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                 </svg>
