@@ -248,9 +248,7 @@ function buildHomeLayout(data, manualHtml) {
             <!-- LEFT COLUMN -->
             <div class="learner-home-left">
 
-                ${buildDesktopRecentCards(recentSlice)}
-
-                ${buildDesktopTodoCards(todoSlice)}
+                ${renderLearnerSnapshotPanel(data.snapshot)}
 
                 <!-- CALENDAR (desktop only — populated by loadLearnerCalendar) -->
                 <div class="learner-cal-panel" style="margin-top:20px; display:none;">
@@ -293,6 +291,62 @@ function buildLearnerSnapCard(card) {
                 ${card.badge || ''}
             </div>
         </div>`;
+}
+
+// ─────────────────────────────────────────────
+// SNAPSHOT PANEL (desktop) — mirrors teacher's renderSnapshotPanel()
+// One card each: Latest Quiz, Upcoming Assignment, Latest Announcement
+// ─────────────────────────────────────────────
+function renderLearnerSnapshotPanel(snapshot) {
+    snapshot = snapshot || { quiz: null, assignment: null, announcement: null };
+
+    const cards = [
+        {
+            key:     'quiz',
+            data:    snapshot.quiz,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
+            label:   'Latest Quiz',
+            color:   '#fdd663',
+            onclick: 'window.learnerQuizCache=null; fetchQuizzes()',
+            empty:   'No quizzes available yet',
+            meta:    snapshot.quiz ? `${snapshot.quiz.start_time}` : '',
+            badge:   snapshot.quiz ? `<span class="learner-snap-status-badge" style="background:${snapshot.quiz.status === 'Open' ? 'rgba(242,140,56,0.15)' : 'rgba(107,114,128,0.15)'};color:${snapshot.quiz.status === 'Open' ? '#f28c38' : '#6b7280'}">${snapshot.quiz.status}</span>` : ''
+        },
+        {
+            key:     'assignment',
+            data:    snapshot.assignment,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
+            label:   'Upcoming Assignment',
+            color:   '#a78bfa',
+            onclick: 'window.learnerAssignmentCache=null; fetchAssignments()',
+            empty:   'No upcoming assignments',
+            meta:    snapshot.assignment ? `Due ${snapshot.assignment.due_date}` : '',
+            badge:   snapshot.assignment ? (
+                        snapshot.assignment.submitted
+                            ? `<span class="learner-snap-status-badge" style="background:rgba(79,209,197,0.15);color:#4fd1c5;">Submitted</span>`
+                            : `<span class="learner-snap-status-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa;">in ${snapshot.assignment.days_left} day${snapshot.assignment.days_left !== 1 ? 's' : ''}</span>`
+                     ) : ''
+        },
+        {
+            key:     'announcement',
+            data:    snapshot.announcement,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
+            label:   'Latest Announcement',
+            color:   '#f59e0b',
+            onclick: 'fetchAnnouncements()',
+            empty:   'No announcements yet',
+            meta:    snapshot.announcement ? `${snapshot.announcement.teacher} &bull; ${snapshot.announcement.created_at}` : '',
+            badge:   ''
+        }
+    ];
+
+    let html = `<div class="learner-snap-panel-title">Quick Snapshot</div>`;
+
+    cards.forEach(card => {
+        html += buildLearnerSnapCard(card);
+    });
+
+    return html;
 }
 
 function buildDesktopTodoCards(todo) {

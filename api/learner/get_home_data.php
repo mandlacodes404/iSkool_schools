@@ -25,12 +25,95 @@ $classId = $classStmt->get_result()->fetch_assoc()['class_id'] ?? null;
 $classStmt->close();
 
 if (!$classId) {
-    echo json_encode(['todo' => [], 'recent' => [], 'events' => []]);
+    echo json_encode(['todo' => [], 'recent' => [], 'events' => [], 'snapshot' => ['quiz' => null, 'assignment' => null, 'announcement' => null]]);
     exit;
 }
 
 $todo   = [];
 $recent = [];
+
+// ────────────────────────────────────────────
+// SNAPSHOT: Latest Quiz, Upcoming Assignment, Latest Announcement
+// Mirrors teacher's get_dashboard_snapshot.php — one item per category
+// ────────────────────────────────────────────
+$snapshot = ['quiz' => null, 'assignment' => null, 'announcement' => null];
+
+// Latest quiz available to this learner (most recent start_time, Open/Scheduled)
+$stmt = $conn->prepare("
+    SELECT q.id, q.title, q.status, q.start_time
+    FROM quizzes q
+    WHERE q.class_id = ?
+      AND q.academic_year_id = ?
+      AND q.status IN ('Open', 'Scheduled')
+    ORDER BY q.start_time DESC
+    LIMIT 1
+");
+$stmt->bind_param("ii", $classId, $yearId);
+$stmt->execute();
+$quizRow = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if ($quizRow) {
+    $snapshot['quiz'] = [
+        'id'         => $quizRow['id'],
+        'title'      => $quizRow['title'],
+        'status'     => $quizRow['status'],
+        'start_time' => $quizRow['start_time'] ? date('d M Y', strtotime($quizRow['start_time'])) : 'Not set'
+    ];
+}
+
+// Next upcoming assignment due, with submission status for this learner
+$stmt = $conn->prepare("
+    SELECT a.id, a.title, a.due_date,
+           s.id AS submission_id
+    FROM assignments a
+    LEFT JOIN submissions s ON s.assignment_id = a.id AND s.student_email = ?
+    WHERE a.class_id = ?
+      AND a.academic_year_id = ?
+      AND a.due_date >= CURDATE()
+    ORDER BY a.due_date ASC
+    LIMIT 1
+");
+$stmt->bind_param("sii", $email, $classId, $yearId);
+$stmt->execute();
+$assignmentRow = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if ($assignmentRow) {
+    $snapshot['assignment'] = [
+        'id'          => $assignmentRow['id'],
+        'title'       => $assignmentRow['title'],
+        'due_date'    => date('d M Y', strtotime($assignmentRow['due_date'])),
+        'days_left'   => (int)ceil((strtotime($assignmentRow['due_date']) - time()) / 86400),
+        'submitted'   => $assignmentRow['submission_id'] !== null
+    ];
+}
+
+// Latest announcement sent to learners in this class
+$stmt = $conn->prepare("
+    SELECT a.id, a.title, a.created_at,
+           CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher
+    FROM announcements a
+    LEFT JOIN users u ON a.created_by = u.email
+    WHERE a.class_id = ?
+      AND a.academic_year_id = ?
+      AND a.send_to = 'learners'
+    ORDER BY a.created_at DESC
+    LIMIT 1
+");
+$stmt->bind_param("ii", $classId, $yearId);
+$stmt->execute();
+$announcementRow = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if ($announcementRow) {
+    $snapshot['announcement'] = [
+        'id'         => $announcementRow['id'],
+        'title'      => $announcementRow['title'],
+        'teacher'    => trim($announcementRow['teacher']),
+        'created_at' => date('d M Y', strtotime($announcementRow['created_at']))
+    ];
+}
 
 // ────────────────────────────────────────────
 // TO-DO 1: Quizzes not yet attempted
@@ -277,4 +360,4 @@ while ($row = $res->fetch_assoc()) {
 }
 $stmt->close();
 
-echo json_encode(['todo' => $todo, 'recent' => $recent, 'events' => $events]);
+echo json_encode(['todo' => $todo, 'recent' => $recent, 'events' => $events, 'snapshot' => $snapshot]);
