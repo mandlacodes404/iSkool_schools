@@ -281,23 +281,61 @@
     }
 
     .lev-mobile-detail-title {
-        margin: 0 0 10px;
+        margin: 0 0 18px;
         color: #e2e8f0;
         font-size: 28px;
         line-height: 1.28;
         font-weight: 800;
         letter-spacing: 0;
         overflow-wrap: anywhere;
-    }
-
-    .lev-mobile-detail-meta {
-        color: #8b949e;
-        font-size: 12px;
-        line-height: 1.5;
         padding-bottom: 18px;
         border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .lev-mobile-detail-author-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         margin-bottom: 18px;
     }
+
+    .lev-mobile-detail-avatar {
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid rgba(79,168,253,0.35);
+        background: rgba(79,168,253,0.1);
+        color: #4fa8fd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+    }
+
+    .lev-mobile-detail-author-info { min-width: 0; }
+
+    .lev-mobile-detail-author-name {
+        color: #e2e8f0;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    .lev-mobile-detail-author-role {
+        color: #8b949e;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
+
+    .lev-mobile-detail-role-badge { color: #4fa8fd; }
+    .lev-mobile-detail-role-sep { color: #5a6472; margin: 0 6px; }
 
     .lev-mobile-detail .eval-description {
         margin-bottom: 20px;

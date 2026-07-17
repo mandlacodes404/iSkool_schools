@@ -86,7 +86,7 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.4';
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.5';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -360,6 +360,59 @@ function renderEvaluationsUI(data) {
             .lev-panel-empty p { font-size: 14px; margin: 0; }
 
             .lev-panel-content { padding: 28px 32px; overflow-y: auto; }
+
+            /* Author row (mirrors mobile detail) */
+            .lev-panel-header {
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .lev-panel-author-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 14px;
+            }
+            .lev-panel-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(79,168,253,0.35);
+                background: rgba(79,168,253,0.1);
+                color: #4fa8fd;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .lev-panel-author-info { min-width: 0; }
+            .lev-panel-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .lev-panel-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+            .lev-panel-role-badge { color: #4fa8fd; }
+            .lev-panel-role-sep { color: #5a6472; margin: 0 6px; }
+            .lev-panel-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0;
+                line-height: 1.28;
+            }
 
             /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lev-mobile-list {
@@ -741,6 +794,14 @@ function escapeLearnerEvaluationHtml(value) {
     }[char]));
 }
 
+function getLearnerEvaluationInitials(name) {
+    const clean = String(name ?? '').trim();
+    if (!clean) return '?';
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 function getLearnerEvaluationFormHtml(evaluation) {
     if (evaluation.submitted) {
         return `
@@ -800,6 +861,9 @@ window.openMobileLearnerEvaluation = function(idx) {
         window.configureHeader({ title: evaluation.title || 'Evaluation', mode: 'detail', detailType: 'Evaluation', color: '#4fa8fd' });
     }
 
+    const teacherName = evaluation.teacher || 'Teacher';
+    const initials = evaluation.teacher_initials || getLearnerEvaluationInitials(teacherName);
+
     apiArea.innerHTML = `
         <article class="lev-mobile-detail">
             <div class="lev-mobile-detail-badge">
@@ -809,8 +873,16 @@ window.openMobileLearnerEvaluation = function(idx) {
                 </svg>
                 Evaluation
             </div>
+            <div class="lev-mobile-detail-author-row">
+                <div class="lev-mobile-detail-avatar">${escapeLearnerEvaluationHtml(initials)}</div>
+                <div class="lev-mobile-detail-author-info">
+                    <div class="lev-mobile-detail-author-name">${escapeLearnerEvaluationHtml(teacherName)}</div>
+                    <div class="lev-mobile-detail-author-role">
+                        <span>Author</span><span class="lev-mobile-detail-role-sep">|</span><span class="lev-mobile-detail-role-badge">Teacher</span>
+                    </div>
+                </div>
+            </div>
             <h1 class="lev-mobile-detail-title learner-mobile-detail-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</h1>
-            <div class="lev-mobile-detail-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
             ${getLearnerEvaluationFormHtml(evaluation)}
         </article>`;
 
@@ -882,11 +954,22 @@ window.selectDesktopLearnerEvaluation = function(idx) {
             </form>`;
     }
 
+    const teacherName = evaluation.teacher || 'Teacher';
+    const initials = evaluation.teacher_initials || getLearnerEvaluationInitials(teacherName);
+
     panel.innerHTML = `
         <div class="lev-panel-content">
-            <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);">
-                <div style="font-size:20px;font-weight:800;color:#e2e8f0;margin-bottom:6px;">${evaluation.title}</div>
-                <div style="font-size:13px;color:#8b949e;">by ${evaluation.teacher}</div>
+            <div class="lev-panel-header">
+                <div class="lev-panel-author-row">
+                    <div class="lev-panel-avatar">${escapeLearnerEvaluationHtml(initials)}</div>
+                    <div class="lev-panel-author-info">
+                        <div class="lev-panel-author-name">${escapeLearnerEvaluationHtml(teacherName)}</div>
+                        <div class="lev-panel-author-role">
+                            <span>Author</span><span class="lev-panel-role-sep">|</span><span class="lev-panel-role-badge">Teacher</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lev-panel-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
             </div>
             ${panelContent}
         </div>`;
