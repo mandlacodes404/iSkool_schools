@@ -628,6 +628,20 @@ function renderQuizCards(groupedData) {
                 flex-shrink: 0;
             }
 
+            .lqz-panel-marks-note {
+                display: flex;
+                align-items: flex-start;
+                gap: 7px;
+                font-size: 12.5px;
+                color: #8b949e;
+                line-height: 1.5;
+                margin-bottom: 14px;
+            }
+            .lqz-panel-marks-note svg { flex-shrink: 0; margin-top: 2px; }
+            .lqz-panel-marks-note strong { color: #a0a8b3; font-weight: 700; }
+            .lqz-panel-marks-note--ready { color: #6fcf97; }
+            .lqz-panel-marks-note--ready strong { color: #6fcf97; }
+
             .lqz-panel-header {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
@@ -1140,6 +1154,22 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     const initials = getLearnerQuizInitials(sender);
     const instructionsBoxId = `lqz-inst-${quiz.id}-${flatIdx}`;
 
+    // ── Marks-availability note (shown for submitted quizzes only) ──
+    let marksNoteHtml = '';
+    if (isPendingResult) {
+        marksNoteHtml = `
+            <div class="lqz-panel-marks-note">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>Your marks will be available on <strong>Gradebook</strong> once your teacher releases them.</span>
+            </div>`;
+    } else if (isCompleted) {
+        marksNoteHtml = `
+            <div class="lqz-panel-marks-note lqz-panel-marks-note--ready">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <span>Your marks are available on <strong>Gradebook</strong>.</span>
+            </div>`;
+    }
+
     panel.innerHTML = `
         <div class="lqz-panel-content">
             <div class="lqz-panel-header">
@@ -1157,6 +1187,7 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
                     <span class="lqz-panel-status-dot" style="background:${statusDotColor};"></span>
                     ${statusLabel}
                 </div>
+                ${marksNoteHtml}
                 <div class="lqz-panel-title">
                     ${escapeHtml(quiz.title)} ${summativeBadge}
                 </div>
