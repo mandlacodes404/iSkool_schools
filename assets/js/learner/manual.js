@@ -53,8 +53,8 @@ function wireManualScrollState() {
 window.loadManual = async function(containerId = 'api-content-area') {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
-    sessionStorage.setItem("lastLearnerPage", "partials/manual.html");
-    if (typeof window.setActive === 'function') window.setActive("partials/manual.html");
+    sessionStorage.setItem("lastLearnerPage", "partials/manual.html?v=1.1");
+    if (typeof window.setActive === 'function') window.setActive("partials/manual.html?v=1.1");
 
     if (window.configureHeader) {
         window.configureHeader({ title: 'Home', mode: 'standard' });
