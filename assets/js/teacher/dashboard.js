@@ -279,6 +279,72 @@ window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml
 };
 
 /**
+ * ─────────────────────────────────────────────
+ * SHARED TEACHER SECTION STATE
+ * ─────────────────────────────────────────────
+ * One place to remember "where the teacher was" on each section so
+ * switching pages, or a plain browser refresh, restores the same view
+ * instead of resetting to each section's default empty state. Mirrors
+ * the learner side's per-page state pattern (manual.js).
+ *
+ * - selection: per-section selected item id (e.g. selected quiz in
+ *   Grades/Quizzes, selected class+term in Analytics). Each section
+ *   reads its own key and, if the id still exists in fresh data,
+ *   re-selects it instead of showing the empty placeholder.
+ * - scrollTop: per-section sidebar/panel scroll position, saved on
+ *   scroll and restored right after that section's content renders.
+ * - collapsedGroups: sidebar class-group ids the teacher has manually
+ *   collapsed, shared across every page that uses collapsible groups
+ *   (Quizzes, Grades, Resources, Announcements, Assignments) since a
+ *   group id is unique per page+class already.
+ *
+ * Persisted to sessionStorage (not just kept in memory) so a plain
+ * page refresh — not only switching between sidebar links — restores
+ * the same view too. sessionStorage only stores strings, so the whole
+ * object is JSON-serialized; collapsedGroups is converted between a
+ * Set (used everywhere else in the code) and a plain array (the only
+ * thing JSON.stringify can store) only at the save/load boundary.
+ */
+const TEACHER_SECTION_STATE_KEY = 'teacherSectionState';
+
+function loadTeacherSectionState() {
+    try {
+        const raw = sessionStorage.getItem(TEACHER_SECTION_STATE_KEY);
+        if (!raw) throw new Error('no saved state');
+        const parsed = JSON.parse(raw);
+        return {
+            selection: parsed.selection || {},
+            scrollTop: parsed.scrollTop || {},
+            collapsedGroups: new Set(parsed.collapsedGroups || [])
+        };
+    } catch (e) {
+        return { selection: {}, scrollTop: {}, collapsedGroups: new Set() };
+    }
+}
+
+window.teacherSectionState = loadTeacherSectionState();
+
+/**
+ * Writes the current in-memory teacherSectionState to sessionStorage.
+ * Called after every mutation (selection change, scroll, group
+ * toggle) so a refresh at any point picks up the latest state.
+ */
+window.persistTeacherSectionState = function() {
+    try {
+        const s = window.teacherSectionState;
+        sessionStorage.setItem(TEACHER_SECTION_STATE_KEY, JSON.stringify({
+            selection: s.selection,
+            scrollTop: s.scrollTop,
+            collapsedGroups: Array.from(s.collapsedGroups)
+        }));
+    } catch (e) {
+        // sessionStorage can throw in rare cases (private browsing quota,
+        // etc.) — state simply won't survive a refresh in that case,
+        // which is a safe, silent fallback rather than a broken page.
+    }
+};
+
+/**
  * Generic toggle handler for any collapsible class-group label.
  * Default state (no click yet) is always expanded. Persists the choice
  * in window.teacherSectionState.collapsedGroups so buildCollapsibleClassGroup()
@@ -296,42 +362,23 @@ window.toggleSidebarClassGroup = function(labelEl) {
 
     if (isCollapsed) window.teacherSectionState.collapsedGroups.add(targetId);
     else window.teacherSectionState.collapsedGroups.delete(targetId);
-};
-
-/**
- * ─────────────────────────────────────────────
- * SHARED TEACHER SECTION STATE
- * ─────────────────────────────────────────────
- * One place to remember "where the teacher was" on each section so
- * switching pages and coming back (even from cache) restores the same
- * view, instead of resetting to each section's default empty state.
- * Mirrors the learner side's per-page state pattern (manual.js).
- *
- * - selection: per-section selected item id (e.g. selected quiz in
- *   Grades/Quizzes, selected class+term in Analytics). Each section
- *   reads its own key and, if the id still exists in fresh data,
- *   re-selects it instead of showing the empty placeholder.
- * - scrollTop: per-section sidebar/panel scroll position, saved on
- *   scroll and restored right after that section's content renders.
- * - collapsedGroups: sidebar class-group ids the teacher has manually
- *   collapsed, shared across every page that uses collapsible groups
- *   (Quizzes, Grades, Resources, Announcements, Assignments) since a
- *   group id is unique per page+class already.
- */
-window.teacherSectionState = window.teacherSectionState || {
-    selection: {},
-    scrollTop: {},
-    collapsedGroups: new Set()
+    window.persistTeacherSectionState();
 };
 
 /**
  * Saves the scroll position of a section's scrollable sidebar/panel
  * element under the given key. Call from a scroll listener wired up
- * once per section (see wireTeacherSectionScroll below).
+ * once per section (see wireTeacherSectionScroll below). The in-memory
+ * value updates immediately; the sessionStorage write is debounced
+ * since scroll fires very frequently and writing on every event would
+ * be wasteful.
  */
+let _teacherScrollPersistTimeout = null;
 window.saveTeacherScrollState = function(key, el) {
     if (!el) return;
     window.teacherSectionState.scrollTop[key] = el.scrollTop;
+    clearTimeout(_teacherScrollPersistTimeout);
+    _teacherScrollPersistTimeout = setTimeout(window.persistTeacherSectionState, 250);
 };
 
 /**

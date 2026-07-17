@@ -474,7 +474,7 @@ function renderTeacherResources(data) {
     // resources are added/removed/reordered between visits.
     const savedId = window.teacherSectionState.selection.resources;
     if (savedId) {
-        const flatIndex = window._allResourcesFlat.findIndex(r => r.id === savedId);
+        const flatIndex = window._allResourcesFlat.findIndex(r => r.id == savedId);
         if (flatIndex !== -1) selectDesktopResource(flatIndex);
     }
 }
@@ -493,6 +493,7 @@ window.selectDesktopResource = function(flatIndex) {
     if (!item) return;
 
     window.teacherSectionState.selection.resources = item.id;
+    window.persistTeacherSectionState();
 
     const panel = document.getElementById('rs-main-panel');
     if (!panel) return;

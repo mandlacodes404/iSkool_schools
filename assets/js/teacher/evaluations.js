@@ -410,6 +410,7 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
 
     window._activeDesktopEvalKey = key;
     window.teacherSectionState.selection.evaluations = { groupIndex, evIndex };
+    window.persistTeacherSectionState();
 
     const ev = window.teacherEvaluationCache[groupIndex].evaluations[evIndex];
     if (!ev) return;

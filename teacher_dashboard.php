@@ -1084,15 +1084,15 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=6.3"></script>
+<script src="assets/js/teacher/dashboard.js?v=6.4"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=5.7"></script>
-<script src="assets/js/teacher/announcements.js?v=4.3"></script>
-<script src="assets/js/teacher/evaluations.js?v=3.1"></script>
-<script src="assets/js/teacher/resources.js?v=3.0"></script>
-<script src="assets/js/teacher/grades.js?v=3.3"></script>
-<script src="assets/js/teacher/assignments.js?v=3.5"></script>
-<script src="assets/js/teacher/sbo.js?v=3.0"></script>
+<script src="assets/js/teacher/quizzes.js?v=5.8"></script>
+<script src="assets/js/teacher/announcements.js?v=4.4"></script>
+<script src="assets/js/teacher/evaluations.js?v=3.2"></script>
+<script src="assets/js/teacher/resources.js?v=3.1"></script>
+<script src="assets/js/teacher/grades.js?v=3.4"></script>
+<script src="assets/js/teacher/assignments.js?v=3.6"></script>
+<script src="assets/js/teacher/sbo.js?v=3.1"></script>
 <script src="assets/js/teacher/analytics.js?v=3.0"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=1.9"></script>
 </body>

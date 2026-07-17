@@ -416,7 +416,7 @@ function renderTeacherGrades(data) {
     window.restoreTeacherScrollState('grades-sidebar', sidebarScrollEl);
 
     const savedQuizId = window.teacherSectionState.selection.grades;
-    if (savedQuizId && window._allGradesQuizzesFlat.some(q => q.id === savedQuizId)) {
+    if (savedQuizId && window._allGradesQuizzesFlat.some(q => q.id == savedQuizId)) {
         selectDesktopGradeQuiz(savedQuizId);
     }
 }
@@ -429,6 +429,7 @@ window.selectDesktopGradeQuiz = async function(quizId) {
 
     window._activeDesktopGradeQuizId = quizId;
     window.teacherSectionState.selection.grades = quizId;
+    window.persistTeacherSectionState();
 
     const panel  = document.getElementById('gr-main-panel');
     if (!panel) return;

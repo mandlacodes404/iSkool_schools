@@ -405,7 +405,7 @@ function renderTeacherSyllabus(data) {
     // rather than storing the index itself, since order can shift.
     const savedClassId = window.teacherSectionState.selection.sbo;
     if (savedClassId != null) {
-        const idx = window._allSBOBriefs.findIndex(b => b.class_id === savedClassId);
+        const idx = window._allSBOBriefs.findIndex(b => b.class_id == savedClassId);
         if (idx !== -1) selectDesktopSBO(idx);
     }
 }
@@ -517,6 +517,7 @@ window.selectDesktopSBO = function(idx) {
     if (!brief) return;
 
     window.teacherSectionState.selection.sbo = brief.class_id;
+    window.persistTeacherSectionState();
 
     const panel = document.getElementById('sbo-main-panel');
     if (!panel) return;

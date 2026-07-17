@@ -351,6 +351,16 @@ function renderTeacherAnnouncements(data) {
     const sidebarScrollEl = apiArea.querySelector('.an-sidebar-scroll');
     window.wireTeacherSectionScroll('announcements-sidebar', sidebarScrollEl);
     window.restoreTeacherScrollState('announcements-sidebar', sidebarScrollEl);
+
+    // Restore whichever announcement was selected before navigating
+    // away/refreshing. Re-derive its current flatIndex from the saved
+    // stable id rather than storing the index itself, since the index
+    // can shift if announcements are added/removed/reordered.
+    const savedId = window.teacherSectionState.selection.announcements;
+    if (savedId) {
+        const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id == savedId);
+        if (flatIndex !== -1) selectDesktopAnnouncement(flatIndex);
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -365,6 +375,9 @@ window.selectDesktopAnnouncement = function(flatIndex) {
 
     const ann = (window._allAnnouncementsFlat || [])[flatIndex];
     if (!ann) return;
+
+    window.teacherSectionState.selection.announcements = ann.id;
+    window.persistTeacherSectionState();
 
     const panel = document.getElementById('an-main-panel');
     if (!panel) return;

@@ -629,6 +629,7 @@ window.selectDesktopQuiz = function(quizId) {
 
     window._activeDesktopQuizId = quizId;
     window.teacherSectionState.selection.quizzes = quizId;
+    window.persistTeacherSectionState();
 
     const quiz = (window._allQuizzesFlat || []).find(q => q.id == quizId);
     if (!quiz) return;

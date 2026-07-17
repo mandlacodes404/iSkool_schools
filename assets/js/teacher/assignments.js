@@ -484,6 +484,16 @@ function renderTeacherAssignments(data) {
     const sidebarScrollEl = apiArea.querySelector('.as-sidebar-scroll');
     window.wireTeacherSectionScroll('assignments-sidebar', sidebarScrollEl);
     window.restoreTeacherScrollState('assignments-sidebar', sidebarScrollEl);
+
+    // Restore whichever assignment was selected before navigating
+    // away/refreshing. Re-derive its current array index from the
+    // saved stable id rather than storing the index itself, since the
+    // index can shift if assignments are added/removed/reordered.
+    const savedId = window.teacherSectionState.selection.assignments;
+    if (savedId) {
+        const index = window._allAssignmentsFlat.findIndex(a => a.id == savedId);
+        if (index !== -1) selectDesktopAssignment(index);
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -499,6 +509,9 @@ window.selectDesktopAssignment = function(index) {
 
     const assignment = (window._allAssignmentsFlat || [])[index];
     if (!assignment) return;
+
+    window.teacherSectionState.selection.assignments = assignment.id;
+    window.persistTeacherSectionState();
 
     const panel = document.getElementById('as-main-panel');
     if (!panel) return;
