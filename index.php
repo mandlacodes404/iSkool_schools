@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/index.css?v=2.9">
     <style>
     #loader-logo svg,
     #loader-logo img {
@@ -426,7 +426,7 @@ function getCsrfToken() {
                 </div>
 
             </div>
-            <div class="brand-panel-footer">&copy; <?= date('Y') ?> <?= htmlspecialchars(iskool_app_version_label()) ?></div>
+            <div class="brand-panel-footer"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
         </div>
 
         <!-- RIGHT: Form panel -->
@@ -583,23 +583,20 @@ function getCsrfToken() {
         const iskoolBrand = document.getElementById('iskool-brand');
         const timeout = 2000;
         setTimeout(() => {
-    animationWrapper.style.opacity = '0';
-    setTimeout(() => {
-        animationWrapper.style.display = 'none';
+    animationWrapper.style.display = 'none';
 
-        // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
-        <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
-            // Logged in → go straight to dashboard
-            window.location.href = 'dashboard';
-        <?php else: ?>
-            // Not logged in → show login form
-            document.querySelector('.form-panel').style.opacity = '1';
-            container.classList.add('show');
-           
-        <?php endif; ?>
-        // ─────────────────────────────────────────────────────
+    // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
+    <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+        // Logged in → go straight to dashboard
+        window.location.href = 'dashboard';
+    <?php else: ?>
+        // Not logged in → show login form
+        document.querySelector('.form-panel').style.opacity = '1';
+        container.classList.add('show');
+       
+    <?php endif; ?>
+    // ─────────────────────────────────────────────────────
 
-          }, 800);
          }, timeout);
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');

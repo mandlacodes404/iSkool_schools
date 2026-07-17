@@ -29,7 +29,6 @@ body {
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.8s ease;
     }
 
     #loader-logo {
@@ -643,6 +642,11 @@ body {
     .container {
         min-height: 100vh;
         max-width: 100%;
+    }
+
+    .splash-version-footer {
+        font-size: 15px;
+        color: #4a515c;
     }
 
     .brand-panel {
