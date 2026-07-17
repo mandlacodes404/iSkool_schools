@@ -395,6 +395,19 @@ function renderTeacherSyllabus(data) {
     // Also keep dataset on results container for mobile filter
     const rc = document.getElementById('sboResultsContainer');
     if (rc) rc.dataset.briefs = JSON.stringify(briefs);
+
+    const sidebarScrollEl = apiArea.querySelector('.sbo-sidebar-scroll');
+    window.wireTeacherSectionScroll('sbo-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('sbo-sidebar', sidebarScrollEl);
+
+    // Restore whichever syllabus brief was selected before navigating
+    // away. Re-derive its current idx from the saved stable class_id
+    // rather than storing the index itself, since order can shift.
+    const savedClassId = window.teacherSectionState.selection.sbo;
+    if (savedClassId != null) {
+        const idx = window._allSBOBriefs.findIndex(b => b.class_id === savedClassId);
+        if (idx !== -1) selectDesktopSBO(idx);
+    }
 }
 
 function buildSBOCards(briefs) {
@@ -502,6 +515,8 @@ window.selectDesktopSBO = function(idx) {
 
     const brief = (window._allSBOBriefs || [])[idx];
     if (!brief) return;
+
+    window.teacherSectionState.selection.sbo = brief.class_id;
 
     const panel = document.getElementById('sbo-main-panel');
     if (!panel) return;

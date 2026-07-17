@@ -600,6 +600,17 @@ function renderTeacherQuizzes(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+
+    // Restore whichever quiz was selected before navigating away, and
+    // the sidebar's scroll position.
+    const sidebarScrollEl = apiArea.querySelector('.qz-sidebar-scroll');
+    window.wireTeacherSectionScroll('quizzes-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('quizzes-sidebar', sidebarScrollEl);
+
+    const savedQuizId = window.teacherSectionState.selection.quizzes;
+    if (savedQuizId && window._allQuizzesFlat.some(q => q.id == savedQuizId)) {
+        selectDesktopQuiz(savedQuizId);
+    }
 }
 
 // Note: class-group collapsing is handled by the shared
@@ -617,6 +628,7 @@ window.selectDesktopQuiz = function(quizId) {
     if (sidebarItem) sidebarItem.classList.add('active');
 
     window._activeDesktopQuizId = quizId;
+    window.teacherSectionState.selection.quizzes = quizId;
 
     const quiz = (window._allQuizzesFlat || []).find(q => q.id == quizId);
     if (!quiz) return;

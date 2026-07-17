@@ -251,6 +251,11 @@ window.updateInfoRail = function(railId, title, bodyHtml) {
 
 /**
  * Builds the markup for one collapsible class group in a sidebar.
+ * Collapsed/expanded state is remembered per groupId (via
+ * window.teacherSectionState.collapsedGroups) so re-rendering the same
+ * sidebar — e.g. from cache when switching back to this section — keeps
+ * whichever groups the teacher had collapsed, instead of resetting
+ * every group back to expanded.
  * @param {string} groupId       - unique DOM id for the collapsible content wrapper
  * @param {string} labelClass    - page-specific label class, e.g. "qz-sidebar-class-label"
  * @param {string} labelInnerHtml - the label's contents (name, icons, badges, etc.)
@@ -258,23 +263,26 @@ window.updateInfoRail = function(railId, title, bodyHtml) {
  * @returns {string}
  */
 window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml, itemsHtml) {
+    const isCollapsed = window.teacherSectionState.collapsedGroups.has(groupId);
     return `
-        <div class="${labelClass} tchr-sidebar-class-label--toggle"
+        <div class="${labelClass} tchr-sidebar-class-label--toggle${isCollapsed ? ' collapsed' : ''}"
             onclick="toggleSidebarClassGroup(this)"
             data-target="${groupId}"
             role="button"
-            aria-expanded="true">
+            aria-expanded="${isCollapsed ? 'false' : 'true'}">
             <svg class="tchr-sidebar-class-chevron" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
                 <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
             <span>${labelInnerHtml}</span>
         </div>
-        <div class="tchr-sidebar-class-group" id="${groupId}">${itemsHtml}</div>`;
+        <div class="tchr-sidebar-class-group${isCollapsed ? ' collapsed' : ''}" id="${groupId}">${itemsHtml}</div>`;
 };
 
 /**
  * Generic toggle handler for any collapsible class-group label.
- * Default state (no click yet) is always expanded.
+ * Default state (no click yet) is always expanded. Persists the choice
+ * in window.teacherSectionState.collapsedGroups so buildCollapsibleClassGroup()
+ * can restore it next time this group's sidebar is rendered.
  */
 window.toggleSidebarClassGroup = function(labelEl) {
     if (!labelEl) return;
@@ -285,6 +293,72 @@ window.toggleSidebarClassGroup = function(labelEl) {
     const isCollapsed = group.classList.toggle('collapsed');
     labelEl.classList.toggle('collapsed', isCollapsed);
     labelEl.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+
+    if (isCollapsed) window.teacherSectionState.collapsedGroups.add(targetId);
+    else window.teacherSectionState.collapsedGroups.delete(targetId);
+};
+
+/**
+ * ─────────────────────────────────────────────
+ * SHARED TEACHER SECTION STATE
+ * ─────────────────────────────────────────────
+ * One place to remember "where the teacher was" on each section so
+ * switching pages and coming back (even from cache) restores the same
+ * view, instead of resetting to each section's default empty state.
+ * Mirrors the learner side's per-page state pattern (manual.js).
+ *
+ * - selection: per-section selected item id (e.g. selected quiz in
+ *   Grades/Quizzes, selected class+term in Analytics). Each section
+ *   reads its own key and, if the id still exists in fresh data,
+ *   re-selects it instead of showing the empty placeholder.
+ * - scrollTop: per-section sidebar/panel scroll position, saved on
+ *   scroll and restored right after that section's content renders.
+ * - collapsedGroups: sidebar class-group ids the teacher has manually
+ *   collapsed, shared across every page that uses collapsible groups
+ *   (Quizzes, Grades, Resources, Announcements, Assignments) since a
+ *   group id is unique per page+class already.
+ */
+window.teacherSectionState = window.teacherSectionState || {
+    selection: {},
+    scrollTop: {},
+    collapsedGroups: new Set()
+};
+
+/**
+ * Saves the scroll position of a section's scrollable sidebar/panel
+ * element under the given key. Call from a scroll listener wired up
+ * once per section (see wireTeacherSectionScroll below).
+ */
+window.saveTeacherScrollState = function(key, el) {
+    if (!el) return;
+    window.teacherSectionState.scrollTop[key] = el.scrollTop;
+};
+
+/**
+ * Restores a previously saved scroll position onto the given element,
+ * if one exists. Safe to call even if nothing was saved yet.
+ */
+window.restoreTeacherScrollState = function(key, el) {
+    if (!el) return;
+    const saved = window.teacherSectionState.scrollTop[key];
+    if (Number.isFinite(saved)) {
+        requestAnimationFrame(() => { el.scrollTop = saved; });
+    }
+};
+
+/**
+ * Wires a passive scroll listener onto an element that saves its
+ * scroll position under `key` as the teacher scrolls. Uses a data
+ * attribute to avoid double-wiring the same element across re-renders
+ * (the element itself is usually rebuilt each render, so this mostly
+ * guards against wiring the same DOM node twice in one render).
+ */
+window.wireTeacherSectionScroll = function(key, el) {
+    if (!el || el.dataset.scrollStateWired === '1') return;
+    el.dataset.scrollStateWired = '1';
+    el.addEventListener('scroll', () => {
+        window.saveTeacherScrollState(key, el);
+    }, { passive: true });
 };
 
 document.addEventListener('DOMContentLoaded', function () {

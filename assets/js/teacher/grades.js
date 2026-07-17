@@ -407,6 +407,18 @@ function renderTeacherGrades(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     loadGradesClasses();
+
+    // Restore whichever quiz was selected before navigating away, and
+    // the sidebar's scroll position, so switching back to Grades looks
+    // exactly as the teacher left it instead of resetting to empty.
+    const sidebarScrollEl = apiArea.querySelector('.gr-sidebar-scroll');
+    window.wireTeacherSectionScroll('grades-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('grades-sidebar', sidebarScrollEl);
+
+    const savedQuizId = window.teacherSectionState.selection.grades;
+    if (savedQuizId && window._allGradesQuizzesFlat.some(q => q.id === savedQuizId)) {
+        selectDesktopGradeQuiz(savedQuizId);
+    }
 }
 
 // ── DESKTOP PANEL: SELECT QUIZ ───────────────────────────────────────────────
@@ -416,6 +428,7 @@ window.selectDesktopGradeQuiz = async function(quizId) {
     if (sidebarItem) sidebarItem.classList.add('active');
 
     window._activeDesktopGradeQuizId = quizId;
+    window.teacherSectionState.selection.grades = quizId;
 
     const panel  = document.getElementById('gr-main-panel');
     if (!panel) return;

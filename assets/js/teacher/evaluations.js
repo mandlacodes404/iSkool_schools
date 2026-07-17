@@ -383,6 +383,19 @@ function renderTeacherEvaluations(data) {
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
     loadEvalClasses();
+
+    const sidebarScrollEl = apiArea.querySelector('.ev-sidebar-scroll');
+    window.wireTeacherSectionScroll('evaluations-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('evaluations-sidebar', sidebarScrollEl);
+
+    // Restore whichever evaluation was selected before navigating away,
+    // if that same group/index still exists in the freshly-loaded data.
+    const saved = window.teacherSectionState.selection.evaluations;
+    if (saved) {
+        const group = (window.teacherEvaluationCache || [])[saved.groupIndex];
+        const ev = group && group.evaluations && group.evaluations[saved.evIndex];
+        if (ev) selectDesktopEval(saved.groupIndex, saved.evIndex);
+    }
 }
 
 // ── DESKTOP PANEL: SELECT EVALUATION ────────────────────────────────────────
@@ -396,6 +409,7 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
     if (sidebarItem) sidebarItem.classList.add('active');
 
     window._activeDesktopEvalKey = key;
+    window.teacherSectionState.selection.evaluations = { groupIndex, evIndex };
 
     const ev = window.teacherEvaluationCache[groupIndex].evaluations[evIndex];
     if (!ev) return;

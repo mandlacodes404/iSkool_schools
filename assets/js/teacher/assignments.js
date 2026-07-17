@@ -480,6 +480,10 @@ function renderTeacherAssignments(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+
+    const sidebarScrollEl = apiArea.querySelector('.as-sidebar-scroll');
+    window.wireTeacherSectionScroll('assignments-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('assignments-sidebar', sidebarScrollEl);
 }
 
 // ─────────────────────────────────────────────

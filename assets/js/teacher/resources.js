@@ -463,6 +463,20 @@ function renderTeacherResources(data) {
     fileInput?.addEventListener('change', updateFileName);
 
     loadResourceClasses();
+
+    const sidebarScrollEl = apiArea.querySelector('.rs-sidebar-scroll');
+    window.wireTeacherSectionScroll('resources-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('resources-sidebar', sidebarScrollEl);
+
+    // Restore whichever resource was selected before navigating away.
+    // Re-derive its current flatIndex from the saved stable id rather
+    // than storing the index itself, since the index can shift if
+    // resources are added/removed/reordered between visits.
+    const savedId = window.teacherSectionState.selection.resources;
+    if (savedId) {
+        const flatIndex = window._allResourcesFlat.findIndex(r => r.id === savedId);
+        if (flatIndex !== -1) selectDesktopResource(flatIndex);
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -477,6 +491,8 @@ window.selectDesktopResource = function(flatIndex) {
 
     const item = (window._allResourcesFlat || [])[flatIndex];
     if (!item) return;
+
+    window.teacherSectionState.selection.resources = item.id;
 
     const panel = document.getElementById('rs-main-panel');
     if (!panel) return;

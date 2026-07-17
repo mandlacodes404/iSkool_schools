@@ -347,6 +347,10 @@ function renderTeacherAnnouncements(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+
+    const sidebarScrollEl = apiArea.querySelector('.an-sidebar-scroll');
+    window.wireTeacherSectionScroll('announcements-sidebar', sidebarScrollEl);
+    window.restoreTeacherScrollState('announcements-sidebar', sidebarScrollEl);
 }
 
 // ─────────────────────────────────────────────
