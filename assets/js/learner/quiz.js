@@ -9,6 +9,25 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+function getLearnerQuizInitials(name) {
+    const clean = String(name ?? '').trim();
+    if (!clean) return '?';
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function formatLearnerQuizPostedDate(rawDate) {
+    if (!rawDate) return '';
+    const d = new Date(String(rawDate).replace(/-/g, '/'));
+    if (Number.isNaN(d.getTime())) return '';
+    const day = d.getDate();
+    const month = d.toLocaleString('en-US', { month: 'short' });
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day} ${month} at ${hours}:${mins}`;
+}
+
 window.learnerQuizCache          = null;
 window.quizInstructionsCache     = {};
 window.learnerQuizPrefetchPromise = null;
@@ -541,16 +560,85 @@ function renderQuizCards(groupedData) {
 
             .lqz-panel-content { padding: 28px 32px; }
 
+            /* Author row (mirrors announcements/assignments panel pattern) */
+            .lqz-panel-author-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .lqz-panel-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(253,214,99,0.35);
+                background: rgba(253,214,99,0.1);
+                color: #fdd663;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .lqz-panel-author-info { min-width: 0; }
+            .lqz-panel-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .lqz-panel-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+            .lqz-panel-role-badge { color: #fdd663; }
+            .lqz-panel-role-sep { color: #5a6472; margin: 0 6px; }
+            .lqz-panel-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            .lqz-panel-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 4px 9px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-bottom: 12px;
+                color: #c9d1d9;
+                border: 1px solid rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.04);
+            }
+            .lqz-panel-status-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
             .lqz-panel-header {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
             }
             .lqz-panel-title {
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: 800;
                 color: #e2e8f0;
                 margin: 0 0 8px;
+                line-height: 1.28;
             }
             .lqz-panel-meta {
                 font-size: 13px;
@@ -566,6 +654,56 @@ function renderQuizCards(groupedData) {
                 align-items: center;
                 gap: 12px;
             }
+
+            /* Instructions — simple, unboxed, same aesthetic as the rest of the panel */
+            .lqz-panel-instructions { margin-top: 8px; }
+            .lqz-panel-instructions-loading {
+                color: #8b949e;
+                font-size: 13px;
+                padding: 4px 0;
+            }
+            .lqz-panel-inst-label {
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: #8b949e;
+                margin: 22px 0 10px;
+            }
+            .lqz-panel-inst-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .lqz-panel-inst-list li {
+                position: relative;
+                padding-left: 18px;
+                font-size: 14px;
+                color: #c9d1d9;
+                line-height: 1.6;
+            }
+            .lqz-panel-inst-list li::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 8px;
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: #fdd663;
+            }
+            .lqz-panel-inst-list li.lqz-panel-inst-warn { color: #e67e22; }
+            .lqz-panel-inst-list li.lqz-panel-inst-warn::before { background: #e67e22; }
+            .lqz-panel-inst-note {
+                font-size: 13px;
+                color: #8b949e;
+                line-height: 1.6;
+                margin-top: 14px;
+            }
+            .lqz-panel-inst-note strong { color: #a0a8b3; }
 
             /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lqz-mobile-list {
@@ -951,14 +1089,27 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
         isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && st > now);
     }
     const isClosed = quiz.status === 'Closed';
+    const isCompleted = quiz.attempt_status === 'submitted' && !(quiz.publish_marks === 0 || quiz.result_label === 'Pending');
+    const isPendingResult = quiz.attempt_status === 'submitted' && (quiz.publish_marks === 0 || quiz.result_label === 'Pending');
+    const isInProgress = quiz.attempt_status === 'in_progress';
+    const canTakeQuiz = !isClosed && !isScheduled && !isCompleted && !isPendingResult;
 
+    // ── Status badge (mirrors announcements/assignments panel pattern) ──
+    let statusDotColor = '#fdd663';
+    let statusLabel = 'Upcoming';
+    if (isCompleted) { statusDotColor = '#27ae60'; statusLabel = 'Completed'; }
+    else if (isPendingResult) { statusDotColor = '#fdd663'; statusLabel = 'Pending Result'; }
+    else if (isClosed) { statusDotColor = '#6b7280'; statusLabel = 'Closed'; }
+    else if (isScheduled) { statusDotColor = '#fdd663'; statusLabel = 'Scheduled'; }
+    else if (isInProgress) { statusDotColor = '#e67e22'; statusLabel = 'In Progress'; }
+    else { statusDotColor = '#4fd1c5'; statusLabel = 'Not Started'; }
+
+    // ── Action button ──
     let actionBtn = '';
-    if (quiz.attempt_status === 'submitted') {
-        if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
-            actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:15px;">Pending</span>`;
-        } else {
+    if (isCompleted) {
         actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:15px;">✓ Completed</span>`;
-        }
+    } else if (isPendingResult) {
+        actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:15px;">Pending</span>`;
     } else if (isClosed) {
         actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:15px;">Closed</span>`;
     } else if (isScheduled) {
@@ -969,25 +1120,45 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
                          style="color:#fdd663; font-weight:700; font-size:15px;">
                         Calculating...
                      </span>`;
-    } else if (quiz.attempt_status === 'in_progress') {
-        actionBtn = `<button onclick="loadQuizInstructions(${quiz.id})"
-            style="background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.4);color:#e67e22;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+    } else if (isInProgress) {
+        actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
+            onclick="openLearnerQuizFrame(event, ${quiz.id})"
+            style="background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.4);color:#e67e22;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
             Continue Quiz
-        </button>`;
+        </a>`;
     } else {
-        actionBtn = `<button onclick="loadQuizInstructions(${quiz.id})"
-            style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.4);color:#4fd1c5;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
+        actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
+            onclick="openLearnerQuizFrame(event, ${quiz.id})"
+            style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.4);color:#4fd1c5;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
             Start Quiz
-        </button>`;
+        </a>`;
     }
 
     const summativeBadge = quiz.is_summative
         ? `<span style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">Summative</span>`
         : '';
 
+    const sender = quiz.teacher || 'Teacher';
+    const initials = getLearnerQuizInitials(sender);
+    const instructionsBoxId = `lqz-inst-${quiz.id}-${flatIdx}`;
+
     panel.innerHTML = `
         <div class="lqz-panel-content">
             <div class="lqz-panel-header">
+                <div class="lqz-panel-author-row">
+                    <div class="lqz-panel-avatar">${escapeHtml(initials)}</div>
+                    <div class="lqz-panel-author-info">
+                        <div class="lqz-panel-author-name">${escapeHtml(sender)}</div>
+                        <div class="lqz-panel-author-role">
+                            <span>Author</span><span class="lqz-panel-role-sep">|</span><span class="lqz-panel-role-badge">Teacher</span>
+                        </div>
+                        <div class="lqz-panel-posted">Posted ${escapeHtml(formatLearnerQuizPostedDate(quiz.start_time))}</div>
+                    </div>
+                </div>
+                <div class="lqz-panel-status">
+                    <span class="lqz-panel-status-dot" style="background:${statusDotColor};"></span>
+                    ${statusLabel}
+                </div>
                 <div class="lqz-panel-title">
                     ${escapeHtml(quiz.title)} ${summativeBadge}
                 </div>
@@ -1001,6 +1172,12 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
                     <span>${escapeHtml(formatQuizDate(quiz.start_time))}</span>
                 </div>
             </div>
+
+            ${canTakeQuiz || isInProgress ? `
+            <div class="lqz-panel-instructions" id="${instructionsBoxId}">
+                <div class="lqz-panel-instructions-loading">Loading instructions…</div>
+            </div>` : ''}
+
             <div class="lqz-panel-action-row">
                 ${actionBtn}
             </div>
@@ -1008,6 +1185,56 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
 
     // Kick off countdown if needed
     startQuizCountdowns();
+
+    // Load instructions inline for actionable quizzes only
+    if (canTakeQuiz || isInProgress) {
+        loadLearnerQuizPanelInstructions(quiz.id, instructionsBoxId);
+    }
+};
+
+// Swaps the desktop content area for the mainFrame iframe and navigates it to
+// take_quiz.php — mirrors the show/hide pattern fetchQuizzes uses on load.
+window.openLearnerQuizFrame = function(event, quizId) {
+    if (event) event.preventDefault();
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    if (apiArea) apiArea.style.display = 'none';
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = `take_quiz.php?quiz_id=${quizId}`;
+    }
+};
+
+// Fetches quiz instructions and renders them inline in the desktop panel,
+// in the same simple/unboxed style as the rest of the panel (no separate screen).
+window.loadLearnerQuizPanelInstructions = async function(quizId, boxId) {
+    try {
+        const response = await fetch(`api/learner/get_quiz_instructions.php?quiz_id=${quizId}`);
+        const payload = await response.json();
+        if (payload.status === 'error') throw new Error(payload.message || 'Unable to load instructions');
+
+        const box = document.getElementById(boxId);
+        if (!box) return; // user navigated away before this resolved
+
+        const data = payload.data ?? payload;
+
+        const bullets = [
+            data.isContinuing ? `<li class="lqz-panel-inst-warn"><strong>Note:</strong> you have an unfinished attempt — you'll resume where you left off.</li>` : '',
+            `<li>You can attempt this quiz <strong>${escapeHtml(data.attemptLimit)}</strong> time(s).</li>`,
+            `<li>The timer starts immediately once you begin and cannot be paused.</li>`,
+            data.layout_mode === 'multi_page'
+                ? `<li>AI invigilator is active — tab switches and exits are monitored per question.</li>`
+                : `<li>Session monitoring is active for this quiz.</li>`,
+        ].filter(Boolean).join('');
+
+        box.innerHTML = `
+            <div class="lqz-panel-inst-label">Instructions</div>
+            <ul class="lqz-panel-inst-list">${bullets}</ul>
+        `;
+    } catch (err) {
+        const box = document.getElementById(boxId);
+        if (box) box.innerHTML = `<div class="lqz-panel-inst-note">Couldn't load instructions: ${escapeHtml(err.message)}</div>`;
+    }
 };
 
 window.lqzMobileSearch = function(val) {
