@@ -1122,13 +1122,11 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
                      </span>`;
     } else if (isInProgress) {
         actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
-            onclick="openLearnerQuizFrame(event, ${quiz.id})"
             style="background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.4);color:#e67e22;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
             Continue Quiz
         </a>`;
     } else {
         actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
-            onclick="openLearnerQuizFrame(event, ${quiz.id})"
             style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.4);color:#4fd1c5;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
             Start Quiz
         </a>`;
@@ -1189,19 +1187,6 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     // Load instructions inline for actionable quizzes only
     if (canTakeQuiz || isInProgress) {
         loadLearnerQuizPanelInstructions(quiz.id, instructionsBoxId);
-    }
-};
-
-// Swaps the desktop content area for the mainFrame iframe and navigates it to
-// take_quiz.php — mirrors the show/hide pattern fetchQuizzes uses on load.
-window.openLearnerQuizFrame = function(event, quizId) {
-    if (event) event.preventDefault();
-    const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    if (apiArea) apiArea.style.display = 'none';
-    if (iframe) {
-        iframe.style.display = 'block';
-        iframe.src = `take_quiz.php?quiz_id=${quizId}`;
     }
 };
 
