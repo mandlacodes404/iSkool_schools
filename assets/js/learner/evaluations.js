@@ -27,6 +27,8 @@ function saveEvaluationPageState() {
     const state = {
         selectedIdx:   window._learnerEvaluationSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mobileSearch: document.getElementById('levMobileSearch')?.value || '',
+        openFolders: Array.from(document.querySelectorAll('.lev-mobile-folder-body:not(.collapsed)')).map(el => el.id),
     };
     if (window.learnerPageState) window.learnerPageState.set('evaluations', state);
     else sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
@@ -38,13 +40,28 @@ function restoreEvaluationPageState() {
             ? window.learnerPageState.get('evaluations')
             : JSON.parse(sessionStorage.getItem('evaluationPageState') || '{}');
         if (!state || Object.keys(state).length === 0) return;
-        if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-            requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (state.mobileSearch) {
+                const input = document.getElementById('levMobileSearch');
+                if (input) {
+                    input.value = state.mobileSearch;
+                    window.levMobileSearch(state.mobileSearch);
+                }
+            }
+            if (Array.isArray(state.openFolders)) {
+                document.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
+                    const open = state.openFolders.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const chev = body.previousElementSibling?.querySelector('.lev-mobile-folder-chevron');
+                    if (chev) chev.classList.toggle('open', open);
+                });
+            }
+            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerEvaluation(state.selectedIdx);
                 const sidebar = document.querySelector('.lev-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
-            });
-        }
+            }
+        });
     } catch (e) { /* ignore bad state */ }
 }
 
@@ -109,6 +126,29 @@ window.fetchEvaluations = async function() {
     }
 };
 
+// ─────────────────────────────────────────────
+// GROUP FLAT LIST BY TEACHER
+// The API returns a flat array (each item carries its own `teacher`
+// string), already ordered newest-created-first via the SQL query.
+// We group client-side and keep that same first-appearance order for
+// the teacher folders, so the most recently active teacher surfaces
+// first — same end result as the pre-grouped assignments/announcements
+// endpoints, without needing a timestamp field.
+// ─────────────────────────────────────────────
+function getGroupedLearnerEvaluationEntries(data) {
+    const order = [];
+    const map = {};
+    (data || []).forEach(evaluation => {
+        const teacher = evaluation.teacher || 'Teacher';
+        if (!map[teacher]) {
+            map[teacher] = [];
+            order.push(teacher);
+        }
+        map[teacher].push(evaluation);
+    });
+    return order.map(teacher => ({ teacher, evaluations: map[teacher] }));
+}
+
 // New Helper Function to handle the actual HTML building
 function renderEvaluationsUI(data) {
     const apiArea = document.getElementById('api-content-area');
@@ -124,60 +164,66 @@ function renderEvaluationsUI(data) {
         return;
     }
 
-    // ── Build flat list for desktop panel lookup ──
-    window._allLearnerEvaluationsFlat = data;
+    // ── Group by teacher, build flat list for desktop/mobile panel lookup ──
+    const teacherEntries = getGroupedLearnerEvaluationEntries(data);
 
-    // ── Build sidebar HTML ──
-    let sidebarHtml = '';
-    data.forEach((evaluation, idx) => {
-        sidebarHtml += `
-            <div class="lev-sidebar-item" id="lev-sidebar-${idx}"
-                onclick="selectDesktopLearnerEvaluation(${idx})">
-                <div class="lev-sidebar-item-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fa8fd" stroke-width="2" fill="none">
-                        <path d="M9 11l3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                </div>
-                <div class="lev-sidebar-item-info">
-                    <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
-                    <div class="lev-sidebar-item-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
-                </div>
-                ${evaluation.submitted
-                    ? '<span class="lev-sidebar-done-badge">Done</span>'
-                    : '<span class="lev-sidebar-pending-dot"></span>'}
-            </div>`;
+    window._allLearnerEvaluationsFlat = [];
+    teacherEntries.forEach(({ evaluations }) => {
+        evaluations.forEach(evaluation => {
+            window._allLearnerEvaluationsFlat.push(evaluation);
+        });
     });
 
-    // ── Build mobile preview list ──
-    let mobileHtml = '';
-    data.forEach((evaluation, idx) => {
-        mobileHtml += `
-            <div class="lev-mobile-card" role="button" tabindex="0"
-                onclick="openMobileLearnerEvaluation(${idx})"
-                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${idx}); }">
-                <div class="lev-mobile-card-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none">
-                        <path d="M9 11l3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                </div>
-                <div class="lev-mobile-card-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
-                ${evaluation.submitted ? '<span class="lev-mobile-done-dot"></span>' : '<span class="lev-mobile-pending-dot"></span>'}
-                <div class="lev-mobile-card-chevron">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+    // ── Build sidebar HTML (desktop, grouped by teacher) ──
+    let sidebarHtml = '';
+    let flatIdx = 0;
+    let desktopGroupIdx = 0;
+    teacherEntries.forEach(({ teacher, evaluations }) => {
+        const groupId = `lev-dg-${desktopGroupIdx++}`;
+        sidebarHtml += `
+            <div class="lev-desktop-teacher-group">
+                <button type="button" class="lev-desktop-teacher-header" onclick="toggleLevDesktopGroup('${groupId}', this)">
+                    <svg class="lev-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                </div>
-            </div>`;
+                    <svg class="lev-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="lev-desktop-teacher-name">${escapeLearnerEvaluationHtml(teacher)}</span>
+                    <span class="lev-desktop-teacher-count">${evaluations.length}</span>
+                </button>
+                <div class="lev-desktop-teacher-body collapsed" id="${groupId}">`;
+        evaluations.forEach(evaluation => {
+            sidebarHtml += `
+                <div class="lev-sidebar-item" id="lev-sidebar-${flatIdx}"
+                    data-title="${escapeLearnerEvaluationHtml(evaluation.title || '').toLowerCase()}"
+                    onclick="selectDesktopLearnerEvaluation(${flatIdx})">
+                    <div class="lev-sidebar-item-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fa8fd" stroke-width="2" fill="none">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                    <div class="lev-sidebar-item-info">
+                        <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
+                        <div class="lev-sidebar-item-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
+                    </div>
+                    ${evaluation.submitted
+                        ? '<span class="lev-sidebar-done-badge">Done</span>'
+                        : '<span class="lev-sidebar-pending-dot"></span>'}
+                </div>`;
+            flatIdx++;
+        });
+        sidebarHtml += `</div></div>`;
     });
 
-    // ── Assemble full HTML ──
-    apiArea.innerHTML = `
+    // ── Build full HTML ──
+    let html = `
         <style>
             @media (min-width: 900px) {
                 .lev-desktop-layout { display: flex !important; }
                 .lev-mobile-list    { display: none !important; }
+                .lev-mobile-search-wrap { display: none !important; }
             }
             @media (max-width: 899px) {
                 .lev-desktop-layout { display: none !important; }
@@ -198,16 +244,6 @@ function renderEvaluationsUI(data) {
                 flex-direction: column;
                 overflow: hidden;
             }
-            .lev-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fa8fd;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
             .lev-sidebar-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -217,6 +253,46 @@ function renderEvaluationsUI(data) {
             .lev-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
+            .lev-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+            .lev-desktop-teacher-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                background: transparent;
+                border: 0;
+                color: #8b949e;
+                cursor: pointer;
+                font-family: inherit;
+                text-align: left;
+            }
+            .lev-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+            .lev-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+            .lev-desktop-teacher-chevron.open { transform: rotate(90deg); }
+            .lev-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
+            .lev-desktop-teacher-name {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+            }
+            .lev-desktop-teacher-count {
+                flex-shrink: 0;
+                font-size: 10px;
+                font-weight: 800;
+                color: #4fa8fd;
+                background: rgba(79,168,253,0.1);
+                border: 1px solid rgba(79,168,253,0.25);
+                border-radius: 999px;
+                padding: 1px 7px;
+            }
+            .lev-desktop-teacher-body.collapsed { display: none; }
             .lev-sidebar-item {
                 display: flex;
                 align-items: center;
@@ -285,35 +361,111 @@ function renderEvaluationsUI(data) {
 
             .lev-panel-content { padding: 28px 32px; overflow-y: auto; }
 
+            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lev-mobile-list {
-                background: #272726;
-                border-radius: 12px;
-                overflow: hidden;
-                margin: 0 0 16px;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
+                margin: 0 0 14px;
             }
-            .lev-mobile-card {
+            @media (max-width: 899px) {
+                .lev-mobile-list {
+                    margin-left: -18px;
+                    margin-right: -18px;
+                }
+            }
+            .lev-mobile-folder-header {
                 display: flex;
                 align-items: center;
-                gap: 14px;
-                min-height: 54px;
-                padding: 14px 16px;
-                background: #272726;
-                border-bottom: none;
+                gap: 12px;
+                padding: 16px 18px;
+                background: transparent;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
                 cursor: pointer;
+                user-select: none;
+                transition: background 0.2s;
             }
-            .lev-mobile-card:last-child { border-bottom: none; }
-            .lev-mobile-card-icon {
-                display: flex;
-                flex-shrink: 0;
-                opacity: 0.78;
-            }
-            .lev-mobile-card-title {
+            .lev-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
+            .lev-mobile-folder-icon { flex-shrink: 0; }
+            .lev-mobile-folder-name {
                 flex: 1;
-                min-width: 0;
+                font-size: 16px;
+                font-weight: 800;
                 color: #e2e8f0;
-                font-size: 14px;
-                font-weight: 500;
-                line-height: 1.3;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lev-mobile-folder-count {
+                font-size: 12px;
+                color: #8b949e;
+                font-weight: 600;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 20px;
+                flex-shrink: 0;
+            }
+            .lev-mobile-folder-chevron {
+                flex-shrink: 0;
+                color: #555e6a;
+                transition: transform 0.3s ease;
+            }
+            .lev-mobile-folder-chevron.open { transform: rotate(90deg); }
+            .lev-mobile-folder-body { display: block; }
+            .lev-mobile-folder-body.collapsed { display: none; }
+            .lev-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 13px 18px;
+                background: transparent;
+                border-bottom: 0;
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
+                cursor: pointer;
+                transition: background 0.15s;
+                position: relative;
+            }
+            .lev-mobile-row::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 18px;
+                right: 18px;
+                height: 1px;
+                background: rgba(255,255,255,0.06);
+            }
+            .lev-mobile-row:last-child::after { display: none; }
+            .lev-mobile-row:active { background: rgba(255,255,255,0.03); }
+            .lev-mobile-row-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: #4fa8fd18;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .lev-mobile-row-body { flex: 1; min-width: 0; }
+            .lev-mobile-row-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #e2e8f0;
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .lev-mobile-row-title-text {
+                min-width: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -327,17 +479,92 @@ function renderEvaluationsUI(data) {
             }
             .lev-mobile-done-dot { background: #22c55e; }
             .lev-mobile-pending-dot { background: #e67e22; }
-            .lev-mobile-card-chevron {
-                color: #30363d;
-                display: flex;
+            .lev-mobile-row-meta {
+                font-size: 11px;
+                color: #555e6a;
+                margin-top: 2px;
+            }
+            .lev-mobile-row-chevron {
                 flex-shrink: 0;
+                color: #555e6a;
+            }
+
+            /* ── MOBILE SEARCH BAR ── */
+            @media (max-width: 899px) {
+                .lev-mobile-search-wrap {
+                    display: block;
+                    margin-bottom: 10px;
+                    position: relative;
+                }
+                .lev-mobile-search-wrap svg {
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    opacity: 0.4;
+                }
+                .lev-mobile-search {
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 9px 14px 9px 36px;
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.05);
+                    border: none;
+                    color: #e2e8f0;
+                    font-size: 15px;
+                    font-family: 'Nunito', sans-serif;
+                    transition: background 0.2s;
+                }
+                .lev-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
+                .lev-mobile-search::placeholder { color: #555e6a; }
+            }
+
+            /* ── DESKTOP SEARCH BAR ── */
+            .lev-desktop-search-wrap {
+                display: none;
+                position: relative;
+                padding: 10px 10px 8px;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+            }
+            .lev-desktop-search-wrap svg {
+                position: absolute;
+                left: 22px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                opacity: 0.4;
+            }
+            .lev-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px 12px 8px 32px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: #e2e8f0;
+                font-size: 12.5px;
+                font-family: 'Nunito', sans-serif;
+                transition: border-color 0.2s;
+            }
+            .lev-desktop-search:focus { outline: none; border-color: #4fa8fd; }
+            .lev-desktop-search::placeholder { color: #555e6a; }
+            @media (min-width: 900px) {
+                .lev-desktop-search-wrap { display: block; }
             }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lev-desktop-layout lqz-flat-layout">
             <div class="lev-sidebar lqz-flat-sidebar">
-                <div class="lev-sidebar-header">All Evaluations</div>
+                <div class="lev-desktop-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="lev-desktop-search" id="levDesktopSearch"
+                        placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+                </div>
                 <div class="lev-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
@@ -351,12 +578,155 @@ function renderEvaluationsUI(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE PREVIEW LIST ═══ -->
-        <div class="lev-mobile-list">
-            ${mobileHtml}
+        <!-- ═══ MOBILE LIST ═══ -->`;
+
+    if (teacherEntries.length > 0) {
+        html += `
+        <div class="lev-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="lev-mobile-search" id="levMobileSearch"
+                placeholder="Search evaluations..." oninput="levMobileSearch(this.value)">
         </div>`;
+    }
+
+    html += `<div class="lev-mobile-list">`;
+
+    let mobileFlatIdx = 0;
+    let mobileGroupIdx = 0;
+    teacherEntries.forEach(({ teacher, evaluations }) => {
+        const gid = `lev-mg-${mobileGroupIdx}`;
+        html += `
+            <div class="lev-mobile-folder-header" onclick="toggleLevMobileFolder('${gid}', this)">
+                <div class="lev-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <span class="lev-mobile-folder-name">${escapeLearnerEvaluationHtml(teacher)}</span>
+                <span class="lev-mobile-folder-count">${evaluations.length} evaluation${evaluations.length !== 1 ? 's' : ''}</span>
+                <svg class="lev-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>
+            <div class="lev-mobile-folder-body collapsed" id="${gid}">`;
+        mobileGroupIdx++;
+
+        evaluations.forEach(evaluation => {
+            html += `
+                <div class="lev-mobile-row" role="button" tabindex="0"
+                    data-title="${escapeLearnerEvaluationHtml(evaluation.title||'').toLowerCase()}"
+                    onclick="openMobileLearnerEvaluation(${mobileFlatIdx})"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${mobileFlatIdx}); }">
+                    <div class="lev-mobile-row-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                    <div class="lev-mobile-row-body">
+                        <div class="lev-mobile-row-title">
+                            <span class="lev-mobile-row-title-text">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</span>
+                            ${evaluation.submitted ? '<span class="lev-mobile-done-dot"></span>' : '<span class="lev-mobile-pending-dot"></span>'}
+                        </div>
+                        <div class="lev-mobile-row-meta">${evaluation.submitted ? 'Completed' : 'Pending'}</div>
+                    </div>
+                    <div class="lev-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>`;
+            mobileFlatIdx++;
+        });
+        html += `</div>`; // close .lev-mobile-folder-body
+    });
+
+    html += `</div>`; // close .lev-mobile-list
+
+    apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
 }
+
+// ─────────────────────────────────────────────
+// SEARCH & FOLDER TOGGLES
+// ─────────────────────────────────────────────
+window.levDesktopSearch = function(val) {
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lev-desktop-teacher-group').forEach(group => {
+        const header = group.querySelector('.lev-desktop-teacher-header');
+        const body   = group.querySelector('.lev-desktop-teacher-body');
+        const nameEl = group.querySelector('.lev-desktop-teacher-name');
+        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
+        if (!header || !body) return;
+
+        const items = body.querySelectorAll('.lev-sidebar-item');
+        let visible = 0;
+        items.forEach(item => {
+            const title = (item.dataset.title || '');
+            const show = !term || title.includes(term) || groupName.includes(term);
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const groupShow = visible > 0 || !term || groupName.includes(term);
+        group.style.display = groupShow ? '' : 'none';
+
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header.querySelector('.lev-desktop-teacher-chevron');
+            if (chev) chev.classList.add('open');
+        } else if (!term) {
+            body.classList.add('collapsed');
+            const chev = header.querySelector('.lev-desktop-teacher-chevron');
+            if (chev) chev.classList.remove('open');
+        }
+    });
+};
+
+window.toggleLevMobileFolder = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const chevron = headerEl.querySelector('.lev-mobile-folder-chevron');
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveEvaluationPageState();
+};
+
+window.toggleLevDesktopGroup = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.lev-desktop-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+};
+
+window.levMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('evaluations', { mobileSearch: val });
+    const term = val.toLowerCase().trim();
+    document.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
+        const header = body.previousElementSibling;
+        const folderName = header ? header.querySelector('.lev-mobile-folder-name').textContent.toLowerCase() : '';
+        const rows = body.querySelectorAll('.lev-mobile-row');
+        let visible = 0;
+        rows.forEach(row => {
+            const title = (row.dataset.title || '');
+            const show = !term || title.includes(term) || folderName.includes(term);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        if (term && visible) {
+            body.classList.remove('collapsed');
+            const chev = header ? header.querySelector('.lev-mobile-folder-chevron') : null;
+            if (chev) chev.classList.add('open');
+        }
+    });
+};
 
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT EVALUATION
