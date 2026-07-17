@@ -5,9 +5,17 @@ function getCsrfToken() {
 window.teacherAnalyticsCache     = null;
 window.teacherAnalyticsCachePromise = null;
 window.analyticsCharts            = {};
-window.analyticsCurrentClassId    = null;
-window.analyticsCurrentTerm       = null;
-window.analyticsActiveTerm        = 1;
+
+// Hydrate from the persisted teacherSectionState (dashboard.js loads
+// first and reads this from sessionStorage) so the previously selected
+// class/term survive a plain browser refresh, not just in-app
+// navigation between sidebar links.
+{
+    const savedAnalytics = window.teacherSectionState?.selection?.analytics;
+    window.analyticsCurrentClassId = savedAnalytics ? savedAnalytics.classId : null;
+    window.analyticsCurrentTerm    = savedAnalytics ? savedAnalytics.term    : null;
+    window.analyticsActiveTerm     = savedAnalytics ? savedAnalytics.term    : 1;
+}
 
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
@@ -820,7 +828,7 @@ function renderTeacherAnalytics(data) {
     // it still exists in the freshly-loaded term/class data, instead of
     // always resetting to the "select a class" placeholder.
     const termData = terms.find(t => t.term === window.analyticsActiveTerm);
-    const stillExists = termData && termData.classes.some(c => c.id === window.analyticsCurrentClassId);
+    const stillExists = termData && termData.classes.some(c => c.id == window.analyticsCurrentClassId);
     if (window.analyticsCurrentClassId && window.analyticsCurrentTerm === window.analyticsActiveTerm && stillExists) {
         selectAnalyticsClass(window.analyticsCurrentClassId, window.analyticsActiveTerm);
     }
@@ -845,7 +853,7 @@ function renderClassList(term) {
         const subject    = cls.subject || null;
         const safeSubject = (cls.subject || '').replace(/'/g, "\\'");
         const safeName    = cls.name.replace(/'/g, "\\'");
-        const isActive    = cls.id === window.analyticsCurrentClassId && term === window.analyticsCurrentTerm;
+        const isActive    = cls.id == window.analyticsCurrentClassId && term === window.analyticsCurrentTerm;
 
         return `
             <div class="an-class-item ${isActive ? 'active' : ''}"
@@ -915,6 +923,8 @@ window.switchAnalyticsTerm = function (term) {
 window.selectAnalyticsClass = async function (classId, term) {
     window.analyticsCurrentClassId = classId;
     window.analyticsCurrentTerm    = term;
+    window.teacherSectionState.selection.analytics = { classId, term };
+    window.persistTeacherSectionState();
 
     // Highlight active class
     document.querySelectorAll('.an-class-item').forEach(el => el.classList.remove('active'));
