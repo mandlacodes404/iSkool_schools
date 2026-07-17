@@ -417,6 +417,58 @@ function renderAnnouncements(data) {
 
             .lan-panel-content { padding: 28px 32px; }
 
+            /* Author row (mirrors mobile detail) */
+            .lan-panel-author-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .lan-panel-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(242,140,56,0.35);
+                background: rgba(242,140,56,0.1);
+                color: #f28c38;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .lan-panel-avatar--school {
+                border-color: rgba(210,149,34,0.35);
+                background: rgba(210,149,34,0.1);
+                color: #d29522;
+            }
+            .lan-panel-author-info { min-width: 0; }
+            .lan-panel-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .lan-panel-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+            .lan-panel-role-badge { color: #f28c38; }
+            .lan-panel-role-badge--school { color: #d29522; }
+            .lan-panel-role-sep { color: #5a6472; margin: 0 6px; }
+            .lan-panel-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+
             .lan-panel-header {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
@@ -428,13 +480,12 @@ function renderAnnouncements(data) {
                 flex-wrap: wrap;
             }
             .lan-panel-title {
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: 800;
-                color: #4fd1c5;
-                margin: 0 0 8px;
+                color: #e2e8f0;
+                margin: 0;
+                line-height: 1.28;
             }
-            .lan-panel-title--school { color: #d29522; }
-            .lan-panel-meta { font-size: 13px; color: #8b949e; }
 
             /* School-wide badge in panel */
             .lan-school-wide-badge {
@@ -1056,11 +1107,14 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     const isNew = new Date(ann.created_at) > sevenDaysAgo;
 
     const isSchool = ann._type === 'school';
+    const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
+    const roleLabel = isSchool ? 'School Admin' : 'Teacher';
+    const initials = ann.initials || getLearnerAnnouncementInitials(sender);
 
     panel.innerHTML = `
         <div class="lan-panel-content">
             <div class="lan-panel-header">
-                <div>
+                <div style="flex:1; min-width:0;">
                     ${isSchool ? `
                         <div class="lan-school-wide-badge">
                             <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
@@ -1069,10 +1123,17 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
                             </svg>
                             School-wide
                         </div>` : ''}
-                    <div class="lan-panel-title ${isSchool ? 'lan-panel-title--school' : ''}">
-                        <i class="${isSchool ? 'fas fa-school' : 'fas fa-bullhorn'}" style="margin-right:8px;"></i>${ann.title}
+                    <div class="lan-panel-author-row">
+                        <div class="lan-panel-avatar ${isSchool ? 'lan-panel-avatar--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</div>
+                        <div class="lan-panel-author-info">
+                            <div class="lan-panel-author-name">${escapeLearnerAnnouncementHtml(sender)}</div>
+                            <div class="lan-panel-author-role">
+                                <span>Author</span><span class="lan-panel-role-sep">|</span><span class="lan-panel-role-badge ${isSchool ? 'lan-panel-role-badge--school' : ''}">${escapeLearnerAnnouncementHtml(roleLabel)}</span>
+                            </div>
+                            <div class="lan-panel-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                        </div>
                     </div>
-                    <div class="lan-panel-meta">${ann.teacher} &bull; ${ann.display_date}</div>
+                    <div class="lan-panel-title">${ann.title}</div>
                 </div>
                 ${isNew ? '<span style="background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid #4fd1c5;padding:3px 10px;font-size:11px;font-weight:800;border-radius:6px;letter-spacing:0.5px;">NEW</span>' : ''}
             </div>

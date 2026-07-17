@@ -384,16 +384,85 @@ function renderAssignmentCards(groupedData) {
 
             .las-panel-content { padding: 28px 32px; }
 
+            /* Author row (mirrors mobile detail) */
+            .las-panel-author-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .las-panel-avatar {
+                flex: 0 0 auto;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 1px solid rgba(167,139,250,0.35);
+                background: rgba(167,139,250,0.08);
+                color: #a78bfa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+            }
+            .las-panel-author-info { min-width: 0; }
+            .las-panel-author-name {
+                color: #e2e8f0;
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.3;
+                overflow-wrap: anywhere;
+            }
+            .las-panel-author-role {
+                color: #8b949e;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-top: 2px;
+            }
+            .las-panel-role-badge { color: #a78bfa; }
+            .las-panel-role-sep { color: #5a6472; margin: 0 6px; }
+            .las-panel-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            .las-panel-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 4px 9px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                margin-bottom: 12px;
+                color: #c9d1d9;
+                border: 1px solid rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.04);
+            }
+            .las-panel-status-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
             .las-panel-header {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
             }
             .las-panel-title {
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: 800;
                 color: #e2e8f0;
                 margin: 0 0 8px;
+                line-height: 1.28;
             }
             .las-panel-meta {
                 font-size: 13px;
@@ -415,9 +484,38 @@ function renderAssignmentCards(groupedData) {
             }
             .las-panel-links {
                 display: flex;
-                gap: 16px;
+                gap: 12px;
                 flex-wrap: wrap;
                 margin-bottom: 24px;
+            }
+            .las-panel-link,
+            .las-panel-action {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 44px;
+                padding: 0 20px;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 800;
+                text-decoration: none;
+                box-sizing: border-box;
+            }
+            .las-panel-link {
+                color: #a78bfa;
+                border: 1px solid rgba(167,139,250,0.35);
+                background: rgba(167,139,250,0.08);
+            }
+            .las-panel-action {
+                color: #0d1117;
+                background: #a78bfa;
+                border: 1px solid #a78bfa;
+            }
+            .las-panel-action--locked {
+                color: #8b949e;
+                background: rgba(255,255,255,0.04);
+                border-color: rgba(255,255,255,0.1);
             }
 
             /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
@@ -1065,30 +1163,33 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     if (!panel) return;
 
     const isDone = !!task.submission_file;
-    const statusColor = task.is_past_due ? '#f85149' : (isDone ? '#a78bfa' : '#888');
-    const statusSVG = task.is_past_due
-        ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; shape-rendering:geometricPrecision"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
-        : (isDone
-            ? `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; shape-rendering:geometricPrecision"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
-            : `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${statusColor}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; shape-rendering:geometricPrecision"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`);
+    const statusDotColor = task.is_past_due ? '#6b7280' : (isDone ? '#22c55e' : '#e67e22');
+    const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
+    const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
+    const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
 
-    const submitAction = task.is_past_due
-        ? `<span style="color:#8b949e; font-weight:700; font-size:14px;">Locked</span>`
-        : `<a href="submit_assignment.php?assignment_id=${task.id}"
-              style="background:rgba(${isDone ? '167,139,250' : '230,126,34'},0.1);border:1px solid rgba(${isDone ? '167,139,250' : '230,126,34'},0.4);color:${isDone ? '#a78bfa' : '#e67e22'};padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-block;">
-              ${isDone ? 'Update Submission' : 'Submit Assignment'}
-           </a>`;
+    const sender = task.teacher || 'Teacher';
+    const initials = task.initials || getLearnerAssignmentInitials(sender);
 
     panel.innerHTML = `
         <div class="las-panel-content">
             <div class="las-panel-header">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    ${statusSVG}
-                    <div class="las-panel-title">${task.title}</div>
+                <div class="las-panel-author-row">
+                    <div class="las-panel-avatar">${escapeLearnerAssignmentHtml(initials)}</div>
+                    <div class="las-panel-author-info">
+                        <div class="las-panel-author-name">${escapeLearnerAssignmentHtml(sender)}</div>
+                        <div class="las-panel-author-role">
+                            <span>Author</span><span class="las-panel-role-sep">|</span><span class="las-panel-role-badge">Teacher</span>
+                        </div>
+                        <div class="las-panel-posted">Posted ${escapeLearnerAssignmentHtml(task.created_at ? formatLearnerAssignmentPostedDate(task.created_at) : '')}</div>
+                    </div>
                 </div>
+                <div class="las-panel-status">
+                    <span class="las-panel-status-dot" style="background:${statusDotColor};"></span>
+                    ${statusLabel}
+                </div>
+                <div class="las-panel-title">${task.title}</div>
                 <div class="las-panel-meta">
-                    <span>${task.teacher}</span>
-                    <span>&bull;</span>
                     <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; shape-rendering:geometricPrecision"><path d="M2 3h20v14H2z"></path><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
                     <span>${task.class_name}</span>
                     <span>&bull;</span>
@@ -1103,21 +1204,21 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
 
             <div class="las-panel-links">
                 ${task.teacher_file ? `
-                    <a href="javascript:void(0)"
-                        onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#a78bfa;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    <a class="las-panel-link" href="javascript:void(0)"
+                        onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                         Teacher Attachment
                     </a>` : ''}
                 ${task.submission_file ? `
-                    <a href="javascript:void(0)"
-                        onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')"
-                        style="color:#a78bfa;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:6px;">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <a class="las-panel-link" href="javascript:void(0)"
+                        onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         View My Work
                     </a>` : ''}
             </div>
 
-            ${submitAction}
+            ${task.is_past_due
+                ? `<span class="las-panel-action las-panel-action--locked">${actionLabel}</span>`
+                : `<a class="las-panel-action" href="${actionHref}" onclick="openLearnerAssignmentSubmission(event, '${actionHref}')">${actionLabel}</a>`}
         </div>`;
 };
