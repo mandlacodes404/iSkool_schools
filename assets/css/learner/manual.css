@@ -92,13 +92,14 @@
     grid-template-columns: minmax(260px, 30%) 1fr;
     gap: 20px;
     padding: 24px;
+    padding-top: 17px;
     align-items: start;
 }
 
 /* LEFT COLUMN */
 .learner-home-left {
     position: sticky;
-    top: 24px;
+    top: 17px;
 }
 
 .learner-home-panel {
