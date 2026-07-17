@@ -86,7 +86,7 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.6';
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.7';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -528,15 +528,6 @@ function renderEvaluationsUI(data) {
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .lev-mobile-done-dot,
-            .lev-mobile-pending-dot {
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
-            .lev-mobile-done-dot { background: #22c55e; }
-            .lev-mobile-pending-dot { background: #e67e22; }
             .lev-mobile-row-meta {
                 font-size: 11px;
                 color: #555e6a;
@@ -689,7 +680,6 @@ function renderEvaluationsUI(data) {
                     <div class="lev-mobile-row-body">
                         <div class="lev-mobile-row-title">
                             <span class="lev-mobile-row-title-text">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</span>
-                            ${evaluation.submitted ? '<span class="lev-mobile-done-dot"></span>' : '<span class="lev-mobile-pending-dot"></span>'}
                         </div>
                         <div class="lev-mobile-row-meta">${metaDate}<span style="color:${statusColor};">${statusText}</span></div>
                     </div>
