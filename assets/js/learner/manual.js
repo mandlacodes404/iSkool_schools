@@ -90,7 +90,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=3.3';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=3.2';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -297,7 +297,7 @@ function buildLearnerSnapCard(card) {
 
 function buildDesktopTodoCards(todo) {
     const colorMap = {
-        quiz: '#4fd1c5',
+        quiz: '#fdd663',
         assignment: '#a78bfa',
         evaluation: '#f28c38'
     };
@@ -325,7 +325,7 @@ function buildDesktopTodoCards(todo) {
     }
 
     todo.forEach(item => {
-        const color = colorMap[item.type] || '#4fd1c5';
+        const color = colorMap[item.type] || '#fdd663';
         const icon = iconMap[item.type] || iconMap.quiz;
         html += buildLearnerSnapCard({
             data: item,
@@ -346,7 +346,7 @@ function buildDesktopRecentCards(recent) {
         announcement: '#f59e0b',
         resource: '#f28c38',
         assignment: '#a78bfa',
-        quiz: '#4fd1c5'
+        quiz: '#fdd663'
     };
     const labelMap = {
         announcement: 'Latest Announcement',
