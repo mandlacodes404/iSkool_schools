@@ -304,9 +304,9 @@ function renderLearnerSnapshotPanel(snapshot) {
         {
             key:     'quiz',
             data:    snapshot.quiz,
-            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
+            icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
             label:   'Latest Quiz',
-            color:   '#fdd663',
+            color:   '#4fd1c5',
             onclick: 'window.learnerQuizCache=null; fetchQuizzes()',
             empty:   'No quizzes available yet',
             meta:    snapshot.quiz ? `${snapshot.quiz.start_time}` : '',
