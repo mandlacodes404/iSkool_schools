@@ -86,7 +86,7 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.5';
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=2.6';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -672,6 +672,9 @@ function renderEvaluationsUI(data) {
         mobileGroupIdx++;
 
         evaluations.forEach(evaluation => {
+            const statusText = evaluation.submitted ? 'Completed' : 'Pending';
+            const statusColor = evaluation.submitted ? '#22c55e' : '#e67e22';
+            const metaDate = evaluation.display_date ? `${escapeLearnerEvaluationHtml(evaluation.display_date)} &bull; ` : '';
             html += `
                 <div class="lev-mobile-row" role="button" tabindex="0"
                     data-title="${escapeLearnerEvaluationHtml(evaluation.title||'').toLowerCase()}"
@@ -688,7 +691,7 @@ function renderEvaluationsUI(data) {
                             <span class="lev-mobile-row-title-text">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</span>
                             ${evaluation.submitted ? '<span class="lev-mobile-done-dot"></span>' : '<span class="lev-mobile-pending-dot"></span>'}
                         </div>
-                        <div class="lev-mobile-row-meta">${evaluation.submitted ? 'Completed' : 'Pending'}</div>
+                        <div class="lev-mobile-row-meta">${metaDate}<span style="color:${statusColor};">${statusText}</span></div>
                     </div>
                     <div class="lev-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
