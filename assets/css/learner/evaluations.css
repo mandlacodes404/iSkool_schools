@@ -337,6 +337,12 @@
     .lev-mobile-detail-role-badge { color: #4fa8fd; }
     .lev-mobile-detail-role-sep { color: #5a6472; margin: 0 6px; }
 
+    .lev-mobile-detail-posted {
+        color: #8b949e;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
     .lev-mobile-detail .eval-description {
         margin-bottom: 20px;
     }

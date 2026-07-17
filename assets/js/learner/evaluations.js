@@ -406,6 +406,11 @@ function renderEvaluationsUI(data) {
             }
             .lev-panel-role-badge { color: #4fa8fd; }
             .lev-panel-role-sep { color: #5a6472; margin: 0 6px; }
+            .lev-panel-posted {
+                color: #8b949e;
+                font-size: 12px;
+                margin-top: 4px;
+            }
             .lev-panel-title {
                 font-size: 20px;
                 font-weight: 800;
@@ -880,6 +885,7 @@ window.openMobileLearnerEvaluation = function(idx) {
                     <div class="lev-mobile-detail-author-role">
                         <span>Author</span><span class="lev-mobile-detail-role-sep">|</span><span class="lev-mobile-detail-role-badge">Teacher</span>
                     </div>
+                    ${evaluation.display_date ? `<div class="lev-mobile-detail-posted">Posted ${escapeLearnerEvaluationHtml(evaluation.display_date)}</div>` : ''}
                 </div>
             </div>
             <h1 class="lev-mobile-detail-title learner-mobile-detail-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</h1>
@@ -967,6 +973,7 @@ window.selectDesktopLearnerEvaluation = function(idx) {
                         <div class="lev-panel-author-role">
                             <span>Author</span><span class="lev-panel-role-sep">|</span><span class="lev-panel-role-badge">Teacher</span>
                         </div>
+                        ${evaluation.display_date ? `<div class="lev-panel-posted">Posted ${escapeLearnerEvaluationHtml(evaluation.display_date)}</div>` : ''}
                     </div>
                 </div>
                 <div class="lev-panel-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>

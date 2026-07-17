@@ -8,6 +8,16 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     echo json_encode(['error' => 'Unauthorized']); exit;
 }
 
+function getInitials(string $text): string {
+    $text = trim($text);
+    if ($text === '') return '?';
+    $words = preg_split('/\s+/', $text);
+    if (count($words) === 1) {
+        return mb_strtoupper(mb_substr($words[0], 0, 1));
+    }
+    return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr(end($words), 0, 1));
+}
+
 $learner_email = $_SESSION['email'];
 
 // 1. Get Current Academic Year
@@ -54,11 +64,16 @@ foreach ($evals as $eval) {
         $statements = $stStmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
+    $teacher = trim($eval['teacher_full'] ?: $eval['teacher_name']);
+
     $response[] = [
         'id' => $eval['id'],
         'title' => $eval['title'],
         'description' => $eval['description'],
-        'teacher' => trim($eval['teacher_full'] ?: $eval['teacher_name']),
+        'teacher' => $teacher,
+        'teacher_initials' => getInitials($teacher),
+        'created_at' => $eval['created_at'],
+        'display_date' => date('j M \a\t H:i', strtotime($eval['created_at'])),
         'submitted' => $submitted,
         'statements' => $statements
     ];
