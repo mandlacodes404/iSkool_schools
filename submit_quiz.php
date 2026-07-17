@@ -821,7 +821,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
             </svg>
             <div class="ring-num" id="ringNum">10</div>
         </div>
-        <div class="countdown-text">Saving to Grades…</div>
+        <div class="countdown-text">Saving to Gradebook…</div>
     </div>
 </div>
 
@@ -865,7 +865,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
             </svg>
             <div class="ring-num" id="ringNum">10</div>
         </div>
-        <div class="countdown-text">Returning to Grades…</div>
+        <div class="countdown-text">Returning to Gradebook…</div>
     </div>
 </div>
 
@@ -897,7 +897,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
                 <line x1="19" y1="12" x2="5" y2="12"/>
                 <polyline points="12 19 5 12 12 5"/>
             </svg>
-            Back to Grades
+            Back to Gradebook
         </button>
     </div>
 </div>
@@ -916,7 +916,7 @@ function goToGrades() {
             window.parent.setActive('grades');
         }
         if (typeof window.parent.configureHeader === 'function') {
-            window.parent.configureHeader({ title: 'My Grades', mode: 'standard' });
+            window.parent.configureHeader({ title: 'Gradebook', mode: 'standard' });
         }
         // Invalidate cache so grades refreshes with latest result
         window.parent.learnerGradesCache = null;
