@@ -5,32 +5,34 @@ function getCsrfToken() {
 window.teacherAnalyticsCache     = null;
 window.teacherAnalyticsCachePromise = null;
 window.analyticsCharts            = {};
+window.analyticsCurrentClassId    = null;
+window.analyticsCurrentTerm       = null;
+window.analyticsActiveTerm        = 1;
 
-// Hydrate from the persisted teacherSectionState (dashboard.js loads
-// first and reads this from sessionStorage) so the previously selected
-// class/term survive a plain browser refresh, not just in-app
-// navigation between sidebar links.
-{
-    const savedAnalytics = window.teacherSectionState?.selection?.analytics;
-    window.analyticsCurrentClassId = savedAnalytics ? savedAnalytics.classId : null;
-    window.analyticsCurrentTerm    = savedAnalytics ? savedAnalytics.term    : null;
-    window.analyticsActiveTerm     = savedAnalytics ? savedAnalytics.term    : 1;
-}
-
-// ─────────────────────────────────────────────
-// SILENT BACKGROUND PREFETCH
-// ─────────────────────────────────────────────
-window.prefetchTeacherAnalytics = function () {
-    if (window.teacherAnalyticsCache) return;
-    if (window.teacherAnalyticsCachePromise) return;
-    window.teacherAnalyticsCachePromise = fetch('api/teacher/get_analytics.php')
-        .then(res => { if (!res.ok) throw new Error('prefetch failed'); return res.json(); })
-        .then(data => {
-            if (data.error) throw new Error(data.error);
-            window.teacherAnalyticsCache = data;
-        })
-        .catch(() => {})
-        .finally(() => { window.teacherAnalyticsCachePromise = null; });
+// Shared Chart.js options for every 0-100% line/bar chart on this page
+// (Quiz Average, gender comparisons, Class Performance by Term). Static —
+// doesn't depend on any single render's data, so it's safe to share across
+// renderDashboard() and the standalone comparison-mode render functions.
+const analyticsChartOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { labels: { color: '#e2e8f0', font: { family: 'Nunito', size: 12 } } },
+        tooltip: {
+            callbacks: { label: ctx => ` ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}` }
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true, max: 100,
+            ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20 },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        x: {
+            ticks: { color: '#8b949e', maxRotation: 30 },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+        }
+    }
 };
 
 // ─────────────────────────────────────────────
@@ -94,6 +96,334 @@ window.analyticsShowInfo = function(key, el) {
     if (el) el.classList.add('an-tapped');
     if (typeof updateInfoRail === 'function') updateInfoRail('an-info-rail', info.title, info.body);
 };
+
+// ─────────────────────────────────────────────
+// COMPARISON MODE: shared fetch used by both the
+// Boys vs Girls by Term and Score Distribution charts to pull a
+// second class's or second term's data for side-by-side comparison.
+// Same endpoint and auth pattern as the main dashboard fetch.
+// ─────────────────────────────────────────────
+async function fetchAnalyticsComparisonData(classId, term) {
+    const res = await fetch('api/teacher/get_analytics_data.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': getCsrfToken() },
+        body: `class_id=${classId}&term=${term}`
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+}
+
+// Returns every class the teacher teaches, deduplicated by id, across all terms.
+function analyticsGetAllClasses() {
+    const seen = new Map();
+    (window.teacherAnalyticsCache?.terms || []).forEach(t => {
+        (t.classes || []).forEach(c => { if (!seen.has(c.id)) seen.set(c.id, c); });
+    });
+    return Array.from(seen.values());
+}
+
+// chartKey: 'term-gender' | 'score-dist'
+window.analyticsToggleCompare = function(chartKey, classId, term) {
+    const panel = document.getElementById(`an-compare-panel-${chartKey}`);
+    if (!panel) return;
+
+    // Already open — close it and revert to the normal single-series view.
+    if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+        panel.innerHTML = '';
+        if (chartKey === 'term-gender') renderTermGenderChart(classId, term, window._analyticsLastData, null, window._analyticsLastCls?.name);
+        else renderScoreDistChart(classId, term, window._analyticsLastData);
+        return;
+    }
+
+    const otherClasses = analyticsGetAllClasses().filter(c => c.id !== classId);
+    const showGenderOption = chartKey === 'term-gender';
+
+    panel.classList.add('open');
+    panel.innerHTML = `
+        <div class="an-compare-choice-row">
+            ${showGenderOption ? `<button class="an-compare-choice active" data-mode="gender" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'gender')">Gender (this class)</button>` : ''}
+            <button class="an-compare-choice${showGenderOption ? '' : ' active'}" data-mode="class" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'class')">Compare to another class</button>
+        </div>
+        <div class="an-compare-class-picker" id="an-compare-class-picker-${chartKey}" style="display:${showGenderOption ? 'none' : 'flex'};">
+            ${otherClasses.length
+                ? `<select onchange="analyticsRunClassCompare('${chartKey}', ${classId}, ${term}, this.value)">
+                       <option value="">Choose a class…</option>
+                       ${otherClasses.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                   </select>`
+                : `<p class="an-compare-empty">No other classes with published assessments this year.</p>`}
+        </div>
+    `;
+
+    // Score Distribution has no gender data yet — jump straight to the class picker.
+    if (!showGenderOption) {
+        // no-op: picker is already visible via the style above
+    }
+};
+
+window.analyticsSetCompareMode = function(chartKey, classId, term, mode) {
+    const panel = document.getElementById(`an-compare-panel-${chartKey}`);
+    if (!panel) return;
+    panel.querySelectorAll('.an-compare-choice').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    const picker = document.getElementById(`an-compare-class-picker-${chartKey}`);
+    if (picker) picker.style.display = (mode === 'class') ? 'flex' : 'none';
+
+    if (mode === 'gender') {
+        // Gender data is already in the page's own dataset — no fetch needed.
+        if (chartKey === 'term-gender') renderTermGenderChart(classId, term, window._analyticsLastData, null, window._analyticsLastCls?.name);
+    }
+};
+
+window.analyticsRunClassCompare = async function(chartKey, classId, term, compareClassId) {
+    if (!compareClassId) return;
+    const picker = document.getElementById(`an-compare-class-picker-${chartKey}`);
+    if (picker) picker.innerHTML = `<p class="an-compare-loading">Loading…</p>`;
+
+    try {
+        const compareData = await fetchAnalyticsComparisonData(compareClassId, term);
+        const compareClass = analyticsGetAllClasses().find(c => c.id == compareClassId);
+        if (chartKey === 'term-gender') {
+            renderTermGenderChart(classId, term, window._analyticsLastData, { classData: compareData, className: compareClass?.name || 'Other class' }, window._analyticsLastCls?.name);
+        } else {
+            renderScoreDistChart(classId, term, window._analyticsLastData, { classData: compareData, className: compareClass?.name || 'Other class' });
+        }
+    } catch (e) {
+        if (picker) picker.innerHTML = `<p class="an-compare-error">Couldn't load that class. Try again.</p>`;
+    }
+};
+
+/**
+ * Renders the Boys vs Girls by Term chart. With no `compareClass` arg,
+ * this is the normal single-class gender view (same data/colours as
+ * before). With a compareClass ({classData, className}), it instead
+ * plots this class's overall average against the other class's overall
+ * average across all 4 terms — genders are not mixed with the
+ * class-comparison view, since that would be a third dimension on a
+ * 2D line chart.
+ */
+function renderTermGenderChart(classId, term, data, compareClass, className) {
+    const canvas = document.getElementById(`chart-term-gender-${classId}-${term}`);
+    if (!canvas) return;
+    const key = `tg-${classId}-${term}`;
+    if (window.analyticsCharts[key]) { try { window.analyticsCharts[key].destroy(); } catch(e){} }
+
+    const byTerm = data.boys_vs_girls_by_term || { boys: [null,null,null,null], girls: [null,null,null,null] };
+
+    let datasets;
+    if (compareClass) {
+        datasets = [
+            {
+                label: className || 'This class',
+                data: data.class_performance_by_term || [null,null,null,null],
+                borderColor: '#4fd1c5',
+                backgroundColor: 'rgba(79,209,197,0.08)',
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#4fd1c5',
+                pointRadius: 6, pointHoverRadius: 9, spanGaps: true
+            },
+            {
+                label: compareClass.className,
+                data: compareClass.classData.class_performance_by_term || [null,null,null,null],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245,158,11,0.08)',
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#f59e0b',
+                pointRadius: 6, pointHoverRadius: 9, spanGaps: true
+            }
+        ];
+    } else {
+        datasets = [
+            {
+                label: 'Boys',
+                data: byTerm.boys,
+                borderColor: '#4e79a7',
+                backgroundColor: 'rgba(78,121,167,0.08)',
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#4e79a7',
+                pointRadius: 6, pointHoverRadius: 9, spanGaps: true
+            },
+            {
+                label: 'Girls',
+                data: byTerm.girls,
+                borderColor: '#af7aa1',
+                backgroundColor: 'rgba(175,122,161,0.08)',
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#af7aa1',
+                pointRadius: 6, pointHoverRadius: 9, spanGaps: true
+            }
+        ];
+    }
+
+    if (!datasets.some(d => (d.data || []).some(v => v !== null))) return;
+
+    window.analyticsCharts[key] = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: { labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'], datasets },
+        options: analyticsChartOpts
+    });
+}
+
+// Fits a normal (bell curve) distribution to the given score buckets, scaled
+// to the same student-count axis as the bars. Returns null when there isn't
+// enough data for the curve to mean anything (fewer than 2 students, or a
+// standard deviation too small to plot meaningfully).
+function analyticsBuildNormalCurve(distribution) {
+    const buckets = distribution.map(b => {
+        const parts = String(b.bucket).split('-').map(Number);
+        const min = parts[0];
+        const max = parts[1];
+        return { min, max, midpoint: (min + max) / 2, count: Number(b.student_count) || 0 };
+    }).filter(b => Number.isFinite(b.midpoint));
+
+    const total = buckets.reduce((sum, b) => sum + b.count, 0);
+    if (total < 2) return null;
+
+    const maxCount = Math.max(...buckets.map(b => b.count));
+    if (maxCount <= 0) return null;
+
+    const mean = buckets.reduce((sum, b) => sum + b.midpoint * b.count, 0) / total;
+    const variance = buckets.reduce((sum, b) => sum + Math.pow(b.midpoint - mean, 2) * b.count, 0) / total;
+    const stdDev = Math.sqrt(variance);
+    if (!Number.isFinite(stdDev) || stdDev < 0.5) return null;
+
+    const normalPdf = value => {
+        const z = (value - mean) / stdDev;
+        return Math.exp(-0.5 * z * z) / (stdDev * Math.sqrt(2 * Math.PI));
+    };
+
+    const rawPoints = buckets.map(b => normalPdf(b.midpoint));
+    const maxRaw = Math.max(...rawPoints);
+    if (!Number.isFinite(maxRaw) || maxRaw <= 0) return null;
+
+    const points = rawPoints.map(v => Math.round((v / maxRaw) * maxCount * 10) / 10);
+    return points.some(v => v > 0) ? points : null;
+}
+
+/**
+ * Renders the Score Distribution histogram. With no `compareClass` arg,
+ * this is the normal single-class view: bucket bars coloured by the same
+ * 60%/40% pass-rate cutoffs used elsewhere, plus an optional normal-curve
+ * overlay. With a compareClass ({classData, className}), it instead shows
+ * two grouped bar series (this class vs. the other class) using neutral
+ * per-class colours instead of pass-rate colouring — a bar can't honestly
+ * carry both "which class" and "which pass zone" as its color at once, and
+ * the normal curve is dropped in this mode since a curve fitted to two
+ * overlapping distributions doesn't have one clear meaning.
+ */
+function renderScoreDistChart(classId, term, data, compareClass) {
+    const canvas = document.getElementById(`chart-score-dist-${classId}-${term}`);
+    if (!canvas) return;
+    const key = `sd-${classId}-${term}`;
+    if (window.analyticsCharts[key]) { try { window.analyticsCharts[key].destroy(); } catch(e){} }
+
+    const scoreDistribution = data.score_distribution || [];
+    if (!scoreDistribution.length) return;
+
+    let datasets;
+    let peakForAxis;
+
+    if (compareClass) {
+        const otherDist = compareClass.classData.score_distribution || [];
+        const thisCounts  = scoreDistribution.map(b => Number(b.student_count) || 0);
+        // Match the other class's buckets by label, in case bucket order
+        // ever differs — safer than assuming identical array order.
+        const otherByBucket = new Map(otherDist.map(b => [b.bucket, Number(b.student_count) || 0]));
+        const otherCounts = scoreDistribution.map(b => otherByBucket.get(b.bucket) || 0);
+
+        datasets = [
+            {
+                label: window._analyticsLastCls?.name || 'This class',
+                data: thisCounts,
+                backgroundColor: 'rgba(79,209,197,0.55)',
+                borderColor: '#4fd1c5',
+                borderWidth: 1, borderRadius: 4, borderSkipped: false
+            },
+            {
+                label: compareClass.className,
+                data: otherCounts,
+                backgroundColor: 'rgba(245,158,11,0.55)',
+                borderColor: '#f59e0b',
+                borderWidth: 1, borderRadius: 4, borderSkipped: false
+            }
+        ];
+        peakForAxis = Math.max(...thisCounts, ...otherCounts, 1);
+    } else {
+        const normalCurve = analyticsBuildNormalCurve(scoreDistribution);
+        const counts = scoreDistribution.map(b => Number(b.student_count) || 0);
+        peakForAxis = Math.max(...counts, ...(normalCurve || []), 1);
+
+        datasets = [
+            {
+                label: 'Learners',
+                data: counts,
+                backgroundColor: scoreDistribution.map(b =>
+                    b.bucket === '0-39'  ? 'rgba(248,81,73,0.58)' :
+                    b.bucket === '40-59' ? 'rgba(245,158,11,0.58)' :
+                                            'rgba(34,197,94,0.58)'),
+                borderColor: scoreDistribution.map(b =>
+                    b.bucket === '0-39'  ? '#f85149' :
+                    b.bucket === '40-59' ? '#f59e0b' :
+                                            '#22c55e'),
+                borderWidth: 1, borderRadius: 0, borderSkipped: false,
+                barPercentage: 1, categoryPercentage: 1, order: 2
+            },
+            ...(normalCurve ? [{
+                type: 'line',
+                label: 'Normal curve',
+                data: normalCurve,
+                borderColor: '#f8fafc',
+                backgroundColor: 'rgba(248,250,252,0.12)',
+                borderWidth: 3, pointRadius: 0, pointHoverRadius: 4,
+                pointBackgroundColor: '#f8fafc', tension: 0.45, fill: false, order: 1
+            }] : [])
+        ];
+    }
+
+    if (!datasets.some(d => (d.data || []).some(v => v > 0))) return;
+
+    const histogramOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                labels: { color: '#e2e8f0', font: { family: 'Nunito', size: 12 }, boxWidth: 16, boxHeight: 8, padding: 14 }
+            },
+            tooltip: {
+                callbacks: {
+                    title: items => items.length ? `${items[0].label} score range` : '',
+                    label: ctx => {
+                        const value = ctx.parsed.y;
+                        if (ctx.dataset.type === 'line') return ` Normal curve: about ${value} learner${value === 1 ? '' : 's'}`;
+                        return ` ${ctx.dataset.label}: ${value} learner${value === 1 ? '' : 's'}`;
+                    }
+                }
+            },
+            datalabels: false
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                suggestedMax: Math.ceil(peakForAxis * 1.25),
+                title: { display: true, text: 'Learners', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
+                ticks: { color: '#8b949e', precision: 0 },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            x: {
+                title: { display: true, text: 'Average score range', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
+                ticks: { color: '#8b949e' },
+                grid: { display: false }
+            }
+        }
+    };
+
+    window.analyticsCharts[key] = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: { labels: scoreDistribution.map(b => b.bucket + '%'), datasets },
+        options: histogramOpts
+    });
+}
 
 // ─────────────────────────────────────────────
 // INJECT STYLES
@@ -531,6 +861,87 @@ window.analyticsShowInfo = function(key, el) {
             white-space: nowrap;
         }
 
+        .an-chart-title-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ── COMPARE: term-gender & score-distribution charts ── */
+        .an-compare-toggle {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: none;
+            color: var(--an-accent);
+            border: 1px solid rgba(79,209,197,0.35);
+            border-radius: 20px;
+            padding: 3px 10px;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .an-compare-toggle:hover {
+            background: rgba(79,209,197,0.12);
+        }
+
+        .an-compare-panel {
+            display: none;
+            margin-bottom: 14px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+        }
+        .an-compare-panel.open { display: block; }
+
+        .an-compare-choice-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .an-compare-choice {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--an-text-dim);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.15s ease;
+        }
+        .an-compare-choice.active {
+            color: #0d1117;
+            background: var(--an-accent);
+            border-color: var(--an-accent);
+        }
+        .an-compare-choice:not(.active):hover {
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .an-compare-class-picker {
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        .an-compare-class-picker select {
+            width: 100%;
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            color: var(--an-text);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .an-compare-empty, .an-compare-loading, .an-compare-error {
+            font-size: 12px;
+            color: var(--an-text-dimmer);
+            margin: 4px 0 0;
+        }
+        .an-compare-error { color: var(--an-red); }
+
         .an-chart-wrap {
             position: relative;
             height: 220px;
@@ -679,6 +1090,7 @@ window.fetchTeacherAnalytics = async function () {
 
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
+    const loader  = document.getElementById('loaderOverlay');
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
@@ -687,6 +1099,8 @@ window.fetchTeacherAnalytics = async function () {
         renderTeacherAnalytics(window.teacherAnalyticsCache);
         return;
     }
+
+    if (loader) loader.style.display = 'flex';
 
     try {
         if (!window.teacherAnalyticsCachePromise) {
@@ -714,6 +1128,8 @@ window.fetchTeacherAnalytics = async function () {
                 <p>Check your connection and try again.</p>
                 <button class="an-retry-btn" onclick="window.teacherAnalyticsCache=null;window.fetchTeacherAnalytics();">Retry</button>
             </div>`;
+    } finally {
+        if (loader) loader.style.display = 'none';
     }
 };
 
@@ -728,14 +1144,7 @@ function renderTeacherAnalytics(data) {
     const currentTerm = data.current_term || 1;
 
     const currentTermData = terms.find(t => t.term === currentTerm);
-    // Preserve the term the teacher was last looking at, if it still has
-    // data, instead of always resetting to the "current" term on every
-    // re-entry to Analytics.
-    const priorTerm = window.analyticsActiveTerm;
-    const priorTermStillValid = priorTerm && terms.some(t => t.term === priorTerm);
-    window.analyticsActiveTerm = priorTermStillValid
-        ? priorTerm
-        : (currentTermData ? currentTerm : terms[0]?.term || currentTerm);
+    window.analyticsActiveTerm = currentTermData ? currentTerm : terms[0]?.term || currentTerm;
     window._analyticsAllTerms  = terms;
     window._analyticsCurrentGlobalTerm = currentTerm;
 
@@ -819,19 +1228,6 @@ function renderTeacherAnalytics(data) {
 
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     renderClassList(window.analyticsActiveTerm);
-
-    const classListEl = document.getElementById('an-class-list');
-    window.wireTeacherSectionScroll('analytics-class-list', classListEl);
-    window.restoreTeacherScrollState('analytics-class-list', classListEl);
-
-    // Restore whichever class was selected before navigating away, if
-    // it still exists in the freshly-loaded term/class data, instead of
-    // always resetting to the "select a class" placeholder.
-    const termData = terms.find(t => t.term === window.analyticsActiveTerm);
-    const stillExists = termData && termData.classes.some(c => c.id == window.analyticsCurrentClassId);
-    if (window.analyticsCurrentClassId && window.analyticsCurrentTerm === window.analyticsActiveTerm && stillExists) {
-        selectAnalyticsClass(window.analyticsCurrentClassId, window.analyticsActiveTerm);
-    }
 }
 
 // ─────────────────────────────────────────────
@@ -853,7 +1249,7 @@ function renderClassList(term) {
         const subject    = cls.subject || null;
         const safeSubject = (cls.subject || '').replace(/'/g, "\\'");
         const safeName    = cls.name.replace(/'/g, "\\'");
-        const isActive    = cls.id == window.analyticsCurrentClassId && term === window.analyticsCurrentTerm;
+        const isActive    = cls.id === window.analyticsCurrentClassId && term === window.analyticsCurrentTerm;
 
         return `
             <div class="an-class-item ${isActive ? 'active' : ''}"
@@ -923,8 +1319,6 @@ window.switchAnalyticsTerm = function (term) {
 window.selectAnalyticsClass = async function (classId, term) {
     window.analyticsCurrentClassId = classId;
     window.analyticsCurrentTerm    = term;
-    window.teacherSectionState.selection.analytics = { classId, term };
-    window.persistTeacherSectionState();
 
     // Highlight active class
     document.querySelectorAll('.an-class-item').forEach(el => el.classList.remove('active'));
@@ -1012,6 +1406,10 @@ function renderDashboard(cls, term, data) {
     const right = document.getElementById('an-right');
     if (!right) return;
 
+    window._analyticsLastData = data;
+    window._analyticsLastCls  = cls;
+    window._analyticsLastTerm = term;
+
     const quizAvgs   = data.quiz_averages             || [];
     const genderData = data.quiz_gender_averages       || [];
     const topGirls   = data.top_girls                  || [];
@@ -1071,47 +1469,9 @@ function renderDashboard(cls, term, data) {
         passing: q.avg >= 50 ? 100 : Math.round((q.avg / 50) * 100)
     }));
 
-    function buildNormalCurve(distribution) {
-        const buckets = distribution.map(b => {
-            const parts = String(b.bucket).split('-').map(Number);
-            const min = parts[0];
-            const max = parts[1];
-            return {
-                min,
-                max,
-                midpoint: (min + max) / 2,
-                count: Number(b.student_count) || 0
-            };
-        }).filter(b => Number.isFinite(b.midpoint));
-
-        const total = buckets.reduce((sum, b) => sum + b.count, 0);
-        if (total < 2) return null;
-
-        const maxCount = Math.max(...buckets.map(b => b.count));
-        if (maxCount <= 0) return null;
-
-        const mean = buckets.reduce((sum, b) => sum + b.midpoint * b.count, 0) / total;
-        const variance = buckets.reduce((sum, b) => sum + Math.pow(b.midpoint - mean, 2) * b.count, 0) / total;
-        const stdDev = Math.sqrt(variance);
-        if (!Number.isFinite(stdDev) || stdDev < 0.5) return null;
-
-        const normalPdf = value => {
-            const z = (value - mean) / stdDev;
-            return Math.exp(-0.5 * z * z) / (stdDev * Math.sqrt(2 * Math.PI));
-        };
-
-        const rawPoints = buckets.map(b => normalPdf(b.midpoint));
-        const maxRaw = Math.max(...rawPoints);
-        if (!Number.isFinite(maxRaw) || maxRaw <= 0) return null;
-
-        const points = rawPoints.map(v => Math.round((v / maxRaw) * maxCount * 10) / 10);
-        return points.some(v => v > 0) ? points : null;
-    }
-
-    const normalCurve = buildNormalCurve(scoreDistribution);
-    const distributionCounts = scoreDistribution.map(b => Number(b.student_count) || 0);
-    const distributionPeak = Math.max(...distributionCounts, ...(normalCurve || []), 1);
-    const distributionSuggestedMax = Math.ceil(distributionPeak * 1.25);
+    // Note: normal-curve math now lives inside renderScoreDistChart() below,
+    // since it needs to run fresh for whichever dataset (single-class or
+    // comparison) that function is currently rendering.
 
     // Colour helper
     function avgColor(v) {
@@ -1185,8 +1545,12 @@ function renderDashboard(cls, term, data) {
             <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-score-dist', this)">
                 <div class="an-chart-title">
                     <span>Score Distribution</span>
-                    ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} learners</span>` : ''}
+                    <span class="an-chart-title-right">
+                        <span class="an-compare-toggle" onclick="event.stopPropagation(); analyticsToggleCompare('score-dist', ${cls.id}, ${term})">Compare</span>
+                        ${scoreDistribution.length ? `<span class="an-chart-title-note">${scoreDistribution.reduce((s, b) => s + b.student_count, 0)} of ${cls.student_count} learners</span>` : ''}
+                    </span>
                 </div>
+                <div class="an-compare-panel" id="an-compare-panel-score-dist" onclick="event.stopPropagation();"></div>
                 <div class="an-chart-wrap tall">
                     ${scoreDistribution.some(b => b.student_count > 0) ? `<canvas id="chart-score-dist-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">No quiz data yet</div>'}
                 </div>
@@ -1209,7 +1573,11 @@ function renderDashboard(cls, term, data) {
         <!-- ROW 5: Boys vs Girls by Term + Pass/Fail -->
         <div class="an-chart-row two-col">
             <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-term-gender', this)">
-                <div class="an-chart-title">Boys vs Girls by Term</div>
+                <div class="an-chart-title">
+                    <span>Boys vs Girls by Term</span>
+                    <span class="an-compare-toggle" onclick="event.stopPropagation(); analyticsToggleCompare('term-gender', ${cls.id}, ${term})">Compare</span>
+                </div>
+                <div class="an-compare-panel" id="an-compare-panel-term-gender" onclick="event.stopPropagation();"></div>
                 <div class="an-chart-wrap">
                     ${(byTerm.boys.some(v=>v!==null)||byTerm.girls.some(v=>v!==null)) ? `<canvas id="chart-term-gender-${cls.id}-${term}"></canvas>` : '<div class="an-no-data">More terms needed</div>'}
                 </div>
@@ -1254,73 +1622,14 @@ function renderDashboard(cls, term, data) {
         </div>`;
 
     // ── Render charts ──
-    const chartOpts = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { labels: { color: '#e2e8f0', font: { family: 'Nunito', size: 12 } } },
-            tooltip: {
-                callbacks: { label: ctx => ` ${ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'No data'}` }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true, max: 100,
-                ticks: { color: '#8b949e', callback: v => v + '%', stepSize: 20 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-            },
-            x: {
-                ticks: { color: '#8b949e', maxRotation: 30 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-            }
-        }
-    };
+    // Note: chartOpts is now analyticsChartOpts (module-level, shared with
+    // the standalone comparison-mode render functions below).
 
     // Separate options for count-based charts (Score Distribution) — chartOpts above assumes a
     // 0-100% axis, which would mislabel a "number of students" axis as a percentage.
-    const histogramOpts = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                labels: {
-                    color: '#e2e8f0',
-                    font: { family: 'Nunito', size: 12 },
-                    boxWidth: 16,
-                    boxHeight: 8,
-                    padding: 14
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    title: items => items.length ? `${items[0].label} score range` : '',
-                    label: ctx => {
-                        const value = ctx.parsed.y;
-                        if (ctx.dataset.type === 'line') {
-                            return ` Normal curve: about ${value} learner${value === 1 ? '' : 's'}`;
-                        }
-                        return ` ${value} learner${value === 1 ? '' : 's'} in this range`;
-                    }
-                }
-            },
-            datalabels: false
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                suggestedMax: distributionSuggestedMax,
-                title: { display: true, text: 'Learners', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
-                ticks: { color: '#8b949e', precision: 0 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-            },
-            x: {
-                title: { display: true, text: 'Average score range', color: '#8b949e', font: { family: 'Nunito', size: 11, weight: '700' } },
-                ticks: { color: '#8b949e' },
-                grid: { display: false }
-            }
-        }
-    };
+    // Note: histogramOpts is now built inside renderScoreDistChart() below,
+    // since it depends on that specific render's data (single-class or
+    // comparison), not renderDashboard's.
 
     // Quiz Average bar
     if (quizAvgs.length) {
@@ -1345,9 +1654,9 @@ function renderDashboard(cls, term, data) {
                     }]
                 },
                 options: {
-                    ...chartOpts,
+                    ...analyticsChartOpts,
                     plugins: {
-                        ...chartOpts.plugins,
+                        ...analyticsChartOpts.plugins,
                         datalabels: false,
                         legend: { display: false }
                     }
@@ -1356,54 +1665,10 @@ function renderDashboard(cls, term, data) {
         }
     }
 
-    // Score Distribution histogram — bucket colours match the same 60%/40% cutoffs as the
-    // Quiz Average bars above, so "red" and "green" mean the same thing everywhere on this page.
-    if (scoreDistribution.some(b => b.student_count > 0)) {
-        const ctx = document.getElementById(`chart-score-dist-${cls.id}-${term}`)?.getContext('2d');
-        if (ctx) {
-            window.analyticsCharts[`sd-${cls.id}-${term}`] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: scoreDistribution.map(b => b.bucket + '%'),
-                    datasets: [
-                        {
-                            label: 'Learners',
-                            data: scoreDistribution.map(b => b.student_count),
-                            backgroundColor: scoreDistribution.map(b =>
-                                b.bucket === '0-39'  ? 'rgba(248,81,73,0.58)' :
-                                b.bucket === '40-59' ? 'rgba(245,158,11,0.58)' :
-                                                        'rgba(34,197,94,0.58)'),
-                            borderColor: scoreDistribution.map(b =>
-                                b.bucket === '0-39'  ? '#f85149' :
-                                b.bucket === '40-59' ? '#f59e0b' :
-                                                        '#22c55e'),
-                            borderWidth: 1,
-                            borderRadius: 0,
-                            borderSkipped: false,
-                            barPercentage: 1,
-                            categoryPercentage: 1,
-                            order: 2
-                        },
-                        ...(normalCurve ? [{
-                            type: 'line',
-                            label: 'Normal curve',
-                            data: normalCurve,
-                            borderColor: '#f8fafc',
-                            backgroundColor: 'rgba(248,250,252,0.12)',
-                            borderWidth: 3,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointBackgroundColor: '#f8fafc',
-                            tension: 0.45,
-                            fill: false,
-                            order: 1
-                        }] : [])
-                    ]
-                },
-                options: histogramOpts
-            });
-        }
-    }
+    // Score Distribution — now built by the standalone, comparison-aware
+    // renderScoreDistChart() so the "Compare" toggle can re-render this one
+    // chart (vs. another class) without re-running the whole dashboard.
+    renderScoreDistChart(cls.id, term, data);
 
     // Boys vs Girls per Quiz
     if (genderData.length) {
@@ -1432,7 +1697,7 @@ function renderDashboard(cls, term, data) {
                         }
                     ]
                 },
-                options: chartOpts
+                options: analyticsChartOpts
             });
         }
     }
@@ -1459,44 +1724,16 @@ function renderDashboard(cls, term, data) {
                         spanGaps: true
                     }]
                 },
-                options: chartOpts
+                options: analyticsChartOpts
             });
         }
     }
 
-    // Boys vs Girls by Term
-    if (byTerm.boys.some(v => v !== null) || byTerm.girls.some(v => v !== null)) {
-        const ctx = document.getElementById(`chart-term-gender-${cls.id}-${term}`)?.getContext('2d');
-        if (ctx) {
-            window.analyticsCharts[`tg-${cls.id}-${term}`] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
-                    datasets: [
-                        {
-                            label: 'Boys',
-                            data: byTerm.boys,
-                            borderColor: '#4e79a7',
-                            backgroundColor: 'rgba(78,121,167,0.08)',
-                            tension: 0.4, fill: true,
-                            pointBackgroundColor: '#4e79a7',
-                            pointRadius: 6, pointHoverRadius: 9, spanGaps: true
-                        },
-                        {
-                            label: 'Girls',
-                            data: byTerm.girls,
-                            borderColor: '#af7aa1',
-                            backgroundColor: 'rgba(175,122,161,0.08)',
-                            tension: 0.4, fill: true,
-                            pointBackgroundColor: '#af7aa1',
-                            pointRadius: 6, pointHoverRadius: 9, spanGaps: true
-                        }
-                    ]
-                },
-                options: chartOpts
-            });
-        }
-    }
+    // Boys vs Girls by Term — now built by the standalone, comparison-aware
+    // renderTermGenderChart() so the "Compare" toggle can re-render this
+    // one chart (gender vs. another class) without re-running the whole
+    // dashboard render.
+    renderTermGenderChart(cls.id, term, data, null, cls.name);
 
     // Pass/Fail bars
     if (passData.length) {
