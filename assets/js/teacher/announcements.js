@@ -58,7 +58,7 @@ window.fetchTeacherAnnouncements = async function() {
         renderTeacherAnnouncements(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="an-error-message">
                 Error loading announcements.
             </p>`;
     }
@@ -86,7 +86,7 @@ function renderTeacherAnnouncements(data) {
     // ── Build sidebar ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No announcements yet.</p>`;
+        sidebarHtml = `<p class="teacher-empty-state an-empty-state-inline">No announcements yet.</p>`;
     } else {
         data.forEach((group, groupIdx) => {
             const classGroupId = `an-class-group-${groupIdx}`;
@@ -118,7 +118,7 @@ function renderTeacherAnnouncements(data) {
 
             // Label — school group gets a distinct teal label, class groups get the muted style
             const labelInnerHtml = group.is_school
-                ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-school-icon">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>
@@ -139,153 +139,13 @@ function renderTeacherAnnouncements(data) {
 
     // ── Full HTML (unchanged structure, added school-item styles) ──
     let html = `
-        <style>
-            /* ── Desktop split layout ── */
-            @media (min-width: 900px) {
-                .an-desktop-layout { display: flex !important; }
-                .an-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .an-desktop-layout { display: none !important; }
-                .an-mobile-list    { display: block !important; }
-            }
-
-            .an-desktop-layout {
-                display: flex; gap: 0;
-                min-height: 500px;
-            }
-
-            /* Left sidebar */
-            .an-sidebar {
-                width: 280px; min-width: 240px; max-width: 300px;
-                display: flex; flex-direction: column; overflow: hidden;
-            }
-            .an-sidebar-header {
-                padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
-                color: #4fd1c5; text-transform: uppercase; flex-shrink: 0;
-            }
-            .an-sidebar-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
-            .an-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .an-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .an-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .an-sidebar-class-label {
-                padding: 8px 16px 4px;
-                font-size: 10px; font-weight: 700;
-                color: #8b949e; text-transform: uppercase; letter-spacing: 0.8px;
-            }
-            .an-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-
-            /* School label — distinct from class labels */
-            .an-sidebar-school-label {
-                display: flex; align-items: center; gap: 5px;
-                color: #f59e0b;
-                border-top: 1px solid rgba(255,255,255,0.05);
-                margin-top: 4px; padding-top: 12px;
-            }
-            .an-sidebar-scroll > .an-sidebar-school-label:first-child {
-                border-top: none; margin-top: 0;
-            }
-            /* Keep the orange tint on hover instead of the shared muted-gray hover */
-            .an-sidebar-school-label.tchr-sidebar-class-label--toggle:hover {
-                color: #fbbf24;
-            }
-
-            .an-sidebar-item {
-                display: flex; align-items: flex-start; gap: 10px;
-                padding: 10px 16px 10px 32px; cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .an-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .an-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            /* School items active state uses orange accent */
-            .an-sidebar-item.an-school-item.active {
-                background: rgba(245,158,11,0.08);
-                border-left-color: #f59e0b;
-            }
-            .an-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; margin-top: 2px; }
-            .an-sidebar-item-info { flex: 1; min-width: 0; }
-            .an-sidebar-item-title {
-                font-size: 13px; font-weight: 600; color: #c9d1d9;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            }
-            .an-sidebar-item.active .an-sidebar-item-title { color: #e2e8f0; }
-            .an-sidebar-item-meta {
-                font-size: 11px; color: #555e6a; margin-top: 3px;
-                overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-            }
-
-            /* Right panel */
-            .an-main-panel {
-                flex: 1; overflow-y: auto;
-                display: flex; flex-direction: column;
-            }
-            .an-main-panel::-webkit-scrollbar { width: 5px; }
-            .an-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .an-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .an-panel-empty {
-                flex: 1; display: flex; flex-direction: column;
-                align-items: center; justify-content: center;
-                color: #555e6a; gap: 8px; padding: 40px;
-            }
-            .an-panel-empty svg { opacity: 0.25; }
-            .an-panel-empty p { font-size: 13px; text-align: center; max-width: 240px; line-height: 1.5; }
-
-            .an-panel-content { padding: 24px 28px; max-width: 720px; }
-            .an-panel-header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-            .an-panel-title { font-size: 20px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; line-height: 1.3; }
-            .an-panel-meta  { font-size: 12px; color: #8b949e; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-            .an-panel-message { font-size: 14px; color: #c9d1d9; line-height: 1.75; white-space: pre-wrap; }
-
-            /* School badge in panel */
-            .an-school-badge {
-                display: inline-flex; align-items: center; gap: 4px;
-                font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
-                text-transform: uppercase;
-                padding: 2px 8px; border-radius: 20px;
-                background: rgba(245,158,11,0.1);
-                border: 1px solid rgba(245,158,11,0.25);
-                color: #f59e0b;
-            }
-
-            /* Mobile list */
-            .an-mobile-list { padding: 12px; }
-            .an-mobile-section-label {
-                font-size: 10px; font-weight: 700; letter-spacing: 1px;
-                text-transform: uppercase; color: #8b949e;
-                margin: 16px 4px 8px; padding-bottom: 6px;
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-            }
-            .an-mobile-section-label.school { color: #f59e0b; }
-            .an-mobile-card {
-                background: #161b22; border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px; padding: 14px 16px; margin-bottom: 8px;
-                cursor: pointer; transition: border-color 0.15s;
-            }
-            .an-mobile-card:hover { border-color: rgba(255,255,255,0.15); }
-            .an-mobile-card.school-card { border-left: 3px solid #f59e0b; }
-            .an-mobile-card-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
-            .an-mobile-card-msg   { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 6px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-            .an-mobile-card-date  { font-size: 11px; color: #484f58; }
-        </style>
-
         <!-- DESKTOP -->
         <div class="an-desktop-layout tchr-flat-layout">
 
             <div class="an-sidebar tchr-flat-sidebar">
-                <div class="an-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="an-sidebar-header">
                     <span>Announcements</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="an-new-btn" onclick="openCreateAnnouncementForm()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create an-new-btn" id="an-new-btn" onclick="openCreateAnnouncementForm()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -324,7 +184,7 @@ function renderTeacherAnnouncements(data) {
 
     // Mobile list — school group first, then class groups
     if (!data || data.length === 0) {
-        html += `<p style="color:#8b949e;font-size:13px;text-align:center;padding:40px 0;">No announcements yet.</p>`;
+        html += `<p class="an-mobile-empty-state">No announcements yet.</p>`;
     } else {
         data.forEach(group => {
             const isSchool = group.is_school || false;
@@ -444,20 +304,17 @@ function openCreateAnnouncementPanel(panel) {
 
     panel.innerHTML = `
         <div class="an-panel-content">
-            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
-                        display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">New Announcement</div>
-                <button onclick="fetchTeacherAnnouncements()"
-                    style="background:none;border:none;color:#8b949e;font-size:22px;
-                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            <div class="an-panel-form-header">
+                <div class="an-panel-form-title">New Announcement</div>
+                <button onclick="fetchTeacherAnnouncements()" class="an-panel-form-close-btn">&times;</button>
             </div>
 
             <label class="teacher-modal-label">Title</label>
             <input type="text" id="annTitle" class="teacher-modal-input" placeholder="e.g. Test next week">
 
             <label class="teacher-modal-label">Message</label>
-            <textarea id="annMessage" class="teacher-modal-input" rows="5"
-                style="resize:vertical;" placeholder="Type your announcement here..."></textarea>
+            <textarea id="annMessage" class="teacher-modal-input an-form-textarea" rows="5"
+                placeholder="Type your announcement here..."></textarea>
 
             <label class="teacher-modal-label">Select Class</label>
             <div id="annClassPicker"></div>
@@ -468,23 +325,20 @@ function openCreateAnnouncementPanel(panel) {
                 <option value="parents">Parents Only</option>
             </select>
 
-            <label class="teacher-modal-label"
-                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <label class="teacher-modal-label an-email-label">
                 <input type="checkbox" id="annForceEmail">
                 Also send email notification
             </label>
 
-            <div id="createAnnError"
-                style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+            <div id="createAnnError" class="an-form-error"></div>
 
-            <div style="display:flex;gap:12px;margin-top:24px;">
+            <div class="an-panel-form-actions">
                 <button onclick="fetchTeacherAnnouncements()"
-                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    class="teacher-modal-cancel an-panel-form-cancel-btn">
                     Cancel
                 </button>
                 <button onclick="submitCreateAnnouncement()"
-                    class="teacher-modal-submit" id="createAnnSubmitBtn"
-                    style="flex:2;padding:13px;font-size:14px;">
+                    class="teacher-modal-submit an-panel-form-submit-btn" id="createAnnSubmitBtn">
                     Send Announcement
                 </button>
             </div>
@@ -544,29 +398,14 @@ window.submitCreateAnnouncement = async function() {
     if (isDesktop && panel) {
         panelLoader = document.createElement('div');
         panelLoader.id = 'an-panel-loader';
-        panelLoader.style.cssText = `
-            position:absolute;inset:0;
-            background:rgba(13,17,23,0.7);
-            backdrop-filter:blur(2px);
-            display:flex;align-items:center;justify-content:center;
-            border-radius:14px;z-index:10;
-        `;
+        panelLoader.className = 'an-panel-loader';
         panelLoader.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-                <div style="width:32px;height:32px;border:3px solid rgba(79,209,197,0.2);
-                            border-top-color:#4fd1c5;border-radius:50%;
-                            animation:an-spin 0.7s linear infinite;"></div>
-                <span style="font-size:13px;color:#8b949e;">Sending...</span>
+            <div class="an-panel-loader-inner">
+                <div class="an-panel-loader-spinner"></div>
+                <span class="an-panel-loader-text">Sending...</span>
             </div>`;
-        // Inject keyframes once
-        if (!document.getElementById('an-spin-style')) {
-            const s = document.createElement('style');
-            s.id = 'an-spin-style';
-            s.textContent = '@keyframes an-spin{to{transform:rotate(360deg)}}';
-            document.head.appendChild(s);
-        }
         // Panel must be position:relative for the absolute overlay to work
-        panel.style.position = 'relative';
+        panel.classList.add('an-panel-relative');
         panel.appendChild(panelLoader);
     } else {
         const globalLoader = document.getElementById('loaderOverlay');
