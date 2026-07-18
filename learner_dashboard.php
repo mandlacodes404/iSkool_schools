@@ -590,6 +590,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // ────────────────────────────────────────────────────────────────────────
     // 1. SMART LOAD LOGIC (Deep Linking + Refresh Persistence)
     // ────────────────────────────────────────────────────────────────────────
+    // On refresh/deep-link, JS memory (cache + prefetch state) is always
+    // wiped, so there's never anything to serve instantly. Rather than flash
+    // the full-screen loader for this one unavoidable cold load, suppress it
+    // here and let the content simply pop in once it arrives.
+    window.suppressInitialLoader = true;
+
     const urlParams = new URLSearchParams(window.location.search);
     const targetPage = urlParams.get('page'); // From Push Notifications
     // UPDATE THIS LINE: Change localStorage to sessionStorage
@@ -722,6 +728,13 @@ document.addEventListener("DOMContentLoaded", function () {
             iframe.src = "learner_manual.php";
         }
     }
+
+    // The suppress flag only applies to this initial restore call. Clear it
+    // shortly after so any page the person navigates to afterward in the
+    // same session shows the loader normally on a genuine cold fetch.
+    // (200ms comfortably covers the 100ms setTimeout used by the discussion
+    // deep-link branch above.)
+    setTimeout(() => { window.suppressInitialLoader = false; }, 200);
 
    // ────────────────────────────────────────────────────────────────────────
     // 2. LOADER & MOBILE AUTO-CLOSE (Teacher-style navigation)
@@ -2770,15 +2783,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=5.3"></script>
-<script src="assets/js/learner/quiz.js?v=8.3"></script>
-<script src="assets/js/learner/assignments.js?v=7.5"></script>
-<script src="assets/js/learner/resources.js?v=6.4"></script>
-<script src="assets/js/learner/announcements.js?v=7.2"></script>
-<script src="assets/js/learner/grades.js?v=5.0"></script>
-<script src="assets/js/learner/evaluations.js?v=4.0"></script>
-<script src="assets/js/learner/discussions.js?v=8.0"></script>
-<script src="assets/js/learner/syllabus.js?v=2.7"></script>
+<script src="assets/js/learner/manual.js?v=5.5"></script>
+<script src="assets/js/learner/quiz.js?v=8.4"></script>
+<script src="assets/js/learner/assignments.js?v=7.7"></script>
+<script src="assets/js/learner/resources.js?v=6.6"></script>
+<script src="assets/js/learner/announcements.js?v=7.3"></script>
+<script src="assets/js/learner/grades.js?v=5.2"></script>
+<script src="assets/js/learner/evaluations.js?v=4.2"></script>
+<script src="assets/js/learner/discussions.js?v=8.2"></script>
+<script src="assets/js/learner/syllabus.js?v=2.9"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.8"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

@@ -137,7 +137,7 @@ window.fetchEvaluations = async function() {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch('api/learner/get_evaluations.php');

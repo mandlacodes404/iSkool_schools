@@ -78,7 +78,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const [manualRes, homeRes, classRes] = await Promise.all([

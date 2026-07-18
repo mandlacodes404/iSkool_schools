@@ -138,7 +138,7 @@ window.fetchQuizzes = async function() {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch('api/learner/get_quizzes.php');
@@ -260,7 +260,7 @@ if (typeof window.configureHeader === 'function') {
     window.configureHeader({ title: 'Instructions', mode: 'detail' });
 }
 showLearnerQuizMobileBottomNav();
-if (loader) loader.style.display = 'flex';
+if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch(`api/learner/get_quiz_instructions.php?quiz_id=${quizId}`);

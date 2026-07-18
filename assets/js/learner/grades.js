@@ -149,7 +149,7 @@ window.fetchGrades = async function () {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const data = await loadGradesData();

@@ -82,7 +82,7 @@ window.fetchAssignments = async function() {
     }
 
     // 7. FETCH LOGIC
-    if (loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch('api/learner/get_assignments.php');
