@@ -76,8 +76,8 @@ window.analyticsCardInfo = {
         body: `<p>Tracks boys' and girls' averages across terms, so you can see whether a gender gap is widening, narrowing, or new.</p>`
     },
     'chart-pass-fail': {
-        title: 'Pass Rate per Quiz',
-        body: `<p>Shows what share of the class passed each assessment, using a 50% threshold.</p>`
+        title: 'Quiz Strength',
+        body: `<p>An estimate of how each quiz's class average compares to a 50% pass mark — not a count of individual students who passed or failed, since that data isn't tracked per-student yet.</p>`
     },
     'performers-girls': {
         title: 'Top 5 Girls',
@@ -1497,8 +1497,14 @@ function renderDashboard(cls, term, data) {
 
     const topOverall = [...topGirls, ...topBoys].sort((a, b) => b.avg - a.avg)[0] || null;
 
-    const boysAvg  = genderData.length ? genderData.reduce((s, d) => s + (d.boys  || 0), 0) / genderData.filter(d => d.boys  !== null).length : null;
-    const girlsAvg = genderData.length ? genderData.reduce((s, d) => s + (d.girls || 0), 0) / genderData.filter(d => d.girls !== null).length : null;
+    // Averaged only over quizzes that actually have a value for that gender —
+    // summing and counting from the same filtered array, so a quiz with zero
+    // boys (or zero girls) attempting it is correctly excluded from both,
+    // rather than counted as a 0 in the sum but dropped from the count.
+    const boysScores  = genderData.map(d => d.boys).filter(v => v !== null);
+    const girlsScores = genderData.map(d => d.girls).filter(v => v !== null);
+    const boysAvg  = boysScores.length  ? boysScores.reduce((s, v) => s + v, 0)  / boysScores.length  : null;
+    const girlsAvg = girlsScores.length ? girlsScores.reduce((s, v) => s + v, 0) / girlsScores.length : null;
 
     let gapValue = '—', gapSub = 'Based on quiz averages', gapColor = 'var(--an-text-dim)';
     if (boysAvg !== null && girlsAvg !== null) {
@@ -1509,10 +1515,17 @@ function renderDashboard(cls, term, data) {
         gapColor = boysAvg >= girlsAvg ? 'var(--an-blue)' : 'var(--an-purple)';
     }
 
-    // Pass/fail per quiz
+    // NOTE: this is NOT a real per-student pass rate — the backend doesn't
+    // currently return how many individual students scored >=50% on each
+    // quiz, only the class average. This rescales that average onto a 0-100
+    // "strength" scale (hits 100 once the average itself reaches 50%) as a
+    // rough proxy. It will not match a true pass-rate percentage and
+    // shouldn't be read as "X% of students passed." A real fix needs a new
+    // backend query that counts individual student pass/fail per quiz.
     const passData = quizAvgs.map(q => ({
-        title:   q.title,
-        passing: q.avg >= 50 ? 100 : Math.round((q.avg / 50) * 100)
+        title:  q.title,
+        avg:    q.avg,
+        strength: q.avg >= 50 ? 100 : Math.round((q.avg / 50) * 100)
     }));
 
     // Note: normal-curve math now lives inside renderScoreDistChart() below,
@@ -1629,7 +1642,7 @@ function renderDashboard(cls, term, data) {
                 </div>
             </div>
             <div class="an-chart-card an-tappable" onclick="analyticsShowInfo('chart-pass-fail', this)">
-                <div class="an-chart-title">Pass Rate per Quiz (50% threshold)</div>
+                <div class="an-chart-title">Quiz Strength (est. vs. 50% average)</div>
                 <div class="an-chart-wrap" style="overflow-y:auto;">
                     ${passData.length ? `<div id="pass-fail-${cls.id}-${term}"></div>` : '<div class="an-no-data">No data yet</div>'}
                 </div>
@@ -1781,7 +1794,8 @@ function renderDashboard(cls, term, data) {
     // dashboard render.
     renderTermGenderChart(cls.id, term, data, null, cls.name);
 
-    // Pass/Fail bars
+    // Quiz Strength bars (estimate, not a real per-student pass rate — see
+    // the passData comment above for why)
     if (passData.length) {
         const wrap = document.getElementById(`pass-fail-${cls.id}-${term}`);
         if (wrap) {
@@ -1789,11 +1803,11 @@ function renderDashboard(cls, term, data) {
                 <div class="an-pass-bar-wrap">
                     <div class="an-pass-bar-label">
                         <span style="color:var(--an-text);font-size:12px;">${q.title}</span>
-                        <span style="color:${q.passing >= 100 ? 'var(--an-green)' : q.passing >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};font-weight:800;font-size:12px;">${q.passing}%</span>
+                        <span style="color:${q.strength >= 100 ? 'var(--an-green)' : q.strength >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};font-weight:800;font-size:12px;">${q.strength}% <span style="color:var(--an-text-dimmer);font-weight:600;">(avg ${q.avg}%)</span></span>
                     </div>
                     <div class="an-pass-bar-track">
                         <div class="an-pass-bar-fill"
-                            style="width:${q.passing}%;background:${q.passing >= 100 ? 'var(--an-green)' : q.passing >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};">
+                            style="width:${q.strength}%;background:${q.strength >= 100 ? 'var(--an-green)' : q.strength >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};">
                         </div>
                     </div>
                 </div>`).join('');
