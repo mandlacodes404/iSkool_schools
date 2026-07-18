@@ -172,14 +172,26 @@ window.fetchQuizzes = async function() {
 // ─────────────────────────────────────────────
 function saveQuizPageState() {
     const sidebar = document.querySelector('.lqz-sidebar-scroll');
+    const mainContent = document.querySelector('.main-content');
     const state = {
         selectedIdx:  window._learnerQuizSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mainScroll:    mainContent ? mainContent.scrollTop : 0,
         mobileSearch: document.getElementById('lqzMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lqz-mobile-folder-body:not(.collapsed)')).map(el => el.id),
+        openDesktopGroups: Array.from(document.querySelectorAll('.lqz-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
     };
     if (window.learnerPageState) window.learnerPageState.set('quiz', state);
     else sessionStorage.setItem('quizPageState', JSON.stringify(state));
+}
+
+function wireQuizScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.lqzScrollWired === '1') return;
+    mainContent.dataset.lqzScrollWired = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveQuizPageState();
+    }, { passive: true });
 }
 
 function restoreQuizPageState() {
@@ -204,11 +216,25 @@ function restoreQuizPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
+            if (Array.isArray(state.openDesktopGroups)) {
+                document.querySelectorAll('.lqz-desktop-teacher-body').forEach(body => {
+                    const open = state.openDesktopGroups.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const header = body.previousElementSibling;
+                    const chevron = header ? header.querySelector('.lqz-desktop-teacher-chevron') : null;
+                    if (chevron) chevron.classList.toggle('open', open);
+                });
+            }
             if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerQuiz(state.selectedIdx);
                 const sidebar = document.querySelector('.lqz-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
             }
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && Number.isFinite(state.mainScroll)) {
+                mainContent.scrollTop = state.mainScroll;
+            }
+            wireQuizScrollState();
         });
     } catch (e) { /* ignore bad state */ }
 }
@@ -1330,6 +1356,7 @@ window.toggleLqzDesktopGroup = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     const chevron = headerEl ? headerEl.querySelector('.lqz-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveQuizPageState();
 };
 
 function startQuizCountdowns() {

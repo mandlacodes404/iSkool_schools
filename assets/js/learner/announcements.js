@@ -84,14 +84,29 @@ window.fetchAnnouncements = async function() {
 // ─────────────────────────────────────────────
 function saveAnnouncementPageState() {
     const sidebar = document.querySelector('.lan-sidebar-scroll');
+    const mainContent = document.querySelector('.main-content');
     const state = {
         selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mainScroll:    mainContent ? mainContent.scrollTop : 0,
         mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
+        openDesktopGroups: Array.from(document.querySelectorAll('.lan-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
     };
     if (window.learnerPageState) window.learnerPageState.set('announcements', state);
     else sessionStorage.setItem('announcementPageState', JSON.stringify(state));
+}
+
+// Wires a passive scroll listener onto .main-content so mobile scroll
+// position saves as the learner scrolls, mirroring wireManualScrollState()
+// in manual.js. Guarded so it's only wired once per page load.
+function wireAnnouncementScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.lanScrollWired === '1') return;
+    mainContent.dataset.lanScrollWired = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveAnnouncementPageState();
+    }, { passive: true });
 }
 
 function restoreAnnouncementPageState() {
@@ -116,11 +131,25 @@ function restoreAnnouncementPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
+            if (Array.isArray(state.openDesktopGroups)) {
+                document.querySelectorAll('.lan-desktop-teacher-body').forEach(body => {
+                    const open = state.openDesktopGroups.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const header = body.previousElementSibling;
+                    const chevron = header ? header.querySelector('.lan-desktop-teacher-chevron') : null;
+                    if (chevron) chevron.classList.toggle('open', open);
+                });
+            }
             if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerAnnouncement(state.selectedIdx);
                 const sidebar = document.querySelector('.lan-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
             }
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && Number.isFinite(state.mainScroll)) {
+                mainContent.scrollTop = state.mainScroll;
+            }
+            wireAnnouncementScrollState();
         });
     } catch (e) { /* ignore bad state */ }
 }
@@ -931,6 +960,7 @@ window.toggleLanDesktopGroup = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     const chevron = headerEl ? headerEl.querySelector('.lan-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveAnnouncementPageState();
 };
 
 function escapeLearnerAnnouncementHtml(value) {

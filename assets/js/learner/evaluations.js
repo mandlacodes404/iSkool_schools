@@ -24,14 +24,26 @@ window.prefetchEvaluations = function () {
 // ─────────────────────────────────────────────
 function saveEvaluationPageState() {
     const sidebar = document.querySelector('.lev-sidebar-scroll');
+    const mainContent = document.querySelector('.main-content');
     const state = {
         selectedIdx:   window._learnerEvaluationSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mainScroll:    mainContent ? mainContent.scrollTop : 0,
         mobileSearch: document.getElementById('levMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lev-mobile-folder-body:not(.collapsed)')).map(el => el.id),
+        openDesktopGroups: Array.from(document.querySelectorAll('.lev-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
     };
     if (window.learnerPageState) window.learnerPageState.set('evaluations', state);
     else sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
+}
+
+function wireEvaluationScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.levScrollWired === '1') return;
+    mainContent.dataset.levScrollWired = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveEvaluationPageState();
+    }, { passive: true });
 }
 
 function restoreEvaluationPageState() {
@@ -56,11 +68,25 @@ function restoreEvaluationPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
+            if (Array.isArray(state.openDesktopGroups)) {
+                document.querySelectorAll('.lev-desktop-teacher-body').forEach(body => {
+                    const open = state.openDesktopGroups.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const header = body.previousElementSibling;
+                    const chevron = header ? header.querySelector('.lev-desktop-teacher-chevron') : null;
+                    if (chevron) chevron.classList.toggle('open', open);
+                });
+            }
             if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerEvaluation(state.selectedIdx);
                 const sidebar = document.querySelector('.lev-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
             }
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && Number.isFinite(state.mainScroll)) {
+                mainContent.scrollTop = state.mainScroll;
+            }
+            wireEvaluationScrollState();
         });
     } catch (e) { /* ignore bad state */ }
 }
@@ -753,6 +779,7 @@ window.toggleLevDesktopGroup = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     const chevron = headerEl ? headerEl.querySelector('.lev-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveEvaluationPageState();
 };
 
 window.levMobileSearch = function(val) {

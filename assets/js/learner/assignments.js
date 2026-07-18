@@ -113,14 +113,26 @@ window.fetchAssignments = async function() {
 // ─────────────────────────────────────────────
 function saveAssignmentPageState() {
     const sidebar = document.querySelector('.las-sidebar-scroll');
+    const mainContent = document.querySelector('.main-content');
     const state = {
         selectedIdx:   window._learnerAssignmentSelectedIdx ?? null,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        mainScroll:    mainContent ? mainContent.scrollTop : 0,
         mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
+        openDesktopGroups: Array.from(document.querySelectorAll('.las-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
     };
     if (window.learnerPageState) window.learnerPageState.set('assignments', state);
     else sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
+}
+
+function wireAssignmentScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.lasScrollWired === '1') return;
+    mainContent.dataset.lasScrollWired = '1';
+    mainContent.addEventListener('scroll', () => {
+        saveAssignmentPageState();
+    }, { passive: true });
 }
 
 function restoreAssignmentPageState() {
@@ -145,11 +157,25 @@ function restoreAssignmentPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
+            if (Array.isArray(state.openDesktopGroups)) {
+                document.querySelectorAll('.las-desktop-teacher-body').forEach(body => {
+                    const open = state.openDesktopGroups.includes(body.id);
+                    body.classList.toggle('collapsed', !open);
+                    const header = body.previousElementSibling;
+                    const chevron = header ? header.querySelector('.las-desktop-teacher-chevron') : null;
+                    if (chevron) chevron.classList.toggle('open', open);
+                });
+            }
             if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
                 window.selectDesktopLearnerAssignment(state.selectedIdx);
                 const sidebar = document.querySelector('.las-sidebar-scroll');
                 if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
             }
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && Number.isFinite(state.mainScroll)) {
+                mainContent.scrollTop = state.mainScroll;
+            }
+            wireAssignmentScrollState();
         });
     } catch (e) { /* ignore bad state */ }
 }
@@ -866,6 +892,7 @@ window.toggleLasDesktopGroup = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     const chevron = headerEl ? headerEl.querySelector('.las-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
+    saveAssignmentPageState();
 };
 
 window.lasMobileSearch = function(val) {

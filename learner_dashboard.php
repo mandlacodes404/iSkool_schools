@@ -265,27 +265,27 @@ function getCsrfToken() {
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links" style="margin-top:50px;">
-      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" id="nav-home-sidebar">
+      <a href="javascript:void(0)" class="desktop-only" onclick="window.prepareLearnerMobileNavigation(); loadManual();" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
 </svg><span>Home</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only" id="nav-quiz-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchQuizzes(); updateHeaderTitle('Quizzes')" class="desktop-only" id="nav-quiz-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only" id="nav-assignments-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchAssignments(); updateHeaderTitle('Assignments')" class="desktop-only" id="nav-assignments-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
         </a>
 
-       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" class="desktop-only" id="nav-resources-sidebar">
+       <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchResources(); updateHeaderTitle('Resources')" class="desktop-only" id="nav-resources-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
         </a>
 
         <a href="javascript:void(0)"
-   onclick="fetchGrades(); updateHeaderTitle('Gradebook')"
+   onclick="window.prepareLearnerMobileNavigation(); fetchGrades(); updateHeaderTitle('Gradebook')"
    data-page="grades" id="nav-grades-sidebar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
@@ -296,15 +296,15 @@ function getCsrfToken() {
     <span>Gradebook</span>
 </a>
 
-        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" id="nav-announcements-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchAnnouncements(); updateHeaderTitle('Announcements')" id="nav-announcements-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" id="nav-evaluations-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchEvaluations(); updateHeaderTitle('Evaluations')" id="nav-evaluations-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Evaluations</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -315,11 +315,11 @@ function getCsrfToken() {
     </svg>
     <span>Syllabus</span>
 </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" id="nav-discussions-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchDiscussions(); updateHeaderTitle('Discussions')" id="nav-discussions-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchLearnerCalendar()" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
+        <a href="javascript:void(0)" onclick="window.prepareLearnerMobileNavigation(); fetchLearnerCalendar()" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -2783,16 +2783,16 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=5.0"></script>
-<script src="assets/js/learner/quiz.js?v=7.8"></script>
-<script src="assets/js/learner/assignments.js?v=7.1"></script>
-<script src="assets/js/learner/resources.js?v=5.9"></script>
-<script src="assets/js/learner/announcements.js?v=6.6"></script>
-<script src="assets/js/learner/grades.js?v=4.5"></script>
-<script src="assets/js/learner/evaluations.js?v=3.5"></script>
-<script src="assets/js/learner/discussions.js?v=7.5"></script>
-<script src="assets/js/learner/syllabus.js?v=2.2"></script>
-<script src="assets/js/learner/learner_calendar.js?v=1.7"></script>
+<script src="assets/js/learner/manual.js?v=5.1"></script>
+<script src="assets/js/learner/quiz.js?v=7.9"></script>
+<script src="assets/js/learner/assignments.js?v=7.2"></script>
+<script src="assets/js/learner/resources.js?v=6.0"></script>
+<script src="assets/js/learner/announcements.js?v=6.7"></script>
+<script src="assets/js/learner/grades.js?v=4.6"></script>
+<script src="assets/js/learner/evaluations.js?v=3.6"></script>
+<script src="assets/js/learner/discussions.js?v=7.6"></script>
+<script src="assets/js/learner/syllabus.js?v=2.3"></script>
+<script src="assets/js/learner/learner_calendar.js?v=1.8"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
