@@ -54,7 +54,7 @@ window.fetchTeacherAssignments = async function() {
         renderTeacherAssignments(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="as-error-message">
                 Error loading assignments.
             </p>`;
     }
@@ -70,7 +70,7 @@ function renderTeacherAssignments(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No assignments created yet.</p>`;
+        sidebarHtml = `<p class="teacher-empty-state as-empty-state-inline">No assignments created yet.</p>`;
     } else {
         // Group by class_name for display, but keep each item's original
         // index into window._allAssignmentsFlat so selectDesktopAssignment(index)
@@ -106,7 +106,7 @@ function renderTeacherAssignments(data) {
                             <div class="as-sidebar-item-title">${assignment.title}</div>
                             <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
                         </div>
-                        <span class="as-sidebar-status-dot" style="background:${dotColor};"></span>
+                        <span class="as-sidebar-status-dot" style="--as-dot-color:${dotColor};"></span>
                     </div>`;
             });
             sidebarHtml += window.buildCollapsibleClassGroup(
@@ -120,202 +120,13 @@ function renderTeacherAssignments(data) {
 
     // ── Build full HTML ──
     let html = `
-        <style>
-            /* ── Desktop split layout ── */
-            @media (min-width: 900px) {
-                .as-desktop-layout { display: flex !important; }
-                .as-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .as-desktop-layout { display: none !important; }
-                .as-mobile-list    { display: block !important; }
-            }
-
-            .as-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            /* Left sidebar */
-            .as-sidebar {
-                width: 280px;
-                min-width: 240px;
-                max-width: 300px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .as-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            .as-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .as-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .as-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .as-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .as-sidebar-class-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
-            .as-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-
-            .as-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px 10px 32px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .as-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .as-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .as-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .as-sidebar-item-info { flex: 1; min-width: 0; }
-            .as-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .as-sidebar-item.active .as-sidebar-item-title { color: #e2e8f0; }
-            .as-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-            .as-sidebar-status-dot {
-                width: 7px; height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
-
-            /* Right panel */
-            .as-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .as-main-panel::-webkit-scrollbar { width: 5px; }
-            .as-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .as-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .as-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .as-panel-empty svg { opacity: 0.3; }
-            .as-panel-empty p { font-size: 14px; margin: 0; }
-
-            .as-panel-content { padding: 28px 32px; }
-
-            .as-panel-header {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 16px;
-                margin-bottom: 20px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                flex-wrap: wrap;
-            }
-            .as-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 6px;
-            }
-            .as-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            .as-panel-actions {
-                display: flex;
-                gap: 8px;
-                flex-shrink: 0;
-                flex-wrap: wrap;
-            }
-            .as-panel-desc {
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
-                padding: 16px 18px;
-                font-size: 13px;
-                color: #c9d1d9;
-                line-height: 1.7;
-                margin-bottom: 20px;
-            }
-            .as-panel-progress-row {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 20px;
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
-                padding: 14px 18px;
-            }
-            .as-panel-progress-bar {
-                flex: 1;
-                height: 6px;
-                background: rgba(255,255,255,0.08);
-                border-radius: 4px;
-                overflow: hidden;
-            }
-            .as-panel-progress-fill {
-                height: 100%;
-                border-radius: 4px;
-                transition: width 0.4s ease;
-            }
-            .as-panel-progress-label {
-                font-size: 13px;
-                font-weight: 700;
-                white-space: nowrap;
-            }
-            @media (max-width: 899px) {
-                .as-desktop-only-btn { display: none !important; }
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="as-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
             <div class="as-sidebar tchr-flat-sidebar">
-                <div class="as-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="as-sidebar-header">
                     <span>Assignments</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="as-new-btn" onclick="openCreateAssignment()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create as-new-btn" id="as-new-btn" onclick="openCreateAssignment()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -383,15 +194,15 @@ function renderTeacherAssignments(data) {
                             <div class="teacher-assignment-progress">
                                 <div class="teacher-assignment-progress-bar">
                                     <div class="teacher-assignment-progress-fill"
-                                        style="width:${subPercent}%;background:${progressColor};">
+                                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};">
                                     </div>
                                 </div>
-                                <span class="teacher-assignment-progress-label" style="color:${progressColor};">
+                                <span class="teacher-assignment-progress-label" style="--as-progress-color:${progressColor};">
                                     ${subCount}/${totalCount} submitted
                                 </span>
                             </div>
                         </div>
-                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+                        <div class="as-card-side-actions">
                             ${assignment.file_url ? `
                                 <a href="${assignment.file_url}" target="_blank"
                                     onclick="event.stopPropagation()"
@@ -411,14 +222,13 @@ function renderTeacherAssignments(data) {
                                 Download All
                             </button>
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"
-                                class="teacher-assignment-chevron" id="achevron-${index}"
-                                style="transition:transform 0.3s ease;">
+                                class="teacher-assignment-chevron as-chevron" id="achevron-${index}">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </div>
                     </div>
 
-                    <div class="teacher-assignment-submissions" id="asubs-${index}" style="display:none;">
+                    <div class="teacher-assignment-submissions as-submissions-collapsible" id="asubs-${index}">
                         <div class="teacher-assignment-desc">
                             ${assignment.description.replace(/\n/g, '<br>')}
                         </div>
@@ -437,7 +247,7 @@ function renderTeacherAssignments(data) {
             assignment.submissions.forEach(sub => {
                 const statusBadge = sub.submitted
                     ? `<span class="teacher-sub-badge submitted">Submitted</span>
-                       <div style="font-size:11px;color:#8b949e;margin-top:3px;">${sub.submitted_at}</div>`
+                       <div class="as-sub-timestamp">${sub.submitted_at}</div>`
                     : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
 
                 let subContent = '—';
@@ -451,7 +261,7 @@ function renderTeacherAssignments(data) {
                             </div>`;
                     } else if (sub.submission_type === 'audio' && sub.audio_url) {
                         subContent = `
-                            <audio controls style="max-width:200px;height:32px;">
+                            <audio controls class="as-sub-audio">
                                 <source src="${sub.audio_url}" type="audio/mpeg">
                             </audio>`;
                     }
@@ -461,7 +271,7 @@ function renderTeacherAssignments(data) {
                     <tr>
                         <td>${sub.name}</td>
                         <td>${statusBadge}</td>
-                        <td style="color:#8b949e;font-size:13px;">${sub.submission_type || '—'}</td>
+                        <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
                         <td>${subContent}</td>
                     </tr>`;
             });
@@ -527,7 +337,7 @@ window.selectDesktopAssignment = function(index) {
     assignment.submissions.forEach(sub => {
         const statusBadge = sub.submitted
             ? `<span class="teacher-sub-badge submitted">Submitted</span>
-               <div style="font-size:11px;color:#8b949e;margin-top:3px;">${sub.submitted_at}</div>`
+               <div class="as-sub-timestamp">${sub.submitted_at}</div>`
             : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
 
         let subContent = '—';
@@ -537,7 +347,7 @@ window.selectDesktopAssignment = function(index) {
             } else if (sub.submission_type === 'text' && sub.text_answer) {
                 subContent = `<div class="teacher-sub-text">${sub.text_answer.replace(/\n/g, '<br>')}</div>`;
             } else if (sub.submission_type === 'audio' && sub.audio_url) {
-                subContent = `<audio controls style="max-width:180px;height:32px;"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
+                subContent = `<audio controls class="as-sub-audio as-sub-audio--panel"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
             }
         }
 
@@ -545,7 +355,7 @@ window.selectDesktopAssignment = function(index) {
             <tr>
                 <td>${sub.name}</td>
                 <td>${statusBadge}</td>
-                <td style="color:#8b949e;font-size:13px;">${sub.submission_type || '—'}</td>
+                <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
                 <td>${subContent}</td>
             </tr>`;
     });
@@ -585,9 +395,9 @@ window.selectDesktopAssignment = function(index) {
             <div class="as-panel-progress-row">
                 <div class="as-panel-progress-bar">
                     <div class="as-panel-progress-fill"
-                        style="width:${subPercent}%;background:${progressColor};"></div>
+                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};"></div>
                 </div>
-                <span class="as-panel-progress-label" style="color:${progressColor};">
+                <span class="as-panel-progress-label" style="--as-progress-color:${progressColor};">
                     ${subCount}/${totalCount} submitted
                 </span>
             </div>
@@ -665,20 +475,16 @@ window.openCreateAssignment = async function() {
             if (newBtn) newBtn.classList.add('active');
         }
 
-        const backFn    = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
-        const headerPad = isDesktop ? 'padding:20px 32px 0;' : '';
-        const formPad   = isDesktop ? 'padding:0 32px 32px;' : '';
+        const backFn = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
 
         target.innerHTML = `
-            <div style="max-width:560px;margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin:${isDesktop ? '0 0 20px' : '0 0 24px'};">
-                    <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:0;font-weight:800;">
+            <div class="as-form-wrap ${isDesktop ? 'as-form-wrap--desktop' : 'as-form-wrap--mobile'}">
+                <div class="as-form-header ${isDesktop ? 'as-form-header--desktop' : ''}">
+                    <h2 class="as-form-title ${isDesktop ? 'as-form-title--desktop' : ''}">
                         Create New Assignment
                     </h2>
                     ${isDesktop ? `
-                        <button onclick="fetchTeacherAssignments()"
-                            style="background:none;border:none;color:#8b949e;font-size:22px;
-                                   cursor:pointer;line-height:1;padding:0;">&times;</button>
+                        <button onclick="fetchTeacherAssignments()" class="as-form-close-btn">&times;</button>
                     ` : ''}
                 </div>
 
@@ -689,8 +495,8 @@ window.openCreateAssignment = async function() {
                         placeholder="e.g. Chapter 5 Essay" required>
 
                     <label class="teacher-modal-label">Description *</label>
-                    <textarea name="description" class="teacher-modal-input" rows="4"
-                        style="resize:vertical;" placeholder="Describe the assignment..." required></textarea>
+                    <textarea name="description" class="teacher-modal-input as-form-textarea" rows="4"
+                        placeholder="Describe the assignment..." required></textarea>
 
                     <label class="teacher-modal-label">Due Date *</label>
                     <input type="datetime-local" name="due_date" class="teacher-modal-input" required>
@@ -698,34 +504,32 @@ window.openCreateAssignment = async function() {
                     <label class="teacher-modal-label">Assign to Class *</label>
                     <div id="assignmentClassPicker"></div>
 
-                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
-                        <div style="font-size:18px;font-weight:800;color:#4fd1c5;">
+                    <div class="as-term-banner">
+                        <div class="as-term-banner-title">
                             Posting to: TERM ${currentTerm}
                         </div>
-                        <div style="font-size:12px;color:#8b949e;margin-top:4px;">
+                        <div class="as-term-banner-subtitle">
                             This assignment belongs to the current active term.
                         </div>
                     </div>
 
                     <label class="teacher-modal-label">Attachment (optional)</label>
-                    <input type="file" name="attachment"
-                        style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
+                    <input type="file" name="attachment" class="as-file-input">
 
-                    <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;margin-top:16px;">
-                        <input type="checkbox" name="force_email" value="1"
-                            style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;margin-top:2px;flex-shrink:0;">
+                    <label class="as-email-checkbox-label">
+                        <input type="checkbox" name="force_email" value="1" class="as-email-checkbox">
                         <span>Learners automatically get mobile notifications. Tick this box to also send email notifications.</span>
                     </label>
 
-                    <div id="caError" style="color:#ff5555;font-size:14px;margin-top:12px;display:none;"></div>
+                    <div id="caError" class="as-form-error"></div>
 
-                    <div style="display:flex;gap:12px;margin-top:20px;margin-bottom:32px;">
+                    <div class="as-form-actions">
                         <button type="button" onclick="fetchTeacherAssignments()"
-                            class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                            class="teacher-modal-cancel as-form-cancel-btn">
                             Cancel
                         </button>
-                        <button type="submit" class="teacher-modal-submit"
-                            id="caSubmitBtn" style="flex:2;padding:13px;font-size:14px;">
+                        <button type="submit" class="teacher-modal-submit as-form-submit-btn"
+                            id="caSubmitBtn">
                             Create Assignment
                         </button>
                     </div>
@@ -787,7 +591,7 @@ window.openCreateAssignment = async function() {
     } catch (e) {
         console.error(e);
         target.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="as-error-message">
                 Error loading create assignment form.
             </p>`;
     } finally {
