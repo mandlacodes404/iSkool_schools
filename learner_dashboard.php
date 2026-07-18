@@ -760,7 +760,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. LOADER & MOBILE AUTO-CLOSE (Teacher-style navigation)
     // ────────────────────────────────────────────────────────────────────────
     
-    document.querySelectorAll('#mobileBottomNav a').forEach(link => {
+    document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('touchstart', () => {
             window.prepareLearnerMobileNavigation();
         }, { passive: true });
@@ -801,6 +801,12 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
                 mobileOverlay.style.display = "none";
             }
         }
+
+        // 1b. MOBILE SCROLL STABILIZATION
+        // touchstart above already handles this on real touch devices, ahead
+        // of the click; this is the fallback for anything that reaches click
+        // without a preceding touchstart (mouse, keyboard, assistive tech).
+        window.prepareLearnerMobileNavigation();
 
         // 2. Detect same-page clicks
         let currentIframePage = '';
