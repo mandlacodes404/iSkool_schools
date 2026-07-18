@@ -120,6 +120,30 @@ window.loadManual = async function(containerId = 'api-content-area') {
     }
 };
 
+// ── Silent background prefetch for all learner pages ──
+// Stagger them so they don't compete with whatever page is rendering right
+// now. Pass the sessionStorage "lastLearnerPage" value (or equivalent) as
+// `skipKey` to avoid double-fetching the page that's already being loaded
+// directly — e.g. on refresh, the restored page gets its own real fetch,
+// so there's no need to also prefetch it here.
+window.kickOffLearnerPrefetches = function(skipKey) {
+    const wants = (key) => !skipKey || !skipKey.includes(key);
+
+    setTimeout(() => {
+        if (wants('quiz_list.php')       && typeof window.prefetchQuizzes        === 'function') window.prefetchQuizzes();
+        if (wants('assignment_list.php') && typeof window.prefetchAssignments    === 'function') window.prefetchAssignments();
+    }, 1500);
+    setTimeout(() => {
+        if (wants('resource_list.php')     && typeof window.prefetchResources     === 'function') window.prefetchResources();
+        if (wants('announcement_list.php') && typeof window.prefetchAnnouncements === 'function') window.prefetchAnnouncements();
+    }, 3000);
+    setTimeout(() => {
+        if (wants('syllabus')            && typeof window.prefetchSyllabus       === 'function') window.prefetchSyllabus();
+        if (wants('evaluation_list.php') && typeof window.prefetchEvaluations    === 'function') window.prefetchEvaluations();
+        if (wants('discussion_list.php') && typeof window.prefetchDiscussions    === 'function') window.prefetchDiscussions();
+    }, 5000);
+};
+
 // Called after home HTML is injected — loads calendar on desktop only, then kicks off prefetches
 function afterHomeRender() {
     restoreManualPageState();
@@ -134,21 +158,8 @@ function afterHomeRender() {
 
     }
 
-    // ── Silent background prefetch for all other pages ──
-    // Stagger them so they don't compete with the home render network traffic.
-    setTimeout(() => {
-        if (typeof window.prefetchQuizzes        === 'function') window.prefetchQuizzes();
-        if (typeof window.prefetchAssignments    === 'function') window.prefetchAssignments();
-    }, 1500);
-    setTimeout(() => {
-        if (typeof window.prefetchResources      === 'function') window.prefetchResources();
-        if (typeof window.prefetchAnnouncements  === 'function') window.prefetchAnnouncements();
-    }, 3000);
-    setTimeout(() => {
-        if (typeof window.prefetchSyllabus       === 'function') window.prefetchSyllabus();
-        if (typeof window.prefetchEvaluations    === 'function') window.prefetchEvaluations();
-        if (typeof window.prefetchDiscussions    === 'function') window.prefetchDiscussions();
-    }, 5000);
+    // Skip nothing here — Home doesn't overlap with any of these pages.
+    window.kickOffLearnerPrefetches();
 }
 
 // ─────────────────────────────────────────────

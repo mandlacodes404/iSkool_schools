@@ -601,6 +601,26 @@ document.addEventListener("DOMContentLoaded", function () {
     // UPDATE THIS LINE: Change localStorage to sessionStorage
     const savedPage = sessionStorage.getItem("lastLearnerPage");
 
+    // Refresh normally only warms the ONE page you land on — every other
+    // page (Quizzes, Announcements, Resources, etc.) stays cold for the
+    // rest of the session because the prefetch chain in afterHomeRender()
+    // only ever runs after Home renders. Kick it off here too so a refresh
+    // on any page still warms the rest in the background, same as Home does.
+    // Detail deep-links (e.g. "quiz_detail") map to their list page so we
+    // don't redundantly prefetch the same page that's about to be fetched
+    // directly for the detail view.
+    const detailToListPage = {
+        quiz_detail: 'quiz_list.php',
+        announcement_detail: 'announcement_list.php',
+        evaluation_detail: 'evaluation_list.php',
+        assignment_detail: 'assignment_list.php',
+        discussion: 'discussion_list.php'
+    };
+    const prefetchSkipKey = detailToListPage[targetPage] || targetPage || savedPage;
+    if (typeof window.kickOffLearnerPrefetches === 'function') {
+        window.kickOffLearnerPrefetches(prefetchSkipKey);
+    }
+
  if (targetPage) {
     window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -2783,15 +2803,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=5.5"></script>
-<script src="assets/js/learner/quiz.js?v=8.4"></script>
-<script src="assets/js/learner/assignments.js?v=7.7"></script>
-<script src="assets/js/learner/resources.js?v=6.6"></script>
-<script src="assets/js/learner/announcements.js?v=7.3"></script>
-<script src="assets/js/learner/grades.js?v=5.2"></script>
-<script src="assets/js/learner/evaluations.js?v=4.2"></script>
-<script src="assets/js/learner/discussions.js?v=8.2"></script>
-<script src="assets/js/learner/syllabus.js?v=2.9"></script>
+<script src="assets/js/learner/manual.js?v=5.6"></script>
+<script src="assets/js/learner/quiz.js?v=8.5"></script>
+<script src="assets/js/learner/assignments.js?v=7.8"></script>
+<script src="assets/js/learner/resources.js?v=6.8"></script>
+<script src="assets/js/learner/announcements.js?v=7.5"></script>
+<script src="assets/js/learner/grades.js?v=5.6"></script>
+<script src="assets/js/learner/evaluations.js?v=4.5"></script>
+<script src="assets/js/learner/discussions.js?v=8.5"></script>
+<script src="assets/js/learner/syllabus.js?v=3.1"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.8"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
