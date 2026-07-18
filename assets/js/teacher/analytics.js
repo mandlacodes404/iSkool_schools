@@ -142,9 +142,27 @@ window.analyticsToggleCompare = function(chartKey, classId, term) {
 
     panel.classList.add('open');
     panel.innerHTML = `
+        <div class="an-compare-label">Compare against</div>
         <div class="an-compare-choice-row">
-            ${showGenderOption ? `<button class="an-compare-choice active" data-mode="gender" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'gender')">Gender (this class)</button>` : ''}
-            <button class="an-compare-choice${showGenderOption ? '' : ' active'}" data-mode="class" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'class')">Compare to another class</button>
+            ${showGenderOption ? `
+                <button class="an-compare-choice active" data-mode="gender" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'gender')">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Gender (this class)
+                </button>` : ''}
+            <button class="an-compare-choice${showGenderOption ? '' : ' active'}" data-mode="class" onclick="analyticsSetCompareMode('${chartKey}', ${classId}, ${term}, 'class')">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                </svg>
+                Another class
+            </button>
         </div>
         <div class="an-compare-class-picker" id="an-compare-class-picker-${chartKey}" style="display:${showGenderOption ? 'none' : 'flex'};">
             ${otherClasses.length
@@ -551,35 +569,32 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         .an-class-list {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 10px;
+            padding: 10px 0;
         }
 
         .an-class-list::-webkit-scrollbar { width: 3px; }
         .an-class-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
         .an-class-item {
-            padding: 12px 12px;
-            border-radius: 10px;
+            padding: 10px 16px;
             cursor: pointer;
-            margin-bottom: 6px;
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
             position: relative;
         }
 
         .an-class-item:hover {
             background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.08);
         }
 
         .an-class-item.active {
             background: rgba(var(--an-accent-rgb),0.08);
-            border-color: rgba(var(--an-accent-rgb),0.25);
+            border-left-color: var(--an-accent);
         }
 
         .an-class-item:focus-visible {
             outline: 2px solid var(--an-accent);
-            outline-offset: 2px;
+            outline-offset: -2px;
         }
 
         .an-class-item-top {
@@ -888,12 +903,28 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         .an-compare-panel {
             display: none;
             margin-bottom: 14px;
-            padding: 12px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
+            padding: 14px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 10px;
         }
-        .an-compare-panel.open { display: block; }
+        .an-compare-panel.open {
+            display: block;
+            animation: an-compare-panel-in 0.18s ease;
+        }
+        @keyframes an-compare-panel-in {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .an-compare-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--an-text-dimmer);
+            margin-bottom: 8px;
+        }
 
         .an-compare-choice-row {
             display: flex;
@@ -901,28 +932,36 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             flex-wrap: wrap;
         }
         .an-compare-choice {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 11px;
             font-weight: 700;
             color: var(--an-text-dim);
             background: transparent;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            padding: 6px 12px;
+            padding: 7px 13px;
             cursor: pointer;
             font-family: 'Nunito', sans-serif;
             transition: all 0.15s ease;
         }
+        .an-compare-choice svg { flex-shrink: 0; opacity: 0.75; transition: opacity 0.15s ease; }
         .an-compare-choice.active {
             color: #0d1117;
             background: var(--an-accent);
             border-color: var(--an-accent);
         }
+        .an-compare-choice.active svg { opacity: 1; }
         .an-compare-choice:not(.active):hover {
             border-color: rgba(255,255,255,0.25);
+            color: var(--an-text);
         }
 
         .an-compare-class-picker {
-            margin-top: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
             flex-direction: column;
         }
         .an-compare-class-picker select {
@@ -933,7 +972,14 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            padding: 8px 10px;
+            padding: 9px 11px;
+            cursor: pointer;
+            transition: border-color 0.15s ease;
+        }
+        .an-compare-class-picker select:hover,
+        .an-compare-class-picker select:focus {
+            border-color: rgba(var(--an-accent-rgb),0.5);
+            outline: none;
         }
         .an-compare-empty, .an-compare-loading, .an-compare-error {
             font-size: 12px;
