@@ -174,10 +174,14 @@ window.fetchQuizzes = async function() {
 function saveQuizPageState() {
     const sidebar = document.querySelector('.lqz-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('lqz-main-panel');
+    const selected = (window._allLearnerQuizzesFlat || [])[window._learnerQuizSelectedIdx];
     const state = {
-        selectedIdx:  window._learnerQuizSelectedIdx ?? null,
+        selectedId:   selected ? String(selected.id) : null,
+        selectedIdx:  window._learnerQuizSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
+        panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('lqzMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lqz-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lqz-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -188,11 +192,13 @@ function saveQuizPageState() {
 
 function wireQuizScrollState() {
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent || mainContent.dataset.lqzScrollWired === '1') return;
-    mainContent.dataset.lqzScrollWired = '1';
-    mainContent.addEventListener('scroll', () => {
-        saveQuizPageState();
-    }, { passive: true });
+    const sidebar = document.querySelector('.lqz-sidebar-scroll');
+    const panel = document.getElementById('lqz-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.lqzScrollWired === '1') return;
+        el.dataset.lqzScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('quiz', saveQuizPageState), { passive: true });
+    });
 }
 
 function restoreQuizPageState() {
@@ -200,7 +206,10 @@ function restoreQuizPageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('quiz')
             : JSON.parse(sessionStorage.getItem('quizPageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireQuizScrollState();
+            return;
+        }
         requestAnimationFrame(() => {
             if (state.mobileSearch) {
                 const input = document.getElementById('lqzMobileSearch');
@@ -226,16 +235,22 @@ function restoreQuizPageState() {
                     if (chevron) chevron.classList.toggle('open', open);
                 });
             }
-            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-                window.selectDesktopLearnerQuiz(state.selectedIdx);
-                const sidebar = document.querySelector('.lqz-sidebar-scroll');
-                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            const selectedIdx = state.selectedId
+                ? (window._allLearnerQuizzesFlat || []).findIndex(quiz => String(quiz.id) === String(state.selectedId))
+                : state.selectedIdx;
+            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+                window.selectDesktopLearnerQuiz(selectedIdx);
             }
+            const sidebar = document.querySelector('.lqz-sidebar-scroll');
+            if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
             const mainContent = document.querySelector('.main-content');
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
+            const panel = document.getElementById('lqz-main-panel');
+            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
             wireQuizScrollState();
+            saveQuizPageState();
         });
     } catch (e) { /* ignore bad state */ }
 }

@@ -4,6 +4,44 @@ window.learnerCalState   = { month: new Date().getMonth() + 1, year: new Date().
 window.learnerCalEvents  = [];
 window.learnerCalEventsCache = window.learnerCalEventsCache || {}; // per-month cache: { "YYYY-M": events[] }
 
+// Shared state-save queue for learner pages. Keeping it here means every
+// learner section uses the same lightweight, debounced persistence logic.
+(function addLearnerQueuedSaveSupport() {
+    const state = window.learnerPageState;
+    if (!state) return;
+
+    state._queuedSaves = state._queuedSaves || {};
+    state._saveTimers = state._saveTimers || {};
+    state.queueSave = function(key, save) {
+        if (typeof save !== 'function') return;
+        this._queuedSaves[key] = save;
+        clearTimeout(this._saveTimers[key]);
+        this._saveTimers[key] = setTimeout(() => {
+            const queuedSave = this._queuedSaves[key];
+            delete this._queuedSaves[key];
+            delete this._saveTimers[key];
+            if (queuedSave) queuedSave();
+        }, 150);
+    };
+    state.flushQueuedSaves = function() {
+        Object.keys(this._queuedSaves).forEach(key => {
+            clearTimeout(this._saveTimers[key]);
+            const queuedSave = this._queuedSaves[key];
+            delete this._queuedSaves[key];
+            delete this._saveTimers[key];
+            if (queuedSave) queuedSave();
+        });
+    };
+
+    if (!window._learnerStateFlushWired) {
+        window._learnerStateFlushWired = true;
+        window.addEventListener('pagehide', () => window.learnerPageState.flushQueuedSaves());
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') window.learnerPageState.flushQueuedSaves();
+        });
+    }
+})();
+
 function saveManualPageState(patch = {}) {
     const mainContent = document.querySelector('.main-content');
     const state = Object.assign({

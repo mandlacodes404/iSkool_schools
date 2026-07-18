@@ -115,10 +115,16 @@ window.fetchAssignments = async function() {
 function saveAssignmentPageState() {
     const sidebar = document.querySelector('.las-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('las-main-panel');
+    const selected = (window._allLearnerAssignmentsFlat || [])[window._learnerAssignmentSelectedIdx];
     const state = {
-        selectedIdx:   window._learnerAssignmentSelectedIdx ?? null,
+        // Keep the id, rather than only the rendered position. New work can
+        // appear at the top of the list between visits, changing every index.
+        selectedId:    selected ? String(selected.id) : null,
+        selectedIdx:   window._learnerAssignmentSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
+        panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.las-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -129,11 +135,13 @@ function saveAssignmentPageState() {
 
 function wireAssignmentScrollState() {
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent || mainContent.dataset.lasScrollWired === '1') return;
-    mainContent.dataset.lasScrollWired = '1';
-    mainContent.addEventListener('scroll', () => {
-        saveAssignmentPageState();
-    }, { passive: true });
+    const sidebar = document.querySelector('.las-sidebar-scroll');
+    const panel = document.getElementById('las-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.lasScrollWired === '1') return;
+        el.dataset.lasScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('assignments', saveAssignmentPageState), { passive: true });
+    });
 }
 
 function restoreAssignmentPageState() {
@@ -141,7 +149,10 @@ function restoreAssignmentPageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('assignments')
             : JSON.parse(sessionStorage.getItem('assignmentPageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireAssignmentScrollState();
+            return;
+        }
         requestAnimationFrame(() => {
             if (state.mobileSearch) {
                 const input = document.getElementById('lasMobileSearch');
@@ -167,16 +178,22 @@ function restoreAssignmentPageState() {
                     if (chevron) chevron.classList.toggle('open', open);
                 });
             }
-            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-                window.selectDesktopLearnerAssignment(state.selectedIdx);
-                const sidebar = document.querySelector('.las-sidebar-scroll');
-                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            const selectedIdx = state.selectedId
+                ? (window._allLearnerAssignmentsFlat || []).findIndex(task => String(task.id) === String(state.selectedId))
+                : state.selectedIdx;
+            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+                window.selectDesktopLearnerAssignment(selectedIdx);
             }
+            const sidebar = document.querySelector('.las-sidebar-scroll');
+            if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
             const mainContent = document.querySelector('.main-content');
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
+            const panel = document.getElementById('las-main-panel');
+            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
             wireAssignmentScrollState();
+            saveAssignmentPageState();
         });
     } catch (e) { /* ignore bad state */ }
 }

@@ -61,6 +61,13 @@ function getSavedLearnerCalendarState() {
     }
 }
 
+function wireLearnerCalendarScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent || mainContent.dataset.lcalScrollState === '1') return;
+    mainContent.dataset.lcalScrollState = '1';
+    mainContent.addEventListener('scroll', () => window.learnerPageState.queueSave('learner_calendar', saveLearnerCalendarState), { passive: true });
+}
+
 // ── ENTRY POINT ──
 window.fetchLearnerCalendar = async function () {
     sessionStorage.setItem('lastLearnerPage', 'learner_calendar');
@@ -97,6 +104,8 @@ window.fetchLearnerCalendar = async function () {
     requestAnimationFrame(() => {
         const mainContent = document.querySelector('.main-content');
         if (mainContent && Number.isFinite(savedState.scrollTop)) mainContent.scrollTop = savedState.scrollTop;
+        wireLearnerCalendarScrollState();
+        saveLearnerCalendarState();
     });
 };
 
@@ -120,6 +129,7 @@ async function renderLearnerCalendarPage(month, year) {
 
     apiArea.innerHTML = buildLearnerCalShell(month, year, window.learnerCalendarPageState.events);
     bindLearnerCalNav();
+    wireLearnerCalendarScrollState();
 }
 
 // ── HTML BUILDER ──

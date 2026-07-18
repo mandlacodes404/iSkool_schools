@@ -85,9 +85,13 @@ window.fetchSyllabus = async function() {
 // ─────────────────────────────────────────────
 function saveSyllabusPageState() {
     const mainContent = document.querySelector('.main-content');
+    const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
+    const panel = document.querySelector('.syl-dt-main-panel');
     const state = {
         activeTerm:  window._syllabusActiveTerm ?? null,
         scrollTop:   mainContent ? mainContent.scrollTop : 0,
+        sidebarScroll: sidebar ? sidebar.scrollTop : 0,
+        panelScroll: panel ? panel.scrollTop : 0,
     };
     if (window.learnerPageState) window.learnerPageState.set('syllabus', state);
     else sessionStorage.setItem('syllabusPageState', JSON.stringify(state));
@@ -98,17 +102,39 @@ function restoreSyllabusPageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('syllabus')
             : JSON.parse(sessionStorage.getItem('syllabusPageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireSyllabusScrollState();
+            return;
+        }
         if (state.activeTerm !== null && state.activeTerm !== undefined) {
             requestAnimationFrame(() => {
                 const tab = document.getElementById(`syl-mob-tab-${state.activeTerm}`)
                     || document.getElementById(`syl-dt-tab-${state.activeTerm}`);
                 if (tab) tab.click();
                 const mainContent = document.querySelector('.main-content');
-                if (mainContent) mainContent.scrollTop = state.scrollTop || 0;
+                const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
+                const panel = document.querySelector('.syl-dt-main-panel');
+                if (mainContent && Number.isFinite(state.scrollTop)) mainContent.scrollTop = state.scrollTop;
+                if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
+                if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+                wireSyllabusScrollState();
+                saveSyllabusPageState();
             });
+        } else {
+            wireSyllabusScrollState();
         }
     } catch (e) { /* ignore bad state */ }
+}
+
+function wireSyllabusScrollState() {
+    const mainContent = document.querySelector('.main-content');
+    const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
+    const panel = document.querySelector('.syl-dt-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.sylScrollWired === '1') return;
+        el.dataset.sylScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('syllabus', saveSyllabusPageState), { passive: true });
+    });
 }
 
 // ─────────────────────────────────────────────

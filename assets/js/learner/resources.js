@@ -78,10 +78,14 @@ window.fetchResources = async function() {
 function saveResourcePageState() {
     const sidebar = document.querySelector('.lrs-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('lrs-main-panel');
+    const selected = (window._allLearnerResourcesFlat || [])[window._learnerResourceSelectedIdx];
     const state = {
-        selectedIdx:   window._learnerResourceSelectedIdx ?? null,
+        selectedId:    selected ? String(selected.id) : null,
+        selectedIdx:   window._learnerResourceSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
+        panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('lrsMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lrs-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lrs-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -92,11 +96,13 @@ function saveResourcePageState() {
 
 function wireResourceScrollState() {
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent || mainContent.dataset.lrsScrollWired === '1') return;
-    mainContent.dataset.lrsScrollWired = '1';
-    mainContent.addEventListener('scroll', () => {
-        saveResourcePageState();
-    }, { passive: true });
+    const sidebar = document.querySelector('.lrs-sidebar-scroll');
+    const panel = document.getElementById('lrs-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.lrsScrollWired === '1') return;
+        el.dataset.lrsScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('resources', saveResourcePageState), { passive: true });
+    });
 }
 
 function restoreResourcePageState() {
@@ -104,7 +110,10 @@ function restoreResourcePageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('resources')
             : JSON.parse(sessionStorage.getItem('resourcePageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireResourceScrollState();
+            return;
+        }
         requestAnimationFrame(() => {
             if (state.mobileSearch) {
                 const input = document.getElementById('lrsMobileSearch');
@@ -130,16 +139,22 @@ function restoreResourcePageState() {
                     if (chevron) chevron.classList.toggle('open', open);
                 });
             }
-            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-                window.selectDesktopLearnerResource(state.selectedIdx);
-                const sidebar = document.querySelector('.lrs-sidebar-scroll');
-                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            const selectedIdx = state.selectedId
+                ? (window._allLearnerResourcesFlat || []).findIndex(file => String(file.id) === String(state.selectedId))
+                : state.selectedIdx;
+            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+                window.selectDesktopLearnerResource(selectedIdx);
             }
+            const sidebar = document.querySelector('.lrs-sidebar-scroll');
+            if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
             const mainContent = document.querySelector('.main-content');
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
+            const panel = document.getElementById('lrs-main-panel');
+            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
             wireResourceScrollState();
+            saveResourcePageState();
         });
     } catch (e) { /* ignore bad state */ }
 }

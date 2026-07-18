@@ -86,10 +86,17 @@ window.fetchAnnouncements = async function() {
 function saveAnnouncementPageState() {
     const sidebar = document.querySelector('.lan-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('lan-main-panel');
+    const selected = (window._allLearnerAnnouncementsFlat || [])[window._learnerAnnouncementSelectedIdx];
     const state = {
-        selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null,
+        // School and teacher announcements can come from separate sources,
+        // so keep the source with the id to avoid an accidental collision.
+        selectedKey:   selected ? `${selected._type || 'teacher'}:${selected.id}` : null,
+        selectedId:    selected ? String(selected.id) : null,
+        selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
+        panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lan-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -103,11 +110,13 @@ function saveAnnouncementPageState() {
 // in manual.js. Guarded so it's only wired once per page load.
 function wireAnnouncementScrollState() {
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent || mainContent.dataset.lanScrollWired === '1') return;
-    mainContent.dataset.lanScrollWired = '1';
-    mainContent.addEventListener('scroll', () => {
-        saveAnnouncementPageState();
-    }, { passive: true });
+    const sidebar = document.querySelector('.lan-sidebar-scroll');
+    const panel = document.getElementById('lan-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.lanScrollWired === '1') return;
+        el.dataset.lanScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('announcements', saveAnnouncementPageState), { passive: true });
+    });
 }
 
 function restoreAnnouncementPageState() {
@@ -115,7 +124,10 @@ function restoreAnnouncementPageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('announcements')
             : JSON.parse(sessionStorage.getItem('announcementPageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireAnnouncementScrollState();
+            return;
+        }
         requestAnimationFrame(() => {
             if (state.mobileSearch) {
                 const input = document.getElementById('lanMobileSearch');
@@ -141,16 +153,24 @@ function restoreAnnouncementPageState() {
                     if (chevron) chevron.classList.toggle('open', open);
                 });
             }
-            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-                window.selectDesktopLearnerAnnouncement(state.selectedIdx);
-                const sidebar = document.querySelector('.lan-sidebar-scroll');
-                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            const selectedIdx = state.selectedKey
+                ? (window._allLearnerAnnouncementsFlat || []).findIndex(ann => `${ann._type || 'teacher'}:${ann.id}` === state.selectedKey)
+                : state.selectedId
+                    ? (window._allLearnerAnnouncementsFlat || []).findIndex(ann => String(ann.id) === String(state.selectedId))
+                : state.selectedIdx;
+            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+                window.selectDesktopLearnerAnnouncement(selectedIdx);
             }
+            const sidebar = document.querySelector('.lan-sidebar-scroll');
+            if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
             const mainContent = document.querySelector('.main-content');
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
+            const panel = document.getElementById('lan-main-panel');
+            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
             wireAnnouncementScrollState();
+            saveAnnouncementPageState();
         });
     } catch (e) { /* ignore bad state */ }
 }

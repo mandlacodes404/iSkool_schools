@@ -42,6 +42,9 @@ window.learnerProgressReportCache = window.learnerProgressReportCache || {};
         update(page, patch) {
             this.set(page, Object.assign({}, this.get(page), patch || {}));
         },
+        // manual.js owns the shared queue; retain it while normalising this helper.
+        queueSave: typeof existing.queueSave === 'function' ? existing.queueSave.bind(existing) : undefined,
+        flushQueuedSaves: typeof existing.flushQueuedSaves === 'function' ? existing.flushQueuedSaves.bind(existing) : undefined,
         clear(page) {
             if (typeof existing.clear === 'function') {
                 existing.clear(page);

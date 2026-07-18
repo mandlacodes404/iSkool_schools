@@ -25,10 +25,14 @@ window.prefetchEvaluations = function () {
 function saveEvaluationPageState() {
     const sidebar = document.querySelector('.lev-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
+    const panel = document.getElementById('lev-main-panel');
+    const selected = (window._allLearnerEvaluationsFlat || [])[window._learnerEvaluationSelectedIdx];
     const state = {
-        selectedIdx:   window._learnerEvaluationSelectedIdx ?? null,
+        selectedId:    selected ? String(selected.id) : null,
+        selectedIdx:   window._learnerEvaluationSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
+        panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('levMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lev-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lev-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -39,11 +43,13 @@ function saveEvaluationPageState() {
 
 function wireEvaluationScrollState() {
     const mainContent = document.querySelector('.main-content');
-    if (!mainContent || mainContent.dataset.levScrollWired === '1') return;
-    mainContent.dataset.levScrollWired = '1';
-    mainContent.addEventListener('scroll', () => {
-        saveEvaluationPageState();
-    }, { passive: true });
+    const sidebar = document.querySelector('.lev-sidebar-scroll');
+    const panel = document.getElementById('lev-main-panel');
+    [mainContent, sidebar, panel].forEach(el => {
+        if (!el || el.dataset.levScrollWired === '1') return;
+        el.dataset.levScrollWired = '1';
+        el.addEventListener('scroll', () => window.learnerPageState.queueSave('evaluations', saveEvaluationPageState), { passive: true });
+    });
 }
 
 function restoreEvaluationPageState() {
@@ -51,7 +57,10 @@ function restoreEvaluationPageState() {
         const state = window.learnerPageState
             ? window.learnerPageState.get('evaluations')
             : JSON.parse(sessionStorage.getItem('evaluationPageState') || '{}');
-        if (!state || Object.keys(state).length === 0) return;
+        if (!state || Object.keys(state).length === 0) {
+            wireEvaluationScrollState();
+            return;
+        }
         requestAnimationFrame(() => {
             if (state.mobileSearch) {
                 const input = document.getElementById('levMobileSearch');
@@ -77,16 +86,22 @@ function restoreEvaluationPageState() {
                     if (chevron) chevron.classList.toggle('open', open);
                 });
             }
-            if (state.selectedIdx !== null && state.selectedIdx !== undefined) {
-                window.selectDesktopLearnerEvaluation(state.selectedIdx);
-                const sidebar = document.querySelector('.lev-sidebar-scroll');
-                if (sidebar) sidebar.scrollTop = state.sidebarScroll || 0;
+            const selectedIdx = state.selectedId
+                ? (window._allLearnerEvaluationsFlat || []).findIndex(evaluation => String(evaluation.id) === String(state.selectedId))
+                : state.selectedIdx;
+            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+                window.selectDesktopLearnerEvaluation(selectedIdx);
             }
+            const sidebar = document.querySelector('.lev-sidebar-scroll');
+            if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
             const mainContent = document.querySelector('.main-content');
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
+            const panel = document.getElementById('lev-main-panel');
+            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
             wireEvaluationScrollState();
+            saveEvaluationPageState();
         });
     } catch (e) { /* ignore bad state */ }
 }
