@@ -37,16 +37,15 @@ window.fetchResources = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 4a. If prefetch is still in-flight, wait for it (no duplicate request)
+    // 4a. If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.resourcePrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.resourcePrefetchPromise;
     }
 
     // 4b. CACHE CHECK (Instant Load)
     if (window.resourceCache) {
         renderResourceCards(window.resourceCache);
-        if (loader) loader.style.display = 'none';
         restoreResourcePageState();
         return;
     }

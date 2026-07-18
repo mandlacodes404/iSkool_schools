@@ -123,16 +123,15 @@ window.fetchQuizzes = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 3a. If prefetch is still in-flight, wait for it (no duplicate request)
+    // 3a. If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.learnerQuizPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.learnerQuizPrefetchPromise;
     }
 
     // 3b. Cache Check – serve instantly
     if (window.learnerQuizCache) {
         renderQuizCards(window.learnerQuizCache);
-        if (loader) loader.style.display = 'none';
         restoreQuizPageState();
         return;
     }

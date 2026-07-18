@@ -66,16 +66,15 @@ window.fetchAssignments = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 6a. If prefetch is still in-flight, wait for it (no duplicate request)
+    // 6a. If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.learnerAssignmentPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.learnerAssignmentPrefetchPromise;
     }
 
     // 6b. CACHE LOGIC
     if (window.learnerAssignmentCache) {
         renderAssignmentCards(window.learnerAssignmentCache);
-        if (loader) loader.style.display = 'none';
         restoreAssignmentPageState();
         return;
     }

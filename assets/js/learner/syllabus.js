@@ -32,9 +32,9 @@ window.fetchSyllabus = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove('active');
 
-    // If prefetch is still in-flight, wait for it (no duplicate request)
+    // If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.syllabusPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.syllabusPrefetchPromise;
     }
 
@@ -42,7 +42,6 @@ window.fetchSyllabus = async function() {
     if (window.syllabusCache) {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
-        if (loader) loader.style.display = 'none';
         restoreSyllabusPageState();
         return;
     }

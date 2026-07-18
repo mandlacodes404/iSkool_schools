@@ -325,15 +325,14 @@ window.fetchDiscussions = async function(options = {}) {
         injectDesktopShell(apiArea);
     }
 
-    // If prefetch is still in-flight, wait for it (no duplicate request)
+    // If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.discussionPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.discussionPrefetchPromise;
     }
 
     if (window.discussionCache) {
         renderDiscussions(window.discussionCache);
-        if (loader) loader.style.display = 'none';
         if (openDiscussionId) {
             await window.loadDiscussionThread(openDiscussionId, { forceRefresh: true });
         } else {

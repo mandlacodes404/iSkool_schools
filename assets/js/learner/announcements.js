@@ -45,16 +45,15 @@ window.fetchAnnouncements = async function() {
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove("active");
 
-    // 4a. If prefetch is still in-flight, wait for it (no duplicate request)
+    // 4a. If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.announcementPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.announcementPrefetchPromise;
     }
 
     // 4b. CACHE CHECK (Instant Load)
     if (window.announcementCache) {
         renderAnnouncements(window.announcementCache);
-        if (loader) loader.style.display = 'none';
         restoreAnnouncementPageState();
         return;
     }

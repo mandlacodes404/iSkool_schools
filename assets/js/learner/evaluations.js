@@ -122,16 +122,15 @@ window.fetchEvaluations = async function() {
         document.head.appendChild(link);
     }
 
-    // 4. If prefetch is still in-flight, wait for it (no duplicate request)
+    // 4. If prefetch is still in-flight, wait for it (no duplicate request).
+    // No loader here — this is normally a few ms and caching makes it invisible.
     if (window.evaluationPrefetchPromise) {
-        if (loader) loader.style.display = 'flex';
         await window.evaluationPrefetchPromise;
     }
 
     // 4. FIXED CACHE CHECK
     if (window.evaluationCache) {
         renderEvaluationsUI(window.evaluationCache); // Call the correct internal function
-        if (loader) loader.style.display = 'none';
         restoreEvaluationPageState();
         return;
     }

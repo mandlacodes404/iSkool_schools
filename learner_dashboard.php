@@ -2771,14 +2771,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=5.0"></script>
-<script src="assets/js/learner/quiz.js?v=7.9"></script>
-<script src="assets/js/learner/assignments.js?v=7.2"></script>
-<script src="assets/js/learner/resources.js?v=6.1"></script>
-<script src="assets/js/learner/announcements.js?v=6.8"></script>
+<script src="assets/js/learner/quiz.js?v=8.0"></script>
+<script src="assets/js/learner/assignments.js?v=7.3"></script>
+<script src="assets/js/learner/resources.js?v=6.2"></script>
+<script src="assets/js/learner/announcements.js?v=6.9"></script>
 <script src="assets/js/learner/grades.js?v=4.7"></script>
-<script src="assets/js/learner/evaluations.js?v=3.7"></script>
-<script src="assets/js/learner/discussions.js?v=7.7"></script>
-<script src="assets/js/learner/syllabus.js?v=2.4"></script>
+<script src="assets/js/learner/evaluations.js?v=3.8"></script>
+<script src="assets/js/learner/discussions.js?v=7.8"></script>
+<script src="assets/js/learner/syllabus.js?v=2.5"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.8"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
