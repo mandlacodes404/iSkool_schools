@@ -36,12 +36,39 @@ const analyticsChartOpts = {
 };
 
 // ─────────────────────────────────────────────
-// TAP-TO-EXPLAIN: card/chart explanations shown in the info rail
+// TAP-TO-EXPLAIN: card/chart explanations shown in the info rail.
+//
+// Each entry's `body` can be either a fixed HTML string (unchanged, static
+// definition) or a function(data) that returns HTML computed live from the
+// currently-selected class/term's real numbers — a plain-language "why",
+// not just a definition. Functions must handle sparse/empty data
+// gracefully (e.g. a class with 0 published quizzes) and fall back to a
+// short, honest "not enough data yet" line rather than guessing.
 // ─────────────────────────────────────────────
 window.analyticsCardInfo = {
     'kpi-class-avg': {
         title: 'Class Average',
-        body: `<p>The average score across every published summative assessment for this class and term.</p>`
+        body: (data) => {
+            const quizAvgs = data?.quiz_averages || [];
+            if (!quizAvgs.length) {
+                return `<p>The average score across every published summative assessment for this class and term.</p>
+                        <p>No published assessments yet this term, so there's nothing to average.</p>`;
+            }
+            const avg = Math.round(quizAvgs.reduce((s, q) => s + q.avg, 0) / quizAvgs.length * 10) / 10;
+            const highest = quizAvgs.reduce((max, q) => q.avg > max.avg ? q : max, quizAvgs[0]);
+            const lowest  = quizAvgs.reduce((min, q) => q.avg < min.avg ? q : min, quizAvgs[0]);
+            const spread  = highest.avg - lowest.avg;
+
+            let why = '';
+            if (quizAvgs.length > 1 && spread >= 15) {
+                why = `<p><strong>${lowest.title}</strong> is pulling the average down at ${lowest.avg}%, well below <strong>${highest.title}</strong> at ${highest.avg}%.</p>`;
+            } else if (quizAvgs.length > 1) {
+                why = `<p>Fairly consistent across assessments — scores range from ${lowest.avg}% to ${highest.avg}%, not far from the ${avg}% average.</p>`;
+            } else {
+                why = `<p>Based on a single assessment (${quizAvgs[0].title}) so far this term.</p>`;
+            }
+            return `<p>The average score across every published summative assessment for this class and term.</p>${why}`;
+        }
     },
     'kpi-highest-quiz': {
         title: 'Highest Quiz',
@@ -53,7 +80,28 @@ window.analyticsCardInfo = {
     },
     'kpi-gender-gap': {
         title: 'Gender Gap',
-        body: `<p>The difference between boys' and girls' average scores this term. A larger gap may be worth a closer look.</p>`
+        body: (data) => {
+            const genderData = data?.quiz_gender_averages || [];
+            const boysScores  = genderData.map(d => d.boys).filter(v => v !== null);
+            const girlsScores = genderData.map(d => d.girls).filter(v => v !== null);
+            const def = `<p>The difference between boys' and girls' average scores this term, based on quizzes where both genders have results.</p>`;
+
+            if (!boysScores.length || !girlsScores.length) {
+                return `${def}<p>Not enough data yet — need at least one assessment with results from both boys and girls this term.</p>`;
+            }
+            const boysAvg  = boysScores.reduce((s, v) => s + v, 0)  / boysScores.length;
+            const girlsAvg = girlsScores.reduce((s, v) => s + v, 0) / girlsScores.length;
+            const diff = Math.abs(boysAvg - girlsAvg).toFixed(1);
+            const leader = boysAvg >= girlsAvg ? 'Boys' : 'Girls';
+            const trailer = leader === 'Boys' ? 'girls' : 'boys';
+
+            let sizeNote;
+            if (diff < 3)       sizeNote = 'a small, likely not meaningful gap.';
+            else if (diff < 10) sizeNote = 'a moderate gap worth keeping an eye on.';
+            else                sizeNote = 'a large gap that may be worth a closer look.';
+
+            return `${def}<p><strong>${leader}</strong> are ahead this term, averaging ${diff} points higher than ${trailer} — ${sizeNote}</p>`;
+        }
     },
     'chart-quiz-avg': {
         title: 'Quiz Average',
@@ -65,11 +113,56 @@ window.analyticsCardInfo = {
     },
     'chart-score-dist': {
         title: 'Score Distribution',
-        body: `<p>Shows how many learners landed in each score range for the term — useful for spotting whether most learners are clustered high, low, or spread out.</p>`
+        body: (data) => {
+            const dist = data?.score_distribution || [];
+            const total = dist.reduce((s, b) => s + (b.student_count || 0), 0);
+            const def = `<p>Shows how many learners landed in each score range for the term.</p>`;
+
+            if (!total) {
+                return `${def}<p>No scored assessments yet this term.</p>`;
+            }
+            const below50 = dist
+                .filter(b => b.bucket === '0-39' || b.bucket === '40-59')
+                .reduce((s, b) => s + (b.student_count || 0), 0);
+            // "40-59" spans the 50% line — count it as roughly half-below for
+            // an honest estimate, since we only have bucketed data, not the
+            // exact per-student number relative to 50%.
+            const roughBelow50 = dist
+                .filter(b => b.bucket === '0-39').reduce((s, b) => s + (b.student_count || 0), 0)
+                + Math.round((dist.find(b => b.bucket === '40-59')?.student_count || 0) / 2);
+            const pct = Math.round((roughBelow50 / total) * 100);
+
+            const topBucket = dist.reduce((max, b) => (b.student_count || 0) > (max.student_count || 0) ? b : max, dist[0]);
+            const clusterNote = (topBucket.student_count / total) >= 0.4
+                ? `<p>Most of the class (${topBucket.student_count} of ${total}) is clustered in the ${topBucket.bucket}% range.</p>`
+                : `<p>Scores are fairly spread out across ranges rather than clustered in one place.</p>`;
+
+            return `${def}<p>Roughly ${pct}% of the class (about ${roughBelow50} of ${total} learners) is trending below the 50% mark this term.</p>${clusterNote}`;
+        }
     },
     'chart-class-trend': {
         title: 'Class Performance by Term',
-        body: `<p>Tracks the class average across terms, so you can see whether performance is improving, declining, or holding steady.</p>`
+        body: (data, ctx) => {
+            const trend = data?.class_performance_by_term || [null,null,null,null];
+            const def = `<p>Tracks the class average across terms, so you can see whether performance is improving, declining, or holding steady.</p>`;
+
+            const term = ctx?.term || 1;
+            const termIdx = term - 1;
+            const priorAvg = termIdx > 0 ? trend[termIdx - 1] : null;
+            const currentAvg = trend[termIdx];
+
+            if (currentAvg === null || currentAvg === undefined) {
+                return `${def}<p>No published assessments yet for Term ${term}.</p>`;
+            }
+            if (priorAvg === null || priorAvg === undefined) {
+                return `${def}<p>Term ${term} average is ${currentAvg}% — this is the first term with data, so there's no prior term to compare against yet.</p>`;
+            }
+            const delta = Math.round((currentAvg - priorAvg) * 10) / 10;
+            const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'unchanged from';
+            const deltaText = delta === 0 ? '' : ` (${delta > 0 ? '+' : ''}${delta} points)`;
+
+            return `${def}<p>Term ${term} average is ${currentAvg}%, ${direction} from ${priorAvg}% in Term ${term - 1}${deltaText}.</p>`;
+        }
     },
     'chart-term-gender': {
         title: 'Boys vs Girls by Term',
@@ -94,7 +187,10 @@ window.analyticsShowInfo = function(key, el) {
     if (!info) return;
     document.querySelectorAll('.an-tappable.an-tapped').forEach(node => node.classList.remove('an-tapped'));
     if (el) el.classList.add('an-tapped');
-    if (typeof updateInfoRail === 'function') updateInfoRail('an-info-rail', info.title, info.body);
+    const body = (typeof info.body === 'function')
+        ? info.body(window._analyticsLastData, { term: window._analyticsLastTerm })
+        : info.body;
+    if (typeof updateInfoRail === 'function') updateInfoRail('an-info-rail', info.title, body);
 };
 
 // ─────────────────────────────────────────────
