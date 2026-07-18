@@ -51,7 +51,7 @@ window.fetchTeacherResources = async function() {
         renderTeacherResources(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="rs-error-message">
                 Error loading resources.
             </p>`;
     }
@@ -74,7 +74,7 @@ function renderTeacherResources(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No resources uploaded yet.</p>`;
+        sidebarHtml = `<p class="teacher-empty-state rs-empty-state-inline">No resources uploaded yet.</p>`;
     } else {
         data.forEach((group, groupIdx) => {
             const classGroupId = `rs-class-group-${groupIdx}`;
@@ -103,196 +103,12 @@ function renderTeacherResources(data) {
 
     // ── Build full HTML ──
     let html = `
-        <style>
-            @media (min-width: 900px) {
-                .rs-desktop-layout { display: flex !important; }
-                .rs-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .rs-desktop-layout { display: none !important; }
-                .rs-mobile-list    { display: block !important; }
-            }
-
-            .rs-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            .rs-sidebar {
-                width: 280px;
-                min-width: 240px;
-                max-width: 300px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .rs-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            .rs-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .rs-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .rs-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .rs-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .rs-sidebar-class-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
-            .rs-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-            .rs-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px 10px 32px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .rs-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .rs-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .rs-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .rs-sidebar-item-info { flex: 1; min-width: 0; }
-            .rs-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .rs-sidebar-item.active .rs-sidebar-item-title { color: #e2e8f0; }
-            .rs-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-
-            .rs-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .rs-main-panel::-webkit-scrollbar { width: 5px; }
-            .rs-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .rs-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .rs-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .rs-panel-empty svg { opacity: 0.3; }
-            .rs-panel-empty p { font-size: 14px; margin: 0; }
-
-            .rs-panel-content { padding: 28px 32px; }
-
-            .rs-panel-header {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 16px;
-                margin-bottom: 20px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                flex-wrap: wrap;
-            }
-            .rs-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 6px;
-            }
-            .rs-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .rs-panel-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-
-            .rs-panel-preview {
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 12px;
-                padding: 40px 32px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 16px;
-                min-height: 200px;
-            }
-            .rs-panel-preview-label {
-                font-size: 14px;
-                color: #8b949e;
-                text-align: center;
-                line-height: 1.6;
-            }
-            .rs-panel-open-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: rgba(79,209,197,0.12);
-                border: 1px solid rgba(79,209,197,0.3);
-                color: #4fd1c5;
-                padding: 10px 20px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: background 0.15s;
-                text-decoration: none;
-            }
-            .rs-panel-open-btn:hover { background: rgba(79,209,197,0.2); }
-            .rs-panel-delete-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: rgba(248,81,73,0.1);
-                border: 1px solid rgba(248,81,73,0.25);
-                color: #f85149;
-                padding: 10px 20px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: background 0.15s;
-            }
-            .rs-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="rs-desktop-layout tchr-flat-layout">
             <div class="rs-sidebar tchr-flat-sidebar">
-                <div class="rs-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="rs-sidebar-header">
                     <span>Resources</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="rs-new-btn" onclick="openUploadResourceForm()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create rs-new-btn" id="rs-new-btn" onclick="openUploadResourceForm()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -362,7 +178,7 @@ function renderTeacherResources(data) {
 
     // Delete modal (shared desktop+mobile) + Upload modal (mobile only)
     html += `
-        <div id="uploadResourceModal" class="teacher-modal-overlay" style="display:none;">
+        <div id="uploadResourceModal" class="teacher-modal-overlay rs-modal-hidden">
             <div class="teacher-modal-box">
                 <div class="teacher-modal-header">
                     <span>Upload Resource</span>
@@ -376,17 +192,11 @@ function renderTeacherResources(data) {
                     <div id="resourceClassPicker"></div>
 
                     <label class="teacher-modal-label">Resource Type</label>
-                    <div style="display:flex;gap:8px;margin-bottom:16px;">
-                        <button id="rsTypeFile" onclick="rsSetType('file')"
-                            style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(79,209,197,0.4);
-                                   background:rgba(79,209,197,0.12);color:#4fd1c5;font-weight:700;
-                                   font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                    <div class="rs-form-section-gap">
+                        <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">
                             📎 File
                         </button>
-                        <button id="rsTypeVideo" onclick="rsSetType('video')"
-                            style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
-                                   background:transparent;color:#8b949e;font-weight:700;
-                                   font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                        <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">
                             ▶ Video (YouTube)
                         </button>
                     </div>
@@ -400,27 +210,27 @@ function renderTeacherResources(data) {
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                             <p>Click or drag file here</p>
-                            <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                            <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+                            <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                            <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
                         </div>
-                        <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+                        <div id="resourceFileName" class="rs-file-name-display"></div>
                     </div>
 
-                    <div id="rsVideoSection" style="display:none;">
+                    <div id="rsVideoSection" class="rs-video-section">
                         <label class="teacher-modal-label">YouTube URL</label>
                         <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
                             placeholder="e.g. https://www.youtube.com/watch?v=...">
-                        <p style="font-size:12px;color:#8b949e;margin:8px 0 0;line-height:1.6;">
-                            ⚠️ Set the video to <strong style="color:#e2e8f0;">Unlisted</strong> on YouTube so only your learners can watch it.
+                        <p class="rs-video-warning">
+                            ⚠️ Set the video to <strong>Unlisted</strong> on YouTube so only your learners can watch it.
                         </p>
                     </div>
 
-                    <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                    <label class="teacher-modal-label rs-email-label">
                         <input type="checkbox" id="resourceForceEmail">
                         Also send email notification
                     </label>
 
-                    <div id="uploadResourceError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+                    <div id="uploadResourceError" class="rs-form-error"></div>
                 </div>
                 <div class="teacher-modal-footer">
                     <button onclick="closeUploadResourceModal()" class="teacher-modal-cancel">Cancel</button>
@@ -429,18 +239,18 @@ function renderTeacherResources(data) {
             </div>
         </div>
 
-        <div id="deleteResourceModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:380px;">
+        <div id="deleteResourceModal" class="teacher-modal-overlay rs-modal-hidden">
+            <div class="teacher-modal-box rs-delete-modal-box">
                 <div class="teacher-modal-header">
                     <span>Delete Resource</span>
                     <button onclick="closeDeleteResourceModal()" class="teacher-modal-close">&times;</button>
                 </div>
                 <div class="teacher-modal-body">
-                    <p style="color:#c9d1d9;font-size:15px;">Are you sure you want to delete this resource? This cannot be undone.</p>
+                    <p class="rs-delete-modal-text">Are you sure you want to delete this resource? This cannot be undone.</p>
                 </div>
                 <div class="teacher-modal-footer">
                     <button onclick="closeDeleteResourceModal()" class="teacher-modal-cancel">Cancel</button>
-                    <button onclick="executeDeleteResource()" class="teacher-modal-submit" style="background:#e74c3c;">Delete</button>
+                    <button onclick="executeDeleteResource()" class="teacher-modal-submit rs-delete-confirm-btn">Delete</button>
                 </div>
             </div>
         </div>`;
@@ -526,16 +336,15 @@ window.selectDesktopResource = function(flatIndex) {
                         </button>
                     </div>
                 </div>
-                <div style="position:relative;width:100%;padding-bottom:56.25%;background:#000;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">
+                <div class="rs-video-embed-wrap">
                     <iframe
                         src="${item.video_url}&autoplay=0&color=white&iv_load_policy=3"
-                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
                     </iframe>
                 </div>
-                <p style="margin:12px 0 0;font-size:12px;color:#555e6a;text-align:center;">
-                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="#555e6a" stroke-width="2" fill="none" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <p class="rs-video-embed-note">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="#555e6a" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     Learners watch this video directly inside iSkool — no YouTube account needed.
                 </p>
             </div>`;
@@ -571,10 +380,10 @@ window.selectDesktopResource = function(flatIndex) {
             </div>
 
             <div class="rs-panel-preview">
-                <div style="opacity:0.55;">${bigIcon}</div>
+                <div class="rs-preview-icon-dim">${bigIcon}</div>
                 <div class="rs-panel-preview-label">
-                    <strong style="color:#c9d1d9;">${item.title}</strong><br>
-                    <span style="font-size:12px;">${item.ext.toUpperCase()} &middot; Uploaded ${item.uploaded_at}</span>
+                    <strong class="rs-preview-title">${item.title}</strong><br>
+                    <span class="rs-preview-subtext">${item.ext.toUpperCase()} &middot; Uploaded ${item.uploaded_at}</span>
                 </div>
                 <a href="resources/${item.filename}" target="_blank" class="rs-panel-open-btn">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
@@ -610,12 +419,9 @@ function openUploadResourcePanel(panel) {
 
     panel.innerHTML = `
         <div class="rs-panel-content">
-            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
-                        display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">Upload Resource</div>
-                <button onclick="fetchTeacherResources()"
-                    style="background:none;border:none;color:#8b949e;font-size:22px;
-                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            <div class="rs-panel-form-header">
+                <div class="rs-panel-form-title">Upload Resource</div>
+                <button onclick="fetchTeacherResources()" class="rs-panel-form-close-btn">&times;</button>
             </div>
 
             <label class="teacher-modal-label">Resource Title</label>
@@ -625,17 +431,11 @@ function openUploadResourcePanel(panel) {
             <div id="resourceClassPicker"></div>
 
             <label class="teacher-modal-label">Resource Type</label>
-            <div style="display:flex;gap:8px;margin-bottom:16px;">
-                <button id="rsTypeFile" onclick="rsSetType('file')"
-                    style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(79,209,197,0.4);
-                           background:rgba(79,209,197,0.12);color:#4fd1c5;font-weight:700;
-                           font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+            <div class="rs-form-section-gap">
+                <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">
                     📎 File
                 </button>
-                <button id="rsTypeVideo" onclick="rsSetType('video')"
-                    style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
-                           background:transparent;color:#8b949e;font-weight:700;
-                           font-family:'Nunito',sans-serif;cursor:pointer;font-size:13px;">
+                <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">
                     ▶ Video (YouTube)
                 </button>
             </div>
@@ -649,36 +449,35 @@ function openUploadResourcePanel(panel) {
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                     <p>Click or drag file here</p>
-                    <p style="font-size:12px;color:#666;">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                    <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" style="display:none;">
+                    <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                    <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
                 </div>
-                <div id="resourceFileName" style="font-size:13px;color:#4fd1c5;margin-top:8px;"></div>
+                <div id="resourceFileName" class="rs-file-name-display"></div>
             </div>
 
-            <div id="rsVideoSection" style="display:none;">
+            <div id="rsVideoSection" class="rs-video-section">
                 <label class="teacher-modal-label">YouTube URL</label>
                 <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
                     placeholder="e.g. https://www.youtube.com/watch?v=...">
-                <p style="font-size:12px;color:#8b949e;margin:8px 0 0;line-height:1.6;">
-                    ⚠️ Set the video to <strong style="color:#e2e8f0;">Unlisted</strong> on YouTube so only learners with the link can watch it.
+                <p class="rs-video-warning">
+                    ⚠️ Set the video to <strong>Unlisted</strong> on YouTube so only learners with the link can watch it.
                 </p>
             </div>
 
-            <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <label class="teacher-modal-label rs-email-label">
                 <input type="checkbox" id="resourceForceEmail">
                 Also send email notification
             </label>
 
-            <div id="uploadResourceError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+            <div id="uploadResourceError" class="rs-form-error"></div>
 
-            <div style="display:flex;gap:12px;margin-top:24px;">
+            <div class="rs-panel-form-actions">
                 <button onclick="fetchTeacherResources()"
-                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    class="teacher-modal-cancel rs-panel-form-cancel-btn">
                     Cancel
                 </button>
                 <button onclick="submitUploadResource()"
-                    class="teacher-modal-submit" id="uploadResourceSubmitBtn"
-                    style="flex:2;padding:13px;font-size:14px;">
+                    class="teacher-modal-submit rs-panel-form-submit-btn" id="uploadResourceSubmitBtn">
                     Upload Resource
                 </button>
             </div>
@@ -743,18 +542,16 @@ window.rsSetType = function(type) {
     const videoSection = document.getElementById('rsVideoSection');
     const fileBtn      = document.getElementById('rsTypeFile');
     const videoBtn     = document.getElementById('rsTypeVideo');
-    const activeStyle  = 'border:1px solid rgba(79,209,197,0.4);background:rgba(79,209,197,0.12);color:#4fd1c5;';
-    const inactiveStyle = 'border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b949e;';
     if (type === 'video') {
         if (fileSection)  fileSection.style.display  = 'none';
         if (videoSection) videoSection.style.display = 'block';
-        if (fileBtn)  fileBtn.style.cssText  += inactiveStyle;
-        if (videoBtn) videoBtn.style.cssText += activeStyle;
+        if (fileBtn)  fileBtn.classList.remove('active');
+        if (videoBtn) videoBtn.classList.add('active');
     } else {
         if (fileSection)  fileSection.style.display  = 'block';
         if (videoSection) videoSection.style.display = 'none';
-        if (fileBtn)  fileBtn.style.cssText  += activeStyle;
-        if (videoBtn) videoBtn.style.cssText += inactiveStyle;
+        if (fileBtn)  fileBtn.classList.add('active');
+        if (videoBtn) videoBtn.classList.remove('active');
     }
     window._rsCurrentType = type;
 };
@@ -766,21 +563,17 @@ window.openTeacherVideoPanel = function(item) {
     if (existing) existing.remove();
     const overlay = document.createElement('div');
     overlay.id = 'rsVideoOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;';
+    overlay.className = 'rs-video-overlay';
     overlay.innerHTML = `
-        <div style="padding:14px 16px;background:rgba(0,0,0,0.6);display:flex;align-items:center;gap:12px;flex-shrink:0;">
-            <button onclick="document.getElementById('rsVideoOverlay').remove()"
-                style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;
-                       padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;
-                       font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:6px;font-size:13px;">
+        <div class="rs-video-overlay-header">
+            <button onclick="document.getElementById('rsVideoOverlay').remove()" class="rs-video-overlay-back-btn">
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 Back
             </button>
-            <div style="font-size:14px;font-weight:700;color:#e2e8f0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</div>
+            <div class="rs-video-overlay-title">${item.title}</div>
         </div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0;">
+        <div class="rs-video-overlay-body">
             <iframe src="${item.video_url}&autoplay=1&color=white&iv_load_policy=3"
-                style="width:100%;height:100%;border:none;"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen></iframe>
         </div>`;
