@@ -47,6 +47,8 @@ window.fetchResources = async function() {
     if (window.resourceCache) {
         renderResourceCards(window.resourceCache);
         restoreResourcePageState();
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 

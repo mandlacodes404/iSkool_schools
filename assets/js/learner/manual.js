@@ -73,6 +73,8 @@ window.loadManual = async function(containerId = 'api-content-area') {
     if (window.manualCache && window.homeDataCache) {
         apiArea.innerHTML = buildHomeLayout(window.homeDataCache, window.manualCache);
         afterHomeRender();
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 

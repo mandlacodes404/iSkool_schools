@@ -144,6 +144,8 @@ window.fetchGrades = async function () {
 
     if (window.learnerGradesCache) {
         renderGrades(window.learnerGradesCache);
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 

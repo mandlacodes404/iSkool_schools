@@ -132,6 +132,8 @@ window.fetchEvaluations = async function() {
     if (window.evaluationCache) {
         renderEvaluationsUI(window.evaluationCache); // Call the correct internal function
         restoreEvaluationPageState();
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 

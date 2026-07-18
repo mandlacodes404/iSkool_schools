@@ -43,6 +43,8 @@ window.fetchSyllabus = async function() {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
         restoreSyllabusPageState();
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 

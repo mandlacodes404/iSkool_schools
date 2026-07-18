@@ -76,6 +76,8 @@ window.fetchAssignments = async function() {
     if (window.learnerAssignmentCache) {
         renderAssignmentCards(window.learnerAssignmentCache);
         restoreAssignmentPageState();
+        if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
+        if (loader) loader.style.display = 'none';
         return;
     }
 
