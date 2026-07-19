@@ -1,0 +1,405 @@
+/* ═══════════════════════════════════════════
+   GRADES — styles extracted from grades.js
+   ═══════════════════════════════════════════ */
+
+/* ── Desktop split layout ── */
+@media (min-width: 900px) {
+    .gr-desktop-layout { display: flex !important; }
+    .gr-mobile-list    { display: none !important; }
+}
+@media (max-width: 899px) {
+    .gr-desktop-layout { display: none !important; }
+    .gr-mobile-list    { display: block !important; }
+}
+
+.gr-desktop-layout {
+    display: flex;
+    gap: 0;
+    min-height: 500px;
+}
+
+/* Left sidebar */
+.gr-sidebar {
+    width: 260px;
+    min-width: 220px;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.gr-sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #4fd1c5;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.gr-sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+.gr-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.gr-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.gr-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+.gr-sidebar-term-label {
+    padding: 8px 16px 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #555e6a;
+    text-transform: uppercase;
+}
+.gr-sidebar-class-label {
+    padding: 4px 16px 2px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+.gr-sidebar-class-label.tchr-sidebar-class-label--toggle {
+    padding-top: 8px;
+    padding-bottom: 6px;
+}
+.gr-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px 10px 32px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+}
+.gr-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+.gr-sidebar-item.active {
+    background: rgba(79,209,197,0.08);
+    border-left-color: #4fd1c5;
+}
+.gr-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+.gr-sidebar-item-info { flex: 1; min-width: 0; }
+.gr-sidebar-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c9d1d9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.gr-sidebar-item.active .gr-sidebar-item-title { color: #e2e8f0; }
+.gr-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
+
+/* Right panel */
+.gr-main-panel {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.gr-main-panel::-webkit-scrollbar { width: 5px; }
+.gr-main-panel::-webkit-scrollbar-track { background: transparent; }
+.gr-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+.gr-panel-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #555e6a;
+    gap: 12px;
+    padding: 40px;
+}
+.gr-panel-empty svg { opacity: 0.3; }
+.gr-panel-empty p { font-size: 14px; margin: 0; }
+
+.gr-panel-content { padding: 28px 32px; }
+
+.gr-panel-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.gr-panel-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin: 0 0 4px;
+}
+.gr-panel-meta {
+    font-size: 13px;
+    color: #8b949e;
+}
+@media (max-width: 899px) {
+    .gr-desktop-only-btn { display: none !important; }
+}
+
+/* ── New button ── */
+.gr-new-btn {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 12px;
+}
+
+/* ── Formerly inline styles ── */
+
+.gr-error-message {
+    color: #ff5555;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.gr-empty-state-inline {
+    padding: 16px;
+    font-size: 13px;
+    color: #555e6a;
+}
+
+.gr-info-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.gr-info-box-spaced {
+    margin-bottom: 16px;
+}
+
+.gr-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.gr-weight-container {
+    display: none;
+    margin-top: 12px;
+}
+
+.gr-weight-input {
+    max-width: 150px;
+}
+
+.gr-modal-hidden {
+    display: none;
+}
+
+.gr-modal-box--add-quiz {
+    max-width: 440px;
+}
+
+.gr-form-error {
+    color: #ff5555;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+}
+.gr-form-success {
+    color: #4fd1c5;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+}
+
+.gr-cell-muted {
+    color: #555e6a;
+}
+
+.gr-panel-loading-spinner {
+    animation: spin 1s linear infinite;
+}
+/* NOTE: relies on the shared @keyframes spin already defined in the
+   dashboard's shared/global CSS. If that shared rule is ever removed,
+   this spinner needs its own @keyframes spin { to { transform: rotate(360deg); } } */
+
+.gr-panel-error-text {
+    color: #f85149;
+}
+
+/* Edit-marks header (panel + back button variant) */
+.gr-panel-header--with-back {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.gr-back-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8b949e;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.gr-edit-marks-meta-sub {
+    color: #8b949e;
+}
+.gr-form-label-spaced {
+    margin-top: 14px;
+}
+.gr-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.gr-form-actions--tight {
+    margin-top: 16px;
+}
+.gr-form-cancel-btn {
+    flex: 1;
+}
+.gr-form-submit-btn {
+    flex: 2;
+}
+
+/* ── Open-ended grading view ── */
+.gr-oe-header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+.gr-oe-release-btn {
+    padding: 9px 12px;
+    font-size: 12px;
+}
+.gr-oe-release-btn[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.gr-oe-release-btn:not([disabled]) {
+    cursor: pointer;
+}
+.gr-oe-warning-text {
+    color: #f5c38b;
+    font-size: 12px;
+    text-align: right;
+}
+.gr-oe-release-message {
+    display: none;
+    font-size: 12px;
+    text-align: right;
+}
+.gr-oe-release-message.is-success { color: #7ee787; }
+.gr-oe-release-message.is-error   { color: #f85149; }
+
+.gr-oe-badge {
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 800;
+}
+.gr-oe-badge--graded {
+    background: rgba(63,185,80,0.12);
+    border: 1px solid rgba(63,185,80,0.35);
+    color: #7ee787;
+}
+.gr-oe-badge--pending {
+    background: rgba(242,140,56,0.12);
+    border: 1px solid rgba(242,140,56,0.35);
+    color: #f5c38b;
+}
+
+.gr-oe-learner-card {
+    background: #1a1919;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 14px 0;
+}
+.gr-oe-learner-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+.gr-oe-learner-name {
+    color: #e2e8f0;
+    font-weight: 800;
+}
+.gr-oe-learner-score {
+    color: #8b949e;
+    font-size: 12px;
+    margin-top: 3px;
+}
+.gr-oe-learner-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.gr-oe-learner-questions {
+    display: none;
+}
+
+.gr-oe-question-block {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
+    margin-top: 12px;
+}
+.gr-oe-question-text {
+    color: #c9d1d9;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.45;
+}
+.gr-oe-question-points {
+    color: #8b949e;
+    font-size: 12px;
+    margin-top: 4px;
+}
+.gr-oe-answer-text {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: #d8dee9;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 12px;
+    margin: 10px 0;
+    white-space: pre-wrap;
+}
+.gr-oe-grade-grid {
+    display: grid;
+    grid-template-columns: minmax(90px,140px) 1fr auto;
+    gap: 10px;
+    align-items: end;
+}
+.gr-oe-grade-field-label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #8b949e;
+    font-size: 12px;
+}
+.gr-oe-grade-input {
+    margin: 0;
+}
+.gr-oe-grade-textarea {
+    margin: 0;
+    resize: vertical;
+}
+.gr-oe-saved-note {
+    color: #7ee787;
+    font-size: 12px;
+    margin-top: 8px;
+    font-weight: 700;
+}
+.gr-oe-pending-footer {
+    color: #f5c38b;
+    font-size: 12px;
+    margin-top: 10px;
+}

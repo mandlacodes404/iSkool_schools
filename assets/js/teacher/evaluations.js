@@ -51,7 +51,7 @@ window.fetchTeacherEvaluations = async function() {
         renderTeacherEvaluations(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="ev-error-message">
                 Error loading evaluations.
             </p>`;
     }
@@ -77,7 +77,7 @@ function renderTeacherEvaluations(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No evaluations released yet.</p>`;
+        sidebarHtml = `<p class="ev-empty-state-inline">No evaluations released yet.</p>`;
     } else {
         data.forEach((group, gIdx) => {
             const classGroupId = `ev-class-group-${gIdx}`;
@@ -110,141 +110,13 @@ function renderTeacherEvaluations(data) {
     }
 
     let html = `
-        <style>
-            /* ── Desktop split layout ── */
-            @media (min-width: 900px) {
-                .ev-desktop-layout { display: flex !important; }
-                .ev-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .ev-desktop-layout { display: none !important; }
-                .ev-mobile-list    { display: block !important; }
-            }
-
-            .ev-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            /* Left sidebar */
-            .ev-sidebar {
-                width: 260px;
-                min-width: 220px;
-                max-width: 280px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .ev-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            .ev-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .ev-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .ev-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .ev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .ev-sidebar-class-label {
-                padding: 4px 16px 2px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
-            .ev-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-            .ev-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px 10px 32px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .ev-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .ev-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .ev-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .ev-sidebar-item-info { flex: 1; min-width: 0; }
-            .ev-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .ev-sidebar-item.active .ev-sidebar-item-title { color: #e2e8f0; }
-            .ev-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-
-            /* Right panel */
-            .ev-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .ev-main-panel::-webkit-scrollbar { width: 5px; }
-            .ev-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .ev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .ev-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .ev-panel-empty svg { opacity: 0.3; }
-            .ev-panel-empty p { font-size: 14px; margin: 0; }
-
-            .ev-panel-content { padding: 28px 32px; }
-
-            .ev-panel-header {
-                margin-bottom: 24px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .ev-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 6px;
-            }
-            .ev-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="ev-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
             <div class="ev-sidebar tchr-flat-sidebar">
-                <div class="ev-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="ev-sidebar-header">
                     <span>Evaluations</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="ev-new-btn" onclick="openReleaseEvaluationForm()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create ev-new-btn" id="ev-new-btn" onclick="openReleaseEvaluationForm()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -316,8 +188,8 @@ function renderTeacherEvaluations(data) {
 
     // Results Modal (shared by both desktop panel and mobile)
     html += `
-        <div id="evalResultsModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;">
+        <div id="evalResultsModal" class="teacher-modal-overlay ev-modal-hidden">
+            <div class="teacher-modal-box ev-modal-box--results">
                 <div class="teacher-modal-header">
                     <span id="evalResultsTitle">Results</span>
                     <button onclick="closeEvalResultsModal()" class="teacher-modal-close">&times;</button>
@@ -329,8 +201,8 @@ function renderTeacherEvaluations(data) {
             </div>
         </div>
 
-        <div id="releaseEvalModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:560px;max-height:85vh;overflow-y:auto;">
+        <div id="releaseEvalModal" class="teacher-modal-overlay ev-modal-hidden">
+            <div class="teacher-modal-box ev-modal-box--release">
                 <div class="teacher-modal-header">
                     <span>Release Evaluation</span>
                     <button onclick="closeReleaseEvaluationModal()" class="teacher-modal-close">&times;</button>
@@ -340,37 +212,35 @@ function renderTeacherEvaluations(data) {
                     <input type="text" id="evalTitle" class="teacher-modal-input" placeholder="e.g. Term 1 Feedback">
 
                     <label class="teacher-modal-label">Description (optional)</label>
-                    <textarea id="evalDescription" class="teacher-modal-input" rows="3" 
-                        style="resize:vertical;" placeholder="Optional description..."></textarea>
+                    <textarea id="evalDescription" class="teacher-modal-input ev-form-textarea" rows="3"
+                        placeholder="Optional description..."></textarea>
 
                     <label class="teacher-modal-label">Select Class *</label>
                     <div id="evalClassPicker"></div>
 
-                    <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                    <label class="teacher-modal-label ev-checkbox-label">
                         <input type="checkbox" id="evalUseDefault" checked>
                         Use default questions (recommended)
                     </label>
 
-                    <div style="margin-top:8px;">
-                        <a href="javascript:void(0)" onclick="toggleDefaultPreview()" 
-                           style="color:#4fd1c5;font-size:13px;text-decoration:none;">
+                    <div class="ev-preview-toggle-wrap">
+                        <a href="javascript:void(0)" onclick="toggleDefaultPreview()" class="ev-preview-toggle-link">
                             👁 View default questions
                         </a>
-                        <div id="defaultStatementsPreview" style="display:none;margin-top:10px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;"></div>
+                        <div id="defaultStatementsPreview" class="ev-modal-hidden ev-default-preview-box"></div>
                     </div>
 
-                    <div id="customStatements" style="margin-top:16px;"></div>
-                    <button type="button" onclick="addCustomStatement()" 
-                        style="background:rgba(79,209,197,0.1);border:1px dashed #4fd1c5;color:#4fd1c5;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px;width:100%;">
+                    <div id="customStatements" class="ev-custom-statements-wrap"></div>
+                    <button type="button" onclick="addCustomStatement()" class="ev-add-statement-btn">
                         + Add Custom Question
                     </button>
 
-                    <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                    <label class="teacher-modal-label ev-checkbox-label">
                         <input type="checkbox" id="evalForceEmail">
                         Also send email notification
                     </label>
 
-                    <div id="releaseEvalError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+                    <div id="releaseEvalError" class="ev-form-error"></div>
                 </div>
                 <div class="teacher-modal-footer">
                     <button onclick="closeReleaseEvaluationModal()" class="teacher-modal-cancel">Cancel</button>
@@ -438,7 +308,7 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
                 <div class="eval-bar-container">
                     <div class="eval-bar-label">${b.label} (${b.count})</div>
                     <div class="eval-bar-bg">
-                        <div class="eval-bar-fill" style="width:${b.percentage}%;background:${b.color};">
+                        <div class="eval-bar-fill" style="--eval-bar-width:${b.percentage}%;--eval-bar-color:${b.color};">
                             ${b.percentage}%
                         </div>
                     </div>
@@ -474,7 +344,7 @@ window.openEvaluationResults = function(groupIndex, evIndex) {
     
     document.getElementById('evalResultsTitle').textContent = ev.title;
 
-    let body = `<p style="color:#8b949e;font-size:14px;margin-bottom:20px;">
+    let body = `<p class="ev-mobile-results-subtitle">
         ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
         ${ev.description ? ' &mdash; ' + ev.description : ''}
     </p>`;
@@ -489,7 +359,7 @@ window.openEvaluationResults = function(groupIndex, evIndex) {
                 <div class="eval-bar-container">
                     <div class="eval-bar-label">${b.label} (${b.count})</div>
                     <div class="eval-bar-bg">
-                        <div class="eval-bar-fill" style="width:${b.percentage}%;background:${b.color};">
+                        <div class="eval-bar-fill" style="--eval-bar-width:${b.percentage}%;--eval-bar-color:${b.color};">
                             ${b.percentage}%
                         </div>
                     </div>
@@ -547,12 +417,9 @@ function openReleaseEvaluationPanel(panel) {
 
     panel.innerHTML = `
         <div class="ev-panel-content">
-            <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.07);
-                        display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:18px;font-weight:800;color:#e2e8f0;">Release Evaluation</div>
-                <button onclick="fetchTeacherEvaluations()"
-                    style="background:none;border:none;color:#8b949e;font-size:22px;
-                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            <div class="ev-form-header">
+                <div class="ev-form-title">Release Evaluation</div>
+                <button onclick="fetchTeacherEvaluations()" class="ev-form-close-btn">&times;</button>
             </div>
 
             <label class="teacher-modal-label">Title *</label>
@@ -560,52 +427,43 @@ function openReleaseEvaluationPanel(panel) {
                 placeholder="e.g. Term 1 Feedback">
 
             <label class="teacher-modal-label">Description (optional)</label>
-            <textarea id="evalDescription" class="teacher-modal-input" rows="3"
-                style="resize:vertical;" placeholder="Optional description..."></textarea>
+            <textarea id="evalDescription" class="teacher-modal-input ev-form-textarea" rows="3"
+                placeholder="Optional description..."></textarea>
 
             <label class="teacher-modal-label">Select Class *</label>
             <div id="evalClassPicker"></div>
 
-            <label class="teacher-modal-label"
-                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <label class="teacher-modal-label ev-checkbox-label">
                 <input type="checkbox" id="evalUseDefault" checked>
                 Use default questions (recommended)
             </label>
 
-            <div style="margin-top:8px;">
-                <a href="javascript:void(0)" onclick="toggleDefaultPreview()"
-                    style="color:#4fd1c5;font-size:13px;text-decoration:none;">
+            <div class="ev-preview-toggle-wrap">
+                <a href="javascript:void(0)" onclick="toggleDefaultPreview()" class="ev-preview-toggle-link">
                     👁 View default questions
                 </a>
-                <div id="defaultStatementsPreview"
-                    style="display:none;margin-top:10px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;"></div>
+                <div id="defaultStatementsPreview" class="ev-modal-hidden ev-default-preview-box"></div>
             </div>
 
-            <div id="customStatements" style="margin-top:16px;"></div>
-            <button type="button" onclick="addCustomStatement()"
-                style="background:rgba(79,209,197,0.1);border:1px dashed #4fd1c5;color:#4fd1c5;
-                       padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;
-                       margin-top:8px;width:100%;">
+            <div id="customStatements" class="ev-custom-statements-wrap"></div>
+            <button type="button" onclick="addCustomStatement()" class="ev-add-statement-btn">
                 + Add Custom Question
             </button>
 
-            <label class="teacher-modal-label"
-                style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+            <label class="teacher-modal-label ev-checkbox-label">
                 <input type="checkbox" id="evalForceEmail">
                 Also send email notification
             </label>
 
-            <div id="releaseEvalError"
-                style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+            <div id="releaseEvalError" class="ev-form-error"></div>
 
-            <div style="display:flex;gap:12px;margin-top:24px;">
+            <div class="ev-form-actions">
                 <button onclick="fetchTeacherEvaluations()"
-                    class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                    class="teacher-modal-cancel ev-form-cancel-btn">
                     Cancel
                 </button>
                 <button onclick="submitReleaseEvaluation()"
-                    class="teacher-modal-submit" id="releaseEvalSubmitBtn"
-                    style="flex:2;padding:13px;font-size:14px;">
+                    class="teacher-modal-submit ev-form-submit-btn" id="releaseEvalSubmitBtn">
                     Release
                 </button>
             </div>
@@ -665,12 +523,12 @@ window.toggleDefaultPreview = async function() {
         try {
             const res  = await fetch('api/teacher/get_default_statements.php');
             const data = await res.json();
-            let html   = '<ol style="margin:0;padding-left:18px;color:#8b949e;font-size:13px;">';
-            data.forEach(s => { html += `<li style="margin-bottom:6px;">${s}</li>`; });
+            let html   = '<ol class="ev-default-preview-list">';
+            data.forEach(s => { html += `<li>${s}</li>`; });
             html += '</ol>';
             preview.innerHTML = html;
         } catch (e) {
-            preview.innerHTML = '<p style="color:#ff5555;font-size:13px;">Failed to load.</p>';
+            preview.innerHTML = '<p class="ev-default-preview-error">Failed to load.</p>';
         }
     }
 
@@ -681,10 +539,10 @@ window.addCustomStatement = function() {
     const container = document.getElementById('customStatements');
     const count     = container.querySelectorAll('textarea').length;
     const div       = document.createElement('div');
-    div.style.marginBottom = '10px';
+    div.className   = 'ev-custom-statement-row';
     div.innerHTML = `
-        <textarea name="statements[${count}]" class="teacher-modal-input" rows="2" 
-            style="resize:vertical;" placeholder="Enter custom question..."></textarea>`;
+        <textarea name="statements[${count}]" class="teacher-modal-input ev-form-textarea" rows="2"
+            placeholder="Enter custom question..."></textarea>`;
     container.appendChild(div);
 };
 

@@ -53,7 +53,7 @@ window.fetchTeacherSyllabus = async function() {
         renderTeacherSyllabus(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="sbo-error-message">
                 Error loading syllabus.
             </p>`;
     }
@@ -77,7 +77,7 @@ function renderTeacherSyllabus(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!briefs.length) {
-        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No syllabus briefs found.</p>`;
+        sidebarHtml = `<p class="sbo-empty-state-inline">No syllabus briefs found.</p>`;
     } else {
         // Group by term, then by class within each term
         const byTerm = {};
@@ -125,206 +125,13 @@ function renderTeacherSyllabus(data) {
     }
 
     let html = `
-        <style>
-            /* ── Desktop split layout ── */
-            @media (min-width: 900px) {
-                .sbo-desktop-layout { display: flex !important; }
-                .sbo-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .sbo-desktop-layout { display: none !important; }
-                .sbo-mobile-list    { display: block !important; }
-            }
-
-            .sbo-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            /* Left sidebar */
-            .sbo-sidebar {
-                width: 260px;
-                min-width: 220px;
-                max-width: 280px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .sbo-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            .sbo-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .sbo-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .sbo-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .sbo-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .sbo-sidebar-term-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 1px;
-                color: #555e6a;
-                text-transform: uppercase;
-            }
-            .sbo-sidebar-class-label {
-                padding: 4px 16px 2px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
-            .sbo-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-            .sbo-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px 10px 32px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .sbo-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .sbo-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .sbo-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .sbo-sidebar-item-info { flex: 1; min-width: 0; }
-            .sbo-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .sbo-sidebar-item.active .sbo-sidebar-item-title { color: #e2e8f0; }
-            .sbo-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-
-            /* Right panel */
-            .sbo-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .sbo-main-panel::-webkit-scrollbar { width: 5px; }
-            .sbo-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .sbo-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .sbo-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .sbo-panel-empty svg { opacity: 0.3; }
-            .sbo-panel-empty p { font-size: 14px; margin: 0; }
-
-            .sbo-panel-content { padding: 28px 32px; }
-
-            .sbo-panel-header {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 16px;
-                margin-bottom: 24px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .sbo-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 6px;
-            }
-            .sbo-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            .sbo-term-badge {
-                background: rgba(79,209,197,0.1);
-                color: #4fd1c5;
-                padding: 4px 10px;
-                border-radius: 20px;
-                font-size: 11px;
-                font-weight: 800;
-                white-space: nowrap;
-            }
-            .sbo-section-label {
-                font-size: 11px;
-                font-weight: 800;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.6px;
-                margin-bottom: 8px;
-            }
-            .sbo-topics-wrap {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                align-items: center;
-                margin-bottom: 20px;
-            }
-            .sbo-topic-chip {
-                background: rgba(79,209,197,0.1);
-                color: #4fd1c5;
-                padding: 3px 8px;
-                border-radius: 20px;
-                font-size: 11px;
-                font-weight: 700;
-            }
-            .sbo-assess-row {
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
-                padding: 14px 18px;
-                margin-bottom: 12px;
-                font-size: 13px;
-                color: #c9d1d9;
-            }
-            .sbo-notes-block {
-                margin-top: 20px;
-                padding-top: 16px;
-                border-top: 1px solid rgba(255,255,255,0.05);
-                font-size: 13px;
-                color: #8b949e;
-                line-height: 1.6;
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="sbo-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
             <div class="sbo-sidebar tchr-flat-sidebar">
-                <div class="sbo-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="sbo-sidebar-header">
                     <span>Syllabus</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="sbo-new-btn" onclick="openSBOForm()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create sbo-new-btn" id="sbo-new-btn" onclick="openSBOForm()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -357,21 +164,13 @@ function renderTeacherSyllabus(data) {
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="sbo-mobile-list">
             <!-- FILTERS -->
-            <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
-                <select id="sboFilterClass" onchange="filterSyllabus()"
-                        style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
-                               padding:8px 14px;border-radius:8px;font-size:13px;
-                               font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
-                               min-width:160px;">
+            <div class="sbo-filter-bar">
+                <select id="sboFilterClass" onchange="filterSyllabus()" class="sbo-filter-select">
                     <option value="">All Classes</option>
                     ${classOptions}
                 </select>
 
-                <select id="sboFilterTerm" onchange="filterSyllabus()"
-                        style="background:#21262d;border:1px solid #30363d;color:#e2e8f0;
-                               padding:8px 14px;border-radius:8px;font-size:13px;
-                               font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;
-                               min-width:140px;">
+                <select id="sboFilterTerm" onchange="filterSyllabus()" class="sbo-filter-select sbo-filter-select--term">
                     <option value="">All Terms</option>
                     <option value="1">Term 1</option>
                     <option value="2">Term 2</option>
@@ -429,21 +228,19 @@ function buildSBOCards(briefs) {
 
         // Topics preview — first 3
         const topicsPreview = brief.topics?.slice(0, 3).map(t =>
-            `<span style="background:rgba(79,209,197,0.1);color:#4fd1c5;
-                          padding:3px 8px;border-radius:20px;font-size:11px;
-                          font-weight:700;">${t}</span>`
+            `<span class="sbo-card-topic-chip">${t}</span>`
         ).join('') || '';
 
         const moreTopics = topicCount > 3
-            ? `<span style="font-size:11px;color:#8b949e;margin-left:4px;">+${topicCount - 3} more</span>`
+            ? `<span class="sbo-card-more-topics">+${topicCount - 3} more</span>`
             : '';
 
         return `
-            <div class="teacher-resource-card" style="flex-direction:column;align-items:flex-start;gap:12px;padding:18px;">
+            <div class="teacher-resource-card sbo-card">
                 
                 <!-- TOP ROW -->
-                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-                    <div style="display:flex;align-items:center;gap:12px;">
+                <div class="sbo-card-top-row">
+                    <div class="sbo-card-top-left">
                         <div class="teacher-resource-icon">
                             <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -461,9 +258,7 @@ function buildSBOCards(briefs) {
                             </div>
                         </div>
                     </div>
-                    <span style="background:rgba(79,209,197,0.1);color:#4fd1c5;
-                                 padding:4px 10px;border-radius:20px;font-size:11px;
-                                 font-weight:800;white-space:nowrap;">
+                    <span class="sbo-card-term-badge">
                         Term ${brief.term}
                     </span>
                 </div>
@@ -471,32 +266,29 @@ function buildSBOCards(briefs) {
                 <!-- TOPICS -->
                 ${topicCount ? `
                 <div>
-                    <div style="font-size:11px;font-weight:800;color:#8b949e;
-                                text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">
+                    <div class="sbo-card-section-title">
                         Topics (${topicCount})
                     </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                    <div class="sbo-card-topics-row">
                         ${topicsPreview}${moreTopics}
                     </div>
                 </div>` : ''}
 
                 <!-- ASSESSMENTS -->
-                <div style="width:100%;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                    <div style="font-size:11px;font-weight:800;color:#8b949e;
-                                text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">
+                <div class="sbo-card-divider-section">
+                    <div class="sbo-card-section-title sbo-card-section-title--tight">
                         Assessment Weighting
                     </div>
-                    <div style="font-size:13px;color:#c9d1d9;">${assessSummary}</div>
+                    <div class="sbo-card-assess-summary">${assessSummary}</div>
                 </div>
 
                 <!-- NOTES -->
                 ${brief.notes ? `
-                <div style="width:100%;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                    <div style="font-size:11px;font-weight:800;color:#8b949e;
-                                text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">
+                <div class="sbo-card-divider-section">
+                    <div class="sbo-card-section-title sbo-card-section-title--tight">
                         Notes
                     </div>
-                    <div style="font-size:13px;color:#8b949e;line-height:1.5;">${brief.notes}</div>
+                    <div class="sbo-card-notes-text">${brief.notes}</div>
                 </div>` : ''}
 
             </div>`;
@@ -529,15 +321,15 @@ window.selectDesktopSBO = function(idx) {
 
     const topicsHtml = topicCount
         ? brief.topics.map(t => `<span class="sbo-topic-chip">${t}</span>`).join('')
-        : '<span style="font-size:13px;color:#555e6a;">No topics listed.</span>';
+        : '<span class="sbo-topics-empty-text">No topics listed.</span>';
 
     const assessHtml = brief.assessments?.length
         ? brief.assessments.map(a => `
             <div class="sbo-assess-row">
-                <span style="font-weight:700;color:#e2e8f0;">${a.type}</span>
-                <span style="float:right;color:#4fd1c5;font-weight:800;">${a.weight}%</span>
+                <span class="sbo-assess-row-type">${a.type}</span>
+                <span class="sbo-assess-row-weight">${a.weight}%</span>
             </div>`).join('')
-        : '<p style="font-size:13px;color:#555e6a;margin:0;">No assessments listed.</p>';
+        : '<p class="sbo-assess-empty-text">No assessments listed.</p>';
 
     panel.innerHTML = `
         <div class="sbo-panel-content">
@@ -552,7 +344,7 @@ window.selectDesktopSBO = function(idx) {
                 <span class="sbo-term-badge">Term ${brief.term}</span>
             </div>
 
-            <div style="margin-bottom:20px;">
+            <div class="sbo-topics-section">
                 <div class="sbo-section-label">Topics (${topicCount})</div>
                 <div class="sbo-topics-wrap">${topicsHtml}</div>
             </div>
@@ -602,12 +394,9 @@ async function openSBOPanel(panel) {
 
     panel.innerHTML = `
         <div class="sbo-panel-content">
-            <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.07);
-                        display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:18px;font-weight:800;color:#e2e8f0;"> Release Syllabus</div>
-                <button onclick="fetchTeacherSyllabus()"
-                    style="background:none;border:none;color:#8b949e;font-size:22px;
-                           cursor:pointer;line-height:1;padding:0;">&times;</button>
+            <div class="sbo-form-header sbo-form-header--panel">
+                <div class="sbo-form-title"> Release Syllabus</div>
+                <button onclick="fetchTeacherSyllabus()" class="sbo-form-close-btn">&times;</button>
             </div>
 
             <label class="teacher-modal-label">Class</label>
@@ -627,41 +416,33 @@ async function openSBOPanel(panel) {
                 placeholder="e.g. Mathematics">
 
             <label class="teacher-modal-label">Syllabus Topics</label>
-            <div id="sboTopicsList" style="display:flex;flex-direction:column;gap:8px;"></div>
-            <button onclick="addSBOTopic()"
-                style="margin-top:8px;background:rgba(79,209,197,0.1);border:1px dashed rgba(79,209,197,0.4);
-                       color:#4fd1c5;border-radius:8px;padding:8px;width:100%;cursor:pointer;
-                       font-size:13px;font-weight:700;">
+            <div id="sboTopicsList" class="sbo-list-stack"></div>
+            <button onclick="addSBOTopic()" class="sbo-add-topic-btn">
                 + Add Topic
             </button>
 
-            <label class="teacher-modal-label" style="margin-top:16px;">Assessment Weighting</label>
-            <div id="sboAssessmentsList" style="display:flex;flex-direction:column;gap:8px;"></div>
-            <button onclick="addSBOAssessment()"
-                style="margin-top:8px;background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.4);
-                       color:#a78bfa;border-radius:8px;padding:8px;width:100%;cursor:pointer;
-                       font-size:13px;font-weight:700;">
+            <label class="teacher-modal-label sbo-form-label-spaced">Assessment Weighting</label>
+            <div id="sboAssessmentsList" class="sbo-list-stack"></div>
+            <button onclick="addSBOAssessment()" class="sbo-add-assessment-btn">
                 + Add Assessment
             </button>
-            <div id="sboWeightTotal"
-                style="margin-top:8px;font-size:12px;font-weight:700;color:#8b949e;text-align:right;">
+            <div id="sboWeightTotal" class="sbo-weight-total">
                 Total: 0%
             </div>
 
-            <label class="teacher-modal-label" style="margin-top:16px;">
-                Additional Notes <span style="color:#8b949e;font-weight:400;">(optional)</span>
+            <label class="teacher-modal-label sbo-form-label-spaced">
+                Additional Notes <span class="sbo-form-label-hint">(optional)</span>
             </label>
-            <textarea id="sboNotes" class="teacher-modal-input"
-                placeholder="e.g. No exam this term — focus on continuous assessment"
-                style="height:70px;resize:vertical;"></textarea>
+            <textarea id="sboNotes" class="teacher-modal-input sbo-notes-textarea sbo-notes-textarea--drawer"
+                placeholder="e.g. No exam this term — focus on continuous assessment"></textarea>
 
-            <div id="sboError" style="color:#ff5555;font-size:13px;display:none;margin-top:8px;"></div>
+            <div id="sboError" class="sbo-form-error sbo-form-error--spaced"></div>
 
-            <div style="display:flex;gap:10px;margin-top:16px;">
+            <div class="sbo-form-actions sbo-form-actions--spaced">
                 <button onclick="fetchTeacherSyllabus()"
-                    class="teacher-modal-cancel" style="flex:1;">Cancel</button>
+                    class="teacher-modal-cancel">Cancel</button>
                 <button onclick="saveSBO()"
-                    class="teacher-modal-submit" style="flex:1;">Post & Notify</button>
+                    class="teacher-modal-submit">Post & Notify</button>
             </div>
         </div>`;
 
@@ -692,19 +473,14 @@ window.openSBODrawer = async function() {
     const drawer = document.createElement('div');
     drawer.id = 'sboDrawer';
     drawer.innerHTML = `
-        <div id="sboBackdrop" onclick="closeSBODrawer()"
-             style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9997;"></div>
+        <div id="sboBackdrop" onclick="closeSBODrawer()" class="sbo-drawer-backdrop"></div>
 
-        <div style="position:fixed;top:0;right:0;height:100%;width:420px;max-width:95vw;
-                    background:#1a1919;border-left:1px solid rgba(255,255,255,0.07);
-                    z-index:9998;overflow-y:auto;padding:28px 24px;box-sizing:border-box;
-                    display:flex;flex-direction:column;gap:16px;">
+        <div class="sbo-drawer-panel">
 
             <!-- Header -->
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-weight:900;font-size:16px;color:#e2e8f0;">Release Syllabus</span>
-                <button onclick="closeSBODrawer()"
-                        style="background:none;border:none;color:#8b949e;font-size:22px;cursor:pointer;">&times;</button>
+            <div class="sbo-form-header">
+                <span class="sbo-form-title sbo-form-title--drawer">Release Syllabus</span>
+                <button onclick="closeSBODrawer()" class="sbo-form-close-btn">&times;</button>
             </div>
 
             <!-- Class -->
@@ -734,11 +510,8 @@ window.openSBODrawer = async function() {
             <!-- Topics -->
             <div>
                 <label class="teacher-modal-label">Syllabus Topics</label>
-                <div id="sboTopicsList" style="display:flex;flex-direction:column;gap:8px;"></div>
-                <button onclick="addSBOTopic()"
-                        style="margin-top:8px;background:rgba(79,209,197,0.1);border:1px dashed rgba(79,209,197,0.4);
-                               color:#4fd1c5;border-radius:8px;padding:8px;width:100%;cursor:pointer;
-                               font-size:13px;font-weight:700;">
+                <div id="sboTopicsList" class="sbo-list-stack"></div>
+                <button onclick="addSBOTopic()" class="sbo-add-topic-btn">
                     + Add Topic
                 </button>
             </div>
@@ -746,34 +519,29 @@ window.openSBODrawer = async function() {
             <!-- Assessments -->
             <div>
                 <label class="teacher-modal-label">Assessment Weighting</label>
-                <div id="sboAssessmentsList" style="display:flex;flex-direction:column;gap:8px;"></div>
-                <button onclick="addSBOAssessment()"
-                        style="margin-top:8px;background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.4);
-                               color:#a78bfa;border-radius:8px;padding:8px;width:100%;cursor:pointer;
-                               font-size:13px;font-weight:700;">
+                <div id="sboAssessmentsList" class="sbo-list-stack"></div>
+                <button onclick="addSBOAssessment()" class="sbo-add-assessment-btn">
                     + Add Assessment
                 </button>
-                <div id="sboWeightTotal"
-                     style="margin-top:8px;font-size:12px;font-weight:700;color:#8b949e;text-align:right;">
+                <div id="sboWeightTotal" class="sbo-weight-total">
                     Total: 0%
                 </div>
             </div>
 
             <!-- Notes -->
             <div>
-                <label class="teacher-modal-label">Additional Notes <span style="color:#8b949e;font-weight:400;">(optional)</span></label>
-                <textarea id="sboNotes" class="teacher-modal-input"
-                          placeholder="e.g. No exam this term — focus on continuous assessment"
-                          style="height:80px;resize:vertical;"></textarea>
+                <label class="teacher-modal-label">Additional Notes <span class="sbo-form-label-hint">(optional)</span></label>
+                <textarea id="sboNotes" class="teacher-modal-input sbo-notes-textarea"
+                          placeholder="e.g. No exam this term — focus on continuous assessment"></textarea>
             </div>
 
             <!-- Error -->
-            <div id="sboError" style="color:#ff5555;font-size:13px;display:none;"></div>
+            <div id="sboError" class="sbo-form-error"></div>
 
             <!-- Actions -->
-            <div style="display:flex;gap:10px;margin-top:4px;">
-                <button onclick="closeSBODrawer()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                <button onclick="saveSBO()" class="teacher-modal-submit" style="flex:1;">Post & Notify</button>
+            <div class="sbo-form-actions">
+                <button onclick="closeSBODrawer()" class="teacher-modal-cancel">Cancel</button>
+                <button onclick="saveSBO()" class="teacher-modal-submit">Post & Notify</button>
             </div>
         </div>`;
 
@@ -801,15 +569,12 @@ window.addSBOTopic = function() {
     const list = document.getElementById('sboTopicsList');
     if (!list) return;
     const row = document.createElement('div');
-    row.className = 'sbo-topic-row';
-    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+    row.className = 'sbo-topic-row sbo-dynamic-row';
     row.innerHTML = `
         <input type="text" placeholder="e.g. Linear Equations"
-               class="teacher-modal-input sbo-topic-input"
-               style="flex:1;margin:0;">
+               class="teacher-modal-input sbo-topic-input sbo-dynamic-row-input">
         <button onclick="this.closest('.sbo-topic-row').remove()"
-                style="background:none;border:none;color:#ff5555;font-size:18px;cursor:pointer;
-                       padding:0 4px;flex-shrink:0;">&times;</button>`;
+                class="sbo-row-remove-btn">&times;</button>`;
     list.appendChild(row);
 };
 
@@ -817,23 +582,18 @@ window.addSBOAssessment = function() {
     const list = document.getElementById('sboAssessmentsList');
     if (!list) return;
     const row = document.createElement('div');
-    row.className = 'sbo-assessment-row';
-    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+    row.className = 'sbo-assessment-row sbo-dynamic-row';
     row.innerHTML = `
         <input type="text" placeholder="e.g. Tests"
-               class="teacher-modal-input sbo-assess-type"
-               style="flex:1;margin:0;">
-        <div style="position:relative;flex-shrink:0;width:72px;">
+               class="teacher-modal-input sbo-assess-type sbo-dynamic-row-input">
+        <div class="sbo-weight-input-wrap">
             <input type="number" placeholder="30" min="1" max="100"
-                   class="teacher-modal-input sbo-assess-weight"
-                   oninput="updateSBOWeightTotal()"
-                   style="width:100%;margin:0;padding-right:20px;box-sizing:border-box;">
-            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
-                         color:#8b949e;font-size:12px;pointer-events:none;">%</span>
+                   class="teacher-modal-input sbo-assess-weight sbo-weight-input"
+                   oninput="updateSBOWeightTotal()">
+            <span class="sbo-weight-input-suffix">%</span>
         </div>
         <button onclick="this.closest('.sbo-assessment-row').remove(); updateSBOWeightTotal();"
-                style="background:none;border:none;color:#ff5555;font-size:18px;cursor:pointer;
-                       padding:0 4px;flex-shrink:0;">&times;</button>`;
+                class="sbo-row-remove-btn">&times;</button>`;
     list.appendChild(row);
     updateSBOWeightTotal();
 };
@@ -845,7 +605,9 @@ window.updateSBOWeightTotal = function() {
     const el = document.getElementById('sboWeightTotal');
     if (!el) return;
     el.textContent = `Total: ${total}%`;
-    el.style.color = total === 100 ? '#4fd1c5' : total > 100 ? '#ff5555' : '#8b949e';
+    el.classList.remove('is-complete', 'is-over');
+    if (total === 100) el.classList.add('is-complete');
+    else if (total > 100) el.classList.add('is-over');
 };
 
 window.saveSBO = async function() {

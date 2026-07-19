@@ -69,7 +69,7 @@ window.fetchTeacherGrades = async function() {
         renderTeacherGrades(data);
     } catch (error) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="gr-error-message">
                 Error loading grades.
             </p>`;
     }
@@ -97,7 +97,7 @@ function renderTeacherGrades(data) {
     // ── Build left sidebar list ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
-        sidebarHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No assessments found.</p>`;
+        sidebarHtml = `<p class="gr-empty-state-inline">No assessments found.</p>`;
     } else {
         data.forEach(termData => {
             sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
@@ -131,152 +131,13 @@ function renderTeacherGrades(data) {
     }
 
     let html = `
-        <style>
-            /* ── Desktop split layout ── */
-            @media (min-width: 900px) {
-                .gr-desktop-layout { display: flex !important; }
-                .gr-mobile-list    { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .gr-desktop-layout { display: none !important; }
-                .gr-mobile-list    { display: block !important; }
-            }
-
-            .gr-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            /* Left sidebar */
-            .gr-sidebar {
-                width: 260px;
-                min-width: 220px;
-                max-width: 280px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .gr-sidebar-header {
-                padding: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            .gr-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .gr-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .gr-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .gr-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .gr-sidebar-term-label {
-                padding: 8px 16px 4px;
-                font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 1px;
-                color: #555e6a;
-                text-transform: uppercase;
-            }
-            .gr-sidebar-class-label {
-                padding: 4px 16px 2px;
-                font-size: 10px;
-                font-weight: 700;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-            }
-            .gr-sidebar-class-label.tchr-sidebar-class-label--toggle {
-                padding-top: 8px;
-                padding-bottom: 6px;
-            }
-            .gr-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px 10px 32px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .gr-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .gr-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .gr-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .gr-sidebar-item-info { flex: 1; min-width: 0; }
-            .gr-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .gr-sidebar-item.active .gr-sidebar-item-title { color: #e2e8f0; }
-            .gr-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-
-            /* Right panel */
-            .gr-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .gr-main-panel::-webkit-scrollbar { width: 5px; }
-            .gr-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .gr-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .gr-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .gr-panel-empty svg { opacity: 0.3; }
-            .gr-panel-empty p { font-size: 14px; margin: 0; }
-
-            .gr-panel-content { padding: 28px 32px; }
-
-            .gr-panel-header {
-                margin-bottom: 20px;
-                padding-bottom: 16px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .gr-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 4px;
-            }
-            .gr-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-            }
-            @media (max-width: 899px) {
-                .gr-desktop-only-btn { display: none !important; }
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="gr-desktop-layout tchr-flat-layout">
             <!-- Left Sidebar -->
             <div class="gr-sidebar tchr-flat-sidebar">
-                <div class="gr-sidebar-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div class="gr-sidebar-header">
                     <span>Assessments</span>
-                    <button class="teacher-upload-btn teacher-desktop-create" id="gr-new-btn" onclick="openAddQuizModal()"
-                        style="text-transform:none;letter-spacing:normal;font-size:12px;">
+                    <button class="teacher-upload-btn teacher-desktop-create gr-new-btn" id="gr-new-btn" onclick="openAddQuizModal()">
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -311,7 +172,7 @@ function renderTeacherGrades(data) {
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="gr-mobile-list">
             <div class="teacher-grades-info">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" class="gr-info-icon">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -360,15 +221,15 @@ function renderTeacherGrades(data) {
 
     // Add Quiz Modal
     html += `
-        <div id="addQuizModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:440px;">
+        <div id="addQuizModal" class="teacher-modal-overlay gr-modal-hidden">
+            <div class="teacher-modal-box gr-modal-box--add-quiz">
                 <div class="teacher-modal-header">
                     <span>Add Assessment Manually</span>
                     <button onclick="closeAddQuizModal()" class="teacher-modal-close">&times;</button>
                 </div>
                 <div class="teacher-modal-body">
-                    <div class="teacher-grades-info" style="margin-bottom:16px;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;margin-top:2px;">
+                    <div class="teacher-grades-info gr-info-box-spaced">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" class="gr-info-icon">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -384,18 +245,18 @@ function renderTeacherGrades(data) {
                         <option value="">-- Choose Class --</option>
                     </select>
 
-                    <label class="teacher-modal-label" style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+                    <label class="teacher-modal-label gr-checkbox-label">
                         <input type="checkbox" id="quizSummative" onchange="toggleWeightField()">
                         Counts toward term mark
                     </label>
 
-                    <div id="weightContainer" style="display:none;margin-top:12px;">
+                    <div id="weightContainer" class="gr-weight-container">
                         <label class="teacher-modal-label">Weight %</label>
-                        <input type="number" id="quizWeight" class="teacher-modal-input"
-                            min="0" max="100" step="0.1" placeholder="e.g. 30" style="max-width:150px;">
+                        <input type="number" id="quizWeight" class="teacher-modal-input gr-weight-input"
+                            min="0" max="100" step="0.1" placeholder="e.g. 30">
                     </div>
 
-                    <div id="addQuizError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
+                    <div id="addQuizError" class="gr-form-error"></div>
                 </div>
                 <div class="teacher-modal-footer">
                     <button onclick="closeAddQuizModal()" class="teacher-modal-cancel">Cancel</button>
@@ -451,7 +312,7 @@ window.selectDesktopGradeQuiz = async function(quizId) {
     panel.innerHTML = `
         <div class="gr-panel-empty">
             <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
-                style="animation:spin 1s linear infinite;">
+                class="gr-panel-loading-spinner">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
             </svg>
             <p>Loading grades...</p>
@@ -476,7 +337,7 @@ window.selectDesktopGradeQuiz = async function(quizId) {
             renderGradesInPanel(data, panel);
         }
     } catch (e) {
-        panel.innerHTML = `<div class="gr-panel-empty"><p style="color:#f85149;">Error loading grades.</p></div>`;
+        panel.innerHTML = `<div class="gr-panel-empty"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
     }
 };
 
@@ -506,10 +367,10 @@ function renderGradesInPanel(data, panel) {
         data.learners.forEach(learner => {
             const score = learner.score !== null
                 ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
-                : '<span style="color:#555e6a;">Not recorded</span>';
+                : '<span class="gr-cell-muted">Not recorded</span>';
             const perc  = learner.percentage
                 ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
-                : '<span style="color:#555e6a;">—</span>';
+                : '<span class="gr-cell-muted">—</span>';
 
             html += `
                 <tr>
@@ -543,11 +404,9 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
 
     panel.innerHTML = `
         <div class="gr-panel-content">
-            <div class="gr-panel-header" style="display:flex;align-items:center;gap:12px;">
+            <div class="gr-panel-header gr-panel-header--with-back">
                 <button onclick="renderGradesInPanel(window.currentQuizData, document.getElementById('gr-main-panel'))"
-                    style="background:none;border:1px solid rgba(255,255,255,0.1);color:#8b949e;
-                           border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;
-                           display:flex;align-items:center;gap:6px;">
+                    class="gr-back-btn">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
@@ -564,17 +423,17 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
                 <input type="number" step="0.01" id="editScore" class="teacher-modal-input"
                     value="${escapeHtml(scoreVal)}" placeholder="e.g. 15">
 
-                <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
+                <label class="teacher-modal-label gr-form-label-spaced">Maximum Possible Score</label>
                 <input type="number" step="0.01" id="editTotal" class="teacher-modal-input"
                     value="${escapeHtml(totalVal)}" placeholder="e.g. 20">
 
-                <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
-                <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
+                <div id="editMarksError" class="gr-form-error"></div>
+                <div id="editMarksSuccess" class="gr-form-success"></div>
 
-                <div style="display:flex;gap:10px;margin-top:20px;">
-                    <button class="teacher-modal-cancel" style="flex:1;"
+                <div class="gr-form-actions">
+                    <button class="teacher-modal-cancel gr-form-cancel-btn"
                         onclick="renderGradesInPanel(window.currentQuizData, document.getElementById('gr-main-panel'))">Cancel</button>
-                    <button class="teacher-modal-submit" style="flex:2;"
+                    <button class="teacher-modal-submit gr-form-submit-btn"
                         id="saveMarksBtn"
                         data-email="${escapeHtml(email)}" data-quiz-id="${quizId}"
                         onclick="saveMarksFromElement(this)">
@@ -611,7 +470,7 @@ window.openQuizGrades = async function(quizId, quizTitle) {
         }
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="gr-error-message">
                 Error loading grades.
             </p>`;
     }
@@ -667,10 +526,10 @@ function renderQuizGrades(data) {
         data.learners.forEach(learner => {
             const score = learner.score !== null
                 ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
-                : '<span style="color:#555e6a;">Not recorded</span>';
+                : '<span class="gr-cell-muted">Not recorded</span>';
             const perc  = learner.percentage
                 ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
-                : '<span style="color:#555e6a;">—</span>';
+                : '<span class="gr-cell-muted">—</span>';
 
             html += `
                 <tr>
@@ -729,14 +588,13 @@ function renderOpenEndedGrades(data, target, isPanel) {
                     <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
                     <div class="gr-panel-meta">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</div>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-                    <button type="button" class="teacher-modal-submit" data-action="toggle-open-ended-publish" data-quiz-id="${escapeHtml(data.quiz_id)}" ${releaseDisabled ? 'disabled' : ''}
-                        title="${releaseDisabled ? 'Grade all open-ended responses before releasing marks.' : ''}"
-                        style="padding:9px 12px;font-size:12px;opacity:${releaseDisabled ? '0.55' : '1'};cursor:${releaseDisabled ? 'not-allowed' : 'pointer'};">
+                <div class="gr-oe-header-actions">
+                    <button type="button" class="teacher-modal-submit gr-oe-release-btn" data-action="toggle-open-ended-publish" data-quiz-id="${escapeHtml(data.quiz_id)}" ${releaseDisabled ? 'disabled' : ''}
+                        title="${releaseDisabled ? 'Grade all open-ended responses before releasing marks.' : ''}">
                         ${marksPublished ? 'Unpublish Marks' : 'Release Marks'}
                     </button>
-                    ${releaseDisabled ? `<div style="color:#f5c38b;font-size:12px;text-align:right;">Grade all open-ended responses before releasing marks.</div>` : ''}
-                    <div id="oeReleaseMessage" style="display:none;font-size:12px;text-align:right;"></div>
+                    ${releaseDisabled ? `<div class="gr-oe-warning-text">Grade all open-ended responses before releasing marks.</div>` : ''}
+                    <div id="oeReleaseMessage" class="gr-oe-release-message"></div>
                 </div>
             </div>`;
 
@@ -750,17 +608,17 @@ function renderOpenEndedGrades(data, target, isPanel) {
                 ? '***'
                 : escapeHtml(learner.score ?? '0');
             const badge = learner.is_fully_graded
-                ? `<span style="background:rgba(63,185,80,0.12);border:1px solid rgba(63,185,80,0.35);color:#7ee787;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Fully Graded</span>`
-                : `<span style="background:rgba(242,140,56,0.12);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
+                ? `<span class="gr-oe-badge gr-oe-badge--graded">Fully Graded</span>`
+                : `<span class="gr-oe-badge gr-oe-badge--pending">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
 
             html += `
-                <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin:14px 0;">
-                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px;">
+                <div class="gr-oe-learner-card">
+                    <div class="gr-oe-learner-card-top">
                         <div>
-                            <div style="color:#e2e8f0;font-weight:800;">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
-                            <div style="color:#8b949e;font-size:12px;margin-top:3px;">Score: ${scoreDisplay} / ${escapeHtml(learner.total ?? '0')}</div>
+                            <div class="gr-oe-learner-name">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
+                            <div class="gr-oe-learner-score">Score: ${scoreDisplay} / ${escapeHtml(learner.total ?? '0')}</div>
                         </div>
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+                        <div class="gr-oe-learner-actions">
                             ${badge}
                             <button type="button" class="teacher-edit-marks-btn gr-desktop-only-btn" data-action="toggle-open-ended-learner"
                                 data-target-id="oe-learner-${escapeHtml(learner.attempt_id)}">
@@ -768,25 +626,25 @@ function renderOpenEndedGrades(data, target, isPanel) {
                             </button>
                         </div>
                     </div>
-                    <div id="oe-learner-${escapeHtml(learner.attempt_id)}" style="display:none;">`;
+                    <div id="oe-learner-${escapeHtml(learner.attempt_id)}" class="gr-oe-learner-questions">`;
 
             openQuestions.forEach(question => {
                 const savedScore = question.grade ? formatOpenEndedScore(question.grade.score) : '';
                 const feedback = question.grade && question.grade.feedback ? question.grade.feedback : '';
                 html += `
-                    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:12px;margin-top:12px;">
-                        <div style="color:#c9d1d9;font-weight:700;font-size:13px;line-height:1.45;">${escapeHtml(question.question_text || '')}</div>
-                        <div style="color:#8b949e;font-size:12px;margin-top:4px;">Max points: ${escapeHtml(question.points)}</div>
-                        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#d8dee9;font-size:13px;line-height:1.5;padding:12px;margin:10px 0;white-space:pre-wrap;">${escapeHtml(question.answer_text || 'No answer submitted.')}</div>
-                        <div style="display:grid;grid-template-columns:minmax(90px,140px) 1fr auto;gap:10px;align-items:end;">
-                            <label style="display:flex;flex-direction:column;gap:5px;color:#8b949e;font-size:12px;">Score
-                                <input type="number" min="0" max="${escapeHtml(question.points)}" step="0.01" class="teacher-modal-input"
+                    <div class="gr-oe-question-block">
+                        <div class="gr-oe-question-text">${escapeHtml(question.question_text || '')}</div>
+                        <div class="gr-oe-question-points">Max points: ${escapeHtml(question.points)}</div>
+                        <div class="gr-oe-answer-text">${escapeHtml(question.answer_text || 'No answer submitted.')}</div>
+                        <div class="gr-oe-grade-grid">
+                            <label class="gr-oe-grade-field-label">Score
+                                <input type="number" min="0" max="${escapeHtml(question.points)}" step="0.01" class="teacher-modal-input gr-oe-grade-input"
                                     id="oe-score-${escapeHtml(learner.attempt_id)}-${escapeHtml(question.question_id)}"
-                                    value="${escapeHtml(savedScore)}" style="margin:0;">
+                                    value="${escapeHtml(savedScore)}">
                             </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;color:#8b949e;font-size:12px;">Feedback
-                                <textarea class="teacher-modal-input" id="oe-feedback-${escapeHtml(learner.attempt_id)}-${escapeHtml(question.question_id)}"
-                                    rows="2" style="margin:0;resize:vertical;">${escapeHtml(feedback)}</textarea>
+                            <label class="gr-oe-grade-field-label">Feedback
+                                <textarea class="teacher-modal-input gr-oe-grade-textarea" id="oe-feedback-${escapeHtml(learner.attempt_id)}-${escapeHtml(question.question_id)}"
+                                    rows="2">${escapeHtml(feedback)}</textarea>
                             </label>
                             <button type="button" class="teacher-edit-marks-btn" data-action="save-open-ended-grade"
                                 data-attempt-id="${escapeHtml(learner.attempt_id)}"
@@ -794,7 +652,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
                                 Save
                             </button>
                         </div>
-                        ${question.grade ? `<div style="color:#7ee787;font-size:12px;margin-top:8px;font-weight:700;">&#10003; Saved: ${escapeHtml(savedScore || '0')} / ${escapeHtml(question.points)}</div>` : ''}
+                        ${question.grade ? `<div class="gr-oe-saved-note">&#10003; Saved: ${escapeHtml(savedScore || '0')} / ${escapeHtml(question.points)}</div>` : ''}
                     </div>`;
             });
 
@@ -803,7 +661,7 @@ function renderOpenEndedGrades(data, target, isPanel) {
     }
 
     if (pendingLearners > 0) {
-        html += `<div style="color:#f5c38b;font-size:12px;margin-top:10px;">${pendingLearners} learner${pendingLearners !== 1 ? 's' : ''} still need manual grading.</div>`;
+        html += `<div class="gr-oe-pending-footer">${pendingLearners} learner${pendingLearners !== 1 ? 's' : ''} still need manual grading.</div>`;
     }
 
     html += `</div>`;
@@ -863,7 +721,7 @@ async function toggleOpenEndedPublish(button) {
     const message = document.getElementById('oeReleaseMessage');
     button.disabled = true;
     button.textContent = 'Updating...';
-    if (message) message.style.display = 'none';
+    if (message) { message.style.display = 'none'; message.classList.remove('is-success', 'is-error'); }
     try {
         const res = await fetch('api/teacher/toggle_publish_marks.php', {
             method: 'POST',
@@ -874,13 +732,13 @@ async function toggleOpenEndedPublish(button) {
         if (data.status !== 'success' && !data.success) throw new Error(data.message || 'Unable to release marks.');
         if (message) {
             message.textContent = data.newStatus == 1 || data.data?.newStatus == 1 ? 'Marks released.' : 'Marks unpublished.';
-            message.style.color = '#7ee787';
+            message.classList.add('is-success');
             message.style.display = 'block';
         }
     } catch (e) {
         if (message) {
             message.textContent = e.message || 'Unable to release marks.';
-            message.style.color = '#f85149';
+            message.classList.add('is-error');
             message.style.display = 'block';
         } else {
             alert(e.message || 'Unable to release marks.');
@@ -940,24 +798,24 @@ window.openEditMarks = function(email, name, quizId, quizTitle, currentScore, cu
             <h3 class="teacher-edit-marks-title">Edit Marks</h3>
             <p class="teacher-edit-marks-meta">
                 <strong>${escapeHtml(name)}</strong><br>
-                <span style="color:#8b949e;">${escapeHtml(quizTitle)}</span>
+                <span class="gr-edit-marks-meta-sub">${escapeHtml(quizTitle)}</span>
             </p>
 
             <label class="teacher-modal-label">Score Received</label>
             <input type="number" step="0.01" id="editScore" class="teacher-modal-input" 
                 value="${escapeHtml(scoreVal)}" placeholder="e.g. 15">
 
-            <label class="teacher-modal-label" style="margin-top:14px;">Maximum Possible Score</label>
+            <label class="teacher-modal-label gr-form-label-spaced">Maximum Possible Score</label>
             <input type="number" step="0.01" id="editTotal" class="teacher-modal-input" 
                 value="${escapeHtml(totalVal)}" placeholder="e.g. 20">
 
-            <div id="editMarksError" style="color:#ff5555;font-size:13px;margin-top:10px;display:none;"></div>
-            <div id="editMarksSuccess" style="color:#4fd1c5;font-size:13px;margin-top:10px;display:none;"></div>
+            <div id="editMarksError" class="gr-form-error"></div>
+            <div id="editMarksSuccess" class="gr-form-success"></div>
 
-            <div style="display:flex;gap:10px;margin-top:20px;">
-                <button class="teacher-modal-cancel" style="flex:1;" 
+            <div class="gr-form-actions">
+                <button class="teacher-modal-cancel gr-form-cancel-btn" 
                     onclick="renderQuizGrades(window.currentQuizData)">Cancel</button>
-                <button class="teacher-modal-submit" style="flex:2;" 
+                <button class="teacher-modal-submit gr-form-submit-btn" 
                     id="saveMarksBtn"
                     data-email="${escapeHtml(email)}" data-quiz-id="${quizId}"
                     onclick="saveMarksFromElement(this)">
