@@ -825,48 +825,18 @@ iframe {
         max-width: 340px; /* keeps it from getting too wide on larger phones/small tablets */
         padding: 16px 18px;
         transition: left var(--transition-speed) ease;
-        border-right: 1px solid #555555;
         background: #20201f;
 
-        /* Kill the inherited inward curve from the base .sidebar rule —
-           on mobile we want the X-style outward corner bulge instead
-           (via the notch pseudo-elements below), not a rounded-in corner. */
+        /* Kill the inherited inward curve from the base .sidebar rule.
+           No border-radius and no right-hand border on mobile at all —
+           the curve + seam now live on .main-content's left edge instead,
+           applied only while the menu is open (see .sidebar.active ~
+           .main-content below). This avoids the corner-notch hack, which
+           didn't render reliably. */
+        border-right: none;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
         position: fixed;
-    }
-
-    /* ── X-STYLE OUTWARD CORNER BULGE ─────────────────────────────────────
-       Two small pseudo-elements sit at the top-right and bottom-right
-       corners of the mobile menu. Each is filled with solid black — the
-       colour the #mobileOverlay dim (rgba(0,0,0,0.4) over a black page)
-       actually renders as once composited — and clipped into a
-       quarter-circle via border-radius, "biting" a curve out of the
-       panel's corner from the outside. This makes the straight edge
-       appear to bulge out and tuck in right at the tip of the corner,
-       matching the X mobile app menu. Sits above the dim overlay
-       (z-index 1500) since it's part of the sidebar (z-index 5000), so
-       it always reads correctly regardless of overlay opacity. Purely
-       decorative; does not touch the overlay element or any colours. */
-    .sidebar::before,
-    .sidebar::after {
-        content: "";
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        right: 0;
-        background: #000000;
-        pointer-events: none;
-    }
-
-    .sidebar::before {
-        top: 0;
-        border-top-left-radius: 18px;
-    }
-
-    .sidebar::after {
-        bottom: 0;
-        border-bottom-left-radius: 18px;
     }
 
     .mobile-only-calendar {
@@ -920,6 +890,17 @@ iframe {
         height: 100vh;
         transform: translateX(min(79vw, 340px)); /* matches new .sidebar width/max-width */
         filter: blur(2px);
+
+        /* The menu itself is now a plain straight-edged panel (no radius,
+           no border-right). Instead, while the menu is open, the dimmed
+           content behind it gets the curve + seam on ITS left edge —
+           same visual seam as before, just living on the other element,
+           since curving .main-content inward is plain, well-supported
+           border-radius with no clipping/positioning tricks involved. */
+        border-top-left-radius: 18px;
+        border-bottom-left-radius: 18px;
+        border-left: 1px solid #555555;
+        overflow: hidden; /* keeps the blurred content from square-cornering past the new radius */
     }
 
     .main-header {
