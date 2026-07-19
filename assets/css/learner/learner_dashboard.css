@@ -934,8 +934,8 @@ iframe {
         left: min(79vw, 340px) !important;
         width: calc(100% - min(79vw, 340px)) !important;
         z-index: 4500 !important;
-        border-top-left-radius: 25px;
-        border-bottom-left-radius: 25px;
+        border-top-left-radius: 30px;
+        border-bottom-left-radius: 30px;
         border-left: 1px solid #555555;
         box-sizing: border-box;
     }
