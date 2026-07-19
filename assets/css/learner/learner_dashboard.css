@@ -30,6 +30,17 @@
 }
 html {
   touch-action: manipulation;
+  /* Stops the browser's own native horizontal edge-swipe gesture
+     (back-navigation on iOS Safari, and the equivalent on some Android
+     browsers) from racing with the menu's own swipe-to-open JS handler
+     below — this was the intermittent "sometimes it opens the menu,
+     sometimes it reloads/navigates back" behaviour. Only the X (horizontal)
+     axis is affected; overscroll-behavior-y is intentionally left alone
+     since pull-to-refresh depends on it and must keep working exactly as
+     before. Works across all phones (not iOS-specific), as a browser-level
+     setting rather than a JS preventDefault(), which can lose the race
+     against the OS gesture recognizer on the very first touch pixels. */
+  overscroll-behavior-x: none;
 }
 body {
     margin: 0;
@@ -39,6 +50,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     overflow: hidden;
+    overscroll-behavior-x: none; /* same fix, applied to body too for broader browser coverage */
 }
 
 /* ── PLATFORM-WIDE NUNITO LOCK ──────────────────────────────────────────────
@@ -390,6 +402,13 @@ body {
         -webkit-overflow-scrolling: touch;
         box-sizing: border-box;
         padding-bottom: 120px;
+        /* Stops the browser's native horizontal edge-swipe (back/reload)
+           gesture from racing with the sidebar's own swipe-to-open JS.
+           This is the actual scroll container on mobile (also used by
+           pull-to-refresh), so this is the most direct place to apply
+           the fix. Only overscroll-behavior-X is set — Y axis is
+           untouched so pull-to-refresh keeps working exactly as before. */
+        overscroll-behavior-x: none;
     }
 
     /* Chrome / Safari / Edge */
