@@ -454,3 +454,105 @@
     }
     .report-modal-box { width: 100vw; height: 100vh; border-radius: 0; }
 }
+
+/* ── SHARED UTILITIES ── */
+/* (was: inline style="" attributes scattered through renderGrades,
+   renderGradeStatsBox, and the fetchGrades error handler) */
+
+/* Fetch error state (was: inline style="" on the <p> built in
+   fetchGrades()'s catch block) */
+.grades-error-state {
+    color: #f85149;
+    text-align: center;
+    margin-top: 60px;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Sidebar "no results" state (was: inline style="" on the <p>
+   built when groups.length === 0 in renderGrades) */
+.grades-sidebar-empty {
+    padding: 16px;
+    font-size: 13px;
+    color: #555e6a;
+}
+
+/* Full-width footer button variant (was: inline style="width:100%;
+   justify-content:center;" on the desktop sidebar's report button) */
+.grades-report-btn--full {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Desktop topbar helper label (was: inline style="" on the "Select
+   a subject" <span> in the desktop topbar) */
+.grades-dt-topbar-hint {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b949e;
+}
+
+/* Zero-margin toggle bar variant (was: inline style="padding-left:0;
+   padding-right:0;margin-bottom:12px;" on the desktop panel's
+   view-toggle-bar, which normally has side padding for the mobile
+   card context) */
+.view-toggle-bar--flush {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 12px;
+}
+
+/* Desktop panel spacing variants for quiz-list / term-marks-view
+   (was: inline style="padding:0 0 16px;" -- the mobile versions of
+   these get their padding from the .subject-card wrapper, which the
+   desktop panel doesn't have) */
+.quiz-list--dt-panel {
+    padding: 0 0 16px;
+}
+.term-marks-view--dt-panel {
+    padding: 0 0 16px;
+}
+
+/* Grading-status inline text colors (was: inline style="" on the
+   <span> inside the "Fully Graded" / "Partially Graded" detail text) */
+.grades-status-text--done {
+    color: #22c55e;
+    font-weight: 800;
+}
+.grades-status-text--pending {
+    color: #f5c38b;
+    font-weight: 800;
+}
+
+/* "Marks not published yet" placeholder (was: inline style="" on
+   the <p> shown when a quiz has no published marks) */
+.grades-unpublished-note {
+    color: #555e6a;
+    font-style: italic;
+}
+
+/* Quiz detail duration line spacing (was: inline style="margin-top:8px;"
+   on the <p> showing quiz duration in the expanded row details) */
+.grades-detail-spaced {
+    margin-top: 8px;
+}
+
+/* Term table "earned" cell (was: inline style="" on the <td> showing
+   the earned/weight fraction in the term marks table) */
+.term-table-earned {
+    color: #68d391;
+    font-weight: 800;
+}
+
+/* Distribution legend color dots/bars (was: inline style="color:..."
+   repeated on 4 <span> elements in both renderGrades and
+   renderGradeStatsBox's static legend markup) */
+.dist-legend-dot--me   { color: #68d391; }
+.dist-legend-dot--low  { color: #f85149; }
+.dist-legend-dot--avg  { color: #f59e0b; }
+.dist-legend-dot--high { color: #22c55e; }
+
+/* Score-circle-wrap full-width wrapper (was: inline style="width:100%;"
+   on the <div> wrapping the distribution bar in the inline stats box) */
+.grade-inline-dist-wrap {
+    width: 100%;
+}

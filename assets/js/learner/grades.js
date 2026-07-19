@@ -1,4 +1,4 @@
-/*
+/**
  * assets/js/grades.js
  * API-driven Grades page — mirrors the logic of the old quiz_history.php
  * Drop-in replacement: call fetchGrades() from sidebar / bottom nav
@@ -159,7 +159,7 @@ window.fetchGrades = async function () {
         renderGrades(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#f85149;text-align:center;margin-top:60px;font-family:'Nunito',sans-serif;">
+            <p class="grades-error-state">
                 Error loading grades. Please try again.
             </p>`;
     } finally {
@@ -188,7 +188,7 @@ function renderGrades(data) {
     // ── BUILD SIDEBAR ITEMS ──────────────────────────────────────────────────
     let sidebarItemsHtml = '';
     if (groups.length === 0) {
-        sidebarItemsHtml = `<p style="padding:16px;font-size:13px;color:#555e6a;">No results yet.</p>`;
+        sidebarItemsHtml = `<p class="grades-sidebar-empty">No results yet.</p>`;
     } else {
         groups.forEach((group, gi) => {
             const quizzes = group.quizzes;
@@ -312,7 +312,7 @@ function renderGrades(data) {
                 ${sidebarItemsHtml}
             </div>
             <div class="grades-dt-sidebar-footer">
-                <button class="grades-report-btn" style="width:100%;justify-content:center;"
+                <button class="grades-report-btn grades-report-btn--full"
                         onclick="generateGradesReport('${targetEmail}')">
                     <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -329,7 +329,7 @@ function renderGrades(data) {
         <div class="grades-dt-main lqz-flat-panel">
             ${groups.length > 0 ? `
             <div class="grades-desktop-topbar">
-                <span style="font-size:13px;font-weight:700;color:#8b949e;">Select a subject</span>
+                <span class="grades-dt-topbar-hint">Select a subject</span>
                 <input type="text" class="grades-search" id="gradesSearchDt"
                     placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
             </div>` : ''}
@@ -369,10 +369,10 @@ function renderGrades(data) {
             </div>
             <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
             <div class="dist-legend">
-                <div><span style="color:#68d391">●</span> Your score</div>
-                <div><span style="color:#f85149">|</span> Lowest in class</div>
-                <div><span style="color:#f59e0b">|</span> Class average</div>
-                <div><span style="color:#22c55e">|</span> Highest in class</div>
+                <div><span class="dist-legend-dot--me">●</span> Your score</div>
+                <div><span class="dist-legend-dot--low">|</span> Lowest in class</div>
+                <div><span class="dist-legend-dot--avg">|</span> Class average</div>
+                <div><span class="dist-legend-dot--high">|</span> Highest in class</div>
             </div>
         </div>
     </div>`;
@@ -428,7 +428,7 @@ window.selectDesktopGradeSubject = function (gi) {
             <span class="grades-dt-panel-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
         </div>
 
-        <div class="view-toggle-bar" style="padding-left:0;padding-right:0;margin-bottom:12px;">
+        <div class="view-toggle-bar view-toggle-bar--flush">
             <button class="view-toggle-btn active-view" id="vt-list-${pfx}"
                     onclick="switchGradesView('${pfx}','list')">
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
@@ -451,11 +451,11 @@ window.selectDesktopGradeSubject = function (gi) {
             </button>
         </div>
 
-        <div class="quiz-list" id="view-list-${pfx}" style="padding:0 0 16px;">
+        <div class="quiz-list quiz-list--dt-panel" id="view-list-${pfx}">
             ${buildQuizList(quizzes, pfx)}
         </div>
 
-        <div class="term-marks-view" id="view-term-${pfx}" style="display:none;padding:0 0 16px;">
+        <div class="term-marks-view term-marks-view--dt-panel" id="view-term-${pfx}" style="display:none;">
             <div class="term-selector-wrap">
                 <select class="term-selector" onchange="refreshTermTable('${pfx}', this.value, ${groupIndex})">
                     ${[1,2,3,4].map(t =>
@@ -499,13 +499,13 @@ function buildOpenEndedGradingStatus(q) {
     if (q.quiz_fully_graded === true || q.is_fully_graded === true) {
         return {
             badge: '<span class="quiz-grading-status done">Fully Graded</span>',
-            details: '<p><strong>Grading Status:</strong> <span style="color:#22c55e;font-weight:800;">Fully Graded</span></p>'
+            details: '<p><strong>Grading Status:</strong> <span class="grades-status-text--done">Fully Graded</span></p>'
         };
     }
 
     return {
         badge: '<span class="quiz-grading-status partial">Partially Graded</span>',
-        details: '<p><strong>Grading Status:</strong> <span style="color:#f5c38b;font-weight:800;">Partially Graded</span></p>'
+        details: '<p><strong>Grading Status:</strong> <span class="grades-status-text--pending">Partially Graded</span></p>'
     };
 }
 
@@ -549,9 +549,9 @@ function buildQuizList(quizzes, gi) {
             <div class="quiz-row-details" id="qdetail-${gi}-${qi}">
                 ${published ? `
                     <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
-                ` : `<p style="color:#555e6a;font-style:italic;">Marks not published yet.</p>`}
+                ` : `<p class="grades-unpublished-note">Marks not published yet.</p>`}
                 ${gradingStatus.details}
-                <p style="margin-top:8px;"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
+                <p class="grades-detail-spaced"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
                 <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
                 <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
                 ${published ? `<div class="grade-inline-stats loading" id="gstats-${gi}-${qi}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
@@ -623,7 +623,7 @@ function buildTermTable(quizzes, selectedTerm) {
             <td>${escHtml(q.quiz_title)}</td>
             <td>${w.toFixed(1)}%</td>
             <td>${escHtml(String(q.score))}/${escHtml(String(q.total))}</td>
-            <td style="color:#68d391;font-weight:800;">${earned.toFixed(1)}/${w.toFixed(1)}</td>
+            <td class="term-table-earned">${earned.toFixed(1)}/${w.toFixed(1)}</td>
         </tr>`;
     }).join('');
 
@@ -894,7 +894,7 @@ function renderGradeStatsBox(box, data) {
                 </svg>
                 <div class="score-circle-text">${pct}%</div>
             </div>
-            <div style="width:100%;">
+            <div class="grade-inline-dist-wrap">
                 <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
                 <div class="dist-bar-wrap">
                     <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
@@ -912,10 +912,10 @@ function renderGradeStatsBox(box, data) {
                 </div>
                 <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                 <div class="dist-legend">
-                    <div><span style="color:#68d391">●</span> Your score</div>
-                    <div><span style="color:#f85149">|</span> Lowest in class</div>
-                    <div><span style="color:#f59e0b">|</span> Class average</div>
-                    <div><span style="color:#22c55e">|</span> Highest in class</div>
+                    <div><span class="dist-legend-dot--me">●</span> Your score</div>
+                    <div><span class="dist-legend-dot--low">|</span> Lowest in class</div>
+                    <div><span class="dist-legend-dot--avg">|</span> Class average</div>
+                    <div><span class="dist-legend-dot--high">|</span> Highest in class</div>
                 </div>
             </div>
         </div>`;
@@ -958,7 +958,7 @@ async function loadGradeStatsInline(statsId) {
                     </svg>
                     <div class="score-circle-text">${pct}%</div>
                 </div>
-                <div style="width:100%;">
+                <div class="grade-inline-dist-wrap">
                     <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
                     <div class="dist-bar-wrap">
                         <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
@@ -976,10 +976,10 @@ async function loadGradeStatsInline(statsId) {
                     </div>
                     <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
                     <div class="dist-legend">
-                        <div><span style="color:#68d391">●</span> Your score</div>
-                        <div><span style="color:#f85149">|</span> Lowest in class</div>
-                        <div><span style="color:#f59e0b">|</span> Class average</div>
-                        <div><span style="color:#22c55e">|</span> Highest in class</div>
+                        <div><span class="dist-legend-dot--me">●</span> Your score</div>
+                        <div><span class="dist-legend-dot--low">|</span> Lowest in class</div>
+                        <div><span class="dist-legend-dot--avg">|</span> Class average</div>
+                        <div><span class="dist-legend-dot--high">|</span> Highest in class</div>
                     </div>
                 </div>
             </div>`;
