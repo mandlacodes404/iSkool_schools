@@ -917,12 +917,25 @@ iframe {
        stylesheet rules of any specificity) — scoped only to mobile while
        the sidebar is active, so it never affects desktop or any other
        state. No colours changed — same border colour the sidebar used
-       to carry. */
+       to carry.
+
+       Z-INDEX: #mobileOverlay's base z-index (1500, set inline in the
+       HTML) sits BELOW #mobileBottomNav's z-index (4000). That's why the
+       curve/seam was visible at the top of the screen but disappeared
+       at the bottom — the bottom nav bar was rendering on top of the
+       overlay there, covering the corner entirely. Raised to 4500 here
+       (still below the sidebar's own 5000, so the menu stays on top of
+       everything) so the seam now renders above the bottom nav too. This
+       also means the overlay's dim now visually covers the bottom nav in
+       addition to the blur already applied to it via
+       .sidebar.active ~ #mobileBottomNav — consistent dimming across the
+       full screen while the menu is open. */
     .sidebar.active ~ #mobileOverlay {
         left: min(79vw, 340px) !important;
         width: calc(100% - min(79vw, 340px)) !important;
-        border-top-left-radius: 18px;
-        border-bottom-left-radius: 18px;
+        z-index: 4500 !important;
+        border-top-left-radius: 25px;
+        border-bottom-left-radius: 25px;
         border-left: 1px solid #555555;
         box-sizing: border-box;
     }
