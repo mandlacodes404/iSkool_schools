@@ -111,16 +111,16 @@ function buildCalendarShell(month, year, events) {
     const legend = `
         <div class="full-cal-legend">
             <span class="full-cal-legend-item">
-                <span class="full-cal-legend-dot" style="background:#4fd1c5"></span> Quiz
+                <span class="full-cal-legend-dot full-cal-legend-dot--quiz"></span> Quiz
             </span>
             <span class="full-cal-legend-item">
-                <span class="full-cal-legend-dot" style="background:#a78bfa"></span> Assignment
+                <span class="full-cal-legend-dot full-cal-legend-dot--assignment"></span> Assignment
             </span>
             <span class="full-cal-legend-item">
-                <span class="full-cal-legend-dot" style="background:#f59e0b"></span> Reminder
+                <span class="full-cal-legend-dot full-cal-legend-dot--reminder"></span> Reminder
             </span>
             <span class="full-cal-legend-item">
-                <span class="full-cal-legend-dot" style="background:#f472b6"></span> Academic
+                <span class="full-cal-legend-dot full-cal-legend-dot--academic"></span> Academic
             </span>
         </div>`;
 
@@ -183,17 +183,17 @@ function buildCalendarShell(month, year, events) {
         const overflow      = dayEvents.length - 3;
 
         const pills = visibleEvents.map(e => {
-            const colors = {
-                quiz:       { bg: 'rgba(79,209,197,0.15)',  text: '#4fd1c5' },
-                assignment: { bg: 'rgba(167,139,250,0.15)', text: '#a78bfa' },
-                reminder:   { bg: 'rgba(245,158,11,0.15)',  text: '#f59e0b' },
-                academic:   { bg: 'rgba(244,114,182,0.15)', text: '#f472b6' },
+            const typeClasses = {
+                quiz:       'full-cal-pill--quiz',
+                assignment: 'full-cal-pill--assignment',
+                reminder:   'full-cal-pill--reminder',
+                academic:   'full-cal-pill--academic',
             };
-            const c = colors[e.type] || colors.reminder;
+            const typeClass = typeClasses[e.type] || typeClasses.reminder;
             const label = e.class_name
-                ? `${e.title} <span style="opacity:0.6;font-weight:600">— ${e.class_name}</span>`
+                ? `${e.title} <span class="full-cal-pill-suffix">— ${e.class_name}</span>`
                 : e.title;
-            return `<div class="full-cal-pill" style="background:${c.bg};color:${c.text}">${label}</div>`;
+            return `<div class="full-cal-pill ${typeClass}">${label}</div>`;
         }).join('');
 
         const overflowPill = overflow > 0
@@ -226,410 +226,6 @@ function buildCalendarShell(month, year, events) {
     const upcomingHtml = buildUpcomingPanel(events, month, year);
 
     return `
-        <style>
-            /* ── FULL CALENDAR PAGE STYLES ── */
-            .full-cal-page-wrapper {
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .full-cal-topbar {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                flex-wrap: wrap;
-                gap: 12px;
-            }
-
-            .full-cal-header-left {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .full-cal-page-title {
-                font-size: 22px;
-                font-weight: 900;
-                color: #4fd1c5;
-                margin: 0;
-            }
-
-            .full-cal-legend {
-                display: flex;
-                align-items: center;
-                gap: 14px;
-                flex-wrap: wrap;
-            }
-
-            .full-cal-legend-item {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                font-size: 12px;
-                font-weight: 700;
-                color: #8b949e;
-            }
-
-            .full-cal-legend-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                display: inline-block;
-                flex-shrink: 0;
-            }
-
-            .full-cal-add-btn {
-                display: flex;
-                align-items: center;
-                gap: 7px;
-                background: #4fd1c5;
-                color: #0d1117;
-                border: none;
-                padding: 10px 16px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 800;
-                cursor: pointer;
-                transition: background 0.2s;
-                font-family: 'Nunito', sans-serif;
-            }
-
-            .full-cal-add-btn:hover { background: #3ab8ae; }
-
-            .full-cal-body {
-                display: flex;
-                gap: 20px;
-                align-items: flex-start;
-            }
-
-            .full-cal-main {
-                flex: 1;
-                min-width: 0;
-                background: #1a1919;
-                border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 16px;
-                overflow: hidden;
-            }
-
-            .full-cal-nav-row {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 16px 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
-            }
-
-            .full-cal-nav-btn {
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: #8b949e;
-                width: 34px;
-                height: 34px;
-                border-radius: 8px;
-                font-size: 22px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                line-height: 1;
-                transition: all 0.2s;
-                font-family: 'Nunito', sans-serif;
-            }
-
-            .full-cal-nav-btn:hover {
-                background: rgba(79,209,197,0.1);
-                border-color: rgba(79,209,197,0.3);
-                color: #4fd1c5;
-            }
-
-            .full-cal-month-label {
-                font-size: 17px;
-                font-weight: 900;
-                color: #e2e8f0;
-            }
-
-            .full-cal-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                border-bottom: 1px solid rgba(255,255,255,0.06);
-            }
-
-            .full-cal-day-header {
-                text-align: center;
-                font-size: 11px;
-                font-weight: 800;
-                color: #555e6a;
-                padding: 10px 4px;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-                border-right: 1px solid rgba(255,255,255,0.03);
-            }
-
-            .full-cal-day-header:last-child { border-right: none; }
-
-            .full-cal-cells {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-            }
-
-            .full-cal-cell {
-                min-height: 90px;
-                padding: 8px;
-                border-right: 1px solid rgba(255,255,255,0.04);
-                border-bottom: 1px solid rgba(255,255,255,0.04);
-                cursor: pointer;
-                transition: background 0.2s;
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                position: relative;
-            }
-
-            .full-cal-cell:hover {
-                background: rgba(255,255,255,0.03);
-            }
-
-            .full-cal-cell:nth-child(7n) { border-right: none; }
-
-            .full-cal-cell-empty {
-                cursor: default;
-                background: rgba(0,0,0,0.1);
-                pointer-events: none;
-            }
-
-            .full-cal-cell-today {
-                background: rgba(79,209,197,0.05);
-            }
-
-            .full-cal-cell-today:hover {
-                background: rgba(79,209,197,0.08);
-            }
-
-            .full-cal-cell-top {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .full-cal-day-num {
-                font-size: 13px;
-                font-weight: 700;
-                color: #8b949e;
-                width: 26px;
-                height: 26px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                transition: all 0.2s;
-                flex-shrink: 0;
-            }
-
-            .full-cal-cell-today .full-cal-day-num {
-                background: #4fd1c5;
-                color: #0d1117;
-                font-weight: 900;
-            }
-
-            .full-cal-cell-has-events .full-cal-day-num {
-                color: #e2e8f0;
-            }
-
-            .full-cal-dots {
-                display: flex;
-                gap: 3px;
-                align-items: center;
-            }
-
-            .full-cal-pills {
-                display: flex;
-                flex-direction: column;
-                gap: 3px;
-            }
-
-            .full-cal-pill {
-                font-size: 11px;
-                font-weight: 700;
-                padding: 3px 7px;
-                border-radius: 5px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                line-height: 1.4;
-            }
-
-            .full-cal-pill-more {
-                background: rgba(255,255,255,0.05) !important;
-                color: #8b949e !important;
-                font-size: 10px;
-                font-weight: 700;
-            }
-
-            /* ── UPCOMING PANEL ── */
-            .full-cal-upcoming {
-                width: 260px;
-                flex-shrink: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .full-cal-upcoming-title {
-                font-size: 11px;
-                font-weight: 800;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
-                margin-bottom: 4px;
-            }
-
-            .full-cal-upcoming-card {
-                background: #1a1919;
-                border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 12px;
-                padding: 12px 14px;
-                transition: border-color 0.2s, transform 0.2s;
-            }
-
-            .full-cal-upcoming-card:hover {
-                border-color: rgba(79,209,197,0.2);
-                transform: translateY(-2px);
-            }
-
-            .full-cal-upcoming-type {
-                font-size: 10px;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-                margin-bottom: 5px;
-            }
-
-            .full-cal-upcoming-title-text {
-                font-size: 13px;
-                font-weight: 700;
-                color: #e2e8f0;
-                margin-bottom: 5px;
-                line-height: 1.3;
-            }
-
-            .full-cal-upcoming-meta {
-                font-size: 11px;
-                color: #555e6a;
-            }
-
-            .full-cal-upcoming-date {
-                font-size: 12px;
-                font-weight: 800;
-                margin-top: 6px;
-            }
-
-            .full-cal-upcoming-empty {
-                background: #1a1919;
-                border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 12px;
-                padding: 20px;
-                text-align: center;
-                font-size: 13px;
-                color: #555e6a;
-            }
-
-            /* ── MODAL (full-page version) ── */
-            #fullCalModal {
-                display: none;
-                position: fixed;
-                top: 0; left: 0;
-                width: 100%; height: 100%;
-                background: rgba(0,0,0,0.65);
-                backdrop-filter: blur(4px);
-                z-index: 9998;
-                align-items: center;
-                justify-content: center;
-            }
-
-            #fullCalModal.open {
-                display: flex;
-            }
-
-            .full-cal-modal-box {
-                background: #1a1919;
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 16px;
-                padding: 24px;
-                width: 340px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            }
-
-            .full-cal-modal-head {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 16px;
-            }
-
-            .full-cal-modal-head span {
-                font-weight: 900;
-                color: #e2e8f0;
-                font-size: 15px;
-            }
-
-            .full-cal-modal-close {
-                background: none;
-                border: none;
-                color: #8b949e;
-                font-size: 22px;
-                cursor: pointer;
-                line-height: 1;
-                font-family: 'Nunito', sans-serif;
-            }
-
-            .full-cal-modal-close:hover { color: #e2e8f0; }
-
-            .full-cal-tab-row {
-                display: flex;
-                gap: 8px;
-                margin-bottom: 20px;
-            }
-
-            .full-cal-tab-btn {
-                flex: 1;
-                padding: 8px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 800;
-                cursor: pointer;
-                transition: all 0.2s;
-                font-family: 'Nunito', sans-serif;
-            }
-
-            .full-cal-modal-error {
-                color: #f85149;
-                font-size: 13px;
-                margin-top: 8px;
-                display: none;
-            }
-
-            .full-cal-modal-actions {
-                display: flex;
-                gap: 10px;
-                margin-top: 16px;
-            }
-
-            /* ── RESPONSIVE ── */
-            @media (max-width: 900px) {
-                .full-cal-body { flex-direction: column; }
-                .full-cal-upcoming { width: 100%; }
-            }
-
-            @media (max-width: 600px) {
-                .full-cal-cell { min-height: 56px; padding: 4px; }
-                .full-cal-pill { display: none; }
-                .full-cal-cell-has-events .full-cal-dots { display: flex; }
-                .full-cal-topbar { flex-direction: column; align-items: flex-start; }
-            }
-        </style>
-
         <div class="full-cal-page-wrapper">
             ${header}
             <div class="full-cal-body">
@@ -659,10 +255,10 @@ function buildUpcomingPanel(events, month, year) {
         .slice(0, 8);
 
     const typeConfig = {
-        quiz:       { label: 'Quiz',       color: '#4fd1c5' },
-        assignment: { label: 'Assignment', color: '#a78bfa' },
-        reminder:   { label: 'Reminder',   color: '#f59e0b' },
-        academic:   { label: 'Academic',   color: '#f472b6' },
+        quiz:       { label: 'Quiz',       cls: 'quiz' },
+        assignment: { label: 'Assignment', cls: 'assignment' },
+        reminder:   { label: 'Reminder',   cls: 'reminder' },
+        academic:   { label: 'Academic',   cls: 'academic' },
     };
 
     const monthNames = [
@@ -683,10 +279,10 @@ function buildUpcomingPanel(events, month, year) {
         const meta = e.class_name ? e.class_name : '';
         return `
             <div class="full-cal-upcoming-card">
-                <div class="full-cal-upcoming-type" style="color:${cfg.color}">${cfg.label}</div>
+                <div class="full-cal-upcoming-type full-cal-upcoming-type--${cfg.cls}">${cfg.label}</div>
                 <div class="full-cal-upcoming-title-text">${e.title}</div>
                 ${meta ? `<div class="full-cal-upcoming-meta">${meta}</div>` : ''}
-                <div class="full-cal-upcoming-date" style="color:${cfg.color}">${dateLabel}</div>
+                <div class="full-cal-upcoming-date full-cal-upcoming-date--${cfg.cls}">${dateLabel}</div>
             </div>`;
     }).join('');
 
@@ -709,14 +305,12 @@ function buildFullCalModal() {
                 <div class="full-cal-tab-row">
                     <button id="fullCalTabReminderBtn"
                         onclick="switchFullCalTab('reminder')"
-                        class="full-cal-tab-btn"
-                        style="border:1px solid #4fd1c5;background:rgba(79,209,197,0.15);color:#4fd1c5;">
+                        class="full-cal-tab-btn full-cal-tab-btn--reminder active">
                         Personal Reminder
                     </button>
                     <button id="fullCalTabAcademicBtn"
                         onclick="switchFullCalTab('academic')"
-                        class="full-cal-tab-btn"
-                        style="border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b949e;">
+                        class="full-cal-tab-btn full-cal-tab-btn--academic">
                         Academic Event
                     </button>
                 </div>
@@ -725,22 +319,22 @@ function buildFullCalModal() {
                 <div id="fullCalTabReminder">
                     <label class="teacher-modal-label">Reminder Title</label>
                     <input type="text" id="fullCalReminderTitle" class="teacher-modal-input" placeholder="e.g. Prepare test papers">
-                    <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+                    <label class="teacher-modal-label full-cal-form-label-spaced">Date</label>
                     <input type="date" id="fullCalReminderDate" class="teacher-modal-input">
                     <div id="fullCalReminderError" class="full-cal-modal-error"></div>
                     <div class="full-cal-modal-actions">
-                        <button onclick="closeFullCalModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                        <button onclick="saveFullCalReminder()" class="teacher-modal-submit" style="flex:1;">Save</button>
+                        <button onclick="closeFullCalModal()" class="teacher-modal-cancel full-cal-modal-btn-half">Cancel</button>
+                        <button onclick="saveFullCalReminder()" class="teacher-modal-submit full-cal-modal-btn-half">Save</button>
                     </div>
                 </div>
 
                 <!-- Academic Tab -->
-                <div id="fullCalTabAcademic" style="display:none;">
+                <div id="fullCalTabAcademic" class="full-cal-tab-panel-hidden">
                     <label class="teacher-modal-label">Event Title</label>
                     <input type="text" id="fullCalAcademicTitle" class="teacher-modal-input" placeholder="e.g. Term 2 Test Week">
-                    <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+                    <label class="teacher-modal-label full-cal-form-label-spaced">Date</label>
                     <input type="date" id="fullCalAcademicDate" class="teacher-modal-input">
-                    <label class="teacher-modal-label" style="margin-top:12px;">Event Type</label>
+                    <label class="teacher-modal-label full-cal-form-label-spaced">Event Type</label>
                     <select id="fullCalAcademicType" class="teacher-modal-input">
                         <option value="test">Test</option>
                         <option value="exam">Exam</option>
@@ -748,14 +342,14 @@ function buildFullCalModal() {
                         <option value="event">School Event</option>
                         <option value="other">Other</option>
                     </select>
-                    <label class="teacher-modal-label" style="margin-top:12px;">Class</label>
+                    <label class="teacher-modal-label full-cal-form-label-spaced">Class</label>
                     <select id="fullCalAcademicClass" class="teacher-modal-input">
                         <option value="">Loading classes...</option>
                     </select>
                     <div id="fullCalAcademicError" class="full-cal-modal-error"></div>
                     <div class="full-cal-modal-actions">
-                        <button onclick="closeFullCalModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                        <button onclick="saveFullCalAcademic()" class="teacher-modal-submit" style="flex:1;">Post Event</button>
+                        <button onclick="closeFullCalModal()" class="teacher-modal-cancel full-cal-modal-btn-half">Cancel</button>
+                        <button onclick="saveFullCalAcademic()" class="teacher-modal-submit full-cal-modal-btn-half">Post Event</button>
                     </div>
                 </div>
             </div>
@@ -821,19 +415,11 @@ window.switchFullCalTab = function (tab) {
     const rBtn = document.getElementById('fullCalTabReminderBtn');
     const aBtn = document.getElementById('fullCalTabAcademicBtn');
 
-    if (rTab) rTab.style.display = isReminder ? 'block' : 'none';
-    if (aTab) aTab.style.display = isReminder ? 'none'  : 'block';
+    if (rTab) rTab.classList.toggle('full-cal-tab-panel-hidden', !isReminder);
+    if (aTab) aTab.classList.toggle('full-cal-tab-panel-hidden', isReminder);
 
-    if (rBtn) {
-        rBtn.style.background   = isReminder ? 'rgba(79,209,197,0.15)' : 'transparent';
-        rBtn.style.borderColor  = isReminder ? '#4fd1c5' : 'rgba(255,255,255,0.1)';
-        rBtn.style.color        = isReminder ? '#4fd1c5' : '#8b949e';
-    }
-    if (aBtn) {
-        aBtn.style.background   = isReminder ? 'transparent' : 'rgba(244,114,182,0.15)';
-        aBtn.style.borderColor  = isReminder ? 'rgba(255,255,255,0.1)' : '#f472b6';
-        aBtn.style.color        = isReminder ? '#8b949e' : '#f472b6';
-    }
+    if (rBtn) rBtn.classList.toggle('active', isReminder);
+    if (aBtn) aBtn.classList.toggle('active', !isReminder);
 };
 
 async function loadFullCalClasses() {

@@ -13,29 +13,13 @@ window.showTeacherScopedLoader = function(panel, message = 'Working...') {
         };
     }
 
-    if (!document.getElementById('teacher-scoped-loader-style')) {
-        const style = document.createElement('style');
-        style.id = 'teacher-scoped-loader-style';
-        style.textContent = '@keyframes teacher-scoped-spin{to{transform:rotate(360deg)}}';
-        document.head.appendChild(style);
-    }
-
-    panel.style.position = 'relative';
+    panel.classList.add('teacher-scoped-loader-host');
     const overlay = document.createElement('div');
     overlay.className = 'teacher-scoped-loader';
-    overlay.style.cssText = `
-        position:absolute;inset:0;
-        background:rgba(13,17,23,0.7);
-        backdrop-filter:blur(2px);
-        display:flex;align-items:center;justify-content:center;
-        border-radius:14px;z-index:10;
-    `;
     overlay.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-            <div style="width:32px;height:32px;border:3px solid rgba(79,209,197,0.2);
-                        border-top-color:#4fd1c5;border-radius:50%;
-                        animation:teacher-scoped-spin 0.7s linear infinite;"></div>
-            <span style="font-size:13px;color:#8b949e;">${message}</span>
+        <div class="teacher-scoped-loader-inner">
+            <div class="teacher-scoped-loader-spinner"></div>
+            <span class="teacher-scoped-loader-text">${message}</span>
         </div>`;
     panel.appendChild(overlay);
 
@@ -48,157 +32,32 @@ window.showTeacherScopedLoader = function(panel, message = 'Working...') {
 // SHARED: COLLAPSIBLE SIDEBAR CLASS GROUPS
 // Reusable across quizzes/grades/resources/announcements/
 // assignments (or any teacher page with a left sidebar
-// grouped by class). Injects one shared stylesheet + one
-// shared toggle function so every page's sidebar behaves
-// the same way without duplicating CSS/JS per file.
+// grouped by class). Styling for .tchr-sidebar-class-label--toggle,
+// .tchr-sidebar-class-chevron, and .tchr-sidebar-class-group now
+// lives in dashboard.css (loaded once in <head>) instead of being
+// injected here at runtime.
 // ─────────────────────────────────────────────
-(function () {
-    if (document.getElementById('teacher-collapsible-sidebar-style')) return;
-    const style = document.createElement('style');
-    style.id = 'teacher-collapsible-sidebar-style';
-    style.textContent = `
-        .tchr-sidebar-class-label--toggle {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.15s ease;
-        }
-        .tchr-sidebar-class-label--toggle:hover {
-            color: #c9d1d9;
-        }
-        .tchr-sidebar-class-chevron {
-            flex-shrink: 0;
-            transition: transform 0.18s ease;
-            transform: rotate(0deg);
-        }
-        .tchr-sidebar-class-label--toggle.collapsed .tchr-sidebar-class-chevron {
-            transform: rotate(-90deg);
-        }
-        .tchr-sidebar-class-group {
-            overflow: hidden;
-            max-height: 2000px;
-            transition: max-height 0.22s ease;
-        }
-        .tchr-sidebar-class-group.collapsed {
-            max-height: 0;
-        }
-    `;
-    document.head.appendChild(style);
-})();
 
 // ─────────────────────────────────────────────
 // SHARED: DESKTOP "FLAT LAYOUT" STYLES
-// One injected copy, reused by every teacher page that renders a
+// One shared copy, reused by every teacher page that renders a
 // sidebar + main-panel split (Quizzes, Announcements, Assignments,
 // Resources, Grades).
 //
-// Replaces the old per-page boxed-card look (border + border-radius +
-// solid #0d1117 panel backgrounds) with a flat, VS-Code/GitHub style:
-// no outer card, panels transparent, single 1px divider between
-// sidebar and main panel. #api-content-area's inline 20px padding is
-// overridden to 0 on desktop, and each page's own -panel-content-style
-// padding (already present per page) keeps panel content readable, so
-// the divider line runs flush from the top nav all the way to the
-// bottom of the viewport. The layout height is filled via 100% rather
-// than each page's own calc(100vh - 140px) guess, since
-// #api-content-area is already flex:1 inside .main-content — a fixed
-// guess on top of that just risks drifting out of sync again.
+// This styling — the flat, VS-Code/GitHub style layout (no outer card,
+// panels transparent, single 1px divider between sidebar and main
+// panel), .tchr-flat-layout / .tchr-flat-sidebar / .tchr-flat-panel,
+// the shared .tchr-info-rail, and the .teacher-desktop-create.active
+// state — now lives in dashboard.css (loaded once in <head>) instead
+// of being injected into <head> at runtime.
 //
-// Usage: call injectSharedTeacherDesktopLayoutStyles() once when a
-// page's HTML is built, then add these classes alongside each page's
-// own prefixed classes:
-//   .tchr-flat-layout   → on the outer sidebar+panel flex wrapper
-//   .tchr-flat-sidebar  → on the sidebar column
-//   .tchr-flat-panel    → on the main (right-hand) panel column
+// This function is kept as a no-op so every other page's existing
+// `injectSharedTeacherDesktopLayoutStyles()` call (already present in
+// each page's render function) keeps working without any changes
+// needed on their end.
 // ─────────────────────────────────────────────
 function injectSharedTeacherDesktopLayoutStyles() {
-    if (document.getElementById('tchr-shared-desktop-layout-style')) return;
-
-    const style = document.createElement('style');
-    style.id = 'tchr-shared-desktop-layout-style';
-    style.textContent = `
-        @media (min-width: 900px) {
-            #api-content-area {
-                padding: 0 !important;
-            }
-        }
-
-        .tchr-flat-layout {
-            border: none !important;
-            border-radius: 0 !important;
-            overflow: visible !important;
-            margin-top: 0 !important;
-            height: 100% !important;
-            min-height: 0 !important;
-        }
-
-        .tchr-flat-sidebar {
-            background: transparent !important;
-            border-right: 1px solid rgba(255,255,255,0.07) !important;
-            height: 100% !important;
-            min-height: 0 !important;
-        }
-
-        .tchr-flat-panel {
-            background: transparent !important;
-            height: 100% !important;
-            min-height: 0 !important;
-        }
-
-        /* Shows a page's "+ New" button as "in progress" while its create
-           form is open in the right panel, so the sidebar always reflects
-           what's actually showing on the right — even when that's a blank
-           compose form rather than a selected item. Shared across any
-           page's teacher-desktop-create button. */
-        .teacher-desktop-create.active {
-            background: #1a6b2e;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
-        }
-        .teacher-desktop-create.active:hover { background: #1a6b2e; }
-
-        /* Restores the breathing room #api-content-area used to give,
-           now scoped to just the sidebar's scrollable list, so the
-           divider itself stays flush. */
-        .tchr-flat-sidebar .qz-sidebar-scroll,
-        .tchr-flat-sidebar .an-sidebar-scroll,
-        .tchr-flat-sidebar .as-sidebar-scroll,
-        .tchr-flat-sidebar .rs-sidebar-scroll,
-        .tchr-flat-sidebar .gr-sidebar-scroll {
-            padding-top: 20px !important;
-        }
-
-        /* Right info rail — fixed width, always visible, shared across
-           any page that calls buildInfoRail(). Same flat-divider
-           convention as the sidebar (border, not a boxed card). Hidden
-           below 1250px so it never crowds the main panel on smaller
-           desktop windows. */
-        .tchr-info-rail {
-            width: 260px; min-width: 220px; max-width: 280px;
-            flex-shrink: 0;
-            border-left: 1px solid rgba(255,255,255,0.07);
-            overflow-y: auto;
-            padding: 20px 22px;
-        }
-        .tchr-info-rail-header {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 11px; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; color: #8b949e;
-            margin-bottom: 14px; padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-        .tchr-info-rail-body p {
-            font-size: 12.5px; line-height: 1.65; color: #8b949e;
-            margin: 0 0 14px 0;
-        }
-        .tchr-info-rail-body p:last-child { margin-bottom: 0; }
-        .tchr-info-rail-body strong { color: #c9d1d9; font-weight: 600; }
-        @media (max-width: 1250px) {
-            .tchr-info-rail { display: none; }
-        }
-    `;
-    document.head.appendChild(style);
+    // Intentionally empty — see comment above.
 }
 
 /**
@@ -530,7 +389,7 @@ function renderSnapshotPanel(data) {
             onclick: 'fetchTeacherQuizzes()',
             empty:   'No quizzes created yet',
             meta:    data.quiz ? `${data.quiz.class_name} &bull; ${data.quiz.start_time}` : '',
-            badge:   data.quiz ? `<span class="snap-status-badge" style="background:${data.quiz.status === 'Open' ? 'rgba(242,140,56,0.15)' : 'rgba(107,114,128,0.15)'};color:${data.quiz.status === 'Open' ? '#f28c38' : '#6b7280'}">${data.quiz.status}</span>` : ''
+            badge:   data.quiz ? `<span class="snap-status-badge snap-status-badge--dynamic" style="--snap-badge-bg:${data.quiz.status === 'Open' ? 'rgba(242,140,56,0.15)' : 'rgba(107,114,128,0.15)'};--snap-badge-color:${data.quiz.status === 'Open' ? '#f28c38' : '#6b7280'};">${data.quiz.status}</span>` : ''
         },
         {
             key:     'assignment',
@@ -541,7 +400,7 @@ function renderSnapshotPanel(data) {
             onclick: 'fetchTeacherAssignments()',
             empty:   'No upcoming assignments',
             meta:    data.assignment ? `${data.assignment.class_name} &bull; Due ${data.assignment.due_date}` : '',
-            badge:   data.assignment ? `<span class="snap-status-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa;">in ${data.assignment.days_left} day${data.assignment.days_left !== 1 ? 's' : ''}</span>` : ''
+            badge:   data.assignment ? `<span class="snap-status-badge snap-status-badge--dynamic" style="--snap-badge-bg:rgba(167,139,250,0.15);--snap-badge-color:#a78bfa;">in ${data.assignment.days_left} day${data.assignment.days_left !== 1 ? 's' : ''}</span>` : ''
         },
         {
             key:     'announcement',
@@ -562,13 +421,13 @@ function renderSnapshotPanel(data) {
         if (!card.data) {
             html += `
                 <div class="snap-card snap-card-empty">
-                    <div class="snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+                    <div class="snap-card-label" style="--snap-label-color:${card.color};">${card.icon} ${card.label}</div>
                     <div class="snap-empty-text">${card.empty}</div>
                 </div>`;
         } else {
             html += `
                 <div class="snap-card" onclick="${card.onclick}">
-                    <div class="snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
+                    <div class="snap-card-label" style="--snap-label-color:${card.color};">${card.icon} ${card.label}</div>
                     <div class="snap-card-title">${card.data.title}</div>
                     <div class="snap-card-meta">
                         ${card.meta}
@@ -578,7 +437,7 @@ function renderSnapshotPanel(data) {
         }
     });
     
-    html += `<div class="snap-panel-title" style="margin-top:20px;">Calendar & Reminders</div>
+    html += `<div class="snap-panel-title snap-panel-title--spaced">Calendar & Reminders</div>
          <div id="snap-calendar"></div>`;
     return html;
 }
@@ -776,8 +635,7 @@ function renderSnapshotPanel(data) {
             const initials = avatarWrapper.querySelector('.initials-avatar');
             if (initials) initials.remove();
             const newImg = document.createElement('img');
-            newImg.className = 'teacher-avatar';
-            newImg.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+            newImg.className = 'teacher-avatar teacher-avatar--uploaded';
             newImg.src = url;
             avatarWrapper.insertBefore(newImg, profileInput);
         }
@@ -800,7 +658,7 @@ window.loadCalendar = async function(month, year) {
     const container = document.getElementById('snap-calendar');
     if (!container) return;
 
-    container.innerHTML = `<div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>`;
+    container.innerHTML = `<div class="mini-cal-loading">Loading...</div>`;
 
     try {
         const res  = await fetch(`api/teacher/get_calendar_events.php?month=${month}&year=${year}`);
@@ -808,7 +666,7 @@ window.loadCalendar = async function(month, year) {
         window.calendarEvents = data.events || [];
         renderCalendar(month, year, window.calendarEvents);
     } catch(e) {
-        container.innerHTML = `<div style="color:#ff5555;font-size:13px;text-align:center;">Failed to load calendar</div>`;
+        container.innerHTML = `<div class="mini-cal-error">Failed to load calendar</div>`;
     }
 };
 
@@ -881,14 +739,14 @@ function renderCalendar(month, year, events) {
                     ${dayEvents.map(e => `
                         <div class="cal-tooltip-item cal-tooltip-${e.type}">
                             ${e.type === 'assignment' 
-    ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#a78bfa" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
+    ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#a78bfa" stroke-width="2" fill="none" class="mini-cal-tooltip-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
    : e.type === 'quiz' 
-? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" style="flex-shrink:0;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
+? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#4fd1c5" stroke-width="2" fill="none" class="mini-cal-tooltip-icon"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`
 : e.type === 'academic'
-? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f472b6" stroke-width="2" fill="none" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`
-: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f59e0b" stroke-width="2" fill="none" style="flex-shrink:0;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`
+? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f472b6" stroke-width="2" fill="none" class="mini-cal-tooltip-icon"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`
+: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="#f59e0b" stroke-width="2" fill="none" class="mini-cal-tooltip-icon"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`
 }
-                            ${e.title}${e.class_name ? ` <span style="opacity:0.6;">— ${e.class_name}</span>` : ''}
+                            ${e.title}${e.class_name ? ` <span class="mini-cal-tooltip-class-suffix">— ${e.class_name}</span>` : ''}
                         </div>`).join('')}
                 </div>` : ''}
             </div>`;
@@ -897,25 +755,25 @@ function renderCalendar(month, year, events) {
     html += `</div>
 
        <!-- Add Event Modal — two tabs -->
-<div id="reminderModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;align-items:center;justify-content:center;">
-    <div style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+<div id="reminderModal" class="mini-cal-modal">
+    <div class="mini-cal-modal-box">
 
         <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <span style="font-weight:800;color:#e2e8f0;">Add to Calendar</span>
-            <button onclick="closeReminderModal()" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;">&times;</button>
+        <div class="mini-cal-modal-header">
+            <span class="mini-cal-modal-title">Add to Calendar</span>
+            <button onclick="closeReminderModal()" class="mini-cal-modal-close">&times;</button>
         </div>
 
         <!-- Tabs -->
-        <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <div class="mini-cal-tab-row">
             <button id="tabReminder"
                 onclick="switchCalTab('reminder')"
-                style="flex:1;padding:8px;border-radius:8px;border:1px solid #4fd1c5;background:rgba(79,209,197,0.15);color:#4fd1c5;font-weight:800;font-size:13px;cursor:pointer;">
+                class="mini-cal-tab-btn mini-cal-tab-btn--reminder active">
                 Personal Reminder
             </button>
             <button id="tabAcademic"
                 onclick="switchCalTab('academic')"
-                style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#8b949e;font-weight:800;font-size:13px;cursor:pointer;">
+                class="mini-cal-tab-btn mini-cal-tab-btn--academic">
                 Academic Event
             </button>
         </div>
@@ -924,22 +782,22 @@ function renderCalendar(month, year, events) {
         <div id="calTabReminder">
             <label class="teacher-modal-label">Reminder Title</label>
             <input type="text" id="reminderTitle" class="teacher-modal-input" placeholder="e.g. Create Test">
-            <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+            <label class="teacher-modal-label mini-cal-form-label-spaced">Date</label>
             <input type="date" id="reminderDate" class="teacher-modal-input">
-            <div id="reminderError" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></div>
-            <div style="display:flex;gap:10px;margin-top:16px;">
-                <button onclick="closeReminderModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                <button onclick="saveReminder()" class="teacher-modal-submit" style="flex:1;">Save</button>
+            <div id="reminderError" class="mini-cal-form-error"></div>
+            <div class="mini-cal-form-actions">
+                <button onclick="closeReminderModal()" class="teacher-modal-cancel mini-cal-form-btn-half">Cancel</button>
+                <button onclick="saveReminder()" class="teacher-modal-submit mini-cal-form-btn-half">Save</button>
             </div>
         </div>
 
         <!-- ACADEMIC EVENT TAB -->
-        <div id="calTabAcademic" style="display:none;">
+        <div id="calTabAcademic" class="mini-cal-tab-panel-hidden">
             <label class="teacher-modal-label">Event Title</label>
             <input type="text" id="academicTitle" class="teacher-modal-input" placeholder="e.g. Term 2 Test Week">
-            <label class="teacher-modal-label" style="margin-top:12px;">Date</label>
+            <label class="teacher-modal-label mini-cal-form-label-spaced">Date</label>
             <input type="date" id="academicDate" class="teacher-modal-input">
-            <label class="teacher-modal-label" style="margin-top:12px;">Event Type</label>
+            <label class="teacher-modal-label mini-cal-form-label-spaced">Event Type</label>
             <select id="academicType" class="teacher-modal-input">
                 <option value="test">Test</option>
                 <option value="exam">Exam</option>
@@ -947,14 +805,14 @@ function renderCalendar(month, year, events) {
                 <option value="event">School Event</option>
                 <option value="other">Other</option>
             </select>
-            <label class="teacher-modal-label" style="margin-top:12px;">Class</label>
+            <label class="teacher-modal-label mini-cal-form-label-spaced">Class</label>
             <select id="academicClass" class="teacher-modal-input">
                 <option value="">Loading classes...</option>
             </select>
-            <div id="academicError" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></div>
-            <div style="display:flex;gap:10px;margin-top:16px;">
-                <button onclick="closeReminderModal()" class="teacher-modal-cancel" style="flex:1;">Cancel</button>
-                <button onclick="saveAcademicEvent()" class="teacher-modal-submit" style="flex:1;">Post Event</button>
+            <div id="academicError" class="mini-cal-form-error"></div>
+            <div class="mini-cal-form-actions">
+                <button onclick="closeReminderModal()" class="teacher-modal-cancel mini-cal-form-btn-half">Cancel</button>
+                <button onclick="saveAcademicEvent()" class="teacher-modal-submit mini-cal-form-btn-half">Post Event</button>
             </div>
         </div>
 
@@ -987,7 +845,7 @@ window.openReminderModal = function(dateStr = '') {
     document.getElementById('reminderTitle').value = '';
     document.getElementById('reminderDate').value  = dateStr;
     document.getElementById('reminderError').style.display = 'none';
-    modal.style.display = 'flex';
+    modal.classList.add('open');
 };
 
 // TO:
@@ -1006,12 +864,12 @@ window.openReminderModal = function(dateStr = '') {
     switchCalTab('reminder');
     // Pre-load classes for academic tab
     window.loadAcademicClasses();
-    modal.style.display = 'flex';
+    modal.classList.add('open');
 };
 
 window.closeReminderModal = function() {
     const modal = document.getElementById('reminderModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.remove('open');
 };
 
 window.saveReminder = async function() {
@@ -1046,19 +904,14 @@ window.saveReminder = async function() {
 window.switchCalTab = function(tab) {
     const isReminder = tab === 'reminder';
 
-    document.getElementById('calTabReminder').style.display = isReminder ? 'block' : 'none';
-    document.getElementById('calTabAcademic').style.display = isReminder ? 'none'  : 'block';
+    document.getElementById('calTabReminder').classList.toggle('mini-cal-tab-panel-hidden', !isReminder);
+    document.getElementById('calTabAcademic').classList.toggle('mini-cal-tab-panel-hidden', isReminder);
 
     const btnR = document.getElementById('tabReminder');
     const btnA = document.getElementById('tabAcademic');
 
-    btnR.style.background   = isReminder ? 'rgba(79,209,197,0.15)' : 'transparent';
-    btnR.style.borderColor  = isReminder ? '#4fd1c5' : 'rgba(255,255,255,0.1)';
-    btnR.style.color        = isReminder ? '#4fd1c5' : '#8b949e';
-
-    btnA.style.background   = isReminder ? 'transparent' : 'rgba(244,114,182,0.15)';
-    btnA.style.borderColor  = isReminder ? 'rgba(255,255,255,0.1)' : '#f472b6';
-    btnA.style.color        = isReminder ? '#8b949e' : '#f472b6';
+    btnR.classList.toggle('active', isReminder);
+    btnA.classList.toggle('active', !isReminder);
 };
 
 // ── LOAD CLASSES INTO ACADEMIC DROPDOWN ──
