@@ -307,7 +307,14 @@ function renderGrades(data) {
     <div class="grades-desktop-layout lqz-flat-layout">
         <!-- Sidebar -->
         <div class="grades-dt-sidebar lqz-flat-sidebar">
-            <div class="grades-dt-sidebar-header">Subjects</div>
+            ${groups.length > 0 ? `
+            <div class="grades-dt-search-wrap">
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="grades-search" id="gradesSearchDt"
+                    placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
+            </div>` : ''}
             <div class="grades-dt-sidebar-scroll">
                 ${sidebarItemsHtml}
             </div>
@@ -327,12 +334,6 @@ function renderGrades(data) {
 
         <!-- Main panel -->
         <div class="grades-dt-main lqz-flat-panel">
-            ${groups.length > 0 ? `
-            <div class="grades-desktop-topbar">
-                <span class="grades-dt-topbar-hint">Select a subject</span>
-                <input type="text" class="grades-search" id="gradesSearchDt"
-                    placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
-            </div>` : ''}
             <div class="grades-dt-panel-scroll" id="grades-dt-panel">
                 <div class="grades-dt-empty">
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
