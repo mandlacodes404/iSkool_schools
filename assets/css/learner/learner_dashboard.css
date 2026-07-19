@@ -937,6 +937,17 @@ iframe {
         border-top-left-radius: 35px;
         border-bottom-left-radius: 35px;
         border-left: 1px solid #555555;
+        /* Extending the same crisp-line trick to the top and bottom edges
+           of this same overlay box, so all three connect into one
+           continuous unbroken line/frame (left + top + bottom) rather
+           than just the left seam on its own. Same colour/weight as the
+           left border. Note these lines run along the TRUE top and
+           bottom edges of the screen (this box is full-height), not
+           around a smaller inset "card" — they won't be very visible on
+           their own against the screen edge, but they connect cleanly
+           into the left border at the top-left/bottom-left corners. */
+        border-top: 1px solid #555555;
+        border-bottom: 1px solid #555555;
         box-sizing: border-box;
     }
 
