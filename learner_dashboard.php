@@ -215,6 +215,9 @@ if (!empty($joinedClassIds)) {
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.0">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -2811,9 +2814,9 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=5.7"></script>
 <script src="assets/js/learner/quiz.js?v=8.6"></script>
-<script src="assets/js/learner/assignments.js?v=7.9"></script>
-<script src="assets/js/learner/resources.js?v=6.9"></script>
-<script src="assets/js/learner/announcements.js?v=7.6"></script>
+<script src="assets/js/learner/assignments.js?v=8.0"></script>
+<script src="assets/js/learner/resources.js?v=7.0"></script>
+<script src="assets/js/learner/announcements.js?v=7.7"></script>
 <script src="assets/js/learner/grades.js?v=5.7"></script>
 <script src="assets/js/learner/evaluations.js?v=4.6"></script>
 <script src="assets/js/learner/discussions.js?v=8.5"></script>

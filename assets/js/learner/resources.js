@@ -64,7 +64,7 @@ window.fetchResources = async function() {
     } catch (error) {
         console.error("Resource Fetch Error:", error);
         if (apiArea) {
-            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading resources.</p>";
+            apiArea.innerHTML = "<p class='lrs-error-state'>Error loading resources.</p>";
         }
     } finally {
         if (loader) loader.style.display = 'none';
@@ -186,7 +186,7 @@ function renderResourceCards(data) {
     if (!apiArea) return;
 
     if (Object.keys(data).length === 0) {
-        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No resources found.</p>";
+        apiArea.innerHTML = "<p class='lrs-empty-state'>No resources found.</p>";
         return;
     }
 
@@ -246,429 +246,15 @@ function renderResourceCards(data) {
     }
 
     // ── Build full HTML ──
+    // (Styles for this markup now live in assets/css/learner/resources.css
+    // — the inline <style> block that used to be injected here was removed
+    // as part of the inline-style cleanup.)
     let html = `
-        <style>
-            @media (min-width: 900px) {
-                .lrs-desktop-layout { display: flex !important; }
-                .lrs-mobile-list    { display: none !important; }
-                .lrs-mobile-search-wrap { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .lrs-desktop-layout { display: none !important; }
-                .lrs-mobile-list    { display: block !important; }
-            }
-
-            .lrs-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            .lrs-sidebar {
-                width: 280px;
-                min-width: 240px;
-                max-width: 300px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .lrs-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .lrs-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .lrs-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .lrs-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .lrs-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
-            .lrs-desktop-teacher-header {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 10px 14px;
-                background: transparent;
-                border: 0;
-                color: #8b949e;
-                cursor: pointer;
-                font-family: inherit;
-                text-align: left;
-            }
-            .lrs-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
-            .lrs-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
-            .lrs-desktop-teacher-chevron.open { transform: rotate(90deg); }
-            .lrs-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
-            .lrs-desktop-teacher-name {
-                flex: 1;
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-            }
-            .lrs-desktop-teacher-count {
-                flex-shrink: 0;
-                font-size: 10px;
-                font-weight: 800;
-                color: #f28c38;
-                background: rgba(242,140,56,0.1);
-                border: 1px solid rgba(242,140,56,0.25);
-                border-radius: 999px;
-                padding: 1px 7px;
-            }
-            .lrs-desktop-teacher-body.collapsed { display: none; }
-            .lrs-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .lrs-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .lrs-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            .lrs-sidebar-item-icon { flex-shrink: 0; opacity: 0.8; }
-            .lrs-sidebar-item-info { flex: 1; min-width: 0; }
-            .lrs-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lrs-sidebar-item.active .lrs-sidebar-item-title { color: #e2e8f0; }
-            .lrs-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-
-            .lrs-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .lrs-main-panel::-webkit-scrollbar { width: 5px; }
-            .lrs-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .lrs-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .lrs-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .lrs-panel-empty svg { opacity: 0.3; }
-            .lrs-panel-empty p { font-size: 14px; margin: 0; }
-
-            .lrs-panel-content { padding: 28px 32px; }
-
-            .lrs-panel-header {
-                margin-bottom: 24px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                display: flex;
-                align-items: flex-start;
-                gap: 18px;
-            }
-            .lrs-panel-icon { flex-shrink: 0; opacity: 0.9; }
-            .lrs-panel-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #4fd1c5;
-                margin: 0 0 6px;
-                line-height: 1.3;
-            }
-            .lrs-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            .lrs-open-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: rgba(79,209,197,0.1);
-                border: 1px solid rgba(79,209,197,0.4);
-                color: #4fd1c5;
-                padding: 12px 28px;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 700;
-                cursor: pointer;
-                text-decoration: none;
-                transition: all 0.2s ease;
-                margin-top: 8px;
-            }
-            .lrs-open-btn:hover {
-                background: rgba(79,209,197,0.2);
-                border-color: #4fd1c5;
-            }
-
-            /* ── VIDEO EMBED STYLES ── */
-            .lrs-video-wrap {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                min-height: 0;
-                background: #000;
-            }
-            .lrs-video-iframe-wrap {
-                position: relative;
-                flex: 1;
-                min-height: 0;
-                background: #000;
-            }
-            .lrs-video-iframe-wrap iframe {
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
-                border: none;
-            }
-
-            /* ── MOBILE VIDEO STYLES ── */
-            .lrs-mobile-video-wrap {
-                width: 100%;
-                aspect-ratio: 16 / 9;
-                background: #000;
-                border-radius: 10px;
-                overflow: hidden;
-                margin-top: 4px;
-            }
-            .lrs-mobile-video-wrap iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-                display: block;
-            }
-            .lrs-mobile-video-card {
-                background: transparent;
-                border-bottom: 0;
-                padding: 13px 18px;
-                position: relative;
-            }
-            .lrs-mobile-video-card::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 18px;
-                right: 18px;
-                height: 1px;
-                background: rgba(255,255,255,0.06);
-            }
-            .lrs-mobile-video-card:last-child::after { display: none; }
-            .lrs-mobile-video-title {
-                font-size: 15px;
-                font-weight: 700;
-                color: #e2e8f0;
-                margin: 0 0 3px;
-            }
-            .lrs-mobile-video-meta {
-                font-size: 11px;
-                color: #555e6a;
-                margin: 0 0 10px;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
-            .lrs-mobile-list {
-                background: transparent;
-                border-radius: 0;
-                overflow: visible;
-                margin: 0 0 14px;
-            }
-            @media (max-width: 899px) {
-                .lrs-mobile-list {
-                    margin-left: -18px;
-                    margin-right: -18px;
-                }
-            }
-            .lrs-mobile-folder-header {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 16px 18px;
-                background: transparent;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
-                cursor: pointer;
-                user-select: none;
-                transition: background 0.2s;
-            }
-            .lrs-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-            .lrs-mobile-folder-icon { flex-shrink: 0; }
-            .lrs-mobile-folder-name {
-                flex: 1;
-                font-size: 16px;
-                font-weight: 800;
-                color: #e2e8f0;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lrs-mobile-folder-count {
-                font-size: 12px;
-                color: #8b949e;
-                font-weight: 600;
-                background: rgba(255,255,255,0.05);
-                padding: 2px 8px;
-                border-radius: 20px;
-                flex-shrink: 0;
-            }
-            .lrs-mobile-folder-chevron {
-                flex-shrink: 0;
-                color: #555e6a;
-                transition: transform 0.3s ease;
-            }
-            .lrs-mobile-folder-chevron.open { transform: rotate(90deg); }
-            .lrs-mobile-folder-body { display: block; }
-            .lrs-mobile-folder-body.collapsed { display: none; }
-            .lrs-mobile-row {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 13px 18px;
-                background: transparent;
-                border-bottom: 0;
-                border-radius: 0;
-                border-left: 0;
-                border-right: 0;
-                cursor: pointer;
-                transition: background 0.15s;
-                position: relative;
-            }
-            .lrs-mobile-row::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 18px;
-                right: 18px;
-                height: 1px;
-                background: rgba(255,255,255,0.06);
-            }
-            .lrs-mobile-row:last-child::after { display: none; }
-            .lrs-mobile-row:active { background: rgba(255,255,255,0.03); }
-            .lrs-mobile-row-icon {
-                width: 32px;
-                height: 32px;
-                border-radius: 8px;
-                background: #f28c3818;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .lrs-mobile-row-body { flex: 1; min-width: 0; }
-            .lrs-mobile-row-title {
-                font-size: 15px;
-                font-weight: 700;
-                color: #e2e8f0;
-                margin: 0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lrs-mobile-row-size {
-                font-size: 11px;
-                color: #555e6a;
-                margin-top: 2px;
-            }
-            .lrs-mobile-row-chevron {
-                flex-shrink: 0;
-                color: #555e6a;
-            }
-
-            /* ── MOBILE SEARCH BAR ── */
-            @media (max-width: 899px) {
-                .lrs-mobile-search-wrap {
-                    display: block;
-                    margin-bottom: 10px;
-                    position: relative;
-                }
-                .lrs-mobile-search-wrap svg {
-                    position: absolute;
-                    left: 12px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    pointer-events: none;
-                    opacity: 0.4;
-                }
-                .lrs-mobile-search {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding: 9px 14px 9px 36px;
-                    border-radius: 10px;
-                    background: rgba(255,255,255,0.05);
-                    border: none;
-                    color: #e2e8f0;
-                    font-size: 15px;
-                    font-family: 'Nunito', sans-serif;
-                    transition: background 0.2s;
-                }
-                .lrs-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-                .lrs-mobile-search::placeholder { color: #555e6a; }
-            }
-
-            /* ── DESKTOP SEARCH BAR ── */
-            .lrs-desktop-search-wrap {
-                display: none;
-                position: relative;
-                padding: 10px 10px 8px;
-                flex-shrink: 0;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .lrs-desktop-search-wrap svg {
-                position: absolute;
-                left: 22px;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                opacity: 0.4;
-            }
-            .lrs-desktop-search {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 8px 12px 8px 32px;
-                border-radius: 8px;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: #e2e8f0;
-                font-size: 12.5px;
-                font-family: 'Nunito', sans-serif;
-                transition: border-color 0.2s;
-            }
-            .lrs-desktop-search:focus { outline: none; border-color: #f28c38; }
-            .lrs-desktop-search::placeholder { color: #555e6a; }
-            @media (min-width: 900px) {
-                .lrs-desktop-search-wrap { display: block; }
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lrs-desktop-layout lqz-flat-layout">
             <div class="lrs-sidebar lqz-flat-sidebar">
                 <div class="lrs-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
                     <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
@@ -735,7 +321,7 @@ function renderResourceCards(data) {
                                 <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
                             </svg>
                             <span>VIDEO</span>
-                            <span style="color:#30363d;">&bull;</span>
+                            <span class="lrs-bullet-muted">&bull;</span>
                             <span>${file.uploaded_at}</span>
                         </div>
                         <div class="lrs-mobile-video-wrap">
@@ -848,134 +434,6 @@ window.selectDesktopLearnerResource = function(flatIdx) {
     const isVideo = file.resource_type === 'video';
     const ext     = (file.ext || '').toLowerCase();
 
-    // ── Shared top bar styles ──
-    const topbarStyles = `
-        <style>
-            .lrs-preview-topbar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 12px;
-                padding: 14px 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                flex-shrink: 0;
-                flex-wrap: wrap;
-                background: #0d1117;
-            }
-            .lrs-preview-topbar-info { flex: 1; min-width: 0; }
-            .lrs-preview-topbar-title {
-                font-size: 14px;
-                font-weight: 700;
-                color: #e2e8f0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lrs-preview-topbar-meta {
-                font-size: 11px;
-                color: #555e6a;
-                margin-top: 2px;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                flex-wrap: wrap;
-            }
-            .lrs-preview-topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
-            .lrs-preview-open-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(79,209,197,0.1);
-                border: 1px solid rgba(79,209,197,0.3);
-                color: #4fd1c5;
-                padding: 7px 14px;
-                border-radius: 7px;
-                font-size: 12px;
-                font-weight: 700;
-                cursor: pointer;
-                text-decoration: none;
-                transition: background 0.15s;
-            }
-            .lrs-preview-open-btn:hover { background: rgba(79,209,197,0.2); }
-            .lrs-yt-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(255,68,68,0.1);
-                border: 1px solid rgba(255,68,68,0.3);
-                color: #ff6b6b;
-                padding: 7px 14px;
-                border-radius: 7px;
-                font-size: 12px;
-                font-weight: 700;
-                cursor: pointer;
-                text-decoration: none;
-                transition: background 0.15s;
-            }
-            .lrs-yt-btn:hover { background: rgba(255,68,68,0.2); }
-            .lrs-preview-wrap {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                min-height: 0;
-            }
-            .lrs-preview-iframe {
-                flex: 1;
-                width: 100%;
-                height: 100%;
-                border: none;
-                background: #fff;
-                display: block;
-            }
-            .lrs-preview-img-wrap {
-                align-items: center;
-                justify-content: center;
-                padding: 24px;
-                background: rgba(255,255,255,0.02);
-                overflow-y: auto;
-            }
-            .lrs-preview-img {
-                max-width: 100%;
-                max-height: 100%;
-                border-radius: 8px;
-                object-fit: contain;
-                box-shadow: 0 4px 32px rgba(0,0,0,0.4);
-            }
-            .lrs-preview-fallback {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 16px;
-                padding: 40px;
-                color: #555e6a;
-            }
-            .lrs-preview-fallback-label {
-                font-size: 14px;
-                color: #555e6a;
-                margin: 0;
-                text-align: center;
-            }
-            /* Desktop video embed */
-            .lrs-video-embed-wrap {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                background: #000;
-                min-height: 0;
-                position: relative;
-            }
-            .lrs-video-embed-wrap iframe {
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
-                border: none;
-            }
-        </style>`;
-
     // ── VIDEO BRANCH ──
     if (isVideo) {
         // Convert embed URL back to watch URL for "open in YouTube" button
@@ -985,8 +443,6 @@ window.selectDesktopLearnerResource = function(flatIdx) {
         );
 
         panel.innerHTML = `
-            ${topbarStyles}
-
             <div class="lrs-preview-topbar">
                 <div class="lrs-preview-topbar-info">
                     <div class="lrs-preview-topbar-title">${file.title}</div>
@@ -1046,9 +502,9 @@ window.selectDesktopLearnerResource = function(flatIdx) {
         const icon = getFileIcon(file.ext, false);
         previewHtml = `
             <div class="lrs-preview-fallback">
-                <div style="opacity:0.5;">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
+                <div class="lrs-preview-fallback-icon">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
                 <p class="lrs-preview-fallback-label">Preview not available for .${ext.toUpperCase()} files</p>
-                <a href="${path}" target="_blank" class="lrs-open-btn" style="margin-top:0;">
+                <a href="${path}" target="_blank" class="lrs-open-btn lrs-open-btn--flush">
                     <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                         <polyline points="15 3 21 3 21 9"></polyline>
@@ -1060,8 +516,6 @@ window.selectDesktopLearnerResource = function(flatIdx) {
     }
 
     panel.innerHTML = `
-        ${topbarStyles}
-
         <div class="lrs-preview-topbar">
             <div class="lrs-preview-topbar-info">
                 <div class="lrs-preview-topbar-title">${file.title}</div>

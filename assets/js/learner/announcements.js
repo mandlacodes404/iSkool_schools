@@ -72,7 +72,7 @@ window.fetchAnnouncements = async function() {
     } catch (error) {
         console.error("Fetch Error:", error);
         if (apiArea) {
-            apiArea.innerHTML = "<p style='color:#ff5555; text-align:center; margin-top:50px;'>Error loading announcements.</p>";
+            apiArea.innerHTML = "<p class='lan-error-state'>Error loading announcements.</p>";
         }
     } finally {
         if (loader) loader.style.display = 'none';
@@ -215,7 +215,7 @@ function renderAnnouncements(data) {
     const hasTeacher     = teacherEntries.length > 0;
 
     if (!hasSchoolWide && !hasTeacher) {
-        apiArea.innerHTML = "<p style='text-align:center; color:#888; margin-top:60px;'>No announcements found.</p>";
+        apiArea.innerHTML = "<p class='lan-empty-state'>No announcements found.</p>";
         return;
     }
 
@@ -262,7 +262,7 @@ function renderAnnouncements(data) {
                     data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
                     onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                     <div class="lan-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
@@ -303,7 +303,7 @@ function renderAnnouncements(data) {
                         data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
                         onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
                         <div class="lan-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>
@@ -321,450 +321,15 @@ function renderAnnouncements(data) {
     }
 
     // ── Build full HTML ──
+    // (Styles for this markup now live in assets/css/learner/announcements.css
+    // — the ~440-line inline <style> block that used to be injected here was
+    // removed as part of the inline-style cleanup.)
     let html = `
-        <style>
-            @media (min-width: 900px) {
-                .lan-desktop-layout { display: flex !important; }
-                .lan-mobile-list    { display: none !important; }
-                .lan-mobile-search-wrap { display: none !important; }
-            }
-            @media (max-width: 899px) {
-                .lan-desktop-layout { display: none !important; }
-                .lan-mobile-list    { display: block !important; }
-            }
-
-            .lan-desktop-layout {
-                display: flex;
-                gap: 0;
-                min-height: 500px;
-            }
-
-            .lan-sidebar {
-                width: 280px;
-                min-width: 240px;
-                max-width: 300px;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            .lan-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            .lan-sidebar-scroll::-webkit-scrollbar { width: 4px; }
-            .lan-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .lan-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .lan-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
-            .lan-desktop-teacher-header {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 10px 14px;
-                background: transparent;
-                border: 0;
-                color: #8b949e;
-                cursor: pointer;
-                font-family: inherit;
-                text-align: left;
-            }
-            .lan-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
-            .lan-desktop-teacher-header--school { color: #d29522; }
-            .lan-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
-            .lan-desktop-teacher-chevron.open { transform: rotate(90deg); }
-            .lan-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
-            .lan-desktop-teacher-name {
-                flex: 1;
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-            }
-            .lan-desktop-teacher-count {
-                flex-shrink: 0;
-                font-size: 10px;
-                font-weight: 800;
-                color: #f28c38;
-                background: rgba(242,140,56,0.1);
-                border: 1px solid rgba(242,140,56,0.25);
-                border-radius: 999px;
-                padding: 1px 7px;
-            }
-            .lan-desktop-teacher-body.collapsed { display: none; }
-
-            .lan-sidebar-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 16px;
-                cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
-            }
-            .lan-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .lan-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
-            }
-            /* School-wide active gets orange accent */
-            .lan-sidebar-item--school.active {
-                background: rgba(210,149,34,0.08);
-                border-left-color: #d29522;
-            }
-
-            .lan-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
-            .lan-sidebar-item-info { flex: 1; min-width: 0; }
-            .lan-sidebar-item-title {
-                font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lan-sidebar-item.active .lan-sidebar-item-title { color: #e2e8f0; }
-            .lan-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-            .lan-sidebar-new-badge {
-                background: rgba(79,209,197,0.1);
-                color: #4fd1c5;
-                border: 1px solid rgba(79,209,197,0.4);
-                font-size: 9px;
-                font-weight: 800;
-                padding: 2px 5px;
-                border-radius: 4px;
-                flex-shrink: 0;
-                letter-spacing: 0.5px;
-            }
-
-            .lan-main-panel {
-                flex: 1;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-            .lan-main-panel::-webkit-scrollbar { width: 5px; }
-            .lan-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .lan-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-            .lan-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
-            }
-            .lan-panel-empty svg { opacity: 0.3; }
-            .lan-panel-empty p { font-size: 14px; margin: 0; }
-
-            .lan-panel-content { padding: 28px 32px; }
-
-            /* Author row (mirrors mobile detail) */
-            .lan-panel-author-row {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 18px;
-            }
-            .lan-panel-avatar {
-                flex: 0 0 auto;
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                border: 1px solid rgba(242,140,56,0.35);
-                background: rgba(242,140,56,0.1);
-                color: #f28c38;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 15px;
-                font-weight: 800;
-                letter-spacing: 0.2px;
-            }
-            .lan-panel-avatar--school {
-                border-color: rgba(210,149,34,0.35);
-                background: rgba(210,149,34,0.1);
-                color: #d29522;
-            }
-            .lan-panel-author-info { min-width: 0; }
-            .lan-panel-author-name {
-                color: #e2e8f0;
-                font-size: 16px;
-                font-weight: 700;
-                line-height: 1.3;
-                overflow-wrap: anywhere;
-            }
-            .lan-panel-author-role {
-                color: #8b949e;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-                margin-top: 2px;
-            }
-            .lan-panel-role-badge { color: #f28c38; }
-            .lan-panel-role-badge--school { color: #d29522; }
-            .lan-panel-role-sep { color: #5a6472; margin: 0 6px; }
-            .lan-panel-posted {
-                color: #8b949e;
-                font-size: 12px;
-                margin-top: 4px;
-            }
-
-            .lan-panel-header {
-                margin-bottom: 20px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-            .lan-panel-title {
-                font-size: 22px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0;
-                line-height: 1.28;
-            }
-
-            /* School-wide badge in panel */
-            .lan-school-wide-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                background: rgba(210,149,34,0.1);
-                color: #d29522;
-                border: 1px solid rgba(210,149,34,0.35);
-                font-size: 10px;
-                font-weight: 800;
-                padding: 3px 8px;
-                border-radius: 5px;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-                margin-bottom: 10px;
-            }
-
-            .lan-panel-message {
-                font-size: 14px;
-                color: #e2e8f0;
-                line-height: 1.8;
-            }
-
-            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
-            .lan-mobile-list {
-                background: transparent;
-                border-radius: 0;
-                overflow: visible;
-                margin: 0 0 14px;
-            }
-            @media (max-width: 899px) {
-                .lan-mobile-list {
-                    margin-left: -18px;
-                    margin-right: -18px;
-                }
-            }
-            .lan-mobile-folder-header {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 16px 18px;
-                background: transparent;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
-                cursor: pointer;
-                user-select: none;
-                transition: background 0.2s;
-            }
-            .lan-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-            .lan-mobile-folder-icon { flex-shrink: 0; }
-            .lan-mobile-folder-name {
-                flex: 1;
-                font-size: 16px;
-                font-weight: 800;
-                color: #e2e8f0;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .lan-mobile-folder-count {
-                font-size: 12px;
-                color: #8b949e;
-                font-weight: 600;
-                background: rgba(255,255,255,0.05);
-                padding: 2px 8px;
-                border-radius: 20px;
-                flex-shrink: 0;
-            }
-            .lan-mobile-folder-chevron {
-                flex-shrink: 0;
-                color: #555e6a;
-                transition: transform 0.3s ease;
-            }
-            .lan-mobile-folder-chevron.open { transform: rotate(90deg); }
-            .lan-mobile-folder-body { display: block; }
-            .lan-mobile-folder-body.collapsed { display: none; }
-            .lan-mobile-card {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 13px 18px;
-                background: transparent;
-                border-bottom: 0;
-                border-radius: 0;
-                border-left: 0;
-                border-right: 0;
-                cursor: pointer;
-                transition: background 0.15s;
-                position: relative;
-            }
-            .lan-mobile-card::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 18px;
-                right: 18px;
-                height: 1px;
-                background: rgba(255,255,255,0.06);
-            }
-            .lan-mobile-card:last-child::after { display: none; }
-            .lan-mobile-card--school {
-                border-left: 0 !important;
-            }
-            .lan-mobile-card:active { background: rgba(255,255,255,0.03); }
-            .lan-mobile-card-icon {
-                width: 32px;
-                height: 32px;
-                border-radius: 8px;
-                background: #f28c3818;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .lan-mobile-card--school .lan-mobile-card-icon {
-                background: #f28c3818;
-            }
-            .lan-mobile-card-body { flex: 1; min-width: 0; }
-            .lan-mobile-card-title {
-                font-size: 15px;
-                font-weight: 700;
-                color: #e2e8f0;
-                margin: 0;
-                line-height: 1.3;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .lan-mobile-card-title-text {
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            .lan-mobile-status-dot {
-                display: inline-block;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
-            .lan-mobile-card-chevron {
-                flex-shrink: 0;
-                color: #555e6a;
-            }
-            .lan-mobile-card-date {
-                font-size: 11px;
-                color: #555e6a;
-                margin-top: 2px;
-            }
-
-
-            /* ── MOBILE SEARCH BAR ── */
-            @media (max-width: 899px) {
-                .lan-mobile-search-wrap {
-                    display: block;
-                    margin-bottom: 10px;
-                    position: relative;
-                }
-                .lan-mobile-search-wrap svg {
-                    position: absolute;
-                    left: 12px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    pointer-events: none;
-                    opacity: 0.4;
-                }
-                .lan-mobile-search {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding: 9px 14px 9px 36px;
-                    border-radius: 10px;
-                    background: rgba(255,255,255,0.05);
-                    border: none;
-                    color: #e2e8f0;
-                    font-size: 15px;
-                    font-family: 'Nunito', sans-serif;
-                    transition: background 0.2s;
-                }
-                .lan-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-                .lan-mobile-search::placeholder { color: #555e6a; }
-            }
-
-            /* ── DESKTOP SEARCH BAR ── */
-            .lan-desktop-search-wrap {
-                display: none;
-                position: relative;
-                padding: 10px 10px 8px;
-                flex-shrink: 0;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .lan-desktop-search-wrap svg {
-                position: absolute;
-                left: 22px;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                opacity: 0.4;
-            }
-            .lan-desktop-search {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 8px 12px 8px 32px;
-                border-radius: 8px;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: #e2e8f0;
-                font-size: 12.5px;
-                font-family: 'Nunito', sans-serif;
-                transition: border-color 0.2s;
-            }
-            .lan-desktop-search:focus { outline: none; border-color: #f28c38; }
-            .lan-desktop-search::placeholder { color: #555e6a; }
-            @media (min-width: 900px) {
-                .lan-desktop-search-wrap { display: block; }
-            }
-        </style>
-
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="lan-desktop-layout lqz-flat-layout">
             <div class="lan-sidebar lqz-flat-sidebar">
                 <div class="lan-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
                     <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
@@ -774,7 +339,7 @@ function renderAnnouncements(data) {
             </div>
             <div class="lan-main-panel lqz-flat-panel" id="lan-main-panel">
                 <div class="lan-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                         <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                     </svg>
@@ -788,7 +353,7 @@ function renderAnnouncements(data) {
     if (hasSchoolWide || hasTeacher) {
         html += `
         <div class="lan-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="lan-mobile-search" id="lanMobileSearch"
@@ -812,7 +377,7 @@ function renderAnnouncements(data) {
                 </div>
                 <span class="lan-mobile-folder-name">School-wide</span>
                 <span class="lan-mobile-folder-count">${schoolWide.length} announcement${schoolWide.length !== 1 ? 's' : ''}</span>
-                <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                <svg class="lan-mobile-folder-chevron lan-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </div>
@@ -826,7 +391,7 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                             <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                             <path d="M8 6v8"/>
@@ -839,7 +404,7 @@ function renderAnnouncements(data) {
                         <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
                     <div class="lan-mobile-card-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </div>
@@ -863,7 +428,7 @@ function renderAnnouncements(data) {
                     </div>
                     <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
                     <span class="lan-mobile-folder-count">${items.length} announcement${items.length !== 1 ? 's' : ''}</span>
-                    <svg class="lan-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                    <svg class="lan-mobile-folder-chevron lan-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </div>
@@ -877,7 +442,7 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                                 <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                                 <path d="M8 6v8"/>
@@ -890,7 +455,7 @@ function renderAnnouncements(data) {
                             <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
                         <div class="lan-mobile-card-chevron">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </div>
@@ -1034,83 +599,6 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const initials = ann.initials || getLearnerAnnouncementInitials(sender);
 
     apiArea.innerHTML = `
-        <style>
-            .lan-mobile-detail {
-                min-height: calc(100vh - 74px);
-                padding: 18px 16px 96px;
-            }
-            .lan-mobile-detail-author-row {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 18px;
-            }
-            .lan-mobile-detail-avatar {
-                flex: 0 0 auto;
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                border: 1px solid rgba(242,140,56,0.35);
-                background: rgba(242,140,56,0.1);
-                color: #f28c38;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 15px;
-                font-weight: 800;
-                letter-spacing: 0.2px;
-            }
-            .lan-mobile-detail-author-info {
-                min-width: 0;
-            }
-            .lan-mobile-detail-author-name {
-                color: #e2e8f0;
-                font-size: 16px;
-                font-weight: 700;
-                line-height: 1.3;
-                overflow-wrap: anywhere;
-            }
-            .lan-mobile-detail-author-role {
-                color: #8b949e;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-                margin-top: 2px;
-            }
-            .lan-mobile-detail-role-badge {
-                color: #f28c38;
-            }
-            .lan-mobile-detail-role-sep {
-                color: #5a6472;
-                margin: 0 6px;
-            }
-            .lan-mobile-detail-posted {
-                color: #8b949e;
-                font-size: 12px;
-                margin-top: 4px;
-            }
-            .lan-mobile-detail-title {
-                margin: 0 0 18px;
-                color: #e2e8f0;
-                font-size: 28px;
-                line-height: 1.28;
-                font-weight: 800;
-                letter-spacing: 0;
-                padding-bottom: 18px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .lan-mobile-detail-message {
-                color: #e2e8f0;
-                font-size: 15px;
-                line-height: 1.75;
-                overflow-wrap: anywhere;
-                white-space: normal;
-            }
-            @media (min-width: 900px) {
-                .lan-mobile-detail { display: none; }
-            }
-        </style>
         <article class="lan-mobile-detail">
             <div class="lan-mobile-detail-author-row">
                 <div class="lan-mobile-detail-avatar">${escapeLearnerAnnouncementHtml(initials)}</div>
@@ -1165,10 +653,10 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     panel.innerHTML = `
         <div class="lan-panel-content">
             <div class="lan-panel-header">
-                <div style="flex:1; min-width:0;">
+                <div class="lan-panel-header-main">
                     ${isSchool ? `
                         <div class="lan-school-wide-badge">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                                 <polyline points="9 22 9 12 15 12 15 22"/>
                             </svg>
@@ -1186,7 +674,7 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
                     </div>
                     <div class="lan-panel-title">${ann.title}</div>
                 </div>
-                ${isNew ? '<span style="background:rgba(79,209,197,0.1);color:#4fd1c5;border:1px solid #4fd1c5;padding:3px 10px;font-size:11px;font-weight:800;border-radius:6px;letter-spacing:0.5px;">NEW</span>' : ''}
+                ${isNew ? '<span class="lan-panel-new-badge">NEW</span>' : ''}
             </div>
             <div class="lan-panel-message">
                 ${ann.message.replace(/\n/g, '<br>')}
