@@ -890,17 +890,41 @@ iframe {
         height: 100vh;
         transform: translateX(min(79vw, 340px)); /* matches new .sidebar width/max-width */
         filter: blur(2px);
+        /* NOTE: the corner-radius + seam previously here got blurred along
+           with everything else on this element, since filter blurs the
+           element's own rendered box including its border/radius — that's
+           why it looked like a fuzzy straight line instead of a crisp
+           curve. The seam now lives on #mobileOverlay instead (a real,
+           unblurred sibling element that's already shown/hidden by JS in
+           sync with the menu) — see the #mobileOverlay rule below. */
+    }
 
-        /* The menu itself is now a plain straight-edged panel (no radius,
-           no border-right). Instead, while the menu is open, the dimmed
-           content behind it gets the curve + seam on ITS left edge —
-           same visual seam as before, just living on the other element,
-           since curving .main-content inward is plain, well-supported
-           border-radius with no clipping/positioning tricks involved. */
+    /* ── CRISP CORNER SEAM (mobile menu open) ─────────────────────────────
+       #mobileOverlay is a plain sibling <div> (not inside .main-content),
+       already toggled display:none/block by JS exactly when the mobile
+       menu opens/closes. Because it has no `filter` applied to it, its
+       own border/radius render perfectly sharp — unlike .main-content,
+       which is intentionally blurred.
+
+       By default #mobileOverlay covers the FULL screen width (inline
+       style left:0, width:100%) sitting behind the sidebar — so its own
+       left corners sit at the screen's edge, hidden completely under the
+       opaque sidebar and invisible. To make the curve show up at the
+       actual visible seam (where the sidebar's straight edge ends), the
+       overlay needs to start exactly there instead of at the screen edge.
+       left/width need !important here purely to beat the inline style
+       attribute set in the HTML (inline styles otherwise always win over
+       stylesheet rules of any specificity) — scoped only to mobile while
+       the sidebar is active, so it never affects desktop or any other
+       state. No colours changed — same border colour the sidebar used
+       to carry. */
+    .sidebar.active ~ #mobileOverlay {
+        left: min(79vw, 340px) !important;
+        width: calc(100% - min(79vw, 340px)) !important;
         border-top-left-radius: 18px;
         border-bottom-left-radius: 18px;
         border-left: 1px solid #555555;
-        overflow: hidden; /* keeps the blurred content from square-cornering past the new radius */
+        box-sizing: border-box;
     }
 
     .main-header {
