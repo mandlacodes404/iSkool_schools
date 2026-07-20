@@ -805,6 +805,25 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
             if (window.innerWidth <= 768 && mobileOverlay) {
                 mobileOverlay.style.display = "none";
             }
+            // Restore the browser bar colour here too — this auto-close
+            // path (triggered by tapping a nav link) bypasses toggleSidebar
+            // entirely, so it needs the same restore logic, otherwise the
+            // browser bar would stay stuck on the menu's dark colour after
+            // navigating to a page that should have its own accent colour.
+            if (window.innerWidth <= 768) {
+                const _themeColorMeta = document.querySelector('meta[name="theme-color"]');
+                const _mainHeader = document.querySelector('.main-header');
+                if (_themeColorMeta) {
+                    const _isScrolledOnColoredPage =
+                        _mainHeader &&
+                        _mainHeader.classList.contains('header-scrolled') &&
+                        _mainHeader.getAttribute('data-page-color');
+                    _themeColorMeta.setAttribute(
+                        'content',
+                        _isScrolledOnColoredPage ? window.learnerCurrentPageColor : '#20201f'
+                    );
+                }
+            }
         }
 
         // 1b. MOBILE SCROLL STABILIZATION
@@ -1918,6 +1937,8 @@ if (avatarWrapper && profileInput) {
 
 window.toggleSidebar = function (forceClose = false) {
     const isCurrentlyOpen = sidebar.classList.contains("active");
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const mainHeader = document.querySelector('.main-header');
 
     // If forceClose is true (from the X button) or it's already open, close it
     if (forceClose || isCurrentlyOpen) {
@@ -1926,11 +1947,35 @@ window.toggleSidebar = function (forceClose = false) {
         if (mobileOverlay) {
             mobileOverlay.style.display = "none";
         }
+
+        // MENU CLOSED: restore the browser bar to whatever colour the
+        // current page should actually be showing right now. If the page
+        // is scrolled down past the header threshold on a coloured page
+        // (e.g. Announcements), that's window.learnerCurrentPageColor —
+        // otherwise it's the dark default, matching exactly what the
+        // scroll handler in configureHeader already does on its own.
+        if (window.innerWidth <= 768 && themeColorMeta) {
+            const isScrolledOnColoredPage =
+                mainHeader &&
+                mainHeader.classList.contains('header-scrolled') &&
+                mainHeader.getAttribute('data-page-color');
+            themeColorMeta.setAttribute(
+                'content',
+                isScrolledOnColoredPage ? window.learnerCurrentPageColor : '#20201f'
+            );
+        }
     } else {
         // Only allow open on mobile
         if (window.innerWidth <= 768) {
             sidebar.classList.add("active");
             mobileOverlay.style.display = "block";
+
+            // MENU OPEN: force the browser bar to match the menu's own
+            // dark background (#20201f), regardless of whatever colour
+            // the current page had it set to — keeps the whole screen
+            // reading as one consistent dark surface while the menu is
+            // open. Restored back on close, above.
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
         }
         // Desktop open is handled by desktopToggle listener — do nothing here
     }
