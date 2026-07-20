@@ -824,11 +824,15 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
                     );
                 }
                 // Same bypass problem as the theme-color restore above:
-                // this path never touches toggleSidebar, so the blur
-                // applied to .main-header on open needs clearing here too,
-                // otherwise it stays stuck blurred after navigating.
+                // this path never touches toggleSidebar, so the background
+                // override applied to .main-header on open needs restoring
+                // here too, otherwise it stays stuck on the menu's dark
+                // colour after navigating (even though the nav-link's own
+                // page load will likely set a fresh colour moments later,
+                // this keeps things consistent either way).
                 if (_mainHeader) {
-                    _mainHeader.style.filter = '';
+                    _mainHeader.style.background = _mainHeader.dataset.bgBeforeMenu ?? '';
+                    delete _mainHeader.dataset.bgBeforeMenu;
                     _mainHeader.style.pointerEvents = '';
                 }
             }
@@ -1956,9 +1960,13 @@ window.toggleSidebar = function (forceClose = false) {
             mobileOverlay.style.display = "none";
         }
 
-        // MENU CLOSED: undo the dim/blur applied to .main-header below.
+        // MENU CLOSED: put .main-header's background back to whatever it
+        // legitimately was before the menu opened (its own page colour, or
+        // transparent on Home) — restored from the value we saved on open,
+        // rather than guessing, so we never clobber a real page colour.
         if (mainHeader) {
-            mainHeader.style.filter = '';
+            mainHeader.style.background = mainHeader.dataset.bgBeforeMenu ?? '';
+            delete mainHeader.dataset.bgBeforeMenu;
             mainHeader.style.pointerEvents = '';
         }
 
@@ -1987,16 +1995,18 @@ window.toggleSidebar = function (forceClose = false) {
             // MENU OPEN: .main-header is nested inside .main-content, so
             // it can't be reached with a CSS sibling selector off
             // .sidebar.active the way #mobileBottomNav and #mobileOverlay
-            // are — and because .main-header has its own position:fixed +
-            // z-index (its own stacking context), it visually escapes
-            // .main-content's own blur filter rather than inheriting it.
-            // That's why it was the one piece of the UI staying fully
-            // sharp/undimmed (showing its own page-accent colour) while
-            // everything else dimmed correctly. Blurred directly here to
-            // match .main-content's blur(2px); pointer-events:none stops
-            // accidental taps on it while dimmed, same as the bottom nav.
+            // are — and its own position:fixed + z-index gives it its own
+            // stacking context, so it doesn't inherit .main-content's
+            // blur either. Simplest fix: rather than trying to blur it,
+            // just recolour it to match the menu's own background
+            // (#20201f) directly, so the whole top strip blends in
+            // exactly like the rest of the dimmed screen. The header's
+            // CURRENT background is saved first (it might legitimately be
+            // a page's own accent colour) so we can put it back exactly
+            // as it was when the menu closes, instead of guessing.
             if (mainHeader) {
-                mainHeader.style.filter = 'blur(2px)';
+                mainHeader.dataset.bgBeforeMenu = mainHeader.style.background || '';
+                mainHeader.style.background = '#20201f';
                 mainHeader.style.pointerEvents = 'none';
             }
 
