@@ -621,6 +621,17 @@ iframe {
 }
 
 @media (max-width: 768px) {
+    /* The avatar dropdown was using #161b22 (a leftover mismatched dark
+       slate colour) instead of the app's actual dark theme colour
+       (#20201f, used everywhere else — sidebar, header, content area).
+       Overriding the BACKGROUND here on mobile only, as requested;
+       desktop keeps its original #161b22 untouched. Border colour left
+       as-is (not part of the request) — let me know if you'd like that
+       updated too. */
+    .avatar-dropdown {
+        background: #20201f;
+    }
+
     #headerBackBtn {
         align-items: center;
         gap: 4px;
