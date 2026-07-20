@@ -2235,47 +2235,89 @@ if (desktopToggle) {
         const DETAIL_TITLE_THRESHOLD = 28; // px before detail title collapses into header
         const BOTTOM_THRESHOLD = 10; // px from bottom before nav fades out
 
-        if (apiArea && mainHeader) {
-            apiArea.addEventListener('scroll', function () {
-                const scrollTop    = apiArea.scrollTop;
-                const scrollHeight = apiArea.scrollHeight;
-                const clientHeight = apiArea.clientHeight;
-                const distFromBottom = scrollHeight - scrollTop - clientHeight;
+        // Pulled out into its own named function so it can be run both on
+        // a real scroll event AND right after a page's content finishes
+        // loading (see the MutationObserver below) — previously this only
+        // ran on 'scroll', so after switching pages (Quiz, Announcements,
+        // etc.) the bottom nav's background was decided against whatever
+        // content happened to be in the DOM at that instant. Since those
+        // pages load asynchronously, the synthetic scroll dispatch in
+        // prepareLearnerMobileNavigation() often fired BEFORE the new
+        // content existed, leaving distFromBottom calculated against the
+        // old/empty page — so the bottom nav could get stuck showing the
+        // wrong background (solid vs transparent) until the person
+        // manually scrolled and triggered a fresh, correct calculation.
+        function recalcMobileScrollUI() {
+            if (!apiArea || !mainHeader) return;
+            const scrollTop    = apiArea.scrollTop;
+            const scrollHeight = apiArea.scrollHeight;
+            const clientHeight = apiArea.clientHeight;
+            const distFromBottom = scrollHeight - scrollTop - clientHeight;
 
-                // Header: solid when scrolled down, transparent at top
-                if (scrollTop > SCROLL_THRESHOLD) {
-                    const pageColor = window.learnerCurrentPageColor || '#20201f';
-                    const isHome = !mainHeader.getAttribute('data-page-color');
-                    // Home stays dark glass; other pages match the browser bar colour
-                    const headerBg = isHome
-                        ? '#20201f'
-                        : pageColor;
-                    mainHeader.classList.add('header-scrolled');
-                    mainHeader.style.background = headerBg;
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#20201f' : pageColor);
+            // Header: solid when scrolled down, transparent at top
+            if (scrollTop > SCROLL_THRESHOLD) {
+                const pageColor = window.learnerCurrentPageColor || '#20201f';
+                const isHome = !mainHeader.getAttribute('data-page-color');
+                // Home stays dark glass; other pages match the browser bar colour
+                const headerBg = isHome
+                    ? '#20201f'
+                    : pageColor;
+                mainHeader.classList.add('header-scrolled');
+                mainHeader.style.background = headerBg;
+                if (themeColorMeta) themeColorMeta.setAttribute('content', isHome ? '#20201f' : pageColor);
+            } else {
+                mainHeader.classList.remove('header-scrolled');
+                mainHeader.style.background = '';
+                if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+            }
+
+            if (mainHeader.classList.contains('mobile-detail-mode')) {
+                if (scrollTop > DETAIL_TITLE_THRESHOLD) {
+                    mainHeader.classList.add('detail-title-collapsed');
                 } else {
-                    mainHeader.classList.remove('header-scrolled');
-                    mainHeader.style.background = '';
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+                    mainHeader.classList.remove('detail-title-collapsed');
                 }
+            }
 
-                if (mainHeader.classList.contains('mobile-detail-mode')) {
-                    if (scrollTop > DETAIL_TITLE_THRESHOLD) {
-                        mainHeader.classList.add('detail-title-collapsed');
-                    } else {
-                        mainHeader.classList.remove('detail-title-collapsed');
-                    }
+            // Bottom nav: transparent near bottom, glass when scrolled up
+            if (bottomNav) {
+                if (distFromBottom <= BOTTOM_THRESHOLD) {
+                    bottomNav.classList.remove('nav-scrolled');
+                } else {
+                    bottomNav.classList.add('nav-scrolled');
                 }
+            }
+        }
 
-                // Bottom nav: transparent near bottom, glass when scrolled up
-                if (bottomNav) {
-                    if (distFromBottom <= BOTTOM_THRESHOLD) {
-                        bottomNav.classList.remove('nav-scrolled');
-                    } else {
-                        bottomNav.classList.add('nav-scrolled');
+        if (apiArea && mainHeader) {
+            apiArea.addEventListener('scroll', recalcMobileScrollUI, { passive: true });
+
+            // Re-run the same check once the loader overlay hides — that's
+            // the one centralised signal that reliably fires after ANY
+            // page's async content has actually finished loading,
+            // regardless of which specific fetch function (fetchQuizzes,
+            // fetchAssignments, etc.) populated it. Using a
+            // MutationObserver instead of a guessed setTimeout, since a
+            // fixed delay would either fire too early on slow connections
+            // or waste time waiting on fast ones.
+            const loaderOverlayEl = document.getElementById('loaderOverlay');
+            if (loaderOverlayEl) {
+                // getComputedStyle (not .style.display) since the loader
+                // starts hidden via CSS (display:none in the stylesheet),
+                // not an inline style — reading .style.display alone would
+                // wrongly see '' (empty) at first load and think it's visible.
+                let wasLoaderVisible = getComputedStyle(loaderOverlayEl).display !== 'none';
+                const loaderObserver = new MutationObserver(() => {
+                    const isLoaderVisible = getComputedStyle(loaderOverlayEl).display !== 'none';
+                    if (wasLoaderVisible && !isLoaderVisible) {
+                        // Loader just went from visible -> hidden: content is ready.
+                        // Double rAF so layout has settled before we measure.
+                        requestAnimationFrame(() => requestAnimationFrame(recalcMobileScrollUI));
                     }
-                }
-            }, { passive: true });
+                    wasLoaderVisible = isLoaderVisible;
+                });
+                loaderObserver.observe(loaderOverlayEl, { attributes: true, attributeFilter: ['style'] });
+            }
         }
     }
     // ─────────────────────────────────────────────────────────────────────
