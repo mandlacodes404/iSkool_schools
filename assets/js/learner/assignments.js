@@ -439,6 +439,21 @@ window.lasDesktopSearch = function(val) {
     });
 };
 
+// Re-checks the bottom nav/header scroll-state repeatedly for a short
+// window after a folder is expanded/collapsed. A single delayed check
+// would need to know the exact CSS transition duration used for the
+// collapse/expand animation (unknown from here, and could change) — 
+// polling a few times over ~400ms means it settles on the right answer
+// regardless of how long that transition actually takes, without
+// needing to hook into a specific transitionend event per folder.
+function recheckMobileNavAfterToggle() {
+    if (typeof window.recalcMobileScrollUI !== 'function') return;
+    const checkTimes = [0, 100, 200, 300, 400];
+    checkTimes.forEach(delay => {
+        setTimeout(() => window.recalcMobileScrollUI(), delay);
+    });
+}
+
 window.toggleLasMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
     if (!body) return;
@@ -447,6 +462,13 @@ window.toggleLasMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAssignmentPageState();
+
+    // Opening/closing a folder changes the page's actual scrollable
+    // height without firing a real 'scroll' event, so the bottom nav's
+    // background (and header) never got re-checked against the new
+    // height — it could stay stuck showing whatever state it was in
+    // before the folder toggled.
+    recheckMobileNavAfterToggle();
 };
 
 window.toggleLasDesktopGroup = function(id, headerEl) {
@@ -457,6 +479,11 @@ window.toggleLasDesktopGroup = function(id, headerEl) {
     const chevron = headerEl ? headerEl.querySelector('.las-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAssignmentPageState();
+
+    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
+    // window.recalcMobileScrollUI won't exist there — recheckMobileNav-
+    // AfterToggle() already no-ops safely when it's missing.
+    recheckMobileNavAfterToggle();
 };
 
 window.lasMobileSearch = function(val) {

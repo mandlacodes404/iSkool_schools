@@ -2247,7 +2247,17 @@ if (desktopToggle) {
         // old/empty page — so the bottom nav could get stuck showing the
         // wrong background (solid vs transparent) until the person
         // manually scrolled and triggered a fresh, correct calculation.
-        function recalcMobileScrollUI() {
+        // Exposed globally (window.recalcMobileScrollUI) so page-specific
+        // scripts — assignments.js, quiz.js, announcements.js, etc. — can
+        // trigger a recalculation themselves after anything that changes
+        // the page's scrollable height WITHOUT a real scroll event, such
+        // as expanding/collapsing an accordion folder. Previously the
+        // bottom nav's background only updated on an actual scroll or a
+        // page switch (via the loader-hide hook below); toggling a folder
+        // open/closed does neither, so the nav could get stuck showing a
+        // background that no longer matched whether the page could
+        // actually scroll.
+        window.recalcMobileScrollUI = function recalcMobileScrollUI() {
             if (!apiArea || !mainHeader) return;
             const scrollTop    = apiArea.scrollTop;
             const scrollHeight = apiArea.scrollHeight;
@@ -2287,7 +2297,8 @@ if (desktopToggle) {
                     bottomNav.classList.add('nav-scrolled');
                 }
             }
-        }
+        };
+        const recalcMobileScrollUI = window.recalcMobileScrollUI;
 
         if (apiArea && mainHeader) {
             apiArea.addEventListener('scroll', recalcMobileScrollUI, { passive: true });
@@ -2943,7 +2954,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=5.8"></script>
 <script src="assets/js/learner/quiz.js?v=8.6"></script>
-<script src="assets/js/learner/assignments.js?v=8.0"></script>
+<script src="assets/js/learner/assignments.js?v=8.1"></script>
 <script src="assets/js/learner/resources.js?v=7.0"></script>
 <script src="assets/js/learner/announcements.js?v=7.7"></script>
 <script src="assets/js/learner/grades.js?v=6.0"></script>
