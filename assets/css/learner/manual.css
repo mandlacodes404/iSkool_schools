@@ -611,7 +611,7 @@
 @media (max-width: 768px) {
 
 .lh-mobile-wrapper {
-    padding: 16px 16px 110px;
+    padding: 16px 16px 90px;
     display: flex;
     flex-direction: column;
     gap: 0;
