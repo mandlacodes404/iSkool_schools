@@ -823,6 +823,14 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
                         _isScrolledOnColoredPage ? window.learnerCurrentPageColor : '#20201f'
                     );
                 }
+                // Same bypass problem as the theme-color restore above:
+                // this path never touches toggleSidebar, so the blur
+                // applied to .main-header on open needs clearing here too,
+                // otherwise it stays stuck blurred after navigating.
+                if (_mainHeader) {
+                    _mainHeader.style.filter = '';
+                    _mainHeader.style.pointerEvents = '';
+                }
             }
         }
 
@@ -1948,6 +1956,12 @@ window.toggleSidebar = function (forceClose = false) {
             mobileOverlay.style.display = "none";
         }
 
+        // MENU CLOSED: undo the dim/blur applied to .main-header below.
+        if (mainHeader) {
+            mainHeader.style.filter = '';
+            mainHeader.style.pointerEvents = '';
+        }
+
         // MENU CLOSED: restore the browser bar to whatever colour the
         // current page should actually be showing right now. If the page
         // is scrolled down past the header threshold on a coloured page
@@ -1969,6 +1983,22 @@ window.toggleSidebar = function (forceClose = false) {
         if (window.innerWidth <= 768) {
             sidebar.classList.add("active");
             mobileOverlay.style.display = "block";
+
+            // MENU OPEN: .main-header is nested inside .main-content, so
+            // it can't be reached with a CSS sibling selector off
+            // .sidebar.active the way #mobileBottomNav and #mobileOverlay
+            // are — and because .main-header has its own position:fixed +
+            // z-index (its own stacking context), it visually escapes
+            // .main-content's own blur filter rather than inheriting it.
+            // That's why it was the one piece of the UI staying fully
+            // sharp/undimmed (showing its own page-accent colour) while
+            // everything else dimmed correctly. Blurred directly here to
+            // match .main-content's blur(2px); pointer-events:none stops
+            // accidental taps on it while dimmed, same as the bottom nav.
+            if (mainHeader) {
+                mainHeader.style.filter = 'blur(2px)';
+                mainHeader.style.pointerEvents = 'none';
+            }
 
             // MENU OPEN: force the browser bar to match the menu's own
             // dark background (#20201f), regardless of whatever colour
