@@ -365,6 +365,23 @@ function renderResourceCards(data) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT RESOURCE (inline preview)
 // ─────────────────────────────────────────────
+
+// Re-checks the bottom nav/header scroll-state repeatedly for a short
+// window after a folder is expanded/collapsed or a search filters rows
+// in/out of view — both change the page's actual scrollable height
+// without firing a real 'scroll' event, so the bottom nav's background
+// (and header) never got re-checked against the new height on its own.
+// A single delayed check would need to know the exact CSS transition
+// duration (unknown from here, and could change) — polling a few times
+// over ~400ms means it settles on the right answer regardless.
+function recheckMobileNavAfterToggle() {
+    if (typeof window.recalcMobileScrollUI !== 'function') return;
+    const checkTimes = [0, 100, 200, 300, 400];
+    checkTimes.forEach(delay => {
+        setTimeout(() => window.recalcMobileScrollUI(), delay);
+    });
+}
+
 window.lrsDesktopSearch = function(val) {
     const term = val.toLowerCase().trim();
     document.querySelectorAll('.lrs-desktop-teacher-group').forEach(group => {
@@ -396,6 +413,11 @@ window.lrsDesktopSearch = function(val) {
             if (chev) chev.classList.remove('open');
         }
     });
+
+    // Desktop doesn't use the dynamic bottom-nav/header behaviour, so
+    // recheckMobileNavAfterToggle() will just no-op there — kept for
+    // consistency in case that ever changes.
+    recheckMobileNavAfterToggle();
 };
 
 window.toggleLrsMobileFolder = function(id, headerEl) {
@@ -406,6 +428,13 @@ window.toggleLrsMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveResourcePageState();
+
+    // Opening/closing a folder changes the page's actual scrollable
+    // height without firing a real 'scroll' event, so the bottom nav's
+    // background (and header) never got re-checked against the new
+    // height — it could stay stuck showing whatever state it was in
+    // before the folder toggled.
+    recheckMobileNavAfterToggle();
 };
 
 window.toggleLrsDesktopGroup = function(id, headerEl) {
@@ -416,6 +445,11 @@ window.toggleLrsDesktopGroup = function(id, headerEl) {
     const chevron = headerEl ? headerEl.querySelector('.lrs-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveResourcePageState();
+
+    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
+    // window.recalcMobileScrollUI won't exist there —
+    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
+    recheckMobileNavAfterToggle();
 };
 
 window.selectDesktopLearnerResource = function(flatIdx) {
@@ -567,6 +601,11 @@ window.lrsMobileSearch = function(val) {
             if (chev) chev.classList.add('open');
         }
     });
+
+    // Filtering rows/folders in/out of view changes the page's scrollable
+    // height just like expanding/collapsing a folder does, but without a
+    // real scroll event — same recalculation fix as the folder toggle.
+    recheckMobileNavAfterToggle();
 };
 
 function getFileIcon(ext, isVideo = false) {

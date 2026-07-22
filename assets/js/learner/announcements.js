@@ -529,6 +529,21 @@ window.lanDesktopSearch = function(val) {
     });
 };
 
+// Re-checks the bottom nav/header scroll-state repeatedly for a short
+// window after a folder is expanded/collapsed — same fix as in
+// assignments.js. A single delayed check would need to know the exact
+// CSS transition duration used for the collapse/expand animation
+// (unknown from here, and could change) — polling a few times over
+// ~400ms means it settles on the right answer regardless of how long
+// that transition actually takes.
+function recheckMobileNavAfterToggle() {
+    if (typeof window.recalcMobileScrollUI !== 'function') return;
+    const checkTimes = [0, 100, 200, 300, 400];
+    checkTimes.forEach(delay => {
+        setTimeout(() => window.recalcMobileScrollUI(), delay);
+    });
+}
+
 window.toggleLanMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
     if (!body) return;
@@ -537,6 +552,13 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     body.classList.toggle('collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAnnouncementPageState();
+
+    // Opening/closing a folder changes the page's actual scrollable
+    // height without firing a real 'scroll' event, so the bottom nav's
+    // background (and header) never got re-checked against the new
+    // height — it could stay stuck showing whatever state it was in
+    // before the folder toggled.
+    recheckMobileNavAfterToggle();
 };
 
 window.toggleLanDesktopGroup = function(id, headerEl) {
@@ -547,6 +569,11 @@ window.toggleLanDesktopGroup = function(id, headerEl) {
     const chevron = headerEl ? headerEl.querySelector('.lan-desktop-teacher-chevron') : null;
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAnnouncementPageState();
+
+    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
+    // window.recalcMobileScrollUI won't exist there —
+    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
+    recheckMobileNavAfterToggle();
 };
 
 function escapeLearnerAnnouncementHtml(value) {
