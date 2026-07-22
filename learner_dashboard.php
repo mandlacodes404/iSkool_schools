@@ -229,7 +229,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=5.8">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=6.3">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -551,6 +551,28 @@ window.prepareLearnerMobileNavigation = function() {
     }
 
     if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+
+    // BOTTOM NAV / HEADER RECHECK ON PAGE SWITCH:
+    // The synthetic 'scroll' dispatch above (and the hardcoded
+    // nav-scrolled/header reset just above it) only reflect the CORRECT
+    // state once the new page's real content is actually in the DOM.
+    // This function fires immediately when a nav link is tapped — before
+    // fetchAssignments()/fetchQuizzes()/etc. have run — so on a cache hit
+    // (the common case once a page has been visited once this session)
+    // the content swaps in synchronously with NO loader shown at all,
+    // and on a fresh fetch it swaps in only once the request resolves.
+    // Either way, a single scroll dispatch fired this early can end up
+    // checking stale/empty content, and — because nothing else re-checks
+    // it afterward — the nav could stay stuck wrong until the person
+    // manually scrolled. Polling recalcMobileScrollUI a few times over
+    // ~500ms (rather than relying on the loader, which frequently never
+    // appears) means it settles on the right answer regardless of
+    // whether the new page came from cache or a real fetch.
+    if (typeof window.recalcMobileScrollUI === 'function') {
+        [50, 150, 300, 500].forEach(delay => {
+            setTimeout(() => window.recalcMobileScrollUI(), delay);
+        });
+    }
 };
 
 window.handleLearnerMobileBottomNav = function(event, loaderFn) {
@@ -2953,12 +2975,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=5.8"></script>
-<script src="assets/js/learner/quiz.js?v=8.7"></script>
-<script src="assets/js/learner/assignments.js?v=8.1"></script>
-<script src="assets/js/learner/resources.js?v=7.1"></script>
-<script src="assets/js/learner/announcements.js?v=7.8"></script>
+<script src="assets/js/learner/quiz.js?v=9.2"></script>
+<script src="assets/js/learner/assignments.js?v=8.5"></script>
+<script src="assets/js/learner/resources.js?v=7.5"></script>
+<script src="assets/js/learner/announcements.js?v=8.2"></script>
 <script src="assets/js/learner/grades.js?v=6.0"></script>
-<script src="assets/js/learner/evaluations.js?v=4.8"></script>
+<script src="assets/js/learner/evaluations.js?v=5.2"></script>
 <script src="assets/js/learner/discussions.js?v=8.5"></script>
 <script src="assets/js/learner/syllabus.js?v=3.3"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
