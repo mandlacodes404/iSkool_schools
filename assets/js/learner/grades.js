@@ -64,10 +64,12 @@ function getGradesState() {
     const state = window.learnerPageState.get('grades') || {};
     state.openSubjects = Array.isArray(state.openSubjects) ? state.openSubjects : null;
     state.openRows = Array.isArray(state.openRows) ? state.openRows : [];
+    state.openGroups = Array.isArray(state.openGroups) ? state.openGroups : [];
     state.views = state.views || {};
     state.terms = state.terms || {};
     state.search = state.search || {};
     state.scroll = state.scroll || {};
+    state.desktopSelection = state.desktopSelection || null;
     return state;
 }
 
@@ -185,27 +187,60 @@ function renderGrades(data) {
     // -- the inline <style id="grades-styles"> block that used to be injected
     // here was removed as part of the inline-style cleanup.)
 
-    // ── BUILD SIDEBAR ITEMS ──────────────────────────────────────────────────
+    // ── BUILD SIDEBAR ITEMS (collapsible groups, one quiz row each) ──────────
+    window._allGradesQuizzesFlat = [];
     let sidebarItemsHtml = '';
     if (groups.length === 0) {
         sidebarItemsHtml = `<p class="grades-sidebar-empty">No results yet.</p>`;
     } else {
+        let flatIdx = 0;
         groups.forEach((group, gi) => {
             const quizzes = group.quizzes;
+            const groupId = `grades-dg-${gi}`;
             sidebarItemsHtml += `
-                <div class="grades-dt-subject-item" id="grades-dt-item-${gi}"
-                     data-grade-subject-index="${gi}"
-                     onclick="selectDesktopGradeSubject(${gi})">
-                    <div class="grades-dt-subject-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
+                <div class="grades-dt-teacher-group">
+                    <div class="grades-dt-teacher-header-row">
+                        <button type="button" class="grades-dt-teacher-header" onclick="toggleGradesDesktopGroup('${groupId}', this)">
+                            <svg class="grades-dt-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                            <svg class="grades-dt-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span class="grades-dt-teacher-name">${escHtml(group.group)}</span>
+                            <span class="grades-dt-teacher-count">${quizzes.length}</span>
+                        </button>
+                        <button type="button" class="grades-dt-term-btn" id="grades-dt-termbtn-${gi}"
+                                onclick="selectDesktopGradeTerm(${gi})">Term Marks</button>
                     </div>
-                    <div class="grades-dt-subject-info">
-                        <div class="grades-dt-subject-name">${escHtml(group.group)}</div>
-                        <div class="grades-dt-subject-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</div>
-                    </div>
-                </div>`;
+                    <div class="grades-dt-teacher-body collapsed" id="${groupId}">`;
+            quizzes.forEach((q, qi) => {
+                const published = q.publish_marks == 1;
+                const pct       = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
+                const pillClass = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+                const pillText  = published ? `${pct}%` : 'Pending';
+
+                sidebarItemsHtml += `
+                        <div class="grades-dt-subject-item" id="grades-dt-item-${flatIdx}"
+                             data-grade-quiz-index="${flatIdx}"
+                             data-title="${escAttr(q.quiz_title || '').toLowerCase()}"
+                             onclick="selectDesktopGradeQuiz(${flatIdx})">
+                            <div class="grades-dt-subject-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="20" x2="18" y2="10"/>
+                                    <line x1="12" y1="20" x2="12" y2="4"/>
+                                    <line x1="6"  y1="20" x2="6"  y2="14"/>
+                                </svg>
+                            </div>
+                            <div class="grades-dt-subject-info">
+                                <div class="grades-dt-subject-name">${escHtml(q.quiz_title)}</div>
+                            </div>
+                            <span class="quiz-score-pill ${pillClass}">${pillText}</span>
+                        </div>`;
+                window._allGradesQuizzesFlat.push({ quiz: q, groupIndex: gi, quizIndexInGroup: qi });
+                flatIdx++;
+            });
+            sidebarItemsHtml += `</div></div>`;
         });
     }
 
@@ -315,20 +350,18 @@ function renderGrades(data) {
                 <input type="text" class="grades-search" id="gradesSearchDt"
                     placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
             </div>` : ''}
+            <button class="grades-report-btn grades-report-btn--full grades-dt-report-btn-top"
+                    onclick="generateGradesReport('${targetEmail}')">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                Progress Report
+            </button>
             <div class="grades-dt-sidebar-scroll">
                 ${sidebarItemsHtml}
-            </div>
-            <div class="grades-dt-sidebar-footer">
-                <button class="grades-report-btn grades-report-btn--full"
-                        onclick="generateGradesReport('${targetEmail}')">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                    Progress Report
-                </button>
             </div>
         </div>
 
@@ -339,7 +372,7 @@ function renderGrades(data) {
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
-                    <p>Select a subject to view your grades</p>
+                    <p>Select an assessment to view your grade</p>
                 </div>
             </div>
         </div>
@@ -383,40 +416,107 @@ function renderGrades(data) {
     apiArea._gradesData = data;
     restoreGradesStateAfterRender();
     wireGradesScrollState();
-    wireDesktopGradeSubjectClicks();
-    if (window.innerWidth >= 900 && groups.length > 0) {
-        const state = getGradesState();
-        const selected = Number.isInteger(parseInt(state.desktopSubject, 10))
-            ? parseInt(state.desktopSubject, 10)
-            : 0;
-        if (typeof window.selectDesktopGradeSubject === 'function' && apiArea._gradesData.groups[selected]) {
-            window.selectDesktopGradeSubject(selected);
-        }
-    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESKTOP PANEL: SELECT SUBJECT
+// DESKTOP SIDEBAR: TOGGLE TEACHER/SUBJECT GROUP
 // ─────────────────────────────────────────────────────────────────────────────
-window.selectDesktopGradeSubject = function (gi) {
+window.toggleGradesDesktopGroup = function (id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    const chevron = headerEl ? headerEl.querySelector('.grades-dt-teacher-chevron') : null;
+    if (chevron) chevron.classList.toggle('open', !isOpen);
+    const openGroups = Array.from(document.querySelectorAll('.grades-dt-teacher-body:not(.collapsed)')).map(el => el.id);
+    saveGradesState({ openGroups });
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESKTOP PANEL: SELECT QUIZ
+// ─────────────────────────────────────────────────────────────────────────────
+window.selectDesktopGradeQuiz = function (flatIdx) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea || !apiArea._gradesData) return;
+    const idx = parseInt(flatIdx, 10);
+    const entry = (window._allGradesQuizzesFlat || [])[idx];
+    if (!entry) return;
+
+    document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.grades-dt-term-btn').forEach(el => el.classList.remove('active'));
+    const item = document.getElementById(`grades-dt-item-${idx}`);
+    if (item) item.classList.add('active');
+    saveGradesState({ desktopSelection: { type: 'quiz', flatIdx: idx } });
+
+    const { quiz: q, groupIndex, quizIndexInGroup } = entry;
+    const panel = document.getElementById('grades-dt-panel');
+    if (!panel) return;
+
+    // Prefixed IDs to avoid clashing with mobile accordion IDs for the same quiz
+    const pfx = `dt${groupIndex}-${quizIndexInGroup}`;
+
+    const published  = q.publish_marks == 1;
+    const pct         = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
+    const pillClass   = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+    const pillText    = published ? `${pct}%` : 'Pending';
+    const gradingStatus = buildOpenEndedGradingStatus(q);
+    const duration    = q.duration;
+    const timeTaken   = formatDuration(q.time_taken, duration * 60);
+    const submittedAt = formatDate(q.submitted_at);
+    const titleHtml   = published
+        ? `<span class="quiz-title-link" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
+        : escHtml(q.quiz_title);
+    const summBadge = q.is_summative
+        ? `<span class="summative-badge">
+            <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+           </span>` : '';
+
+    panel.innerHTML = `
+        <div class="grades-dt-panel-header">
+            <h3 class="grades-dt-panel-title">
+                ${titleHtml}
+                ${summBadge}
+            </h3>
+            <span class="quiz-score-pill ${pillClass}">${pillText}</span>
+        </div>
+
+        <div class="quiz-row-details" id="qdetail-${pfx}" style="display:block;">
+            ${published ? `
+                <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
+            ` : `<p class="grades-unpublished-note">Marks not published yet.</p>`}
+            ${gradingStatus.details}
+            <p class="grades-detail-spaced"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
+            <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
+            <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
+            ${published ? `<div class="grade-inline-stats loading" id="gstats-${pfx}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
+        </div>`;
+
+    if (published) loadGradeStatsInline(`gstats-${pfx}`);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DESKTOP PANEL: SELECT TERM MARKS FOR A GROUP
+// ─────────────────────────────────────────────────────────────────────────────
+window.selectDesktopGradeTerm = function (gi, term) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea || !apiArea._gradesData) return;
     const groupIndex = parseInt(gi, 10);
-    if (!Number.isInteger(groupIndex) || !apiArea._gradesData.groups?.[groupIndex]) return;
+    const group = apiArea._gradesData.groups?.[groupIndex];
+    if (!group) return;
+    const currentTerm = term !== undefined ? parseInt(term, 10) : (apiArea._gradesData.current_term || 1);
 
     document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    const item = document.getElementById(`grades-dt-item-${groupIndex}`);
-    if (item) item.classList.add('active');
-    saveGradesState({ desktopSubject: groupIndex });
+    document.querySelectorAll('.grades-dt-term-btn').forEach(el => el.classList.remove('active'));
+    const btn = document.getElementById(`grades-dt-termbtn-${groupIndex}`);
+    if (btn) btn.classList.add('active');
+    saveGradesState({ desktopSelection: { type: 'term', groupIndex, term: currentTerm } });
 
-    const group       = apiArea._gradesData.groups[groupIndex];
-    const currentTerm = apiArea._gradesData.current_term || 1;
-    const quizzes     = group.quizzes;
-    const panel       = document.getElementById('grades-dt-panel');
+    const panel = document.getElementById('grades-dt-panel');
     if (!panel) return;
-
-    // Use a prefixed ID to avoid any clash with mobile IDs
-    const pfx = `dt${groupIndex}`;
+    const pfx = `dtterm${groupIndex}`;
 
     panel.innerHTML = `
         <div class="grades-dt-panel-header">
@@ -426,49 +526,20 @@ window.selectDesktopGradeSubject = function (gi) {
                 </svg>
                 ${escHtml(group.group)}
             </h3>
-            <span class="grades-dt-panel-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
         </div>
 
-        <div class="view-toggle-bar view-toggle-bar--flush">
-            <button class="view-toggle-btn active-view" id="vt-list-${pfx}"
-                    onclick="switchGradesView('${pfx}','list')">
-                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-                    <line x1="8" y1="18" x2="21" y2="18"/>
-                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-                    <line x1="3" y1="18" x2="3.01" y2="18"/>
-                </svg>
-                Quiz List
-            </button>
-            <button class="view-toggle-btn" id="vt-term-${pfx}"
-                    onclick="switchGradesView('${pfx}','term')">
-                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                    <rect x="4" y="2" width="16" height="20" rx="2"/>
-                    <line x1="8" y1="6" x2="16" y2="6"/>
-                    <line x1="8" y1="10" x2="16" y2="10"/>
-                    <line x1="8" y1="14" x2="16" y2="14"/>
-                </svg>
-                Term Marks
-            </button>
-        </div>
-
-        <div class="quiz-list quiz-list--dt-panel" id="view-list-${pfx}">
-            ${buildQuizList(quizzes, pfx)}
-        </div>
-
-        <div class="term-marks-view term-marks-view--dt-panel" id="view-term-${pfx}" style="display:none;">
+        <div class="term-marks-view term-marks-view--dt-panel">
             <div class="term-selector-wrap">
-                <select class="term-selector" onchange="refreshTermTable('${pfx}', this.value, ${groupIndex})">
+                <select class="term-selector" onchange="selectDesktopGradeTerm(${groupIndex}, this.value)">
                     ${[1,2,3,4].map(t =>
                         `<option value="${t}" ${t === currentTerm ? 'selected' : ''}>Term ${t}</option>`
                     ).join('')}
                 </select>
             </div>
             <div id="term-table-wrap-${pfx}">
-                ${buildTermTable(quizzes, currentTerm)}
+                ${buildTermTable(group.quizzes, currentTerm)}
             </div>
         </div>`;
-    restoreDesktopGradePanelState(pfx);
 };
 
 // Desktop sidebar search
@@ -702,40 +773,30 @@ function restoreGradesStateAfterRender() {
             if (!String(rowId).startsWith('qdetail-dt')) openQuizRowByDetailId(rowId);
         });
 
-        if (state.desktopSubject !== null && state.desktopSubject !== undefined && apiArea?._gradesData?.groups?.[state.desktopSubject]) {
-            window.selectDesktopGradeSubject(state.desktopSubject);
+        if (state.openGroups) {
+            document.querySelectorAll('.grades-dt-teacher-body').forEach(body => {
+                const open = state.openGroups.includes(body.id);
+                body.classList.toggle('collapsed', !open);
+                const header = body.previousElementSibling?.querySelector('.grades-dt-teacher-header');
+                const chevron = header ? header.querySelector('.grades-dt-teacher-chevron') : null;
+                if (chevron) chevron.classList.toggle('open', open);
+            });
+        }
+
+        if (state.desktopSelection && apiArea?._gradesData) {
+            if (state.desktopSelection.type === 'quiz'
+                && (window._allGradesQuizzesFlat || [])[state.desktopSelection.flatIdx]) {
+                window.selectDesktopGradeQuiz(state.desktopSelection.flatIdx);
+            } else if (state.desktopSelection.type === 'term'
+                && apiArea._gradesData.groups?.[state.desktopSelection.groupIndex]) {
+                window.selectDesktopGradeTerm(state.desktopSelection.groupIndex, state.desktopSelection.term);
+            }
         }
 
         requestAnimationFrame(() => {
             const mainContent = document.querySelector('.main-content');
             const panel = document.getElementById('grades-dt-panel');
             if (mainContent && Number.isFinite(state.scroll.main)) mainContent.scrollTop = state.scroll.main;
-            if (panel && Number.isFinite(state.scroll.panel)) panel.scrollTop = state.scroll.panel;
-        });
-    } finally {
-        gradesRestoringState = false;
-    }
-}
-
-function restoreDesktopGradePanelState(prefix) {
-    const state = getGradesState();
-    gradesRestoringState = true;
-    try {
-        if (state.views[prefix]) window.switchGradesView(prefix, state.views[prefix]);
-
-        if (state.terms[prefix]) {
-            const sourceGi = parseInt(String(prefix).replace('dt', ''), 10);
-            const selector = document.querySelector(`#view-term-${prefix} .term-selector`);
-            if (selector) selector.value = state.terms[prefix];
-            window.refreshTermTable(prefix, state.terms[prefix], sourceGi);
-        }
-
-        (state.openRows || []).forEach(rowId => {
-            if (String(rowId).startsWith(`qdetail-${prefix}-`)) openQuizRowByDetailId(rowId);
-        });
-
-        requestAnimationFrame(() => {
-            const panel = document.getElementById('grades-dt-panel');
             if (panel && Number.isFinite(state.scroll.panel)) panel.scrollTop = state.scroll.panel;
         });
     } finally {
@@ -780,16 +841,6 @@ function wireGradesScrollState() {
     }
 }
 
-function wireDesktopGradeSubjectClicks() {
-    const sidebar = document.querySelector('.grades-dt-sidebar-scroll');
-    if (!sidebar || sidebar.dataset.gradesSubjectClicks === '1') return;
-    sidebar.dataset.gradesSubjectClicks = '1';
-    sidebar.addEventListener('click', event => {
-        const item = event.target.closest('.grades-dt-subject-item');
-        if (!item || !sidebar.contains(item)) return;
-        window.selectDesktopGradeSubject(item.dataset.gradeSubjectIndex);
-    });
-}
 
 window.toggleSubjectCard = function (gi) {
     const body = document.getElementById(`scard-body-${gi}`);
@@ -836,7 +887,8 @@ window.switchGradesView = function (gi, view) {
     saveGradesState({ views: Object.assign({}, state.views, { [gi]: view }) });
 };
 
-// gi = ID prefix, term = selected term value, sourceGi = numeric group index (desktop only)
+// gi = ID prefix (mobile subject-card index), term = selected term value
+// sourceGi param kept for signature compatibility but no longer passed by any caller
 window.refreshTermTable = function (gi, term, sourceGi) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea || !apiArea._gradesData) return;

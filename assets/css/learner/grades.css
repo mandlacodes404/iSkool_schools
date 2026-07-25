@@ -60,10 +60,78 @@
 .grades-dt-sidebar-scroll::-webkit-scrollbar { width: 4px; }
 .grades-dt-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .grades-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-.grades-dt-sidebar-footer {
-    padding: 12px 14px;
-    border-top: 1px solid rgba(255,255,255,0.07);
+.grades-dt-report-btn-top {
+    margin: 10px 14px;
     flex-shrink: 0;
+}
+
+.grades-dt-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+.grades-dt-teacher-header-row {
+    display: flex;
+    align-items: center;
+}
+.grades-dt-teacher-header {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: transparent;
+    border: 0;
+    color: #8b949e;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+.grades-dt-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
+.grades-dt-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
+.grades-dt-teacher-chevron.open { transform: rotate(90deg); }
+.grades-dt-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
+.grades-dt-teacher-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+.grades-dt-teacher-count {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    color: #68d391;
+    background: rgba(104,211,145,0.1);
+    border: 1px solid rgba(104,211,145,0.25);
+    border-radius: 999px;
+    padding: 1px 7px;
+}
+.grades-dt-teacher-body.collapsed { display: none; }
+.grades-dt-term-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 10px;
+    padding: 3px 9px;
+    background: rgba(104,211,145,0.08);
+    color: #68d391;
+    border: 1px solid rgba(104,211,145,0.25);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+.grades-dt-term-btn:hover { background: rgba(104,211,145,0.18); }
+.grades-dt-term-btn.active {
+    background: #68d391;
+    color: #0d1117;
 }
 
 .grades-dt-subject-item {
@@ -91,7 +159,6 @@
     text-overflow: ellipsis;
 }
 .grades-dt-subject-item.active .grades-dt-subject-name { color: #e2e8f0; }
-.grades-dt-subject-count { font-size: 11px; color: #555e6a; margin-top: 2px; }
 
 /* Right panel */
 .grades-dt-main {
@@ -140,14 +207,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-}
-.grades-dt-panel-count {
-    font-size: 12px;
-    color: #8b949e;
-    font-weight: 600;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 8px;
-    border-radius: 20px;
 }
 
 /* ══ MOBILE / SHARED STYLES (unchanged) ══ */
@@ -485,23 +544,9 @@
     justify-content: center;
 }
 
-/* Zero-margin toggle bar variant (was: inline style="padding-left:0;
-   padding-right:0;margin-bottom:12px;" on the desktop panel's
-   view-toggle-bar, which normally has side padding for the mobile
-   card context) */
-.view-toggle-bar--flush {
-    padding-left: 0;
-    padding-right: 0;
-    margin-bottom: 12px;
-}
-
-/* Desktop panel spacing variants for quiz-list / term-marks-view
-   (was: inline style="padding:0 0 16px;" -- the mobile versions of
-   these get their padding from the .subject-card wrapper, which the
-   desktop panel doesn't have) */
-.quiz-list--dt-panel {
-    padding: 0 0 16px;
-}
+/* Desktop panel spacing variant for term-marks-view (was: inline
+   style="padding:0 0 16px;" -- the mobile version gets its padding
+   from the .subject-card wrapper, which the desktop panel doesn't have) */
 .term-marks-view--dt-panel {
     padding: 0 0 16px;
 }
