@@ -63,9 +63,16 @@
 .grades-dt-report-btn-top {
     margin: 0 14px 10px;
     flex-shrink: 0;
+    box-sizing: border-box;
     padding: 8px 12px;
+    gap: 6px;
     font-size: 12.5px;
     border-radius: 8px;
+}
+.grades-dt-report-btn-top svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
 }
 
 .grades-dt-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }

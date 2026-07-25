@@ -217,7 +217,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=3.6">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.5">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=2.8">
     <meta name="theme-color" content="#20201f">
