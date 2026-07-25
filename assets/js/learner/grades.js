@@ -199,21 +199,31 @@ function renderGrades(data) {
             const groupId = `grades-dg-${gi}`;
             sidebarItemsHtml += `
                 <div class="grades-dt-teacher-group">
-                    <div class="grades-dt-teacher-header-row">
-                        <button type="button" class="grades-dt-teacher-header" onclick="toggleGradesDesktopGroup('${groupId}', this)">
-                            <svg class="grades-dt-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                            <svg class="grades-dt-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                            </svg>
-                            <span class="grades-dt-teacher-name">${escHtml(group.group)}</span>
-                            <span class="grades-dt-teacher-count">${quizzes.length}</span>
-                        </button>
-                        <button type="button" class="grades-dt-term-btn" id="grades-dt-termbtn-${gi}"
-                                onclick="selectDesktopGradeTerm(${gi})">Term Marks</button>
-                    </div>
-                    <div class="grades-dt-teacher-body collapsed" id="${groupId}">`;
+                    <button type="button" class="grades-dt-teacher-header" onclick="toggleGradesDesktopGroup('${groupId}', this)">
+                        <svg class="grades-dt-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                        <svg class="grades-dt-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span class="grades-dt-teacher-name">${escHtml(group.group)}</span>
+                        <span class="grades-dt-teacher-count">${quizzes.length}</span>
+                    </button>
+                    <div class="grades-dt-teacher-body collapsed" id="${groupId}">
+                        <div class="grades-dt-subject-item grades-dt-term-row" id="grades-dt-termbtn-${gi}"
+                             onclick="selectDesktopGradeTerm(${gi})">
+                            <div class="grades-dt-subject-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="4" y="2" width="16" height="20" rx="2"/>
+                                    <line x1="8" y1="6" x2="16" y2="6"/>
+                                    <line x1="8" y1="10" x2="16" y2="10"/>
+                                    <line x1="8" y1="14" x2="16" y2="14"/>
+                                </svg>
+                            </div>
+                            <div class="grades-dt-subject-info">
+                                <div class="grades-dt-subject-name">Term Marks</div>
+                            </div>
+                        </div>`;
             quizzes.forEach((q, qi) => {
                 const published = q.publish_marks == 1;
                 const pct       = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
@@ -443,7 +453,6 @@ window.selectDesktopGradeQuiz = function (flatIdx) {
     if (!entry) return;
 
     document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.grades-dt-term-btn').forEach(el => el.classList.remove('active'));
     const item = document.getElementById(`grades-dt-item-${idx}`);
     if (item) item.classList.add('active');
     saveGradesState({ desktopSelection: { type: 'quiz', flatIdx: idx } });
@@ -509,7 +518,6 @@ window.selectDesktopGradeTerm = function (gi, term) {
     const currentTerm = term !== undefined ? parseInt(term, 10) : (apiArea._gradesData.current_term || 1);
 
     document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.grades-dt-term-btn').forEach(el => el.classList.remove('active'));
     const btn = document.getElementById(`grades-dt-termbtn-${groupIndex}`);
     if (btn) btn.classList.add('active');
     saveGradesState({ desktopSelection: { type: 'term', groupIndex, term: currentTerm } });
