@@ -611,7 +611,16 @@
 @media (max-width: 768px) {
 
 .lh-mobile-wrapper {
-    padding: 16px 16px 90px;
+    /* Bottom clearance for the fixed bottom nav bar is already handled by
+       #api-content-area's own padding-bottom (quiz.css, shared across all
+       mobile pages) — that alone fully clears the 82px nav + safe area.
+       This wrapper previously added its own flat 90px on top of that,
+       stacking two separate reservations for the same nav bar and leaving
+       a large empty gap to scroll into at the bottom of Home specifically
+       (no other page uses this wrapper). Trimmed to match the 16px side
+       padding so the last card still gets a little breathing room, without
+       double-reserving space. */
+    padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 0;
