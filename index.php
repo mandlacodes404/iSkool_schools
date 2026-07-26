@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=3.0">
+    <link rel="stylesheet" href="assets/css/index.css?v=3.1">
     <style>
     #loader-logo svg,
     #loader-logo img {
@@ -113,7 +113,7 @@ function getCsrfToken() {
             <div class="bp-intro">
                 <div class="bp-intro-eyebrow">
                     <span class="bp-live-dot"></span>
-                    <span>iSkool</span>
+                    <span class="bp-brand-name">iSkool</span>
                 </div>
             </div>
 
@@ -758,8 +758,8 @@ function getCsrfToken() {
         await pvDelay(700);
         document.getElementById('pv-typing').classList.add('pv-vis');
         await pvDelay(1400);
-        document.getElementById('pv-typing').style.opacity = '0';
-        await pvDelay(250);
+        // Dots shrink out just as the reply grows in, so it reads as "dots became the message"
+        document.getElementById('pv-typing').classList.add('pv-typing-out');
         document.getElementById('pv-b2').classList.add('pv-vis');
         await pvDelay(700);
         document.getElementById('pv-b3').classList.add('pv-vis');
@@ -769,8 +769,7 @@ function getCsrfToken() {
         await pvHide('pv1');
         // reset
         ['pv-b1','pv-b2','pv-b3','pv-b4'].forEach(id => document.getElementById(id).classList.remove('pv-vis'));
-        document.getElementById('pv-typing').classList.remove('pv-vis');
-        document.getElementById('pv-typing').style.opacity = '';
+        document.getElementById('pv-typing').classList.remove('pv-vis', 'pv-typing-out');
     }
 
     // ── Card 2: Announcements ──
