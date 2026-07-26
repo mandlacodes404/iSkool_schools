@@ -576,13 +576,19 @@ function getCsrfToken() {
         if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Show glowing logo loader first, then fade out and show container + brand
-    window.onload = function () {
+
+    // Show glowing logo loader until it's actually ready, then fade out and show container + brand.
+    // Instead of a fixed timer, this waits on two things:
+    //   1) the splash logo image finishing load (near-instant once cached on repeat visits)
+    //   2) a small minimum floor (200ms) so the splash never flashes on/off too fast to read
+    // Whichever finishes last is what decides when the splash goes away.
+    document.addEventListener('DOMContentLoaded', function () {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
-        const iskoolBrand = document.getElementById('iskool-brand');
-        const timeout = 2000;
-        setTimeout(() => {
+        const splashImg = document.getElementById('splash-svg');
+        const MIN_SPLASH_MS = 200;
+
+        const revealApp = () => {
     animationWrapper.style.display = 'none';
 
     // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
@@ -596,8 +602,25 @@ function getCsrfToken() {
        
     <?php endif; ?>
     // ─────────────────────────────────────────────────────
+        };
 
-         }, timeout);
+        const minFloor = new Promise(resolve => setTimeout(resolve, MIN_SPLASH_MS));
+
+        const imageReady = new Promise(resolve => {
+            // .complete is true immediately if the image is already cached/loaded
+            // (this is what makes repeat/warm visits skip the wait almost entirely)
+            if (splashImg && splashImg.complete) {
+                resolve();
+            } else if (splashImg) {
+                splashImg.addEventListener('load', resolve, { once: true });
+                splashImg.addEventListener('error', resolve, { once: true }); // don't hang splash on a failed image
+            } else {
+                resolve();
+            }
+        });
+
+        Promise.all([minFloor, imageReady]).then(revealApp);
+
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const activeForm = "<?= $activeForm ?>";
@@ -606,7 +629,7 @@ function getCsrfToken() {
         } else {
             registerForm.classList.add('active');
         }
-    };
+    });
     // Toggle password visibility
     function togglePassword(inputId, icon) {
         const input = document.getElementById(inputId);
