@@ -588,7 +588,7 @@ function getCsrfToken() {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const splashImg = document.getElementById('splash-svg');
-        const MIN_SPLASH_MS = 200;
+        const MIN_SPLASH_MS = 1700;
 
         const revealApp = () => {
     animationWrapper.style.display = 'none';
