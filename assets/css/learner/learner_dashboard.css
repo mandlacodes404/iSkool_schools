@@ -90,7 +90,7 @@ body {
     border-bottom-right-radius: 20px;
     
     /* THE BORDER: A subtle "rim" makes the curve look premium */
-    border-right: 1px solid rgba(255, 255, 255, 0.9);
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .sidebar::-webkit-scrollbar {
