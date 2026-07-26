@@ -80,6 +80,31 @@ if ($result && $row = $result->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css?v=3.4">
+
+<?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+    <!-- ──────────────────────────────────────────────────────────────────
+         Warm-start hints for "remember me" users only.
+         We already know server-side (from the session) that this visit
+         is going to end at the dashboard, so we spend the 1700ms splash
+         window fetching what the dashboard will need instead of leaving
+         the network idle. Nothing here changes the splash timing/feel —
+         it only runs in parallel with it, and only for logged-in users,
+         so a first-time / logged-out visitor's page weight is unchanged.
+         ────────────────────────────────────────────────────────────── -->
+    <link rel="preload" as="style" href="assets/css/learner/quiz.css?v=5.2">
+    <link rel="preload" as="style" href="assets/css/learner/manual.css?v=3.6">
+    <link rel="preload" as="style" href="assets/css/learner/announcements.css?v=1.0">
+    <link rel="preload" as="style" href="assets/css/learner/assignments.css?v=1.0">
+    <link rel="preload" as="style" href="assets/css/learner/grades.css?v=1.7">
+    <link rel="preload" as="style" href="assets/css/learner/resources.css?v=1.0">
+    <link rel="preload" as="style" href="assets/css/learner/evaluations.css?v=2.8">
+    <link rel="preload" as="style" href="assets/css/learner/learner_dashboard.css?v=6.5">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<?php endif; ?>
     <style>
     #loader-logo svg,
     #loader-logo img {
@@ -589,6 +614,20 @@ function getCsrfToken() {
         const container = document.querySelector('.container');
         const splashImg = document.getElementById('splash-svg');
         const MIN_SPLASH_MS = 1700;
+
+    <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+        // ──────── WARM-START PING (splash-time only, logged-in users) ────────
+        // We already know this visit ends at the dashboard. Fire a background
+        // request for it right now, at the very start of the 1700ms splash,
+        // so the dashboard's PHP (session check, school/year/profile/class
+        // queries) and its response run *during* the splash instead of only
+        // starting after we navigate. This is fire-and-forget: it never
+        // touches revealApp/minFloor, so the splash duration and feel are
+        // completely unchanged either way.
+        try {
+            fetch('dashboard', { credentials: 'same-origin' }).catch(() => {});
+        } catch (e) {}
+    <?php endif; ?>
 
         const revealApp = () => {
     animationWrapper.style.display = 'none';
@@ -1252,6 +1291,37 @@ function getCsrfToken() {
         // Show loading state
         btn.disabled = true;
         btn.classList.add('is-loading');
+
+        // ──────── WARM-START: dashboard static assets ────────
+        // These are public files, not gated by login, so it's safe to start
+        // pulling them in the background the moment the user hits submit —
+        // even before we know if the login itself succeeds. If it fails,
+        // we've just warmed some CSS/fonts for nothing; if it succeeds,
+        // the dashboard's stylesheets are already in cache by the time the
+        // redirect below lands, instead of starting cold on arrival.
+        // (Doesn't touch dashboard PHP/DB — that only runs once we know
+        // login succeeded, via the real navigation itself.)
+        if (!window.__dashboardAssetsWarmed) {
+            window.__dashboardAssetsWarmed = true;
+            [
+                'assets/css/learner/quiz.css?v=5.2',
+                'assets/css/learner/manual.css?v=3.6',
+                'assets/css/learner/announcements.css?v=1.0',
+                'assets/css/learner/assignments.css?v=1.0',
+                'assets/css/learner/grades.css?v=1.7',
+                'assets/css/learner/resources.css?v=1.0',
+                'assets/css/learner/evaluations.css?v=2.8',
+                'assets/css/learner/learner_dashboard.css?v=6.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css',
+                'https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap'
+            ].forEach(href => {
+                const link = document.createElement('link');
+                link.rel  = 'preload';
+                link.as   = 'style';
+                link.href = href;
+                document.head.appendChild(link);
+            });
+        }
 
         const formData = new FormData(this);
         // Pass the remember_me checkbox value explicitly
