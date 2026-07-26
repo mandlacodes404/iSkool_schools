@@ -61,17 +61,17 @@
 .grades-dt-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .grades-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .grades-dt-report-btn-top {
-    margin: 0 14px 10px;
+    margin: 10px 14px 8px;
     flex-shrink: 0;
     box-sizing: border-box;
-    padding: 8px 12px;
-    gap: 6px;
-    font-size: 12.5px;
-    border-radius: 8px;
+    padding: 6px 10px;
+    gap: 5px;
+    font-size: 11.5px;
+    border-radius: 7px;
 }
 .grades-dt-report-btn-top svg {
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
     flex-shrink: 0;
 }
 
@@ -147,6 +147,7 @@
     text-overflow: ellipsis;
 }
 .grades-dt-subject-item.active .grades-dt-subject-name { color: #e2e8f0; }
+.grades-dt-subject-item .quiz-score-pill { display: none; }
 
 /* Right panel */
 .grades-dt-main {
