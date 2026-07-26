@@ -240,6 +240,13 @@ body {
     min-height: 1.4em;
     white-space: nowrap;
     overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Line 1 recedes (not vanishes) once focus hands off to line 2 */
+.pv-tw-line.pv-tw-dim {
+    opacity: 0.38;
 }
 
 .pv-tw-line2 {
@@ -248,6 +255,18 @@ body {
     color: #666;
     margin-top: 8px;
     letter-spacing: 0;
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(2px);
+    transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
+                transform 0.45s cubic-bezier(0.22,1,0.36,1),
+                filter 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+
+.pv-tw-line2.pv-tw-in {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
 }
 
 .pv-tw-cursor {
@@ -257,12 +276,22 @@ body {
     background: #3ecf8e;
     margin-left: 2px;
     vertical-align: middle;
-    animation: twBlink 0.75s step-end infinite;
+    border-radius: 1px;
+    opacity: 1;
+    animation: twBlink 1.05s cubic-bezier(0.68,0,0.32,1) infinite;
+    box-shadow: 0 0 0 rgba(62,207,142,0.6);
+    transition: opacity 0.15s ease;
+}
+
+.pv-tw-cursor.pv-tw-cursor-out {
+    animation: none;
+    opacity: 0;
 }
 
 @keyframes twBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    0%, 42% { opacity: 1; box-shadow: 0 0 6px rgba(62,207,142,0.55); }
+    50%, 92% { opacity: 0.12; box-shadow: 0 0 0 rgba(62,207,142,0); }
+    100% { opacity: 1; box-shadow: 0 0 6px rgba(62,207,142,0.55); }
 }
 
 /* ── Preview animation card styles ── */

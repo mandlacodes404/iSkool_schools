@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=2.9">
+    <link rel="stylesheet" href="assets/css/index.css?v=3.0">
     <style>
     #loader-logo svg,
     #loader-logo img {
@@ -966,6 +966,7 @@ function getCsrfToken() {
     }
 
     // ── Card 0: Typewriter Intro (plays once at start) ──
+    // Line 1's own type-in behavior is left exactly as-is (untouched).
     async function pvTypewriter(elId, text, speed) {
         const el = document.getElementById(elId);
         el.innerHTML = '';
@@ -979,22 +980,67 @@ function getCsrfToken() {
         return cursor;
     }
 
+    // Natural, less mechanical typing: small randomized jitter per character,
+    // with a slightly longer breath after spaces/punctuation. Used for line 2
+    // only, so line 1's cadence/feel is unchanged.
+    async function pvTypewriterNatural(elId, text, baseSpeed) {
+        const el = document.getElementById(elId);
+        el.innerHTML = '';
+        const cursor = document.createElement('span');
+        cursor.className = 'pv-tw-cursor';
+        el.appendChild(cursor);
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            el.insertBefore(document.createTextNode(ch), cursor);
+            const jitter = (Math.random() - 0.5) * baseSpeed * 0.6; // ±30%
+            let wait = baseSpeed + jitter;
+            if (ch === ' ') wait += baseSpeed * 0.3;
+            if (/[.,!?]/.test(ch)) wait += baseSpeed * 1.4;
+            await pvDelay(Math.max(14, wait));
+        }
+        return cursor;
+    }
+
+    // Fade a cursor out smoothly instead of yanking it from the DOM.
+    async function pvCursorOut(cursor) {
+        if (!cursor) return;
+        cursor.classList.add('pv-tw-cursor-out');
+        await pvDelay(160);
+        cursor.remove();
+    }
+
     async function pvCard0() {
         pvShow('pv0');
         await pvDelay(400);
-        // Line 1
+
+        // Line 1 — type-in untouched.
+        const line1El = document.getElementById('pv-tw1');
+        const line2El = document.getElementById('pv-tw2');
         const c1 = await pvTypewriter('pv-tw1', 'Get a glimpse of iSkool', 52);
         await pvDelay(700);
-        c1.remove();
-        // Line 2 fades in via typewriter
-        const c2 = await pvTypewriter('pv-tw2', 'A smarter way to run your school.', 44);
+
+        // Handoff: cursor 1 fades out as line 1 recedes (dims, doesn't vanish),
+        // giving line 2 a clear moment to take focus rather than a hard cut.
+        pvCursorOut(c1);
+        line1El.classList.add('pv-tw-dim');
+        await pvDelay(180);
+
+        // Line 2 container settles in (fade + rise + unblur) just before typing starts.
+        line2El.classList.add('pv-tw-in');
+        await pvDelay(120);
+
+        const c2 = await pvTypewriterNatural('pv-tw2', 'A smarter way to run your school.', 40);
         await pvDelay(1200);
-        c2.remove();
-        await pvDelay(400);
+        await pvCursorOut(c2);
+
+        await pvDelay(300);
         await pvHide('pv0');
-        // Reset lines
-        document.getElementById('pv-tw1').innerHTML = '';
-        document.getElementById('pv-tw2').innerHTML = '';
+
+        // Reset for next play-through.
+        line1El.innerHTML = '';
+        line1El.classList.remove('pv-tw-dim');
+        line2El.innerHTML = '';
+        line2El.classList.remove('pv-tw-in');
     }
 
 
