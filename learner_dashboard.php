@@ -220,6 +220,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.7">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=2.8">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=6.4">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -229,7 +230,7 @@ if (!empty($joinedClassIds)) {
     <link rel="manifest" href="/manifest.php">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=6.3">
+    
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
