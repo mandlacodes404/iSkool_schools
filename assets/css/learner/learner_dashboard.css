@@ -1407,7 +1407,6 @@ iframe {
 }
 /* Desktop slide-in menu */
 .sidebar.desktop-open {
-    left: 0 !important;
     transform: translateX(0) !important;
 }
 
@@ -1424,6 +1423,17 @@ iframe {
         pointer-events: none;
         z-index: 4999;
         transition: opacity var(--transition-speed) ease;
+        /* Forces the browser to build the blur's compositing layer at page
+           load instead of on first click. backdrop-filter is one of the
+           most expensive properties to activate for the first time — with
+           opacity:0 sitting idle since load, the browser defers creating
+           that layer until it's actually needed, which is exactly what was
+           causing the stutter on the very first menu open (and why the
+           second open was instant — the layer already existed by then).
+           will-change just tells the browser "build this ahead of time,
+           this element will animate opacity soon" so the expensive part
+           happens quietly during idle page-load time instead of on click. */
+        will-change: opacity;
     }
     .sidebar.desktop-open ~ .desktop-backdrop {
         opacity: 1;
@@ -1434,15 +1444,27 @@ iframe {
 /* Default hidden on desktop - slide from left */
 @media (min-width: 769px) {
     .sidebar {
-        left: -100%;                    /* Start hidden off-screen */
-        transition: left var(--transition-speed) ease, transform var(--transition-speed) ease;
+        /* Off-canvas via transform instead of `left`. `left` is a layout
+           property — animating it forces the browser to recompute layout
+           and repaint on every single frame of the 0.3s transition.
+           `transform: translateX()` produces the identical visual result
+           but is handled entirely by the GPU compositor, with no layout
+           or repaint cost — this was the other half of the first-open
+           stutter, stacking on top of the backdrop's blur-layer creation
+           in the same animation frame. left:0 is kept as a static base
+           (no longer animated) purely as a safety fallback for any
+           browser that somehow ignores the transform. */
+        left: 0;
+        transform: translateX(-100%);   /* Start hidden off-screen */
+        transition: transform var(--transition-speed) ease;
         width: var(--sidebar-width);    /* Keep your 240px width */
         box-shadow: 4px 0 20px rgba(0,0,0,0.35); /* subtle shadow when open */
         z-index: 5000;                  /* Must be above the desktop backdrop (4999) */
+        will-change: transform;         /* same idea as the backdrop above — build the compositor layer at load, not on first click */
     }
 
     .sidebar.desktop-open {
-        left: 0;
+        transform: translateX(0);
     }
 
     /* No permanent sidebar anymore - remove collapsed logic */
