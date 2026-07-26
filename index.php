@@ -578,10 +578,12 @@ function getCsrfToken() {
 
 
     // Show glowing logo loader until it's actually ready, then fade out and show container + brand.
-    // Instead of a fixed timer, this waits on two things:
+    // Instead of a fixed timer, this waits on:
     //   1) the splash logo image finishing load (near-instant once cached on repeat visits)
     //   2) a small minimum floor (200ms) so the splash never flashes on/off too fast to read
-    // Whichever finishes last is what decides when the splash goes away.
+    //   3) (only when showing the login form) web fonts finishing load, so labels/icons
+    //      don't visibly snap into place right after the form becomes visible
+    // Whichever condition finishes last is what decides when the splash goes away.
     document.addEventListener('DOMContentLoaded', function () {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
@@ -619,7 +621,20 @@ function getCsrfToken() {
             }
         });
 
-        Promise.all([minFloor, imageReady]).then(revealApp);
+        const baseReady = Promise.all([minFloor, imageReady]);
+
+    <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+        // Logged in → we're about to navigate away to the dashboard, so there's
+        // no point waiting on fonts here — reveal as soon as the base conditions are met.
+        baseReady.then(revealApp);
+    <?php else: ?>
+        // Not logged in → the login form is about to become visible on this same page,
+        // so also wait for its fonts/icons (Nunito, Inter, Font Awesome) to be ready —
+        // otherwise labels and icons would visibly snap into place right after reveal.
+        // (Falls back to just baseReady if the Font Loading API isn't supported.)
+        const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+        Promise.all([baseReady, fontsReady]).then(revealApp);
+    <?php endif; ?>
 
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
