@@ -2378,27 +2378,26 @@ if (desktopToggle) {
             }
 
             // ── Indicator element — grey starburst spinner ───────────────────────
-            // Replicates the native iOS pull-to-refresh indicator:
-            // a 32px grey spinner made of 12 radial lines (like a clock face),
+            // A compact ring of rounded, fully visible spinner pills,
             // sitting in a white pill/circle, centered just below the header.
             const ptr = document.createElement('div');
             ptr.id = 'ptrIndicator';
 
-            // Build 12 radial lines (starburst) as inline SVG — grey, like Image 1
+            // Build eight thicker rounded pills. Keeping every pill at full
+            // opacity makes the rotating ring clear instead of fading away.
             ptr.innerHTML = '<svg id="ptrSpinSvg" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">'
                 + (function() {
                     var lines = '';
-                    for (var i = 0; i < 12; i++) {
-                        var angle  = i * 30;
-                        var opacity = (0.2 + (i / 12) * 0.8).toFixed(2);
-                        // Each line: short inner segment to outer edge from center
+                    for (var i = 0; i < 8; i++) {
+                        var angle  = i * 45;
+                        // Each pill is a short segment around the centre.
                         var rad    = (angle - 90) * Math.PI / 180;
-                        var x1     = (16 + Math.cos(rad) * 7).toFixed(2);
-                        var y1     = (16 + Math.sin(rad) * 7).toFixed(2);
+                        var x1     = (16 + Math.cos(rad) * 6).toFixed(2);
+                        var y1     = (16 + Math.sin(rad) * 6).toFixed(2);
                         var x2     = (16 + Math.cos(rad) * 13).toFixed(2);
                         var y2     = (16 + Math.sin(rad) * 13).toFixed(2);
                         lines += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2
-                               + '" stroke="rgba(120,120,128,' + opacity + ')" stroke-width="2.6" stroke-linecap="round"/>';
+                               + '" stroke="rgb(120,120,128)" stroke-width="3.8" stroke-linecap="round"/>';
                     }
                     return lines;
                 }())
@@ -2430,7 +2429,7 @@ if (desktopToggle) {
             let startY = 0, pulling = false, triggered = false, pullOffset = 0;
 
             function startSpin() {
-                svgEl.style.animation = 'ptrSpin 0.75s linear infinite';
+                svgEl.style.animation = 'ptrSpin 1.35s linear infinite';
             }
             function hide() {
                 ptr.style.opacity   = '0';
