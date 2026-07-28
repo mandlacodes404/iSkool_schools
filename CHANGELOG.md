@@ -1,5 +1,13 @@
 # iSkool Changelog
 
+## [Unreleased]
+### Changed
+- Learner Dashboard (Mobile): Reworked pull-to-refresh to behave like a native app: the current page follows the pull with resistance, stays held down while refreshed content loads, then smoothly returns to its resting position. The refresh spinner now sits in the temporary gap above the pulled-down page rather than overlapping the content; it uses eight thicker, fully visible rounded pills rotating at a slower speed. Native vertical overscroll is contained so it cannot compete with the custom interaction (`learner_dashboard.php`, `learner_dashboard.css`).
+- Learner Discussions (Mobile): Added Discussions to the pull-to-refresh page map, so refreshing the discussion list now reloads its data instead of falling back to the Home page (`learner_dashboard.php`).
+
+### Fixed
+- Learner Discussions (Mobile): Fixed the pull-to-refresh indicator appearing while scrolling through older chat messages. Discussion threads use their own message scroller, which is now excluded from the page-level refresh gesture (`discussions.js`, `learner_dashboard.php`).
+
 ## [v1.2.0]
 ### Changed
 - Teacher Dashboard (Desktop): Widened the scrollbars in the left-side lists for Analytics, Quizzes, Announcements, Assignments, Resources, Grades, Evaluations, and Syllabus from their thin styling to 8px, making them easier to locate and use. Mobile layouts are unchanged (`analytics.js`, `quizzes.js`, `announcements.css`, `assignments.css`, `resources.css`, `grades.css`, `evaluations.css`, `sbo.css`).
