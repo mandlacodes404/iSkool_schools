@@ -269,7 +269,7 @@
 @media (max-width: 899px) {
     .quiz-row-title { color: #e2e8f0; font-size: 15px; }
     .quiz-row-title a { color: #e2e8f0; }
-    .quiz-row-title a:hover { color: #fff; }
+    .quiz-row-title a:hover { color: #e2e8f0; }
     .quiz-title-link { color: #fff; }
     .quiz-unpublished .quiz-row-title { color: #8b949e; }
 }
@@ -457,7 +457,7 @@
         padding: 16px 18px;
     }
     .grades-mobile-layout .subject-header:hover {
-        background: rgba(255,255,255,0.03);
+        background: transparent;
     }
     .grades-mobile-layout .view-toggle-bar {
         background: transparent;
@@ -482,7 +482,7 @@
     .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) {
         transform: none;
         border-color: rgba(255,255,255,0.06);
-        background: rgba(255,255,255,0.02);
+        background: transparent;
     }
     .grades-mobile-layout .quiz-row-details {
         background: rgba(255,255,255,0.02);
