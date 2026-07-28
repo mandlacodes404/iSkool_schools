@@ -406,9 +406,10 @@ body {
            gesture from racing with the sidebar's own swipe-to-open JS.
            This is the actual scroll container on mobile (also used by
            pull-to-refresh), so this is the most direct place to apply
-           the fix. Only overscroll-behavior-X is set — Y axis is
-           untouched so pull-to-refresh keeps working exactly as before. */
+           the fix. The custom pull-to-refresh below handles the Y axis, so
+           native browser overscroll cannot compete with its held animation. */
         overscroll-behavior-x: none;
+        overscroll-behavior-y: contain;
     }
 
     /* Chrome / Safari / Edge */

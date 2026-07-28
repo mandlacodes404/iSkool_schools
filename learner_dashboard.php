@@ -220,7 +220,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.8">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=2.8">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=6.6">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=6.7">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -2426,7 +2426,8 @@ if (desktopToggle) {
 
             const svgEl    = ptr.querySelector('#ptrSpinSvg');
             const THRESHOLD = 72;
-            let startY = 0, pulling = false, triggered = false;
+            const HOLD_OFFSET = 52;
+            let startY = 0, pulling = false, triggered = false, pullOffset = 0;
 
             function startSpin() {
                 svgEl.style.animation = 'ptrSpin 0.75s linear infinite';
@@ -2435,6 +2436,22 @@ if (desktopToggle) {
                 ptr.style.opacity   = '0';
                 ptr.style.transform = 'translateX(-50%) translateY(-80px)';
                 svgEl.style.animation = 'none';
+            }
+
+            // Move the actual page with the gesture, rather than only moving
+            // the indicator. This gives the refresh interaction the familiar
+            // native-app feel: pull, hold while loading, then settle back.
+            function setPagePullOffset(offset, animate) {
+                scrollEl.style.transition = animate
+                    ? 'transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)'
+                    : 'none';
+                scrollEl.style.transform = offset ? 'translate3d(0, ' + offset + 'px, 0)' : '';
+
+                if (animate && !offset) {
+                    setTimeout(function() {
+                        if (!window._ptrRefreshing) scrollEl.style.transition = '';
+                    }, 260);
+                }
             }
 
             // ── Cache bust + re-fetch — loaderOverlay suppressed during PTR ──────
@@ -2446,6 +2463,7 @@ if (desktopToggle) {
                 if (page === 'grades')                window.learnerGradesCache        = null;
                 if (page === 'resources')             window.learnerResourcesCache     = null;
                 if (page === 'manual')                window.learnerManualCache        = null;
+                if (page === 'discussion_list.php')   window.discussionCache           = null;
 
                 // Suppress the loaderOverlay so only the PTR spinner is visible
                 window._ptrRefreshing = true;
@@ -2459,21 +2477,40 @@ if (desktopToggle) {
                     'grades':                window.fetchGrades,
                     'resources':             window.fetchResources,
                     'manual':                window.fetchManual,
+                    'discussion_list.php':   window.fetchDiscussions,
                 };
                 const fn = fnMap[page];
-                if (typeof fn === 'function') fn();
-                else if (typeof window.loadLearnerHome === 'function') window.loadLearnerHome();
+                const refresh = typeof fn === 'function'
+                    ? fn()
+                    : (typeof window.loadLearnerHome === 'function' ? window.loadLearnerHome() : null);
 
-                // Re-enable loaderOverlay after the fetch cycle completes
-                setTimeout(function() { window._ptrRefreshing = false; }, 1200);
+                // Every page fetcher is async, so the caller can keep the page
+                // in its held position until fresh content has been rendered.
+                return Promise.resolve(refresh).finally(function() {
+                    window._ptrRefreshing = false;
+                });
             }
 
             // ── Touch handlers ──────────────────────────────────────────────────
             scrollEl.addEventListener('touchstart', function(e) {
+                // Discussion threads have their own nested message scroller. Its
+                // touch events bubble to #api-content-area, which is kept at
+                // scrollTop 0 while the thread is open. Without this guard, a
+                // normal swipe through older messages looks like a page-level
+                // pull-to-refresh gesture.
+                if (scrollEl.classList.contains('disc-thread-active')) {
+                    pulling = false;
+                    triggered = false;
+                    return;
+                }
+
+                if (window._ptrRefreshing) return;
+
                 if (scrollEl.scrollTop === 0) {
                     startY    = e.touches[0].clientY;
                     pulling   = true;
                     triggered = false;
+                    pullOffset = 0;
                 }
             }, { passive: true });
 
@@ -2484,10 +2521,11 @@ if (desktopToggle) {
 
                 const capped     = Math.min(deltaY, THRESHOLD * 1.5);
                 const progress   = Math.min(capped / THRESHOLD, 1);
-                const translateY = Math.min(capped * 0.4, 28);
+                pullOffset       = Math.min(capped * 0.5, HOLD_OFFSET);
 
                 ptr.style.opacity   = String(Math.min(progress * 1.5, 1));
-                ptr.style.transform = 'translateX(-50%) translateY(' + translateY + 'px)';
+                ptr.style.transform = 'translateX(-50%) translateY(' + pullOffset + 'px)';
+                setPagePullOffset(pullOffset, false);
 
                 if (capped >= THRESHOLD && !triggered) {
                     triggered = true;
@@ -2499,12 +2537,23 @@ if (desktopToggle) {
                 if (!pulling) return;
                 pulling = false;
                 if (triggered) {
+                    // Keep the content and spinner visibly held while the
+                    // request runs, then ease both back to their resting place.
+                    pullOffset = Math.max(pullOffset, HOLD_OFFSET);
+                    ptr.style.opacity = '1';
+                    ptr.style.transform = 'translateX(-50%) translateY(' + pullOffset + 'px)';
+                    setPagePullOffset(pullOffset, true);
                     setTimeout(function() {
-                        refreshCurrentPage();
-                        setTimeout(hide, 900);
+                        refreshCurrentPage().finally(function() {
+                            setTimeout(function() {
+                                hide();
+                                setPagePullOffset(0, true);
+                            }, 180);
+                        });
                     }, 150);
                 } else {
                     hide();
+                    setPagePullOffset(0, true);
                 }
             }, { passive: true });
         })();
