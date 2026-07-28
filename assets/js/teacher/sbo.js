@@ -62,6 +62,26 @@ window.fetchTeacherSyllabus = async function() {
 // Track active brief for desktop panel
 window._activeSBOBriefIndex = null;
 
+function formatSBOUpdatedDateTime(updatedAt) {
+    if (!updatedAt) return '';
+
+    const date = new Date(updatedAt);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const formattedDate = date.toLocaleDateString('en-ZA', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+    const formattedTime = date.toLocaleTimeString('en-ZA', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
+    return `${formattedDate} · ${formattedTime}`;
+}
+
 function renderTeacherSyllabus(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -99,6 +119,7 @@ function renderTeacherSyllabus(data) {
                 const classGroupId = `sbo-class-group-${term}-${clsIdx}`;
                 let itemsHtml = '';
                 clsGroup.items.forEach(({ brief, idx }) => {
+                    const updatedAt = formatSBOUpdatedDateTime(brief.updated_at);
                     itemsHtml += `
                         <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
                             onclick="selectDesktopSBO(${idx})">
@@ -110,7 +131,7 @@ function renderTeacherSyllabus(data) {
                             </div>
                             <div class="sbo-sidebar-item-info">
                                 <div class="sbo-sidebar-item-title">${brief.subject}</div>
-                                <div class="sbo-sidebar-item-meta">${brief.updated_at || ''}</div>
+                                <div class="sbo-sidebar-item-meta">${updatedAt}</div>
                             </div>
                         </div>`;
                 });
