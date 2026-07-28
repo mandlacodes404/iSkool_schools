@@ -1042,22 +1042,18 @@ function renderQuizCards(groupedData) {
             let rowClick = '';
             let rowKeydown = '';
             let statusText = '';
-            let statusColor = '#8b949e';
 
             if (quiz.attempt_status === 'submitted') {
                 if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
                     actionBtn = `<span class="lqz-mobile-row-action" style="color:#fdd663;">Pending</span>`;
                     statusText = 'Awaiting Results';
-                    statusColor = '#fdd663';
                 } else {
                     actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
                     statusText = 'Completed';
-                    statusColor = '#22c55e';
                 }
             } else if (isClosed) {
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#6b7280;">Closed</span>`;
                 statusText = 'No Longer Available';
-                statusColor = '#6b7280';
             } else if (isScheduled) {
                 const startTime = new Date(startTimeStr.replace(/-/g, "/"));
                 actionBtn = `<span class="quiz-countdown lqz-mobile-row-action"
@@ -1067,19 +1063,16 @@ function renderQuizCards(groupedData) {
                                 Calculating...
                              </span>`;
                 statusText = `Opens ${formatQuizDate(quiz.start_time)}`;
-                statusColor = '#fdd663';
             } else if (quiz.attempt_status === 'in_progress') {
                 rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
                 rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#e67e22;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
                 statusText = 'In Progress';
-                statusColor = '#e67e22';
             } else {
                 rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
                 rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
                 actionBtn = `<span class="lqz-mobile-row-action" style="color:#4fd1c5;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
                 statusText = 'Available Now';
-                statusColor = '#4fd1c5';
             }
             const rowAttrs = rowClick ? `role="button" tabindex="0" ${rowClick} ${rowKeydown}` : '';
 
@@ -1102,7 +1095,7 @@ function renderQuizCards(groupedData) {
                         <div class="lqz-mobile-row-title">
                             <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                         </div>
-                        <div class="lqz-mobile-row-meta">${metaPoints}<span style="color:${statusColor};">${statusText}</span></div>
+                        <div class="lqz-mobile-row-meta">${metaPoints}<span>${statusText}</span></div>
                     </div>
                     <div class="lqz-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">

@@ -771,7 +771,7 @@
     shape-rendering: geometricPrecision;
 }
 
-/* Mobile row status text color (was: inline style="color:${statusColor};"
-   next to the due-date meta text in the mobile list row) */
-.lev-mobile-row-status--done    { color: #22c55e; }
-.lev-mobile-row-status--pending { color: #e67e22; }
+/* Mobile row statuses are part of the supporting metadata, so they use the
+   same muted colour as the date rather than a state-specific accent. */
+.lev-mobile-row-status--done,
+.lev-mobile-row-status--pending { color: inherit; }

@@ -336,6 +336,10 @@ function renderResourceCards(data) {
             } else {
                 // ── Mobile: regular file row ──
                 const icon = getFileIcon(file.ext, false);
+                const fileMeta = [file.size, file.uploaded_at]
+                    .filter(Boolean)
+                    .map(escapeResourceHtml)
+                    .join(' <span class="lrs-bullet-muted">&bull;</span> ');
                 html += `
                     <div class="lrs-mobile-row"
                          data-title="${file.title.toLowerCase()}"
@@ -343,7 +347,7 @@ function renderResourceCards(data) {
                         <div class="lrs-mobile-row-icon">${icon}</div>
                         <div class="lrs-mobile-row-body">
                             <div class="lrs-mobile-row-title">${file.title}</div>
-                            ${file.size ? `<div class="lrs-mobile-row-size">${file.size}</div>` : ''}
+                            ${fileMeta ? `<div class="lrs-mobile-row-size">${fileMeta}</div>` : ''}
                         </div>
                         <div class="lrs-mobile-row-chevron">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
