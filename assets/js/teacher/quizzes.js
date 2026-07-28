@@ -187,7 +187,9 @@ function renderTeacherQuizzes(data) {
                 overflow-y: auto;
                 padding: 8px 0;
             }
-            .qz-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            @media (min-width: 900px) {
+                .qz-sidebar-scroll::-webkit-scrollbar { width: 8px; }
+            }
             .qz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .qz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 

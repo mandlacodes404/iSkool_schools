@@ -669,6 +669,9 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-class-list::-webkit-scrollbar { width: 3px; }
+        @media (min-width: 901px) {
+            .an-class-list::-webkit-scrollbar { width: 8px; }
+        }
         .an-class-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
         .an-class-item {
