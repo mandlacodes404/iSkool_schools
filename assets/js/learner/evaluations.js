@@ -325,7 +325,6 @@ function renderEvaluationsUI(data) {
 
         evaluations.forEach(evaluation => {
             const statusText = evaluation.submitted ? 'Completed' : 'Pending';
-            const statusClass = evaluation.submitted ? 'lev-mobile-row-status--done' : 'lev-mobile-row-status--pending';
             const metaDate = evaluation.display_date ? `${escapeLearnerEvaluationHtml(evaluation.display_date)} &bull; ` : '';
             html += `
                 <div class="lev-mobile-row" role="button" tabindex="0"
@@ -342,7 +341,7 @@ function renderEvaluationsUI(data) {
                         <div class="lev-mobile-row-title">
                             <span class="lev-mobile-row-title-text">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</span>
                         </div>
-                        <div class="lev-mobile-row-meta">${metaDate}<span class="${statusClass}">${statusText}</span></div>
+                        <div class="lev-mobile-row-meta"><span>${metaDate}${statusText}</span></div>
                     </div>
                     <div class="lev-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
