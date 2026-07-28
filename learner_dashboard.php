@@ -2454,6 +2454,12 @@ if (desktopToggle) {
                 }
             }
 
+            // The indicator belongs in the empty space above the pulled-down
+            // content. Centre its unchanged 42px wrapper inside that gap.
+            function getIndicatorOffset(offset) {
+                return Math.max((offset - 42) / 2, -42);
+            }
+
             // ── Cache bust + re-fetch — loaderOverlay suppressed during PTR ──────
             function refreshCurrentPage() {
                 const page = sessionStorage.getItem('lastLearnerPage') || 'home';
@@ -2524,7 +2530,7 @@ if (desktopToggle) {
                 pullOffset       = Math.min(capped * 0.5, HOLD_OFFSET);
 
                 ptr.style.opacity   = String(Math.min(progress * 1.5, 1));
-                ptr.style.transform = 'translateX(-50%) translateY(' + pullOffset + 'px)';
+                ptr.style.transform = 'translateX(-50%) translateY(' + getIndicatorOffset(pullOffset) + 'px)';
                 setPagePullOffset(pullOffset, false);
 
                 if (capped >= THRESHOLD && !triggered) {
@@ -2541,7 +2547,7 @@ if (desktopToggle) {
                     // request runs, then ease both back to their resting place.
                     pullOffset = Math.max(pullOffset, HOLD_OFFSET);
                     ptr.style.opacity = '1';
-                    ptr.style.transform = 'translateX(-50%) translateY(' + pullOffset + 'px)';
+                    ptr.style.transform = 'translateX(-50%) translateY(' + getIndicatorOffset(pullOffset) + 'px)';
                     setPagePullOffset(pullOffset, true);
                     setTimeout(function() {
                         refreshCurrentPage().finally(function() {
