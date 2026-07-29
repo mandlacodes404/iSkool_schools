@@ -248,7 +248,7 @@ function renderEvaluationsUI(data) {
                     </div>
                     <div class="lev-sidebar-item-info">
                         <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
-                        <div class="lev-sidebar-item-meta">by ${escapeLearnerEvaluationHtml(evaluation.teacher || 'Teacher')}</div>
+                        <div class="lev-sidebar-item-meta">${escapeLearnerEvaluationHtml(evaluation.display_date || '')}</div>
                     </div>
                     ${evaluation.submitted
                         ? '<span class="lev-sidebar-done-badge">Done</span>'
