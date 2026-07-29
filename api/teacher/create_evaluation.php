@@ -120,7 +120,8 @@ while ($learner = $learnersResult->fetch_assoc()) {
     }
     $checkSub->close();
 
-    if (!$isPushSent || $forceEmail) {
+    // Email is an explicit teacher choice, never a push-delivery fallback.
+    if ($forceEmail) {
         try {
             $mail = new PHPMailer(true);
             $mail->isSMTP();

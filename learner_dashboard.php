@@ -2940,64 +2940,68 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-// Global function to send the subscription to your server log
-function sendToCatcher(subscription) {
-    console.log('Sending subscription to server...');
-    fetch('subscribe_push.php', {
+const PUSH_VAPID_PUBLIC_KEY = <?= json_encode(getenv('VAPID_PUBLIC_KEY') ?: 'BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w') ?>;
+
+async function registerPushServiceWorker() {
+    const registration = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+    return navigator.serviceWorker.ready.then(() => registration);
+}
+
+// Saves the browser subscription before any teacher sends a notification.
+// The server identifies the signed-in user from the session; no email address
+// is trusted from the browser request.
+async function sendToCatcher(subscription) {
+    const response = await fetch('subscribe_push.php', {
         method: 'POST',
-        headers: { 'X-CSRF-Token': getCsrfToken() },
-        body: JSON.stringify({
-            subscription: subscription,
-            email: '<?= addslashes($_SESSION['email']) ?>',
-            role: '<?= addslashes($_SESSION['role']) ?>'
-        }),
-        headers: {'Content-Type': 'application/json'}
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log('Server response:', data);
-        if(document.getElementById('pushPromptContainer')) {
-            document.getElementById('pushPromptContainer').style.display = 'none';
-        }
-    })
-    .catch(err => {
-        console.error('Catcher send failed:', err);
-        alert('Log Error: ' + err);
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': getCsrfToken(),
+        },
+        body: JSON.stringify({ subscription }),
     });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || 'Could not save notification subscription.');
+    }
+
+    const prompt = document.getElementById('pushPromptContainer');
+    if (prompt) prompt.style.display = 'none';
+    return data;
 }
 
 /**
  * 2. IPHONE BUTTON ACTION
  * This is what runs when you tap your orange button
  */
-function requestIphonePush() {
-    console.log("Requesting permission...");
-    
-    if (!('serviceWorker' in navigator)) {
-        alert("Error: Service Worker not found.");
+async function requestIphonePush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        alert('Notifications are not supported by this browser.');
         return;
     }
 
-    Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array('BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w')
-                })
-                .then(subscription => {
-                    
-                    sendToCatcher(subscription);
-                })
-                .catch(err => {
-                    alert('Subscription Failed: ' + err);
-                    console.error(err);
-                });
-            });
-        } else {
-            alert('Permission was: ' + permission + ". If denied, you must reset Safari settings.");
+    try {
+        const permission = Notification.permission === 'default'
+            ? await Notification.requestPermission()
+            : Notification.permission;
+        if (permission !== 'granted') {
+            alert('Notifications are ' + permission + '. If blocked, enable them in your browser or device settings.');
+            return;
         }
-    });
+
+        const registration = await registerPushServiceWorker();
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY),
+            });
+        }
+        await sendToCatcher(subscription);
+    } catch (err) {
+        console.error('Push subscription failed:', err);
+        alert('Could not enable notifications. Please try Sync Notifications again.');
+    }
 }
 
 /**
@@ -3008,14 +3012,12 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log('Push script initialized');
 
     if ('serviceWorker' in navigator && 'PushManager' in window) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.pushManager.getSubscription().then(existingSub => {
-                if (existingSub) {
-                    console.log('Already subscribed, refreshing log...');
-                    sendToCatcher(existingSub);
-                }
-            });
-        });
+        registerPushServiceWorker()
+            .then(registration => registration.pushManager.getSubscription())
+            .then(existingSub => {
+                if (existingSub) return sendToCatcher(existingSub);
+            })
+            .catch(err => console.error('Push subscription sync failed:', err));
     }
 
 

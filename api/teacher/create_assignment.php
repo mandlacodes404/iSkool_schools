@@ -269,8 +269,8 @@ while ($learner = $learnersResult->fetch_assoc()) {
         );
     }
 
-    // Email if push failed or force_email checked
-    if (!$isPushSent || $force_email) {
+    // Email is an explicit teacher choice, never a push-delivery fallback.
+    if ($force_email) {
         try {
             $mail             = new PHPMailer(true);
             $mail->isSMTP();

@@ -60,7 +60,8 @@ function notifyLearners($conn, $classId, $yearId, $title, $teacherEmail, $teache
         }
         $checkSub->close();
 
-        if (!$isPushSent || $forceEmail) {
+        // Email is an explicit teacher choice, never a push-delivery fallback.
+        if ($forceEmail) {
             try {
                 $mail             = new PHPMailer(true);
                 $mail->isSMTP();

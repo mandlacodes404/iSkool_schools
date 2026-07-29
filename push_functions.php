@@ -18,6 +18,11 @@ function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $sch
 
     $vapid_public  = getenv('VAPID_PUBLIC_KEY');
     $vapid_private = getenv('VAPID_PRIVATE_KEY');
+    if (!$vapid_public || !$vapid_private) {
+        error_log('Push delivery skipped: VAPID keys are not configured.');
+        $stmt->close();
+        return false;
+    }
 
     $auth = [
         'VAPID' => [

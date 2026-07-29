@@ -1,3 +1,11 @@
+self.addEventListener("install", event => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("push", event => {
   // Default values
   let data = {
@@ -57,8 +65,9 @@ self.addEventListener("notificationclick", event => {
             for (const client of clientList) {
                 // If we find an open window, navigate it to the deep link and focus
                 if ("navigate" in client && "focus" in client) {
-                    client.navigate(targetUrl);
-                    return client.focus();
+                    return client.navigate(targetUrl)
+                        .catch(() => client)
+                        .then(clientWindow => clientWindow.focus());
                 }
             }
 

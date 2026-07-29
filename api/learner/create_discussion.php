@@ -122,21 +122,7 @@ $classmates = $cmStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $cmStmt->close();
 
 foreach ($classmates as $cm) {
-    $pushed = sendPushToUser($conn, $cm['email'], "New Discussion: $title", "$creator_display started a topic.", $learnerDiscussionLink, $schoolName);
-    if (!$pushed) {
-        try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP(); $mail->Host = getenv('SMTP_HOST'); $mail->SMTPAuth = true;
-            $mail->Username = getenv('SMTP_USER'); $mail->Password = getenv('SMTP_PASSWORD');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; $mail->Port = getenv('SMTP_PORT');
-            $from_email = getenv('SMTP_FROM');
-            $mail->setFrom($from_email, $schoolName);
-            $mail->addAddress($cm['email']); $mail->isHTML(true);
-            $mail->Subject = "New Discussion: $title";
-            $mail->Body = $emailTemplate($cm['name']);
-            $mail->send();
-        } catch (Exception $e) { error_log("Email error: " . $e->getMessage()); }
-    }
+    sendPushToUser($conn, $cm['email'], "New Discussion: $title", "$creator_display started a topic.", $learnerDiscussionLink, $schoolName);
 }
 
 echo json_encode(['success' => true, 'discussion_id' => $disc_id]);

@@ -15,12 +15,12 @@ if (!isset($input['subscription'])) {
     exit;
 }
 
-$email = $input['email'] ?? '';
+$email = $_SESSION['email'] ?? '';
 $endpoint = $input['subscription']['endpoint'] ?? '';
 $p256dh = $input['subscription']['keys']['p256dh'] ?? '';
 $auth = $input['subscription']['keys']['auth'] ?? '';
 
-if (!$email || !$endpoint) {
+if (!$email || !$endpoint || !$p256dh || !$auth) {
     echo json_encode(['success' => false, 'message' => 'Missing fields']);
     exit;
 }
@@ -28,7 +28,10 @@ if (!$email || !$endpoint) {
 // Save or Update the subscription in the DB
 $sql = "INSERT INTO user_subscriptions (user_email, endpoint, p256dh, auth) 
         VALUES (?, ?, ?, ?) 
-        ON DUPLICATE KEY UPDATE p256dh = VALUES(p256dh), auth = VALUES(auth)";
+        ON DUPLICATE KEY UPDATE
+            p256dh = VALUES(p256dh),
+            auth = VALUES(auth),
+            created_at = CURRENT_TIMESTAMP";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ssss", $email, $endpoint, $p256dh, $auth);
