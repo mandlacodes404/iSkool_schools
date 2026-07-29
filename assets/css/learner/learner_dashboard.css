@@ -456,9 +456,8 @@ iframe {
 }
 
 @media (min-width: 769px) {
-    .sidebar,
     .main-header {
-        background: #161b22;
+        background: #252526;
     }
 
     .main-header .school-name {
