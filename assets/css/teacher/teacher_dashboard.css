@@ -461,6 +461,23 @@
         }
 
         @media (min-width: 769px) {
+            /* Desktop API layout: darker navigation/auxiliary panels frame
+               the #0d1117 main workspace. */
+            .top-nav-wrapper,
+            .tchr-flat-sidebar,
+            .tchr-info-rail {
+                background: #1b1919;
+            }
+
+            .tchr-flat-sidebar {
+                background: #1b1919 !important;
+            }
+
+            #api-content-area,
+            .tchr-flat-panel {
+                background: #0d1117 !important;
+            }
+
             .sidebar a.desktop-top-row-link { display: none; }
         }
 
