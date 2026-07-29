@@ -7,7 +7,7 @@
     color: #ffffff;
     font-family: 'Nunito', sans-serif;
     line-height: 1.5;
-    background-color: #000000;
+    background-color: #0d1117;
 
     /* --- ADD THESE TO FIX SCROLLING --- */
     height: calc(100vh - 70px); /* Adjust 70px if your top header is taller */
@@ -20,6 +20,10 @@
 /* NOTE: .disc-thread-active is added by discussions.js when a thread is open,
    so these !important overrides don't fight the thread's scroll layout.       */
 @media (max-width: 767px) {
+    #api-content-area {
+        background-color: #000000;
+    }
+
     #api-content-area:not(.disc-thread-active) {
         max-height: calc(100vh - 68px - env(safe-area-inset-top, 0)) !important;
         overflow-y: auto !important;

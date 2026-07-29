@@ -213,7 +213,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - iSkool</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.3">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=1.0">
