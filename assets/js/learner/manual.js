@@ -1065,7 +1065,7 @@ function injectSharedDesktopLayoutStyles() {
         }
 
         .lqz-flat-sidebar {
-            background: #121820 !important;
+            background: #161616 !important;
             border-right: 1px solid rgba(255,255,255,0.07) !important;
             height: 100% !important;
             min-height: 0 !important;
