@@ -220,7 +220,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.8">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.1">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.0">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.1">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -3031,7 +3031,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=6.0"></script>
+<script src="assets/js/learner/manual.js?v=6.1"></script>
 <script src="assets/js/learner/quiz.js?v=9.3"></script>
 <script src="assets/js/learner/assignments.js?v=8.5"></script>
 <script src="assets/js/learner/resources.js?v=7.6"></script>
