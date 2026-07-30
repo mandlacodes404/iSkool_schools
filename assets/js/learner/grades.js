@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
 window.fetchGrades = async function () {
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem('lastLearnerPage', 'grades');
+    if (typeof window.setActive === 'function') window.setActive('grades');
 
     if (typeof window.configureHeader === 'function') {
         window.configureHeader({ title: 'Grades', mode: 'standard', color: '#68d391' });
@@ -440,6 +441,11 @@ window.toggleGradesDesktopGroup = function (id, headerEl) {
     if (chevron) chevron.classList.toggle('open', !isOpen);
     const openGroups = Array.from(document.querySelectorAll('.grades-dt-teacher-body:not(.collapsed)')).map(el => el.id);
     saveGradesState({ openGroups });
+
+    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
+    // window.recalcMobileScrollUI won't exist there —
+    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
+    recheckMobileNavAfterToggle();
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -850,6 +856,21 @@ function wireGradesScrollState() {
 }
 
 
+// Re-checks the bottom nav/header scroll-state repeatedly for a short
+// window after a subject card or quiz row is expanded/collapsed — same
+// fix as in announcements.js / assignments.js. A single delayed check
+// would need to know the exact CSS transition duration used for the
+// collapse/expand animation (unknown from here, and could change) —
+// polling a few times over ~400ms means it settles on the right answer
+// regardless of how long that transition actually takes.
+function recheckMobileNavAfterToggle() {
+    if (typeof window.recalcMobileScrollUI !== 'function') return;
+    const checkTimes = [0, 100, 200, 300, 400];
+    checkTimes.forEach(delay => {
+        setTimeout(() => window.recalcMobileScrollUI(), delay);
+    });
+}
+
 window.toggleSubjectCard = function (gi) {
     const body = document.getElementById(`scard-body-${gi}`);
     const chev = document.getElementById(`scard-chev-${gi}`);
@@ -860,6 +881,13 @@ window.toggleSubjectCard = function (gi) {
     const openSubjects = Array.from(document.querySelectorAll('[id^="scard-chev-"].open'))
         .map(el => el.id.replace('scard-chev-', ''));
     saveGradesState({ openSubjects });
+
+    // Opening/closing a subject card changes the page's actual scrollable
+    // height without firing a real 'scroll' event, so the bottom nav's
+    // background (and header) never got re-checked against the new
+    // height — it could stay stuck showing whatever state it was in
+    // before the card toggled.
+    recheckMobileNavAfterToggle();
 };
 
 window.toggleQuizRow = function (detailId, btnId, statsId) {
@@ -871,6 +899,10 @@ window.toggleQuizRow = function (detailId, btnId, statsId) {
     if (btn) btn.classList.toggle('open', !isOpen);
     if (!isOpen && statsId) loadGradeStatsInline(statsId);
     saveOpenQuizRows();
+
+    // Same reasoning as toggleSubjectCard above — expanding a quiz row's
+    // detail also changes scrollable height without a real scroll event.
+    recheckMobileNavAfterToggle();
 };
 
 // Works for both mobile (numeric gi) and desktop (string pfx like "dt0")
