@@ -222,7 +222,9 @@ function restoreQuizPageState() {
                 document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
                     const open = state.openFolders.includes(body.id);
                     body.classList.toggle('collapsed', !open);
-                    const chev = body.previousElementSibling?.querySelector('.lqz-mobile-folder-chevron');
+                    const header = body.previousElementSibling;
+                    if (header) header.classList.toggle('lqz-mobile-folder-header--collapsed', !open);
+                    const chev = header?.querySelector('.lqz-mobile-folder-chevron');
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
@@ -786,7 +788,7 @@ function renderQuizCards(groupedData) {
                 transition: background 0.2s;
             }
             .lqz-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-            .lqz-mobile-folder-header:has(+ .lqz-mobile-folder-body.collapsed) {
+            .lqz-mobile-folder-header--collapsed {
                 background: rgba(255,255,255,0.05);
             }
             .lqz-mobile-folder-icon { flex-shrink: 0; }
@@ -1016,7 +1018,7 @@ function renderQuizCards(groupedData) {
     for (const { teacher, quizzes } of teacherEntries) {
         const gid = `lqz-mg-${mobileGroupIdx}`;
         html += `
-            <div class="lqz-mobile-folder-header" onclick="toggleLqzMobileFolder('${gid}', this)">
+            <div class="lqz-mobile-folder-header lqz-mobile-folder-header--collapsed" onclick="toggleLqzMobileFolder('${gid}', this)">
                 <div class="lqz-mobile-folder-icon">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="#fdd663" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -1312,6 +1314,7 @@ window.lqzMobileSearch = function(val) {
         // Keep folder open while searching
         if (term && visible) {
             body.classList.remove('collapsed');
+            if (header) header.classList.remove('lqz-mobile-folder-header--collapsed');
             const chev = header ? header.querySelector('.lqz-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
         }
@@ -1381,6 +1384,7 @@ window.toggleLqzMobileFolder = function(id, headerEl) {
     const chevron = headerEl.querySelector('.lqz-mobile-folder-chevron');
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
+    headerEl.classList.toggle('lqz-mobile-folder-header--collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveQuizPageState();
 
