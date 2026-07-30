@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 ### Changed
+- Learner Dashboard (Desktop): Refined the API workspace colour hierarchy: the main content canvas now uses `#0d1117`, while the header and shared split-layout left panel use the supporting `#12161c` surface. Mobile styling is unchanged (`quiz.css`, `learner_dashboard.css`, `manual.js`, `learner_dashboard.php`).
+- Teacher Dashboard (Desktop): Matched the learner workspace hierarchy by applying `#12161c` to the top header, API left panel, and contextual info rail, while keeping the main panel at `#0d1117`. Mobile styling is unchanged (`teacher_dashboard.css`, `teacher_dashboard.php`).
 - Learner Dashboard (Mobile): Reworked pull-to-refresh to behave like a native app: the current page follows the pull with resistance, stays held down while refreshed content loads, then smoothly returns to its resting position. The refresh spinner now sits in the temporary gap above the pulled-down page rather than overlapping the content; it uses eight thicker, fully visible rounded pills rotating at a slower speed. Native vertical overscroll is contained so it cannot compete with the custom interaction (`learner_dashboard.php`, `learner_dashboard.css`).
 - Learner Discussions (Mobile): Added Discussions to the pull-to-refresh page map, so refreshing the discussion list now reloads its data instead of falling back to the Home page (`learner_dashboard.php`).
 - Learner Dashboard (Mobile): Simplified list metadata by rendering Quiz and Evaluation statuses in the same muted colour as the surrounding meta text. Resource file rows now show both file size and upload date, separated by a dot (`quiz.js`, `evaluations.js`, `resources.js`).
