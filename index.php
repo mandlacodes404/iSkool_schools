@@ -119,6 +119,7 @@ function getCsrfToken() {
 }
 </script></head>
 <body>
+<?php require_once __DIR__ . '/rotate-lock.php'; ?>
     <!-- Animation wrapper -->
     <div id="animation-wrapper">
        <div id="loader-logo">
