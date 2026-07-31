@@ -126,7 +126,9 @@ function restoreResourcePageState() {
                 document.querySelectorAll('.lrs-mobile-folder-body').forEach(body => {
                     const open = state.openFolders.includes(body.id);
                     body.classList.toggle('collapsed', !open);
-                    const chev = body.previousElementSibling?.querySelector('.lrs-mobile-folder-chevron');
+                    const header = body.previousElementSibling;
+                    if (header) header.classList.toggle('lrs-mobile-folder-header--collapsed', !open);
+                    const chev = header?.querySelector('.lrs-mobile-folder-chevron');
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
@@ -294,7 +296,7 @@ function renderResourceCards(data) {
     for (const { teacher, files } of teacherEntries) {
         const gid = `lrs-mg-${mobileGroupIdx}`;
         html += `
-            <div class="lrs-mobile-folder-header" onclick="toggleLrsMobileFolder('${gid}', this)">
+            <div class="lrs-mobile-folder-header lrs-mobile-folder-header--collapsed" onclick="toggleLrsMobileFolder('${gid}', this)">
                 <div class="lrs-mobile-folder-icon">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -430,6 +432,7 @@ window.toggleLrsMobileFolder = function(id, headerEl) {
     const chevron = headerEl.querySelector('.lrs-mobile-folder-chevron');
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
+    headerEl.classList.toggle('lrs-mobile-folder-header--collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveResourcePageState();
 
@@ -601,6 +604,7 @@ window.lrsMobileSearch = function(val) {
         body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
         if (term && visible) {
             body.classList.remove('collapsed');
+            if (header) header.classList.remove('lrs-mobile-folder-header--collapsed');
             const chev = header ? header.querySelector('.lrs-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
         }

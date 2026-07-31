@@ -591,6 +591,9 @@
     transition: background 0.2s;
 }
 .lev-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
+.lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) {
+    background: rgba(255,255,255,0.05);
+}
 .lev-mobile-folder-icon { flex-shrink: 0; }
 .lev-mobile-folder-name {
     flex: 1;

@@ -73,7 +73,9 @@ function restoreEvaluationPageState() {
                 document.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
                     const open = state.openFolders.includes(body.id);
                     body.classList.toggle('collapsed', !open);
-                    const chev = body.previousElementSibling?.querySelector('.lev-mobile-folder-chevron');
+                    const header = body.previousElementSibling;
+                    if (header) header.classList.toggle('lev-mobile-folder-header--collapsed', !open);
+                    const chev = header?.querySelector('.lev-mobile-folder-chevron');
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
@@ -308,7 +310,7 @@ function renderEvaluationsUI(data) {
     teacherEntries.forEach(({ teacher, evaluations }) => {
         const gid = `lev-mg-${mobileGroupIdx}`;
         html += `
-            <div class="lev-mobile-folder-header" onclick="toggleLevMobileFolder('${gid}', this)">
+            <div class="lev-mobile-folder-header lev-mobile-folder-header--collapsed" onclick="toggleLevMobileFolder('${gid}', this)">
                 <div class="lev-mobile-folder-icon">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -424,6 +426,7 @@ window.toggleLevMobileFolder = function(id, headerEl) {
     const chevron = headerEl.querySelector('.lev-mobile-folder-chevron');
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
+    headerEl.classList.toggle('lev-mobile-folder-header--collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveEvaluationPageState();
 
@@ -468,6 +471,7 @@ window.levMobileSearch = function(val) {
         body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
         if (term && visible) {
             body.classList.remove('collapsed');
+            if (header) header.classList.remove('lev-mobile-folder-header--collapsed');
             const chev = header ? header.querySelector('.lev-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
         }

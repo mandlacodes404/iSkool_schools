@@ -140,7 +140,9 @@ function restoreAnnouncementPageState() {
                 document.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
                     const open = state.openFolders.includes(body.id);
                     body.classList.toggle('collapsed', !open);
-                    const chev = body.previousElementSibling?.querySelector('.lan-mobile-folder-chevron');
+                    const header = body.previousElementSibling;
+                    if (header) header.classList.toggle('lan-mobile-folder-header--collapsed', !open);
+                    const chev = header?.querySelector('.lan-mobile-folder-chevron');
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
@@ -369,7 +371,7 @@ function renderAnnouncements(data) {
     if (hasSchoolWide) {
         const swGid = 'lan-mg-school';
         html += `
-            <div class="lan-mobile-folder-header" onclick="toggleLanMobileFolder('${swGid}', this)">
+            <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${swGid}', this)">
                 <div class="lan-mobile-folder-icon">
                     <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -420,7 +422,7 @@ function renderAnnouncements(data) {
         for (const { teacher, items } of teacherEntries) {
             const tGid = `lan-mg-teacher-${teacherGroupIdx}`;
             html += `
-                <div class="lan-mobile-folder-header" onclick="toggleLanMobileFolder('${tGid}', this)">
+                <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${tGid}', this)">
                     <div class="lan-mobile-folder-icon">
                         <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -490,6 +492,7 @@ window.lanMobileSearch = function(val) {
         body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
         if (term && visible) {
             body.classList.remove('collapsed');
+            if (header) header.classList.remove('lan-mobile-folder-header--collapsed');
             const chev = header ? header.querySelector('.lan-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
         }
@@ -550,6 +553,7 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     const chevron = headerEl.querySelector('.lan-mobile-folder-chevron');
     const isOpen = !body.classList.contains('collapsed');
     body.classList.toggle('collapsed', isOpen);
+    headerEl.classList.toggle('lan-mobile-folder-header--collapsed', isOpen);
     if (chevron) chevron.classList.toggle('open', !isOpen);
     saveAnnouncementPageState();
 
