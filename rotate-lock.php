@@ -43,9 +43,13 @@
         color: #ffffff;
     }
 
-    /* Hide the app underneath while the lock is showing */
-    body.iskool-landscape-locked > *:not(#iskool-rotate-lock) {
-        visibility: hidden;
+    /* Hide the app underneath while the lock is showing.
+       Pure CSS, same media query as the overlay itself — no JS/class
+       dependency, so there's no flash of the desktop-width layout
+       before the lock appears (JS only runs after DOMContentLoaded,
+       which is too late to prevent that first paint). */
+    body > *:not(#iskool-rotate-lock) {
+        visibility: hidden !important;
     }
 }
 
@@ -59,16 +63,3 @@
     <i class="fa-solid fa-mobile-screen-button"></i>
     <p><strong>Please rotate your device.</strong><br>iSkool works best in portrait mode.</p>
 </div>
-
-<script>
-(function () {
-    function iskoolApplyLandscapeLockClass() {
-        var isSmall = window.matchMedia('(max-width: 926px)').matches;
-        var isLandscape = window.matchMedia('(orientation: landscape)').matches;
-        document.body.classList.toggle('iskool-landscape-locked', isSmall && isLandscape);
-    }
-    window.addEventListener('resize', iskoolApplyLandscapeLockClass);
-    window.addEventListener('orientationchange', iskoolApplyLandscapeLockClass);
-    document.addEventListener('DOMContentLoaded', iskoolApplyLandscapeLockClass);
-})();
-</script>
