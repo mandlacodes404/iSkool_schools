@@ -788,7 +788,7 @@ function renderQuizCards(groupedData) {
                 transition: background 0.2s;
             }
             .lqz-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-            .lqz-mobile-folder-header--collapsed {
+            .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) {
                 background: rgba(255,255,255,0.05);
             }
             .lqz-mobile-folder-icon { flex-shrink: 0; }
