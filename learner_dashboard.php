@@ -238,6 +238,7 @@ function getCsrfToken() {
 }
 </script></head>
 <body>
+<?php require_once __DIR__ . '/rotate-lock.php'; ?>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
 <div class="sidebar">
