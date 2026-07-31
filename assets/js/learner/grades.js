@@ -288,7 +288,7 @@ function renderGrades(data) {
             const quizzes = group.quizzes;
             mobileHtml += `
             <div class="subject-card" id="scard-${gi}">
-                <div class="subject-header" onclick="toggleSubjectCard(${gi})">
+                <div class="subject-header subject-header--collapsed" onclick="toggleSubjectCard(${gi})">
                     <div class="subject-name">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -766,8 +766,10 @@ function restoreGradesStateAfterRender() {
                 const gi = body.id.replace('scard-body-', '');
                 const open = state.openSubjects.includes(gi);
                 const chev = document.getElementById(`scard-chev-${gi}`);
+                const header = chev ? chev.closest('.subject-header') : null;
                 body.style.display = open ? 'block' : 'none';
                 if (chev) chev.classList.toggle('open', open);
+                if (header) header.classList.toggle('subject-header--collapsed', !open);
             });
         }
 
@@ -874,10 +876,12 @@ function recheckMobileNavAfterToggle() {
 window.toggleSubjectCard = function (gi) {
     const body = document.getElementById(`scard-body-${gi}`);
     const chev = document.getElementById(`scard-chev-${gi}`);
+    const header = chev ? chev.closest('.subject-header') : null;
     if (!body || !chev) return;
     const open = chev.classList.contains('open');
     body.style.display = open ? 'none' : 'block';
     chev.classList.toggle('open', !open);
+    if (header) header.classList.toggle('subject-header--collapsed', open);
     const openSubjects = Array.from(document.querySelectorAll('[id^="scard-chev-"].open'))
         .map(el => el.id.replace('scard-chev-', ''));
     saveGradesState({ openSubjects });

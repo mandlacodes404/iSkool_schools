@@ -459,6 +459,9 @@
     .grades-mobile-layout .subject-header:hover {
         background: transparent;
     }
+    .grades-mobile-layout .subject-header:not(.subject-header--collapsed) {
+        background: rgba(255,255,255,0.05);
+    }
     .grades-mobile-layout .view-toggle-bar {
         background: transparent;
         padding: 10px 18px 8px;
