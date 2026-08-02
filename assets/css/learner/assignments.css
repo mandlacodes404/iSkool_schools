@@ -260,6 +260,8 @@
     color: #0d1117;
     background: #a78bfa;
     border: 1px solid #a78bfa;
+    font-family: inherit;
+    cursor: pointer;
 }
 .las-panel-action--locked {
     color: #8b949e;
@@ -648,6 +650,8 @@
     background: #a78bfa;
     border: 1px solid #a78bfa;
     width: 100%;
+    font-family: inherit;
+    cursor: pointer;
 }
 .las-mobile-detail-action--locked {
     color: #8b949e;
@@ -656,4 +660,125 @@
 }
 @media (min-width: 900px) {
     .las-mobile-detail { display: none; }
+}
+
+/* Inline assignment submission — kept within the assignment detail rather
+   than navigating the learner away to a separate page. */
+.las-submission-form {
+    margin-top: 18px;
+    padding: 20px;
+    border: 1px solid rgba(167,139,250,0.28);
+    border-radius: 12px;
+    background: rgba(167,139,250,0.055);
+}
+.las-submission-form[hidden] { display: none; }
+.las-submission-form-heading {
+    color: #e2e8f0;
+    font-size: 16px;
+    font-weight: 800;
+}
+.las-submission-form-help {
+    margin: 5px 0 18px;
+    color: #8b949e;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.las-submission-label {
+    display: block;
+    margin: 16px 0 7px;
+    color: #c9d1d9;
+    font-size: 13px;
+    font-weight: 800;
+}
+.las-submission-label span {
+    color: #8b949e;
+    font-weight: 600;
+}
+.las-submission-textarea,
+.las-submission-file {
+    width: 100%;
+    box-sizing: border-box;
+    color: #e2e8f0;
+    background: rgba(13,17,23,0.72);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 9px;
+    font: inherit;
+    font-size: 13px;
+}
+.las-submission-textarea {
+    min-height: 132px;
+    padding: 12px;
+    resize: vertical;
+    line-height: 1.55;
+}
+.las-submission-file {
+    padding: 9px;
+}
+.las-submission-textarea:focus,
+.las-submission-file:focus {
+    outline: none;
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.13);
+}
+.las-submission-current-file {
+    margin: 0 0 8px;
+    color: #8b949e;
+    font-size: 12px;
+}
+.las-submission-current-file a {
+    color: #a78bfa;
+    font-weight: 800;
+    text-decoration: none;
+}
+.las-submission-error {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    color: #ffaaa5;
+    border: 1px solid rgba(248,81,73,0.38);
+    border-radius: 8px;
+    background: rgba(248,81,73,0.09);
+    font-size: 13px;
+}
+.las-submission-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+.las-submission-cancel,
+.las-submission-submit {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.las-submission-cancel {
+    color: #c9d1d9;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.04);
+}
+.las-submission-submit {
+    min-width: 158px;
+    color: #0d1117;
+    border: 1px solid #a78bfa;
+    background: #a78bfa;
+}
+.las-submission-submit .btn-spinner span {
+    background: #0d1117;
+}
+@media (max-width: 899px) {
+    .las-submission-form {
+        padding: 16px;
+        margin-top: 14px;
+    }
+    .las-submission-actions {
+        flex-direction: column-reverse;
+    }
+    .las-submission-cancel,
+    .las-submission-submit {
+        width: 100%;
+    }
 }

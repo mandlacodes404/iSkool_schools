@@ -160,7 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
 
     // 3. Final Response
     if ($execute) {
-        echo json_encode(['success' => true]);
+        echo json_encode([
+            'success' => true,
+            'file_url' => $fileUrl,
+            'submission_text' => $submission_text
+        ]);
     } else {
         echo json_encode(['success' => false, 'error' => "Execute failed: " . $conn->error]);
     }

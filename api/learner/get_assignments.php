@@ -58,7 +58,9 @@ $sql = "
         u.name        AS t_name,
         u.second_name AS t_second_name,
         u.surname     AS t_surname,
-        s.file_url AS submission_url
+        s.id AS submission_id,
+        s.file_url AS submission_url,
+        s.text_answer AS submission_text
     FROM assignments a
     JOIN classes c ON a.class_id = c.id
     JOIN class_students cs ON a.class_id = cs.class_id AND cs.academic_year_id = ?
@@ -95,7 +97,9 @@ while ($row = $result->fetch_assoc()) {
         'created_at' => $row['created_at'],
         'is_past_due' => $isPastDue,
         'teacher_file' => $row['file_url'],
+        'has_submission' => !empty($row['submission_id']),
         'submission_file' => $row['submission_url'],
+        'submission_text' => $row['submission_text'],
         'class_name' => $row['class_name'],
         'teacher_initials' => $nameParts['initials']
     ];

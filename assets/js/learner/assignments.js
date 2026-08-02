@@ -24,22 +24,113 @@ function showLearnerAssignmentMobileBottomNav() {
     }
 }
 
-window.openLearnerAssignmentSubmission = function(event, href) {
-    if (event) event.preventDefault();
+function learnerAssignmentSpinnerMarkup() {
+    return `
+        <span class="btn-spinner" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </span>`;
+}
 
-    const apiArea = document.getElementById('api-content-area');
-    const iframe = document.getElementById('mainFrame');
-    if (apiArea) apiArea.style.display = 'none';
-    if (iframe) {
-        const keepNavVisible = function() {
-            showLearnerAssignmentMobileBottomNav();
-            iframe.removeEventListener('load', keepNavVisible);
-        };
-        iframe.addEventListener('load', keepNavVisible);
-        iframe.style.display = 'block';
-        iframe.src = href;
+function hasLearnerAssignmentSubmission(task) {
+    return Boolean(task && (task.has_submission || task.submission_file));
+}
+
+function learnerAssignmentSubmissionFormMarkup(task, formId) {
+    const assignmentId = encodeURIComponent(task.id);
+    const currentFile = task.submission_file
+        ? `<p class="las-submission-current-file">Current file: <a href="javascript:void(0)" onclick="viewDocument('${escapeLearnerAssignmentJsString(task.submission_file)}', 'My Submission: ${escapeLearnerAssignmentJsString(task.title)}')">View uploaded work</a></p>`
+        : '';
+
+    return `
+        <form id="${formId}" class="las-submission-form" action="submit_assignment.php?assignment_id=${assignmentId}" enctype="multipart/form-data" onsubmit="submitLearnerAssignmentInline(event, this)" hidden>
+            <div class="las-submission-form-heading">${hasLearnerAssignmentSubmission(task) ? 'Update your submission' : 'Submit your work'}</div>
+            <p class="las-submission-form-help">Add a written response, a file, or both. Files can be up to 50MB.</p>
+            <label class="las-submission-label" for="${formId}-text">Submission text <span>(optional)</span></label>
+            <textarea id="${formId}-text" class="las-submission-textarea" name="submission_text" rows="6" placeholder="Write your response here...">${escapeLearnerAssignmentHtml(task.submission_text || '')}</textarea>
+            <label class="las-submission-label" for="${formId}-file">Upload file <span>(optional)</span></label>
+            ${currentFile}
+            <input id="${formId}-file" class="las-submission-file" type="file" name="submission_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip">
+            <p class="las-submission-error" role="alert" hidden></p>
+            <div class="las-submission-actions">
+                <button type="button" class="las-submission-cancel" onclick="closeLearnerAssignmentInlineForm('${formId}')">Cancel</button>
+                <button type="submit" class="las-submission-submit btn-loadable">
+                    <span class="btn-label">${hasLearnerAssignmentSubmission(task) ? 'Update Submission' : 'Submit Assignment'}</span>
+                    ${learnerAssignmentSpinnerMarkup()}
+                </button>
+            </div>
+        </form>`;
+}
+
+window.openLearnerAssignmentInlineForm = function(event, formId) {
+    if (event) event.preventDefault();
+    const form = document.getElementById(formId);
+    if (!form) return false;
+    form.hidden = false;
+    form.querySelector('.las-submission-textarea')?.focus();
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return false;
+};
+
+window.closeLearnerAssignmentInlineForm = function(formId) {
+    const form = document.getElementById(formId);
+    if (form) form.hidden = true;
+};
+
+window.submitLearnerAssignmentInline = async function(event, form) {
+    event.preventDefault();
+
+    const submitButton = form.querySelector('[type="submit"]');
+    const error = form.querySelector('.las-submission-error');
+    if (error) {
+        error.hidden = true;
+        error.textContent = '';
     }
-    showLearnerAssignmentMobileBottomNav();
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('is-loading');
+    }
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '' },
+            body: new FormData(form)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Your submission could not be saved. Please try again.');
+        }
+
+        const assignmentId = new URL(form.action, window.location.href).searchParams.get('assignment_id');
+        const task = (window._allLearnerAssignmentsFlat || []).find(item => String(item.id) === String(assignmentId));
+        if (task) {
+            task.has_submission = true;
+            task.submission_file = result.file_url || task.submission_file;
+            task.submission_text = result.submission_text || '';
+        }
+
+        window.learnerAssignmentCache = null;
+        if (window.innerWidth > 899 && typeof window.selectDesktopLearnerAssignment === 'function') {
+            window.selectDesktopLearnerAssignment(window._learnerAssignmentSelectedIdx);
+        } else {
+            const taskIndex = (window._allLearnerAssignmentsFlat || []).findIndex(item => String(item.id) === String(assignmentId));
+            if (taskIndex >= 0 && typeof window.openMobileLearnerAssignment === 'function') {
+                window.openMobileLearnerAssignment(taskIndex);
+            }
+        }
+    } catch (submissionError) {
+        console.error('Assignment submission error:', submissionError);
+        if (error) {
+            error.textContent = submissionError.message || 'Your submission could not be saved. Please try again.';
+            error.hidden = false;
+        }
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('is-loading');
+        }
+    }
 };
 
 window.fetchAssignments = async function() {
@@ -272,7 +363,7 @@ function renderAssignmentCards(groupedData) {
                 </button>
                 <div class="las-desktop-teacher-body collapsed" id="${groupId}">`;
         tasks.forEach(task => {
-            const isDone = !!task.submission_file;
+            const isDone = hasLearnerAssignmentSubmission(task);
             const dotClass = task.is_past_due ? 'las-sidebar-status-dot--past-due'
                 : isDone ? 'las-sidebar-status-dot--done' : 'las-sidebar-status-dot--pending';
 
@@ -364,7 +455,7 @@ function renderAssignmentCards(groupedData) {
         mobileGroupIdx++;
 
         tasks.forEach(task => {
-            const isDone = !!task.submission_file;
+            const isDone = hasLearnerAssignmentSubmission(task);
             const metaClass = task.is_past_due ? 'las-mobile-row-meta--past-due'
                 : isDone ? 'las-mobile-row-meta--done' : 'las-mobile-row-meta--pending';
 
@@ -566,12 +657,12 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     }
     showLearnerAssignmentMobileBottomNav();
 
-    const isDone = !!task.submission_file;
+    const isDone = hasLearnerAssignmentSubmission(task);
     const statusDotClass = task.is_past_due ? 'las-status-dot--past-due'
         : isDone ? 'las-status-dot--done' : 'las-status-dot--pending';
     const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
     const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
-    const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
+    const submissionFormId = `las-mobile-submission-${task.id}`;
 
     const sender = task.teacher || 'Teacher';
     const initials = task.initials || getLearnerAssignmentInitials(sender);
@@ -615,7 +706,8 @@ window.openMobileLearnerAssignment = function(flatIdx) {
             </div>
             ${task.is_past_due
                 ? `<span class="las-mobile-detail-action las-mobile-detail-action--locked">${actionLabel}</span>`
-                : `<a class="las-mobile-detail-action" href="${actionHref}" target="mainFrame" onclick="openLearnerAssignmentSubmission(event, '${actionHref}')">${actionLabel}</a>`}
+                : `<button type="button" class="las-mobile-detail-action" onclick="openLearnerAssignmentInlineForm(event, '${submissionFormId}')">${actionLabel}</button>
+                   ${learnerAssignmentSubmissionFormMarkup(task, submissionFormId)}`}
         </article>`;
 
     const mainContent = document.querySelector('.main-content');
@@ -646,12 +738,12 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     const panel = document.getElementById('las-main-panel');
     if (!panel) return;
 
-    const isDone = !!task.submission_file;
+    const isDone = hasLearnerAssignmentSubmission(task);
     const statusDotClass = task.is_past_due ? 'las-status-dot--past-due'
         : isDone ? 'las-status-dot--done' : 'las-status-dot--pending';
     const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
     const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
-    const actionHref = `submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}`;
+    const submissionFormId = `las-desktop-submission-${task.id}`;
 
     const sender = task.teacher || 'Teacher';
     const initials = task.initials || getLearnerAssignmentInitials(sender);
@@ -704,6 +796,7 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
 
             ${task.is_past_due
                 ? `<span class="las-panel-action las-panel-action--locked">${actionLabel}</span>`
-                : `<a class="las-panel-action" href="${actionHref}" onclick="openLearnerAssignmentSubmission(event, '${actionHref}')">${actionLabel}</a>`}
+                : `<button type="button" class="las-panel-action" onclick="openLearnerAssignmentInlineForm(event, '${submissionFormId}')">${actionLabel}</button>
+                   ${learnerAssignmentSubmissionFormMarkup(task, submissionFormId)}`}
         </div>`;
 };
