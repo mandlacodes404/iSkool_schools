@@ -20,7 +20,7 @@ echo json_encode([
     "display"          => "standalone",
     "background_color" => "#20201f",
     "theme_color"      => "#20201f",
-    "orientation"      => "any",
+    "orientation"      => "portrait",
     "icons"            => [
         [
             "src"     => "https://iskool.online/icons/icon-192.png",

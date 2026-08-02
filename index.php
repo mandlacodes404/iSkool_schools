@@ -68,7 +68,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login - iSkool</title>
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/manifest.php?v=1.1">
 
 <meta name="theme-color" content="#20201f">
 
@@ -635,8 +635,16 @@ function getCsrfToken() {
 
     // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
     <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
-        // Logged in → go straight to dashboard
-        window.location.href = 'dashboard';
+        // Do not let the splash redirect initialise a dashboard while a phone
+        // is sideways. The shared portrait guard resumes this after rotation.
+        const openDashboard = () => {
+            if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.isLocked()) {
+                return;
+            }
+            window.location.href = 'dashboard';
+        };
+        window.addEventListener('iskool:portrait-ready', openDashboard, { once: true });
+        openDashboard();
     <?php else: ?>
         // Not logged in → show login form
         document.querySelector('.form-panel').style.opacity = '1';

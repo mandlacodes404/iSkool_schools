@@ -67,7 +67,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.0">
     <title>Dashboard - iSkool</title>
-    <link rel="manifest" href="/manifest.php">
+    <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -80,6 +80,15 @@ function getCsrfToken() {
 </script></head>
 <body>
 <?php require_once __DIR__ . '/rotate-lock.php'; ?>
+<script>
+// Re-initialise in portrait so the mobile home layout is never inherited from
+// a desktop-width render that happened while the phone was sideways.
+if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad) {
+    window.addEventListener('iskool:portrait-ready', function () {
+        window.location.reload();
+    }, { once: true });
+}
+</script>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
 <!-- ═══════════════════════════════════════════
