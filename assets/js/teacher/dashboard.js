@@ -2,6 +2,50 @@ function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
 }
+
+// Uses the same eight-pill spinner as the login button, but keeps it inside
+// the action button that started the request. The returned function restores
+// the button after the request settles.
+window.showTeacherButtonLoader = function(button) {
+    if (!button) return function() {};
+
+    if (!button.querySelector('.btn-label')) {
+        const label = document.createElement('span');
+        label.className = 'btn-label';
+        while (button.firstChild) label.appendChild(button.firstChild);
+        button.appendChild(label);
+
+        const spinner = document.createElement('span');
+        spinner.className = 'btn-spinner';
+        spinner.setAttribute('aria-hidden', 'true');
+        spinner.innerHTML = '<span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>';
+        button.appendChild(spinner);
+    }
+
+    button.classList.add('btn-loadable', 'is-loading');
+    button.disabled = true;
+
+    return function hideTeacherButtonLoader() {
+        const label = Array.from(button.children).find(function(child) {
+            return child.classList.contains('btn-label');
+        });
+        const spinner = Array.from(button.children).find(function(child) {
+            return child.classList.contains('btn-spinner');
+        });
+
+        // Restore the button's original child structure. This matters for
+        // action-card buttons whose icons and labels need to remain direct
+        // children after their label/status has been updated.
+        if (label) {
+            while (label.firstChild) button.insertBefore(label.firstChild, label);
+            label.remove();
+        }
+        if (spinner) spinner.remove();
+        button.classList.remove('btn-loadable', 'is-loading');
+        button.disabled = false;
+    };
+};
+
 window.showTeacherScopedLoader = function(panel, message = 'Working...') {
     const isDesktop = window.innerWidth >= 900 && panel;
 

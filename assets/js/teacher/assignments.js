@@ -556,12 +556,7 @@ window.openCreateAssignment = async function() {
                 return;
             }
             fd.set('class_id', classId);
-            submitBtn.disabled    = true;
-            submitBtn.textContent = 'Creating...';
-            const hideSubmitLoader = window.showTeacherScopedLoader
-                ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Creating...')
-                : null;
-            if (!hideSubmitLoader && loader) loader.style.display = 'flex';
+            const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
             try {
                 const res  = await fetch('api/teacher/create_assignment.php', {
                     method: 'POST',
@@ -581,10 +576,7 @@ window.openCreateAssignment = async function() {
                 errorDiv.textContent = 'Something went wrong. Please try again.';
                 errorDiv.style.display = 'block';
             } finally {
-                submitBtn.disabled    = false;
-                submitBtn.textContent = 'Create Assignment';
-                if (hideSubmitLoader) hideSubmitLoader();
-                else if (loader) loader.style.display = 'none';
+                hideSubmitLoader();
             }
         });
 

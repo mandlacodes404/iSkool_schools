@@ -697,8 +697,7 @@ async function saveOpenEndedGrade(button) {
     fd.append('score', score);
     fd.append('feedback', feedback);
 
-    button.disabled = true;
-    button.textContent = 'Saving...';
+    const hideButtonLoader = window.showTeacherButtonLoader(button);
     try {
         const res = await fetch('api/teacher/grade_open_ended.php', {
             method: 'POST',
@@ -710,8 +709,8 @@ async function saveOpenEndedGrade(button) {
         await refreshOpenEndedGrades(quizId, targetMode);
     } catch (e) {
         alert(e.message || 'Unable to save grade.');
-        button.disabled = false;
-        button.textContent = 'Save';
+    } finally {
+        hideButtonLoader();
     }
 }
 
@@ -719,8 +718,7 @@ async function toggleOpenEndedPublish(button) {
     if (button.disabled) return;
     const quizId = parseInt(button.dataset.quizId, 10);
     const message = document.getElementById('oeReleaseMessage');
-    button.disabled = true;
-    button.textContent = 'Updating...';
+    const hideButtonLoader = window.showTeacherButtonLoader(button);
     if (message) { message.style.display = 'none'; message.classList.remove('is-success', 'is-error'); }
     try {
         const res = await fetch('api/teacher/toggle_publish_marks.php', {
@@ -745,6 +743,7 @@ async function toggleOpenEndedPublish(button) {
         }
     } finally {
         await refreshOpenEndedGrades(quizId, document.getElementById('gr-main-panel') && document.getElementById('gr-main-panel').contains(button) ? 'panel' : 'mobile').catch(() => {});
+        hideButtonLoader();
     }
 }
 
@@ -858,12 +857,7 @@ window.saveMarks = async function(email, quizId) {
     fd.append('score',      score);
     fd.append('total',      total);
 
-    saveBtn.disabled    = true;
-    saveBtn.textContent = 'Saving...';
-    const hideSubmitLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
-        : null;
-    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherButtonLoader(saveBtn);
 
     try {
         const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -898,10 +892,7 @@ window.saveMarks = async function(email, quizId) {
         errorDiv.textContent = 'Connection error. Please try again.';
         errorDiv.style.display = 'block';
     } finally {
-        saveBtn.disabled    = false;
-        saveBtn.textContent = 'Save Marks';
-        if (hideSubmitLoader) hideSubmitLoader();
-        else if (loader) loader.style.display = 'none';
+        hideSubmitLoader();
     }
 };
 
@@ -976,9 +967,7 @@ window.submitAddQuiz = async function() {
         if (weight) fd.append('weight_percent', weight);
     }
 
-    submitBtn.disabled    = true;
-    submitBtn.textContent = 'Adding...';
-    if (loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
 
     try {
         const res  = await fetch('api/teacher/add_manual_quiz.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -996,8 +985,6 @@ window.submitAddQuiz = async function() {
         errorDiv.textContent = 'Connection error. Please try again.';
         errorDiv.style.display = 'block';
     } finally {
-        submitBtn.disabled    = false;
-        submitBtn.textContent = 'Add Assessment';
-        if (loader) loader.style.display = 'none';
+        hideSubmitLoader();
     }
 };

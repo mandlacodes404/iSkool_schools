@@ -373,10 +373,6 @@ window.submitCreateAnnouncement = async function() {
     const errorDiv   = document.getElementById('createAnnError');
     const submitBtn  = document.getElementById('createAnnSubmitBtn');
 
-    // On desktop, scope the loader to the right panel only
-    const isDesktop = window.innerWidth >= 900;
-    const panel     = document.getElementById('an-main-panel');
-
     errorDiv.style.display = 'none';
 
     if (!title)   { errorDiv.textContent = 'Please enter a title.';   errorDiv.style.display = 'block'; return; }
@@ -390,27 +386,7 @@ window.submitCreateAnnouncement = async function() {
     fd.append('send_to',  sendTo);
     if (forceEmail) fd.append('force_email', '1');
 
-    submitBtn.disabled    = true;
-    submitBtn.textContent = 'Sending...';
-
-    // Show panel-scoped loader on desktop, global overlay on mobile
-    let panelLoader = null;
-    if (isDesktop && panel) {
-        panelLoader = document.createElement('div');
-        panelLoader.id = 'an-panel-loader';
-        panelLoader.className = 'an-panel-loader';
-        panelLoader.innerHTML = `
-            <div class="an-panel-loader-inner">
-                <div class="an-panel-loader-spinner"></div>
-                <span class="an-panel-loader-text">Sending...</span>
-            </div>`;
-        // Panel must be position:relative for the absolute overlay to work
-        panel.classList.add('an-panel-relative');
-        panel.appendChild(panelLoader);
-    } else {
-        const globalLoader = document.getElementById('loaderOverlay');
-        if (globalLoader) globalLoader.style.display = 'flex';
-    }
+    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
 
     try {
         const res  = await fetch('api/teacher/create_announcement.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -429,13 +405,6 @@ window.submitCreateAnnouncement = async function() {
         errorDiv.textContent  = 'Connection error. Please try again.';
         errorDiv.style.display = 'block';
     } finally {
-        submitBtn.disabled    = false;
-        submitBtn.textContent = 'Send';
-        if (panelLoader) {
-            panelLoader.remove();
-        } else {
-            const globalLoader = document.getElementById('loaderOverlay');
-            if (globalLoader) globalLoader.style.display = 'none';
-        }
+        hideSubmitLoader();
     }
 };

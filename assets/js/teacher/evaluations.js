@@ -575,12 +575,7 @@ window.submitReleaseEvaluation = async function() {
         if (ta.value.trim()) fd.append(`statements[${i}]`, ta.value.trim());
     });
 
-    submitBtn.disabled    = true;
-    submitBtn.textContent = 'Releasing...';
-    const hideSubmitLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Releasing...')
-        : null;
-    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
 
     try {
         const res  = await fetch('api/teacher/create_evaluation.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -598,9 +593,6 @@ window.submitReleaseEvaluation = async function() {
         errorDiv.textContent = 'Connection error. Please try again.';
         errorDiv.style.display = 'block';
     } finally {
-        submitBtn.disabled    = false;
-        submitBtn.textContent = 'Release';
-        if (hideSubmitLoader) hideSubmitLoader();
-        else if (loader) loader.style.display = 'none';
+        hideSubmitLoader();
     }
 };

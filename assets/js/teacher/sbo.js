@@ -660,12 +660,7 @@ window.saveSBO = async function() {
     // Find submit btn in either panel or drawer
     const btn = document.querySelector('#sbo-main-panel .teacher-modal-submit')
              || document.querySelector('#sboDrawer .teacher-modal-submit');
-    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
-    const panel = document.getElementById('sbo-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel && document.querySelector('#sbo-main-panel .teacher-modal-submit');
-    const hideSubmitLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
-        : null;
+    const hideSubmitLoader = window.showTeacherButtonLoader(btn);
 
     try {
         const res  = await fetch('api/teacher/save_sbo.php', {
@@ -686,13 +681,11 @@ window.saveSBO = async function() {
         } else {
             err.textContent   = data.error || 'Failed to save.';
             err.style.display = 'block';
-            if (btn) { btn.textContent = 'Post & Notify'; btn.disabled = false; }
-            if (hideSubmitLoader) hideSubmitLoader();
         }
     } catch(e) {
         err.textContent   = 'Connection error. Please try again.';
         err.style.display = 'block';
-        if (btn) { btn.textContent = 'Post & Notify'; btn.disabled = false; }
-        if (hideSubmitLoader) hideSubmitLoader();
+    } finally {
+        hideSubmitLoader();
     }
 };

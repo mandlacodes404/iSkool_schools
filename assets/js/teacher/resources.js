@@ -614,11 +614,7 @@ window.submitUploadResource = async function() {
     }
 
     const loadingText = type === 'video' ? 'Saving...' : 'Uploading...';
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = loadingText; }
-    const hideSubmitLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, loadingText)
-        : null;
-    if (!hideSubmitLoader && loader) loader.style.display = 'flex';
+    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
 
     try {
         const res  = await fetch('api/teacher/upload_resource.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
@@ -636,9 +632,7 @@ window.submitUploadResource = async function() {
     } catch (e) {
         if (errorDiv) { errorDiv.textContent = 'Connection error. Please try again.'; errorDiv.style.display = 'block'; }
     } finally {
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Upload Resource'; }
-        if (hideSubmitLoader) hideSubmitLoader();
-        else if (loader) loader.style.display = 'none';
+        hideSubmitLoader();
     }
 };
 
@@ -658,13 +652,8 @@ window.closeDeleteResourceModal = function() {
 
 window.executeDeleteResource = async function() {
     if (!resourceToDelete) return;
-    const loader = document.getElementById('loaderOverlay');
-    const panel  = document.getElementById('rs-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Deleting...')
-        : null;
-    if (!hideLoader && loader) loader.style.display = 'flex';
+    const deleteButton = document.querySelector('#deleteResourceModal .rs-delete-confirm-btn');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
     closeDeleteResourceModal();
 
     try {
@@ -682,8 +671,7 @@ window.executeDeleteResource = async function() {
     } catch (e) {
         alert('Connection error.');
     } finally {
-        if (hideLoader) hideLoader();
-        else if (loader) loader.style.display = 'none';
+        hideLoader();
     }
 };
 

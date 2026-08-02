@@ -787,13 +787,8 @@ window.toggleQuizDetails = function(quizId) {
 // TOGGLE PUBLISH MARKS
 // ─────────────────────────────────────────────
 window.togglePublishMarks = async function(quizId) {
-    const loader = document.getElementById('loaderOverlay');
-    const panel  = document.getElementById('qz-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Updating...')
-        : null;
-    if (!hideLoader && loader) loader.style.display = 'flex';
+    const actionButton = document.getElementById(`publish-btn-${quizId}`);
+    const hideLoader = window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_publish_marks.php', {
@@ -834,8 +829,7 @@ window.togglePublishMarks = async function(quizId) {
     } catch (e) {
         alert('Connection error');
     } finally {
-        if (hideLoader) hideLoader();
-        else if (loader) loader.style.display = 'none';
+        hideLoader();
     }
 };
 
@@ -848,13 +842,8 @@ window.toggleQuizStatusFromElement = function(el) {
 
 window.toggleQuizStatus = async function(quizId, currentStatus) {
     const newStatus = currentStatus === 'Closed' ? 'Open' : 'Closed';
-    const loader    = document.getElementById('loaderOverlay');
-    const panel     = document.getElementById('qz-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Updating...')
-        : null;
-    if (!hideLoader && loader) loader.style.display = 'flex';
+    const actionButton = document.getElementById(`status-btn-${quizId}`);
+    const hideLoader = window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_quiz_status.php', {
@@ -895,7 +884,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
                 if (btn.classList.contains('qz-action-card')) {
                     const span = btn.querySelector('.qz-action-card-text span:first-child');
                     if (span) span.textContent = newBtnText;
-                    btn.className = `qz-action-card ${newBtnClass}`;
+                    btn.className = `qz-action-card ${newBtnClass} btn-loadable is-loading`;
                 } else {
                     btn.textContent = newBtnText;
                     btn.className   = `teacher-quiz-action-btn ${newBtnClass}`;
@@ -915,8 +904,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
     } catch (e) {
         alert('Connection error');
     } finally {
-        if (hideLoader) hideLoader();
-        else if (loader) loader.style.display = 'none';
+        hideLoader();
     }
 };
 
@@ -1543,12 +1531,7 @@ window.openCreateQuiz = async function() {
                 fd.delete('publish_marks');
             }
             fd.set('class_id', classId);
-            submitBtn.disabled    = true;
-            submitBtn.textContent = 'Creating...';
-            const hideSubmitLoader = window.showTeacherScopedLoader
-                ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Creating...')
-                : null;
-            if (!hideSubmitLoader && loader) loader.style.display = 'flex';
+            const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
             try {
                 const res  = await fetch('create_quiz.php', {
                     method: 'POST',
@@ -1576,10 +1559,7 @@ window.openCreateQuiz = async function() {
                 errorDiv.textContent = 'Something went wrong. Please try again.';
                 errorDiv.style.display = 'block';
             } finally {
-                submitBtn.disabled    = false;
-                submitBtn.textContent = 'Create Quiz';
-                if (hideSubmitLoader) hideSubmitLoader();
-                else if (loader) loader.style.display = 'none';
+                hideSubmitLoader();
             }
         });
 
@@ -2547,12 +2527,7 @@ async function submitEditQuiz(e) {
     const panel = document.getElementById('qz-main-panel');
     const isDesktop = window.innerWidth >= 900 && panel;
     errorDiv.style.display = 'none';
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving...';
-    const hideLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Saving...')
-        : null;
-    if (!hideLoader && loader) loader.style.display = 'flex';
+    const hideLoader = window.showTeacherButtonLoader(submitBtn);
 
     try {
         refreshEditQuestionIndexes();
@@ -2574,10 +2549,7 @@ async function submitEditQuiz(e) {
         errorDiv.textContent = 'Something went wrong. Please try again.';
         errorDiv.style.display = 'block';
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Quiz';
-        if (hideLoader) hideLoader();
-        else if (loader) loader.style.display = 'none';
+        hideLoader();
     }
 }
 
@@ -2600,14 +2572,9 @@ window.closeDeleteQuizModal = function() {
 window.confirmDeleteQuiz = async function() {
     if (!activeDeleteQuizId) return;
     const error = document.getElementById('deleteQuizError');
-    const loader = document.getElementById('loaderOverlay');
-    const panel = document.getElementById('qz-main-panel');
-    const isDesktop = window.innerWidth >= 900 && panel;
-    const hideLoader = window.showTeacherScopedLoader
-        ? window.showTeacherScopedLoader(isDesktop ? panel : null, 'Deleting...')
-        : null;
+    const deleteButton = document.querySelector('#deleteQuizModal [data-action="confirm-delete-quiz"]');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
     if (error) error.style.display = 'none';
-    if (!hideLoader && loader) loader.style.display = 'flex';
 
     try {
         const res = await fetch('api/teacher/delete_quiz.php', {
@@ -2632,8 +2599,7 @@ window.confirmDeleteQuiz = async function() {
             error.style.display = 'block';
         }
     } finally {
-        if (hideLoader) hideLoader();
-        else if (loader) loader.style.display = 'none';
+        hideLoader();
     }
 };
 
