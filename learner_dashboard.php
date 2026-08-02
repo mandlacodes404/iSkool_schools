@@ -2471,40 +2471,104 @@ if (desktopToggle) {
             }
 
             // ── Cache bust + re-fetch — loaderOverlay suppressed during PTR ──────
-            function refreshCurrentPage() {
-                const page = sessionStorage.getItem('lastLearnerPage') || 'home';
-                if (page === 'quiz_list.php')         window.learnerQuizCache          = null;
-                if (page === 'assignment_list.php')   window.learnerAssignmentCache    = null;
-                if (page === 'announcement_list.php') window.announcementCache         = null;
-                if (page === 'grades')                window.learnerGradesCache        = null;
-                if (page === 'resources')             window.learnerResourcesCache     = null;
-                if (page === 'manual')                window.learnerManualCache        = null;
-                if (page === 'discussion_list.php')   window.discussionCache           = null;
+            const refreshPages = {
+                'quiz_list.php': {
+                    caches: ['learnerQuizCache'], pending: ['learnerQuizPrefetchPromise'],
+                    refresh: () => window.fetchQuizzes?.()
+                },
+                'assignment_list.php': {
+                    caches: ['learnerAssignmentCache'], pending: ['learnerAssignmentPrefetchPromise'],
+                    refresh: () => window.fetchAssignments?.()
+                },
+                'announcement_list.php': {
+                    caches: ['announcementCache'], pending: ['announcementPrefetchPromise'],
+                    refresh: () => window.fetchAnnouncements?.()
+                },
+                'resource_list.php': {
+                    caches: ['resourceCache'], pending: ['resourcePrefetchPromise'],
+                    refresh: () => window.fetchResources?.()
+                },
+                'evaluation_list.php': {
+                    caches: ['evaluationCache'], pending: ['evaluationPrefetchPromise'],
+                    refresh: () => window.fetchEvaluations?.()
+                },
+                'syllabus': {
+                    caches: ['syllabusCache'], pending: ['syllabusPrefetchPromise'],
+                    refresh: () => window.fetchSyllabus?.()
+                },
+                'grades': {
+                    caches: ['learnerGradesCache'], pending: ['learnerGradesCachePromise'],
+                    refresh: () => window.fetchGrades?.()
+                },
+                'discussion_list.php': {
+                    caches: ['discussionCache'], pending: ['discussionPrefetchPromise'],
+                    refresh: () => window.fetchDiscussions?.()
+                },
+                'learner_calendar': {
+                    clear: () => { window.learnerCalendarEventsCache = {}; },
+                    pending: ['learnerCalendarEventsPromises'],
+                    refresh: () => window.fetchLearnerCalendar?.()
+                },
+                'partials/manual.html': {
+                    caches: ['manualCache', 'homeDataCache'],
+                    refresh: () => window.loadManual?.()
+                },
+                'learner_manual.php': {
+                    refresh: () => window.fetchManual?.()
+                }
+            };
 
-                // Suppress the loaderOverlay so only the PTR spinner is visible
+            // Support page keys saved by earlier dashboard versions too.
+            refreshPages.resources = refreshPages['resource_list.php'];
+            refreshPages.manual = refreshPages['partials/manual.html'];
+            refreshPages.home = refreshPages['partials/manual.html'];
+
+            function clearPageCaches(config) {
+                if (typeof config.clear === 'function') config.clear();
+                (config.caches || []).forEach(function(cacheName) {
+                    window[cacheName] = null;
+                });
+            }
+
+            function waitForPendingRefreshes(config) {
+                const pending = (config.pending || [])
+                    .map(function(promiseName) {
+                        const request = window[promiseName];
+                        if (request && typeof request.then === 'function') {
+                            return Promise.resolve(request).catch(function() {});
+                        }
+                        if (request && typeof request === 'object') {
+                            const requests = Object.values(request)
+                                .filter(function(value) { return value && typeof value.then === 'function'; });
+                            return requests.length ? Promise.all(requests).catch(function() {}) : null;
+                        }
+                        return null;
+                    })
+                    .filter(Boolean);
+                return pending.length ? Promise.all(pending) : Promise.resolve();
+            }
+
+            // The saved page keys above are the source of truth. On every pull
+            // we clear its live cache, wait out any earlier prefetch, clear the
+            // result again, then run the normal page fetcher. This prevents a
+            // stale prefetch response from being rendered as a "refresh".
+            function refreshCurrentPage() {
+                const page = sessionStorage.getItem('lastLearnerPage') || 'partials/manual.html';
+                const config = refreshPages[page] || refreshPages['partials/manual.html'];
+
                 window._ptrRefreshing = true;
                 clearTimeout(window.loaderTimeout);
                 loader.style.display = 'none';
 
-                const fnMap = {
-                    'quiz_list.php':         window.fetchQuizzes,
-                    'assignment_list.php':   window.fetchAssignments,
-                    'announcement_list.php': window.fetchAnnouncements,
-                    'grades':                window.fetchGrades,
-                    'resources':             window.fetchResources,
-                    'manual':                window.fetchManual,
-                    'discussion_list.php':   window.fetchDiscussions,
-                };
-                const fn = fnMap[page];
-                const refresh = typeof fn === 'function'
-                    ? fn()
-                    : (typeof window.loadLearnerHome === 'function' ? window.loadLearnerHome() : null);
-
-                // Every page fetcher is async, so the caller can keep the page
-                // in its held position until fresh content has been rendered.
-                return Promise.resolve(refresh).finally(function() {
-                    window._ptrRefreshing = false;
-                });
+                clearPageCaches(config);
+                return waitForPendingRefreshes(config)
+                    .then(function() {
+                        clearPageCaches(config);
+                        return typeof config.refresh === 'function' ? config.refresh() : null;
+                    })
+                    .finally(function() {
+                        window._ptrRefreshing = false;
+                    });
             }
 
             // ── Touch handlers ──────────────────────────────────────────────────
