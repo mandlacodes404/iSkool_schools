@@ -596,6 +596,17 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
+        .an-left-panel-title {
+            display: none;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--an-text);
+            margin: 0 0 16px;
+        }
+        @media (min-width: 901px) {
+            .an-left-panel-title { display: block; }
+        }
+
         .an-left-title {
             font-size: 11px;
             font-weight: 800;
@@ -1327,6 +1338,7 @@ function renderTeacherAnalytics(data) {
             <!-- LEFT -->
             <div class="an-left tchr-flat-sidebar">
                 <div class="an-left-header">
+                    <h2 class="an-left-panel-title">Analytics</h2>
                     <div class="an-left-title">Classes</div>
                     <div class="an-term-tabs">${termTabs}</div>
                 </div>
