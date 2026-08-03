@@ -1111,7 +1111,7 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/grades.js?v=3.8"></script>
 <script src="assets/js/teacher/assignments.js?v=3.7"></script>
 <script src="assets/js/teacher/sbo.js?v=3.6"></script>
-<script src="assets/js/teacher/analytics.js?v=3.7"></script>
+<script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 </body>
 </html>

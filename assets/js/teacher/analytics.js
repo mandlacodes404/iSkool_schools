@@ -605,6 +605,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
         @media (min-width: 901px) {
             .an-left-panel-title { display: block; }
+            .an-outer-header--mobile-only { display: none !important; }
         }
 
         .an-left-title {
@@ -1331,7 +1332,7 @@ function renderTeacherAnalytics(data) {
     }).join('');
 
     apiArea.innerHTML = `
-        <div class="teacher-resources-header" style="margin-bottom:16px;">
+        <div class="teacher-resources-header an-outer-header--mobile-only" style="margin-bottom:16px;">
             <h2 class="teacher-resources-title">Analytics</h2>
         </div>
         <div class="an-shell an-fade-in tchr-flat-layout">
