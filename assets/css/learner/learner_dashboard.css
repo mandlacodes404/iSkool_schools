@@ -1472,6 +1472,12 @@ iframe {
         transform: translateX(0);
     }
 
+    /* Desktop-only sidebar (menu) background — matches teacher dashboard.
+       Only overrides color; layout/position rules above are untouched. */
+    .sidebar {
+        background: #12161c;
+    }
+
     /* No permanent sidebar anymore - remove collapsed logic */
     .sidebar.collapsed,
     .sidebar.collapsed ~ .main-content {
