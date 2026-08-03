@@ -479,6 +479,11 @@
             }
 
             .sidebar a.desktop-top-row-link { display: none; }
+
+            /* Desktop-only sidebar (menu) background */
+            .sidebar {
+                background: #12161c;
+            }
         }
 
         @media (max-width: 480px) {

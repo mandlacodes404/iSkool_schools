@@ -72,7 +72,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=2.0">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -119,7 +119,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
 
-    <div class="sidebar-links" style="margin-top:20px;">
+    <div class="sidebar-links" style="margin-top:40px;">
         <!-- Home -->
         <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
