@@ -8,6 +8,12 @@
     gap: 0;
 }
 
+@media (min-width: 901px) {
+    .full-cal-page-wrapper {
+        padding: 24px 28px;
+    }
+}
+
 .full-cal-topbar {
     display: flex;
     align-items: flex-start;

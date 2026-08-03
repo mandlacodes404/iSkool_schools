@@ -66,7 +66,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=1.1">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.1">
     <title>Dashboard - iSkool</title>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
