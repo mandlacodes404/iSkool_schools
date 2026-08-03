@@ -1336,6 +1336,17 @@
     height: 100%;
     align-items: flex-start;
 }
+/* Desktop only: #api-content-area's padding is zeroed globally (see
+   dashboard.css) so the sidebar/panel divider on other pages can run
+   flush edge-to-edge. The home layout has no sidebar divider to keep
+   flush, so it gets a small 5px margin back on its own, rather than
+   changing #api-content-area's shared padding for every page. */
+@media (min-width: 900px) {
+    .dashboard-home-layout {
+        padding: 5px;
+        box-sizing: border-box;
+    }
+}
 
 .dashboard-snapshot-panel {
     width: 30%;
