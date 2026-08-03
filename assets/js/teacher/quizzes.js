@@ -178,7 +178,7 @@ function renderTeacherQuizzes(data) {
                 font-size: 11px;
                 font-weight: 800;
                 letter-spacing: 1.5px;
-                color: #4fd1c5;
+                color: #ffffff;
                 text-transform: uppercase;
                 flex-shrink: 0;
             }
