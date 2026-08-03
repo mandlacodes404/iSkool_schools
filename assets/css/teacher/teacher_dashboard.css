@@ -41,6 +41,8 @@
             height: 100vh;
             z-index: 5000;
             overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
             box-shadow: 2px 0 8px rgba(0,0,0,0.2);
             transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
                         visibility var(--transition-speed), opacity var(--transition-speed);
@@ -50,6 +52,10 @@
             left: 0;
             visibility: visible;
             opacity: 1;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
         }
 
         .sidebar-header {
@@ -495,7 +501,7 @@
             }
 
             .sidebar a,
-            .sidebar button:not(.desktop-close-btn) {
+            .sidebar button:not(.desktop-close-btn):not(.round-toggle) {
                 padding: 7px 12px;
                 margin-bottom: 0;
                 border-radius: 9px;
@@ -506,18 +512,18 @@
                 min-height: 0;
             }
             .sidebar a span,
-            .sidebar button:not(.desktop-close-btn) span {
+            .sidebar button:not(.desktop-close-btn):not(.round-toggle) span {
                 font-weight: 300;
             }
             .sidebar a svg,
-            .sidebar button:not(.desktop-close-btn) svg {
+            .sidebar button:not(.desktop-close-btn):not(.round-toggle) svg {
                 width: 17px;
                 height: 17px;
                 margin-right: 9px;
                 opacity: 0.78;
             }
             .sidebar a:hover,
-            .sidebar button:not(.desktop-close-btn):hover,
+            .sidebar button:not(.desktop-close-btn):not(.round-toggle):hover,
             .sidebar a.active,
             .sidebar button.active {
                 background: rgba(255,255,255,0.045);
