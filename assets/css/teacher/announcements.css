@@ -1343,7 +1343,7 @@
    changing #api-content-area's shared padding for every page. */
 @media (min-width: 900px) {
     .dashboard-home-layout {
-        padding: 5px;
+        padding: 8px;
         box-sizing: border-box;
     }
 }
