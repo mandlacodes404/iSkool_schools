@@ -91,8 +91,7 @@
     display: grid;
     grid-template-columns: minmax(260px, 30%) 1fr;
     gap: 20px;
-    padding: 24px;
-    padding-top: 17px;
+    padding: 7px 7px 20px 7px;
     align-items: start;
 }
 
