@@ -257,10 +257,10 @@ body {
     letter-spacing: 0;
     opacity: 0;
     transform: translateY(4px);
-    filter: blur(2px);
-    transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
-                transform 0.45s cubic-bezier(0.22,1,0.36,1),
-                filter 0.45s cubic-bezier(0.22,1,0.36,1);
+    filter: blur(1px);
+    transition: opacity 0.4s cubic-bezier(0.22,1,0.36,1),
+                transform 0.4s cubic-bezier(0.22,1,0.36,1),
+                filter 0.4s cubic-bezier(0.22,1,0.36,1);
 }
 
 .pv-tw-line2.pv-tw-in {

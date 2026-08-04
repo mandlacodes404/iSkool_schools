@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/index.css?v=3.6">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -1073,8 +1073,10 @@ function getCsrfToken() {
         await pvDelay(180);
 
         // Line 2 container settles in (fade + rise + unblur) just before typing starts.
+        // We wait for the full transition to finish (0.4s in CSS) before typing the
+        // first character — starting mid-transition is what caused the visible stutter.
         line2El.classList.add('pv-tw-in');
-        await pvDelay(120);
+        await pvDelay(430);
 
         const c2 = await pvTypewriterNatural('pv-tw2', 'A smarter way to run your school.', 40);
         await pvDelay(1200);
