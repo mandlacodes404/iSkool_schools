@@ -79,7 +79,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=3.4">
+    <link rel="stylesheet" href="assets/css/index.css?v=3.5">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -481,7 +481,7 @@ function getCsrfToken() {
                     <input type="password" name="password" id="login-password" placeholder="Password" required>
                     <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
                 </div>
-                 <div style="display: flex; align-items: center; margin: 10px 0 15px 10px; text-align: left;">
+                 <div class="remember-me-row" style="display: flex; align-items: center; margin: 10px 0 15px 10px; text-align: left;">
                   <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer;">
                   <label for="remember_me" style="font-size: 13px; color: #ccc; cursor: pointer; user-select: none;">Keep me logged in</label>
                 </div>

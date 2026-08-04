@@ -673,6 +673,11 @@ body {
         max-width: 100%;
     }
 
+    /* Hide "Keep me logged in" on desktop only (kept for mobile) */
+    .remember-me-row {
+        display: none !important;
+    }
+
     .splash-version-footer {
         font-size: 15px;
         color: #4a515c;
