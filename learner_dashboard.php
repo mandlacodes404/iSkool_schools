@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.5">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.6">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -2110,6 +2110,24 @@ window.toggleSidebar = function (forceClose = false) {
     }
 
     mobileOverlay.addEventListener("click", toggleSidebar);
+
+    // ------------------------------------------------------------------------
+    // MOBILE TOGGLE — native-app-style press feedback (scale down on touch,
+    // spring back on release), matching the tap feel of apps like Claude/Kimi.
+    // CSS :active already covers this on most browsers, but iOS Safari won't
+    // reliably fire :active on a plain tap unless a touch handler is attached
+    // somewhere in the chain — so we toggle a .pressed class by hand as a
+    // guaranteed fallback. touchcancel is handled too (e.g. a scroll starts
+    // mid-press) so the button never gets stuck in the pressed-down state.
+    // ------------------------------------------------------------------------
+    const mobileToggleBtn = document.getElementById('mobileToggle');
+    if (mobileToggleBtn) {
+        const pressOn  = () => mobileToggleBtn.classList.add('pressed');
+        const pressOff = () => mobileToggleBtn.classList.remove('pressed');
+        mobileToggleBtn.addEventListener('touchstart', pressOn,  { passive: true });
+        mobileToggleBtn.addEventListener('touchend',   pressOff, { passive: true });
+        mobileToggleBtn.addEventListener('touchcancel', pressOff, { passive: true });
+    }
 
     // ------------------------------------------------------------------------
     // MOBILE SWIPE GESTURES - open sidebar on swipe-right, close on swipe-left
