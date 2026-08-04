@@ -1325,29 +1325,11 @@ iframe {
     font-size: 26px;
     cursor: pointer;
     padding: 8px;
-    border-radius: 10px;
-    transition: color 0.3s ease,
-                transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Kill the default mobile browser tap flash (grey/blue box) so our
-       own scale-down press effect is the only feedback the user sees —
-       this is the bit that makes it feel like a native app tap. */
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    user-select: none;
+    transition: color 0.3s ease;
 }
 
 #mobileToggle:hover {
     color: var(--accent-color);
-}
-
-/* The actual "app-like" press feedback: shrink slightly the instant a
-   finger (or click) is down, spring back on release. No colour change —
-   scale only. .pressed is toggled by JS as a touch-event fallback for
-   browsers (mainly iOS Safari) that don't reliably apply :active on a
-   simple tap. */
-#mobileToggle:active,
-#mobileToggle.pressed {
-    transform: scale(0.88);
 }
 
 @media (max-width: 768px) {
