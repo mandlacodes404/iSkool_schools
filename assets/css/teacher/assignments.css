@@ -376,3 +376,34 @@
     padding: 13px;
     font-size: 14px;
 }
+/* ── Delete button (panel) ── */
+.as-panel-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.25);
+    color: #f85149;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.as-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+
+/* ── Delete modal ── */
+.as-modal-hidden {
+    display: none;
+}
+.as-delete-modal-box {
+    max-width: 380px;
+}
+.as-delete-modal-text {
+    color: #c9d1d9;
+    font-size: 15px;
+}
+.as-delete-confirm-btn {
+    background: #e74c3c;
+}

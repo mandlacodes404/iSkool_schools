@@ -1700,9 +1700,19 @@
 .an-panel-empty p { font-size: 13px; text-align: center; max-width: 240px; line-height: 1.5; }
 
 .an-panel-content { padding: 24px 28px; max-width: 720px; }
-.an-panel-header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.an-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-wrap: wrap;
+}
 .an-panel-title { font-size: 20px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; line-height: 1.3; }
 .an-panel-meta  { font-size: 12px; color: #8b949e; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.an-panel-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
 .an-panel-message { font-size: 14px; color: #c9d1d9; line-height: 1.75; white-space: pre-wrap; }
 
 /* School badge in panel */
@@ -1855,4 +1865,35 @@
 /* Panel must be position:relative for the absolute loader overlay to work */
 .an-panel-relative {
     position: relative;
+}
+/* ── Delete button (panel) ── */
+.an-panel-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.25);
+    color: #f85149;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.an-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+
+/* ── Delete modal ── */
+.an-modal-hidden {
+    display: none;
+}
+.an-delete-modal-box {
+    max-width: 380px;
+}
+.an-delete-modal-text {
+    color: #c9d1d9;
+    font-size: 15px;
+}
+.an-delete-confirm-btn {
+    background: #e74c3c;
 }

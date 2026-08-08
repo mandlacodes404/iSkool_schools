@@ -156,6 +156,22 @@ function renderTeacherAssignments(data) {
             `) : ''}
         </div>
 
+        <div id="deleteAssignmentModal" class="teacher-modal-overlay as-modal-hidden">
+            <div class="teacher-modal-box as-delete-modal-box">
+                <div class="teacher-modal-header">
+                    <span>Delete Assignment</span>
+                    <button onclick="closeDeleteAssignmentModal()" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p class="as-delete-modal-text">Are you sure you want to delete this assignment? Learner submissions for it will also be removed. This cannot be undone.</p>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button onclick="closeDeleteAssignmentModal()" class="teacher-modal-cancel">Cancel</button>
+                    <button onclick="executeDeleteAssignment()" class="teacher-modal-submit as-delete-confirm-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ═══ MOBILE LIST (unchanged) ═══ -->
         <div class="as-mobile-list">`;
 
@@ -388,6 +404,16 @@ window.selectDesktopAssignment = function(index) {
                         </svg>
                         Download All
                     </button>
+                    <button class="as-panel-delete-btn" onclick="confirmDeleteAssignment(${assignment.id})">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                        </svg>
+                        Delete
+                    </button>
                 </div>
             </div>
 
@@ -589,5 +615,48 @@ window.openCreateAssignment = async function() {
     } finally {
         if (hideInitialLoader) hideInitialLoader();
         else if (loader) loader.style.display = 'none';
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE ASSIGNMENT (desktop)
+// ─────────────────────────────────────────────
+let assignmentToDelete = null;
+
+window.confirmDeleteAssignment = function(id) {
+    assignmentToDelete = id;
+    const modal = document.getElementById('deleteAssignmentModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeDeleteAssignmentModal = function() {
+    assignmentToDelete = null;
+    const modal = document.getElementById('deleteAssignmentModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.executeDeleteAssignment = async function() {
+    if (!assignmentToDelete) return;
+    const idToDelete = assignmentToDelete;
+    const deleteButton = document.querySelector('#deleteAssignmentModal .as-delete-confirm-btn');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
+    closeDeleteAssignmentModal();
+
+    try {
+        const fd = new FormData();
+        fd.append('id', idToDelete);
+        const res  = await fetch('api/teacher/delete_assignment.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            window.teacherAssignmentsCache = null;
+            fetchTeacherAssignments();
+        } else {
+            alert(data.error || 'Delete failed.');
+        }
+    } catch (e) {
+        alert('Connection error.');
+    } finally {
+        hideLoader();
     }
 };

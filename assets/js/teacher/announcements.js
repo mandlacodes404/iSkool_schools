@@ -179,6 +179,22 @@ function renderTeacherAnnouncements(data) {
 
         </div>
 
+        <div id="deleteAnnouncementModal" class="teacher-modal-overlay an-modal-hidden">
+            <div class="teacher-modal-box an-delete-modal-box">
+                <div class="teacher-modal-header">
+                    <span>Delete Announcement</span>
+                    <button onclick="closeDeleteAnnouncementModal()" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p class="an-delete-modal-text">Are you sure you want to delete this announcement? This cannot be undone.</p>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button onclick="closeDeleteAnnouncementModal()" class="teacher-modal-cancel">Cancel</button>
+                    <button onclick="executeDeleteAnnouncement()" class="teacher-modal-submit an-delete-confirm-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
         <!-- MOBILE -->
         <div class="an-mobile-list">`;
 
@@ -252,16 +268,33 @@ window.selectDesktopAnnouncement = function(flatIndex) {
            </span> &bull;`
         : '';
 
+    const deleteBtn = ann.is_school ? '' : `
+        <div class="an-panel-actions">
+            <button class="an-panel-delete-btn" onclick="confirmDeleteAnnouncement(${ann.id})">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                </svg>
+                Delete
+            </button>
+        </div>`;
+
     panel.innerHTML = `
         <div class="an-panel-content">
             <div class="an-panel-header">
-                <div class="an-panel-title">${ann.title}</div>
-                <div class="an-panel-meta">
-                    ${schoolBadge}
-                    <span>${ann.class_name}</span>
-                    <span>&bull;</span>
-                    <span>${ann.display_date}</span>
+                <div>
+                    <div class="an-panel-title">${ann.title}</div>
+                    <div class="an-panel-meta">
+                        ${schoolBadge}
+                        <span>${ann.class_name}</span>
+                        <span>&bull;</span>
+                        <span>${ann.display_date}</span>
+                    </div>
                 </div>
+                ${deleteBtn}
             </div>
             <div class="an-panel-message">${ann.message.replace(/\n/g, '<br>')}</div>
         </div>`;
@@ -406,5 +439,48 @@ window.submitCreateAnnouncement = async function() {
         errorDiv.style.display = 'block';
     } finally {
         hideSubmitLoader();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE ANNOUNCEMENT (desktop)
+// ─────────────────────────────────────────────
+let announcementToDelete = null;
+
+window.confirmDeleteAnnouncement = function(id) {
+    announcementToDelete = id;
+    const modal = document.getElementById('deleteAnnouncementModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeDeleteAnnouncementModal = function() {
+    announcementToDelete = null;
+    const modal = document.getElementById('deleteAnnouncementModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.executeDeleteAnnouncement = async function() {
+    if (!announcementToDelete) return;
+    const idToDelete = announcementToDelete;
+    const deleteButton = document.querySelector('#deleteAnnouncementModal .an-delete-confirm-btn');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
+    closeDeleteAnnouncementModal();
+
+    try {
+        const fd = new FormData();
+        fd.append('id', idToDelete);
+        const res  = await fetch('api/teacher/delete_announcement.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            window.teacherAnnouncementCache = null;
+            fetchTeacherAnnouncements();
+        } else {
+            alert(data.error || 'Delete failed.');
+        }
+    } catch (e) {
+        alert('Connection error.');
+    } finally {
+        hideLoader();
     }
 };
