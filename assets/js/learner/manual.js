@@ -1045,8 +1045,18 @@ function injectSharedDesktopLayoutStyles() {
     const style = document.createElement('style');
     style.id = 'lqz-shared-desktop-layout-style';
     style.textContent = `
+        /* Scoped with :has() so this only overrides #api-content-area while
+           it actually contains a flat-layout page (Quiz, Announcements,
+           Assignments, etc). Previously this targeted the bare #api-content-area
+           ID unconditionally — once injected (on the first flat-layout page
+           visit), padding:0/overflow:hidden/height:auto stuck around for the
+           rest of the session and silently broke every OTHER page rendered
+           into the same container afterward, including Home: its scroll
+           container lost overflow-y (no more scrolling), and its own
+           .learner-home-wrapper padding got squashed by the forced
+           height:auto + overflow:hidden box behavior on return visits. */
         @media (min-width: 900px) {
-            #api-content-area {
+            #api-content-area:has(.lqz-flat-layout) {
                 padding: 0 !important;
                 height: auto !important;
                 flex: 1 1 auto !important;
