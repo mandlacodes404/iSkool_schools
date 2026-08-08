@@ -652,13 +652,14 @@ window.closeDeleteResourceModal = function() {
 
 window.executeDeleteResource = async function() {
     if (!resourceToDelete) return;
+    const idToDelete = resourceToDelete;
     const deleteButton = document.querySelector('#deleteResourceModal .rs-delete-confirm-btn');
     const hideLoader = window.showTeacherButtonLoader(deleteButton);
     closeDeleteResourceModal();
 
     try {
         const fd = new FormData();
-        fd.append('id', resourceToDelete);
+        fd.append('id', idToDelete);
         const res  = await fetch('api/teacher/delete_resource.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
