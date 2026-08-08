@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.7">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.8">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -332,7 +332,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </svg>
     <span>Syllabus</span>
 </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" id="nav-discussions-sidebar">
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" class="mobile-only-discussions" id="nav-discussions-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
@@ -663,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
  if (targetPage) {
     window.history.replaceState({}, document.title, window.location.pathname);
 
-    if (targetPage === 'discussion') {
+    if (targetPage === 'discussion' && window.innerWidth <= 768) {
     const discId = urlParams.get('id');
     if (discId) {
         // Make sure apiArea is visible first
@@ -3113,7 +3113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/announcements.js?v=8.3"></script>
 <script src="assets/js/learner/grades.js?v=6.6"></script>
 <script src="assets/js/learner/evaluations.js?v=5.7"></script>
-<script src="assets/js/learner/discussions.js?v=8.5"></script>
+<script src="assets/js/learner/discussions.js?v=8.6"></script>
 <script src="assets/js/learner/syllabus.js?v=3.3"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
 <?php include 'includes/global_viewer.php'; ?>

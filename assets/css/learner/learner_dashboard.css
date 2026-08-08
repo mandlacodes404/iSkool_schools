@@ -283,6 +283,10 @@ body {
     display: none !important;
 }
 
+.mobile-only-discussions {
+    display: none !important;
+}
+
 .desktop-toggle-btn {
     background: none; 
     color: var(--text-color);
@@ -875,6 +879,10 @@ iframe {
     }
 
     .mobile-only-calendar {
+        display: flex !important;
+    }
+
+    .mobile-only-discussions {
         display: flex !important;
     }
 

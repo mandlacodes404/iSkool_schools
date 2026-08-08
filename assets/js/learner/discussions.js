@@ -1114,8 +1114,11 @@ function buildPostCard(r, user_role, is_in_class, discId) {
                <div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`
             : `<div class="disc-avatar-ph" style="background:${avatarColor.bg};color:${avatarColor.color};">${initial}</div>`;
 
-    const meTag      = isMe   ? `<span class="disc-tag me">You</span>`   : '';
-    const displayName = escHtml(r.replier_display || 'Learner');
+    // On mobile, own messages show "You" in place of the real name, same as
+    // typical group-chat apps. Desktop keeps the real name plus the "You" badge.
+    const isMobileOwnMessage = isMe && !isDesktop();
+    const meTag      = (isMe && !isMobileOwnMessage) ? `<span class="disc-tag me">You</span>`   : '';
+    const displayName = isMobileOwnMessage ? 'You' : escHtml(r.replier_display || 'Learner');
 
     const quoteHtml = r.quote_author
         ? `<div class="disc-quote">
