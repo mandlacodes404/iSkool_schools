@@ -902,6 +902,9 @@ function renderThread(data) {
                 .disc-posts-scroll { background: transparent; }
                 /* Reply/Report buttons are replaced by the long-press action popup on mobile */
                 .disc-footer { display: none !important; }
+                /* Hide the chat scroller line on mobile only — desktop keeps the thin scrollbar */
+                .disc-posts-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+                .disc-posts-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
             }
 
             /* ── DATE CHIP ── */
