@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=7.9">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.0">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -480,48 +480,45 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
             while ($c = $res->fetch_assoc()) { $myClasses[] = $c; }
             $resStmt->close();
             ?>
-            <div class="lmc-layout">
-                <!-- ═══ LEFT: CLASS PANEL ═══ -->
-                <div class="lmc-panel lmc-panel-left">
-                    <div class="lmc-panel-heading">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lmc-icon-crisp">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        </svg>
-                        <span>My Class</span>
-                    </div>
+            <div class="lmc-wrap">
+                <!-- ═══ CLASS ═══ -->
+                <div class="lmc-col">
+                    <div class="lmc-panel-title">My Class</div>
                     <?php foreach ($myClasses as $c): ?>
                         <div class="lmc-class-card">
-                            <div class="lmc-class-avatar">
-                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <div class="lmc-class-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                                 </svg>
                             </div>
-                            <div class="lmc-class-info">
+                            <div class="lmc-class-body">
+                                <div class="lmc-class-label">Class</div>
                                 <div class="lmc-class-name"><?= htmlspecialchars($c['name']) ?></div>
-                                <div class="lmc-class-meta"><?= htmlspecialchars($currentYearName) ?></div>
+                                <div class="lmc-class-sub"><?= htmlspecialchars($currentYearName) ?></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
 
-                <!-- ═══ RIGHT: PARENT LINKING PANEL ═══ -->
-                <div class="lmc-panel lmc-panel-right">
-                    <div class="lmc-panel-heading">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lmc-icon-crisp">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                        <span>Parent Link</span>
-                    </div>
-                    <div class="parent-link-section lmc-parent-section">
-                        <div class="lmc-parent-status <?= $parentLink ? 'lmc-parent-status--linked' : '' ?>">
-                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <?php if ($parentLink): ?>
-                                    <path d="M20 6L9 17l-5-5"/>
-                                <?php else: ?>
-                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                                <?php endif; ?>
-                            </svg>
-                            <span><?= $parentLink ? 'A parent is linked to your account' : 'No parent linked yet' ?></span>
+                <!-- ═══ PARENT LINK ═══ -->
+                <div class="lmc-col">
+                    <div class="lmc-panel-title">Parent Link</div>
+                    <div class="parent-link-section lmc-parent-block">
+                        <div class="lmc-parent-top">
+                            <div class="lmc-class-icon lmc-parent-icon <?= $parentLink ? 'lmc-parent-icon--linked' : '' ?>">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="<?= $parentLink ? '#68d391' : '#63b3ed' ?>" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <?php if ($parentLink): ?>
+                                        <path d="M20 6L9 17l-5-5"/>
+                                    <?php else: ?>
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    <?php endif; ?>
+                                </svg>
+                            </div>
+                            <div class="lmc-class-body">
+                                <div class="lmc-class-label">Parent</div>
+                                <div class="lmc-class-name"><?= $parentLink ? 'Linked' : 'Not linked' ?></div>
+                                <div class="lmc-class-sub"><?= $parentLink ? 'A parent has access to your progress' : 'No parent linked to your account yet' ?></div>
+                            </div>
                         </div>
                         <button type="button" class="toggle-parent-link lmc-toggle-btn" onclick="toggleParentDropdown()">
                             <?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?>
@@ -549,7 +546,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
             </div>
         <?php else: ?>
             <div class="lmc-empty-wrap">
-                <svg viewBox="0 0 24 24" width="44" height="44" stroke="#63b3ed" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lmc-icon-crisp">
+                <svg viewBox="0 0 24 24" width="40" height="40" stroke="#63b3ed" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                 </svg>
                 <p>Not joined any class yet.</p>
