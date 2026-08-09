@@ -134,6 +134,7 @@ foreach ($evaluations as $eval) {
     }
 
     $grouped[$class_name][] = [
+        'id'             => (int)$eval['id'],
         'title'          => $eval['title'],
         'description'    => $eval['description'],
         'response_count' => (int)$eval['response_count'],

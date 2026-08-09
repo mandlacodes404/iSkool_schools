@@ -182,6 +182,22 @@ function renderTeacherSyllabus(data) {
             `) : ''}
         </div>
 
+        <div id="deleteSBOModal" class="teacher-modal-overlay sbo-modal-hidden">
+            <div class="teacher-modal-box sbo-delete-modal-box">
+                <div class="teacher-modal-header">
+                    <span>Delete Syllabus Brief</span>
+                    <button onclick="closeDeleteSBOModal()" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p class="sbo-delete-modal-text">Are you sure you want to delete this syllabus brief? This cannot be undone.</p>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button onclick="closeDeleteSBOModal()" class="teacher-modal-cancel">Cancel</button>
+                    <button onclick="executeDeleteSBO()" class="teacher-modal-submit sbo-delete-confirm-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="sbo-mobile-list">
             <!-- FILTERS -->
@@ -362,7 +378,19 @@ window.selectDesktopSBO = function(idx) {
                         ${updatedDate ? `<span>&bull;</span><span>Updated ${updatedDate}</span>` : ''}
                     </div>
                 </div>
-                <span class="sbo-term-badge">Term ${brief.term}</span>
+                <div class="sbo-panel-actions">
+                    <span class="sbo-term-badge">Term ${brief.term}</span>
+                    <button class="sbo-panel-delete-btn" onclick="confirmDeleteSBO(${brief.id})">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
             </div>
 
             <div class="sbo-topics-section">
@@ -687,5 +715,48 @@ window.saveSBO = async function() {
         err.style.display = 'block';
     } finally {
         hideSubmitLoader();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE SYLLABUS BRIEF (desktop)
+// ─────────────────────────────────────────────
+let sboToDelete = null;
+
+window.confirmDeleteSBO = function(id) {
+    sboToDelete = id;
+    const modal = document.getElementById('deleteSBOModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeDeleteSBOModal = function() {
+    sboToDelete = null;
+    const modal = document.getElementById('deleteSBOModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.executeDeleteSBO = async function() {
+    if (!sboToDelete) return;
+    const idToDelete = sboToDelete;
+    const deleteButton = document.querySelector('#deleteSBOModal .sbo-delete-confirm-btn');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
+    closeDeleteSBOModal();
+
+    try {
+        const fd = new FormData();
+        fd.append('id', idToDelete);
+        const res  = await fetch('api/teacher/delete_sbo.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            window.teacherSBOCache = null;
+            fetchTeacherSyllabus();
+        } else {
+            alert(data.error || 'Delete failed.');
+        }
+    } catch (e) {
+        alert('Connection error.');
+    } finally {
+        hideLoader();
     }
 };

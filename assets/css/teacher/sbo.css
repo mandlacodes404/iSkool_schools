@@ -509,3 +509,43 @@
     flex-direction: column;
     gap: 16px;
 }
+/* ── Panel actions row (badge + delete button) ── */
+.sbo-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+/* ── Delete button (panel) ── */
+.sbo-panel-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.25);
+    color: #f85149;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.sbo-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+
+/* ── Delete modal ── */
+.sbo-modal-hidden {
+    display: none;
+}
+.sbo-delete-modal-box {
+    max-width: 380px;
+}
+.sbo-delete-modal-text {
+    color: #c9d1d9;
+    font-size: 15px;
+}
+.sbo-delete-confirm-btn {
+    background: #e74c3c;
+}

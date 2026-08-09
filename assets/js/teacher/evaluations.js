@@ -147,6 +147,22 @@ function renderTeacherEvaluations(data) {
             `) : ''}
         </div>
 
+        <div id="deleteEvaluationModal" class="teacher-modal-overlay ev-modal-hidden">
+            <div class="teacher-modal-box ev-delete-modal-box">
+                <div class="teacher-modal-header">
+                    <span>Delete Evaluation</span>
+                    <button onclick="closeDeleteEvaluationModal()" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p class="ev-delete-modal-text">Are you sure you want to delete this evaluation? This cannot be undone.</p>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button onclick="closeDeleteEvaluationModal()" class="teacher-modal-cancel">Cancel</button>
+                    <button onclick="executeDeleteEvaluation()" class="teacher-modal-submit ev-delete-confirm-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="ev-mobile-list">`;
 
@@ -291,11 +307,23 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
     let body = `
         <div class="ev-panel-content">
             <div class="ev-panel-header">
-                <div class="ev-panel-title">${ev.title}</div>
-                <div class="ev-panel-meta">
-                    ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
-                    ${ev.description ? ' &mdash; ' + ev.description : ''}
+                <div>
+                    <div class="ev-panel-title">${ev.title}</div>
+                    <div class="ev-panel-meta">
+                        ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
+                        ${ev.description ? ' &mdash; ' + ev.description : ''}
+                    </div>
                 </div>
+                <button class="ev-panel-delete-btn" onclick="confirmDeleteEvaluation(${ev.id})">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                    Delete
+                </button>
             </div>`;
 
     ev.statements.forEach(s => {
@@ -594,5 +622,48 @@ window.submitReleaseEvaluation = async function() {
         errorDiv.style.display = 'block';
     } finally {
         hideSubmitLoader();
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE EVALUATION (desktop)
+// ─────────────────────────────────────────────
+let evaluationToDelete = null;
+
+window.confirmDeleteEvaluation = function(id) {
+    evaluationToDelete = id;
+    const modal = document.getElementById('deleteEvaluationModal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeDeleteEvaluationModal = function() {
+    evaluationToDelete = null;
+    const modal = document.getElementById('deleteEvaluationModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.executeDeleteEvaluation = async function() {
+    if (!evaluationToDelete) return;
+    const idToDelete = evaluationToDelete;
+    const deleteButton = document.querySelector('#deleteEvaluationModal .ev-delete-confirm-btn');
+    const hideLoader = window.showTeacherButtonLoader(deleteButton);
+    closeDeleteEvaluationModal();
+
+    try {
+        const fd = new FormData();
+        fd.append('id', idToDelete);
+        const res  = await fetch('api/teacher/delete_evaluation.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            window.teacherEvaluationCache = null;
+            fetchTeacherEvaluations();
+        } else {
+            alert(data.error || 'Delete failed.');
+        }
+    } catch (e) {
+        alert('Connection error.');
+    } finally {
+        hideLoader();
     }
 };

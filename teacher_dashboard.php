@@ -63,8 +63,8 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=4.4">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.3">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.3">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=1.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.1">
     <title>Dashboard - iSkool</title>
@@ -1107,11 +1107,11 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=6.1"></script>
 <script src="assets/js/teacher/announcements.js?v=4.6"></script>
-<script src="assets/js/teacher/evaluations.js?v=3.7"></script>
+<script src="assets/js/teacher/evaluations.js?v=3.8"></script>
 <script src="assets/js/teacher/resources.js?v=3.3"></script>
 <script src="assets/js/teacher/grades.js?v=3.8"></script>
 <script src="assets/js/teacher/assignments.js?v=3.8"></script>
-<script src="assets/js/teacher/sbo.js?v=3.6"></script>
+<script src="assets/js/teacher/sbo.js?v=3.7"></script>
 <script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 </body>

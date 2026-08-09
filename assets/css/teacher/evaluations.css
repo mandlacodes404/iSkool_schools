@@ -118,9 +118,14 @@
 .ev-panel-content { padding: 28px 32px; }
 
 .ev-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 24px;
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-wrap: wrap;
 }
 .ev-panel-title {
     font-size: 20px;
@@ -278,4 +283,33 @@
 .eval-bar-fill {
     width: var(--eval-bar-width, 0%);
     background: var(--eval-bar-color, #4fd1c5);
+}
+/* ── Delete button (panel) ── */
+.ev-panel-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.25);
+    color: #f85149;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+.ev-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+
+/* ── Delete modal ── */
+.ev-delete-modal-box {
+    max-width: 380px;
+}
+.ev-delete-modal-text {
+    color: #c9d1d9;
+    font-size: 15px;
+}
+.ev-delete-confirm-btn {
+    background: #e74c3c;
 }
