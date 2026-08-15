@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           # We use the relative path from your FTP login root
-          server-dir: sandbox.iskool.online/
+          server-dir: sandbox.iskool.xyz/
           exclude: |
             **/.git*
             **/.git*/**

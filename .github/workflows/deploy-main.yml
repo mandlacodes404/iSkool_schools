@@ -28,7 +28,7 @@ jobs:
             **/.github*/**
             **/vendor/**
             **/node_modules/**
-            **/sandbox.iskool.online/**
+            **/sandbox.iskool.xyz/**
             **/cgi-bin/**
             **/.env*
             composer.lock

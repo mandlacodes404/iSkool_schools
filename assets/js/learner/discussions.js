@@ -940,12 +940,29 @@ function renderThread(data) {
             .disc-body-wrap.is-op { background:rgba(79,209,197,0.06); border-color:rgba(79,209,197,0.15); }
             .disc-body-wrap.is-me { border-color:rgba(79,209,197,0.2); }
 
-            /* Mobile-only bubble overrides — placed after the base rules above so they
-               win the cascade on mobile without needing !important or touching desktop. */
+            /* Mobile-only overrides — Concept 3 (flat/minimal): no spine, no bubble
+               background, just avatar + name + text with a hairline row divider.
+               Placed after the base rules above so they win the cascade on mobile
+               without needing !important or touching desktop. */
             @media (max-width: 767px) {
-                .disc-body-wrap { background: #272726; border-color: transparent; }
-                .disc-body-wrap.is-op { background: #272726; border-color: transparent; }
-                .disc-body-wrap.is-me { border-color: rgba(79,209,197,0.2); }
+                .disc-spine { display: none; }
+                .disc-post-card {
+                    padding: 14px 4px;
+                    border-bottom: 1px solid rgba(255,255,255,0.07);
+                    margin: 0;
+                }
+                .disc-post-card:last-of-type { border-bottom: none; padding-bottom: 14px; }
+                .disc-avatar, .disc-avatar-ph { width: 28px; height: 28px; }
+                .disc-post-header { margin-bottom: 4px; }
+                .disc-author { font-size: 13px; }
+                .disc-author.disc-author-me { color: #4fd1c5; }
+                .disc-tag.me { background: none; border: none; padding: 0; color: #4fd1c5; font-size: 9px; }
+                .disc-tag.teacher { background: none; border: none; padding: 0; font-size: 9px; }
+                .disc-time { font-size: 10.5px; }
+                .disc-body-wrap { background: transparent; border: none; border-radius: 0; padding: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+                .disc-body-wrap.is-op { background: transparent; border-color: transparent; }
+                .disc-body-wrap.is-me { border-color: transparent; }
+                .disc-body { font-size: 13.5px; line-height: 1.6; color: #c9d1d9; }
             }
 
             /* ── QUOTE ── */
@@ -976,7 +993,7 @@ function renderThread(data) {
                     user-select: none;
                     -webkit-touch-callout: none;
                 }
-                .disc-body-wrap.disc-pressed { background: rgba(255,255,255,0.06); }
+                .disc-body-wrap.disc-pressed { background: rgba(255,255,255,0.05); border-radius: 8px; margin: -6px -8px; padding: 6px 8px; }
                 #discLongPressOverlay {
                     position:fixed; inset:0; background:rgba(0,0,0,0.55);
                     z-index:5500; display:none; backdrop-filter:blur(2px);
@@ -1191,7 +1208,7 @@ function buildPostCard(r, user_role, is_in_class, discId) {
             <div class="disc-post-content">
                 <div class="disc-post-header">
                     ${avatarHtml}
-                    <span class="disc-author">${displayName}</span>
+                    <span class="disc-author${isMobileOwnMessage ? ' disc-author-me' : ''}">${displayName}</span>
                     ${meTag}
                     <span class="disc-time">${formatTime(r.created_at)}</span>
                 </div>
