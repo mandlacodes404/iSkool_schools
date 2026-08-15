@@ -23,19 +23,19 @@ echo json_encode([
     "orientation"      => "portrait",
     "icons"            => [
         [
-            "src"     => "https://iskool.online/icons/icon-192.png",
+            "src"     => "https://iskool.xyz/icons/icon-192.png",
             "sizes"   => "192x192",
             "type"    => "image/png",
             "purpose" => "any"
         ],
         [
-            "src"     => "https://iskool.online/icons/icon-512.png",
+            "src"     => "https://iskool.xyz/icons/icon-512.png",
             "sizes"   => "512x512",
             "type"    => "image/png",
             "purpose" => "any"
         ],
         [
-            "src"     => "https://iskool.online/icons/maskable-icon-512.png",
+            "src"     => "https://iskool.xyz/icons/maskable-icon-512.png",
             "sizes"   => "512x512",
             "type"    => "image/png",
             "purpose" => "maskable"
