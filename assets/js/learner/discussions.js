@@ -213,18 +213,25 @@ function discAvatarColor(seed) {
         hash = ((hash << 5) - hash) + text.charCodeAt(i);
         hash |= 0;
     }
+    const hue = Math.abs(hash) % 360;
 
-    /* Fixed palette — clean, saturated, easy to tell people apart.
-       Same person always lands on the same colour (stable hash → index). */
-    const palette = ['#e57373', '#64b5f6', '#81c784', '#ffb74d', '#ba68c8', '#4dd0e1', '#f06292'];
-    const color   = palette[Math.abs(hash) % palette.length];
+    /* Mobile: softer, less saturated tint (rgba-style translucency via hsla).
+       Desktop keeps the original solid, more saturated colour untouched.
+       `text` is a brighter, more saturated variant of the same hue — legible
+       as small text on the dark background, used to colour the author name
+       so it visually matches their avatar. */
+    if (!isDesktop()) {
+        return {
+            bg: `hsla(${hue}, 35%, 65%, 0.4)`,
+            color: '#ffffff',
+            text: `hsl(${hue}, 70%, 72%)`,
+        };
+    }
 
-    /* `bg`/`color` used for the avatar circle, `text` for the author name —
-       both the same solid colour so name and avatar visually match. */
     return {
-        bg: color,
+        bg: `hsl(${hue} 68% 38%)`,
         color: '#ffffff',
-        text: color,
+        text: `hsl(${hue}, 70%, 68%)`,
     };
 }
 
