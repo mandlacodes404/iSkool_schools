@@ -1329,13 +1329,9 @@ function injectMobileComposer(discId) {
         position:fixed;bottom:16px;left:0;right:0;
         padding:10px 14px;
         padding-bottom:calc(10px + env(safe-area-inset-bottom));
-        background:rgba(17,17,17,0.96);
-        border-top:1px solid rgba(255,255,255,0.08);
-        border-radius:18px 18px 0 0;
-        box-shadow:0 -4px 24px rgba(0,0,0,0.5);
+        background:transparent;
         z-index:5000;
-        display:flex;flex-direction:column;gap:0;
-        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);`;
+        display:flex;flex-direction:column;gap:0;`;
     trigger.innerHTML = `
         <!-- Mobile typing indicator — shown above the trigger pill -->
         <div id="discMobileTyping" style="
@@ -1352,19 +1348,19 @@ function injectMobileComposer(discId) {
         <!-- Trigger row -->
         <div style="display:flex;align-items:center;gap:10px;">
             <div onclick="discOpenMobileSheet(${discId})" style="
-                flex:1;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);
+                flex:1;background:transparent;border:1px solid rgba(255,255,255,0.07);
                 border-radius:22px;padding:10px 16px;
                 color:#8b949e;font-family:'Nunito',sans-serif;
                 font-size:14px;font-weight:600;cursor:text;
                 display:flex;align-items:center;gap:8px;">
                 <i class="fas fa-comment-dots" style="color:#4fd1c5;font-size:13px;"></i>
-                Write a reply…
+                Add to the discussion…
             </div>
             <button onclick="discOpenMobileSheet(${discId},'attach')" style="
-                width:40px;height:40px;border-radius:50%;background:#1b1b1b;
-                border:1px solid rgba(255,255,255,0.08);color:#8b949e;
+                width:40px;height:40px;border-radius:50%;background:transparent;
+                border:1.5px solid #4fd1c5;color:#4fd1c5;
                 display:flex;align-items:center;justify-content:center;
-                cursor:pointer;flex-shrink:0;font-size:15px;">
+                cursor:pointer;flex-shrink:0;font-size:14px;">
                 <i class="fas fa-paperclip"></i>
             </button>
         </div>`;
