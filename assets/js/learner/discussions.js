@@ -216,17 +216,22 @@ function discAvatarColor(seed) {
     const hue = Math.abs(hash) % 360;
 
     /* Mobile: softer, less saturated tint (rgba-style translucency via hsla).
-       Desktop keeps the original solid, more saturated colour untouched. */
+       Desktop keeps the original solid, more saturated colour untouched.
+       `text` is a brighter, more saturated variant of the same hue — legible
+       as small text on the dark background, used to colour the author name
+       so it visually matches their avatar. */
     if (!isDesktop()) {
         return {
             bg: `hsla(${hue}, 35%, 65%, 0.4)`,
             color: '#ffffff',
+            text: `hsl(${hue}, 70%, 72%)`,
         };
     }
 
     return {
         bg: `hsl(${hue} 68% 38%)`,
         color: '#ffffff',
+        text: `hsl(${hue}, 70%, 68%)`,
     };
 }
 
@@ -1208,7 +1213,7 @@ function buildPostCard(r, user_role, is_in_class, discId) {
             <div class="disc-post-content">
                 <div class="disc-post-header">
                     ${avatarHtml}
-                    <span class="disc-author${isMobileOwnMessage ? ' disc-author-me' : ''}">${displayName}</span>
+                    <span class="disc-author${isMobileOwnMessage ? ' disc-author-me' : ''}"${isMobileOwnMessage ? '' : ` style="color:${avatarColor.text};"`}>${displayName}</span>
                     ${meTag}
                     <span class="disc-time">${formatTime(r.created_at)}</span>
                 </div>
