@@ -219,12 +219,15 @@ function discAvatarColor(seed) {
        Desktop keeps the original solid, more saturated colour untouched.
        `text` is a brighter, more saturated variant of the same hue — legible
        as small text on the dark background, used to colour the author name
-       so it visually matches their avatar. */
+       so it visually matches their avatar.
+       `pillBg` is a soft ~10% tint of the same hue, for pill/badge backgrounds
+       (mirrors the old teal pill's rgba(79,209,197,0.1) look). */
     if (!isDesktop()) {
         return {
             bg: `hsla(${hue}, 35%, 65%, 0.4)`,
             color: '#ffffff',
             text: `hsl(${hue}, 70%, 72%)`,
+            pillBg: `hsla(${hue}, 60%, 60%, 0.12)`,
         };
     }
 
@@ -232,6 +235,7 @@ function discAvatarColor(seed) {
         bg: `hsl(${hue} 68% 38%)`,
         color: '#ffffff',
         text: `hsl(${hue}, 70%, 68%)`,
+        pillBg: `hsla(${hue}, 60%, 55%, 0.12)`,
     };
 }
 
@@ -725,7 +729,7 @@ function renderMobileList(data) {
                                        font-family:'Nunito',sans-serif;white-space:nowrap;overflow:hidden;
                                        text-overflow:ellipsis;">${escHtml(d.title)}</h3>
                             <span data-disc-mobile-count="${d.id}" style="flex-shrink:0;display:flex;align-items:center;gap:4px;font-size:11px;
-                                         font-weight:700;color:#4fd1c5;background:rgba(79,209,197,0.1);
+                                         font-weight:700;color:${avatarColor.text};background:${avatarColor.pillBg};
                                          padding:3px 9px;border-radius:10px;font-family:'Nunito',sans-serif;">
                                 <i class="fas fa-comment" style="font-size:10px;"></i>${d.reply_count}
                             </span>
