@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
         const [manualRes, snapshotRes] = await Promise.all([
-            fetch('partials/teacher_manual.html?v=1.3'),
+            fetch('partials/teacher_manual.html?v=1.5'),
             fetch('api/teacher/get_dashboard_snapshot.php')
         ]);
         const manualHtml = await manualRes.text();
@@ -464,14 +464,14 @@ function renderSnapshotPanel(data) {
     cards.forEach(card => {
         if (!card.data) {
             html += `
-                <div class="snap-card snap-card-empty">
-                    <div class="snap-card-label" style="--snap-label-color:${card.color};">${card.icon} ${card.label}</div>
+                <div class="snap-card snap-card-empty" style="--snap-label-color:${card.color};">
+                    <div class="snap-card-label">${card.icon} ${card.label}</div>
                     <div class="snap-empty-text">${card.empty}</div>
                 </div>`;
         } else {
             html += `
-                <div class="snap-card" onclick="${card.onclick}">
-                    <div class="snap-card-label" style="--snap-label-color:${card.color};">${card.icon} ${card.label}</div>
+                <div class="snap-card" style="--snap-label-color:${card.color};" onclick="${card.onclick}">
+                    <div class="snap-card-label">${card.icon} ${card.label}</div>
                     <div class="snap-card-title">${card.data.title}</div>
                     <div class="snap-card-meta">
                         ${card.meta}
