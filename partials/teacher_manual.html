@@ -71,6 +71,15 @@ strong {
     color: #fff;
     font-weight: 700;
 }
+
+/* Desktop only: make the right-panel manual cards background-transparent
+   while keeping the existing border, so the dashboard-home surface shows
+   through. Mobile keeps the solid --card-bg background. */
+@media (min-width: 900px) {
+    .section {
+        background-color: transparent;
+    }
+}
 </style>
 
 <div class="section">
