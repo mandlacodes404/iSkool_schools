@@ -22,6 +22,15 @@
     border-color: rgba(79, 209, 197, 0.3);
 }
 
+/* Desktop only: right-panel manual cards get a white border on
+   hover instead of the teal tint used on mobile. Placed after the
+   base :hover rule so it wins at desktop widths. */
+@media (min-width: 900px) {
+    .section:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
 .section h2 {
     color: #ffffff;
     font-size: 20px;

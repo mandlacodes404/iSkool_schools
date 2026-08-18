@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
         const [manualRes, snapshotRes] = await Promise.all([
-            fetch('partials/teacher_manual.html?v=1.2'),
+            fetch('partials/teacher_manual.html?v=1.3'),
             fetch('api/teacher/get_dashboard_snapshot.php')
         ]);
         const manualHtml = await manualRes.text();

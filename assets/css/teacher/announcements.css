@@ -1397,6 +1397,17 @@
     border-color: rgba(255,255,255,0.12);
 }
 
+/* Desktop only: on hover, tint the card's border with its own
+   --snap-label-color (already set inline per card — teal for quiz,
+   purple for assignment, orange for announcement) instead of the
+   generic white/12% used on mobile. Placed after the base :hover
+   rule above so it wins on desktop widths. */
+@media (min-width: 900px) {
+    .snap-card:hover {
+        border-color: var(--snap-label-color, rgba(255,255,255,0.12));
+    }
+}
+
 .snap-card-empty {
     cursor: default;
     opacity: 0.5;
