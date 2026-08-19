@@ -63,17 +63,6 @@ body {
     font-family: 'Nunito', sans-serif;
 }
 
-/* ── Desktop/mobile sidebar header+footer swap ──
-   Mobile keeps the original layout: avatar+name+email up top, version
-   string at the bottom. Desktop swaps to: "iSkool" wordmark up top,
-   avatar+name+email pinned at the bottom instead. Default (mobile-first)
-   state below shows the mobile pieces and hides the desktop pieces;
-   the min-width:769px block further down flips this. */
-.desktop-only-brand,
-.desktop-only-account {
-    display: none;
-}
-
 .sidebar {
     width: var(--sidebar-width);
     background: #000000;
@@ -315,50 +304,22 @@ body {
 }
 
 @media (min-width: 769px) {
-    :root {
-        --sidebar-width: 260px;
-    }
     .desktop-toggle-btn {
         display: block;
     }
-
-    /* ── Flat, Claude-style sidebar shape: drop the rounded "pill" curve,
-       keep just the hairline right-edge divider. ── */
-    .sidebar {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        border-right: 1px solid rgba(255,255,255,0.08);
+    .sidebar .footer {
+        bottom: 10px;
     }
-
-    /* ── Header/footer swap: hide the mobile avatar-up-top pieces,
-       show the iSkool wordmark instead. Avatar+name move to
-       the bottom (sidebar-account), replacing the version footer. ── */
-    .mobile-only-avatar,
-    .mobile-only-name,
-    .mobile-only-footer {
-        display: none !important;
+    .sidebar.collapsed .footer {
+        bottom: 20px;
     }
-    .desktop-only-brand,
-    .desktop-only-account {
-        display: flex;
-    }
-    .sidebar-brand {
-        font-size: 18px;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: -0.2px;
-    }
-    .sidebar.collapsed .sidebar-brand {
-        display: none;
-    }
-
     .sidebar-header {
-        margin-bottom: 8px !important;
+        margin-bottom: 16px !important;
     }
     .sidebar-links {
-        margin-top: 12px !important;
-        padding-top: 0;
-        border-top: none;
+        margin-top: 8px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.06);
     }
     .sidebar a,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
@@ -382,82 +343,35 @@ body {
         margin-right: 9px;
         opacity: 0.78;
     }
-
-    /* ── "Lifted" hover/active, matching the Claude sidebar: a soft,
-       slightly-more-opaque rounded fill rather than a flat tint or a
-       shifting translateX/border-left. Row radius (9px, set above)
-       is what gives the rounded "lifted" shape. ── */
     .sidebar a:hover,
-    .sidebar button:not(.join-class-btn):not(.desktop-close-btn):hover {
-        background: rgba(255,255,255,0.07);
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn):hover,
+    .sidebar a.active,
+    .sidebar button.active {
+        background: rgba(255,255,255,0.045);
         color: #e2e8f0;
         transform: none;
     }
-    /* Active-state override lives further down the file, right after
-       the unscoped .sidebar a.active rule it needs to beat on source
-       order (see comment there) — kept in one place instead of two. */
-
-    /* ── Grouping: quiet-list feel via spacing only, no divider lines.
-       Group 1 (coursework): Home, Quiz, Assignments, Resources, Gradebook
-       Group 2 (reference): Announcements, Evaluations, Syllabus,
-                             Discussions, Calendar
-       Group 3 (class management): Join a Class / My Class ── */
-    #nav-announcements-sidebar {
-        margin-top: 18px;
+    .sidebar a.active,
+    .sidebar button.active {
+        border-left: 2px solid #4fd1c5;
+        padding-left: 8px;
     }
-    #nav-joinclass-sidebar,
-    #nav-myclass-sidebar {
-        margin-top: 18px;
-    }
-
-    /* Reserve room at the bottom of the sidebar so the last nav item
-       (Join a Class / My Class) never sits behind the absolutely-
-       positioned .sidebar-account block below. */
-    .sidebar-links {
-        padding-bottom: 76px;
-    }
-
-    /* ── Bottom account block (desktop only): avatar + name on one
-       line, pinned where the version footer used to sit. ── */
-    .sidebar-account {
-        position: absolute;
-        bottom: 14px;
-        left: 20px;
-        width: calc(100% - 40px);
-        align-items: center;
-        gap: 10px;
-        padding: 8px;
-        border-radius: 9px;
-        cursor: pointer;
-        transition: background var(--transition-speed) ease;
-    }
-    .sidebar-account:hover {
-        background: rgba(255,255,255,0.07);
-    }
-    .sidebar-account-name {
-        font-size: 13px;
-        font-weight: 600;
+    .learner-name {
+        font-size: 16px;
+        font-weight: 400;
+        margin-top: 8px;
+        max-height: none;
+        opacity: 1;
+        display: block;
         color: #fff;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        min-width: 0;
-        flex: 1;
     }
-    .sidebar-account-avatar {
-        width: 28px;
-        height: 28px;
+    .learner-email {
         font-size: 11px;
-        flex-shrink: 0;
-    }
-    .sidebar.collapsed .sidebar-account-name {
-        display: none;
-    }
-    .sidebar.collapsed .sidebar-account {
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        padding: 8px;
+        color: #7d8794;
+        margin-bottom: 6px;
+        max-height: none;
+        opacity: 1;
+        display: block;
     }
 }
 
@@ -1379,23 +1293,6 @@ iframe {
     border-left: none; /* Remove the old border */
 }
 
-/* Desktop only: override the teal/grey inset-shadow active state above
-   with the flat "lifted" rounded fill used across the rest of the
-   Claude-style desktop sidebar redesign. This rule must come after the
-   unscoped one directly above (same specificity — source order decides),
-   otherwise the teal/grey version would win on desktop too. Mobile is
-   untouched; it still uses the teal/grey box-shadow version above. */
-@media (min-width: 769px) {
-    .sidebar a.active,
-    .sidebar button.active {
-        background: rgba(255,255,255,0.09);
-        box-shadow: none;
-        border-left: none;
-        padding-left: 12px;
-        color: #ffffff;
-    }
-}
-
 .sidebar span {
     opacity: 1;
     transition: opacity var(--transition-speed) ease;
@@ -1691,11 +1588,10 @@ iframe {
         transform: translateX(0);
     }
 
-    /* Desktop-only sidebar (menu) background — matches Claude's
-       neutral dark gray sidebar (not the blue-tinted #12161c used
-       elsewhere, e.g. .main-header, which is untouched). */
+    /* Desktop-only sidebar (menu) background — matches teacher dashboard.
+       Only overrides color; layout/position rules above are untouched. */
     .sidebar {
-        background: #1e1e1e;
+        background: #12161c;
     }
 
     /* No permanent sidebar anymore - remove collapsed logic */
