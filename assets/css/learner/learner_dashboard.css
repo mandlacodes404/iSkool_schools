@@ -315,6 +315,9 @@ body {
 }
 
 @media (min-width: 769px) {
+    :root {
+        --sidebar-width: 260px;
+    }
     .desktop-toggle-btn {
         display: block;
     }
@@ -328,7 +331,7 @@ body {
     }
 
     /* ── Header/footer swap: hide the mobile avatar-up-top pieces,
-       show the iSkool wordmark instead. Avatar+name+email move to
+       show the iSkool wordmark instead. Avatar+name move to
        the bottom (sidebar-account), replacing the version footer. ── */
     .mobile-only-avatar,
     .mobile-only-name,
@@ -350,12 +353,12 @@ body {
     }
 
     .sidebar-header {
-        margin-bottom: 16px !important;
+        margin-bottom: 8px !important;
     }
     .sidebar-links {
-        margin-top: 8px;
-        padding-top: 10px;
-        border-top: 1px solid rgba(255,255,255,0.06);
+        margin-top: 12px !important;
+        padding-top: 0;
+        border-top: none;
     }
     .sidebar a,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
@@ -414,8 +417,8 @@ body {
         padding-bottom: 76px;
     }
 
-    /* ── Bottom account block (desktop only): avatar + name + email,
-       pinned where the version footer used to sit. ── */
+    /* ── Bottom account block (desktop only): avatar + name on one
+       line, pinned where the version footer used to sit. ── */
     .sidebar-account {
         position: absolute;
         bottom: 14px;
@@ -431,10 +434,6 @@ body {
     .sidebar-account:hover {
         background: rgba(255,255,255,0.07);
     }
-    .sidebar-account-text {
-        min-width: 0;
-        flex: 1;
-    }
     .sidebar-account-name {
         font-size: 13px;
         font-weight: 600;
@@ -442,20 +441,16 @@ body {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-    .sidebar-account-email {
-        font-size: 11px;
-        color: #7d8794;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-width: 0;
+        flex: 1;
     }
     .sidebar-account-avatar {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+        flex-shrink: 0;
     }
-    .sidebar.collapsed .sidebar-account-text {
+    .sidebar.collapsed .sidebar-account-name {
         display: none;
     }
     .sidebar.collapsed .sidebar-account {
@@ -1696,10 +1691,11 @@ iframe {
         transform: translateX(0);
     }
 
-    /* Desktop-only sidebar (menu) background — matches teacher dashboard.
-       Only overrides color; layout/position rules above are untouched. */
+    /* Desktop-only sidebar (menu) background — matches Claude's
+       neutral dark gray sidebar (not the blue-tinted #12161c used
+       elsewhere, e.g. .main-header, which is untouched). */
     .sidebar {
-        background: #12161c;
+        background: #1e1e1e;
     }
 
     /* No permanent sidebar anymore - remove collapsed logic */

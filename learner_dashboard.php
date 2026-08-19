@@ -387,24 +387,21 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     <!-- MOBILE ONLY: version footer, exactly as before -->
     <div class="footer mobile-only-footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
 
-    <!-- DESKTOP ONLY: avatar + name + email pinned at the bottom, replacing the version footer -->
+    <!-- DESKTOP ONLY: avatar + name pinned at the bottom, replacing the version footer -->
     <div class="sidebar-account desktop-only-account" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); const _sb = document.querySelector('.sidebar'); if(_sb){ _sb.classList.remove('active','desktop-open'); const _ov = document.getElementById('mobileOverlay'); if(_ov) _ov.style.display='none'; }">
         <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>"
                      alt="Profile Picture"
                      class="learner-avatar"
-                     style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:none;">
+                     style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:none;">
             <?php else: ?>
                 <div class="initials-avatar sidebar-account-avatar">
                     <?= htmlspecialchars($initials) ?>
                 </div>
             <?php endif; ?>
         </div>
-        <div class="sidebar-account-text">
-            <div class="sidebar-account-name"><?= htmlspecialchars($learnerFullName) ?></div>
-            <div class="sidebar-account-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
-        </div>
+        <div class="sidebar-account-name"><?= htmlspecialchars($learnerFullName) ?></div>
     </div>
 </div>
 
