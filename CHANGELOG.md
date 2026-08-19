@@ -1,6 +1,14 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Changed
+- Teacher Dashboard (Desktop): Home page padding on `.dashboard-home-layout` increased from `8px` to `20px` on all sides, matching `#api-content-area`'s base padding elsewhere in the app. Desktop-only; mobile is unaffected (`announcements.css`).
+- Teacher Dashboard (Desktop): Add Event modal (`.mini-cal-modal-box`, opened from the mini calendar's `+` button) background changed from `#1a1919` to a slightly lighter, fully solid `#1e1e1e` with stronger border contrast, so it reads clearly as its own surface against the overlay (`dashboard.css`).
+- Teacher Dashboard (Desktop): Home page "Quick Snapshot" to-do cards (`.snap-card`) and the manual/help cards on the right panel (`.section` in `teacher_manual.html`) now have a transparent background instead of a solid charcoal fill, keeping only their border. Both panels' border colour is now unified at `rgba(255,255,255,0.12)`. Mobile keeps the original solid backgrounds on both (`announcements.css`, `teacher_manual.html`).
+- Teacher Quizzes (Desktop): Quiz action buttons (`.qz-action-card` — Publish, Close, Reopen, Results, Edit, Delete, Integrity) base state changed from a faint filled background to a transparent background with the same unified border colour (`rgba(255,255,255,0.12)`) used on the home page panels; hover border changed to `rgba(255,255,255,0.5)`. Each button's per-action colour (teal/red/green/blue/orange) on hover is unchanged. The "+ New" quiz button was not touched (`quizzes.js`).
+- Teacher Grades (Desktop): Open-ended grading learner cards (`.gr-oe-learner-card`, showing learner name and score) background changed from solid `#1a1919` to transparent, with the border colour unified to `rgba(255,255,255,0.12)` and a new hover state (`rgba(255,255,255,0.5)`). Desktop-only; mobile keeps the original solid `#1a1919` background (`grades.css`).
+
+## [1.2.1] - 2026-08-15
 ### Added
 - Teacher Announcements (Desktop): Added a Delete action to the detail panel, with a confirmation modal matching the existing Resources delete pattern; school-wide announcements posted by admin are not deletable from here. Backed by a new endpoint that checks ownership before deleting (`announcements.js`, `announcements.css`, `delete_announcement.php`).
 - Teacher Assignments (Desktop): Added a Delete action alongside "Download All" in the detail panel, with the same confirmation modal pattern. The new endpoint blocks the delete and tells the teacher how many learners have already submitted, rather than silently removing their work; only deletes the assignment's attachment and row once there are zero submissions (`assignments.js`, `assignments.css`, `delete_assignment.php`).
