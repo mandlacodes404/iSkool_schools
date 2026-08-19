@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.1">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.2">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -254,8 +254,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 <div class="sidebar">
     
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-        
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); const _sb = document.querySelector('.sidebar'); if(_sb){ _sb.classList.remove('active','desktop-open'); const _ov = document.getElementById('mobileOverlay'); if(_ov) _ov.style.display='none'; }">
+
+        <!-- MOBILE: avatar stays up top, exactly as before -->
+        <div class="profile-picture-wrapper mobile-only-avatar" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); const _sb = document.querySelector('.sidebar'); if(_sb){ _sb.classList.remove('active','desktop-open'); const _ov = document.getElementById('mobileOverlay'); if(_ov) _ov.style.display='none'; }">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
@@ -269,6 +270,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
             <input type="file" id="profileInput" accept="image/*" style="display:none;">
         </div>
 
+        <!-- DESKTOP: iSkool wordmark replaces the avatar up top (avatar moves to sidebar-account at the bottom below) -->
+        <div class="sidebar-brand desktop-only-brand">iSkool</div>
+
         <button type="button" class="desktop-close-btn" onclick="toggleSidebar(true)" aria-label="Close Menu">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -278,8 +282,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 </button>
     </div>
 
-    <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
-    <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
+    <!-- MOBILE ONLY: name/email under the top avatar, exactly as before -->
+    <div class="learner-name mobile-only-name"><?= htmlspecialchars($learnerFullName) ?></div>  
+    <div class="learner-email mobile-only-name"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
 
     <div class="sidebar-links" style="margin-top:50px;">
       <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" id="nav-home-sidebar">
@@ -379,7 +384,28 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <?php endif; ?>
     </div>
 
-    <div class="footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
+    <!-- MOBILE ONLY: version footer, exactly as before -->
+    <div class="footer mobile-only-footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
+
+    <!-- DESKTOP ONLY: avatar + name + email pinned at the bottom, replacing the version footer -->
+    <div class="sidebar-account desktop-only-account" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); const _sb = document.querySelector('.sidebar'); if(_sb){ _sb.classList.remove('active','desktop-open'); const _ov = document.getElementById('mobileOverlay'); if(_ov) _ov.style.display='none'; }">
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;">
+            <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
+                <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>"
+                     alt="Profile Picture"
+                     class="learner-avatar"
+                     style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:none;">
+            <?php else: ?>
+                <div class="initials-avatar sidebar-account-avatar">
+                    <?= htmlspecialchars($initials) ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="sidebar-account-text">
+            <div class="sidebar-account-name"><?= htmlspecialchars($learnerFullName) ?></div>
+            <div class="sidebar-account-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">
