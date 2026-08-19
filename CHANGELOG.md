@@ -12,6 +12,8 @@
 - Learner Dashboard (Mobile): Home page boxes (`.lh-class-card`, `.lh-card`) background changed from solid `#272726` to transparent, with a new `1px solid rgba(255,255,255,0.12)` border matching the desktop panel border colour, in place of the previous borderless solid fill (`manual.css`).
 - Learner Dashboard (Desktop): Sidebar (menu) width increased from `240px` to `260px`, and the right-edge border plus rounded top-right/bottom-right corners removed, so the panel now sits flush against the main content with a flat edge. Mobile sidebar width and shape are unchanged (`learner_dashboard.css`).
 - Learner Dashboard (Desktop): Sidebar background darkened from `#12161c` to `#0a0d12`, intentionally kept off pure black. Mobile and the top header (`.main-header`) are unaffected (`learner_dashboard.css`).
+- Teacher Dashboard (Desktop): Sidebar (menu) width increased from `240px` to `260px`, background darkened from `#12161c` to `#0a0d12`, and the rounded right-edge corners plus `rgba(255,255,255,0.18)` border removed, matching the same changes made to the learner sidebar. The closed/off-screen resting position (`left: -240px`) was also updated to `-260px` to match the new width; mobile overrides both `left` and `width` independently and is unaffected (`teacher_dashboard.css`).
+- Teacher Dashboard (Mobile & Desktop): School logo border thinned from `2px` to `0.5px`. Single shared rule, not scoped to a breakpoint, so this applies identically on both (`teacher_dashboard.css`).
 
 ## [1.2.1] - 2026-08-15
 ### Added
