@@ -339,8 +339,8 @@ function renderTeacherQuizzes(data) {
                 margin-top: 8px;
             }
             .qz-action-card {
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.08);
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.12);
                 border-radius: 12px;
                 padding: 18px 20px;
                 cursor: pointer;
@@ -354,7 +354,7 @@ function renderTeacherQuizzes(data) {
             }
             .qz-action-card:hover {
                 background: rgba(255,255,255,0.06);
-                border-color: rgba(255,255,255,0.15);
+                border-color: #ffffff;
                 transform: translateY(-1px);
             }
             .qz-action-card.publish { border-color: rgba(79,209,197,0.2); }
