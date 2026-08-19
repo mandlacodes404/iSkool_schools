@@ -320,6 +320,21 @@
     padding: 16px;
     margin: 14px 0;
 }
+/* Desktop only: background-transparent with the same border colour used
+   across the dashboard home panels (.snap-card / .section), and white
+   on hover. Mobile keeps the solid #1a1919 background above. Placed
+   AFTER the base rule — equal-specificity rules resolve by source
+   order, so this must come later in the file to actually win. */
+@media (min-width: 900px) {
+    .gr-oe-learner-card {
+        background: transparent;
+        border-color: rgba(255,255,255,0.12);
+        transition: border-color 0.2s ease;
+    }
+    .gr-oe-learner-card:hover {
+        border-color: #ffffff;
+    }
+}
 .gr-oe-learner-card-top {
     display: flex;
     justify-content: space-between;
