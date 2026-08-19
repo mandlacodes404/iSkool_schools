@@ -184,7 +184,7 @@
             width: 36px; height: 36px;
             border-radius: 8px;
             object-fit: cover;
-            border: 2px solid #30363d;
+            border: 0.5px solid #30363d;
         }
         .top-nav-school-name {
             font-size: 16px;
