@@ -35,7 +35,7 @@
             box-sizing: border-box;
             position: fixed;
             top: 0;
-            left: -240px;
+            left: -260px;
             visibility: hidden;
             opacity: 0;
             height: 100vh;
@@ -467,6 +467,9 @@
         }
 
         @media (min-width: 769px) {
+            :root {
+                --sidebar-width: 260px;
+            }
             /* Desktop API layout: darker navigation/auxiliary panels frame
                the #0d1117 main workspace. */
             .top-nav-wrapper,
@@ -486,12 +489,15 @@
 
             .sidebar a.desktop-top-row-link { display: none; }
 
-            /* Desktop-only sidebar (menu) — matches learner dashboard styling */
+            /* Desktop-only sidebar (menu) — matches learner dashboard styling.
+               Background darkened from #12161c to #0a0d12 (kept off pure
+               black), and the rounded right-edge corners + border removed
+               so the panel sits flush against the main content. */
             .sidebar {
-                background: #12161c;
-                border-top-right-radius: 20px;
-                border-bottom-right-radius: 20px;
-                border-right: 1px solid rgba(255, 255, 255, 0.18);
+                background: #0a0d12;
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                border-right: none;
             }
 
             .sidebar-links {
