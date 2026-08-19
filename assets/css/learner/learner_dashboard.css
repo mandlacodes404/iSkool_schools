@@ -1564,6 +1564,9 @@ iframe {
 
 /* Default hidden on desktop - slide from left */
 @media (min-width: 769px) {
+    :root {
+        --sidebar-width: 260px;
+    }
     .sidebar {
         /* Off-canvas via transform instead of `left`. `left` is a layout
            property — animating it forces the browser to recompute layout
@@ -1592,6 +1595,18 @@ iframe {
        Only overrides color; layout/position rules above are untouched. */
     .sidebar {
         background: #12161c;
+    }
+
+    /* Desktop only: remove the right-edge border and the rounded
+       top-right/bottom-right corners inherited from the base .sidebar
+       rule (line ~93). Mobile already has its own border-right:none
+       override further up the file (max-width:768px block) — this is
+       the equivalent for desktop, which previously had no override
+       and was still showing the border + curve. */
+    .sidebar {
+        border-right: none;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
     }
 
     /* No permanent sidebar anymore - remove collapsed logic */
