@@ -1591,10 +1591,11 @@ iframe {
         transform: translateX(0);
     }
 
-    /* Desktop-only sidebar (menu) background — matches teacher dashboard.
-       Only overrides color; layout/position rules above are untouched. */
+    /* Desktop-only sidebar (menu) background — darker than the previous
+       #12161c but intentionally not pure black (#000000), keeping a
+       faint hint of the same blue-gray tint. */
     .sidebar {
-        background: #12161c;
+        background: #0a0d12;
     }
 
     /* Desktop only: remove the right-edge border and the rounded
