@@ -130,7 +130,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=3.9';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=4.0';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -327,14 +327,14 @@ function buildHomeLayout(data, manualHtml) {
 function buildLearnerSnapCard(card) {
     if (!card.data) {
         return `
-            <div class="learner-snap-card learner-snap-card-empty">
+            <div class="learner-snap-card learner-snap-card-empty" style="--snap-label-color:${card.color};">
                 <div class="learner-snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
                 <div class="learner-snap-empty-text">${card.empty}</div>
             </div>`;
     }
 
     return `
-        <div class="learner-snap-card" onclick="${card.onclick}">
+        <div class="learner-snap-card" style="--snap-label-color:${card.color};" onclick="${card.onclick}">
             <div class="learner-snap-card-label" style="color:${card.color}">${card.icon} ${card.label}</div>
             <div class="learner-snap-card-title">${card.data.title}</div>
             <div class="learner-snap-card-meta">
