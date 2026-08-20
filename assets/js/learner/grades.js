@@ -1565,6 +1565,24 @@ function renderProgressReport(data) {
                 /* Inside the modal, the report no longer needs its own topbar/back-button */
                 .pr-modal-sheet .pr-topbar { display: none !important; }
                 .pr-modal-sheet .pr-wrap { padding-top: 4px; max-width: 100%; }
+
+                /* ── QUIZ REVIEW: same modal sheet treatment ── */
+                .pr-modal-sheet.review-modal-sheet {
+                    height: 92vh;
+                    max-height: 92vh;
+                }
+                .review-modal-sheet .pr-modal-scroll {
+                    flex: 1;
+                    padding: 0;
+                    display: flex;
+                }
+                .review-modal-frame {
+                    width: 100%;
+                    height: 100%;
+                    border: 0;
+                    background: #0d1117;
+                    display: block;
+                }
                 .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
                 .pr-subjects-list { padding: 0 16px 6px; }
                 .pr-subject-info { flex: 0 0 100px; }
@@ -1882,15 +1900,43 @@ function formatDate(dateStr) {
 
 window.openQuizReview = function(resultId, event) {
     if (event) event.stopPropagation();
-    const apiArea = document.getElementById('api-content-area');
-    const iframe  = document.getElementById('mainFrame');
-    const myClassContent = document.getElementById('myClassContent');
-    const mainContent = document.querySelector('.main-content');
-    const mobileBottomNav = document.getElementById('mobileBottomNav');
     const isMobileGradesView = window.innerWidth <= 899;
     const reviewUrl = `review_quiz.php?result_id=${encodeURIComponent(resultId)}`;
 
     sessionStorage.setItem('lastLearnerPage', 'grades');
+
+    if (isMobileGradesView) {
+        // Mobile: same full-screen modal sheet treatment as the progress
+        // report. Grades view (and its header/bottom nav) underneath is
+        // left completely alone; closing the sheet is a dismiss, not a
+        // navigation, so no configureHeader/back-button wiring is needed.
+        let modal = document.getElementById('prReportModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'prReportModal';
+            document.body.appendChild(modal);
+        }
+        modal.className = 'pr-modal-overlay';
+        modal.innerHTML = `
+            <div class="pr-modal-sheet review-modal-sheet" onclick="event.stopPropagation()">
+                <div class="pr-modal-handle-row">
+                    <div class="pr-modal-grabber"></div>
+                    <button class="pr-modal-close-btn" onclick="closeQuizReviewModal()" aria-label="Close">×</button>
+                </div>
+                <div class="pr-modal-scroll">
+                    <iframe class="review-modal-frame" src="${reviewUrl}" title="Quiz review"></iframe>
+                </div>
+            </div>`;
+        modal.onclick = () => closeQuizReviewModal();
+        return;
+    }
+
+    // Desktop: unchanged — swap the iframe into the panel, header goes detail-mode.
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
+
     if (window.configureHeader) {
         window.configureHeader({ title: 'Review', mode: 'detail', detailType: 'Review', backLabel: 'Grades' });
     }
@@ -1899,15 +1945,11 @@ window.openQuizReview = function(resultId, event) {
     if (iframe)  {
         iframe.style.display = 'block';
         iframe.src = reviewUrl;
-        if (isMobileGradesView) {
-            iframe.classList.add('grades-mobile-review-frame');
-            iframe.setAttribute('title', 'Quiz review');
-        } else {
-            iframe.classList.remove('grades-mobile-review-frame');
-        }
-    }
-    if (isMobileGradesView && mobileBottomNav) {
-        mobileBottomNav.style.setProperty('display', 'none', 'important');
     }
     if (mainContent) mainContent.scrollTop = 0;
+};
+
+window.closeQuizReviewModal = function () {
+    const modal = document.getElementById('prReportModal');
+    if (modal) modal.remove();
 };
