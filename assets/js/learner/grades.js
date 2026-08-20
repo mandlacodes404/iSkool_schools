@@ -1493,6 +1493,78 @@ function renderProgressReport(data) {
                 .pr-strip-item { flex: 1; min-width: 90px; padding-right: 0; }
                 .pr-term-tabs { padding: 14px 16px 0; gap: 6px; }
                 .pr-term-tab { min-width: calc(50% - 4px); flex: none; padding: 10px 6px; }
+            }
+
+            /* ── MOBILE: PROGRESS REPORT AS FULL-SCREEN MODAL ── */
+            @media (max-width: 899px) {
+                .pr-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.55);
+                    z-index: 9300;
+                    display: flex;
+                    align-items: flex-end;
+                    opacity: 0;
+                    animation: prOverlayFadeIn 0.22s ease forwards;
+                }
+                @keyframes prOverlayFadeIn { to { opacity: 1; } }
+
+                .pr-modal-sheet {
+                    width: 100%;
+                    max-height: 92vh;
+                    margin-top: auto;
+                    background: #0d1117;
+                    border-radius: 18px 18px 0 0;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    transform: translateY(100%);
+                    animation: prSheetSlideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+                }
+                @keyframes prSheetSlideUp { to { transform: translateY(0); } }
+
+                .pr-modal-handle-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    padding: 10px 0 4px;
+                    flex-shrink: 0;
+                }
+                .pr-modal-grabber {
+                    width: 36px;
+                    height: 4px;
+                    border-radius: 100px;
+                    background: rgba(255,255,255,0.18);
+                }
+                .pr-modal-close-btn {
+                    position: absolute;
+                    right: 12px;
+                    top: 6px;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.06);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: #c9d1d9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    line-height: 1;
+                    cursor: pointer;
+                }
+                .pr-modal-close-btn:active { background: rgba(255,255,255,0.12); }
+
+                .pr-modal-scroll {
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                    padding: 4px 0 0;
+                }
+
+                /* Inside the modal, the report no longer needs its own topbar/back-button */
+                .pr-modal-sheet .pr-topbar { display: none !important; }
+                .pr-modal-sheet .pr-wrap { padding-top: 4px; max-width: 100%; }
                 .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
                 .pr-subjects-list { padding: 0 16px 6px; }
                 .pr-subject-info { flex: 0 0 100px; }
@@ -1606,7 +1678,7 @@ function renderProgressReport(data) {
         return (name || '').split(' ').filter(Boolean).slice(0,2).map(function(w){ return w[0].toUpperCase(); }).join('');
     }
 
-    apiArea.innerHTML = `
+    const reportInnerHtml = `
         <div class="pr-wrap" id="pr-wrap">
 
             <div class="pr-topbar">
@@ -1719,6 +1791,34 @@ function renderProgressReport(data) {
             </div>
         </div>`;
 
+    const isMobileGradesView = window.innerWidth <= 899;
+
+    if (isMobileGradesView) {
+        // Mobile: report opens as a full-screen modal sheet layered over the
+        // grades view underneath, so the underlying grades screen is left
+        // untouched and "closing" the report is a dismiss, not a navigation.
+        let modal = document.getElementById('prReportModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'prReportModal';
+            document.body.appendChild(modal);
+        }
+        modal.className = 'pr-modal-overlay';
+        modal.innerHTML = `
+            <div class="pr-modal-sheet" onclick="event.stopPropagation()">
+                <div class="pr-modal-handle-row">
+                    <div class="pr-modal-grabber"></div>
+                    <button class="pr-modal-close-btn" onclick="prBackToGrades()" aria-label="Close">×</button>
+                </div>
+                <div class="pr-modal-scroll">
+                    ${reportInnerHtml}
+                </div>
+            </div>`;
+        modal.onclick = () => prBackToGrades();
+    } else {
+        apiArea.innerHTML = reportInnerHtml;
+    }
+
     apiArea._prData            = data;
     apiArea._buildSubjectCards = buildSubjectCards;
     apiArea._pctColor          = pctColor;
@@ -1735,6 +1835,11 @@ window.prSwitchTerm = function (term) {
 };
 
 window.prBackToGrades = function () {
+    const modal = document.getElementById('prReportModal');
+    if (modal && window.innerWidth <= 899) {
+        modal.remove();
+        return;
+    }
     window.fetchGrades();
 };
 
