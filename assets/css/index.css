@@ -690,40 +690,13 @@ body {
         align-items: stretch;
         flex: 0 0 48%;
         padding: 48px 40px;
-        background: #111110;
+        background: transparent;
         border-right: none;
         box-sizing: border-box;
         position: sticky;
         top: 0;
         height: 100vh;
         overflow: hidden;
-    }
-
-    /* Curved SVG divider on right edge of brand panel */
-    .brand-panel::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: -1px;
-        width: 32px;
-        height: 100%;
-        background: #111110;
-        clip-path: polygon(0 0, 60% 0, 100% 6%, 100% 94%, 60% 100%, 0 100%);
-        z-index: 2;
-        pointer-events: none;
-    }
-
-    /* Thin accent line on the curved edge */
-    .brand-panel::before {
-        content: '';
-        position: absolute;
-        top: 6%;
-        right: 18px;
-        width: 1px;
-        height: 88%;
-        background: linear-gradient(to bottom, transparent, #2a2a2a 15%, #2a2a2a 85%, transparent);
-        z-index: 3;
-        pointer-events: none;
     }
 
     .brand-panel-logo,
@@ -749,7 +722,7 @@ body {
 
     .form-panel {
         flex: 1;
-        background: #111110;
+        background: transparent;
         padding: 60px 64px;
         justify-content: flex-start;
         margin: 18px;
