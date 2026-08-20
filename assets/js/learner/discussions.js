@@ -825,6 +825,13 @@ function renderThread(data) {
     const target = getThreadTarget();
     if (!target) return;
 
+    /* MOBILE: now that we actually know the discussion's title, push it into
+       the real app header (the sticky bar with the back button) so it shows
+       in full — not truncated, and not a generic "Discussion" placeholder. */
+    if (!isDesktop() && window.configureHeader) {
+        window.configureHeader({ title: disc.title, mode: 'detail' });
+    }
+
     let lastDate = null;
 
     function maybeDate(dateStr) {
@@ -897,10 +904,6 @@ function renderThread(data) {
             .disc-thread-head { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:rgba(10,10,14,0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); position:relative; z-index:2; }
             .disc-thread-head-title { font-size:14px; font-weight:700; color:#e2e8f0; font-family:'Nunito',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
             .disc-thread-head-meta { font-size:11px; color:#8b949e; font-family:'Nunito',sans-serif; margin-top:2px; }
-
-            /* MOBILE: title-only block, sits directly below the back button/header */
-            .disc-thread-head-mobile { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.07); flex-shrink:0; background:rgba(10,10,14,0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); position:relative; z-index:2; }
-            .disc-thread-head-mobile .disc-thread-head-title { font-size:18px; font-weight:800; white-space:normal; }
 
             /* ── SCROLL AREA — takes all remaining space, compose stays below ── */
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; background:transparent; position:relative; z-index:1; }
@@ -1106,10 +1109,7 @@ function renderThread(data) {
             <div class="disc-thread-head">
                 <div class="disc-thread-head-title">${escHtml(disc.title)}</div>
                 <div class="disc-thread-head-meta" id="discThreadPostCount">${escHtml(disc.subject_name || '')}${disc.subject_name ? ' · ' : ''}${replies.length + 1} post${replies.length === 0 ? '' : 's'}</div>
-            </div>` : `
-            <div class="disc-thread-head-mobile">
-                <div class="disc-thread-head-title">${escHtml(disc.title)}</div>
-            </div>`}
+            </div>` : ''}
             <div class="disc-posts-scroll" id="discPostsScroll">
                 ${postsHtml}
                 <div id="discBottom"></div>
