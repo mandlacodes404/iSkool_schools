@@ -749,9 +749,14 @@ body {
 
     .form-panel {
         flex: 1;
-        background: #1a1919;
+        background: #111110;
         padding: 60px 64px;
         justify-content: flex-start;
+        margin: 18px;
+        min-height: calc(100vh - 36px);
+        max-height: calc(100vh - 36px);
+        border: 1px solid #2a2a2a;
+        border-radius: 16px;
     }
 
     /* Keep the shorter login form vertically centred */
