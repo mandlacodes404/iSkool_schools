@@ -724,7 +724,7 @@ body {
         flex: 1;
         background: transparent;
         padding: 60px 64px;
-        justify-content: flex-start;
+        justify-content: center;
         margin: 18px;
         min-height: calc(100vh - 36px);
         max-height: calc(100vh - 36px);
@@ -732,12 +732,17 @@ body {
         border-radius: 16px;
     }
 
-    /* Keep the shorter login form vertically centred */
+    /* Register form is long — top-align the panel so it scrolls naturally
+       from the top, instead of centering (which would force overflow) */
+    .form-panel:has(#register-form.active) {
+        justify-content: flex-start;
+    }
+
+    /* Login form is short — no need for a forced min-height, .form-panel's
+       own centering (justify-content: center) handles vertical centering */
     #login-form.active {
-        min-height: calc(100vh - 120px);
         display: flex;
         flex-direction: column;
-        justify-content: center;
     }
 
     /* Register form gets breathing room at top and bottom */
