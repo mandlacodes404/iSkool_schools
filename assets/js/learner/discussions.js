@@ -322,13 +322,17 @@ window.fetchDiscussions = async function(options = {}) {
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
     if (window.configureHeader) window.configureHeader({ title: 'Discussions', mode: 'standard' });
 
-    // Undo the inline visibility override we set while inside a thread, so
-    // other detail-mode pages (Settings, My Class) get their normal
-    // scroll-collapse fade-in back instead of inheriting our forced state.
+    // Undo the inline visibility/mask override we set while inside a
+    // thread, so other detail-mode pages (Settings, My Class) get their
+    // normal scroll-collapse fade-in and ellipsis truncation back instead
+    // of inheriting our forced state.
     const headerTitleElReset = document.getElementById('headerTitle');
     if (headerTitleElReset) {
-        headerTitleElReset.style.opacity   = '';
-        headerTitleElReset.style.transform = '';
+        headerTitleElReset.style.opacity          = '';
+        headerTitleElReset.style.transform        = '';
+        headerTitleElReset.style.webkitMaskImage  = '';
+        headerTitleElReset.style.maskImage        = '';
+        headerTitleElReset.style.textOverflow     = '';
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -836,9 +840,10 @@ function renderThread(data) {
 
     /* MOBILE: now that we actually know the discussion's title, push it into
        the real app header (the sticky bar with the back button) so it shows
-       in full — not truncated, and not a generic "Discussion" placeholder.
-       detailType stays 'Discussion' explicitly so the back button (which
-       matches on detailType) still knows this is a discussion thread. */
+       in full — not hard-truncated, and not a generic "Discussion"
+       placeholder. detailType stays 'Discussion' explicitly so the back
+       button (which matches on detailType) still knows this is a
+       discussion thread. */
     if (!isDesktop() && window.configureHeader) {
         window.configureHeader({ title: disc.title, mode: 'detail', detailType: 'Discussion' });
         // Discussion has no large body title to scroll past (unlike Settings/
@@ -848,6 +853,16 @@ function renderThread(data) {
         if (headerTitleEl) {
             headerTitleEl.style.opacity   = '1';
             headerTitleEl.style.transform = 'translateY(0)';
+            // Long titles: fade the right edge instead of cutting with an
+            // ellipsis. The gradient only visually clips text that's
+            // actually wide enough to overflow the title column — short
+            // titles sit fully opaque with no fade at all.
+            headerTitleEl.style.webkitMaskImage = 'linear-gradient(to right, #000 85%, transparent 100%)';
+            headerTitleEl.style.maskImage       = 'linear-gradient(to right, #000 85%, transparent 100%)';
+            // Ellipsis would clip the text to "…" before the mask ever runs,
+            // so the fade would just be fading a "…" character. Disabling it
+            // here lets the mask fade real text at the edge instead.
+            headerTitleEl.style.textOverflow    = 'clip';
         }
     }
 
