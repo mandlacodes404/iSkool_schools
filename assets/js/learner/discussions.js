@@ -827,9 +827,11 @@ function renderThread(data) {
 
     /* MOBILE: now that we actually know the discussion's title, push it into
        the real app header (the sticky bar with the back button) so it shows
-       in full — not truncated, and not a generic "Discussion" placeholder. */
+       in full — not truncated, and not a generic "Discussion" placeholder.
+       detailType stays 'Discussion' explicitly so the back button (which
+       matches on detailType) still knows this is a discussion thread. */
     if (!isDesktop() && window.configureHeader) {
-        window.configureHeader({ title: disc.title, mode: 'detail' });
+        window.configureHeader({ title: disc.title, mode: 'detail', detailType: 'Discussion' });
     }
 
     let lastDate = null;
