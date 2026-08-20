@@ -204,14 +204,13 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-.bp-live-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #3ecf8e;
-    display: inline-block;
-    animation: pvPulse 1.8s infinite ease-in-out;
-    flex-shrink: 0;
+.bp-brand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+    color: #E3E3E3;
 }
 
 /* ── Typewriter intro card ── */

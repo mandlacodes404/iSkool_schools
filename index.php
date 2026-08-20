@@ -77,9 +77,10 @@ if ($result && $row = $result->fetch_assoc()) {
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=4.1">
+    <link rel="stylesheet" href="assets/css/index.css?v=4.2">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -98,7 +99,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link rel="preload" as="style" href="assets/css/learner/grades.css?v=1.7">
     <link rel="preload" as="style" href="assets/css/learner/resources.css?v=1.0">
     <link rel="preload" as="style" href="assets/css/learner/evaluations.css?v=2.8">
-    <link rel="preload" as="style" href="assets/css/learner/learner_dashboard.css?v=6.5">
+    <link rel="preload" as="style" href="assets/css/learner/learner_dashboard.css?v=6.6">
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -138,7 +139,6 @@ function getCsrfToken() {
             <!-- Eyebrow only above preview -->
             <div class="bp-intro">
                 <div class="bp-intro-eyebrow">
-                    <span class="bp-live-dot"></span>
                     <span class="bp-brand-name">iSkool</span>
                 </div>
             </div>
