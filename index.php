@@ -66,7 +66,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <meta charset="UTF-8" />
 <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login - iSkool</title>
+<title>Login - <?= htmlspecialchars($schoolName) ?></title>
 
 <link rel="manifest" href="/manifest.php?v=1.1">
 

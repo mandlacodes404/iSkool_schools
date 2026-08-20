@@ -67,7 +67,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.3">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=1.6">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.1">
-    <title>Dashboard - iSkool</title>
+    <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
