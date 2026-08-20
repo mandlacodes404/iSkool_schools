@@ -322,10 +322,10 @@ window.fetchDiscussions = async function(options = {}) {
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
     if (window.configureHeader) window.configureHeader({ title: 'Discussions', mode: 'standard' });
 
-    // Undo the inline visibility/position/mask override we set while inside
-    // a thread, so other detail-mode pages (Settings, My Class) get their
-    // normal centered layout, scroll-collapse fade-in, and ellipsis
-    // truncation back instead of inheriting our forced state.
+    // Undo the inline visibility/mask override we set while inside a
+    // thread, so other detail-mode pages (Settings, My Class) get their
+    // normal scroll-collapse fade-in and ellipsis truncation back instead
+    // of inheriting our forced state.
     const headerTitleElReset = document.getElementById('headerTitle');
     if (headerTitleElReset) {
         headerTitleElReset.style.opacity          = '';
@@ -333,14 +333,6 @@ window.fetchDiscussions = async function(options = {}) {
         headerTitleElReset.style.webkitMaskImage  = '';
         headerTitleElReset.style.maskImage        = '';
         headerTitleElReset.style.textOverflow     = '';
-        headerTitleElReset.style.position         = '';
-        headerTitleElReset.style.left             = '';
-        headerTitleElReset.style.right            = '';
-        headerTitleElReset.style.width            = '';
-        headerTitleElReset.style.maxWidth         = '';
-        headerTitleElReset.style.textAlign        = '';
-        const logoContainerElReset = headerTitleElReset.closest('.logo-container');
-        if (logoContainerElReset) logoContainerElReset.style.position = '';
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -861,36 +853,16 @@ function renderThread(data) {
         if (headerTitleEl) {
             headerTitleEl.style.opacity   = '1';
             headerTitleEl.style.transform = 'translateY(0)';
-
-            // Fixed box instead of centered/text-length-dependent position:
-            // #headerTitle normally sits centered in .logo-container, so a
-            // long title's left edge creeps toward the back button as the
-            // text grows. Pinning left-align + a fixed width means the
-            // start position (gap from back button) and the fade point
-            // are both constant, no matter how long the title text is.
-            headerTitleEl.style.position   = 'absolute';
-            headerTitleEl.style.left       = '68px';   // fixed gap from the back button
-            headerTitleEl.style.right      = '56px';   // fixed gap from the right edge
-            headerTitleEl.style.width      = 'auto';
-            headerTitleEl.style.maxWidth   = 'none';
-            headerTitleEl.style.textAlign  = 'left';
-
             // Long titles: fade the right edge instead of cutting with an
-            // ellipsis. Because the box above is now fixed-width, this fade
-            // point is constant too — it doesn't slide with text length.
+            // ellipsis. The gradient only visually clips text that's
+            // actually wide enough to overflow the title column — short
+            // titles sit fully opaque with no fade at all.
             headerTitleEl.style.webkitMaskImage = 'linear-gradient(to right, #000 85%, transparent 100%)';
             headerTitleEl.style.maskImage       = 'linear-gradient(to right, #000 85%, transparent 100%)';
             // Ellipsis would clip the text to "…" before the mask ever runs,
             // so the fade would just be fading a "…" character. Disabling it
             // here lets the mask fade real text at the edge instead.
             headerTitleEl.style.textOverflow    = 'clip';
-
-            // #headerTitle is now position:absolute, so its parent
-            // (.logo-container) needs position:relative to anchor it —
-            // otherwise 'left'/'right' would resolve against .main-header
-            // or an even further ancestor instead.
-            const logoContainerEl = headerTitleEl.closest('.logo-container');
-            if (logoContainerEl) logoContainerEl.style.position = 'relative';
         }
     }
 
