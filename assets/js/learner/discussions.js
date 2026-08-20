@@ -322,6 +322,15 @@ window.fetchDiscussions = async function(options = {}) {
     if (typeof window.setActive === 'function') window.setActive("discussion_list.php");
     if (window.configureHeader) window.configureHeader({ title: 'Discussions', mode: 'standard' });
 
+    // Undo the inline visibility override we set while inside a thread, so
+    // other detail-mode pages (Settings, My Class) get their normal
+    // scroll-collapse fade-in back instead of inheriting our forced state.
+    const headerTitleElReset = document.getElementById('headerTitle');
+    if (headerTitleElReset) {
+        headerTitleElReset.style.opacity   = '';
+        headerTitleElReset.style.transform = '';
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
     const loader  = document.getElementById('loaderOverlay');
@@ -832,6 +841,14 @@ function renderThread(data) {
        matches on detailType) still knows this is a discussion thread. */
     if (!isDesktop() && window.configureHeader) {
         window.configureHeader({ title: disc.title, mode: 'detail', detailType: 'Discussion' });
+        // Discussion has no large body title to scroll past (unlike Settings/
+        // My Class), so force the header title visible right away instead of
+        // waiting for the scroll-collapse fade-in those pages use.
+        const headerTitleEl = document.getElementById('headerTitle');
+        if (headerTitleEl) {
+            headerTitleEl.style.opacity   = '1';
+            headerTitleEl.style.transform = 'translateY(0)';
+        }
     }
 
     let lastDate = null;
