@@ -2083,11 +2083,18 @@ window.toggleSidebar = function (forceClose = false) {
             }
 
             // MENU OPEN: force the browser bar to match the menu's own
-            // dark background (#20201f), regardless of whatever colour
-            // the current page had it set to — keeps the whole screen
-            // reading as one consistent dark surface while the menu is
-            // open. Restored back on close, above.
-            if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+            // dark background, regardless of whatever colour the current
+            // page had it set to — keeps the whole screen reading as one
+            // consistent dark surface while the menu is open. Restored
+            // back on close, above.
+            //
+            // NOTE: #mobileOverlay (the dimming layer behind the menu) is
+            // rgba(0,0,0,0.4), not flat #20201f — the status bar can't see
+            // that DOM overlay at all, so pushing plain #20201f here reads
+            // lighter than the dimmed strip actually visible above the
+            // menu. Pushing #20201f pre-composited under 40% black
+            // (~#131313) instead matches what the eye actually sees.
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#131313');
         }
         // Desktop open is handled by desktopToggle listener — do nothing here
     }
@@ -3170,7 +3177,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=8.7"></script>
 <script src="assets/js/learner/resources.js?v=7.8"></script>
 <script src="assets/js/learner/announcements.js?v=8.4"></script>
-<script src="assets/js/learner/grades.js?v=7.4"></script>
+<script src="assets/js/learner/grades.js?v=7.6"></script>
 <script src="assets/js/learner/evaluations.js?v=5.7"></script>
 <script src="assets/js/learner/discussions.js?v=10.1"></script>
 <script src="assets/js/learner/syllabus.js?v=3.3"></script>

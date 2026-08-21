@@ -1851,7 +1851,26 @@ function renderProgressReport(data) {
 // itself: save whatever the header/theme-color currently legitimately are,
 // force both to the sheet/menu's own dark #20201f while open, then restore
 // the saved values on close instead of guessing. Same approach here.
+//
+// IMPORTANT: the sliver of background peeking out above the sheet (around
+// the header) is NOT plain #20201f -- it's #20201f seen THROUGH the sheet's
+// own rgba(0,0,0,0.55) dimming overlay, which sits in the DOM on top of it.
+// #20201f composited under 55% black works out to ~#0e0e0e, visibly darker
+// than flat #20201f. The status bar can't see that overlay at all (it's a
+// DOM element, not something the OS compositor knows about), so if we push
+// plain #20201f to theme-color, the status bar ends up lighter than the
+// dimmed strip sitting directly below it -- a visible seam right at the top,
+// even though the header/theme-color values technically "match" on paper.
+// Pushing the pre-composited value instead makes the status bar read as the
+// same dimmed shade the eye actually sees just below it.
+// The header background itself stays plain #20201f (not composited) since
+// .main-header is a real DOM element sitting under the same overlay as
+// everything else -- it gets dimmed by the overlay naturally, same as the
+// rest of the page. Only theme-color needs the pre-composited value, since
+// it's the one color the overlay can never reach.
 // ─────────────────────────────────────────────────────────────────────────────
+const SHEET_OVERLAY_DIMMED_COLOR = '#0e0e0e'; // #20201f composited under rgba(0,0,0,0.55)
+
 function darkenBrowserBarForSheet() {
     if (window.innerWidth > 899) return null;
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
@@ -1860,7 +1879,7 @@ function darkenBrowserBarForSheet() {
         themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
         headerBg: mainHeader ? mainHeader.style.background : ''
     };
-    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+    if (themeColorMeta) themeColorMeta.setAttribute('content', SHEET_OVERLAY_DIMMED_COLOR);
     if (mainHeader) mainHeader.style.background = '#20201f';
     return saved;
 }
