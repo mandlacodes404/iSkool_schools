@@ -2334,6 +2334,24 @@ if (desktopToggle) {
         // actually scroll.
         window.recalcMobileScrollUI = function recalcMobileScrollUI() {
             if (!apiArea || !mainHeader) return;
+            // Bail out completely while a full-screen sheet (Progress Report /
+            // Quiz Review) is open. Those sheets force the header background
+            // AND the theme-color meta to the sheet's own dark #20201f via
+            // darkenBrowserBarForSheet() (see grades.js) so the browser/status
+            // bar blends with the sheet instead of the page underneath. But
+            // this function keeps running off the underlying page's OWN
+            // scroll container/listener + the loader-hide MutationObserver,
+            // both of which are completely independent of the sheet — so a
+            // scroll (or a recalc triggered from inside the sheet's content,
+            // e.g. an accordion toggle) could fire in between, re-read the
+            // underlying page's scrollTop, and slam the header/theme-color
+            // back to that page's own accent colour (e.g. Grades' green)
+            // WHILE the sheet is still open and dark on top of it — the
+            // exact mismatch this was reported for. Checking for the sheet
+            // here, at the single source both the header background and the
+            // theme-color meta are decided, closes that race instead of
+            // relying on timing.
+            if (document.querySelector('.pr-modal-overlay')) return;
             const scrollTop    = apiArea.scrollTop;
             const scrollHeight = apiArea.scrollHeight;
             const clientHeight = apiArea.clientHeight;
