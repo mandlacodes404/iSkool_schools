@@ -245,7 +245,7 @@ if ($userRole === 'learner') {
             <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
             <title>Results Not Published</title>
             <style>
-                body { background:#0d1117; color:#e0e6f0; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; margin:0; }
+                body { background:#20201f; color:#e0e6f0; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; margin:0; }
                 h1 { color:#4fd1c5; }
                 a { color:#4fd1c5; text-decoration:none; border:1px solid #4fd1c5; padding:10px 20px; border-radius:8px; margin-top:20px; }
             </style>
@@ -280,7 +280,7 @@ function format_review_points($value): string {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d1117;
+            --bg-color: #20201f;
             --card-bg: #1a202c;
             --text-color: #e0e6f0;
             --accent-color: #4fd1c5;
@@ -393,7 +393,7 @@ function format_review_points($value): string {
 
         @media (max-width: 768px) {
             :root {
-                --bg-color: #0d1117;
+                --bg-color: #20201f;
                 --card-bg: transparent;
                 --text-color: #e2e8f0;
                 --correct: #22c55e;
