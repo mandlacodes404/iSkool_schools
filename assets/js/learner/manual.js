@@ -369,7 +369,7 @@ function renderLearnerSnapshotPanel(snapshot) {
             icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
             label:   'Upcoming Assignment',
             color:   '#a78bfa',
-            onclick: 'window.learnerAssignmentCache=null; fetchAssignments()',
+            onclick: snapshot.assignment ? `openLearnerDesktopSnapshotItem('assignment', ${Number(snapshot.assignment.id) || 0})` : '',
             empty:   'No upcoming assignments',
             meta:    snapshot.assignment ? `Due ${snapshot.assignment.due_date}` : '',
             badge:   snapshot.assignment ? (
@@ -384,7 +384,7 @@ function renderLearnerSnapshotPanel(snapshot) {
             icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
             label:   'Latest Announcement',
             color:   '#f59e0b',
-            onclick: 'fetchAnnouncements()',
+            onclick: snapshot.announcement ? `openLearnerDesktopSnapshotItem('announcement', ${Number(snapshot.announcement.id) || 0})` : '',
             empty:   'No announcements yet',
             meta:    snapshot.announcement ? `${snapshot.announcement.teacher} &bull; ${snapshot.announcement.created_at}` : '',
             badge:   ''
@@ -399,6 +399,61 @@ function renderLearnerSnapshotPanel(snapshot) {
 
     return html;
 }
+
+// Desktop Quick Snapshot cards reuse the existing split layouts. Once the
+// relevant list has rendered, select the exact item so its full content is
+// shown in the right-hand panel.
+window.openLearnerDesktopSnapshotItem = async function(type, itemId) {
+    if (window.innerWidth <= 899) return;
+
+    const id = String(itemId || '');
+    if (!id) return;
+
+    const config = type === 'assignment'
+        ? {
+            cacheKey: 'learnerAssignmentCache',
+            fetchPage: window.fetchAssignments,
+            items: () => window._allLearnerAssignmentsFlat || [],
+            select: window.selectDesktopLearnerAssignment,
+            sidebarItemId: index => `las-sidebar-${index}`,
+            groupSelector: '.las-desktop-teacher-body',
+            headerClass: 'las-desktop-teacher-header',
+            chevronSelector: '.las-desktop-teacher-chevron'
+        }
+        : type === 'announcement'
+            ? {
+                cacheKey: 'announcementCache',
+                fetchPage: window.fetchAnnouncements,
+                items: () => window._allLearnerAnnouncementsFlat || [],
+                select: window.selectDesktopLearnerAnnouncement,
+                sidebarItemId: index => `lan-sidebar-${index}`,
+                groupSelector: '.lan-desktop-teacher-body',
+                headerClass: 'lan-desktop-teacher-header',
+                chevronSelector: '.lan-desktop-teacher-chevron'
+            }
+            : null;
+
+    if (!config || typeof config.fetchPage !== 'function' || typeof config.select !== 'function') return;
+
+    window[config.cacheKey] = null;
+    await config.fetchPage();
+
+    const index = config.items().findIndex(item =>
+        String(item.id) === id && (type !== 'announcement' || item._type === 'teacher')
+    );
+    if (index < 0) return;
+
+    config.select(index);
+
+    const sidebarItem = document.getElementById(config.sidebarItemId(index));
+    const group = sidebarItem?.closest(config.groupSelector);
+    const header = group?.previousElementSibling;
+    if (group && header) {
+        group.classList.remove('collapsed');
+        header.classList.add(config.headerClass);
+        header.querySelector(config.chevronSelector)?.classList.add('open');
+    }
+};
 
 function buildDesktopTodoCards(todo) {
     const colorMap = {

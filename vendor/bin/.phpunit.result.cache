@@ -1,1 +1,1 @@
-{"version":2,"defects":[],"times":{"FirstTest::test_php_unit_is_working":0.141,"FirstTest::test_math_still_works":0.023}}
+{"version":2,"defects":[],"times":{"FirstTest::test_php_unit_is_working":0.119,"FirstTest::test_math_still_works":0.015}}
