@@ -430,7 +430,7 @@ function renderSnapshotPanel(data) {
             icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
             label:   'Latest Quiz',
             color:   '#4fd1c5',
-            onclick: 'fetchTeacherQuizzes()',
+            onclick: data.quiz ? `openTeacherSnapshotDetail('quiz', ${Number(data.quiz.id) || 0})` : '',
             empty:   'No quizzes created yet',
             meta:    data.quiz ? `${data.quiz.class_name} &bull; ${data.quiz.start_time}` : '',
             badge:   data.quiz ? `<span class="snap-status-badge snap-status-badge--dynamic" style="--snap-badge-bg:${data.quiz.status === 'Open' ? 'rgba(242,140,56,0.15)' : 'rgba(107,114,128,0.15)'};--snap-badge-color:${data.quiz.status === 'Open' ? '#f28c38' : '#6b7280'};">${data.quiz.status}</span>` : ''
@@ -441,7 +441,7 @@ function renderSnapshotPanel(data) {
             icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
             label:   'Upcoming Assignment',
             color:   '#a78bfa',
-            onclick: 'fetchTeacherAssignments()',
+            onclick: data.assignment ? `openTeacherSnapshotDetail('assignment', ${Number(data.assignment.id) || 0})` : '',
             empty:   'No upcoming assignments',
             meta:    data.assignment ? `${data.assignment.class_name} &bull; Due ${data.assignment.due_date}` : '',
             badge:   data.assignment ? `<span class="snap-status-badge snap-status-badge--dynamic" style="--snap-badge-bg:rgba(167,139,250,0.15);--snap-badge-color:#a78bfa;">in ${data.assignment.days_left} day${data.assignment.days_left !== 1 ? 's' : ''}</span>` : ''
@@ -452,7 +452,7 @@ function renderSnapshotPanel(data) {
             icon:    `<svg viewBox="0 0 24 24" width="20" height="20" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
             label:   'Latest Announcement',
             color:   '#f59e0b',
-            onclick: 'fetchTeacherAnnouncements()',
+            onclick: data.announcement ? `openTeacherSnapshotDetail('announcement', ${Number(data.announcement.id) || 0})` : '',
             empty:   'No announcements sent yet',
             meta:    data.announcement ? `${data.announcement.class_name} &bull; ${data.announcement.created_at}` : '',
             badge:   ''
@@ -489,6 +489,47 @@ function renderSnapshotPanel(data) {
     // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
     // ─────────────────────────────────────────────
+// Snapshot cards load the normal desktop section, then select the exact
+// matching item so its existing detail renderer fills the right panel.
+window.openTeacherSnapshotDetail = async function(type, itemId) {
+    if (window.innerWidth <= 768) return;
+
+    const id = String(itemId || '');
+    if (!id) return;
+
+    const config = type === 'quiz'
+        ? {
+            cacheKey: 'teacherQuizzesCache',
+            fetchPage: window.fetchTeacherQuizzes,
+            find: () => (window._allQuizzesFlat || []).find(item => String(item.id) === id),
+            select: item => window.selectDesktopQuiz?.(item.id)
+        }
+        : type === 'assignment'
+            ? {
+                cacheKey: 'teacherAssignmentsCache',
+                fetchPage: window.fetchTeacherAssignments,
+                find: () => (window._allAssignmentsFlat || []).findIndex(item => String(item.id) === id),
+                select: index => window.selectDesktopAssignment?.(index)
+            }
+            : type === 'announcement'
+                ? {
+                    cacheKey: 'teacherAnnouncementCache',
+                    fetchPage: window.fetchTeacherAnnouncements,
+                    find: () => (window._allAnnouncementsFlat || []).findIndex(item => String(item.id) === id),
+                    select: index => window.selectDesktopAnnouncement?.(index)
+                }
+                : null;
+
+    if (!config || typeof config.fetchPage !== 'function') return;
+
+    window[config.cacheKey] = null;
+    await config.fetchPage();
+
+    const target = config.find();
+    if (target === undefined || target === -1 || target === null) return;
+    config.select(target);
+};
+
     const savedPage = sessionStorage.getItem("lastTeacherPage");
 
     if (savedPage === "teacher_announcements") {
