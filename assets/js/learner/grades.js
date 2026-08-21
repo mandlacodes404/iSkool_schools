@@ -1828,7 +1828,6 @@ function renderProgressReport(data) {
                     ${reportInnerHtml}
                 </div>
             </div>`;
-        modal.onclick = () => prBackToGrades();
         wireSheetDragToClose(modal, () => prBackToGrades());
     } else {
         apiArea.innerHTML = reportInnerHtml;
@@ -1837,6 +1836,41 @@ function renderProgressReport(data) {
     apiArea._prData            = data;
     apiArea._buildSubjectCards = buildSubjectCards;
     apiArea._pctColor          = pctColor;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOBILE SHEET: keep the browser/status bar in sync with the dimmed overlay
+//
+// The sheet's dark overlay (rgba(0,0,0,0.55)) only dims the page DOM — it
+// can't reach the OS status bar, which reads the separate
+// <meta name="theme-color"> tag. If the Grades page had already scrolled
+// past its header threshold, that tag is sitting on the page's own accent
+// colour (e.g. Grades' green), so opening a sheet left a bright status bar
+// sitting above a dimmed, darkened header/page — the exact mismatch in the
+// screenshots. toggleSidebar() (the hamburger menu) already solves this for
+// itself: save whatever the header/theme-color currently legitimately are,
+// force both to the sheet/menu's own dark #20201f while open, then restore
+// the saved values on close instead of guessing. Same approach here.
+// ─────────────────────────────────────────────────────────────────────────────
+function darkenBrowserBarForSheet() {
+    if (window.innerWidth > 899) return null;
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const mainHeader = document.querySelector('.main-header');
+    const saved = {
+        themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
+        headerBg: mainHeader ? mainHeader.style.background : ''
+    };
+    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
+    if (mainHeader) mainHeader.style.background = '#20201f';
+    return saved;
+}
+
+function restoreBrowserBarAfterSheet(saved) {
+    if (!saved) return;
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const mainHeader = document.querySelector('.main-header');
+    if (themeColorMeta && saved.themeColor !== null) themeColorMeta.setAttribute('content', saved.themeColor);
+    if (mainHeader) mainHeader.style.background = saved.headerBg;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1877,6 +1911,15 @@ function wireSheetDragToClose(modal, onClose) {
     if (!sheet || !handle) return;
 
     openSheetAnimated(sheet);
+    const savedBrowserBar = darkenBrowserBarForSheet();
+    // Wrap the real close so every path that ends the sheet -- tapping
+    // outside, dragging past the threshold, or the caller's own close
+    // function -- restores the browser bar exactly once, in one place.
+    const closeAndRestore = () => {
+        restoreBrowserBarAfterSheet(savedBrowserBar);
+        onClose();
+    };
+    modal.onclick = closeAndRestore;
 
     const CLOSE_THRESHOLD_RATIO = 0.3; // 30% of sheet height
     const FLICK_VELOCITY = 0.6;        // px/ms - fast downward swipe also closes
@@ -1923,7 +1966,7 @@ function wireSheetDragToClose(modal, onClose) {
             // Let it continue the rest of the way down, then close.
             sheet.style.transition = 'transform 0.2s ease-out';
             sheet.style.transform = 'translateY(100%)';
-            setTimeout(() => onClose(), 200);
+            setTimeout(() => closeAndRestore(), 200);
         } else {
             // Snap back open.
             sheet.style.transition = 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)';
@@ -2025,7 +2068,6 @@ window.openQuizReview = function(resultId, event) {
                     <iframe class="review-modal-frame" src="${reviewUrl}" title="Quiz review"></iframe>
                 </div>
             </div>`;
-        modal.onclick = () => closeQuizReviewModal();
         wireSheetDragToClose(modal, () => closeQuizReviewModal());
         return;
     }
