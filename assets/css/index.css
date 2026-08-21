@@ -804,7 +804,7 @@ body {
     }
 
     #form-school-dot {
-        width: 8px; height: 8px;
+        width: 6px; height: 6px;
         background: #3ecf8e;
         border-radius: 50%;
         flex-shrink: 0;
