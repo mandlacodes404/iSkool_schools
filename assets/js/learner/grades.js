@@ -1513,7 +1513,10 @@ function renderProgressReport(data) {
                     width: 100%;
                     max-height: 92vh;
                     margin-top: auto;
-                    background: #0d1117;
+                    /* Matches #api-content-area's mobile background (quiz.css)
+                       so the sheet reads as part of the same app surface
+                       instead of a slightly different, bluer near-black. */
+                    background: #20201f;
                     border-radius: 18px 18px 0 0;
                     display: flex;
                     flex-direction: column;
@@ -1565,7 +1568,7 @@ function renderProgressReport(data) {
                     width: 100%;
                     height: 100%;
                     border: 0;
-                    background: #0d1117;
+                    background: #20201f;
                     display: block;
                 }
                 .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
