@@ -1554,6 +1554,15 @@ function renderProgressReport(data) {
                 .pr-modal-sheet .pr-topbar { display: none !important; }
                 .pr-modal-sheet .pr-wrap { padding-top: 4px; max-width: 100%; }
 
+                /* Flat style: the report's content sits directly on the sheet's
+                   own background instead of inside a nested "card" panel. */
+                .pr-modal-sheet .pr-card {
+                    background: transparent;
+                    border: none;
+                    border-radius: 0;
+                    margin-bottom: 0;
+                }
+
                 /* ── QUIZ REVIEW: same modal sheet treatment ── */
                 .pr-modal-sheet.review-modal-sheet {
                     height: 92vh;
