@@ -1528,8 +1528,10 @@ function renderProgressReport(data) {
                     align-items: center;
                     justify-content: center;
                     position: relative;
-                    padding: 10px 0 4px;
+                    padding: 14px 0 10px;
                     flex-shrink: 0;
+                    touch-action: none;
+                    cursor: grab;
                 }
                 .pr-modal-grabber {
                     width: 36px;
@@ -1537,25 +1539,10 @@ function renderProgressReport(data) {
                     border-radius: 100px;
                     background: rgba(255,255,255,0.18);
                 }
-                .pr-modal-close-btn {
-                    position: absolute;
-                    right: 12px;
-                    top: 6px;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.06);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    color: #c9d1d9;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 16px;
-                    line-height: 1;
-                    cursor: pointer;
+                .pr-modal-sheet.pr-sheet-dragging {
+                    animation: none;
+                    transition: none;
                 }
-                .pr-modal-close-btn:active { background: rgba(255,255,255,0.12); }
-
                 .pr-modal-scroll {
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
@@ -1826,13 +1813,13 @@ function renderProgressReport(data) {
             <div class="pr-modal-sheet" onclick="event.stopPropagation()">
                 <div class="pr-modal-handle-row">
                     <div class="pr-modal-grabber"></div>
-                    <button class="pr-modal-close-btn" onclick="prBackToGrades()" aria-label="Close">×</button>
                 </div>
                 <div class="pr-modal-scroll">
                     ${reportInnerHtml}
                 </div>
             </div>`;
         modal.onclick = () => prBackToGrades();
+        wireSheetDragToClose(modal, () => prBackToGrades());
     } else {
         apiArea.innerHTML = reportInnerHtml;
     }
@@ -1840,6 +1827,76 @@ function renderProgressReport(data) {
     apiArea._prData            = data;
     apiArea._buildSubjectCards = buildSubjectCards;
     apiArea._pctColor          = pctColor;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOBILE SHEET: drag-down-to-close on the handle row
+// Press+drag the grabber handle down; the sheet tracks the finger 1:1.
+// Release past ~30% of the sheet's height (or a fast downward flick) and it
+// closes; otherwise it snaps back open. Tapping the dimmed area above the
+// sheet (already wired via modal.onclick) still closes it instantly.
+// ─────────────────────────────────────────────────────────────────────────────
+function wireSheetDragToClose(modal, onClose) {
+    const sheet  = modal.querySelector('.pr-modal-sheet');
+    const handle = modal.querySelector('.pr-modal-handle-row');
+    if (!sheet || !handle) return;
+
+    const CLOSE_THRESHOLD_RATIO = 0.3; // 30% of sheet height
+    const FLICK_VELOCITY = 0.6;        // px/ms - fast downward swipe also closes
+
+    let startY = 0;
+    let currentY = 0;
+    let startTime = 0;
+    let dragging = false;
+    let sheetHeight = 0;
+
+    function onPointerDown(e) {
+        // Ignore non-primary touches / right-click drags
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        dragging = true;
+        startY = e.clientY;
+        currentY = startY;
+        startTime = Date.now();
+        sheetHeight = sheet.getBoundingClientRect().height;
+        sheet.classList.add('pr-sheet-dragging');
+        handle.setPointerCapture && handle.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e) {
+        if (!dragging) return;
+        currentY = e.clientY;
+        const delta = Math.max(0, currentY - startY); // only allow dragging down
+        sheet.style.transform = `translateY(${delta}px)`;
+    }
+
+    function finishDrag() {
+        if (!dragging) return;
+        dragging = false;
+        sheet.classList.remove('pr-sheet-dragging');
+
+        const delta = Math.max(0, currentY - startY);
+        const elapsed = Math.max(1, Date.now() - startTime);
+        const velocity = delta / elapsed;
+        const pastThreshold = sheetHeight > 0 && (delta / sheetHeight) >= CLOSE_THRESHOLD_RATIO;
+        const isFlick = velocity >= FLICK_VELOCITY && delta > 10;
+
+        if (pastThreshold || isFlick) {
+            // Let it continue the rest of the way down, then close.
+            sheet.style.transition = 'transform 0.2s ease-out';
+            sheet.style.transform = `translateY(100%)`;
+            setTimeout(() => onClose(), 200);
+        } else {
+            // Snap back open.
+            sheet.style.transition = 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)';
+            sheet.style.transform = 'translateY(0)';
+            setTimeout(() => { sheet.style.transition = ''; }, 260);
+        }
+    }
+
+    handle.addEventListener('pointerdown', onPointerDown);
+    handle.addEventListener('pointermove', onPointerMove);
+    handle.addEventListener('pointerup', finishDrag);
+    handle.addEventListener('pointercancel', finishDrag);
 }
 
 window.prSwitchTerm = function (term) {
@@ -1921,13 +1978,13 @@ window.openQuizReview = function(resultId, event) {
             <div class="pr-modal-sheet review-modal-sheet" onclick="event.stopPropagation()">
                 <div class="pr-modal-handle-row">
                     <div class="pr-modal-grabber"></div>
-                    <button class="pr-modal-close-btn" onclick="closeQuizReviewModal()" aria-label="Close">×</button>
                 </div>
                 <div class="pr-modal-scroll">
                     <iframe class="review-modal-frame" src="${reviewUrl}" title="Quiz review"></iframe>
                 </div>
             </div>`;
         modal.onclick = () => closeQuizReviewModal();
+        wireSheetDragToClose(modal, () => closeQuizReviewModal());
         return;
     }
 
