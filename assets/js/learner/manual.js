@@ -88,6 +88,17 @@ function wireManualScrollState() {
     }, { passive: true });
 }
 
+function buildMobileHomeLoadingState() {
+    return `
+        <div aria-busy="true" aria-label="Loading home" style="padding:20px 16px 120px;">
+            <div style="height:88px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+            <div style="height:18px;width:92px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
+            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+            <div style="height:18px;width:72px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
+            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);"></div>
+        </div>`;
+}
+
 window.loadManual = async function(containerId = 'api-content-area') {
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
@@ -102,13 +113,14 @@ window.loadManual = async function(containerId = 'api-content-area') {
     const iframe         = document.getElementById('mainFrame');
     const loader         = document.getElementById('loaderOverlay');
     const myClassContent = document.getElementById('myClassContent');
+    const isMobile       = window.innerWidth <= 768;
 
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
     if (myClassContent) myClassContent.classList.remove('active');
 
     // Serve from cache instantly
-    if (window.manualCache && window.homeDataCache) {
+    if (window.homeDataCache && (isMobile || window.manualCache)) {
         apiArea.innerHTML = buildHomeLayout(window.homeDataCache, window.manualCache);
         afterHomeRender();
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -118,14 +130,32 @@ window.loadManual = async function(containerId = 'api-content-area') {
 
     if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
 
-    try {
-        const [manualRes, homeRes, classRes] = await Promise.all([
-            fetch('partials/manual.html?v=1.1'),
-            fetch('api/learner/get_home_data.php'),
-            fetch('api/learner/get_my_class.php')
-        ]);
+    // On a cold mobile launch, render an immediate placeholder instead of
+    // leaving the API area empty while Home data is requested.
+    if (isMobile && apiArea) apiArea.innerHTML = buildMobileHomeLoadingState();
 
-        const manualHtml = await manualRes.text();
+    try {
+        let manualHtml = '';
+        let homeRes;
+        let classRes;
+
+        if (isMobile) {
+            // The desktop-only manual fragment is not rendered in the mobile
+            // Home layout, so do not wait for an unnecessary third request.
+            [homeRes, classRes] = await Promise.all([
+                fetch('api/learner/get_home_data.php'),
+                fetch('api/learner/get_my_class.php')
+            ]);
+        } else {
+            let manualRes;
+            [manualRes, homeRes, classRes] = await Promise.all([
+                fetch('partials/manual.html?v=1.1'),
+                fetch('api/learner/get_home_data.php'),
+                fetch('api/learner/get_my_class.php')
+            ]);
+            manualHtml = await manualRes.text();
+        }
+
         const homeData   = await homeRes.json();
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;

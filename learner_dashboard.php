@@ -656,19 +656,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // NEW: MOBILE TWIST LOGIC (Add this here)
     // ────────────────────────────────────────────────────────────────────────
     const isMobile = window.innerWidth <= 768;
-    // We check sessionStorage for "lastLearnerPage" to see if this is a fresh start
-    if (isMobile && !sessionStorage.getItem("lastLearnerPage")) {
-        const mainContent = document.querySelector(".main-content");
-        mainContent.classList.add("mobile-first-load");
-
-        // Ensure the bottom navigation shows its glass background on first open
+    // Do not use the old mobile-first-load flip here. Its first animation
+    // frame has opacity: 0, which deliberately hid the dashboard for ~0.8s
+    // whenever the PWA opened in a new browser session.
+    if (isMobile) {
         const bottomNav = document.getElementById('mobileBottomNav');
         if (bottomNav) bottomNav.classList.add('nav-scrolled');
-
-        setTimeout(() => {
-            mainContent.classList.remove("mobile-first-load");
-            mainContent.style.transform = '';
-        }, 1000);
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -3154,7 +3147,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=7.0"></script>
+<script src="assets/js/learner/manual.js?v=7.1"></script>
 <script src="assets/js/learner/quiz.js?v=9.8"></script>
 <script src="assets/js/learner/assignments.js?v=8.7"></script>
 <script src="assets/js/learner/resources.js?v=7.8"></script>
