@@ -80,7 +80,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/index.css?v=4.6">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
