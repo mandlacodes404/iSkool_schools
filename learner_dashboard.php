@@ -3154,11 +3154,11 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=6.8"></script>
-<script src="assets/js/learner/quiz.js?v=9.7"></script>
+<script src="assets/js/learner/manual.js?v=6.9"></script>
+<script src="assets/js/learner/quiz.js?v=9.8"></script>
 <script src="assets/js/learner/assignments.js?v=8.7"></script>
-<script src="assets/js/learner/resources.js?v=7.7"></script>
-<script src="assets/js/learner/announcements.js?v=8.3"></script>
+<script src="assets/js/learner/resources.js?v=7.8"></script>
+<script src="assets/js/learner/announcements.js?v=8.4"></script>
 <script src="assets/js/learner/grades.js?v=6.8"></script>
 <script src="assets/js/learner/evaluations.js?v=5.7"></script>
 <script src="assets/js/learner/discussions.js?v=10.1"></script>

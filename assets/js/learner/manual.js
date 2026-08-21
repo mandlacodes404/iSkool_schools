@@ -568,11 +568,6 @@ function buildMobileTodo(todo) {
         assignment: 'Assignment',
         evaluation: 'Evaluation'
     };
-    const actionMap = {
-        quiz:       'window.learnerQuizCache=null; fetchQuizzes()',
-        assignment: 'window.learnerAssignmentCache=null; fetchAssignments()',
-        evaluation: 'window.evaluationCache=null; fetchEvaluations()'
-    };
     const iconMap = {
         quiz: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
         assignment: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>`,
@@ -582,12 +577,11 @@ function buildMobileTodo(todo) {
     return todo.map((item, i) => {
         const color  = colorMap[item.type]  || '#4fd1c5';
         const label  = labelMap[item.type]  || item.type;
-        const action = actionMap[item.type] || '';
         const icon   = iconMap[item.type]   || iconMap.quiz;
         const isLast = i === todo.length - 1;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
@@ -633,12 +627,6 @@ function buildMobileRecent(recent) {
         assignment:   '#a78bfa',
         quiz:         '#fdd663'
     };
-    const actionMap = {
-        announcement: 'fetchAnnouncements()',
-        resource:     'fetchResources()',
-        assignment:   'fetchAssignments()',
-        quiz:         'window.learnerQuizCache=null; fetchQuizzes()'
-    };
     const iconMap = {
         announcement: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
         resource:     `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`,
@@ -648,12 +636,11 @@ function buildMobileRecent(recent) {
 
     return recent.map((item, i) => {
         const color  = colorMap[item.type]  || '#4fd1c5';
-        const action = actionMap[item.type] || '';
         const icon   = iconMap[item.type]   || iconMap.announcement;
         const isLast = i === recent.length - 1;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="${action}">
+            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0}, '${item.scope || ''}')">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
@@ -673,6 +660,90 @@ function buildMobileRecent(recent) {
             </div>`;
     }).join('');
 }
+
+// Home cards are only rendered on the mobile layout. Assignments and
+// announcements open their detail screen; quizzes and resources open the
+// list with the teacher folder containing the selected item expanded.
+window.openLearnerHomeItem = async function(type, itemId, scope = '') {
+    const id = String(itemId || '');
+    if (!id) return;
+
+    const clearPageState = key => {
+        if (window.learnerPageState) window.learnerPageState.clear(key);
+    };
+
+    if (type === 'assignment') {
+        clearPageState('assignments');
+        window.learnerAssignmentCache = null;
+        await window.fetchAssignments();
+        window.openMobileLearnerAssignmentById?.(id);
+        return;
+    }
+
+    if (type === 'announcement') {
+        clearPageState('announcements');
+        window.announcementCache = null;
+        await window.fetchAnnouncements();
+        window.openMobileLearnerAnnouncementById?.(id, scope);
+        return;
+    }
+
+    // Evaluations are not part of the new deep-link behaviour; retain the
+    // existing list navigation for them.
+    if (type === 'evaluation') {
+        window.evaluationCache = null;
+        await window.fetchEvaluations?.();
+        return;
+    }
+
+    const folderConfig = type === 'quiz'
+        ? {
+            stateKey: 'quiz',
+            cacheKey: 'learnerQuizCache',
+            fetchPage: window.fetchQuizzes,
+            rowSelector: '.lqz-mobile-row',
+            rowIdKey: 'quizId',
+            folderSelector: '.lqz-mobile-folder-body',
+            headerClass: 'lqz-mobile-folder-header--collapsed',
+            chevronSelector: '.lqz-mobile-folder-chevron',
+            toggle: window.toggleLqzMobileFolder
+        }
+        : type === 'resource'
+            ? {
+                stateKey: 'resources',
+                cacheKey: 'resourceCache',
+                fetchPage: window.fetchResources,
+                rowSelector: '.lrs-mobile-row, .lrs-mobile-video-card',
+                rowIdKey: 'resourceId',
+                folderSelector: '.lrs-mobile-folder-body',
+                headerClass: 'lrs-mobile-folder-header--collapsed',
+                chevronSelector: '.lrs-mobile-folder-chevron',
+                toggle: window.toggleLrsMobileFolder
+            }
+            : null;
+
+    if (!folderConfig || typeof folderConfig.fetchPage !== 'function') return;
+
+    clearPageState(folderConfig.stateKey);
+    window[folderConfig.cacheKey] = null;
+    await folderConfig.fetchPage();
+
+    const row = Array.from(document.querySelectorAll(folderConfig.rowSelector))
+        .find(element => String(element.dataset[folderConfig.rowIdKey]) === id);
+    const folder = row?.closest(folderConfig.folderSelector);
+    const header = folder?.previousElementSibling;
+    if (!folder || !header) return;
+
+    if (folder.classList.contains('collapsed') && typeof folderConfig.toggle === 'function') {
+        folderConfig.toggle(folder.id, header);
+    } else {
+        folder.classList.remove('collapsed');
+        header.classList.remove(folderConfig.headerClass);
+        header.querySelector(folderConfig.chevronSelector)?.classList.add('open');
+    }
+
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 // ─────────────────────────────────────────────
 // MOBILE UPCOMING EVENTS (academic_events)

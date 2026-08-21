@@ -316,7 +316,7 @@ function renderResourceCards(data) {
             if (isVideo) {
                 // ── Mobile: inline video embed ──
                 html += `
-                    <div class="lrs-mobile-video-card">
+                    <div class="lrs-mobile-video-card" data-resource-id="${file.id}">
                         <div class="lrs-mobile-video-title">${file.title}</div>
                         <div class="lrs-mobile-video-meta">
                             <svg viewBox="0 0 24 24" width="12" height="12" fill="#ff4444" stroke="none">
@@ -344,6 +344,7 @@ function renderResourceCards(data) {
                     .join(' <span class="lrs-bullet-muted">&bull;</span> ');
                 html += `
                     <div class="lrs-mobile-row"
+                         data-resource-id="${file.id}"
                          data-title="${file.title.toLowerCase()}"
                          onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
                         <div class="lrs-mobile-row-icon">${icon}</div>

@@ -648,9 +648,11 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (mainContent) mainContent.scrollTop = 0;
 };
 
-window.openMobileLearnerAnnouncementById = function(announcementId) {
+window.openMobileLearnerAnnouncementById = function(announcementId, scope = '') {
     const targetId = String(announcementId || '');
-    const flatIdx = (window._allLearnerAnnouncementsFlat || []).findIndex(ann => String(ann.id) === targetId);
+    const flatIdx = (window._allLearnerAnnouncementsFlat || []).findIndex(ann =>
+        String(ann.id) === targetId && (!scope || (ann._type || 'teacher') === scope)
+    );
     if (flatIdx >= 0) {
         window.openMobileLearnerAnnouncement(flatIdx);
     }

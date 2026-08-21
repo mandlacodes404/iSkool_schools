@@ -1092,7 +1092,7 @@ function renderQuizCards(groupedData) {
                 : '';
 
             html += `
-                <div class="lqz-mobile-row" ${rowAttrs} data-title="${escapeHtml(quiz.title).toLowerCase()}">
+                <div class="lqz-mobile-row" ${rowAttrs} data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title).toLowerCase()}">
                     <div class="lqz-mobile-row-icon">
                         ${learnerQuizPencilSvg(20, 20, '#fdd663')}
                     </div>

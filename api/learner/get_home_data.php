@@ -211,7 +211,7 @@ $stmt->close();
 // RECENT 1: Announcements (last 7 days)
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT a.title, a.created_at,
+    SELECT a.id, a.title, a.created_at,
            CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher
     FROM announcements a
     LEFT JOIN users u ON a.created_by = u.email
@@ -228,6 +228,8 @@ $res = $stmt->get_result();
 while ($row = $res->fetch_assoc()) {
     $recent[] = [
         'type'       => 'announcement',
+        'id'         => (int)$row['id'],
+        'scope'      => 'teacher',
         'title'      => $row['title'],
         'meta'       => trim($row['teacher']),
         'created_at' => $row['created_at']
@@ -239,7 +241,7 @@ $stmt->close();
 // RECENT 2: Resources (last 7 days)
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT r.title, r.uploaded_at,
+    SELECT r.id, r.title, r.uploaded_at,
            CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher
     FROM resources r
     LEFT JOIN users u ON r.uploaded_by = u.email
@@ -255,6 +257,7 @@ $res = $stmt->get_result();
 while ($row = $res->fetch_assoc()) {
     $recent[] = [
         'type'       => 'resource',
+        'id'         => (int)$row['id'],
         'title'      => $row['title'],
         'meta'       => trim($row['teacher']),
         'created_at' => $row['uploaded_at']
@@ -266,7 +269,7 @@ $stmt->close();
 // RECENT 3: Assignments posted (last 7 days)
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT a.title, a.created_at,
+    SELECT a.id, a.title, a.created_at,
            CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher
     FROM assignments a
     LEFT JOIN users u ON a.created_by = u.email
@@ -282,6 +285,7 @@ $res = $stmt->get_result();
 while ($row = $res->fetch_assoc()) {
     $recent[] = [
         'type'       => 'assignment',
+        'id'         => (int)$row['id'],
         'title'      => $row['title'],
         'meta'       => trim($row['teacher']),
         'created_at' => $row['created_at']
@@ -294,7 +298,7 @@ $stmt->close();
 // NEW: newly created/opened quizzes appear in recent activity
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT q.title, q.start_time AS created_at,
+    SELECT q.id, q.title, q.start_time AS created_at,
            CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher
     FROM quizzes q
     LEFT JOIN users u ON q.created_by = u.email
@@ -311,6 +315,7 @@ $res = $stmt->get_result();
 while ($row = $res->fetch_assoc()) {
     $recent[] = [
         'type'       => 'quiz',
+        'id'         => (int)$row['id'],
         'title'      => $row['title'],
         'meta'       => trim($row['teacher']),
         'created_at' => $row['created_at']
