@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 ### Changed
+- Learner Dashboard (Mobile): Home page To-Do and Recent cards now open the exact item selected. Assignments and announcements open directly in their mobile detail views, while quizzes and resources navigate to their list and automatically expand the teacher folder containing that item (`manual.js`, `get_home_data.php`, `quiz.js`, `resources.js`, `announcements.js`, `learner_dashboard.php`).
+- Learner Dashboard (Desktop): Quick Snapshot cards for the upcoming assignment and latest announcement now load the matching record into the existing right-hand detail panel instead of only opening the relevant list (`manual.js`, `learner_dashboard.php`).
+- Teacher Dashboard (Desktop): Quick Snapshot cards now open the selected quiz, assignment, or announcement in the corresponding right-hand detail panel instead of only opening the section list (`dashboard.js`, `teacher_dashboard.php`).
+- Learner Dashboard (Mobile): Removed the invisible first-load flip animation that was delaying the initial dashboard display. Mobile Home also skips its unused desktop manual-fragment request and shows an immediate placeholder while essential Home data loads, avoiding a blank screen on a cold app launch (`learner_dashboard.php`, `manual.js`).
+
+## [1.2.2] - 2026-08-20
 - Login/Register Page (Desktop): Page title now shows the school's actual name instead of "iSkool" (e.g. "Dashboard - Landulwazi High School"), pulled from the existing `$schoolName` lookup already used elsewhere on each page. Same change applied to the Teacher and Learner dashboard page titles (`index.php`, `teacher_dashboard.php`, `learner_dashboard.php`).
 - Login/Register Page (Desktop): Right-hand form panel (`.form-panel`) no longer has a solid charcoal background. It's now transparent with a bordered card frame instead — `1px solid #2a2a2a`, `16px` border-radius, inset `18px` from all four sides, matching the spacing previously used for the left panel's accent line. Panel height math adjusted (`calc(100vh - 36px)`) so the inset doesn't introduce a page-level scrollbar. Mobile is unaffected (`index.css`).
 - Login/Register Page (Desktop): Left brand panel (`.brand-panel`) background removed (now transparent); its curved right-edge divider shape (`.brand-panel::after`) and thin accent border line (`.brand-panel::before`) were both removed entirely. Mobile is unaffected (`index.css`).
