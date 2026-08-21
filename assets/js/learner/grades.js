@@ -1518,10 +1518,12 @@ function renderProgressReport(data) {
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
+                    /* Open/close transform + transition are driven entirely from JS
+                       (see wireSheetDragToClose / openSheetAnimated) so nothing --
+                       no CSS animation, no leftover fill-mode -- ever fights the
+                       live drag transform. This is what caused the flicker. */
                     transform: translateY(100%);
-                    animation: prSheetSlideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
                 }
-                @keyframes prSheetSlideUp { to { transform: translateY(0); } }
 
                 .pr-modal-handle-row {
                     display: flex;
@@ -1538,10 +1540,6 @@ function renderProgressReport(data) {
                     height: 4px;
                     border-radius: 100px;
                     background: rgba(255,255,255,0.18);
-                }
-                .pr-modal-sheet.pr-sheet-dragging {
-                    animation: none;
-                    transition: none;
                 }
                 .pr-modal-scroll {
                     overflow-y: auto;
@@ -1830,16 +1828,43 @@ function renderProgressReport(data) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOBILE SHEET: drag-down-to-close on the handle row
-// Press+drag the grabber handle down; the sheet tracks the finger 1:1.
+// MOBILE SHEET: open animation + drag-down-to-close on the handle row
+//
+// Everything that touches the sheet's `transform` lives in this one function
+// (open slide-up, live drag tracking, snap-back, close slide-down). Previously
+// the open animation was a separate CSS `animation ... forwards` rule, which
+// keeps "holding" translateY(0) as a higher-priority layer even after it
+// finishes -- so when the drag handler set an inline transform to follow the
+// finger, the animation's held value and the drag's inline value fought each
+// other every frame, which is what caused the flicker. Routing both through
+// plain inline transform + transition (one owner, never overlapping) fixes it.
+//
+// Drag behaviour: press+drag the grabber, the sheet tracks the finger 1:1.
 // Release past ~30% of the sheet's height (or a fast downward flick) and it
-// closes; otherwise it snaps back open. Tapping the dimmed area above the
-// sheet (already wired via modal.onclick) still closes it instantly.
+// finishes closing; otherwise it snaps back open. Tapping the dimmed area
+// above the sheet (wired via modal.onclick) still closes it instantly.
 // ─────────────────────────────────────────────────────────────────────────────
+function openSheetAnimated(sheet) {
+    sheet.style.transition = 'none';
+    sheet.style.transform = 'translateY(100%)';
+    // Force a reflow so the browser registers the starting position before
+    // we switch on the transition -- otherwise the two style writes collapse
+    // into one and there's nothing to animate from.
+    void sheet.offsetHeight;
+    sheet.style.transition = 'transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)';
+    sheet.style.transform = 'translateY(0)';
+    sheet.addEventListener('transitionend', function clearInline() {
+        sheet.style.transition = '';
+        sheet.removeEventListener('transitionend', clearInline);
+    }, { once: true });
+}
+
 function wireSheetDragToClose(modal, onClose) {
     const sheet  = modal.querySelector('.pr-modal-sheet');
     const handle = modal.querySelector('.pr-modal-handle-row');
     if (!sheet || !handle) return;
+
+    openSheetAnimated(sheet);
 
     const CLOSE_THRESHOLD_RATIO = 0.3; // 30% of sheet height
     const FLICK_VELOCITY = 0.6;        // px/ms - fast downward swipe also closes
@@ -1858,7 +1883,10 @@ function wireSheetDragToClose(modal, onClose) {
         currentY = startY;
         startTime = Date.now();
         sheetHeight = sheet.getBoundingClientRect().height;
-        sheet.classList.add('pr-sheet-dragging');
+        // No transition while actively dragging -- the transform must track
+        // the finger with zero lag, with nothing else animating it at the
+        // same time.
+        sheet.style.transition = 'none';
         handle.setPointerCapture && handle.setPointerCapture(e.pointerId);
     }
 
@@ -1872,7 +1900,6 @@ function wireSheetDragToClose(modal, onClose) {
     function finishDrag() {
         if (!dragging) return;
         dragging = false;
-        sheet.classList.remove('pr-sheet-dragging');
 
         const delta = Math.max(0, currentY - startY);
         const elapsed = Math.max(1, Date.now() - startTime);
@@ -1883,13 +1910,16 @@ function wireSheetDragToClose(modal, onClose) {
         if (pastThreshold || isFlick) {
             // Let it continue the rest of the way down, then close.
             sheet.style.transition = 'transform 0.2s ease-out';
-            sheet.style.transform = `translateY(100%)`;
+            sheet.style.transform = 'translateY(100%)';
             setTimeout(() => onClose(), 200);
         } else {
             // Snap back open.
             sheet.style.transition = 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)';
             sheet.style.transform = 'translateY(0)';
-            setTimeout(() => { sheet.style.transition = ''; }, 260);
+            sheet.addEventListener('transitionend', function clearInline() {
+                sheet.style.transition = '';
+                sheet.removeEventListener('transitionend', clearInline);
+            }, { once: true });
         }
     }
 
