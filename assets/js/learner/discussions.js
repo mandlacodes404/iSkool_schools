@@ -288,6 +288,7 @@ function unlockMobileLayout() {
     const nav = document.getElementById('mobileBottomNav');
     if (nav) nav.style.display = '';
     /* Remove the mobile composer pill (and legacy sheet/overlay ids, if present) */
+    document.getElementById('discMobileTrigger')?._discComposerResizeObserver?.disconnect();
     document.getElementById('discMobileTrigger')?.remove();
     document.getElementById('discMobileSheet')?.remove();
     document.getElementById('discMobileOverlay')?.remove();
@@ -943,8 +944,11 @@ function renderThread(data) {
             .disc-posts-scroll { flex:1; overflow-y:auto; padding:12px 10px 16px; display:flex; flex-direction:column; gap:0; scrollbar-width:thin; scrollbar-color:#1b1b1b transparent; -webkit-overflow-scrolling:touch; min-height:0; background:transparent; position:relative; z-index:1; }
 
             @media (max-width: 767px) {
-                /* Enough room for the trigger bar (≈64px) + safe area + breathing room */
-                .disc-posts-scroll { padding-bottom: 100px; }
+                /* Static fallback only — the real value is set dynamically per
+                   render by a ResizeObserver in injectMobileComposer(), since the
+                   pill's height varies with textarea growth and reply/file/voice
+                   previews. This number just covers the instant before JS runs. */
+                .disc-posts-scroll { padding-bottom: 190px; }
                 /* Hide the desktop compose box on mobile — replaced by the floating sheet */
                 .disc-compose { display: none !important; }
                 /* Transparent on mobile only — lets the chat/thread area show the real page background */
@@ -1360,6 +1364,7 @@ function wireCompose(discId) {
 // ─────────────────────────────────────────────
 function injectMobileComposer(discId) {
     /* Clean up any stale instances */
+    document.getElementById('discMobileTrigger')?._discComposerResizeObserver?.disconnect();
     document.getElementById('discMobileSheet')?.remove();
     document.getElementById('discMobileTrigger')?.remove();
     document.getElementById('discMobileOverlay')?.remove();
@@ -1527,6 +1532,39 @@ function injectMobileComposer(discId) {
             sheetBox.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.05) inset,' +
                 '0 6px 16px -6px rgba(0,0,0,0.5), 0 14px 32px -12px rgba(0,0,0,0.45)';
         });
+    }
+
+    /* ── Keep the scroll area's bottom padding in sync with the pill's real
+       height, so the last message is never hidden behind it. The pill's
+       height varies with textarea growth and with the reply/file/voice
+       preview rows toggling above it — a fixed padding number always ends
+       up wrong in one of those states, so we measure it live instead. */
+    const scrollEl = document.querySelector('.disc-posts-scroll');
+    if (scrollEl && window.ResizeObserver) {
+        /* Was the view already scrolled to (or very near) the bottom right
+           before this padding change? If so, keep it pinned to the bottom
+           after the padding updates — otherwise the padding growing (e.g.
+           textarea gaining a line, a preview row appearing) silently eats
+           into the visible area and clips the last message, without the
+           user having scrolled away from the bottom themselves. */
+        const syncPadding = () => {
+            const wasNearBottom =
+                scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 120;
+            const extraBreathingRoom = 16;
+            scrollEl.style.paddingBottom = (trigger.offsetHeight + extraBreathingRoom) + 'px';
+            if (wasNearBottom) {
+                scrollEl.scrollTop = scrollEl.scrollHeight;
+            }
+        };
+        const ro = new ResizeObserver(syncPadding);
+        ro.observe(trigger);
+        /* Run once now, and again on the next frame — the pill's first
+           layout pass (fonts, the browser applying our inline styles)
+           isn't always settled in the same tick it's appended in. */
+        syncPadding();
+        requestAnimationFrame(syncPadding);
+        /* Clean up the observer when this composer instance is torn down */
+        trigger._discComposerResizeObserver = ro;
     }
 }
 
