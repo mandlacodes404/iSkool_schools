@@ -530,8 +530,13 @@
 /* ── MOBILE: ASSIGNMENT DETAIL VIEW ── */
 /* (was: second inline <style> block, injected in openMobileLearnerAssignment) */
 .las-mobile-detail {
-    min-height: calc(100vh - 74px);
     padding: 18px 16px 96px;
+}
+@media (max-width: 899px) {
+    .las-mobile-detail {
+        margin-left: -18px;
+        margin-right: -18px;
+    }
 }
 .las-mobile-detail-author-row {
     display: flex;
