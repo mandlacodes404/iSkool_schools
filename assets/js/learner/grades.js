@@ -1120,14 +1120,28 @@ window.generateGradesReport = async function (targetEmail) {
     }
 };
 
-function renderProgressReport(data) {
-    const apiArea = document.getElementById('api-content-area');
-    if (!apiArea) return;
-
-    if (!document.getElementById('pr-styles')) {
-        const style = document.createElement('style');
-        style.id = 'pr-styles';
-        style.textContent = `
+// Injects the shared <style id="pr-styles"> block (Progress Report card,
+// mobile full-screen sheet treatment, hero header, subject rows, and the
+// Quiz Review sheet's own .review-modal-sheet/.review-modal-frame rules --
+// all of it lives in this one block). Guarded so it only runs once no
+// matter which entry point calls it first.
+//
+// BUG FIX: this used to be inlined directly inside renderProgressReport(),
+// so the styles only existed once the Progress Report sheet had been opened
+// at least once. openQuizReview() never called renderProgressReport() and
+// never injected this stylesheet itself, so opening Quiz Review first (with
+// Progress Report never opened yet) produced a modal/sheet with correct DOM
+// and correct JS wiring (wireSheetDragToClose ran fine) but NO CSS at all --
+// .pr-modal-overlay wasn't fixed/full-screen, .pr-modal-sheet had no
+// background or slide-up transform, etc. It looked like the sheet "didn't
+// open" but really it opened unstyled and invisible/inert. Extracting the
+// injection into its own function callable from both entry points fixes
+// this at the source instead of duplicating the styles.
+function ensurePrStylesInjected() {
+    if (document.getElementById('pr-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'pr-styles';
+    style.textContent = `
             /* ── PROGRESS REPORT WRAP ── */
             .pr-wrap {
                 max-width: 680px;
@@ -1752,8 +1766,14 @@ function renderProgressReport(data) {
                 .pr-grade-pills { margin-left: 0; }
             }
         `;
-        document.head.appendChild(style);
-    }
+    document.head.appendChild(style);
+}
+
+function renderProgressReport(data) {
+    const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    ensurePrStylesInjected();
 
     const currentTerm = data.current_term || 1;
     const subjects    = data.subjects || [];
@@ -2306,6 +2326,14 @@ window.openQuizReview = function(resultId, event) {
         // report. Grades view (and its header/bottom nav) underneath is
         // left completely alone; closing the sheet is a dismiss, not a
         // navigation, so no configureHeader/back-button wiring is needed.
+        //
+        // ensurePrStylesInjected() is required here: the .pr-modal-* /
+        // .review-modal-* CSS this sheet depends on used to only get
+        // injected from inside renderProgressReport(), so opening Quiz
+        // Review before ever opening the Progress Report sheet produced a
+        // correctly-wired but completely unstyled (invisible/inert) modal.
+        // See ensurePrStylesInjected()'s own comment for the full story.
+        ensurePrStylesInjected();
         let modal = document.getElementById('prReportModal');
         if (!modal) {
             modal = document.createElement('div');
