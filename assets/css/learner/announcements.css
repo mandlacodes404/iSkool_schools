@@ -488,8 +488,13 @@
 /* ── MOBILE: ANNOUNCEMENT DETAIL VIEW ── */
 /* (was: second inline <style> block, injected in openMobileLearnerAnnouncement) */
 .lan-mobile-detail {
-    min-height: calc(100vh - 74px);
     padding: 18px 16px 96px;
+}
+@media (max-width: 899px) {
+    .lan-mobile-detail {
+        margin-left: -18px;
+        margin-right: -18px;
+    }
 }
 .lan-mobile-detail-author-row {
     display: flex;
