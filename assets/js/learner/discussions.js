@@ -1396,8 +1396,7 @@ function injectMobileComposer(discId) {
         <!-- Reply preview (hidden by default) -->
         <div id="discSheetReplyPreview" style="
             display:none;margin:0 0 8px;
-            background:rgba(79,209,197,0.06);
-            border:1px solid rgba(79,209,197,0.2);
+            background:#20201f;
             border-radius:10px;padding:8px 12px;
             font-size:12px;color:#8b949e;
             flex-direction:row;align-items:center;gap:8px;">
@@ -1422,8 +1421,7 @@ function injectMobileComposer(discId) {
         <!-- Voice preview (hidden by default) -->
         <div id="discSheetVoicePreview" style="
             display:none;margin:0 0 8px;
-            background:rgba(248,81,73,0.05);
-            border:1px solid rgba(248,81,73,0.2);
+            background:#20201f;
             border-radius:10px;padding:10px 14px;
             flex-direction:row;align-items:center;gap:10px;">
             <span id="discSheetVoiceDot" class="disc-voice-rec-dot"></span>
@@ -1822,7 +1820,7 @@ function _discSheetShowVoiceReady(mimeType) {
     const s = String(_discRecordSeconds % 60).padStart(2, '0');
     if (dot)     dot.className = 'disc-voice-rec-done';
     if (recBars) recBars.style.display = 'none';
-    if (preview) { preview.style.background = 'rgba(79,209,197,0.05)'; preview.style.borderColor = 'rgba(79,209,197,0.2)'; }
+    if (preview) { preview.style.background = '#20201f'; preview.style.borderColor = 'transparent'; }
     if (status)  { status.textContent = `Voice note ready · ${m}:${s}`; status.style.color = '#4fd1c5'; }
 }
 
