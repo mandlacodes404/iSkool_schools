@@ -1359,6 +1359,103 @@ function renderProgressReport(data) {
             .pr-term-tab-avg { font-size: 17px; font-weight: 900; color: #e2e8f0; }
             .pr-term-tab.active .pr-term-tab-avg { color: #68d391; }
             .pr-term-tab-sub { font-size: 10px; color: #555e6a; margin-top: 2px; }
+
+            /* Hidden by default (desktop); shown only inside .pr-modal-sheet
+               on mobile, see the ≤899px media query below. */
+            .pr-hero { display: none; }
+
+            /* ── MOBILE HEADER REDESIGN (Design B: single hero card) ──
+               Replaces school band + student row + avg strip + term tabs
+               with one compressed block: top line (school/term + status),
+               name + overall average sharing a row, then a slim term-trend
+               line. Subjects keep their existing markup/CSS untouched —
+               this only reorganizes what comes before them. Mobile-only
+               (≤899px, matching the existing full-screen sheet breakpoint);
+               desktop keeps the original school band / strip / tabs. */
+            .pr-hero-topline {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 16px 12px;
+                gap: 10px;
+            }
+            .pr-hero-school {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                min-width: 0;
+                font-size: 12px;
+                color: #8b949e;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .pr-hero-school i { font-size: 15px; color: #68d391; flex-shrink: 0; }
+            .pr-hero-status {
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.3px;
+                color: #68d391;
+                background: rgba(104,211,145,0.12);
+                padding: 4px 9px;
+                border-radius: 100px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .pr-hero-idrow {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 16px 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .pr-hero-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: rgba(104,211,145,0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 800;
+                color: #68d391;
+                flex-shrink: 0;
+            }
+            .pr-hero-nameblock { flex: 1; min-width: 0; }
+            .pr-hero-name {
+                font-size: 14px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .pr-hero-class { font-size: 11px; color: #8b949e; margin-top: 1px; }
+            .pr-hero-avgblock { text-align: right; flex-shrink: 0; }
+            .pr-hero-avgnum { font-size: 26px; font-weight: 900; line-height: 1; }
+            .pr-hero-avglabel { font-size: 10px; color: #555e6a; margin-top: 3px; }
+            .pr-hero-trendrow {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+            }
+            .pr-hero-trendlabel {
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: #555e6a;
+            }
+            .pr-hero-trenditems { display: flex; gap: 14px; }
+            .pr-hero-trenditem { display: flex; align-items: center; gap: 5px; }
+            .pr-hero-trenditem-t { font-size: 10px; color: #8b949e; }
+            .pr-hero-trenditem-v { font-size: 12px; font-weight: 800; }
+            .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #68d391; }
+            .pr-hero-trenditem.pr-hero-trend-disabled { opacity: 0.4; }
+
             .pr-current-dot {
                 position: absolute;
                 top: 7px;
@@ -1563,6 +1660,17 @@ function renderProgressReport(data) {
                     margin-bottom: 0;
                 }
 
+                /* Design B header redesign: swap school band / student row /
+                   avg strip / term tabs for the single compressed hero
+                   block. Subjects section below is untouched. Scoped to
+                   the mobile sheet only -- desktop keeps the original
+                   layout entirely. */
+                .pr-modal-sheet .pr-school-band,
+                .pr-modal-sheet .pr-student-row,
+                .pr-modal-sheet .pr-avg-strip,
+                .pr-modal-sheet .pr-term-tabs { display: none !important; }
+                .pr-modal-sheet .pr-hero { display: block; }
+
                 /* ── QUIZ REVIEW: same modal sheet treatment ── */
                 .pr-modal-sheet.review-modal-sheet {
                     height: 92vh;
@@ -1627,6 +1735,54 @@ function renderProgressReport(data) {
                 <div class="pr-term-tab-sub">${t === currentTerm ? 'Current' : (hasData ? 'Completed' : 'Upcoming')}</div>
             </div>`;
     }).join('');
+
+    // ── MOBILE HEADER REDESIGN (Design B) ──
+    // Same underlying data as termTabsHtml above (termAvg/pctColor/currentTerm)
+    // so the two never disagree, just laid out as one compressed hero block
+    // instead of separate school band / student row / avg strip / term tabs.
+    // Shown on mobile only -- see .pr-hero / .pr-modal-sheet CSS above.
+    const heroTrendItemsHtml = [1,2,3,4].map(t => {
+        const avg = termAvg(t);
+        const c = pctColor(avg);
+        const hasData = subjects.some(s => s.terms[t]?.pct !== null);
+        const isCurrent = t === currentTerm;
+        return `
+            <div class="pr-hero-trenditem ${isCurrent ? 'pr-hero-trend-current' : ''} ${!hasData ? 'pr-hero-trend-disabled' : ''}"
+                 onclick="prSwitchTerm(${t})"
+                 style="${!hasData ? 'pointer-events:none;' : 'cursor:pointer;'}">
+                <span class="pr-hero-trenditem-t">T${t}</span>
+                <span class="pr-hero-trenditem-v" style="color:${hasData ? c.text : '#555e6a'};">${avg !== null ? avg : '—'}</span>
+            </div>`;
+    }).join('');
+
+    const heroHtml = `
+        <div class="pr-hero">
+            <div class="pr-hero-topline">
+                <div class="pr-hero-school">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="1.8" fill="none">
+                        <path d="M22 10v12H2V10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M7 9.5v5M17 9.5v5M12 14.5v5"/>
+                    </svg>
+                    <span>${escHtmlPr(data.school_name)} &middot; Term ${currentTerm}</span>
+                </div>
+                <span class="pr-hero-status">On Track</span>
+            </div>
+            <div class="pr-hero-idrow">
+                <div class="pr-hero-avatar">${initials(data.learner_name)}</div>
+                <div class="pr-hero-nameblock">
+                    <div class="pr-hero-name">${escHtmlPr(data.learner_name)}</div>
+                    <div class="pr-hero-class">${escHtmlPr(data.learner_class)}</div>
+                </div>
+                <div class="pr-hero-avgblock">
+                    <div class="pr-hero-avgnum" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '—'}</div>
+                    <div class="pr-hero-avglabel">overall</div>
+                </div>
+            </div>
+            <div class="pr-hero-trendrow">
+                <span class="pr-hero-trendlabel">Term trend</span>
+                <div class="pr-hero-trenditems">${heroTrendItemsHtml}</div>
+            </div>
+        </div>`;
 
     function gradeLabel(pct) {
         if (pct === null) return { letter: '?', cls: '' };
@@ -1714,6 +1870,8 @@ function renderProgressReport(data) {
             </div>
 
             <div class="pr-card">
+
+                ${heroHtml}
 
                 <div class="pr-school-band">
                     <div class="pr-logo-wrap">
@@ -2008,6 +2166,11 @@ window.prSwitchTerm = function (term) {
     if (!apiArea || !apiArea._prData) return;
     document.querySelectorAll('.pr-term-tab').forEach((tab, i) => {
         tab.classList.toggle('active', i + 1 === term);
+    });
+    // Keep the mobile hero's term-trend row in sync too, since it renders
+    // its own "current" highlight independently of .pr-term-tab.
+    document.querySelectorAll('.pr-hero-trenditem').forEach((item, i) => {
+        item.classList.toggle('pr-hero-trend-current', i + 1 === term);
     });
     const grid = document.getElementById('pr-subjects-grid');
     if (grid) grid.innerHTML = apiArea._buildSubjectCards(term);
