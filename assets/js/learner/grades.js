@@ -1548,6 +1548,51 @@ function renderProgressReport(data) {
             .pr-grade-d { background: rgba(248,81,73,0.14);  color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
             .pr-subject-no-data { font-size: 12px; color: #555e6a; font-style: italic; flex: 1; }
 
+            /* ── SUBJECT ROWS v2 (mobile-only, bar-free) ──
+               Design 2: grade badge leads, name + coverage as plain muted
+               text, mark % on the right -- no progress bars, no legend
+               needed to decode them. Hidden by default (desktop keeps the
+               original two-bar .pr-subject-row); shown only inside
+               .pr-modal-sheet on mobile, see the ≤899px media query below.
+               Rendered alongside the original row for the same subject so
+               prSwitchTerm's innerHTML re-render keeps working unchanged
+               for both variants at once. */
+            .pr-subject-row-v2 {
+                display: none;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 0;
+                border-top: 1px solid rgba(255,255,255,0.05);
+            }
+            /* .pr-subject-row (hidden on mobile) always sits immediately
+               before each subject's .pr-subject-row-v2 as a DOM sibling, so
+               :first-of-type (tag-based, not class-based) would never match
+               the first v2 row -- it'd always see .pr-subject-row there
+               first. Target the actual first visible row explicitly. */
+            .pr-subjects-list > .pr-subject-row:first-child + .pr-subject-row-v2 { border-top: none; }
+            .pr-subject-v2-badge {
+                width: 30px;
+                height: 24px;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                font-weight: 800;
+                flex-shrink: 0;
+            }
+            .pr-subject-v2-info { flex: 1; min-width: 0; }
+            .pr-subject-v2-name {
+                font-size: 13px;
+                font-weight: 500;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .pr-subject-v2-meta { font-size: 10px; color: #555e6a; margin-top: 1px; }
+            .pr-subject-v2-pct { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+
             /* ── FOOTER LEGEND ── */
             .pr-footer-legend {
                 padding: 12px 22px;
@@ -1670,6 +1715,16 @@ function renderProgressReport(data) {
                 .pr-modal-sheet .pr-avg-strip,
                 .pr-modal-sheet .pr-term-tabs { display: none !important; }
                 .pr-modal-sheet .pr-hero { display: block; }
+
+                /* Subject rows Design 2: bar-free, mobile-only. The
+                   "Mark · Covered" column hint and the two-bar legend item
+                   both exist only to decode the bars, so they're hidden
+                   here too -- nothing left needing a legend. Grade-scale
+                   pills (A 80-100 etc.) stay, they're independently useful. */
+                .pr-modal-sheet .pr-subject-row { display: none !important; }
+                .pr-modal-sheet .pr-subject-row-v2 { display: flex; }
+                .pr-modal-sheet .pr-subjects-col-hint { display: none !important; }
+                .pr-modal-sheet .pr-legend-item { display: none !important; }
 
                 /* ── QUIZ REVIEW: same modal sheet treatment ── */
                 .pr-modal-sheet.review-modal-sheet {
@@ -1813,12 +1868,21 @@ function renderProgressReport(data) {
                         '<div class="pr-subject-code">' + escHtmlPr(s.code || '') + '</div>' +
                     '</div>' +
                     '<div class="pr-subject-no-data">No assessments this term</div>' +
+                '</div>' +
+                '<div class="pr-subject-row-v2">' +
+                    '<div class="pr-subject-v2-badge" style="background:rgba(255,255,255,0.05);color:#555e6a;border:1px solid rgba(255,255,255,0.08);">?</div>' +
+                    '<div class="pr-subject-v2-info">' +
+                        '<div class="pr-subject-v2-name">' + escHtmlPr(s.name) + '</div>' +
+                        '<div class="pr-subject-v2-meta">No assessments this term</div>' +
+                    '</div>' +
                 '</div>';
             }
 
             const coveredPct = covered !== null ? covered : 0;
             const coveredTxt = covered !== null ? covered + '%' : '—';
             const codeText   = escHtmlPr(s.code || (td.count + ' assessment' + (td.count !== 1 ? 's' : '')));
+            const countText  = td.count + ' assessment' + (td.count !== 1 ? 's' : '');
+            const v2MetaText = countText + (covered !== null ? ' &middot; ' + coveredTxt + ' covered' : '');
 
             return '<div class="pr-subject-row">' +
                 '<div class="pr-subject-icon" style="background:' + c.bg + ';color:' + c.text + ';">' +
@@ -1841,6 +1905,14 @@ function renderProgressReport(data) {
                     '</div>' +
                 '</div>' +
                 '<div class="pr-subject-grade ' + gl.cls + '">' + gl.letter + '</div>' +
+            '</div>' +
+            '<div class="pr-subject-row-v2">' +
+                '<div class="pr-subject-v2-badge ' + gl.cls + '">' + gl.letter + '</div>' +
+                '<div class="pr-subject-v2-info">' +
+                    '<div class="pr-subject-v2-name">' + escHtmlPr(s.name) + '</div>' +
+                    '<div class="pr-subject-v2-meta">' + v2MetaText + '</div>' +
+                '</div>' +
+                '<div class="pr-subject-v2-pct" style="color:' + c.text + ';">' + Math.round(pct) + '%</div>' +
             '</div>';
         }).join('');
     }
