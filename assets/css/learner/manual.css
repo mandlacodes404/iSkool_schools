@@ -640,23 +640,26 @@
     gap: 0;
 }
 
-/* Class card */
+/* Class card — lifted via technique 1 off the page background (#20201f) */
 .lh-class-card {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.12);
+    background: #323231;   /* #20201f, same hue/sat, L +7% */
     border-radius: 14px;
     padding: 14px;
     margin-bottom: 24px;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.045) inset,
+        0 4px 12px -4px rgba(0,0,0,0.45),
+        0 10px 24px -10px rgba(0,0,0,0.4);
 }
 .lh-class-card.lh-class-empty {
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
 .lh-class-card.lh-class-empty:active {
-    background: rgba(255, 255, 255, 0.04);
+    background: #3C3C3B; /* one step further lifted, same derivation */
 }
 .lh-class-icon {
     width: 40px;
@@ -730,30 +733,43 @@
     letter-spacing: 0;
 }
 
-/* Card container */
+/* Card container — no longer wraps rows together; kept as a harmless
+   no-op in case any other page still references the class, but Home's
+   rows are now individually lifted cards (see .lh-row below). */
 .lh-card {
     background: transparent;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.12);
-    overflow: hidden;
 }
 
-/* Individual row */
+/* Individual row — each one is now its own lifted card (technique 1,
+   same fill as .lh-class-card and the mobile input pill: #20201f + L +7%)
+   instead of being grouped inside one shared .lh-card with hairline
+   dividers between rows. */
 .lh-row {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 13px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: #323231;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.045) inset,
+        0 4px 12px -4px rgba(0,0,0,0.45),
+        0 10px 24px -10px rgba(0,0,0,0.4);
     cursor: pointer;
     transition: background 0.15s ease;
     -webkit-tap-highlight-color: transparent;
 }
+.lh-row:last-child {
+    margin-bottom: 0;
+}
 .lh-row:active {
-    background: rgba(255, 255, 255, 0.04);
+    background: #3C3C3B; /* one step further lifted, same derivation */
 }
 .lh-row-last {
-    border-bottom: none;
+    /* No longer needed now that every row is its own card (this rule
+       previously removed the shared bottom divider on the last row of
+       a grouped .lh-card) — left as a no-op selector for safety. */
 }
 
 /* Icon box */
@@ -803,7 +819,7 @@
     color: #2d3748;
 }
 
-/* Empty state */
+/* Empty state — also its own lifted card, consistent with populated rows */
 .lh-empty-state {
     display: flex;
     flex-direction: column;
@@ -811,6 +827,12 @@
     padding: 28px 20px;
     text-align: center;
     gap: 8px;
+    background: #323231;
+    border-radius: 14px;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.045) inset,
+        0 4px 12px -4px rgba(0,0,0,0.45),
+        0 10px 24px -10px rgba(0,0,0,0.4);
 }
 .lh-empty-icon {
     width: 52px;

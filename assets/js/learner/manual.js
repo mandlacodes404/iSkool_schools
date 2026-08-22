@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=4.1';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=4.2';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -275,9 +275,7 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${todoSlice.length > 0 ? `<span class="lh-badge">${todoSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card">
-                    ${buildMobileTodo(todoSlice)}
-                </div>
+                ${buildMobileTodo(todoSlice)}
             </div>
 
             <!-- RECENTS SECTION -->
@@ -293,9 +291,7 @@ function buildHomeLayout(data, manualHtml) {
                         Recent
                     </div>
                 </div>
-                <div class="lh-card">
-                    ${buildMobileRecent(recentSlice)}
-                </div>
+                ${buildMobileRecent(recentSlice)}
             </div>
 
             <!-- UPCOMING EVENTS SECTION -->
@@ -314,9 +310,7 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                    ${buildMobileEvents(eventsSlice)}
-                </div>
+                ${buildMobileEvents(eventsSlice)}
             </div>
 
         </div>`;
@@ -659,14 +653,13 @@ function buildMobileTodo(todo) {
         evaluation: `<polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/>`
     };
 
-    return todo.map((item, i) => {
+    return todo.map((item) => {
         const color  = colorMap[item.type]  || '#4fd1c5';
         const label  = labelMap[item.type]  || item.type;
         const icon   = iconMap[item.type]   || iconMap.quiz;
-        const isLast = i === todo.length - 1;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
+            <div class="lh-row" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
@@ -719,13 +712,12 @@ function buildMobileRecent(recent) {
         quiz:         `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`
     };
 
-    return recent.map((item, i) => {
+    return recent.map((item) => {
         const color  = colorMap[item.type]  || '#4fd1c5';
         const icon   = iconMap[item.type]   || iconMap.announcement;
-        const isLast = i === recent.length - 1;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0}, '${item.scope || ''}')">
+            <div class="lh-row" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0}, '${item.scope || ''}')">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
@@ -838,7 +830,7 @@ function buildMobileEvents(events) {
 
     if (!events.length) {
         return `
-            <div class="lh-empty-state">
+            <div class="lh-empty-state" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
                 <div class="lh-empty-icon" style="background:${sectionColor}14;">
                     <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -874,12 +866,11 @@ function buildMobileEvents(events) {
         other:   `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`
     };
 
-    return events.map((item, i) => {
+    return events.map((item) => {
         const type   = item.event_type || 'other';
         const color  = typeColorMap[type]  || '#8b949e';
         const label  = typeLabelMap[type]  || 'Event';
         const icon   = typeIconMap[type]   || typeIconMap.other;
-        const isLast = i === events.length - 1;
 
         // Format the date nicely: "20 Mar" or "Mon, 20 Mar"
         const d       = new Date(item.event_date + 'T00:00:00');
@@ -892,7 +883,7 @@ function buildMobileEvents(events) {
         const isPast  = d < today;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:pointer;${isPast ? 'opacity:0.5;' : ''}">
+            <div class="lh-row" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="${isPast ? 'opacity:0.5;' : ''}">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
