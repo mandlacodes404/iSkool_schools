@@ -1549,7 +1549,21 @@ function injectMobileComposer(discId) {
             const wasNearBottom =
                 scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 120;
             const extraBreathingRoom = 16;
-            scrollEl.style.paddingBottom = (trigger.offsetHeight + extraBreathingRoom) + 'px';
+            const pillHeight = trigger.offsetHeight + extraBreathingRoom;
+            scrollEl.style.paddingBottom = pillHeight + 'px';
+
+            /* Fade mask: fully opaque (clear) everywhere above the pill,
+               fading to transparent only across the zone the pill itself
+               occupies — so content is crisp right up until it actually
+               passes underneath the pill, then fades instead of just
+               getting covered. The fade starts at the same height as the
+               pill so it never encroaches on space above it. */
+            const fadeZone = pillHeight;
+            const gradient =
+                `linear-gradient(to bottom, #000 0, #000 calc(100% - ${fadeZone}px), transparent 100%)`;
+            scrollEl.style.maskImage = gradient;
+            scrollEl.style.webkitMaskImage = gradient;
+
             if (wasNearBottom) {
                 scrollEl.scrollTop = scrollEl.scrollHeight;
             }
