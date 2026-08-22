@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.6">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.7">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
