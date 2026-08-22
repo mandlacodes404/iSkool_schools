@@ -287,9 +287,9 @@ function unlockMobileLayout() {
     /* Restore the bottom nav when leaving a thread */
     const nav = document.getElementById('mobileBottomNav');
     if (nav) nav.style.display = '';
-    /* Remove the mobile sheet elements if they exist */
-    document.getElementById('discMobileSheet')?.remove();
+    /* Remove the mobile composer pill (and legacy sheet/overlay ids, if present) */
     document.getElementById('discMobileTrigger')?.remove();
+    document.getElementById('discMobileSheet')?.remove();
     document.getElementById('discMobileOverlay')?.remove();
     /* Remove the long-press action popup if it exists */
     document.getElementById('discLongPressMenu')?.remove();
@@ -1081,7 +1081,7 @@ function renderThread(data) {
             /* ── COMPOSE — always pinned to bottom of the flex column, never floats ── */
             .disc-compose { flex-shrink:0; padding:10px 12px 14px; border-top:1px solid rgba(255,255,255,0.07); background:rgba(10,10,14,0.75); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); position:relative; z-index:2; }
 
-            /* disc-compose is desktop-only; mobile uses discMobileSheet instead */
+            /* disc-compose is desktop-only; mobile uses the persistent discMobileTrigger pill instead */
             .disc-reply-preview { display:none; background:rgba(79,209,197,0.06); border:1px solid rgba(79,209,197,0.2); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; align-items:center; gap:8px; }
             .disc-reply-preview.show { display:flex; }
             .disc-file-preview { display:none; align-items:center; gap:8px; background:#1b1b1b; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 12px; margin-bottom:8px; font-size:12px; color:#8b949e; }
@@ -1354,7 +1354,9 @@ function wireCompose(discId) {
 }
 
 // ─────────────────────────────────────────────
-// MOBILE COMPOSER — floating trigger + bottom sheet
+// MOBILE COMPOSER — single persistent lifted pill
+// (previously: slim trigger that opened a separate bottom sheet;
+//  now the pill itself is the always-present input, no handoff)
 // ─────────────────────────────────────────────
 function injectMobileComposer(discId) {
     /* Clean up any stale instances */
@@ -1362,17 +1364,7 @@ function injectMobileComposer(discId) {
     document.getElementById('discMobileTrigger')?.remove();
     document.getElementById('discMobileOverlay')?.remove();
 
-    /* ── 1. Dimmer overlay (behind sheet, above posts) ── */
-    const overlay = document.createElement('div');
-    overlay.id = 'discMobileOverlay';
-    overlay.style.cssText = `
-        position:fixed;inset:0;background:rgba(0,0,0,0.55);
-        z-index:5500;display:none;backdrop-filter:blur(2px);
-        -webkit-backdrop-filter:blur(2px);transition:opacity 0.25s ease;opacity:0;`;
-    overlay.addEventListener('click', discCloseMobileSheet);
-    document.body.appendChild(overlay);
-
-    /* ── 2. Fixed trigger bar at bottom — lifted 16px off the very bottom ── */
+    /* Fixed pill container at bottom — lifted 16px off the very bottom */
     const trigger = document.createElement('div');
     trigger.id = 'discMobileTrigger';
     trigger.style.cssText = `
@@ -1383,7 +1375,7 @@ function injectMobileComposer(discId) {
         z-index:5000;
         display:flex;flex-direction:column;gap:0;`;
     trigger.innerHTML = `
-        <!-- Mobile typing indicator — shown above the trigger pill -->
+        <!-- Mobile typing indicator — shown above the pill -->
         <div id="discMobileTyping" style="
             display:none;align-items:center;gap:8px;
             padding:4px 4px 6px;font-size:12px;
@@ -1395,49 +1387,10 @@ function injectMobileComposer(discId) {
             </div>
             <span id="discMobileTypingText">Someone is typing...</span>
         </div>
-        <!-- Trigger row -->
-        <div style="display:flex;align-items:center;gap:10px;">
-            <div onclick="discOpenMobileSheet(${discId})" style="
-                flex:1;background:transparent;border:1px solid rgba(255,255,255,0.07);
-                border-radius:22px;padding:10px 16px;
-                color:#8b949e;font-family:'Nunito',sans-serif;
-                font-size:14px;font-weight:600;cursor:text;
-                display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-comment-dots" style="color:#4fd1c5;font-size:13px;"></i>
-                Add to the discussion…
-            </div>
-            <button onclick="discOpenMobileSheet(${discId},'attach')" style="
-                width:40px;height:40px;border-radius:50%;background:transparent;
-                border:1.5px solid #4fd1c5;color:#4fd1c5;
-                display:flex;align-items:center;justify-content:center;
-                cursor:pointer;flex-shrink:0;font-size:14px;">
-                <i class="fas fa-paperclip"></i>
-            </button>
-        </div>`;
-    document.body.appendChild(trigger);
-
-    /* ── 3. Bottom sheet ── */
-    const sheet = document.createElement('div');
-    sheet.id = 'discMobileSheet';
-    sheet.style.cssText = `
-        position:fixed;bottom:0;left:0;right:0;
-        background:#111;
-        border-top:1px solid rgba(255,255,255,0.1);
-        border-radius:20px 20px 0 0;
-        box-shadow:0 -8px 40px rgba(0,0,0,0.7);
-        z-index:6000;
-        transform:translateY(100%);
-        transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
-        max-height:80vh;display:flex;flex-direction:column;`;
-    sheet.innerHTML = `
-        <!-- Drag handle -->
-        <div style="display:flex;justify-content:center;padding:10px 0 6px;" onclick="discCloseMobileSheet()">
-            <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);"></div>
-        </div>
 
         <!-- Reply preview (hidden by default) -->
         <div id="discSheetReplyPreview" style="
-            display:none;margin:0 12px 8px;
+            display:none;margin:0 0 8px;
             background:rgba(79,209,197,0.06);
             border:1px solid rgba(79,209,197,0.2);
             border-radius:10px;padding:8px 12px;
@@ -1451,8 +1404,8 @@ function injectMobileComposer(discId) {
 
         <!-- File preview (hidden by default) -->
         <div id="discSheetFilePreview" style="
-            display:none;margin:0 12px 8px;
-            background:#1b1b1b;border:1px solid rgba(255,255,255,0.07);
+            display:none;margin:0 0 8px;
+            background:#3D3D3B;border:1px solid rgba(255,255,255,0.07);
             border-radius:10px;padding:8px 12px;
             font-size:12px;color:#8b949e;
             flex-direction:row;align-items:center;gap:8px;">
@@ -1463,7 +1416,7 @@ function injectMobileComposer(discId) {
 
         <!-- Voice preview (hidden by default) -->
         <div id="discSheetVoicePreview" style="
-            display:none;margin:0 12px 8px;
+            display:none;margin:0 0 8px;
             background:rgba(248,81,73,0.05);
             border:1px solid rgba(248,81,73,0.2);
             border-radius:10px;padding:10px 14px;
@@ -1485,47 +1438,54 @@ function injectMobileComposer(discId) {
             </button>
         </div>
 
-        <!-- Compose box -->
-        <div style="margin:0 12px;background:#1b1b1b;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;transition:border-color 0.2s;" id="discSheetBox">
+        <!-- The pill itself — lifted (technique 1: background #20201f, box #323231) -->
+        <div id="discSheetBox" style="
+            background:#323231;border-radius:26px;padding:10px 10px 10px 12px;
+            box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset,
+                       0 6px 16px -6px rgba(0,0,0,0.5),
+                       0 14px 32px -12px rgba(0,0,0,0.45);
+            display:flex;flex-direction:column;gap:10px;transition:box-shadow 0.2s;">
+
             <textarea id="discSheetTextarea"
-                placeholder="Add to the discussion…"
+                placeholder="Add to discussion"
                 rows="1"
                 style="width:100%;background:transparent;border:none;color:#e2e8f0;
-                       font-family:'Nunito',sans-serif;font-size:15px;font-weight:600;
-                       padding:13px 14px 8px;resize:none;outline:none;
-                       min-height:48px;max-height:140px;line-height:1.5;
-                       box-sizing:border-box;"></textarea>
+                       font-family:'Nunito',sans-serif;font-size:16.5px;font-weight:600;
+                       padding:4px 8px;resize:none;outline:none;
+                       min-height:36px;max-height:140px;line-height:1.5;
+                       box-sizing:border-box;color:#e2e8f0;"></textarea>
+            <style>#discSheetTextarea::placeholder{color:#8A8985;font-weight:600;}</style>
 
-            <!-- Toolbar -->
-            <div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-top:1px solid rgba(255,255,255,0.07);">
-                <!-- Attach -->
-                <label style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
-                    <i class="fas fa-paperclip"></i>
-                    <input type="file" id="discSheetFileInput" accept="image/*,.pdf" style="display:none;">
-                </label>
-                <!-- Mic -->
-                <button id="discSheetMicBtn"
-                    onclick="discSheetToggleRecording(${discId})"
-                    style="background:none;border:none;color:#8b949e;cursor:pointer;padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:5px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <!-- Post button -->
-                <button id="discSheetPostBtn"
-                    onclick="discSheetSubmitReply(${discId})"
-                    style="background:#4fd1c5;color:#0d1117;border:none;padding:8px 18px;
-                           border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;
-                           font-weight:800;cursor:pointer;display:flex;align-items:center;
-                           gap:6px;margin-left:auto;transition:background 0.2s;">
-                    <i class="fas fa-paper-plane"></i> Post
-                </button>
+            <!-- Controls row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <label style="width:34px;height:34px;border-radius:50%;background:#3D3D3B;color:#C7C6C0;
+                                   display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                        <i class="fas fa-plus" style="font-size:14px;"></i>
+                        <input type="file" id="discSheetFileInput" accept="image/*,.pdf" style="display:none;">
+                    </label>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button id="discSheetMicBtn"
+                        onclick="discSheetToggleRecording(${discId})"
+                        style="width:34px;height:34px;border-radius:50%;background:#3D3D3B;color:#C7C6C0;
+                               border:none;display:flex;align-items:center;justify-content:center;
+                               cursor:pointer;flex-shrink:0;">
+                        <i class="fas fa-microphone" style="font-size:14px;"></i>
+                    </button>
+                    <button id="discSheetPostBtn"
+                        onclick="discSheetSubmitReply(${discId})"
+                        style="width:34px;height:34px;border-radius:50%;background:#F0EFEA;color:#20201f;
+                               border:none;display:flex;align-items:center;justify-content:center;
+                               cursor:pointer;flex-shrink:0;">
+                        <i class="fas fa-paper-plane" style="font-size:13px;"></i>
+                    </button>
+                </div>
             </div>
-        </div>
+        </div>`;
+    document.body.appendChild(trigger);
 
-        <!-- Safe area spacer -->
-        <div style="height:calc(14px + env(safe-area-inset-bottom));flex-shrink:0;"></div>`;
-    document.body.appendChild(sheet);
-
-    /* Wire up sheet textarea auto-resize + typing signal */
+    /* Wire up textarea auto-resize + typing signal */
     const sheetTa = document.getElementById('discSheetTextarea');
     if (sheetTa) {
         sheetTa.addEventListener('input', function() {
@@ -1535,7 +1495,7 @@ function injectMobileComposer(discId) {
         });
     }
 
-    /* Wire up sheet file input */
+    /* Wire up file input */
     const sheetFi = document.getElementById('discSheetFileInput');
     if (sheetFi) {
         sheetFi.addEventListener('change', function() {
@@ -1556,11 +1516,17 @@ function injectMobileComposer(discId) {
         });
     }
 
-    /* Focus sheet box border on focus */
+    /* Subtle focus lift on the pill itself, no separate surface to open */
     const sheetBox = document.getElementById('discSheetBox');
     if (sheetTa && sheetBox) {
-        sheetTa.addEventListener('focus',  () => sheetBox.style.borderColor = 'rgba(79,209,197,0.4)');
-        sheetTa.addEventListener('blur',   () => sheetBox.style.borderColor = 'rgba(255,255,255,0.08)');
+        sheetTa.addEventListener('focus', () => {
+            sheetBox.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.08) inset,' +
+                '0 8px 20px -6px rgba(0,0,0,0.55), 0 18px 38px -14px rgba(0,0,0,0.5)';
+        });
+        sheetTa.addEventListener('blur', () => {
+            sheetBox.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.05) inset,' +
+                '0 6px 16px -6px rgba(0,0,0,0.5), 0 14px 32px -12px rgba(0,0,0,0.45)';
+        });
     }
 }
 
@@ -1680,42 +1646,7 @@ window.discCloseLongPressMenu = function() {
 };
 
 /* Open the sheet */
-window.discOpenMobileSheet = function(discId, mode) {
-    const sheet   = document.getElementById('discMobileSheet');
-    const overlay = document.getElementById('discMobileOverlay');
-    const trigger = document.getElementById('discMobileTrigger');
-    if (!sheet) return;
-
-    overlay.style.display = 'block';
-    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
-    sheet.style.transform = 'translateY(0)';
-    if (trigger) trigger.style.display = 'none';
-
-    /* If triggered via attach button, immediately open file picker */
-    if (mode === 'attach') {
-        setTimeout(() => document.getElementById('discSheetFileInput')?.click(), 320);
-    } else {
-        setTimeout(() => document.getElementById('discSheetTextarea')?.focus(), 320);
-    }
-};
-
-/* Close the sheet */
-window.discCloseMobileSheet = function() {
-    const sheet   = document.getElementById('discMobileSheet');
-    const overlay = document.getElementById('discMobileOverlay');
-    const trigger = document.getElementById('discMobileTrigger');
-    if (!sheet) return;
-
-    sheet.style.transform = 'translateY(100%)';
-    overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; }, 280);
-    if (trigger) trigger.style.display = 'flex';
-
-    /* Blur textarea to dismiss keyboard */
-    document.getElementById('discSheetTextarea')?.blur();
-};
-
-/* Reply helpers for the sheet */
+/* Reply helpers for the pill */
 window.discSheetCancelReply = function() {
     window._discReplyTo = 0;
     const p = document.getElementById('discSheetReplyPreview');
@@ -1759,7 +1690,7 @@ window.discSheetSubmitReply = async function(discId) {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        /* Clear sheet */
+        /* Clear the pill, keep it open — no separate surface to close */
         if (ta) { ta.value = ''; ta.style.height = 'auto'; }
         if (fi) fi.value = '';
         discSheetCancelReply();
@@ -1767,9 +1698,6 @@ window.discSheetSubmitReply = async function(discId) {
         _discVoiceBlob = null;
         _discAudioChunks = [];
         document.getElementById('discSheetVoicePreview').style.display = 'none';
-
-        /* Close the sheet */
-        discCloseMobileSheet();
 
         handleRepliesAdded(discId, data.reply, { scrollToBottom: true });
 
@@ -1979,16 +1907,14 @@ window.discSetReply = function(id, author, preview) {
     const previewText = author + ': ' + preview;
 
     if (!isDesktop()) {
-        /* ── Mobile: fill the sheet's reply preview and open the sheet ── */
+        /* ── Mobile: fill the pill's reply preview and focus it directly ── */
         const sheetPreview = document.getElementById('discSheetReplyPreview');
         const sheetText    = document.getElementById('discSheetPreviewText');
         if (sheetPreview && sheetText) {
             sheetText.textContent = previewText;
             sheetPreview.style.display = 'flex';
         }
-        /* Open the sheet and focus the textarea */
-        const discId = window._currentDiscId;
-        discOpenMobileSheet(discId);
+        document.getElementById('discSheetTextarea')?.focus();
     } else {
         /* ── Desktop: fill the existing compose reply preview ── */
         const p = document.getElementById('discPreviewText');
