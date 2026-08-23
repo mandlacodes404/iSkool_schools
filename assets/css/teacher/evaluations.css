@@ -98,9 +98,10 @@
     display: flex;
     flex-direction: column;
 }
-.ev-main-panel::-webkit-scrollbar { width: 5px; }
+.ev-main-panel::-webkit-scrollbar { width: 8px; }
 .ev-main-panel::-webkit-scrollbar-track { background: transparent; }
-.ev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.ev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+.ev-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
 .ev-panel-empty {
     flex: 1;
