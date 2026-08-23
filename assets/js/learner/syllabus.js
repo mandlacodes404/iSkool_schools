@@ -249,9 +249,10 @@ function renderSyllabusPage(data) {
                 overflow-y: auto;
                 padding: 8px 0;
             }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar { width: 8px; }
             .syl-dt-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
             .syl-dt-term-item {
                 padding: 14px 16px;
@@ -284,9 +285,10 @@ function renderSyllabusPage(data) {
                 flex: 1;
                 overflow-y: auto;
             }
-            .syl-dt-main-panel::-webkit-scrollbar { width: 5px; }
+            .syl-dt-main-panel::-webkit-scrollbar { width: 8px; }
             .syl-dt-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .syl-dt-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .syl-dt-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .syl-dt-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
             .syl-dt-panel { padding: 28px 32px; }
 

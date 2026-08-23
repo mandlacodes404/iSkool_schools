@@ -396,9 +396,10 @@
     overflow-y: auto;
     padding: 8px 0;
 }
-.lev-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.lev-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 .lev-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-.lev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.lev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+.lev-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
 .lev-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
 .lev-desktop-teacher-header {
@@ -489,9 +490,10 @@
     display: flex;
     flex-direction: column;
 }
-.lev-main-panel::-webkit-scrollbar { width: 5px; }
+.lev-main-panel::-webkit-scrollbar { width: 8px; }
 .lev-main-panel::-webkit-scrollbar-track { background: transparent; }
-.lev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.lev-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+.lev-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
 .lev-panel-empty {
     flex: 1;
