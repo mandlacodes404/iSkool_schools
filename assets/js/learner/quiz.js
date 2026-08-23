@@ -503,9 +503,10 @@ function renderQuizCards(groupedData) {
                 overflow-y: auto;
                 padding: 8px 0;
             }
-            .lqz-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .lqz-sidebar-scroll::-webkit-scrollbar { width: 8px; }
             .lqz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .lqz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .lqz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .lqz-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
             .lqz-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
             .lqz-desktop-teacher-header {
@@ -585,9 +586,10 @@ function renderQuizCards(groupedData) {
                 display: flex;
                 flex-direction: column;
             }
-            .lqz-main-panel::-webkit-scrollbar { width: 5px; }
+            .lqz-main-panel::-webkit-scrollbar { width: 8px; }
             .lqz-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .lqz-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .lqz-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .lqz-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
             .lqz-panel-empty {
                 flex: 1;
