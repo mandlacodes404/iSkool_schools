@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Changed
+- Teacher & Learner Dashboards (Desktop): Right-hand detail panel and left sidebar scrollbars, on every split-panel view (Assignments, Announcements, Quiz, Evaluations, Resources, Syllabus), thickened from their previous inconsistent widths (4px/5px) to a uniform `8px`, and now brighten on hover (`rgba(255,255,255,0.1)` → `rgba(255,255,255,0.22)`) instead of staying static (`evaluations.css`, `assignments.css`, `announcements.css`, `quiz.js`, `resources.css`, `syllabus.js`).
 - Learner Dashboard (Mobile): Home page To-Do and Recent cards now open the exact item selected. Assignments and announcements open directly in their mobile detail views, while quizzes and resources navigate to their list and automatically expand the teacher folder containing that item (`manual.js`, `get_home_data.php`, `quiz.js`, `resources.js`, `announcements.js`, `learner_dashboard.php`).
 - Learner Dashboard (Desktop): Quick Snapshot cards for the upcoming assignment and latest announcement now load the matching record into the existing right-hand detail panel instead of only opening the relevant list (`manual.js`, `learner_dashboard.php`).
 - Teacher Dashboard (Desktop): Quick Snapshot cards now open the selected quiz, assignment, or announcement in the corresponding right-hand detail panel instead of only opening the section list (`dashboard.js`, `teacher_dashboard.php`).
