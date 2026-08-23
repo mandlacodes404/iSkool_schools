@@ -50,7 +50,8 @@
     .as-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 }
 .as-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-.as-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.as-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+.as-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
 .as-sidebar-class-label {
     padding: 8px 16px 4px;
@@ -105,9 +106,10 @@
     display: flex;
     flex-direction: column;
 }
-.as-main-panel::-webkit-scrollbar { width: 5px; }
+.as-main-panel::-webkit-scrollbar { width: 8px; }
 .as-main-panel::-webkit-scrollbar-track { background: transparent; }
-.as-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.as-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+.as-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
 .as-panel-empty {
     flex: 1;
