@@ -896,7 +896,7 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-row-meta {
                 font-size: 12px;
-                color: #8b96a3;
+                color: #555e6a;
                 margin-top: 2px;
             }
             .lqz-summative-badge {
