@@ -699,8 +699,8 @@
 }
 .lh-carousel-card {
     scroll-snap-align: start;
-    flex: 0 0 86%;
-    max-width: 86%;
+    flex: 0 0 100%;
+    max-width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
