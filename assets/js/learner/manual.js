@@ -275,9 +275,7 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${todoSlice.length > 0 ? `<span class="lh-badge">${todoSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card">
-                    ${buildMobileTodo(todoSlice)}
-                </div>
+                ${buildMobileTodo(todoSlice)}
             </div>
 
             <!-- RECENTS SECTION -->
@@ -603,6 +601,27 @@ function buildMobileClassCard(myClass) {
 }
 
 // ─────────────────────────────────────────────
+// CAROUSEL DOTS — syncs active dot with scroll position
+// (shared by any horizontal snap-scroll carousel on mobile Home)
+// ─────────────────────────────────────────────
+function updateLhCarouselDots(trackEl, dotsId) {
+    if (!trackEl) return;
+    const dotsEl = document.getElementById(dotsId);
+    if (!dotsEl) return;
+
+    const cardEls = trackEl.children;
+    if (!cardEls.length) return;
+
+    const cardWidth = cardEls[0].getBoundingClientRect().width + parseFloat(getComputedStyle(trackEl).gap || 0);
+    const activeIndex = Math.round(trackEl.scrollLeft / cardWidth);
+
+    const dots = dotsEl.children;
+    for (let i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle('lh-carousel-dot-active', i === activeIndex);
+    }
+}
+
+// ─────────────────────────────────────────────
 // MOBILE TO-DO
 // ─────────────────────────────────────────────
 function buildMobileTodo(todo) {
@@ -610,15 +629,17 @@ function buildMobileTodo(todo) {
 
     if (!todo.length) {
         return `
-            <div class="lh-empty-state">
-                <div class="lh-empty-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
-                        <path d="M9 11l3 3L22 4"/>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                    </svg>
+            <div class="lh-card">
+                <div class="lh-empty-state">
+                    <div class="lh-empty-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                    </div>
+                    <div class="lh-empty-title">You're all caught up</div>
+                    <div class="lh-empty-desc">Quizzes and assignments that need your attention will appear here.</div>
                 </div>
-                <div class="lh-empty-title">You're all caught up</div>
-                <div class="lh-empty-desc">Quizzes and assignments that need your attention will appear here.</div>
             </div>`;
     }
 
@@ -638,14 +659,13 @@ function buildMobileTodo(todo) {
         evaluation: `<polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/>`
     };
 
-    return todo.map((item, i) => {
-        const color  = colorMap[item.type]  || '#4fd1c5';
-        const label  = labelMap[item.type]  || item.type;
-        const icon   = iconMap[item.type]   || iconMap.quiz;
-        const isLast = i === todo.length - 1;
+    const cards = todo.map((item, i) => {
+        const color = colorMap[item.type] || '#4fd1c5';
+        const label = labelMap[item.type] || item.type;
+        const icon  = iconMap[item.type]  || iconMap.quiz;
 
         return `
-            <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
+            <div class="lh-carousel-card" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
                 <div class="lh-row-icon" style="background:${sectionColor}18;">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
@@ -663,6 +683,16 @@ function buildMobileTodo(todo) {
                 </svg>
             </div>`;
     }).join('');
+
+    const dots = todo.map((_, i) => `<span class="lh-carousel-dot${i === 0 ? ' lh-carousel-dot-active' : ''}"></span>`).join('');
+
+    return `
+        <div class="lh-carousel-bleed">
+            <div class="lh-carousel-track" id="lhTodoTrack" onscroll="updateLhCarouselDots(this, 'lhTodoDots')">
+                ${cards}
+            </div>
+        </div>
+        ${todo.length > 1 ? `<div class="lh-carousel-dots" id="lhTodoDots">${dots}</div>` : ''}`;
 }
 
 // ─────────────────────────────────────────────
