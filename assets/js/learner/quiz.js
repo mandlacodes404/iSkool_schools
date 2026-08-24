@@ -860,7 +860,7 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
-                font-size: 15px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #e2e8f0;
                 margin: 0;
@@ -895,8 +895,8 @@ function renderQuizCards(groupedData) {
                 color: #555e6a;
             }
             .lqz-mobile-row-meta {
-                font-size: 11px;
-                color: #555e6a;
+                font-size: 13px;
+                color: #9aa4b2;
                 margin-top: 2px;
             }
             .lqz-summative-badge {
