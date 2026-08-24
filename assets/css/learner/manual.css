@@ -674,12 +674,15 @@
 }
 
 /* ── Horizontal snap-scroll carousel (To-Do, and reusable elsewhere) ──
-   .lh-carousel-bleed cancels .lh-mobile-wrapper's 16px side padding so the
-   track can scroll edge-to-edge; the track re-applies 16px as scroll-padding
-   so the first/last card still align with the rest of the page, while the
-   trailing card is allowed to peek in from the right edge. */
+   Two ancestors add side padding around this section: #api-content-area
+   (18px, from quiz.css) and .lh-mobile-wrapper (16px, above). Both stack
+   between the track and the true screen edge, so .lh-carousel-bleed must
+   cancel the combined 34px, not just the inner wrapper's 16px — otherwise
+   a leftover gap remains on both sides and the last card can't peek all
+   the way to the edge. The track then re-applies 16px as scroll-padding
+   so cards still align with the rest of the page's content by default. */
 .lh-carousel-bleed {
-    margin: 0 -16px;
+    margin: 0 -34px;
 }
 .lh-carousel-track {
     display: flex;
@@ -687,8 +690,8 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 0 16px;
-    scroll-padding: 0 16px;
+    padding: 0 34px;
+    scroll-padding: 0 34px;
     scrollbar-width: none;
 }
 .lh-carousel-track::-webkit-scrollbar {
