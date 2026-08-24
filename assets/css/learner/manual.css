@@ -640,61 +640,18 @@
     gap: 0;
 }
 
-/* Class card — lifted via technique 1 off the page background (#20201f) */
-.lh-class-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #323231;   /* #20201f, same hue/sat, L +7% */
-    border-radius: 14px;
-    padding: 14px;
+/* Class info — flat text, no card chrome */
+.lh-class-flat {
     margin-bottom: 24px;
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,0.045) inset,
-        0 4px 12px -4px rgba(0,0,0,0.45),
-        0 10px 24px -10px rgba(0,0,0,0.4);
 }
-.lh-class-card.lh-class-empty {
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-.lh-class-card.lh-class-empty:active {
-    background: #3C3C3B; /* one step further lifted, same derivation */
-}
-.lh-class-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(79, 209, 197, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.lh-class-body {
-    flex: 1;
-    min-width: 0;
-}
-.lh-class-label {
-    font-size: 10px;
-    font-weight: 800;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
-}
-.lh-class-name {
-    font-size: 15px;
-    font-weight: 700;
+.lh-class-flat-line {
+    font-size: 14px;
+    font-weight: 500;
     color: #e2e8f0;
+    line-height: 1.5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-.lh-class-sub {
-    font-size: 12px;
-    color: #4a5568;
-    margin-top: 2px;
 }
 
 /* Section wrapper */

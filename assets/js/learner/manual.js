@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=4.4';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=4.5';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -588,38 +588,17 @@ function buildDesktopRecentCards(recent) {
 
 function buildMobileClassCard(myClass) {
     if (!myClass || !myClass.name) {
-        // Not joined yet — show a prompt card
-        return `
-            <div class="lh-class-card lh-class-empty" onclick="window.showMyClass ? showMyClass() : null">
-                <div class="lh-class-icon" style="background:#63b3ed18;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="16"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                </div>
-                <div class="lh-class-body">
-                    <div class="lh-class-name">No class joined yet</div>
-                    <div class="lh-class-sub">Tap to join a class</div>
-                </div>
-                <svg viewBox="0 0 24 24" width="14" height="14" stroke="#4a5568" stroke-width="2" fill="none" style="flex-shrink:0;">
-                    <polyline points="9 18 15 12 9 6"/>
-                </svg>
-            </div>`;
+        // Not joined yet — render nothing
+        return '';
     }
 
+    const fullName = `${myClass.learner_name || ''} ${myClass.learner_surname || ''}`.trim();
+
     return `
-        <div class="lh-class-card">
-            <div class="lh-class-icon" style="background:#63b3ed18;">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
-            </div>
-            <div class="lh-class-body">
-                <div class="lh-class-label">My Class</div>
-                <div class="lh-class-name">${myClass.name}</div>
-            </div>
+        <div class="lh-class-flat">
+            <div class="lh-class-flat-line">${fullName}</div>
+            <div class="lh-class-flat-line">${myClass.school_name || ''}</div>
+            <div class="lh-class-flat-line">${myClass.name}</div>
         </div>`;
 }
 

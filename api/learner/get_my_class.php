@@ -44,4 +44,27 @@ $stmt->execute();
 $row = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-echo json_encode($row ?: null);
+if (!$row) {
+    echo json_encode(null);
+    exit();
+}
+
+// Learner name/surname
+$nameStmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ? LIMIT 1");
+$nameStmt->bind_param("s", $learnerEmail);
+$nameStmt->execute();
+$nameRow = $nameStmt->get_result()->fetch_assoc();
+$nameStmt->close();
+
+$row['learner_name']    = $nameRow['name'] ?? '';
+$row['learner_surname'] = $nameRow['surname'] ?? '';
+
+// School name
+$schoolName = 'My School'; // fallback only
+$schoolResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($schoolRow = $schoolResult->fetch_assoc()) {
+    $schoolName = $schoolRow['setting_value'];
+}
+$row['school_name'] = $schoolName;
+
+echo json_encode($row);
