@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=5.6';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=5.7';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -291,7 +291,7 @@ function buildHomeLayout(data, manualHtml) {
                         Recent
                     </div>
                 </div>
-                <div class="lh-card">
+                <div class="lh-card lh-card-recent">
                     ${buildMobileRecent(recentSlice)}
                 </div>
             </div>

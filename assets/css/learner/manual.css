@@ -776,9 +776,16 @@
    Sits directly on the page background, no lifted card box. The week
    strip and event rows are separated by a hairline instead of living
    inside a shared background panel. ── */
+/* Widened toward the screen edge, halfway between the wrapper's default
+   16px inset and the carousel's full 34px bleed (see .lh-carousel-bleed
+   above for why 34px is the combined ancestor padding to cancel). Net
+   margin here is -34px + 8px re-added = -26px, landing the section at
+   an ~8px gap from the true screen edge instead of 16px. */
 .lh-events-flat {
     background: transparent;
     box-shadow: none;
+    margin: 0 -26px;
+    padding: 0 8px;
 }
 
 .lh-week-strip {
@@ -877,6 +884,19 @@
         0 0 0 1px rgba(255,255,255,0.045) inset,
         0 4px 12px -4px rgba(0,0,0,0.45),
         0 10px 24px -10px rgba(0,0,0,0.4);
+}
+
+/* Recents only — widened toward the screen edge, same halfway bleed as
+   .lh-events-flat (see the comment above .lh-events-flat for the 34px
+   ancestor-padding math). Scoped to .lh-card-recent, not all .lh-card,
+   so the shared To-Do empty-state card stays at its normal 16px inset. */
+.lh-card-recent {
+    margin: 0 -26px;
+}
+.lh-card-recent .lh-row,
+.lh-card-recent .lh-empty-state {
+    padding-left: 22px;
+    padding-right: 22px;
 }
 
 /* Individual row — grouped inside .lh-card, divided by a hairline */
