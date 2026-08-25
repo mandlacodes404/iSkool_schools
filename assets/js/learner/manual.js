@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=5.4';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=5.5';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -312,8 +312,11 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                    ${buildMobileEvents(eventsSlice)}
+                <div class="lh-card">
+                    ${buildMobileEventsWeekStrip()}
+                    <div onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
+                        ${buildMobileEvents(eventsSlice)}
+                    </div>
                 </div>
             </div>
 
@@ -840,6 +843,46 @@ window.openLearnerHomeItem = async function(type, itemId, scope = '') {
 };
 
 // ─────────────────────────────────────────────
+// MOBILE UPCOMING EVENTS — WEEK STRIP
+// Purely visual header sitting above the events list: shows the current
+// week (Sun–Sat) with today highlighted. Does not filter the list below.
+// ─────────────────────────────────────────────
+function buildMobileEventsWeekStrip() {
+    const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const monNames  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const today     = new Date();
+    today.setHours(0,0,0,0);
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // back up to Sunday
+
+    let cells = '';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        const isToday = d.getTime() === today.getTime();
+
+        cells += `
+            <div class="lh-week-cell">
+                <span class="lh-week-day-label">${dayLabels[i]}</span>
+                <span class="lh-week-day-num${isToday ? ' lh-week-today' : ''}">${d.getDate()}</span>
+            </div>`;
+    }
+
+    const monthLabel = `${monNames[startOfWeek.getMonth()]} ${startOfWeek.getFullYear()}`;
+
+    return `
+        <div class="lh-week-strip">
+            <div class="lh-week-strip-header">
+                <span class="lh-week-strip-month">${monthLabel}</span>
+            </div>
+            <div class="lh-week-strip-grid">
+                ${cells}
+            </div>
+        </div>`;
+}
+
+// ─────────────────────────────────────────────
 // MOBILE UPCOMING EVENTS (academic_events)
 // ─────────────────────────────────────────────
 function buildMobileEvents(events) {
@@ -856,7 +899,7 @@ function buildMobileEvents(events) {
                         <line x1="3" y1="10" x2="21" y2="10"/>
                     </svg>
                 </div>
-                <div class="lh-empty-title">No upcoming events</div>
+                <div class="lh-empty-title">You have no upcoming events this week</div>
                 <div class="lh-empty-desc">Tests, exams, and school events added by your teacher will appear here.</div>
             </div>`;
     }
