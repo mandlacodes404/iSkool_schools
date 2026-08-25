@@ -892,12 +892,12 @@
    Scoped to .lh-card-recent, not all .lh-card, so the shared To-Do
    empty-state card stays at its normal 16px inset. */
 .lh-card-recent {
-    margin: 0 -22px;
+    margin: 0 -19px;
 }
 .lh-card-recent .lh-row,
 .lh-card-recent .lh-empty-state {
-    padding-left: 26px;
-    padding-right: 26px;
+    padding-left: 29px;
+    padding-right: 29px;
 }
 
 /* Individual row — grouped inside .lh-card, divided by a hairline */
