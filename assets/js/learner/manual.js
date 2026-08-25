@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=6.4';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=6.2';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -724,6 +724,12 @@ function buildMobileRecent(recent) {
         assignment:   '#a78bfa',
         quiz:         '#fdd663'
     };
+    const labelMap = {
+        announcement: 'Announcement',
+        resource:     'Resource',
+        assignment:   'Assignment',
+        quiz:         'Quiz'
+    };
     const iconMap = {
         announcement: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
         resource:     `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`,
@@ -733,6 +739,7 @@ function buildMobileRecent(recent) {
 
     return recent.map((item, i) => {
         const color  = colorMap[item.type]  || '#4fd1c5';
+        const label  = labelMap[item.type]  || item.type;
         const icon   = iconMap[item.type]   || iconMap.announcement;
         const isLast = i === recent.length - 1;
 
@@ -746,6 +753,7 @@ function buildMobileRecent(recent) {
                 <div class="lh-row-body">
                     <div class="lh-row-title">${item.title}</div>
                     <div class="lh-row-meta">
+                        <span class="lh-type-tag" style="color:${color}; background:${color}18;">${label}</span>
                         <span>${item.meta}</span>
                         <span class="lh-dot-sep">·</span>
                         <span>${item.time_ago}</span>
