@@ -886,17 +886,18 @@
         0 10px 24px -10px rgba(0,0,0,0.4);
 }
 
-/* Recents only — widened toward the screen edge, same halfway bleed as
-   .lh-events-flat (see the comment above .lh-events-flat for the 34px
-   ancestor-padding math). Scoped to .lh-card-recent, not all .lh-card,
-   so the shared To-Do empty-state card stays at its normal 16px inset. */
+/* Recents only — widened toward the screen edge (~12px gap), a lighter
+   bleed than .lh-events-flat's ~8px. See the comment above
+   .lh-events-flat for the 34px ancestor-padding math this cancels.
+   Scoped to .lh-card-recent, not all .lh-card, so the shared To-Do
+   empty-state card stays at its normal 16px inset. */
 .lh-card-recent {
-    margin: 0 -26px;
+    margin: 0 -22px;
 }
 .lh-card-recent .lh-row,
 .lh-card-recent .lh-empty-state {
-    padding-left: 22px;
-    padding-right: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
 }
 
 /* Individual row — grouped inside .lh-card, divided by a hairline */
