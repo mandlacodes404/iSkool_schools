@@ -699,8 +699,8 @@
 }
 .lh-carousel-card {
     scroll-snap-align: start;
-    flex: 0 0 93%;
-    max-width: 93%;
+    flex: 0 0 95%;
+    max-width: 95%;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -892,12 +892,12 @@
    Scoped to .lh-card-recent, not all .lh-card, so the shared To-Do
    empty-state card stays at its normal 16px inset. */
 .lh-card-recent {
-    margin: 0 -19px;
+    margin: 0 -17px;
 }
 .lh-card-recent .lh-row,
 .lh-card-recent .lh-empty-state {
-    padding-left: 29px;
-    padding-right: 29px;
+    padding-left: 31px;
+    padding-right: 31px;
 }
 
 /* Individual row — grouped inside .lh-card, divided by a hairline */
