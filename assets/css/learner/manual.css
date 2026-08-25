@@ -772,12 +772,19 @@
     letter-spacing: 0;
 }
 
-/* ── Upcoming Events week strip — visual-only header inside .lh-card,
-   sits above the event rows. Doesn't filter the list; just shows
-   the current week with today highlighted. ── */
+/* ── Upcoming Events — flat (no card) layout ──
+   Sits directly on the page background, no lifted card box. The week
+   strip and event rows are separated by a hairline instead of living
+   inside a shared background panel. ── */
+.lh-events-flat {
+    background: transparent;
+    box-shadow: none;
+}
+
 .lh-week-strip {
-    padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4px 2px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 4px;
 }
 
 .lh-week-strip-header {
@@ -833,6 +840,31 @@
     background: #4fd1c5;
     color: #0d1117;
     font-weight: 900;
+}
+
+/* Dot under each day — empty/transparent unless that day has an event */
+.lh-week-day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: transparent;
+    margin-top: 1px;
+}
+
+.lh-week-day-dot-active {
+    background: #f472b6; /* matches the section's pink accent */
+}
+
+/* Flat mode: rows no longer sit inside a card, so give the list its own
+   hairline dividers instead of relying on .lh-card's background/shadow. */
+.lh-events-flat .lh-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.lh-events-flat .lh-row:active {
+    background: rgba(255, 255, 255, 0.03);
+}
+.lh-events-flat .lh-row-last {
+    border-bottom: none;
 }
 
 /* Card container — grouped lifted card holding all rows for a section

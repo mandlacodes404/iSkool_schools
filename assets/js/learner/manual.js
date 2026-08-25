@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=5.5';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=5.6';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -312,8 +312,8 @@ function buildHomeLayout(data, manualHtml) {
                     </div>
                     ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
                 </div>
-                <div class="lh-card">
-                    ${buildMobileEventsWeekStrip()}
+                <div class="lh-events-flat">
+                    ${buildMobileEventsWeekStrip(eventsSlice)}
                     <div onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
                         ${buildMobileEvents(eventsSlice)}
                     </div>
@@ -845,9 +845,11 @@ window.openLearnerHomeItem = async function(type, itemId, scope = '') {
 // ─────────────────────────────────────────────
 // MOBILE UPCOMING EVENTS — WEEK STRIP
 // Purely visual header sitting above the events list: shows the current
-// week (Sun–Sat) with today highlighted. Does not filter the list below.
+// week (Sun–Sat) with today highlighted, and a dot under any day that has
+// an event. Does not filter the list below.
 // ─────────────────────────────────────────────
-function buildMobileEventsWeekStrip() {
+function buildMobileEventsWeekStrip(events) {
+    events = events || [];
     const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const monNames  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -856,16 +858,25 @@ function buildMobileEventsWeekStrip() {
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay()); // back up to Sunday
 
+    // Build a Set of "YYYY-MM-DD" strings that have an event, so we can
+    // check each day cell in O(1).
+    const eventDates = new Set(events.map(e => e.event_date));
+
+    const pad = n => String(n).padStart(2, '0');
+
     let cells = '';
     for (let i = 0; i < 7; i++) {
         const d = new Date(startOfWeek);
         d.setDate(startOfWeek.getDate() + i);
         const isToday = d.getTime() === today.getTime();
+        const dateKey = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const hasEvent = eventDates.has(dateKey);
 
         cells += `
             <div class="lh-week-cell">
                 <span class="lh-week-day-label">${dayLabels[i]}</span>
                 <span class="lh-week-day-num${isToday ? ' lh-week-today' : ''}">${d.getDate()}</span>
+                <span class="lh-week-day-dot${hasEvent ? ' lh-week-day-dot-active' : ''}"></span>
             </div>`;
     }
 
