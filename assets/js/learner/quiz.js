@@ -856,6 +856,10 @@ function renderQuizCards(groupedData) {
                 justify-content: center;
                 flex-shrink: 0;
             }
+            .lqz-mobile-row-icon svg {
+                width: 20px;
+                height: 20px;
+            }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
                 font-size: 16px;
