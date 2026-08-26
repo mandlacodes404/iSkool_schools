@@ -160,7 +160,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=6.9';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=7.0';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -670,7 +670,7 @@ function buildMobileTodo(todo) {
 
         return `
             <div class="lh-carousel-card" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0})">
-                <div class="lh-row-icon" style="background:${sectionColor}18;">
+                <div class="lh-row-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
@@ -746,7 +746,7 @@ function buildMobileRecent(recent) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" onclick="openLearnerHomeItem('${item.type}', ${Number(item.id) || 0}, '${item.scope || ''}')">
-                <div class="lh-row-icon" style="background:${sectionColor}18;">
+                <div class="lh-row-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>
@@ -911,7 +911,7 @@ function buildMobileEvents(events) {
     if (!events.length) {
         return `
             <div class="lh-empty-state">
-                <div class="lh-empty-icon" style="background:${sectionColor}14;">
+                <div class="lh-empty-icon">
                     <svg viewBox="0 0 24 24" width="28" height="28" stroke="${sectionColor}" stroke-width="1.5" fill="none">
                         <rect x="3" y="4" width="18" height="18" rx="2"/>
                         <line x1="16" y1="2" x2="16" y2="6"/>
@@ -965,7 +965,7 @@ function buildMobileEvents(events) {
 
         return `
             <div class="lh-row${isLast ? ' lh-row-last' : ''}" style="cursor:pointer;${isPast ? 'opacity:0.5;' : ''}">
-                <div class="lh-row-icon" style="background:${sectionColor}18;">
+                <div class="lh-row-icon">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sectionColor}" stroke-width="2" fill="none">
                         ${icon}
                     </svg>

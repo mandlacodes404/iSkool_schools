@@ -154,8 +154,6 @@
 .learner-home-activity-icon {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: var(--bg-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -384,9 +382,6 @@
     .learner-home-activity-icon {
         width: 30px;
         height: 30px;
-        border-radius: 8px;
-        background: rgba(79,209,197,0.08);
-        border: 1px solid rgba(79,209,197,0.16);
     }
 
     .learner-home-activity-title,
@@ -980,8 +975,6 @@
 .lh-empty-icon {
     width: 52px;
     height: 52px;
-    border-radius: 14px;
-    background: rgba(79, 209, 197, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
