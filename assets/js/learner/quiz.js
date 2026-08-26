@@ -851,8 +851,6 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-row-icon {
                 width: 32px;
                 height: 32px;
-                border-radius: 8px;
-                background: #fdd66318;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;

@@ -490,15 +490,10 @@
     .grades-mobile-layout .quiz-row-icon {
         width: 32px;
         height: 32px;
-        border-radius: 8px;
-        background: #68d39118;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-    }
-    .grades-mobile-layout .quiz-unpublished .quiz-row-icon {
-        background: #f8514914;
     }
     .grade-inline-grid {
         grid-template-columns: 1fr;
