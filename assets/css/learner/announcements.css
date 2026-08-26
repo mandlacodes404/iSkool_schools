@@ -336,6 +336,10 @@
     justify-content: center;
     flex-shrink: 0;
 }
+.lan-mobile-card-icon svg {
+    width: 22px;
+    height: 22px;
+}
 .lan-mobile-card-body { flex: 1; min-width: 0; }
 .lan-mobile-card-title {
     font-size: 16px;
