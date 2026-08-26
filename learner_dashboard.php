@@ -220,7 +220,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.3">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.6">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.5">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.6">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=8.7">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3171,7 +3171,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/resources.js?v=7.8"></script>
 <script src="assets/js/learner/announcements.js?v=8.4"></script>
 <script src="assets/js/learner/grades.js?v=8.1"></script>
-<script src="assets/js/learner/evaluations.js?v=5.7"></script>
+<script src="assets/js/learner/evaluations.js?v=5.8"></script>
 <script src="assets/js/learner/discussions.js?v=10.6"></script>
 <script src="assets/js/learner/syllabus.js?v=3.4"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
