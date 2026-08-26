@@ -1,6 +1,6 @@
 # iSkool Changelog
 
-## [1.2.3] - 2026-08-20
+## [1.2.3] - 2026-08-25
 ### Changed
 - Teacher & Learner Dashboards (Desktop): Right-hand detail panel and left sidebar scrollbars, on every split-panel view (Assignments, Announcements, Quiz, Evaluations, Resources, Syllabus), thickened from their previous inconsistent widths (4px/5px) to a uniform `8px`, and now brighten on hover (`rgba(255,255,255,0.1)` → `rgba(255,255,255,0.22)`) instead of staying static (`evaluations.css`, `assignments.css`, `announcements.css`, `quiz.js`, `resources.css`, `syllabus.js`).
 - Learner Dashboard (Mobile): Home page To-Do and Recent cards now open the exact item selected. Assignments and announcements open directly in their mobile detail views, while quizzes and resources navigate to their list and automatically expand the teacher folder containing that item (`manual.js`, `get_home_data.php`, `quiz.js`, `resources.js`, `announcements.js`, `learner_dashboard.php`).
