@@ -331,15 +331,10 @@
 .lan-mobile-card-icon {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: #f28c3818;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-.lan-mobile-card--school .lan-mobile-card-icon {
-    background: #f28c3818;
 }
 .lan-mobile-card-body { flex: 1; min-width: 0; }
 .lan-mobile-card-title {
