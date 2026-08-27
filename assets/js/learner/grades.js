@@ -8,6 +8,7 @@ window.learnerGradesCache = null;
 window.learnerGradesCachePromise = null;
 window.learnerGradeStatsCache = window.learnerGradeStatsCache || {};
 window.learnerProgressReportCache = window.learnerProgressReportCache || {};
+window.learnerQuizReviewCache = window.learnerQuizReviewCache || {};
 
 // Shared learner-side state helper. Normalize the helper because learner_dashboard
 // may define it before this file with a smaller API.
@@ -1747,15 +1748,168 @@ function ensurePrStylesInjected() {
                 }
                 .review-modal-sheet .pr-modal-scroll {
                     flex: 1;
-                    padding: 0;
-                    display: flex;
+                    padding: 18px 16px 40px;
                 }
-                .review-modal-frame {
+
+                /* Quiz review content -- rendered directly from
+                   get_quiz_review.php's JSON (see buildQuizReviewHtml),
+                   replacing the old <iframe src="review_quiz.php"> so the
+                   review shares the app's cache and dark-mode handling
+                   instead of loading a whole separate document. */
+                .qr-scorehead {
+                    padding-bottom: 16px;
+                    margin-bottom: 6px;
+                    border-bottom: 1px solid rgba(255,255,255,0.07);
+                }
+                .qr-pct {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 62px;
+                    height: 34px;
+                    padding: 0 12px;
+                    border-radius: 10px;
+                    background: rgba(79,209,197,0.08);
+                    border: 1px solid rgba(79,209,197,0.28);
+                    color: #4fd1c5;
+                    font-size: 18px;
+                    font-weight: 900;
+                    margin-bottom: 12px;
+                }
+                .qr-title {
+                    margin: 0 0 8px;
+                    color: #e2e8f0;
+                    font-size: 20px;
+                    line-height: 1.28;
+                    font-weight: 800;
+                }
+                .qr-meta { color: #8b949e; font-size: 12px; }
+                .qr-not-published {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #e2e8f0;
+                }
+                .qr-not-published i { font-size: 30px; color: #4fd1c5; margin-bottom: 14px; display: block; }
+                .qr-not-published p { color: #8b949e; font-size: 13px; margin-top: 8px; }
+                .qr-error {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #8b949e;
+                    font-size: 13px;
+                }
+
+                .qr-qbox {
+                    padding: 16px 0 18px;
+                    border-bottom: 1px solid rgba(255,255,255,0.07);
+                }
+                .qr-qbox:last-child { border-bottom: none; }
+                .qr-qmeta {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 3px 8px;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: #8b949e;
+                    font-size: 10px;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 10px;
+                }
+                .qr-qtext {
+                    color: #e2e8f0;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    font-weight: 700;
+                    margin: 0 0 12px;
+                    overflow-wrap: anywhere;
+                }
+                .qr-qimage {
                     width: 100%;
-                    height: 100%;
-                    border: 0;
-                    background: #20201f;
-                    display: block;
+                    border-radius: 10px;
+                    margin: 0 0 12px;
+                    border: 1px solid rgba(255,255,255,0.08);
+                }
+                .qr-choices { display: flex; flex-direction: column; gap: 8px; }
+                .qr-choice {
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    min-height: 40px;
+                    padding: 10px 12px;
+                    border-radius: 9px;
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    color: #c9d1d9;
+                    font-size: 13px;
+                    line-height: 1.4;
+                }
+                .qr-choice.qr-correct { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.09); color: #e2e8f0; }
+                .qr-choice.qr-incorrect { border-color: rgba(248,81,73,0.42); background: rgba(248,81,73,0.09); color: #e2e8f0; }
+                .qr-choice i { font-size: 15px; flex-shrink: 0; }
+                .qr-choice i.qr-icon-correct { color: #22c55e; }
+                .qr-choice i.qr-icon-incorrect { color: #f85149; }
+                .qr-choice i.qr-icon-neutral { opacity: 0.3; }
+                .qr-badge-user {
+                    margin-left: auto;
+                    color: #4fd1c5;
+                    background: rgba(79,209,197,0.08);
+                    border: 1px solid rgba(79,209,197,0.2);
+                    font-size: 10px;
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                .qr-deduction-note {
+                    color: #f5c38b;
+                    font-size: 12px;
+                    margin-bottom: 10px;
+                }
+
+                .qr-fitb-row {
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 9px;
+                    padding: 11px 12px;
+                    margin-top: 8px;
+                    font-size: 13px;
+                }
+                .qr-fitb-row.qr-correct { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.09); }
+                .qr-fitb-row.qr-incorrect { border-color: rgba(248,81,73,0.42); background: rgba(248,81,73,0.09); }
+                .qr-fitb-row i { margin-right: 6px; }
+                .qr-fitb-answer { font-weight: 800; color: #e2e8f0; }
+                .qr-fitb-correct { font-size: 11px; color: #8b949e; margin-top: 5px; }
+
+                .qr-open-box {
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 9px;
+                    padding: 12px;
+                    font-size: 13px;
+                    line-height: 1.55;
+                    color: #e2e8f0;
+                    white-space: pre-wrap;
+                    overflow-wrap: anywhere;
+                }
+                .qr-open-grade {
+                    background: rgba(34,197,94,0.1);
+                    border: 1px solid rgba(34,197,94,0.25);
+                    border-radius: 9px;
+                    padding: 11px 12px;
+                    margin-top: 8px;
+                    font-size: 13px;
+                    color: #d8f5df;
+                }
+                .qr-open-pending {
+                    background: rgba(245,158,11,0.09);
+                    border: 1px solid rgba(245,158,11,0.25);
+                    border-radius: 9px;
+                    padding: 11px 12px;
+                    margin-top: 8px;
+                    font-size: 13px;
+                    color: #f5c38b;
                 }
                 .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
                 .pr-subjects-list { padding: 0 16px 6px; }
@@ -2314,6 +2468,109 @@ function formatDate(dateStr) {
     });
 }
 
+// ── QUIZ REVIEW RENDERER ──
+// Client-side port of review_quiz.php's question templates, operating on
+// the JSON shape returned by get_quiz_review.php. Ported branch-for-branch
+// from the original PHP `foreach ($questions as $q)` loop: MCQ, fill-in-
+// blank, open-ended, and multiple-answer each keep the same visibility
+// rules (e.g. multiple-answer's is_correct/accepted_answers are only ever
+// non-null in the JSON once publish_marks is true, same as the PHP
+// template's own `(int)$quizInfo['publish_marks'] === 1` checks).
+function buildQuizReviewQuestionHtml(q, index) {
+    const ptsEarned   = q.points_earned_display;
+    const ptsPossible = q.points_possible_display;
+    let bodyHtml = '';
+
+    if (q.question_type === 'fill_in_blank') {
+        const blanks = (q.fitb && q.fitb.blanks) || [];
+        bodyHtml = blanks.map(function(blank) {
+            const cls = blank.is_correct ? 'qr-correct' : 'qr-incorrect';
+            const icon = blank.is_correct ? 'fa-check-circle qr-icon-correct' : 'fa-times-circle qr-icon-incorrect';
+            const answerText = blank.learner_answer !== '' ? escHtmlPr(blank.learner_answer) : 'No answer submitted.';
+            const acceptedHtml = (blank.accepted_answers && blank.accepted_answers.length)
+                ? '<div class="qr-fitb-correct">Accepted answers: ' + escHtmlPr(blank.accepted_answers.join(', ')) + '</div>'
+                : '';
+            return '<div class="qr-fitb-row ' + cls + '">' +
+                '<div><i class="fas ' + icon + '"></i>Blank ' + escHtmlPr(String(blank.blank_index)) + ' - Your answer: ' +
+                '<span class="qr-fitb-answer">' + answerText + '</span></div>' +
+                acceptedHtml +
+            '</div>';
+        }).join('');
+    } else if (q.question_type === 'open_ended') {
+        const oe = q.open_ended || {};
+        const answerText = q.answer_text !== '' ? escHtmlPr(q.answer_text).replace(/\n/g, '<br>') : 'No answer submitted.';
+        bodyHtml = '<div class="qr-open-box"><strong>Your answer:</strong><br>' + answerText + '</div>';
+        if (oe.grade) {
+            const feedbackHtml = oe.grade.feedback
+                ? '<div style="margin-top:8px;"><strong>Teacher feedback:</strong><br>' + escHtmlPr(oe.grade.feedback).replace(/\n/g, '<br>') + '</div>'
+                : '';
+            bodyHtml += '<div class="qr-open-grade"><strong>Awarded:</strong> ' +
+                escHtmlPr(String(oe.grade.score)) + ' / ' + escHtmlPr(String(q.points_possible)) +
+                feedbackHtml + '</div>';
+        } else {
+            bodyHtml += '<div class="qr-open-pending">Awaiting teacher grading.</div>';
+        }
+    } else if (q.question_type === 'multiple_answer') {
+        const ma = q.multiple_answer || {};
+        const selectedIds = ma.selected_choice_ids || [];
+        const deductionHtml = ma.show_deduction
+            ? '<div class="qr-deduction-note">' + (ma.correct_selected_count || 0) + ' correct selected (+' +
+                (ma.points_added_display || '0') + 'pts), ' + (ma.wrong_selected_count || 0) + ' wrong selected (-' +
+                (ma.points_deducted_display || '0') + 'pts deducted)</div>'
+            : '';
+        const choicesHtml = (q.choices || []).map(function(choice) {
+            const isSelected = selectedIds.indexOf(choice.id) !== -1;
+            const isCorrect = choice.is_correct === true;
+            let cls = '';
+            let icon = '<i class="far fa-square qr-icon-neutral"></i>';
+            if (isCorrect) { cls = 'qr-correct'; icon = '<i class="fas fa-check-circle qr-icon-correct"></i>'; }
+            else if (isSelected && choice.is_correct === false) { cls = 'qr-incorrect'; icon = '<i class="fas fa-times-circle qr-icon-incorrect"></i>'; }
+            const userBadge = isSelected ? '<span class="qr-badge-user">Your Answer</span>' : '';
+            return '<div class="qr-choice ' + cls + '">' + icon + escHtmlPr(choice.text) + userBadge + '</div>';
+        }).join('');
+        bodyHtml = deductionHtml + '<div class="qr-choices">' + choicesHtml + '</div>';
+    } else {
+        // Plain MCQ (single-select)
+        bodyHtml = '<div class="qr-choices">' + (q.choices || []).map(function(choice) {
+            const isSelected = choice.id === q.selected_choice_id;
+            const isCorrect = choice.is_correct === true;
+            let cls = '';
+            let icon = '<i class="far fa-circle qr-icon-neutral"></i>';
+            if (isCorrect) { cls = 'qr-correct'; icon = '<i class="fas fa-check-circle qr-icon-correct"></i>'; }
+            else if (isSelected && !isCorrect) { cls = 'qr-incorrect'; icon = '<i class="fas fa-times-circle qr-icon-incorrect"></i>'; }
+            const userBadge = isSelected ? '<span class="qr-badge-user">Your Answer</span>' : '';
+            return '<div class="qr-choice ' + cls + '">' + icon + escHtmlPr(choice.text) + userBadge + '</div>';
+        }).join('') + '</div>';
+    }
+
+    const imageHtml = q.image ? '<img src="' + escHtmlPr(q.image) + '" class="qr-qimage" alt="Question Image">' : '';
+
+    return '<div class="qr-qbox">' +
+        '<div class="qr-qmeta">Question ' + (index + 1) + ' - ' + ptsEarned + ' / ' + ptsPossible + ' pts</div>' +
+        '<div class="qr-qtext">' + escHtmlPr(q.text) + '</div>' +
+        imageHtml + bodyHtml +
+    '</div>';
+}
+
+function buildQuizReviewHtml(data) {
+    if (!data.published) {
+        return '<div class="qr-not-published">' +
+            '<i class="fas fa-chart-simple"></i>' +
+            '<div style="font-weight:800;font-size:15px;">Results Not Published</div>' +
+            '<p>' + escHtmlPr(data.message || 'Your teacher has not released the marks for this quiz yet.') + '</p>' +
+        '</div>';
+    }
+    const quiz = data.quiz;
+    const questionsHtml = (data.questions || []).map(function(q, i) {
+        return buildQuizReviewQuestionHtml(q, i);
+    }).join('');
+    return '<div class="qr-scorehead">' +
+        '<div class="qr-pct">' + quiz.percentage + '%</div>' +
+        '<div class="qr-title">' + escHtmlPr(quiz.title) + '</div>' +
+        '<div class="qr-meta">Points: <strong>' + quiz.score + ' / ' + quiz.total + '</strong> &middot; Date: ' + escHtmlPr(quiz.submitted_at_display) + '</div>' +
+    '</div>' + questionsHtml;
+}
+
 window.openQuizReview = function(resultId, event) {
     if (event) event.stopPropagation();
     const isMobileGradesView = window.innerWidth <= 899;
@@ -2347,10 +2604,38 @@ window.openQuizReview = function(resultId, event) {
                     <div class="pr-modal-grabber"></div>
                 </div>
                 <div class="pr-modal-scroll">
-                    <iframe class="review-modal-frame" src="${reviewUrl}" title="Quiz review"></iframe>
+                    <div id="qr-content" class="qr-loading" style="text-align:center;padding:60px 20px;color:#8b949e;font-size:13px;">Loading review…</div>
                 </div>
             </div>`;
         wireSheetDragToClose(modal, () => closeQuizReviewModal());
+
+        // Fetch-and-render (replaces the old <iframe src="review_quiz.php">):
+        // instant re-render from cache on repeat opens of the same result,
+        // same pattern as learnerProgressReportCache/renderProgressReport.
+        // Guards against the modal having already been closed/replaced by
+        // the time an in-flight fetch resolves (e.g. user swiped it shut,
+        // or opened a different quiz review before this one returned).
+        const renderInto = (html) => {
+            const el = document.getElementById('qr-content');
+            if (el) el.innerHTML = html;
+        };
+        if (window.learnerQuizReviewCache[resultId]) {
+            renderInto(buildQuizReviewHtml(window.learnerQuizReviewCache[resultId]));
+            return;
+        }
+        fetch(`get_quiz_review.php?result_id=${encodeURIComponent(resultId)}`)
+            .then(r => {
+                if (!r.ok) throw new Error('http_' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                window.learnerQuizReviewCache[resultId] = data;
+                renderInto(buildQuizReviewHtml(data));
+            })
+            .catch(() => {
+                renderInto('<div class="qr-error">Couldn\'t load this review. Please try again.</div>');
+            });
         return;
     }
 
