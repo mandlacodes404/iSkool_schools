@@ -35,6 +35,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 14px;
 }
 
 /* Update your existing #loader-logo svg style */
@@ -42,27 +43,24 @@ body {
 #loader-logo img {
         width: 104px; 
         height: 104px;
-        animation: reveal 0.6s ease-out forwards, wheelSpin 10s linear 0.6s infinite;
+        animation: reveal 0.6s ease-out forwards;
         transform-origin: center;
     }
 
-@keyframes reveal {
-        from { opacity: 0; transform: scale(0.85) rotate(0deg); }
-        to { opacity: 1; transform: scale(1) rotate(0deg); }
-    }
-
-@keyframes wheelSpin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-
-/* Desktop: no spin on splash screen */
-@media (min-width: 769px) {
-    #loader-logo svg,
-    #loader-logo img {
-        animation: reveal 0.6s ease-out forwards;
-    }
+#splash-wordmark {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    line-height: 1;
+    animation: reveal 0.6s ease-out forwards;
 }
+
+@keyframes reveal {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: scale(1); }
+    }
 
     /* Branding Styles */
     .branding {
@@ -107,12 +105,16 @@ body {
     @media (max-width: 480px) {
         #loader-logo {
             font-size: 4rem;
+            gap: 10px;
         }
         #loader-logo svg,
         #loader-logo img {
-            width: 92px;
-            height: 92px;
-            animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
+            width: 68px;
+            height: 68px;
+            animation: reveal 0.6s ease-out forwards;
+        }
+        #splash-wordmark {
+            font-size: 30px;
         }
         .branding {
             font-size: 13px;
@@ -131,12 +133,16 @@ body {
     @media (max-width: 360px) {
         #loader-logo {
             font-size: 3rem;
+            gap: 8px;
         }
         #loader-logo svg,
         #loader-logo img {
-            width: 82px;
-            height: 82px;
-            animation: reveal 0.6s ease-out forwards, wheelSpin 13s linear 0.6s infinite;
+            width: 60px;
+            height: 60px;
+            animation: reveal 0.6s ease-out forwards;
+        }
+        #splash-wordmark {
+            font-size: 26px;
         }
         .branding {
             font-size: 12px;

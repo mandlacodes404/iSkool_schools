@@ -78,9 +78,10 @@ if ($result && $row = $result->fetch_assoc()) {
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=4.7">
+    <link rel="stylesheet" href="assets/css/index.css?v=4.8">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -125,6 +126,7 @@ function getCsrfToken() {
     <div id="animation-wrapper">
        <div id="loader-logo">
           <img id="splash-svg" src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
+          <span id="splash-wordmark">iSkool</span>
         </div>
         <div class="branding splash-version-footer">
             <?= htmlspecialchars(iskool_app_version_label()) ?>
