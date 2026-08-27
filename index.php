@@ -129,7 +129,7 @@ function getCsrfToken() {
           <span id="splash-wordmark">iSkool</span>
         </div>
         <div class="branding splash-version-footer">
-            <?= htmlspecialchars(iskool_app_version_label()) ?>
+            <?= htmlspecialchars(trim(str_ireplace('iSkool', '', iskool_app_version_label()))) ?>
         </div>
     </div>
     <!-- Login/Register container -->
