@@ -2396,6 +2396,52 @@ if (desktopToggle) {
         if (apiArea && mainHeader) {
             apiArea.addEventListener('scroll', recalcMobileScrollUI, { passive: true });
 
+            // Every learner page renders inside #api-content-area, but not every
+            // page uses the loader or has its own recheck helper. Observe that
+            // shared container so a page which renders from cache, completes a
+            // delayed request, expands a section, or changes a filter gets the
+            // correct bottom-nav state without requiring the learner to scroll.
+            // The delayed checks also cover CSS height transitions, whose final
+            // size is not available in the mutation callback itself.
+            let contentRecheckFrame = null;
+            let contentRecheckTimers = [];
+            const scheduleContentScrollUIRecheck = () => {
+                if (contentRecheckFrame !== null) {
+                    cancelAnimationFrame(contentRecheckFrame);
+                }
+                contentRecheckTimers.forEach(clearTimeout);
+                contentRecheckTimers = [];
+
+                contentRecheckFrame = requestAnimationFrame(() => {
+                    contentRecheckFrame = requestAnimationFrame(() => {
+                        contentRecheckFrame = null;
+                        recalcMobileScrollUI();
+                    });
+                });
+
+                [150, 400].forEach(delay => {
+                    contentRecheckTimers.push(setTimeout(recalcMobileScrollUI, delay));
+                });
+            };
+
+            const contentObserver = new MutationObserver(scheduleContentScrollUIRecheck);
+            contentObserver.observe(apiArea, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style', 'hidden', 'open']
+            });
+
+            // Images, embedded content, and fonts can increase a page's height
+            // after its markup has already been inserted. Capturing load events
+            // from descendants keeps the nav correct for those pages as well.
+            apiArea.addEventListener('load', scheduleContentScrollUIRecheck, true);
+            window.addEventListener('resize', scheduleContentScrollUIRecheck, { passive: true });
+            window.addEventListener('orientationchange', scheduleContentScrollUIRecheck, { passive: true });
+
+            // Set the correct state for the initially rendered learner page too.
+            scheduleContentScrollUIRecheck();
+
             // Re-run the same check once the loader overlay hides — that's
             // the one centralised signal that reliably fires after ANY
             // page's async content has actually finished loading,
