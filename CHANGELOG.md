@@ -1,5 +1,10 @@
 # iSkool Changelog
 
+## [Unreleased]
+### Fixed
+- Learner Dashboard (Mobile): Bottom navigation background and header scroll state now recalculate automatically after every learner page renders or changes height, including cached and delayed loads, filtering, accordions, media loading, resizing, and device rotation. This removes the need to scroll before the navigation background reflects the current page length (`learner_dashboard.php`).
+- Learner Dashboard (Mobile): Sidebar menu now highlights the active Home, Quiz, Assignments, Resources, Announcements, Evaluations, and Discussions page consistently. Those links were missing the `data-page` values used by the shared active-navigation handler; Grades, Syllabus, and Calendar already had them (`learner_dashboard.php`).
+
 ## [1.2.3] - 2026-08-25
 ### Changed
 - Teacher & Learner Dashboards (Desktop): Right-hand detail panel and left sidebar scrollbars, on every split-panel view (Assignments, Announcements, Quiz, Evaluations, Resources, Syllabus), thickened from their previous inconsistent widths (4px/5px) to a uniform `8px`, and now brighten on hover (`rgba(255,255,255,0.1)` → `rgba(255,255,255,0.22)`) instead of staying static (`evaluations.css`, `assignments.css`, `announcements.css`, `quiz.js`, `resources.css`, `syllabus.js`).
