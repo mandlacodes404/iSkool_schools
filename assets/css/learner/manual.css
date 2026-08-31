@@ -169,7 +169,7 @@
 
 .learner-home-activity-meta {
     font-size: 12px;
-    color: #555e6a;
+    color: #7d8590;
     margin-top: 2px;
 }
 
@@ -220,7 +220,7 @@
 
 .learner-home-todo-meta {
     font-size: 12px;
-    color: #555e6a;                               /* was: var(--text-muted) */
+    color: #7d8590;                               /* was: var(--text-muted) */
     margin-top: 2px;
 }
 
@@ -394,7 +394,7 @@
 
     .learner-home-activity-meta,
     .learner-home-todo-meta {
-        color: #8b949e;
+        color: #7d8590;
         font-size: 11px;
         line-height: 1.35;
         margin-top: 3px;
