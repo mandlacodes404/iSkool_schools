@@ -594,11 +594,8 @@ function buildMobileClassCard(myClass) {
         return '';
     }
 
-    const fullName = `${myClass.learner_name || ''} ${myClass.learner_surname || ''}`.trim();
-
     return `
         <div class="lh-class-flat">
-            <div class="lh-class-flat-line">${fullName}</div>
             <div class="lh-class-flat-line lh-class-flat-school"><span class="lh-class-dot"></span>${myClass.school_name || ''}</div>
             <div class="lh-class-flat-line">${myClass.name}</div>
         </div>`;
