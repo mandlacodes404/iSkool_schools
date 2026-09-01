@@ -217,7 +217,31 @@ function renderAnnouncements(data) {
     const hasTeacher     = teacherEntries.length > 0;
 
     if (!hasSchoolWide && !hasTeacher) {
-        apiArea.innerHTML = "<p class='lan-empty-state'>No announcements found.</p>";
+        apiArea.innerHTML = `
+            <!-- ═══ DESKTOP EMPTY ═══ -->
+            <div class="lan-desktop-layout lqz-flat-layout">
+                <div class="lan-main-panel lqz-flat-panel" style="flex:1;">
+                    <div class="lan-panel-empty">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
+                        <p>No announcements found</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lan-mobile-list">
+                <div class="lan-mobile-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    </svg>
+                    <p class="lan-mobile-empty-title">No announcements yet</p>
+                    <p class="lan-mobile-empty-body">Your teachers haven't posted any announcements. Check back soon.</p>
+                </div>
+            </div>`;
         return;
     }
 

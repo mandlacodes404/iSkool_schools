@@ -188,7 +188,35 @@ function renderResourceCards(data) {
     if (!apiArea) return;
 
     if (Object.keys(data).length === 0) {
-        apiArea.innerHTML = "<p class='lrs-empty-state'>No resources found.</p>";
+        apiArea.innerHTML = `
+            <!-- ═══ DESKTOP EMPTY ═══ -->
+            <div class="lrs-desktop-layout lqz-flat-layout">
+                <div class="lrs-main-panel lqz-flat-panel" style="flex:1;">
+                    <div class="lrs-panel-empty">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <p>No resources found</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lrs-mobile-list">
+                <div class="lrs-mobile-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <p class="lrs-mobile-empty-title">No resources yet</p>
+                    <p class="lrs-mobile-empty-body">Your teachers haven't posted any resources. Check back soon.</p>
+                </div>
+            </div>`;
         return;
     }
 

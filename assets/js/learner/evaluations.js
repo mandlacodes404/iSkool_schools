@@ -129,7 +129,7 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=3.6';
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=3.7';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -200,11 +200,59 @@ function renderEvaluationsUI(data) {
 
     // ── Handle special / empty states ──
     if (data && data.status === 'no_class') {
-        apiArea.innerHTML = '<p class="eval-empty-state">You are not enrolled in a class yet.</p>';
+        apiArea.innerHTML = `
+            <!-- ═══ DESKTOP EMPTY ═══ -->
+            <div class="lev-desktop-layout lqz-flat-layout">
+                <div class="lev-main-panel lqz-flat-panel" style="flex:1;">
+                    <div class="lev-panel-empty">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        <p>You are not enrolled in a class yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lev-mobile-list">
+                <div class="lev-mobile-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <p class="lev-mobile-empty-title">Not enrolled yet</p>
+                    <p class="lev-mobile-empty-body">You're not enrolled in a class yet. Check back soon.</p>
+                </div>
+            </div>`;
         return;
     }
     if (!data || data.length === 0) {
-        apiArea.innerHTML = '<p class="eval-empty-state">No active evaluations at the moment.</p>';
+        apiArea.innerHTML = `
+            <!-- ═══ DESKTOP EMPTY ═══ -->
+            <div class="lev-desktop-layout lqz-flat-layout">
+                <div class="lev-main-panel lqz-flat-panel" style="flex:1;">
+                    <div class="lev-panel-empty">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        <p>No active evaluations at the moment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lev-mobile-list">
+                <div class="lev-mobile-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <p class="lev-mobile-empty-title">No evaluations yet</p>
+                    <p class="lev-mobile-empty-body">Your teachers haven't posted any evaluations. Check back soon.</p>
+                </div>
+            </div>`;
         return;
     }
 

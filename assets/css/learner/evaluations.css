@@ -768,6 +768,32 @@
     text-align: center;
 }
 
+/* ── MOBILE EMPTY STATE (no evaluations / no search matches) ── */
+.lev-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #555e6a;
+    min-height: calc(100vh - 280px);
+}
+.lev-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.lev-mobile-empty-title {
+    color: #c9d1d9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.lev-mobile-empty-body {
+    color: #8b949e;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+.lev-mobile-search-empty svg { opacity: 0.5; }
+
 /* Crisp SVG stroke rendering (was: style="shape-rendering:geometricPrecision"
    on the desktop and mobile search icons, and the mobile folder chevron) */
 .lev-icon-crisp {

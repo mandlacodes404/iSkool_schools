@@ -465,6 +465,32 @@
     margin-top: 60px;
 }
 
+/* ── MOBILE EMPTY STATE (no resources / no search matches) ── */
+.lrs-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #555e6a;
+    min-height: calc(100vh - 280px);
+}
+.lrs-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.lrs-mobile-empty-title {
+    color: #c9d1d9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.lrs-mobile-empty-body {
+    color: #8b949e;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+.lrs-mobile-search-empty svg { opacity: 0.5; }
+
 /* ── DESKTOP PANEL: RESOURCE PREVIEW TOPBAR ── */
 /* (was: second inline <style> block, built as the topbarStyles template
    string and interpolated into both the video and file preview branches

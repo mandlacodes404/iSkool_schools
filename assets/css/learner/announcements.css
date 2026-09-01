@@ -486,6 +486,32 @@
     margin-top: 60px;
 }
 
+/* ── MOBILE EMPTY STATE (no announcements / no search matches) ── */
+.lan-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #555e6a;
+    min-height: calc(100vh - 280px);
+}
+.lan-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.lan-mobile-empty-title {
+    color: #c9d1d9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.lan-mobile-empty-body {
+    color: #8b949e;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+.lan-mobile-search-empty svg { opacity: 0.5; }
+
 /* ── MOBILE: ANNOUNCEMENT DETAIL VIEW ── */
 /* (was: second inline <style> block, injected in openMobileLearnerAnnouncement) */
 .lan-mobile-detail {
