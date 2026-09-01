@@ -213,7 +213,7 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.3">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.4">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=1.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.0">
@@ -3212,7 +3212,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.3"></script>
-<script src="assets/js/learner/quiz.js?v=10.4"></script>
+<script src="assets/js/learner/quiz.js?v=10.5"></script>
 <script src="assets/js/learner/assignments.js?v=8.7"></script>
 <script src="assets/js/learner/resources.js?v=7.8"></script>
 <script src="assets/js/learner/announcements.js?v=8.4"></script>

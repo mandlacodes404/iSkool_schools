@@ -564,7 +564,13 @@ function getCsrfToken() {
                     </label>
                 </div>
 
-                <button type="submit" id="register-btn">Register</button>
+                <button type="submit" id="register-btn">
+                    <span class="btn-label">Register</span>
+                    <span class="btn-spinner" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                    </span>
+                </button>
                 <p>Already have an account? 
                    <a href="#" onclick="showForm('login-form'); return false;">Login</a>
                 </p>
@@ -1397,6 +1403,9 @@ function getCsrfToken() {
         btn.disabled    = true;
         btn.textContent = 'Registering…';
 
+        btn.classList.add('is-loading');
+        btn.innerHTML = '<span class="btn-label">Register</span><span class="btn-spinner" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>';
+
         const formData = new FormData(this);
 
         try {
@@ -1473,6 +1482,7 @@ function getCsrfToken() {
                 // Also reset the register form fields and button
                 document.getElementById('register-form-el').reset();
                 document.getElementById('register-btn').disabled    = false;
+                document.getElementById('register-btn').classList.remove('is-loading');
                 document.getElementById('register-btn').textContent = 'Register';
                 // Show the login form
                 showForm('login-form');

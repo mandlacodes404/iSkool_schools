@@ -366,15 +366,11 @@ function renderQuizCards(groupedData) {
     if (!apiArea) return;
 
     const now = new Date();
-
-    if (!groupedData || Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<p style='text-align:center; margin-top:60px; color: #888;'>No quizzes available.</p>";
-        return;
-    }
+    const hasAnyQuizzes = groupedData && Object.keys(groupedData).length > 0;
 
     // ── Build flat list for desktop panel lookup ──
     const desktopQuizzesByTeacher = {};
-    for (const [subject, quizzes] of Object.entries(groupedData)) {
+    for (const [subject, quizzes] of Object.entries(groupedData || {})) {
         quizzes.forEach(quiz => {
             const teacher = String(quiz.teacher || quiz.teacher_name || quiz.created_by_name || subject || 'Unknown Teacher').trim() || 'Unknown Teacher';
             const desktopQuiz = { ...quiz, subject, teacher };
@@ -945,7 +941,33 @@ function renderQuizCards(groupedData) {
                 }
                 .lqz-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
                 .lqz-mobile-search::placeholder { color: #555e6a; }
+                .lqz-mobile-search:disabled { opacity: 0.6; }
             }
+
+            /* ── MOBILE EMPTY STATES (no quizzes / no search matches) ── */
+            .lqz-mobile-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 48px 24px;
+                color: #555e6a;
+            }
+            .lqz-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+            .lqz-mobile-empty-title {
+                color: #c9d1d9;
+                font-size: 15px;
+                font-weight: 700;
+                margin: 0 0 6px;
+            }
+            .lqz-mobile-empty-body {
+                color: #8b949e;
+                font-size: 13px;
+                margin: 0;
+                line-height: 1.5;
+            }
+            .lqz-mobile-search-empty svg { opacity: 0.5; }
 
             /* ── DESKTOP SEARCH BAR ── */
             .lqz-desktop-search-wrap {
@@ -1002,21 +1024,43 @@ function renderQuizCards(groupedData) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->`;
+        <!-- ═══ MOBILE LIST ═══ -->`;
 
-    // Mobile search bar (rendered outside the card so it spans full width)
-    if (teacherEntries.length > 0) {
-        html += `
+    // Mobile search bar — always rendered so the learner can search/clear
+    // even when there are zero quizzes or a filter currently matches nothing.
+    html += `
         <div class="lqz-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="lqz-mobile-search" id="lqzMobileSearch"
-                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)">
+                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)"
+                ${hasAnyQuizzes ? '' : 'disabled'}>
         </div>`;
-    }
 
     html += `<div class="lqz-mobile-list">`;
+
+    // True empty state — no quizzes posted at all yet.
+    if (!hasAnyQuizzes) {
+        html += `
+            <div class="lqz-mobile-empty">
+                ${learnerQuizPencilSvg(46, 46, '#fdd663')}
+                <p class="lqz-mobile-empty-title">No quizzes yet</p>
+                <p class="lqz-mobile-empty-body">Your teachers haven't posted any quizzes. Check back soon.</p>
+            </div>`;
+    }
+
+    // Zero-results state — hidden by default, shown by lqzMobileSearch()
+    // when a search term matches nothing. Kept in the DOM (not injected
+    // fresh each keystroke) so it can just be toggled.
+    html += `
+        <div class="lqz-mobile-empty lqz-mobile-search-empty" id="lqzMobileSearchEmpty" style="display:none;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#555e6a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p class="lqz-mobile-empty-title" id="lqzMobileSearchEmptyText">No matches</p>
+            <p class="lqz-mobile-empty-body">Try a different title or teacher name.</p>
+        </div>`;
 
     let mobileGroupIdx = 0;
     for (const { teacher, quizzes } of teacherEntries) {
@@ -1300,6 +1344,7 @@ window.loadLearnerQuizPanelInstructions = async function(quizId, boxId) {
 window.lqzMobileSearch = function(val) {
     if (window.learnerPageState) window.learnerPageState.update('quiz', { mobileSearch: val });
     const term = val.toLowerCase().trim();
+    let totalVisible = 0;
     document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
         const folderName = header ? header.querySelector('.lqz-mobile-folder-name').textContent.toLowerCase() : '';
@@ -1312,9 +1357,10 @@ window.lqzMobileSearch = function(val) {
             if (show) visible++;
         });
         // Show/hide entire folder based on matches
-        const folderWrap = header ? header.parentElement : null;
-        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        const folderShown = (visible || !term || folderName.includes(term));
+        if (header) header.style.display = folderShown ? '' : 'none';
+        body.style.display = folderShown ? '' : 'none';
+        if (folderShown) totalVisible += (term ? visible : rows.length);
         // Keep folder open while searching
         if (term && visible) {
             body.classList.remove('collapsed');
@@ -1323,6 +1369,18 @@ window.lqzMobileSearch = function(val) {
             if (chev) chev.classList.add('open');
         }
     });
+
+    // Zero-results empty state — only relevant when actively searching
+    // and nothing at all in the list matched.
+    const searchEmpty = document.getElementById('lqzMobileSearchEmpty');
+    if (searchEmpty) {
+        const showEmpty = term.length > 0 && totalVisible === 0;
+        searchEmpty.style.display = showEmpty ? 'flex' : 'none';
+        if (showEmpty) {
+            const label = document.getElementById('lqzMobileSearchEmptyText');
+            if (label) label.textContent = `No matches for "${val.trim()}"`;
+        }
+    }
 
     // Filtering rows/folders in/out of view changes the page's scrollable
     // height just like expanding/collapsing a folder does, but without a

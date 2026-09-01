@@ -932,20 +932,23 @@ button:hover {
 }
 
 /* ── Login button loading state ── */
-button#login-btn {
+button#login-btn,
+button#register-btn {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-button#login-btn.is-loading {
+button#login-btn.is-loading,
+button#register-btn.is-loading {
     opacity: 0.55;
     cursor: default;
     pointer-events: none;
 }
 
-button#login-btn .btn-spinner {
+button#login-btn .btn-spinner,
+button#register-btn .btn-spinner {
     display: none;
     position: absolute;
     top: 50%;
@@ -956,11 +959,13 @@ button#login-btn .btn-spinner {
     margin-left: -10px;
 }
 
-button#login-btn.is-loading .btn-label {
+button#login-btn.is-loading .btn-label,
+button#register-btn.is-loading .btn-label {
     visibility: hidden;
 }
 
-button#login-btn.is-loading .btn-spinner {
+button#login-btn.is-loading .btn-spinner,
+button#register-btn.is-loading .btn-spinner {
     display: block;
 }
 
