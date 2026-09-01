@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=6.1">
+    <link rel="stylesheet" href="assets/css/index.css?v=6.2">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -564,13 +564,7 @@ function getCsrfToken() {
                     </label>
                 </div>
 
-                <button type="submit" id="register-btn">
-                    <span class="btn-label">Register</span>
-                    <span class="btn-spinner" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span><span></span>
-                    </span>
-                </button>
+                <button type="submit" id="register-btn">Register</button>
                 <p>Already have an account? 
                    <a href="#" onclick="showForm('login-form'); return false;">Login</a>
                 </p>
@@ -1403,9 +1397,6 @@ function getCsrfToken() {
         btn.disabled    = true;
         btn.textContent = 'Registering…';
 
-        btn.classList.add('is-loading');
-        btn.innerHTML = '<span class="btn-label">Register</span><span class="btn-spinner" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>';
-
         const formData = new FormData(this);
 
         try {
@@ -1482,7 +1473,6 @@ function getCsrfToken() {
                 // Also reset the register form fields and button
                 document.getElementById('register-form-el').reset();
                 document.getElementById('register-btn').disabled    = false;
-                document.getElementById('register-btn').classList.remove('is-loading');
                 document.getElementById('register-btn').textContent = 'Register';
                 // Show the login form
                 showForm('login-form');
