@@ -328,10 +328,7 @@ function renderAssignmentCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    if (Object.keys(groupedData).length === 0) {
-        apiArea.innerHTML = "<p class='las-empty-state'>No assignments found.</p>";
-        return;
-    }
+    const hasAnyAssignments = groupedData && Object.keys(groupedData).length > 0;
 
     // ── Build flat list for desktop panel lookup ──
     const teacherEntries = getSortedLearnerAssignmentEntries(groupedData);
@@ -420,8 +417,9 @@ function renderAssignmentCards(groupedData) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    if (teacherEntries.length > 0) {
-        html += `
+    // Mobile search bar — always rendered and tappable, even when there are
+    // zero assignments or a filter currently matches nothing.
+    html += `
         <div class="las-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -429,9 +427,35 @@ function renderAssignmentCards(groupedData) {
             <input type="text" class="las-mobile-search" id="lasMobileSearch"
                 placeholder="Search assignments..." oninput="lasMobileSearch(this.value)">
         </div>`;
-    }
 
     html += `<div class="las-mobile-list">`;
+
+    // True empty state — no assignments posted at all yet.
+    if (!hasAnyAssignments) {
+        html += `
+            <div class="las-mobile-empty">
+                <svg viewBox="0 0 24 24" width="46" height="46" stroke="#a78bfa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <p class="las-mobile-empty-title">No assignments yet</p>
+                <p class="las-mobile-empty-body">Your teachers haven't posted any assignments. Check back soon.</p>
+            </div>`;
+    }
+
+    // Zero-results state — hidden by default, shown by lasMobileSearch()
+    // when a search term matches nothing. Kept in the DOM so it can just
+    // be toggled rather than injected fresh each keystroke.
+    html += `
+        <div class="las-mobile-empty las-mobile-search-empty" id="lasMobileSearchEmpty" style="display:none;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#555e6a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p class="las-mobile-empty-title" id="lasMobileSearchEmptyText">No matches</p>
+            <p class="las-mobile-empty-body">Try a different title or teacher name.</p>
+        </div>`;
 
     let mobileFlatIdx = 0;
 
@@ -583,6 +607,7 @@ window.toggleLasDesktopGroup = function(id, headerEl) {
 window.lasMobileSearch = function(val) {
     if (window.learnerPageState) window.learnerPageState.update('assignments', { mobileSearch: val });
     const term = val.toLowerCase().trim();
+    let totalVisible = 0;
     document.querySelectorAll('.las-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
         const folderName = header ? header.querySelector('.las-mobile-folder-name').textContent.toLowerCase() : '';
@@ -594,8 +619,10 @@ window.lasMobileSearch = function(val) {
             row.style.display = show ? '' : 'none';
             if (show) visible++;
         });
-        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
+        const folderShown = (visible || !term || folderName.includes(term));
+        if (header) header.style.display = folderShown ? '' : 'none';
+        body.style.display = folderShown ? '' : 'none';
+        if (folderShown) totalVisible += (term ? visible : rows.length);
         if (term && visible) {
             body.classList.remove('collapsed');
             if (header) header.classList.remove('las-mobile-folder-header--collapsed');
@@ -603,6 +630,23 @@ window.lasMobileSearch = function(val) {
             if (chev) chev.classList.add('open');
         }
     });
+
+    // Zero-results empty state — only relevant when actively searching
+    // and nothing at all in the list matched.
+    const searchEmpty = document.getElementById('lasMobileSearchEmpty');
+    if (searchEmpty) {
+        const showEmpty = term.length > 0 && totalVisible === 0;
+        searchEmpty.style.display = showEmpty ? 'flex' : 'none';
+        if (showEmpty) {
+            const label = document.getElementById('lasMobileSearchEmptyText');
+            if (label) label.textContent = `No matches for "${val.trim()}"`;
+        }
+    }
+
+    // Filtering rows/folders in/out of view changes the page's scrollable
+    // height just like expanding/collapsing a folder does, but without a
+    // real scroll event — same recalculation fix as the folder toggle.
+    recheckMobileNavAfterToggle();
 };
 
 function escapeLearnerAssignmentHtml(value) {

@@ -433,6 +433,32 @@
     .las-mobile-search::placeholder { color: #555e6a; }
 }
 
+/* ── MOBILE EMPTY STATES (no assignments / no search matches) ── */
+.las-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #555e6a;
+    min-height: calc(100vh - 280px);
+}
+.las-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.las-mobile-empty-title {
+    color: #c9d1d9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.las-mobile-empty-body {
+    color: #8b949e;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+.las-mobile-search-empty svg { opacity: 0.5; }
+
 /* ── DESKTOP SEARCH BAR ── */
 .las-desktop-search-wrap {
     display: none;
@@ -525,11 +551,6 @@
     color: #ff5555;
 }
 
-.las-empty-state {
-    text-align: center;
-    color: #888;
-    margin-top: 60px;
-}
 
 /* ── MOBILE: ASSIGNMENT DETAIL VIEW ── */
 /* (was: second inline <style> block, injected in openMobileLearnerAssignment) */
