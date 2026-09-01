@@ -894,8 +894,8 @@ input[type="email"],
 input[type="password"],
 input[type="number"],
 select {
-    background: #454542 ;
-    color: #d1d1cf;
+    background: #1E1F20;
+    color: #fff;
     border: 1px solid transparent;
     padding: 12px 20px;
     border-radius: 30px;
@@ -907,29 +907,11 @@ select {
     display: block;
 }
 
-input::placeholder {
-    color: #d1d1cf;
-    opacity: 1;
-}
-
 input:focus, select:focus {
-    background: #454542;
+    background: #1E1F20;
     border-color: #444746;
     box-shadow: 0 0 0 1px #444746;
     outline: none;
-}
-
-/* Neutralise the browser's yellow autofill tint so the box keeps its
-   own #8a8680 background before AND after autofill kicks in. */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-    -webkit-text-fill-color: #20201f;
-    -webkit-box-shadow: 0 0 0 1000px #454542 inset;
-    box-shadow: 0 0 0 1000px #454542 inset;
-    caret-color: #20201f;
-    transition: background-color 5000s ease-in-out 0s;
 }
 
   button {
