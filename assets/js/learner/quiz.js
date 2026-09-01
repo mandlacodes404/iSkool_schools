@@ -941,7 +941,6 @@ function renderQuizCards(groupedData) {
                 }
                 .lqz-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
                 .lqz-mobile-search::placeholder { color: #555e6a; }
-                .lqz-mobile-search:disabled { opacity: 0.6; }
             }
 
             /* ── MOBILE EMPTY STATES (no quizzes / no search matches) ── */
@@ -951,8 +950,9 @@ function renderQuizCards(groupedData) {
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-                padding: 48px 24px;
+                padding: 24px;
                 color: #555e6a;
+                min-height: calc(100vh - 280px);
             }
             .lqz-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
             .lqz-mobile-empty-title {
@@ -1026,16 +1026,15 @@ function renderQuizCards(groupedData) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    // Mobile search bar — always rendered so the learner can search/clear
-    // even when there are zero quizzes or a filter currently matches nothing.
+    // Mobile search bar — always rendered and always tappable, even in
+    // empty states, so the learner can search/clear without a dead-end UI.
     html += `
         <div class="lqz-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="lqz-mobile-search" id="lqzMobileSearch"
-                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)"
-                ${hasAnyQuizzes ? '' : 'disabled'}>
+                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)">
         </div>`;
 
     html += `<div class="lqz-mobile-list">`;

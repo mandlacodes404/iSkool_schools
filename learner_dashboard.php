@@ -3212,7 +3212,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.3"></script>
-<script src="assets/js/learner/quiz.js?v=10.5"></script>
+<script src="assets/js/learner/quiz.js?v=10.6"></script>
 <script src="assets/js/learner/assignments.js?v=8.7"></script>
 <script src="assets/js/learner/resources.js?v=7.8"></script>
 <script src="assets/js/learner/announcements.js?v=8.4"></script>
