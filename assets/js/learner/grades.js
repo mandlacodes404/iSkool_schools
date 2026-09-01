@@ -283,7 +283,14 @@ function renderGrades(data) {
         </div>`;
 
     if (groups.length === 0) {
-        mobileHtml += `<div class="grades-empty">No quiz results found yet.</div>`;
+        mobileHtml += `
+            <div class="grades-mobile-empty">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                <p class="grades-mobile-empty-title">No grades yet</p>
+                <p class="grades-mobile-empty-body">Your teachers haven't published any grades. Check back soon.</p>
+            </div>`;
     } else {
         groups.forEach((group, gi) => {
             const quizzes = group.quizzes;

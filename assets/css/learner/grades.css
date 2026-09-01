@@ -311,6 +311,32 @@
 .review-link:hover { opacity: 1; }
 .summative-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #68d391; border: 1px solid rgba(104,211,145,0.3); padding: 1px 6px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
 .grades-empty { text-align: center; color: #555e6a; font-size: 15px; padding: 60px 20px; }
+
+/* ── MOBILE EMPTY STATE (no grade groups / no results at all) ── */
+.grades-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #555e6a;
+    min-height: calc(100vh - 280px);
+}
+.grades-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.grades-mobile-empty-title {
+    color: #c9d1d9;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+.grades-mobile-empty-body {
+    color: #8b949e;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+}
+
 .g-modal-overlay { display: none !important; }
 
 /* Inline performance overview */
