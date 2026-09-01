@@ -4,6 +4,7 @@
 ### Added
 - Learner Quiz & Assignments (Mobile): Added a proper empty state for both pages — when a teacher hasn't posted anything yet, the list now shows a centred icon (matching each page's own accent colour) with a short heading and explanation, instead of a bare unstyled line of text. The search bar stays visible and tappable in this state (`quiz.js`, `assignments.js`).
 - Learner Quiz & Assignments (Mobile): Searching now shows a "No matches for '...'" state with a search icon when a filter matches nothing, instead of the list silently going blank with no explanation or way to tell it's empty rather than broken (`quiz.js`, `assignments.js`).
+- Learner Announcements, Resources, Evaluations & Grades (Mobile): Extended the same empty-state treatment to the remaining pages — when there's nothing to show yet, each now displays a centred icon (reusing that page's own existing accent colour and iconography, e.g. the bar-chart icon already used per-quiz on Grades) with a bold heading and short explanation, instead of a single unstyled line of text. Desktop's existing panel empty states are unchanged; Evaluations keeps its separate "not enrolled in a class" message alongside the new "no evaluations yet" one (`announcements.js`, `resources.js`, `evaluations.js`, `grades.js`, `announcements.css`, `resources.css`, `evaluations.css`, `grades.css`).
 
 ### Changed
 - Login Page (Desktop & Mobile): Splash screen version-footer text weight reduced from `800` to `400`, so it no longer reads as bold against the logo/wordmark above it (`index.css`).
