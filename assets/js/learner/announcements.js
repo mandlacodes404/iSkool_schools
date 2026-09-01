@@ -232,6 +232,13 @@ function renderAnnouncements(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lan-mobile-search-wrap">
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="lan-mobile-search" id="lanMobileSearch"
+                    placeholder="Search announcements..." oninput="lanMobileSearch(this.value)">
+            </div>
             <div class="lan-mobile-list">
                 <div class="lan-mobile-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -376,8 +383,7 @@ function renderAnnouncements(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    if (hasSchoolWide || hasTeacher) {
-        html += `
+    html += `
         <div class="lan-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -385,7 +391,6 @@ function renderAnnouncements(data) {
             <input type="text" class="lan-mobile-search" id="lanMobileSearch"
                 placeholder="Search announcements..." oninput="lanMobileSearch(this.value)">
         </div>`;
-    }
 
     html += `<div class="lan-mobile-list">`;
 

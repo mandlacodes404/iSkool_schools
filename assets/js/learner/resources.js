@@ -205,6 +205,13 @@ function renderResourceCards(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
+            <div class="lrs-mobile-search-wrap">
+                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
+                    placeholder="Search resources..." oninput="lrsMobileSearch(this.value)">
+            </div>
             <div class="lrs-mobile-list">
                 <div class="lrs-mobile-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
@@ -307,8 +314,7 @@ function renderResourceCards(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    if (teacherEntries.length > 0) {
-        html += `
+    html += `
         <div class="lrs-mobile-search-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -316,7 +322,6 @@ function renderResourceCards(data) {
             <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
                 placeholder="Search resources..." oninput="lrsMobileSearch(this.value)">
         </div>`;
-    }
 
     html += `<div class="lrs-mobile-list">`;
 

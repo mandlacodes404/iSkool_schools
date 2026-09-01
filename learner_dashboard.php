@@ -3214,10 +3214,10 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/manual.js?v=10.3"></script>
 <script src="assets/js/learner/quiz.js?v=10.6"></script>
 <script src="assets/js/learner/assignments.js?v=8.8"></script>
-<script src="assets/js/learner/resources.js?v=7.9"></script>
-<script src="assets/js/learner/announcements.js?v=8.5"></script>
-<script src="assets/js/learner/grades.js?v=8.4"></script>
-<script src="assets/js/learner/evaluations.js?v=5.9"></script>
+<script src="assets/js/learner/resources.js?v=8.0"></script>
+<script src="assets/js/learner/announcements.js?v=8.6"></script>
+<script src="assets/js/learner/grades.js?v=8.5"></script>
+<script src="assets/js/learner/evaluations.js?v=6.0"></script>
 <script src="assets/js/learner/discussions.js?v=10.6"></script>
 <script src="assets/js/learner/syllabus.js?v=3.4"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
