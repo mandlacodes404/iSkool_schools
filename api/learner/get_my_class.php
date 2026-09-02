@@ -1,7 +1,9 @@
 <?php
 /**
  * api/learner/get_my_class.php
- * Returns the class the logged-in learner has joined (or null if none).
+ * Returns the class the logged-in learner has joined, and the school
+ * name — even if the learner hasn't joined a class yet. When there's
+ * no class, `id`/`name` are null but `school_name` is still populated.
  */
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once dirname(__DIR__, 2) . '/config.php';
@@ -44,9 +46,11 @@ $stmt->execute();
 $row = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
+// No class joined yet — still return school/learner info so the UI can
+// show the school name without a class attached, instead of bailing
+// out with a bare null.
 if (!$row) {
-    echo json_encode(null);
-    exit();
+    $row = ['id' => null, 'name' => null];
 }
 
 // Learner name/surname
