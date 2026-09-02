@@ -589,15 +589,15 @@ function buildDesktopRecentCards(recent) {
 }
 
 function buildMobileClassCard(myClass) {
-    if (!myClass || !myClass.name) {
-        // Not joined yet — render nothing
+    if (!myClass || (!myClass.school_name && !myClass.name)) {
+        // No school or class data at all — render nothing
         return '';
     }
 
     return `
         <div class="lh-class-flat">
-            <div class="lh-class-flat-line lh-class-flat-school"><span class="lh-class-dot"></span>${myClass.school_name || ''}</div>
-            <div class="lh-class-flat-line">${myClass.name}</div>
+            ${myClass.school_name ? `<div class="lh-class-flat-line lh-class-flat-school"><span class="lh-class-dot"></span>${myClass.school_name}</div>` : ''}
+            ${myClass.name ? `<div class="lh-class-flat-line">${myClass.name}</div>` : ''}
         </div>`;
 }
 
