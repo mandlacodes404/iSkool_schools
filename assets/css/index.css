@@ -781,7 +781,7 @@ body {
        vertically-centered preview cards below — cards keep their original position */
     .bp-intro {
         position: absolute;
-        top: 48px;
+        top: 24px;
         left: 40px;
         right: 40px;
         margin-bottom: 0;
