@@ -50,7 +50,7 @@ body {
 
 #splash-wordmark {
     font-family: 'Nunito', sans-serif;
-    font-weight: 800;
+    font-weight: 600;
     font-size: 42px;
     color: #ffffff;
     letter-spacing: 0.2px;
@@ -779,7 +779,7 @@ body {
 
     /* Nudge the logo + "iSkool" block up slightly, no horizontal shift */
     .bp-intro {
-        margin-top: -18px;
+        margin-top: -34px;
     }
 
     /* Logo next to the "iSkool" wordmark on the left brand panel — static, no spin */
