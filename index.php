@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=6.2">
+    <link rel="stylesheet" href="assets/css/index.css?v=6.3">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -141,6 +141,9 @@ function getCsrfToken() {
             <!-- Eyebrow only above preview -->
             <div class="bp-intro">
                 <div class="bp-intro-eyebrow">
+                    <div id="bp-logo-svg">
+                        <img src="/icon.svg?v=1.4" width="36" height="36" alt="iSkool logo">
+                    </div>
                     <span class="bp-brand-name">iSkool</span>
                 </div>
             </div>
@@ -459,11 +462,8 @@ function getCsrfToken() {
 
         <!-- RIGHT: Form panel -->
         <div class="form-panel">
-        <!-- Logo + School Name (desktop: shown here, replaces brand panel header) -->
+        <!-- School Name (desktop: shown here, replaces brand panel header) -->
         <div id="form-top-brand">
-            <div id="form-logo-svg">
-                <img src="/icon.svg?v=1.4" width="54" height="54" alt="iSkool logo">
-            </div>
             <div id="form-school-badge">
                 <div id="form-school-dot"></div>
                 <span id="form-school-name"><?= htmlspecialchars($schoolName) ?></span>

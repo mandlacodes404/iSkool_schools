@@ -177,7 +177,7 @@ body {
     animation: fadeSlideIn 1.2s ease forwards;
 }
 
-/* ── Logo + school name above form — desktop only ── */
+/* ── School name above form — desktop only ── */
 #form-top-brand {
     display: none;
 }
@@ -767,7 +767,7 @@ body {
         display: none !important;
     }
 
-    /* Logo + school name above the login form on desktop */
+    /* School name above the login form on desktop */
     #form-top-brand {
         display: flex;
         align-items: center;
@@ -777,27 +777,16 @@ body {
         max-width: 380px;
     }
 
-    #form-logo-svg svg,
-    #form-logo-svg img {
-        display: block;
-        width: 54px;
-        height: 54px;
-        animation: brandSpin 26s ease-in-out infinite;
-        transform-origin: center;
+    /* Logo next to the "iSkool" wordmark on the left brand panel — static, no spin */
+    .bp-intro-eyebrow {
+        gap: 12px;
     }
 
-    @keyframes brandSpin {
-        /* 0s–4s: initial wait at 0° */
-        0%      { transform: rotate(0deg); }
-        15.38%  { transform: rotate(0deg); }
-        /* 4s–11s: clockwise 360° (7s spin) */
-        42.31%  { transform: rotate(360deg); }
-        /* 11s–15s: wait at 360° */
-        57.69%  { transform: rotate(360deg); }
-        /* 15s–22s: anticlockwise back to 0° (7s spin) */
-        84.62%  { transform: rotate(0deg); }
-        /* 22s–26s: wait at 0° */
-        100%    { transform: rotate(0deg); }
+    #bp-logo-svg svg,
+    #bp-logo-svg img {
+        display: block;
+        width: 36px;
+        height: 36px;
     }
 
     #form-school-badge {
