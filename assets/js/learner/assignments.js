@@ -410,7 +410,7 @@ function renderAssignmentCards(groupedData) {
                         <line x1="16" y1="13" x2="8" y2="13"></line>
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
-                    <p>Select an assignment from the left</p>
+                    <p>${hasAnyAssignments ? 'Select an assignment from the left' : "Your teachers haven't posted any assignments yet."}</p>
                 </div>
             </div>
         </div>

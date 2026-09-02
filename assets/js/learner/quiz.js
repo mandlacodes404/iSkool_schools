@@ -1019,7 +1019,7 @@ function renderQuizCards(groupedData) {
             <div class="lqz-main-panel lqz-flat-panel" id="lqz-main-panel">
                 <div class="lqz-panel-empty">
                     ${learnerQuizPencilSvg(48, 48, '#fdd663').replace('stroke-width="2"', 'stroke-width="1.5"')}
-                    <p>Select a quiz from the left</p>
+                    <p>${hasAnyQuizzes ? 'Select a quiz from the left' : "Your teachers haven't posted any quizzes yet."}</p>
                 </div>
             </div>
         </div>

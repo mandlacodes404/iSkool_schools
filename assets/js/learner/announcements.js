@@ -220,13 +220,23 @@ function renderAnnouncements(data) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
             <div class="lan-desktop-layout lqz-flat-layout">
-                <div class="lan-main-panel lqz-flat-panel" style="flex:1;">
+                <div class="lan-sidebar lqz-flat-sidebar">
+                    <div class="lan-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
+                            placeholder="Search announcements..." oninput="lanDesktopSearch(this.value)">
+                    </div>
+                    <div class="lan-sidebar-scroll"></div>
+                </div>
+                <div class="lan-main-panel lqz-flat-panel" id="lan-main-panel">
                     <div class="lan-panel-empty">
                         <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                         </svg>
-                        <p>No announcements found</p>
+                        <p>Your teachers haven't posted any announcements yet.</p>
                     </div>
                 </div>
             </div>

@@ -191,7 +191,17 @@ function renderResourceCards(data) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
             <div class="lrs-desktop-layout lqz-flat-layout">
-                <div class="lrs-main-panel lqz-flat-panel" style="flex:1;">
+                <div class="lrs-sidebar lqz-flat-sidebar">
+                    <div class="lrs-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
+                            placeholder="Search resources..." oninput="lrsDesktopSearch(this.value)">
+                    </div>
+                    <div class="lrs-sidebar-scroll"></div>
+                </div>
+                <div class="lrs-main-panel lqz-flat-panel" id="lrs-main-panel">
                     <div class="lrs-panel-empty">
                         <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -199,7 +209,7 @@ function renderResourceCards(data) {
                             <line x1="16" y1="13" x2="8" y2="13"></line>
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                         </svg>
-                        <p>No resources found</p>
+                        <p>Your teachers haven't posted any resources yet.</p>
                     </div>
                 </div>
             </div>

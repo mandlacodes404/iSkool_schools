@@ -361,14 +361,13 @@ function renderGrades(data) {
     <div class="grades-desktop-layout lqz-flat-layout">
         <!-- Sidebar -->
         <div class="grades-dt-sidebar lqz-flat-sidebar">
-            ${groups.length > 0 ? `
             <div class="grades-dt-search-wrap">
                 <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input type="text" class="grades-search" id="gradesSearchDt"
                     placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
-            </div>` : ''}
+            </div>
             <button class="grades-dt-report-btn"
                     onclick="generateGradesReport('${targetEmail}')">
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
@@ -391,7 +390,7 @@ function renderGrades(data) {
                     <svg viewBox="0 0 24 24" width="40" height="40" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
-                    <p>Select an assessment to view your grade</p>
+                    <p>${groups.length > 0 ? 'Select an assessment to view your grade' : "Your teachers haven't published any grades yet."}</p>
                 </div>
             </div>
         </div>

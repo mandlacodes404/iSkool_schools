@@ -203,13 +203,23 @@ function renderEvaluationsUI(data) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
             <div class="lev-desktop-layout lqz-flat-layout">
-                <div class="lev-main-panel lqz-flat-panel" style="flex:1;">
+                <div class="lev-sidebar lqz-flat-sidebar">
+                    <div class="lev-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lev-desktop-search" id="levDesktopSearch"
+                            placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+                    </div>
+                    <div class="lev-sidebar-scroll"></div>
+                </div>
+                <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                     <div class="lev-panel-empty">
                         <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
                             <path d="M9 11l3 3L22 4"></path>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
-                        <p>You are not enrolled in a class yet</p>
+                        <p>You haven't joined a class yet.</p>
                     </div>
                 </div>
             </div>
@@ -238,13 +248,23 @@ function renderEvaluationsUI(data) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
             <div class="lev-desktop-layout lqz-flat-layout">
-                <div class="lev-main-panel lqz-flat-panel" style="flex:1;">
+                <div class="lev-sidebar lqz-flat-sidebar">
+                    <div class="lev-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lev-desktop-search" id="levDesktopSearch"
+                            placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+                    </div>
+                    <div class="lev-sidebar-scroll"></div>
+                </div>
+                <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                     <div class="lev-panel-empty">
                         <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
                             <path d="M9 11l3 3L22 4"></path>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
-                        <p>No active evaluations at the moment</p>
+                        <p>Your teachers haven't posted any evaluations yet.</p>
                     </div>
                 </div>
             </div>
