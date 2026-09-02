@@ -777,9 +777,19 @@ body {
         max-width: 380px;
     }
 
+    /* Nudge the logo + "iSkool" block up slightly, no horizontal shift */
+    .bp-intro {
+        margin-top: -18px;
+    }
+
     /* Logo next to the "iSkool" wordmark on the left brand panel — static, no spin */
     .bp-intro-eyebrow {
-        gap: 12px;
+        gap: 6px;
+    }
+
+    .bp-brand-name {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 600;
     }
 
     #bp-logo-svg svg,
