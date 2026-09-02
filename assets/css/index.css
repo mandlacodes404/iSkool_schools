@@ -693,7 +693,7 @@ body {
     .brand-panel {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: stretch;
         flex: 0 0 48%;
         padding: 48px 40px;
@@ -775,11 +775,6 @@ body {
         margin-bottom: 36px;
         width: 100%;
         max-width: 380px;
-    }
-
-    /* Nudge the logo + "iSkool" block up slightly, no horizontal shift */
-    .bp-intro {
-        margin-top: -34px;
     }
 
     /* Logo next to the "iSkool" wordmark on the left brand panel — static, no spin */
