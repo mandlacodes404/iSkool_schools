@@ -21,7 +21,7 @@
  * @license     Proprietary - Unauthorized use prohibited
  * @version     1.1.3
  * @since       2025-12-14
- * @link        https://iskool.online
+ * @link        https://iskool.xyz
  */
 
 // Pilot Program - Simulated Tweak 2026

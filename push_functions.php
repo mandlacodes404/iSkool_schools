@@ -5,7 +5,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
-function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool', $icon = 'https://iskool.online/uploads/schools/default_school.png') {
+function sendPushToUser($conn, $email, $title, $message, $targetUrl = null, $schoolName = 'iSkool', $icon = 'https://iskool.xyz/uploads/schools/default_school.png') {
     $stmt = $conn->prepare("SELECT endpoint, p256dh, auth FROM user_subscriptions WHERE user_email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();

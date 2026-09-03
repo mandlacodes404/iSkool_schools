@@ -66,7 +66,7 @@ shared helpers, a consistent auth guard, and schema discipline become necessary.
 3. config.php detects the environment:
    - localhost → connects to hardcoded iskowdbw_sandtonhigh
    - live server → extracts subdomain from HTTP_HOST
-                   sandtonhigh.iskool.online → iskowdbw_sandtonhigh
+                   sandtonhigh.iskool.xyz → iskowdbw_sandtonhigh
 4. index.php includes check_remember_me.php
 5. Login form submits via fetch() to auth/login_ajax.php
 6. On success, frontend redirects to dashboard.php
@@ -185,8 +185,8 @@ Logout:
 Each school has its own completely isolated database:
 
 ```
-sandtonhigh.iskool.online  →  iskowdbw_sandtonhigh
-landulwazi.iskool.online   →  iskowdbw_landulwazi
+sandtonhigh.iskool.xyz  →  iskowdbw_sandtonhigh
+landulwazi.iskool.xyz   →  iskowdbw_landulwazi
 ```
 
 `config.php` handles this routing. The active database name is stored in
@@ -401,7 +401,7 @@ folders — these have not been migrated.
 
 ### Email flow
 
-PHPMailer connects via SMTP to `iskool.online` on port 465.
+PHPMailer connects via SMTP to `iskool.xyz` on port 465.
 
 Emails are triggered by:
 - New user registration (`auth/register_ajax.php`)
@@ -433,7 +433,7 @@ Try push notification first
 | Branch | Environment | Trigger | Destination |
 |--------|------------|---------|-------------|
 | `main` | Production | push to main | `public_html/` |
-| `dev` | Sandbox/staging | push to dev | `sandbox.iskool.online/` |
+| `dev` | Sandbox/staging | push to dev | `sandbox.iskool.xyz/` |
 
 Both use `SamKirkland/FTP-Deploy-Action@v4.3.4` to sync files via FTP.
 

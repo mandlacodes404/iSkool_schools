@@ -45,7 +45,7 @@ Open index.php and fill in these values at the top:
   SA_PASSWORD      → Your private panel password (make it strong)
   CPANEL_API_TOKEN → Paste your cPanel API token
   DB_PASS          → Your cPanel database password
-  SMTP_PASS        → Password for support@iskool.online
+  SMTP_PASS        → Password for support@iskool.xyz
 
 ---
 
@@ -73,7 +73,7 @@ Option B: The panel already has password protection built in.
 
 ## Step 6 — Access the panel
 
-Go to: https://iskool.online/superadmin/
+Go to: https://iskool.xyz/superadmin/
 Enter your SA_PASSWORD to log in.
 
 ---
@@ -92,7 +92,7 @@ Click "Create School" — the system will:
 ✅ Create the database (iskowdbw_subdomain)
 ✅ Run the SQL template with all 41 tables
 ✅ Insert school name, access keys, academic year, admin account
-✅ Create the subdomain (subdomain.iskool.online)
+✅ Create the subdomain (subdomain.iskool.xyz)
 ✅ Send branded welcome email with login details and access keys
 ✅ Log the school in the master database
 
@@ -110,7 +110,7 @@ Total time: ~30 seconds
 
 "cPanel API error"
 → Check your API token is correct and hasn't expired
-→ Make sure CPANEL_HOST is https://iskool.online:2083
+→ Make sure CPANEL_HOST is https://iskool.xyz:2083
 
 "Master DB error"
 → Make sure you ran iskool_master.sql and created the iskowdbw_master database
@@ -128,4 +128,4 @@ Total time: ~30 seconds
 
 ---
 
-iSkool LMS — support@iskool.online — www.iskool.online
+iSkool LMS — support@iskool.xyz — www.iskool.xyz

@@ -51,7 +51,7 @@
       <div class="footer-col">\
         <p class="footer-col-title">Product</p>\
         <ul>\
-          <li><a href="https://iskool.online" target="_blank" rel="noopener noreferrer">iSkool</a></li>\
+          <li><a href="https://iskool.xyz" target="_blank" rel="noopener noreferrer">iSkool</a></li>\
           <li><a href="laura.html">Laura</a></li>\
         </ul>\
       </div>\

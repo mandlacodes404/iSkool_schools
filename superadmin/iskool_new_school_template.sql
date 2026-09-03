@@ -588,6 +588,6 @@ COMMIT;
 
 -- ============================================================
 --  END OF TEMPLATE
---  iSkool LMS — www.iskool.online
---  support@iskool.online
+--  iSkool LMS — www.iskool.xyz
+--  support@iskool.xyz
 -- ============================================================

@@ -70,7 +70,7 @@ try {
     $mail->Port       = getenv('SMTP_PORT');
     $from_email       = getenv('SMTP_FROM');
     $mail->setFrom($from_email, 'iSkool Website');
-    $mail->addAddress('info@iskool.online', 'iSkool Team');
+    $mail->addAddress('info@iskool.xyz', 'iSkool Team');
     $mail->isHTML(true);
     $mail->Subject = 'New Affiliate Application — ' . $full_name . ' [' . $ref . ']';
     $mail->Body = '
@@ -85,7 +85,7 @@ try {
 
       <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
         <tr>
-          <td style="vertical-align:middle;padding-right:8px;"><img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;"></td>
+          <td style="vertical-align:middle;padding-right:8px;"><img src="https://iskool.xyz/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;"></td>
           <td style="vertical-align:middle;"><span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span></td>
         </tr>
       </table>
@@ -117,7 +117,7 @@ try {
 
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td style="border-top:1px solid #e8e6e2;padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp; <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a></p>
+          <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp; <a href="https://iskool.xyz" style="color:#9a9a9a;text-decoration:none;">iskool.xyz</a></p>
         </td></tr>
       </table>
 
@@ -163,7 +163,7 @@ try {
       <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
         <tr>
           <td style="vertical-align:middle;padding-right:8px;">
-            <img src="https://iskool.online/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
+            <img src="https://iskool.xyz/apple-touch-icon.png" width="22" height="22" alt="iSkool" style="display:block;border-radius:5px;">
           </td>
           <td style="vertical-align:middle;">
             <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
@@ -200,7 +200,7 @@ try {
 
       <p style="margin:0 0 24px;font-size:16px;color:#4a4a4a;line-height:1.7;">
         Questions? Reply to this email or contact us at
-        <a href="mailto:info@iskool.online" style="color:#0866ff;text-decoration:none;">info@iskool.online</a>.
+        <a href="mailto:info@iskool.xyz" style="color:#0866ff;text-decoration:none;">info@iskool.xyz</a>.
       </p>
 
       <p style="margin:0 0 36px;font-size:16px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Team</p>
@@ -210,7 +210,7 @@ try {
           <p style="margin:0;font-size:12px;color:#9a9a9a;line-height:1.6;">
             iSkool (Pty) Ltd, Johannesburg, South Africa
             &nbsp;&middot;&nbsp;
-            <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a>
+            <a href="https://iskool.xyz" style="color:#9a9a9a;text-decoration:none;">iskool.xyz</a>
           </p>
           <p style="margin:6px 0 0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
         </td></tr>

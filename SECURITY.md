@@ -502,4 +502,4 @@ These are the things the codebase gets right. Do not change these patterns.
 
 *Last updated: May 2026 — based on full codebase security audit*
 *Review this document whenever authentication, uploads, or database access patterns change*
-*Security issues should be reported to: security@iskool.online — never open a public GitHub issue for a security vulnerability*
+*Security issues should be reported to: security@iskool.xyz — never open a public GitHub issue for a security vulnerability*

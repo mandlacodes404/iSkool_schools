@@ -81,7 +81,7 @@
       </a>\
     </div>\
     <div class="footer-bottom-row">\
-      <p class="footer-copy">iSkool by <a href="https://iskool.online/ENTHROPY_website.html" target="_blank" rel="noopener noreferrer" class="footer-brand-link">Enthropy</a> &copy; 2025-2026 . All rights reserved.</p>\
+      <p class="footer-copy">iSkool by <a href="https://iskool.xyz/ENTHROPY_website.html" target="_blank" rel="noopener noreferrer" class="footer-brand-link">Enthropy</a> &copy; 2025-2026 . All rights reserved.</p>\
     </div>\
   </div>\
 </footer>';
@@ -204,19 +204,19 @@
     <div class="demo-modal-title" id="demoModalTitle">Which dashboard would you like to explore?</div>\
     <p class="demo-modal-sub">Each role has its own experience. Pick yours and see iSkool in action.</p>\
     <div class="demo-cards">\
-      <a href="https://sandbox.iskool.online" class="demo-card demo-card--learner" target="_blank" rel="noopener noreferrer">\
+      <a href="https://sandbox.iskool.xyz" class="demo-card demo-card--learner" target="_blank" rel="noopener noreferrer">\
         <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg></div>\
         <div class="demo-card-name">Learner</div>\
         <div class="demo-card-desc">Quizzes, assignments, results &amp; resources</div>\
         <div class="demo-card-action">Explore &rarr;</div>\
       </a>\
-      <a href="https://sandbox.iskool.online" class="demo-card demo-card--teacher" target="_blank" rel="noopener noreferrer">\
+      <a href="https://sandbox.iskool.xyz" class="demo-card demo-card--teacher" target="_blank" rel="noopener noreferrer">\
         <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>\
         <div class="demo-card-name">Teacher</div>\
         <div class="demo-card-desc">Set assessments, track class performance</div>\
         <div class="demo-card-action">Explore &rarr;</div>\
       </a>\
-      <a href="https://sandbox.iskool.online" class="demo-card demo-card--admin" target="_blank" rel="noopener noreferrer">\
+      <a href="https://sandbox.iskool.xyz" class="demo-card demo-card--admin" target="_blank" rel="noopener noreferrer">\
         <div class="demo-card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>\
         <div class="demo-card-name">Admin</div>\
         <div class="demo-card-desc">School-wide oversight &amp; management</div>\

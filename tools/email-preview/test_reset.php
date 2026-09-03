@@ -62,7 +62,7 @@ try {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:36px;">
                 <tr>
                   <td style="vertical-align:middle;padding-right:8px;">
-                    <img src="https://iskool.online/apple-touch-icon.png" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
+                    <img src="https://iskool.xyz/apple-touch-icon.png" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
                   </td>
                   <td style="vertical-align:middle;">
                     <span style="font-size:15px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">iSkool</span>
@@ -94,7 +94,7 @@ try {
               <p style="margin:0 0 24px;font-size:14px;color:#6a6a6a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
                 If you did not request a password reset, you can ignore this email — your password will remain unchanged.
                 If you are concerned about your account security, contact us at
-                <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
+                <a href="mailto:support@iskool.xyz" style="color:#0866ff;text-decoration:none;">support@iskool.xyz</a>.
               </p>
 
               <p style="margin:0 0 40px;font-size:14px;color:#4a4a4a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">Thanks,<br>iSkool Support</p>
@@ -104,12 +104,12 @@ try {
                 <tr>
                   <td style="background:#f2f2f2;border-radius:8px;padding:24px 28px;">
                     <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#0d0d0d;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
-                      <img src="https://iskool.online/icon.svg" alt="iSkool" style="display:block;height:24px;">
+                      <img src="https://iskool.xyz/icon.svg" alt="iSkool" style="display:block;height:24px;">
                     </p>
                     <p style="margin:0 0 8px;font-size:12px;color:#9a9a9a;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">
                       iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
-                      <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
-                      <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
+                      <a href="https://iskool.xyz" style="color:#9a9a9a;text-decoration:none;">iskool.xyz</a> &nbsp;&middot;&nbsp;
+                      <a href="mailto:support@iskool.xyz" style="color:#9a9a9a;text-decoration:none;">support@iskool.xyz</a>
                     </p>
                     <p style="margin:0;font-size:12px;color:#9a9a9a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,Arial,sans-serif;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
                   </td>

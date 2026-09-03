@@ -3,7 +3,7 @@
 ## Project Overview
 
 iSkool is a **multi-tenant school management platform** built in PHP. Each school gets its own
-database. Subdomain routing (`sandtonhigh.iskool.online`) determines which database to connect to.
+database. Subdomain routing (`sandtonhigh.iskool.xyz`) determines which database to connect to.
 Roles: `learner`, `teacher`, `admin` (school admin), `superadmin`.
 
 ---

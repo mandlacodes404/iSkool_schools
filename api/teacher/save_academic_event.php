@@ -111,7 +111,7 @@ foreach ($learners as $learner) {
         $notifMessage,
         'learner_dashboard.php',
         $schoolName,
-        'https://iskool.online/assets/icons/calendar.png'
+        'https://iskool.xyz/assets/icons/calendar.png'
     );
 }
 

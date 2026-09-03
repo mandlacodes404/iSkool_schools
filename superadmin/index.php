@@ -15,7 +15,7 @@ if (file_exists($env_file)) {
 // ============================================================
 //  iSkool — Superadmin School Onboarding Panel
 //  File:    superadmin/index.php
-//  Access:  iskool.online/superadmin/
+//  Access:  iskool.xyz/superadmin/
 //
 //  SECURITY: Protect this folder with .htaccess IP restriction.
 //  See the included .htaccess file.
@@ -30,16 +30,16 @@ date_default_timezone_set('Africa/Johannesburg');
 define('SA_PASSWORD',      getenv('SUPERADMIN_PASSWORD'));       // your private panel password
 define('CPANEL_USER',      getenv('CPANEL_USER'));
 define('CPANEL_API_TOKEN', getenv('CPANEL_TOKEN'));    // from cPanel API Tokens
-define('CPANEL_HOST',      'https://iskool.online:2083');
+define('CPANEL_HOST',      'https://iskool.xyz:2083');
 define('DB_HOST',          getenv('DB_HOST'));
 define('DB_USER',          getenv('DB_USER'));
 define('DB_PASS',          getenv('DB_PASSWORD'));            // your cPanel DB password
 define('DB_PREFIX',        getenv('DB_PREFIX'));
-define('MAIN_DOMAIN',      'iskool.online');
+define('MAIN_DOMAIN',      'iskool.xyz');
 define('TEMPLATE_PATH',    __DIR__ . '/iskool_new_school_template.sql');
 define('SMTP_HOST',        getenv('SMTP_HOST'));
 define('SMTP_USER',        getenv('SMTP_USER'));
-define('SMTP_PASS',        getenv('SMTP_PASSWORD'));         // support@iskool.online password
+define('SMTP_PASS',        getenv('SMTP_PASSWORD'));         // support@iskool.xyz password
 define('SMTP_PORT',        getenv('SMTP_PORT'));
 define('SMTP_FROM',        getenv('SMTP_FROM'));
 
@@ -396,7 +396,7 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
 
       <p style="margin:0 0 8px;font-size:14px;color:#555;line-height:1.7;">
         If you need any assistance please contact us at 
-        <a href="mailto:support@iskool.online" style="color:#39d5c1;">support@iskool.online</a>.
+        <a href="mailto:support@iskool.xyz" style="color:#39d5c1;">support@iskool.xyz</a>.
         We are here to help you get the most out of iSkool.
       </p>
       <p style="margin:0;font-size:14px;color:#555;">
@@ -413,8 +413,8 @@ function buildWelcomeEmailHTML(string $name, string $schoolName, string $schoolU
         iSkool LMS · Johannesburg, South Africa
       </p>
       <p style="margin:0;font-size:12px;color:#484f58;">
-        <a href="https://iskool.online" style="color:#39d5c1;">www.iskool.online</a> · 
-        <a href="mailto:support@iskool.online" style="color:#484f58;">support@iskool.online</a>
+        <a href="https://iskool.xyz" style="color:#39d5c1;">www.iskool.xyz</a> ·
+        <a href="mailto:support@iskool.xyz" style="color:#484f58;">support@iskool.xyz</a>
       </p>
       <p style="margin:8px 0 0;font-size:11px;color:#484f58;">
         © {$year} iSkool LMS. All rights reserved.
@@ -447,8 +447,8 @@ function buildWelcomeEmailText(string $name, string $schoolName, string $schoolU
          . "Parent:  {$keys['parent']}\n"
          . "Admin:   {$keys['admin']}\n\n"
          . "SECURITY: Do NOT share the Teacher or Admin keys with learners.\n\n"
-         . "Need help? Email support@iskool.online\n"
-         . "© " . date('Y') . " iSkool LMS — www.iskool.online";
+         . "Need help? Email support@iskool.xyz\n"
+         . "© " . date('Y') . " iSkool LMS — www.iskool.xyz";
 }
 
 // ============================================================
@@ -831,7 +831,7 @@ if ($authed) {
                    oninput="updatePreview(this.value)">
             <div class="hint">Lowercase letters and numbers only. No spaces.</div>
             <div class="url-preview" id="url_preview">
-              <span id="preview_text">yourschool</span>.iskool.online
+              <span id="preview_text">yourschool</span>.iskool.xyz
             </div>
           </div>
 
@@ -902,9 +902,9 @@ if ($authed) {
             <tr>
               <td><strong><?= htmlspecialchars($school['school_name']) ?></strong></td>
               <td>
-                <a href="https://<?= $school['subdomain'] ?>.iskool.online" target="_blank"
+                <a href="https://<?= $school['subdomain'] ?>.iskool.xyz" target="_blank"
                    style="color:var(--teal);text-decoration:none;">
-                  <?= $school['subdomain'] ?>.iskool.online
+                  <?= $school['subdomain'] ?>.iskool.xyz
                 </a>
               </td>
               <td>

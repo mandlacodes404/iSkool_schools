@@ -32,7 +32,7 @@ if ($role === 'learner') {
         </table>
         <p style="margin:16px 0 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
             Follow our step-by-step installation guide attached to this email, or visit
-            <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
+            <a href="https://iskool.xyz/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.xyz/install_guide.html</a>
             for instructions.
         </p>';
 } elseif ($role === 'teacher') {
@@ -40,7 +40,7 @@ if ($role === 'learner') {
     $roleTips  = '
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
             <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.6;border-bottom:1px solid #f0f0f0;">
-                Visit <a href="https://iskool.online" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online</a> on your desktop browser — this is where you will create and send content to your class.
+                Visit <a href="https://iskool.xyz" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.xyz</a> on your desktop browser — this is where you will create and send content to your class.
             </td></tr>
             <tr><td style="padding:10px 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
                 You can also download the iSkool mobile app and enable notifications in your device settings to stay updated wherever you are.
@@ -48,7 +48,7 @@ if ($role === 'learner') {
         </table>
         <p style="margin:16px 0 0;font-size:13px;color:#4a4a4a;line-height:1.7;">
             Follow our step-by-step setup guide attached to this email, or visit
-            <a href="https://iskool.online/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.online/install_guide.html</a>
+            <a href="https://iskool.xyz/install_guide.html" style="color:#0866ff;text-decoration:none;font-weight:500;">iskool.xyz/install_guide.html</a>
             for instructions.
         </p>';
 } elseif ($role === 'parent') {
@@ -133,7 +133,7 @@ try {
         <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
           <tr>
             <td style="vertical-align:middle;padding-right:8px;">
-              <img src="https://iskool.online/apple-touch-icon.png?v=1.1" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
+              <img src="https://iskool.xyz/apple-touch-icon.png?v=1.1" width="36" height="36" alt="iSkool" style="display:block;border-radius:7px;">
             </td>
             <td style="vertical-align:middle;">
               <span style="font-size:13px;font-weight:600;color:#0d0d0d;letter-spacing:-0.2px;">iSkool</span>
@@ -164,7 +164,7 @@ try {
         <!-- Security note -->
         <p style="margin:0 0 24px;font-size:13px;color:#6a6a6a;line-height:1.7;">
           If you did not register for this account, contact us immediately at
-          <a href="mailto:support@iskool.online" style="color:#0866ff;text-decoration:none;">support@iskool.online</a>.
+          <a href="mailto:support@iskool.xyz" style="color:#0866ff;text-decoration:none;">support@iskool.xyz</a>.
         </p>
 
         <p style="margin:0 0 40px;font-size:13px;color:#4a4a4a;line-height:1.7;">Thanks,<br>iSkool Support</p>
@@ -173,11 +173,11 @@ try {
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">
           <tr>
             <td style="background:#f2f2f2;border-radius:8px;padding:24px 28px;">
-              <img src="https://iskool.online/email.png" alt="iSkool" style="display:block;height:24px;">
+              <img src="https://iskool.xyz/email.png" alt="iSkool" style="display:block;height:24px;">
               <p style="margin:0 0 8px;font-size:12px;color:#9a9a9a;line-height:1.6;">
                 iSkool (Pty) Ltd, Johannesburg, South Africa &nbsp;&middot;&nbsp;
-                <a href="https://iskool.online" style="color:#9a9a9a;text-decoration:none;">iskool.online</a> &nbsp;&middot;&nbsp;
-                <a href="mailto:support@iskool.online" style="color:#9a9a9a;text-decoration:none;">support@iskool.online</a>
+                <a href="https://iskool.xyz" style="color:#9a9a9a;text-decoration:none;">iskool.xyz</a> &nbsp;&middot;&nbsp;
+                <a href="mailto:support@iskool.xyz" style="color:#9a9a9a;text-decoration:none;">support@iskool.xyz</a>
               </p>
               <p style="margin:0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
             </td>

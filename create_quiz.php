@@ -448,7 +448,7 @@ if ($checkSub->get_result()->num_rows > 0) {
         "Status: " . $status,
         $quizLink,
         $schoolName,
-        'https://iskool.online/assets/icons/quiz.png'
+        'https://iskool.xyz/assets/icons/quiz.png'
     );
 }
         $checkSub->close();
@@ -513,7 +513,7 @@ if ($checkSub->get_result()->num_rows > 0) {
 
   <!-- Footer -->
   <p style="margin:0;font-size:12px;color:#aaaaaa;line-height:1.6;font-family:\'DM Sans\',Helvetica,Arial,sans-serif;">
-    ' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.online" style="color:#aaaaaa;text-decoration:underline;">iSkool</a>
+    ' . htmlspecialchars($schoolName) . ' &nbsp;&middot;&nbsp; Powered by <a href="https://iskool.xyz" style="color:#aaaaaa;text-decoration:underline;">iSkool</a>
   </p>
 
 </td></tr>

@@ -2,7 +2,7 @@
 
 > A cloud-based, multi-tenant Learning Management System built for African schools. Teachers create content, learners complete work and track progress, parents stay informed, and administrators oversee everything — all from any device, any browser.
 
-**Live:** https://iskool.online | **Version:** 1.1.2 | **License:** Proprietary © 2026 iSkool EdTech
+**Live:** https://iskool.xyz | **Version:** 1.1.2 | **License:** Proprietary © 2026 iSkool EdTech
 
 ---
 
@@ -24,7 +24,7 @@
 
 ## Overview
 
-iSkool is built on a **multi-tenant architecture** — each school gets its own isolated database. Schools access the platform via branded subdomains (e.g., `sandtonhigh.iskool.online`). A superadmin panel can provision an entirely new school in ~30 seconds.
+iSkool is built on a **multi-tenant architecture** — each school gets its own isolated database. Schools access the platform via branded subdomains (e.g., `sandtonhigh.iskool.xyz`). A superadmin panel can provision an entirely new school in ~30 seconds.
 
 **Highlights:**
 - No installation required for end users — fully browser-based
@@ -232,8 +232,8 @@ Multi-tenant — each school has its own isolated database:
 ### How Routing Works
 The subdomain determines the database:
 ```
-sandtonhigh.iskool.online → connects to iskowdbw_sandtonhigh
-landulwazi.iskool.online  → connects to iskowdbw_landulwazi
+sandtonhigh.iskool.xyz → connects to iskowdbw_sandtonhigh
+landulwazi.iskool.xyz  → connects to iskowdbw_landulwazi
 ```
 The active database is stored in `$_SESSION['current_school_db']`.
 
@@ -401,8 +401,8 @@ refactor: move grade calculation to helper function
 | Terms of service | `terms-of-service.html` |
 
 **Email:** mandlasimphiwe99@gmail.com
-**Support:** support@iskool.online
-**Security issues:** security@iskool.online *(do not open public GitHub issues for security bugs)*
+**Support:** support@iskool.xyz
+**Security issues:** security@iskool.xyz *(do not open public GitHub issues for security bugs)*
 
 ---
 

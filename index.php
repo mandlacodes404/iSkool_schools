@@ -20,7 +20,7 @@
  * @license     Proprietary - Unauthorized use prohibited
  * @version     1.1.3
  * @since       2025-12-14
- * @link        https://iskool.online
+ * @link        https://iskool.xyz
  */
 
 require_once __DIR__ . '/auth/session_guard.php';
