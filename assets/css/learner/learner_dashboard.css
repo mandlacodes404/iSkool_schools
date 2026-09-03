@@ -1052,7 +1052,7 @@ iframe {
     .sidebar a,
     .sidebar button:not(.join-class-btn):not(.desktop-close-btn) {
         padding: 10px 12px;
-        margin-bottom: 6px;
+        margin-bottom: 3px;
         border-radius: 12px;
         min-height: 48px;
     }
@@ -1217,7 +1217,7 @@ iframe {
         font-size: 16px !important;
         font-weight: 700 !important; /* Bold like teacher side */
         padding: 11px 13px !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 3px !important;
         background: none; /* flat — no per-row background on mobile */
         border-radius: 12px !important;
     }
