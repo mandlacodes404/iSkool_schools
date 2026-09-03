@@ -1218,7 +1218,7 @@ iframe {
         font-weight: 700 !important; /* Bold like teacher side */
         padding: 11px 13px !important;
         margin-bottom: 6px !important;
-        background: rgba(255, 255, 255, 0.03); /* Subtle button background */
+        background: none; /* flat — no per-row background on mobile */
         border-radius: 12px !important;
     }
 
