@@ -463,7 +463,7 @@
     .grades-mobile-layout .subject-card {
         background: transparent;
         border: 0;
-        border-radius: 14px;
+        border-radius: 0;
         border-bottom: 1px solid rgba(255,255,255,0.08);
         margin: 0;
     }
@@ -491,20 +491,19 @@
         padding: 8px 18px 16px;
     }
     .grades-mobile-layout .quiz-row {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        margin-bottom: 0;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        margin-bottom: 8px;
         position: relative;
     }
     .grades-mobile-layout .quiz-row:last-child {
-        border-bottom: 0;
+        margin-bottom: 0;
     }
     .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) {
         transform: none;
         border-color: rgba(255,255,255,0.06);
-        background: transparent;
+        background: rgba(255,255,255,0.02);
     }
     .grades-mobile-layout .quiz-row-details {
         background: rgba(255,255,255,0.02);
