@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.5">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.7">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.7">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.1">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.3">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -240,6 +240,77 @@ function getCsrfToken() {
 </script></head>
 <body>
 <?php require_once __DIR__ . '/rotate-lock.php'; ?>
+
+<!-- ──────── SPLASH HANDOFF ────────
+     Continues the splash started on index.php so there's no blank flash
+     between the login page redirecting here and the dashboard being ready.
+     Hidden by dash-splash-init.js below once the dashboard's home content
+     has actually finished loading AND the original 1700ms splash budget
+     (tracked from index.php) has elapsed. If a visitor lands here directly
+     (no sessionStorage flag set — e.g. a plain refresh), the init script
+     hides this immediately so it never shows on its own. -->
+<div id="dash-splash">
+    <div id="dash-splash-logo">
+        <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
+        <span id="dash-splash-wordmark">iSkool</span>
+    </div>
+    <img src="enthropy/enthropy_wordmark.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
+</div>
+<script>
+// ──────── SPLASH HANDOFF: hide once home is actually ready ────────
+// Waits on TWO things, whichever finishes last:
+//   1) the remaining time on the 1700ms budget index.php already started
+//      (so total splash time across both pages stays ~1700ms, not 3400ms)
+//   2) home content actually being ready — either the 'iskool:home-ready'
+//      event (fired by afterHomeRender() in manual.js once Home's fetches
+//      resolve and render) or the mainFrame iframe's 'load' event, whichever
+//      applies to how this visit's Home content ends up loading.
+// A hard MAX_SPLASH_MS ceiling guarantees the splash is never stuck up
+// forever if something above fails silently.
+(function () {
+    var splash = document.getElementById('dash-splash');
+    if (!splash) return;
+
+    var startedAtRaw = null;
+    try { startedAtRaw = sessionStorage.getItem('splashStartedAt'); } catch (e) {}
+
+    // No handoff flag → we didn't arrive here via the login splash (e.g. a
+    // plain refresh on the dashboard). Don't show a splash of our own.
+    if (!startedAtRaw) {
+        splash.style.display = 'none';
+        return;
+    }
+    try { sessionStorage.removeItem('splashStartedAt'); } catch (e) {}
+
+    var MIN_SPLASH_MS = 1700;
+    var MAX_SPLASH_MS = 6000; // safety ceiling — never hang forever
+    var elapsed = Date.now() - parseInt(startedAtRaw, 10);
+    var remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
+
+    var hidden = false;
+    function hideSplash() {
+        if (hidden) return;
+        hidden = true;
+        splash.classList.add('dash-splash-hidden');
+        setTimeout(function () { splash.style.display = 'none'; }, 400);
+    }
+
+    var minFloor = new Promise(function (resolve) { setTimeout(resolve, remaining); });
+    var homeReady = new Promise(function (resolve) {
+        window.addEventListener('iskool:home-ready', resolve, { once: true });
+        // The #mainFrame iframe is defined further down in the body, so it
+        // doesn't exist yet at this point in the initial top-of-body script —
+        // wait for DOMContentLoaded before attaching its 'load' listener.
+        document.addEventListener('DOMContentLoaded', function () {
+            var frame = document.querySelector('iframe[name="mainFrame"]');
+            if (frame) frame.addEventListener('load', resolve, { once: true });
+        }, { once: true });
+    });
+
+    Promise.all([minFloor, homeReady]).then(hideSplash);
+    setTimeout(hideSplash, MAX_SPLASH_MS);
+})();
+</script>
 <script>
 // A dashboard opened while a phone is sideways may already have selected the
 // desktop home layout. Rebuild it once portrait is restored.
@@ -3211,7 +3282,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=10.4"></script>
+<script src="assets/js/learner/manual.js?v=10.5"></script>
 <script src="assets/js/learner/quiz.js?v=10.7"></script>
 <script src="assets/js/learner/assignments.js?v=8.9"></script>
 <script src="assets/js/learner/resources.js?v=8.1"></script>

@@ -214,6 +214,13 @@ window.kickOffLearnerPrefetches = function(skipKey) {
 
 // Called after home HTML is injected — loads calendar on desktop only, then kicks off prefetches
 function afterHomeRender() {
+    // Home content is now actually painted in the DOM — this is the signal
+    // the dashboard's splash handoff (dash-splash-init.js) waits on before
+    // hiding the splash it inherited from index.php.
+    try {
+        window.dispatchEvent(new CustomEvent('iskool:home-ready'));
+    } catch (e) {}
+
     restoreManualPageState();
     wireManualScrollState();
 

@@ -907,6 +907,99 @@ iframe {
     }
 }
 
+/* ── SPLASH HANDOFF ──────────────────────────────────────────────────────
+   Continuation of the splash screen started on index.php (the login page)
+   for logged-in users. Visually identical to #animation-wrapper /
+   #loader-logo / #splash-wordmark / .splash-version-footer over there —
+   keep these in sync if that markup/styling ever changes.
+   Sits above #loaderOverlay (max z-index 8000 on mobile) so it always
+   fully covers the dashboard underneath until dash-splash-init.js decides
+   the page is actually ready. ── */
+#dash-splash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    opacity: 1;
+    transition: opacity 0.35s ease;
+}
+
+#dash-splash.dash-splash-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#dash-splash-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transform: translateX(-20px);
+}
+
+#dash-splash-logo img {
+    width: 104px;
+    height: 104px;
+}
+
+#dash-splash-wordmark {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    font-size: 42px;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    line-height: 1;
+}
+
+#dash-splash-brand-wordmark {
+    position: absolute;
+    bottom: 1px;
+    height: 118px;
+    width: auto;
+    opacity: 0.92;
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    #dash-splash-logo {
+        gap: 10px;
+    }
+    #dash-splash-logo img {
+        width: 68px;
+        height: 68px;
+    }
+    #dash-splash-wordmark {
+        font-size: 30px;
+    }
+    #dash-splash-brand-wordmark {
+        height: 96px;
+        bottom: 20px;
+    }
+}
+
+@media (max-width: 360px) {
+    #dash-splash-logo {
+        gap: 8px;
+    }
+    #dash-splash-logo img {
+        width: 60px;
+        height: 60px;
+    }
+    #dash-splash-wordmark {
+        font-size: 26px;
+    }
+    #dash-splash-brand-wordmark {
+        height: 85px;
+        bottom: 17px;
+    }
+}
+
 /* ── SCOPED LOADER ── */
 #loaderOverlay {
     position: absolute;

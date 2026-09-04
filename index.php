@@ -619,6 +619,18 @@ function getCsrfToken() {
         const MIN_SPLASH_MS = 1700;
 
     <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
+        // ──────── SPLASH HANDOFF (logged-in users) ────────
+        // The dashboard paints its own copy of this exact splash the instant
+        // it starts loading, so we deliberately do NOT hide #animation-wrapper
+        // before navigating below — leaving it up avoids a blank flash between
+        // this page and the dashboard's own splash taking over.
+        // Record when the splash first appeared so the dashboard can honour
+        // the *remaining* time on this same 1700ms budget instead of
+        // restarting the full timer on the new page.
+        try {
+            sessionStorage.setItem('splashStartedAt', String(Date.now()));
+        } catch (e) {}
+
         // ──────── WARM-START PING (splash-time only, logged-in users) ────────
         // We already know this visit ends at the dashboard. Fire a background
         // request for it right now, at the very start of the 1700ms splash,
@@ -633,12 +645,13 @@ function getCsrfToken() {
     <?php endif; ?>
 
         const revealApp = () => {
-    animationWrapper.style.display = 'none';
-
     // ──────── AFTER ANIMATION: CHECK IF LOGGED IN ────────
     <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
         // Do not let the splash redirect initialise a dashboard while a phone
         // is sideways. The shared portrait guard resumes this after rotation.
+        // Note: animationWrapper is intentionally left visible here — see the
+        // SPLASH HANDOFF comment above. The dashboard takes over the splash
+        // and is responsible for hiding it once it's actually ready.
         const openDashboard = () => {
             if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.isLocked()) {
                 return;
@@ -648,7 +661,8 @@ function getCsrfToken() {
         window.addEventListener('iskool:portrait-ready', openDashboard, { once: true });
         openDashboard();
     <?php else: ?>
-        // Not logged in → show login form
+        // Not logged in → hide the splash and show the login form
+        animationWrapper.style.display = 'none';
         document.querySelector('.form-panel').style.opacity = '1';
         container.classList.add('show');
        
