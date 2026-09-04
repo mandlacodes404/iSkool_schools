@@ -88,7 +88,7 @@ body {
     }
 
     #splash-brand-wordmark {
-        height: 48px;
+        height: 90px;
         width: auto;
         display: block;
         opacity: 0.92;
@@ -137,7 +137,7 @@ body {
             text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
         }
         #splash-brand-wordmark {
-            height: 40px;
+            height: 75px;
         }
     }
 
@@ -168,7 +168,7 @@ body {
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
         }
         #splash-brand-wordmark {
-            height: 34px;
+            height: 65px;
         }
     }
 
@@ -683,7 +683,7 @@ body {
         font-size: 15px;
     }
     #splash-brand-wordmark {
-        height: 44px;
+        height: 80px;
     }
 }
 
@@ -707,7 +707,7 @@ body {
     }
 
     #splash-brand-wordmark {
-        height: 50px;
+        height: 95px;
     }
 
     .brand-panel {
