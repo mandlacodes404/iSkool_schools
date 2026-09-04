@@ -257,7 +257,7 @@ function getCsrfToken() {
        background to the splash while it's up; dash-splash-init.js removes
        this <style> tag once the splash finishes hiding, handing background
        control back to the normal dashboard theme. */
-    body { background-color: #0a0a0a !important; }
+    body { background-color: #20201f !important; }
 </style>
 <div id="dash-splash">
     <div id="dash-splash-logo">
