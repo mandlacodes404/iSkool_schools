@@ -87,6 +87,13 @@ body {
         line-height: 1;
     }
 
+    #splash-brand-wordmark {
+        height: 15px;
+        width: auto;
+        display: block;
+        opacity: 0.92;
+    }
+
     .branding span {
         display: block;
     }
@@ -129,6 +136,9 @@ body {
             font-size: 15px;
             text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
         }
+        #splash-brand-wordmark {
+            height: 13px;
+        }
     }
 
     @media (max-width: 360px) {
@@ -156,6 +166,9 @@ body {
         .branding span:nth-child(2) {
             font-size: 14px;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+        }
+        #splash-brand-wordmark {
+            height: 12px;
         }
     }
 
@@ -669,6 +682,9 @@ body {
     .splash-version-footer {
         font-size: 15px;
     }
+    #splash-brand-wordmark {
+        height: 15px;
+    }
 }
 
 /* ── Desktop ── */
@@ -688,6 +704,10 @@ body {
     .splash-version-footer {
         font-size: 15px;
         color: #4a515c;
+    }
+
+    #splash-brand-wordmark {
+        height: 16px;
     }
 
     .brand-panel {
