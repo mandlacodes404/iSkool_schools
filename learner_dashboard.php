@@ -215,13 +215,13 @@ if (!empty($joinedClassIds)) {
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.4">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.0">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.2">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.5">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.7">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.8">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.8">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.3">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.0">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.0">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.8">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -249,6 +249,16 @@ function getCsrfToken() {
      (tracked from index.php) has elapsed. If a visitor lands here directly
      (no sessionStorage flag set — e.g. a plain refresh), the init script
      hides this immediately so it never shows on its own. -->
+<style id="dash-splash-bg-override">
+    /* The dashboard's own background (--bg-color) is pure #000000, one
+       shade darker than the splash's #0a0a0a. Without this, that
+       difference shows as a flash to black around/under the splash during
+       initial paint and again during the fade-out transition. Match body's
+       background to the splash while it's up; dash-splash-init.js removes
+       this <style> tag once the splash finishes hiding, handing background
+       control back to the normal dashboard theme. */
+    body { background-color: #0a0a0a !important; }
+</style>
 <div id="dash-splash">
     <div id="dash-splash-logo">
         <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
@@ -271,6 +281,11 @@ function getCsrfToken() {
     var splash = document.getElementById('dash-splash');
     if (!splash) return;
 
+    function removeBgOverride() {
+        var styleTag = document.getElementById('dash-splash-bg-override');
+        if (styleTag) styleTag.remove();
+    }
+
     var startedAtRaw = null;
     try { startedAtRaw = sessionStorage.getItem('splashStartedAt'); } catch (e) {}
 
@@ -278,6 +293,7 @@ function getCsrfToken() {
     // plain refresh on the dashboard). Don't show a splash of our own.
     if (!startedAtRaw) {
         splash.style.display = 'none';
+        removeBgOverride();
         return;
     }
     try { sessionStorage.removeItem('splashStartedAt'); } catch (e) {}
@@ -292,7 +308,14 @@ function getCsrfToken() {
         if (hidden) return;
         hidden = true;
         splash.classList.add('dash-splash-hidden');
-        setTimeout(function () { splash.style.display = 'none'; }, 400);
+        // Hand background control back to the normal dashboard theme only
+        // once the splash's own fade-out (see .dash-splash-hidden transition
+        // in learner_dashboard.css) has finished, so the black/near-black
+        // seam never becomes visible mid-fade either.
+        setTimeout(function () {
+            splash.style.display = 'none';
+            removeBgOverride();
+        }, 400);
     }
 
     var minFloor = new Promise(function (resolve) { setTimeout(resolve, remaining); });
@@ -3282,13 +3305,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=10.5"></script>
-<script src="assets/js/learner/quiz.js?v=10.8"></script>
-<script src="assets/js/learner/assignments.js?v=8.9"></script>
+<script src="assets/js/learner/manual.js?v=10.8"></script>
+<script src="assets/js/learner/quiz.js?v=10.9"></script>
+<script src="assets/js/learner/assignments.js?v=9.3"></script>
 <script src="assets/js/learner/resources.js?v=8.1"></script>
 <script src="assets/js/learner/announcements.js?v=8.7"></script>
 <script src="assets/js/learner/grades.js?v=8.6"></script>
-<script src="assets/js/learner/evaluations.js?v=6.2"></script>
+<script src="assets/js/learner/evaluations.js?v=6.5"></script>
 <script src="assets/js/learner/discussions.js?v=10.6"></script>
 <script src="assets/js/learner/syllabus.js?v=3.4"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
