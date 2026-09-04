@@ -12,10 +12,16 @@
 - Login Page (Desktop & Mobile): Splash screen version-footer text weight reduced from `800` to `400`, so it no longer reads as bold against the logo/wordmark above it (`index.css`).
 - Learner Home (Mobile): Recent and To-Do card meta lines, and the To-Do empty-state text, recoloured from `#555e6a`/`var(--text-faint)` to `#7d8590` for a clearer secondary-text tier against the card's `#1a1919` background; the shared `≥769px` meta-line override updated to match (`manual.css`).
 - Learner Home (Mobile): Class card no longer shows the learner's full name — now shows only the school name and class name (`manual.js`).
+- Login Page (Desktop & Mobile): Splash screen footer now shows the ENTHROPY wordmark (`enthropy/enthropy_wordmark.svg`) in place of the `v1.2.3` version-number text (`index.php`, `index.css`).
+- Login Page (Desktop & Mobile): ENTHROPY splash footer wordmark enlarged in several passes from its initial `15px` height up to `118px` (base), with matching increases across the `≤480px` (`96px`) and `≤360px` (`85px`) mobile breakpoints and the `900px+` desktop breakpoint (`130px`), so it reads clearly instead of appearing as near-invisible fine print (`index.css`).
+- Login Page (Desktop & Mobile): Splash footer (ENTHROPY wordmark) position lowered closer to the bottom edge — `bottom` reduced from `32px` to `12px` on the base/desktop rule, from `64px` to `40px` on the `≤480px` breakpoint, and from `60px` to `36px` on the `≤360px` breakpoint (`index.css`).
 
 ### Fixed
 - Learner Dashboard (Mobile): Bottom navigation background and header scroll state now recalculate automatically after every learner page renders or changes height, including cached and delayed loads, filtering, accordions, media loading, resizing, and device rotation. This removes the need to scroll before the navigation background reflects the current page length (`learner_dashboard.php`).
 - Learner Dashboard (Mobile): Sidebar menu now highlights the active Home, Quiz, Assignments, Resources, Announcements, Evaluations, and Discussions page consistently. Those links were missing the `data-page` values used by the shared active-navigation handler; Grades, Syllabus, and Calendar already had them (`learner_dashboard.php`).
+
+### Removed
+- Login Page (Desktop & Mobile): Splash screen no longer displays the app version number (`v1.2.3`); it has been replaced by the ENTHROPY wordmark (`index.php`).
 
 ## [1.2.3] - 2026-08-25
 ### Changed
