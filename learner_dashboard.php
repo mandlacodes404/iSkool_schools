@@ -215,12 +215,12 @@ if (!empty($joinedClassIds)) {
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.4">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=1.9">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.2">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.7">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.7">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=1.8">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=3.8">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.3">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3283,12 +3283,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.5"></script>
-<script src="assets/js/learner/quiz.js?v=10.7"></script>
+<script src="assets/js/learner/quiz.js?v=10.8"></script>
 <script src="assets/js/learner/assignments.js?v=8.9"></script>
 <script src="assets/js/learner/resources.js?v=8.1"></script>
 <script src="assets/js/learner/announcements.js?v=8.7"></script>
 <script src="assets/js/learner/grades.js?v=8.6"></script>
-<script src="assets/js/learner/evaluations.js?v=6.1"></script>
+<script src="assets/js/learner/evaluations.js?v=6.2"></script>
 <script src="assets/js/learner/discussions.js?v=10.6"></script>
 <script src="assets/js/learner/syllabus.js?v=3.4"></script>
 <script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
