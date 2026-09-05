@@ -65,8 +65,6 @@ body {
 
     /* Branding Styles */
     .branding {
-        position: absolute;
-        bottom: 1px;
         font-size: 14px;
         color: #2f343b;
         font-family: 'Nunito', sans-serif;
@@ -87,7 +85,14 @@ body {
         line-height: 1;
     }
 
+    /* Positioned the same way as the dashboard's splash handoff
+       (#dash-splash-brand-wordmark in learner_dashboard.css): absolute +
+       bottom directly on the image itself, rather than on the .branding
+       wrapper. Requested by Thomas to match the position he preferred on
+       that screen. */
     #splash-brand-wordmark {
+        position: absolute;
+        bottom: 1px;
         height: 118px;
         width: auto;
         display: block;
@@ -126,7 +131,6 @@ body {
         }
         .branding {
             font-size: 13px;
-            bottom: 20px;
             color: #596270;
         }
         .branding span:nth-child(1) {
@@ -157,7 +161,6 @@ body {
         }
         .branding {
             font-size: 12px;
-            bottom: 17px;
             color: #596270;
         }
         .branding span:nth-child(1) {
