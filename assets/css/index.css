@@ -92,8 +92,8 @@ body {
        that screen. */
     #splash-brand-wordmark {
         position: absolute;
-        bottom: 1px;
-        height: 135px;
+        bottom: -4px;
+        height: 145px;
         width: auto;
         display: block;
         opacity: 0.92;
@@ -141,7 +141,7 @@ body {
             text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
         }
         #splash-brand-wordmark {
-            height: 110px;
+            height: 120px;
         }
     }
 
@@ -171,7 +171,7 @@ body {
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
         }
         #splash-brand-wordmark {
-            height: 98px;
+            height: 106px;
         }
     }
 
@@ -686,7 +686,8 @@ body {
         font-size: 15px;
     }
     #splash-brand-wordmark {
-        height: 135px;
+        height: 145px;
+        bottom: -4px;
     }
 }
 
