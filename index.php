@@ -81,13 +81,13 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=8.1">
+    <link rel="stylesheet" href="assets/css/index.css?v=8.2">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
          Warm-start hints for "remember me" users only.
          We already know server-side (from the session) that this visit
-         is going to end at the dashboard, so we spend the 1700ms splash
+         is going to end at the dashboard, so we spend the 1300ms splash
          window fetching what the dashboard will need instead of leaving
          the network idle. Nothing here changes the splash timing/feel —
          it only runs in parallel with it, and only for logged-in users,
@@ -616,7 +616,7 @@ function getCsrfToken() {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const splashImg = document.getElementById('splash-svg');
-        const MIN_SPLASH_MS = 1700;
+        const MIN_SPLASH_MS = 1300;
 
     <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
         // ──────── SPLASH HANDOFF (logged-in users) ────────
@@ -625,7 +625,7 @@ function getCsrfToken() {
         // before navigating below — leaving it up avoids a blank flash between
         // this page and the dashboard's own splash taking over.
         // Record when the splash first appeared so the dashboard can honour
-        // the *remaining* time on this same 1700ms budget instead of
+        // the *remaining* time on this same 1300ms budget instead of
         // restarting the full timer on the new page.
         try {
             sessionStorage.setItem('splashStartedAt', String(Date.now()));
@@ -633,7 +633,7 @@ function getCsrfToken() {
 
         // ──────── WARM-START PING (splash-time only, logged-in users) ────────
         // We already know this visit ends at the dashboard. Fire a background
-        // request for it right now, at the very start of the 1700ms splash,
+        // request for it right now, at the very start of the 1300ms splash,
         // so the dashboard's PHP (session check, school/year/profile/class
         // queries) and its response run *during* the splash instead of only
         // starting after we navigate. This is fire-and-forget: it never

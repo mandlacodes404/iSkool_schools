@@ -245,7 +245,7 @@ function getCsrfToken() {
      Continues the splash started on index.php so there's no blank flash
      between the login page redirecting here and the dashboard being ready.
      Hidden by dash-splash-init.js below once the dashboard's home content
-     has actually finished loading AND the original 1700ms splash budget
+     has actually finished loading AND the original 1300ms splash budget
      (tracked from index.php) has elapsed. If a visitor lands here directly
      (no sessionStorage flag set — e.g. a plain refresh), the init script
      hides this immediately so it never shows on its own. -->
@@ -276,8 +276,8 @@ function getCsrfToken() {
 <script>
 // ──────── SPLASH HANDOFF: hide once home is actually ready ────────
 // Waits on TWO things, whichever finishes last:
-//   1) the remaining time on the 1700ms budget index.php already started
-//      (so total splash time across both pages stays ~1700ms, not 3400ms)
+//   1) the remaining time on the 1300ms budget index.php already started
+//      (so total splash time across both pages stays ~1300ms, not 2600ms)
 //   2) home content actually being ready — either the 'iskool:home-ready'
 //      event (fired by afterHomeRender() in manual.js once Home's fetches
 //      resolve and render) or the mainFrame iframe's 'load' event, whichever
@@ -305,7 +305,7 @@ function getCsrfToken() {
     }
     try { sessionStorage.removeItem('splashStartedAt'); } catch (e) {}
 
-    var MIN_SPLASH_MS = 1700;
+    var MIN_SPLASH_MS = 1300;
     var MAX_SPLASH_MS = 6000; // safety ceiling — never hang forever
     var elapsed = Date.now() - parseInt(startedAtRaw, 10);
     var remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
