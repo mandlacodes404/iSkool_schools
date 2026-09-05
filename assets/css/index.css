@@ -93,7 +93,7 @@ body {
     #splash-brand-wordmark {
         position: absolute;
         bottom: 1px;
-        height: 118px;
+        height: 135px;
         width: auto;
         display: block;
         opacity: 0.92;
@@ -141,7 +141,7 @@ body {
             text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
         }
         #splash-brand-wordmark {
-            height: 96px;
+            height: 110px;
         }
     }
 
@@ -171,7 +171,7 @@ body {
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
         }
         #splash-brand-wordmark {
-            height: 85px;
+            height: 98px;
         }
     }
 
@@ -686,7 +686,7 @@ body {
         font-size: 15px;
     }
     #splash-brand-wordmark {
-        height: 118px;
+        height: 135px;
     }
 }
 

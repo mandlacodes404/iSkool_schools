@@ -914,12 +914,12 @@ iframe {
    keep these in sync if that markup/styling ever changes.
    NOTE on index.css's cascade (so these values aren't "fixed" back to the
    wrong ones later): index.css has a `@media (max-width: 480px)` block
-   that sets #splash-brand-wordmark to 96px, but a *later* rule at
-   `@media (max-width: 899px)` sets it to 118px and also sets the page
+   that sets #splash-brand-wordmark to 110px, but a *later* rule at
+   `@media (max-width: 899px)` sets it to 135px and also sets the page
    background to #20201f. Because that 899px block comes after the 480px
    block in the file, it wins the cascade on every phone width (not just
    480–899px) — so on every real mobile device the login splash's footer
-   wordmark is 118px tall on a #20201f background, never 96px/85px on
+   wordmark is 135px tall on a #20201f background, never 110px/98px on
    #0a0a0a. The values below match that actual rendered result, not the
    480px/360px block in isolation.
    Sits above #loaderOverlay (max z-index 8000 on mobile) so it always
@@ -1005,15 +1005,18 @@ iframe {
     }
 }
 
-/* Matches index.css's real mobile result: background #20201f and footer
-   wordmark 118px/bottom 1px, applied at the same 899px breakpoint index.css
-   uses, so #dash-splash tracks it exactly instead of an invented one. */
+/* Matches index.css's real mobile result: background #20201f, applied at
+   the same 899px breakpoint index.css uses, so #dash-splash tracks it
+   exactly instead of an invented one. Footer wordmark is bumped to 135px
+   on mobile only (desktop keeps the base 118px above) per Thomas's
+   request — mirrors the same mobile-only bump on #splash-brand-wordmark
+   in index.css. */
 @media (max-width: 899px) {
     #dash-splash {
         background: #20201f;
     }
     #dash-splash-brand-wordmark {
-        height: 118px;
+        height: 135px;
         bottom: 1px;
     }
 }
