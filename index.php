@@ -616,7 +616,7 @@ function getCsrfToken() {
         const animationWrapper = document.getElementById('animation-wrapper');
         const container = document.querySelector('.container');
         const splashImg = document.getElementById('splash-svg');
-        const MIN_SPLASH_MS = 800;
+        const MIN_SPLASH_MS = 700;
 
     <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
         // ──────── SPLASH HANDOFF (logged-in users) ────────
