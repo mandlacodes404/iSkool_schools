@@ -92,7 +92,7 @@ body {
        that screen. */
     #splash-brand-wordmark {
         position: absolute;
-        bottom: -4px;
+        bottom: -12px;
         height: 145px;
         width: auto;
         display: block;
@@ -687,7 +687,7 @@ body {
     }
     #splash-brand-wordmark {
         height: 145px;
-        bottom: -4px;
+        bottom: -12px;
     }
 }
 
