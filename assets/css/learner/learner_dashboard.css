@@ -912,6 +912,16 @@ iframe {
    for logged-in users. Visually identical to #animation-wrapper /
    #loader-logo / #splash-wordmark / .splash-version-footer over there —
    keep these in sync if that markup/styling ever changes.
+   NOTE on index.css's cascade (so these values aren't "fixed" back to the
+   wrong ones later): index.css has a `@media (max-width: 480px)` block
+   that sets #splash-brand-wordmark to 96px, but a *later* rule at
+   `@media (max-width: 899px)` sets it to 118px and also sets the page
+   background to #20201f. Because that 899px block comes after the 480px
+   block in the file, it wins the cascade on every phone width (not just
+   480–899px) — so on every real mobile device the login splash's footer
+   wordmark is 118px tall on a #20201f background, never 96px/85px on
+   #0a0a0a. The values below match that actual rendered result, not the
+   480px/360px block in isolation.
    Sits above #loaderOverlay (max z-index 8000 on mobile) so it always
    fully covers the dashboard underneath until dash-splash-init.js decides
    the page is actually ready. ── */
@@ -966,6 +976,9 @@ iframe {
     pointer-events: none;
 }
 
+/* Matches index.css's logo/wordmark-text step-down at 480px — these two
+   properties have no later override in index.css, so they genuinely do
+   shrink at this breakpoint (unlike the footer wordmark/background above). */
 @media (max-width: 480px) {
     #dash-splash-logo {
         gap: 10px;
@@ -976,10 +989,6 @@ iframe {
     }
     #dash-splash-wordmark {
         font-size: 30px;
-    }
-    #dash-splash-brand-wordmark {
-        height: 96px;
-        bottom: 20px;
     }
 }
 
@@ -994,9 +1003,18 @@ iframe {
     #dash-splash-wordmark {
         font-size: 26px;
     }
+}
+
+/* Matches index.css's real mobile result: background #20201f and footer
+   wordmark 118px/bottom 1px, applied at the same 899px breakpoint index.css
+   uses, so #dash-splash tracks it exactly instead of an invented one. */
+@media (max-width: 899px) {
+    #dash-splash {
+        background: #20201f;
+    }
     #dash-splash-brand-wordmark {
-        height: 85px;
-        bottom: 17px;
+        height: 118px;
+        bottom: 1px;
     }
 }
 

@@ -221,7 +221,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.8">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=9.9">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -250,14 +250,21 @@ function getCsrfToken() {
      (no sessionStorage flag set — e.g. a plain refresh), the init script
      hides this immediately so it never shows on its own. -->
 <style id="dash-splash-bg-override">
-    /* The dashboard's own background (--bg-color) is pure #000000, one
-       shade darker than the splash's #0a0a0a. Without this, that
-       difference shows as a flash to black around/under the splash during
-       initial paint and again during the fade-out transition. Match body's
-       background to the splash while it's up; dash-splash-init.js removes
-       this <style> tag once the splash finishes hiding, handing background
-       control back to the normal dashboard theme. */
-    body { background-color: #20201f !important; }
+    /* The dashboard's own background is #20201f (used across sidebar,
+       header, content area — see learner_dashboard.css). Without this,
+       that shows through as a flash around/under the splash during initial
+       paint and again during the fade-out transition, since #dash-splash
+       itself is #0a0a0a on desktop / #20201f on mobile (matching
+       index.php's own desktop/mobile split — see the comment above
+       #dash-splash in learner_dashboard.css for why those differ).
+       Match body's background to whichever the splash is currently using;
+       dash-splash-init.js removes this <style> tag once the splash finishes
+       hiding, handing background control back to the normal dashboard
+       theme. */
+    body { background-color: #0a0a0a !important; }
+    @media (max-width: 899px) {
+        body { background-color: #20201f !important; }
+    }
 </style>
 <div id="dash-splash">
     <div id="dash-splash-logo">
