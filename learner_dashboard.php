@@ -3057,7 +3057,9 @@ if (detailType === 'Evaluation') {
     }
 }
 
-if (currentTitle === 'Calendar') {
+// The visible header title can be replaced or hidden while a mobile detail
+// page scrolls. The detail type is the stable source of truth for Calendar.
+if (detailType === 'Calendar') {
     if (typeof loadManual === 'function') {
         window.loadManual();
         return;
