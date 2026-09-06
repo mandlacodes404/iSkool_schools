@@ -2659,6 +2659,7 @@ if (desktopToggle) {
             const svgEl    = ptr.querySelector('#ptrSpinSvg');
             const THRESHOLD = 72;
             const HOLD_OFFSET = 52;
+            const PTR_REFRESH_TIMEOUT = 15000;
             let startY = 0, pulling = false, triggered = false, pullOffset = 0;
 
             function startSpin() {
@@ -2767,7 +2768,22 @@ if (desktopToggle) {
                         return null;
                     })
                     .filter(Boolean);
-                return pending.length ? Promise.all(pending) : Promise.resolve();
+                if (!pending.length) return Promise.resolve(false);
+
+                // A stalled prefetch used to make the pull indicator spin
+                // indefinitely. Wait briefly, then start a fresh request.
+                return Promise.race([
+                    Promise.all(pending).then(() => false),
+                    new Promise(resolve => setTimeout(() => resolve(true), PTR_REFRESH_TIMEOUT))
+                ]);
+            }
+
+            function clearPendingRefreshes(config) {
+                (config.pending || []).forEach(function(promiseName) {
+                    const request = window[promiseName];
+                    window[promiseName] = request && typeof request === 'object' &&
+                        typeof request.then !== 'function' ? {} : null;
+                });
             }
 
             // The saved page keys above are the source of truth. On every pull
@@ -2783,11 +2799,21 @@ if (desktopToggle) {
                 loader.style.display = 'none';
 
                 clearPageCaches(config);
-                return waitForPendingRefreshes(config)
-                    .then(function() {
+                const refreshWork = waitForPendingRefreshes(config)
+                    .then(function(prefetchTimedOut) {
+                        if (prefetchTimedOut) clearPendingRefreshes(config);
                         clearPageCaches(config);
                         return typeof config.refresh === 'function' ? config.refresh() : null;
-                    })
+                    });
+
+                // Mobile requests can remain pending without rejecting. The
+                // gesture must always release even when that happens.
+                return Promise.race([
+                    refreshWork,
+                    new Promise(resolve => setTimeout(() => resolve('timed_out'), PTR_REFRESH_TIMEOUT))
+                ]).then(function(result) {
+                    if (result === 'timed_out') console.warn('Pull-to-refresh timed out.');
+                })
                     .finally(function() {
                         window._ptrRefreshing = false;
                     });
@@ -2863,27 +2889,6 @@ if (desktopToggle) {
         // ── Patch loaderOverlay show logic to respect PTR suppression ──────────
         // Wrap the native display setter so that when a PTR refresh is in
         // progress, the overlay cannot be made visible by the fetch functions.
-        (function patchLoaderForPTR() {
-            var origSet = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style');
-            // Lightweight approach: override on the specific element after DOM ready
-            var _loaderEl = document.getElementById('loaderOverlay');
-            if (!_loaderEl) return;
-            var _origDisplayDescriptor = Object.getOwnPropertyDescriptor(
-                CSSStyleDeclaration.prototype, 'display'
-            );
-            // Monkey-patch only this element's style.display
-            Object.defineProperty(_loaderEl.style, 'display', {
-                get: function() {
-                    return _origDisplayDescriptor.get.call(_loaderEl.style);
-                },
-                set: function(val) {
-                    // If a PTR refresh is running, block any attempt to show the overlay
-                    if (val === 'flex' && window._ptrRefreshing) return;
-                    _origDisplayDescriptor.set.call(_loaderEl.style, val);
-                },
-                configurable: true,
-            });
-        }());
     }
     // ─────────────────────────────────────────────────────────────────────
 });
@@ -3328,16 +3333,16 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=10.9"></script>
-<script src="assets/js/learner/quiz.js?v=11.0"></script>
-<script src="assets/js/learner/assignments.js?v=9.4"></script>
-<script src="assets/js/learner/resources.js?v=8.2"></script>
-<script src="assets/js/learner/announcements.js?v=8.8"></script>
-<script src="assets/js/learner/grades.js?v=8.7"></script>
-<script src="assets/js/learner/evaluations.js?v=6.6"></script>
-<script src="assets/js/learner/discussions.js?v=10.7"></script>
-<script src="assets/js/learner/syllabus.js?v=3.5"></script>
-<script src="assets/js/learner/learner_calendar.js?v=2.0"></script>
+<script src="assets/js/learner/manual.js?v=10.10"></script>
+<script src="assets/js/learner/quiz.js?v=11.1"></script>
+<script src="assets/js/learner/assignments.js?v=9.5"></script>
+<script src="assets/js/learner/resources.js?v=8.3"></script>
+<script src="assets/js/learner/announcements.js?v=8.9"></script>
+<script src="assets/js/learner/grades.js?v=8.8"></script>
+<script src="assets/js/learner/evaluations.js?v=6.7"></script>
+<script src="assets/js/learner/discussions.js?v=10.8"></script>
+<script src="assets/js/learner/syllabus.js?v=3.6"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

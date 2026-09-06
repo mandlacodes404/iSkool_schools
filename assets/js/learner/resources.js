@@ -55,7 +55,7 @@ window.fetchResources = async function() {
         return;
     }
 
-    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && !window._ptrRefreshing && loader) loader.style.display = 'flex';
 
     try {
         const response = await fetch('api/learner/get_resources.php');

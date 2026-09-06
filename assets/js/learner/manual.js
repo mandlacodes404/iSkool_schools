@@ -131,7 +131,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         return;
     }
 
-    if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
+    if (!window.suppressInitialLoader && !window._ptrRefreshing && loader) loader.style.display = 'flex';
 
     // On a cold mobile launch, render an immediate placeholder instead of
     // leaving the API area empty while Home data is requested.

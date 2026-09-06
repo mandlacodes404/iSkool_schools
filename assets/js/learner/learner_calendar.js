@@ -99,7 +99,9 @@ window.fetchLearnerCalendar = async function () {
     const year = savedState.year || window.learnerCalendarPageState.year;
     const loader = document.getElementById('loaderOverlay');
     const isCached = Boolean(window.learnerCalendarEventsCache[learnerCalendarCacheKey(month, year)]);
-    if (!isCached && loader) loader.style.display = 'flex';
+    // Pull-to-refresh has its own indicator. Do not manipulate the shared
+    // overlay while that gesture is active.
+    if (!isCached && !window._ptrRefreshing && loader) loader.style.display = 'flex';
 
     try {
         await renderLearnerCalendarPage(month, year, navigation);
