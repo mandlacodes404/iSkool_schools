@@ -16,6 +16,8 @@ window.prefetchResources = function () {
 };
 
 window.fetchResources = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('resource_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
     // 1. SAVE STATE & UI Highlighting
@@ -42,6 +44,7 @@ window.fetchResources = async function() {
     if (window.resourcePrefetchPromise) {
         await window.resourcePrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // 4b. CACHE CHECK (Instant Load)
     if (window.resourceCache) {
@@ -58,16 +61,18 @@ window.fetchResources = async function() {
         const response = await fetch('api/learner/get_resources.php');
         if (!response.ok) throw new Error('Failed to fetch resources');
         const data = await response.json();
+        if (!isCurrentNavigation()) return;
         window.resourceCache = data;
         renderResourceCards(data);
         restoreResourcePageState();
     } catch (error) {
+        if (!isCurrentNavigation()) return;
         console.error("Resource Fetch Error:", error);
         if (apiArea) {
             apiArea.innerHTML = "<p class='lrs-error-state'>Error loading resources.</p>";
         }
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

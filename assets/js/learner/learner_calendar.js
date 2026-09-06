@@ -11,6 +11,7 @@ window.learnerCalendarPageState = {
 };
 window.learnerCalendarEventsCache = window.learnerCalendarEventsCache || {};
 window.learnerCalendarEventsPromises = window.learnerCalendarEventsPromises || {};
+let learnerCalendarRenderSequence = 0;
 
 function learnerCalendarCacheKey(month, year) {
     return `${year}-${month}`;
@@ -70,6 +71,10 @@ function wireLearnerCalendarScrollState() {
 
 // ── ENTRY POINT ──
 window.fetchLearnerCalendar = async function () {
+    const navigation = window.beginLearnerViewNavigation?.('learner_calendar');
+    window.stopLearnerDiscussionPolling?.();
+    window.unlockMobileDiscussionLayout?.();
+    window._inDiscussionThread = false;
     sessionStorage.setItem('lastLearnerPage', 'learner_calendar');
     if (typeof window.setActive === 'function') window.setActive('learner_calendar');
 
@@ -97,11 +102,14 @@ window.fetchLearnerCalendar = async function () {
     if (!isCached && loader) loader.style.display = 'flex';
 
     try {
-        await renderLearnerCalendarPage(month, year);
+        await renderLearnerCalendarPage(month, year, navigation);
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && (!navigation || window.isCurrentLearnerViewNavigation?.(navigation))) {
+            loader.style.display = 'none';
+        }
     }
     requestAnimationFrame(() => {
+        if (navigation && !window.isCurrentLearnerViewNavigation?.(navigation)) return;
         const mainContent = document.querySelector('.main-content');
         if (mainContent && Number.isFinite(savedState.scrollTop)) mainContent.scrollTop = savedState.scrollTop;
         wireLearnerCalendarScrollState();
@@ -110,23 +118,37 @@ window.fetchLearnerCalendar = async function () {
 };
 
 // ── MAIN RENDER ──
-async function renderLearnerCalendarPage(month, year) {
+async function renderLearnerCalendarPage(month, year, navigation = null) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
+    const renderSequence = ++learnerCalendarRenderSequence;
 
     // Show skeleton instantly
     apiArea.innerHTML = buildLearnerCalShell(month, year, []);
     bindLearnerCalNav();
 
     try {
-        window.learnerCalendarPageState.events = await loadLearnerCalendarEvents(month, year);
+        const events = await loadLearnerCalendarEvents(month, year);
+        if (renderSequence !== learnerCalendarRenderSequence ||
+            (navigation && !window.isCurrentLearnerViewNavigation?.(navigation))) {
+            return;
+        }
+        window.learnerCalendarPageState.events = events;
         window.learnerCalendarPageState.month  = month;
         window.learnerCalendarPageState.year   = year;
         saveLearnerCalendarState();
     } catch (e) {
+        if (renderSequence !== learnerCalendarRenderSequence ||
+            (navigation && !window.isCurrentLearnerViewNavigation?.(navigation))) {
+            return;
+        }
         window.learnerCalendarPageState.events = [];
     }
 
+    if (renderSequence !== learnerCalendarRenderSequence ||
+        (navigation && !window.isCurrentLearnerViewNavigation?.(navigation))) {
+        return;
+    }
     apiArea.innerHTML = buildLearnerCalShell(month, year, window.learnerCalendarPageState.events);
     bindLearnerCalNav();
     wireLearnerCalendarScrollState();
@@ -656,6 +678,27 @@ window.learnerCalPageNext = async function () {
     if (month > 12) { month = 1; year++; }
     await renderLearnerCalendarPage(month, year);
     saveLearnerCalendarState();
+};
+
+// The sidebar calendar link is a mobile-only route. It must not fall through
+// to the generic sidebar click handler, which prepares the previous standard
+// page after this detail page has already started loading.
+window.openLearnerCalendar = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    if (sidebar) sidebar.classList.remove('active', 'desktop-open');
+    if (overlay) overlay.style.display = 'none';
+
+    if (typeof window.prepareLearnerMobileNavigation === 'function') {
+        window.prepareLearnerMobileNavigation();
+    }
+    window.fetchLearnerCalendar();
+    return false;
 };
 
 // ══════════════════════════════════════════════════════════════

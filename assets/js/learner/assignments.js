@@ -134,6 +134,8 @@ window.submitLearnerAssignmentInline = async function(event, form) {
 };
 
 window.fetchAssignments = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('assignment_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     // 1. Clear any existing timers
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
@@ -162,6 +164,7 @@ window.fetchAssignments = async function() {
     if (window.learnerAssignmentPrefetchPromise) {
         await window.learnerAssignmentPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // 6b. CACHE LOGIC
     if (window.learnerAssignmentCache) {
@@ -180,10 +183,12 @@ window.fetchAssignments = async function() {
         if (!response.ok) throw new Error('Failed to fetch assignments');
         
         const groupedData = await response.json();
+        if (!isCurrentNavigation()) return;
         window.learnerAssignmentCache = groupedData;
         renderAssignmentCards(groupedData);
         restoreAssignmentPageState();
     } catch (error) {
+        if (!isCurrentNavigation()) return;
         console.error("Assignment Fetch Error:", error);
         if (apiArea) {
             apiArea.innerHTML = `
@@ -195,7 +200,7 @@ window.fetchAssignments = async function() {
         }
     } finally {
         // 8. ALWAYS hide the loader, even if it fails
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

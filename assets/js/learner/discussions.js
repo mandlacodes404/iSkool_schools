@@ -296,6 +296,8 @@ function unlockMobileLayout() {
     document.getElementById('discLongPressMenu')?.remove();
     document.getElementById('discLongPressOverlay')?.remove();
 }
+window.unlockMobileDiscussionLayout = unlockMobileLayout;
+window.stopLearnerDiscussionPolling = stopDiscPolling;
 
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
@@ -313,6 +315,8 @@ window.prefetchDiscussions = function () {
 };
 
 window.fetchDiscussions = async function(options = {}) {
+    const navigation = window.beginLearnerViewNavigation?.('discussion_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     stopDiscPolling();
     const openDiscussionId = normaliseDiscId(
         typeof options === 'object' ? options.openDiscussionId : options
@@ -353,6 +357,7 @@ window.fetchDiscussions = async function(options = {}) {
     if (window.discussionPrefetchPromise) {
         await window.discussionPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     if (window.discussionCache) {
         renderDiscussions(window.discussionCache);
@@ -372,17 +377,20 @@ window.fetchDiscussions = async function(options = {}) {
         const res  = await fetch('api/learner/get_discussions.php');
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
+        if (!isCurrentNavigation()) return;
         window.discussionCache = data;
         renderDiscussions(data);
         if (openDiscussionId) {
             await window.loadDiscussionThread(openDiscussionId, { forceRefresh: true });
+            if (!isCurrentNavigation()) return;
         } else {
             restoreDiscussionPageState();
         }
     } catch (e) {
+        if (!isCurrentNavigation()) return;
         if (apiArea) apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">Error loading discussions.</p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
@@ -774,6 +782,10 @@ function renderMobileList(data) {
 // 2. THREAD VIEW
 // ─────────────────────────────────────────────
 window.loadDiscussionThread = async function(discId, options = {}) {
+    const navigation = window.learnerViewNavigation
+        ? { id: window.learnerViewNavigation.id, page: window.learnerViewNavigation.page }
+        : null;
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     discId = normaliseDiscId(discId);
     if (!discId) return;
 
@@ -803,6 +815,7 @@ window.loadDiscussionThread = async function(discId, options = {}) {
     const loader = document.getElementById('loaderOverlay');
 
     if (window.discussionThreadCache[discId] && !options.forceRefresh) {
+        if (!isCurrentNavigation()) return;
         renderThread(window.discussionThreadCache[discId]);
         currentDiscId          = discId;
         window._currentDiscId  = discId;
@@ -816,6 +829,7 @@ window.loadDiscussionThread = async function(discId, options = {}) {
     try {
         const res  = await fetch(`api/learner/get_discussion_thread.php?discussion_id=${discId}`);
         const data = await res.json();
+        if (!isCurrentNavigation()) return;
         if (data.error) throw new Error(data.error);
 
         renderThread(data);
@@ -827,10 +841,11 @@ window.loadDiscussionThread = async function(discId, options = {}) {
         discTypingPollInterval = setInterval(() => pollTyping(discId), 2000);
 
     } catch (e) {
+        if (!isCurrentNavigation()) return;
         const target = getThreadTarget();
         if (target) target.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">${escHtml(e.message)}</p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
     }
 };
 

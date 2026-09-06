@@ -100,6 +100,8 @@ function buildMobileHomeLoadingState() {
 }
 
 window.loadManual = async function(containerId = 'api-content-area') {
+    const navigation = window.beginLearnerViewNavigation?.('partials/manual.html');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
     sessionStorage.setItem("lastLearnerPage", "partials/manual.html");
@@ -121,6 +123,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
 
     // Serve from cache instantly
     if (window.homeDataCache && (isMobile || window.manualCache)) {
+        if (!isCurrentNavigation()) return;
         apiArea.innerHTML = buildHomeLayout(window.homeDataCache, window.manualCache);
         afterHomeRender();
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -175,15 +178,17 @@ window.loadManual = async function(containerId = 'api-content-area') {
         window.manualCache   = manualHtml;
         window.homeDataCache = homeData;
 
+        if (!isCurrentNavigation()) return;
         apiArea.innerHTML = buildHomeLayout(homeData, manualHtml);
         afterHomeRender();
 
     } catch (error) {
+        if (!isCurrentNavigation()) return;
         console.error('Home load failed:', error);
         apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">
             Could not load home screen.</p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

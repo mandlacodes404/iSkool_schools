@@ -109,6 +109,8 @@ function restoreEvaluationPageState() {
 }
 
 window.fetchEvaluations = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('evaluation_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     
     sessionStorage.setItem("lastLearnerPage", "evaluation_list.php");
@@ -144,6 +146,7 @@ window.fetchEvaluations = async function() {
     if (window.evaluationPrefetchPromise) {
         await window.evaluationPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // 4. FIXED CACHE CHECK
     if (window.evaluationCache) {
@@ -159,13 +162,15 @@ window.fetchEvaluations = async function() {
     try {
         const response = await fetch('api/learner/get_evaluations.php');
         const data = await response.json();
+        if (!isCurrentNavigation()) return;
         window.evaluationCache = data; 
         renderEvaluationsUI(data); // Call the helper function here too
         restoreEvaluationPageState();
     } catch (e) {
+        if (!isCurrentNavigation()) return;
         apiArea.innerHTML = "<p class='eval-error-state'>Error loading evaluations.</p>";
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

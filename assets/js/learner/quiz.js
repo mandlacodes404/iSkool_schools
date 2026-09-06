@@ -103,6 +103,8 @@ function getSortedLearnerQuizTeacherEntries(quizzesByTeacher) {
 }
 
 window.fetchQuizzes = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('quiz_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     sessionStorage.setItem("lastLearnerPage", "quiz_list.php");
 
@@ -128,6 +130,7 @@ window.fetchQuizzes = async function() {
     if (window.learnerQuizPrefetchPromise) {
         await window.learnerQuizPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // 3b. Cache Check – serve instantly
     if (window.learnerQuizCache) {
@@ -145,12 +148,14 @@ window.fetchQuizzes = async function() {
         if (!response.ok) throw new Error('Network response was not ok');
         
         const payload = await response.json();
+        if (!isCurrentNavigation()) return;
         if (payload.status === 'error') throw new Error(payload.message || 'Unable to load quizzes');
         const groupedData = payload.data ?? payload;
         window.learnerQuizCache = groupedData; 
         renderQuizCards(groupedData);
         restoreQuizPageState();
     } catch (error) {
+        if (!isCurrentNavigation()) return;
         console.error("Quiz Fetch Error:", error);
         if (apiArea) {
             apiArea.innerHTML = `
@@ -163,7 +168,7 @@ window.fetchQuizzes = async function() {
                 </div>`;
         }
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

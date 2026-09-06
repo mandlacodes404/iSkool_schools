@@ -134,6 +134,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // ENTRY POINT
 // ─────────────────────────────────────────────────────────────────────────────
 window.fetchGrades = async function () {
+    const navigation = window.beginLearnerViewNavigation?.('grades');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     clearTimeout(window.loaderTimeout);
     sessionStorage.setItem('lastLearnerPage', 'grades');
     if (typeof window.setActive === 'function') window.setActive('grades');
@@ -160,14 +162,16 @@ window.fetchGrades = async function () {
 
     try {
         const data = await loadGradesData();
+        if (!isCurrentNavigation()) return;
         renderGrades(data);
     } catch (e) {
+        if (!isCurrentNavigation()) return;
         if (apiArea) apiArea.innerHTML = `
             <p class="grades-error-state">
                 Error loading grades. Please try again.
             </p>`;
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

@@ -15,6 +15,8 @@ window.prefetchSyllabus = function () {
 };
 
 window.fetchSyllabus = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('syllabus');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
     sessionStorage.setItem('lastLearnerPage', 'syllabus');
@@ -37,6 +39,7 @@ window.fetchSyllabus = async function() {
     if (window.syllabusPrefetchPromise) {
         await window.syllabusPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // Serve from cache instantly
     if (window.syllabusCache) {
@@ -53,6 +56,7 @@ window.fetchSyllabus = async function() {
     try {
         const res  = await fetch('api/learner/get_sbo.php');
         const data = await res.json();
+        if (!isCurrentNavigation()) return;
 
         if (data.error) throw new Error(data.error);
 
@@ -62,6 +66,7 @@ window.fetchSyllabus = async function() {
         restoreSyllabusPageState();
 
     } catch (err) {
+        if (!isCurrentNavigation()) return;
         console.error('Syllabus fetch error:', err);
         if (apiArea) {
             apiArea.innerHTML = `
@@ -75,7 +80,7 @@ window.fetchSyllabus = async function() {
                 </div>`;
         }
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

@@ -24,6 +24,8 @@ function showLearnerAnnouncementMobileBottomNav() {
 }
 
 window.fetchAnnouncements = async function() {
+    const navigation = window.beginLearnerViewNavigation?.('announcement_list.php');
+    const isCurrentNavigation = () => !navigation || window.isCurrentLearnerViewNavigation?.(navigation);
     if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
 
     // 1. SAVE STATE & UI Highlighting
@@ -50,6 +52,7 @@ window.fetchAnnouncements = async function() {
     if (window.announcementPrefetchPromise) {
         await window.announcementPrefetchPromise;
     }
+    if (!isCurrentNavigation()) return;
 
     // 4b. CACHE CHECK (Instant Load)
     if (window.announcementCache) {
@@ -66,16 +69,18 @@ window.fetchAnnouncements = async function() {
         const response = await fetch('api/learner/get_announcements.php');
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
+        if (!isCurrentNavigation()) return;
         window.announcementCache = data;
         renderAnnouncements(data);
         restoreAnnouncementPageState();
     } catch (error) {
+        if (!isCurrentNavigation()) return;
         console.error("Fetch Error:", error);
         if (apiArea) {
             apiArea.innerHTML = "<p class='lan-error-state'>Error loading announcements.</p>";
         }
     } finally {
-        if (loader) loader.style.display = 'none';
+        if (loader && isCurrentNavigation()) loader.style.display = 'none';
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };

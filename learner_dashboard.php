@@ -437,7 +437,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchLearnerCalendar()" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
+        <a href="javascript:void(0)" onclick="return openLearnerCalendar(event)" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -669,6 +669,22 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 </div>
 
 <script>
+// A learner section can still be fetching when another section is selected.
+// Keep a single navigation identity so an older response cannot replace the
+// page the learner just chose (most noticeable when opening Calendar on mobile).
+window.learnerViewNavigation = window.learnerViewNavigation || { id: 0, page: '' };
+window.beginLearnerViewNavigation = function(page) {
+    const navigation = window.learnerViewNavigation;
+    navigation.id += 1;
+    navigation.page = page;
+    return { id: navigation.id, page: page };
+};
+window.isCurrentLearnerViewNavigation = function(navigation) {
+    return Boolean(navigation) &&
+        window.learnerViewNavigation.id === navigation.id &&
+        window.learnerViewNavigation.page === navigation.page;
+};
+
 window.prepareLearnerMobileNavigation = function() {
     if (window.innerWidth > 768) return;
 
@@ -3312,16 +3328,16 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=10.8"></script>
-<script src="assets/js/learner/quiz.js?v=10.9"></script>
-<script src="assets/js/learner/assignments.js?v=9.3"></script>
-<script src="assets/js/learner/resources.js?v=8.1"></script>
-<script src="assets/js/learner/announcements.js?v=8.7"></script>
-<script src="assets/js/learner/grades.js?v=8.6"></script>
-<script src="assets/js/learner/evaluations.js?v=6.5"></script>
-<script src="assets/js/learner/discussions.js?v=10.6"></script>
-<script src="assets/js/learner/syllabus.js?v=3.4"></script>
-<script src="assets/js/learner/learner_calendar.js?v=1.9"></script>
+<script src="assets/js/learner/manual.js?v=10.9"></script>
+<script src="assets/js/learner/quiz.js?v=11.0"></script>
+<script src="assets/js/learner/assignments.js?v=9.4"></script>
+<script src="assets/js/learner/resources.js?v=8.2"></script>
+<script src="assets/js/learner/announcements.js?v=8.8"></script>
+<script src="assets/js/learner/grades.js?v=8.7"></script>
+<script src="assets/js/learner/evaluations.js?v=6.6"></script>
+<script src="assets/js/learner/discussions.js?v=10.7"></script>
+<script src="assets/js/learner/syllabus.js?v=3.5"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
