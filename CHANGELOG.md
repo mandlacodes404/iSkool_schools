@@ -1,6 +1,8 @@
 # iSkool Changelog
 
 ## [Unreleased]
+
+## [v1.2.4] - 2026-09-07
 ### Added
 - Learner Quiz & Assignments (Mobile): Added a proper empty state for both pages — when a teacher hasn't posted anything yet, the list now shows a centred icon (matching each page's own accent colour) with a short heading and explanation, instead of a bare unstyled line of text. The search bar stays visible and tappable in this state (`quiz.js`, `assignments.js`).
 - Learner Quiz & Assignments (Mobile): Searching now shows a "No matches for '...'" state with a search icon when a filter matches nothing, instead of the list silently going blank with no explanation or way to tell it's empty rather than broken (`quiz.js`, `assignments.js`).
