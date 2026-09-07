@@ -697,10 +697,25 @@ window.openLearnerCalendar = function(event) {
         event.stopImmediatePropagation();
     }
 
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('mobileOverlay');
-    if (sidebar) sidebar.classList.remove('active', 'desktop-open');
-    if (overlay) overlay.style.display = 'none';
+    // Do not manually remove the menu classes here. Opening the mobile menu
+    // disables pointer events on the header; toggleSidebar(true) is the one
+    // close path that restores them. Bypassing it left Calendar's visible
+    // Back button unable to receive taps.
+    if (typeof window.toggleSidebar === 'function') {
+        window.toggleSidebar(true);
+    } else {
+        // Defensive fallback for an incomplete dashboard load.
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const mainHeader = document.querySelector('.main-header');
+        if (sidebar) sidebar.classList.remove('active', 'desktop-open');
+        if (overlay) overlay.style.display = 'none';
+        if (mainHeader) {
+            mainHeader.style.background = mainHeader.dataset.bgBeforeMenu ?? '';
+            delete mainHeader.dataset.bgBeforeMenu;
+            mainHeader.style.pointerEvents = '';
+        }
+    }
 
     if (typeof window.prepareLearnerMobileNavigation === 'function') {
         window.prepareLearnerMobileNavigation();
