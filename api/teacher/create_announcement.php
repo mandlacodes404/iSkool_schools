@@ -108,10 +108,14 @@ while ($recipient = $recipients->fetch_assoc()) {
     $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
     $checkSub->bind_param("s", $rEmail);
     $checkSub->execute();
-    if ($checkSub->get_result()->num_rows > 0) {
+    $subResult = $checkSub->get_result();
+    $checkSub->close();
+
+    // Release this result before sendPushToUser() starts its own query on
+    // the same MySQLi connection. This is the working assignment sequence.
+    if ($subResult->num_rows > 0) {
         $isPushSent = sendPushToUser($conn, $rEmail, $fullPushTitle, $msg, $announcementLink, $schoolName);
     }
-    $checkSub->close();
 
     // Match quiz notifications: fall back to email when push is unavailable,
     // or send both channels when the teacher explicitly selects email.

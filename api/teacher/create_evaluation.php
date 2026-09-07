@@ -109,7 +109,12 @@ while ($learner = $learnersResult->fetch_assoc()) {
     $checkSub = $conn->prepare("SELECT id FROM user_subscriptions WHERE user_email = ? LIMIT 1");
     $checkSub->bind_param("s", $lEmail);
     $checkSub->execute();
-    if ($checkSub->get_result()->num_rows > 0) {
+    $subResult = $checkSub->get_result();
+    $checkSub->close();
+
+    // Match assignments: close this statement before the push helper
+    // performs another query through the shared database connection.
+    if ($subResult->num_rows > 0) {
         $isPushSent = sendPushToUser(
             $conn, $lEmail,
             "📊 New Evaluation: " . $title,
@@ -118,7 +123,6 @@ while ($learner = $learnersResult->fetch_assoc()) {
             $schoolName
         );
     }
-    $checkSub->close();
 
     // Match quiz notifications: fall back to email when push is unavailable,
     // or send both channels when the teacher explicitly selects email.
