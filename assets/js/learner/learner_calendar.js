@@ -91,7 +91,13 @@ window.fetchLearnerCalendar = async function () {
 
     // Configure header — show back button, hide menu buttons
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Calendar', mode: 'detail' });
+        window.configureHeader({
+            title: 'Calendar',
+            mode: 'detail',
+            // The mobile calendar is reached from the menu, so Back always
+            // returns to the learner Home view rather than browser history.
+            backAction: () => window.returnToLearnerHome?.()
+        });
     }
 
     const savedState = getSavedLearnerCalendarState();

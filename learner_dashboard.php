@@ -504,7 +504,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </svg>
 </button>
 
-        <button id="headerBackBtn" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="handleHeaderBack()">
+        <button id="headerBackBtn" type="button" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="return window.handleHeaderBack(event)">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -973,6 +973,7 @@ document.addEventListener("DOMContentLoaded", function () {
                           onClick.includes('fetchGrades') ||
                           onClick.includes('fetchSyllabus') || 
                           onClick.includes('fetchLearnerCalendar') ||
+                          onClick.includes('openLearnerCalendar') ||
                           onClick.includes('fetchAnnouncements');
 
         // Inside your Main Script's link click listener:
@@ -985,6 +986,7 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
                  (onClick.includes('fetchGrades') && window.learnerGradesCache) ||
                  (onClick.includes('fetchSyllabus') && (window.syllabusCache || window.syllabusPrefetchPromise)) ||
                  onClick.includes('fetchLearnerCalendar') ||
+                 onClick.includes('openLearnerCalendar') ||
                  (onClick.includes('fetchDiscussions') && (window.discussionCache || window.discussionPrefetchPromise)); // <-- ADD THIS
 
         // 1. AUTO-CLOSE MENU
@@ -2950,6 +2952,12 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
 
     if (mode === 'detail') {
     window.learnerHeaderDetailType = config.detailType || title;
+    // Detail pages may define a specific return destination. Keeping this on
+    // the header state avoids inferring navigation from a title that can be
+    // hidden or replaced on mobile while the page scrolls.
+    window.learnerHeaderBackAction = typeof config.backAction === 'function'
+        ? config.backAction
+        : null;
     const backLabel = config.backLabel || window.learnerHeaderCurrentTitle || '';
     if (backLabelEl) backLabelEl.innerText = backLabel;
     if (mainHeader && window.innerWidth <= 768) {
@@ -2977,6 +2985,7 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
     }
 } else {
         window.learnerHeaderDetailType = null;
+        window.learnerHeaderBackAction = null;
         window.learnerHeaderCurrentTitle = title;
         if (backLabelEl) backLabelEl.innerText = '';
         if (mainHeader) mainHeader.classList.remove('mobile-detail-mode', 'detail-title-collapsed');
@@ -3007,16 +3016,61 @@ if (window.innerWidth <= 768 && titleEl) titleEl.style.display = 'none'; // ← 
 };
 
 // --- BACK BUTTON NAVIGATION LOGIC ---
-window.handleHeaderBack = function() {
+window.returnToLearnerHome = function() {
+    const apiArea = document.getElementById('api-content-area');
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    const sidebar = document.querySelector('.sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    if (sidebar) sidebar.classList.remove('active', 'desktop-open');
+    if (mobileOverlay) mobileOverlay.style.display = 'none';
+    if (apiArea) apiArea.style.display = 'block';
+    if (iframe) iframe.style.display = 'none';
+    if (myClassContent) myClassContent.classList.remove('active');
+
+    if (typeof window.loadManual === 'function') {
+        window.loadManual();
+        return;
+    }
+
+    // Keep the existing iframe fallback available if the Home script failed
+    // to load, rather than leaving the learner stranded on a detail page.
+    if (iframe) {
+        iframe.style.display = 'block';
+        iframe.src = 'learner_manual.php';
+    }
+    window.configureHeader?.({ title: 'Home', mode: 'standard' });
+    window.setActive?.('partials/manual.html');
+};
+
+window.handleHeaderBack = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
     const iframe = document.getElementById('mainFrame');
     const titleEl = document.getElementById('headerTitle');
     const currentTitle = titleEl ? titleEl.innerText : '';
     const detailType = window.learnerHeaderDetailType || currentTitle;
 
-    // 1. QUIZ PROTECTION: If taking a quiz, ask before leaving
-    if (iframe && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
+    // Calendar and other API detail views can declare their exact return
+    // action. Execute it before inspecting an iframe, which may still hold a
+    // hidden page from an earlier visit.
+    const backAction = window.learnerHeaderBackAction;
+    if (typeof backAction === 'function') {
+        backAction();
+        return false;
+    }
+
+    // 1. QUIZ PROTECTION: Only a visible iframe can be the current quiz.
+    // A hidden iframe can retain confirmExit() after a previous quiz and was
+    // preventing unrelated pages, including Calendar, from going back.
+    const iframeIsVisible = iframe && getComputedStyle(iframe).display !== 'none';
+    if (iframeIsVisible && iframe.contentWindow && typeof iframe.contentWindow.confirmExit === 'function') {
         iframe.contentWindow.confirmExit();
-        return; 
+        return false;
     }
 
     // 2. ASSIGNMENTS: If coming back from Submission detail
@@ -3060,10 +3114,8 @@ if (detailType === 'Evaluation') {
 // The visible header title can be replaced or hidden while a mobile detail
 // page scrolls. The detail type is the stable source of truth for Calendar.
 if (detailType === 'Calendar') {
-    if (typeof loadManual === 'function') {
-        window.loadManual();
-        return;
-    }
+    window.returnToLearnerHome();
+    return false;
 }
 
 if (currentTitle === 'Review') {
@@ -3081,24 +3133,8 @@ if (currentTitle === 'Personal Information') {
 }
 
     // 4. GENERAL FALLBACK: Return to Home/Manual
-    const apiArea = document.getElementById('api-content-area');
-    if (apiArea) apiArea.style.display = 'block'; // Show API
-    if (iframe) iframe.style.display = 'none';   // Hide Iframe
-
-    if (typeof window.loadManual === 'function') {
-        window.loadManual();
-    } else {
-        if (iframe) {
-            iframe.style.display = 'block';
-            iframe.src = 'learner_manual.php';
-        }
-    }
-    window.configureHeader({ title: 'Home', mode: 'standard' });
-    
-    // Update Active UI using the full path
-    if (typeof window.setActive === 'function') {
-        window.setActive("partials/manual.html");
-    }
+    window.returnToLearnerHome();
+    return false;
 };
 
 // --- IFRAME MONITOR (The "Safety Net") ---
@@ -3344,7 +3380,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/evaluations.js?v=6.7"></script>
 <script src="assets/js/learner/discussions.js?v=10.8"></script>
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
-<script src="assets/js/learner/learner_calendar.js?v=2.1"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.2"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
