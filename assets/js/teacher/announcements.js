@@ -402,7 +402,11 @@ window.submitCreateAnnouncement = async function() {
     const message    = document.getElementById('annMessage').value.trim();
     const classId    = window.getClassPickerValue('annClassPicker');
     const sendTo     = (document.getElementById('annSendTo') || {}).value || 'learners';
-    const forceEmail = document.getElementById('annForceEmail').checked;
+    // The desktop panel and mobile modal can both exist in the page. Read
+    // the visible checkbox so the teacher's selected value is the one sent.
+    const forceEmailInput = Array.from(document.querySelectorAll('[id="annForceEmail"]'))
+        .find(input => input.getClientRects().length > 0);
+    const forceEmail = Boolean(forceEmailInput?.checked);
     const errorDiv   = document.getElementById('createAnnError');
     const submitBtn  = document.getElementById('createAnnSubmitBtn');
 

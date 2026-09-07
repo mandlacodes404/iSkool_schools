@@ -579,7 +579,11 @@ window.submitReleaseEvaluation = async function() {
     const desc       = document.getElementById('evalDescription').value.trim();
     const classId    = window.getClassPickerValue('evalClassPicker');
     const useDefault = document.getElementById('evalUseDefault').checked;
-    const forceEmail = document.getElementById('evalForceEmail').checked;
+    // The desktop panel and mobile modal can both exist in the page. Read
+    // the visible checkbox so the teacher's selected value is the one sent.
+    const forceEmailInput = Array.from(document.querySelectorAll('[id="evalForceEmail"]'))
+        .find(input => input.getClientRects().length > 0);
+    const forceEmail = Boolean(forceEmailInput?.checked);
     const errorDiv   = document.getElementById('releaseEvalError');
     const submitBtn  = document.getElementById('releaseEvalSubmitBtn');
     const loader     = document.getElementById('loaderOverlay');

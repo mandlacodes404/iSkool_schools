@@ -583,7 +583,11 @@ window.openTeacherVideoPanel = function(item) {
 window.submitUploadResource = async function() {
     const title      = document.getElementById('resourceTitle')?.value.trim();
     const classId    = window.getClassPickerValue('resourceClassPicker');
-    const forceEmail = document.getElementById('resourceForceEmail')?.checked;
+    // The desktop panel and mobile modal can both exist in the page. Read
+    // the visible checkbox so the teacher's selected value is the one sent.
+    const forceEmailInput = Array.from(document.querySelectorAll('[id="resourceForceEmail"]'))
+        .find(input => input.getClientRects().length > 0);
+    const forceEmail = Boolean(forceEmailInput?.checked);
     const errorDiv   = document.getElementById('uploadResourceError');
     const submitBtn  = document.getElementById('uploadResourceSubmitBtn');
     const loader     = document.getElementById('loaderOverlay');
