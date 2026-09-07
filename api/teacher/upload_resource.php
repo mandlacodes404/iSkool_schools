@@ -60,8 +60,9 @@ function notifyLearners($conn, $classId, $yearId, $title, $teacherEmail, $teache
         }
         $checkSub->close();
 
-        // Email is an explicit teacher choice, never a push-delivery fallback.
-        if ($forceEmail) {
+        // Match quiz notifications: fall back to email when push is unavailable,
+        // or send both channels when the teacher explicitly selects email.
+        if (!$isPushSent || $forceEmail) {
             try {
                 $mail             = new PHPMailer(true);
                 $mail->isSMTP();
