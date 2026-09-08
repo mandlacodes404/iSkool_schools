@@ -1751,8 +1751,18 @@ window.discSheetSubmitReply = async function(discId) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
 
     try {
-        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken(), 'X-iSkool-Queue-User': window.learnerQueueUser || '' }, body: fd });
         const data = await res.json();
+        if (data.queued) {
+            if (ta) ta.value = '';
+            if (fi) fi.value = '';
+            discSheetCancelReply();
+            discSheetClearFile();
+            _discVoiceBlob = null;
+            _discAudioChunks = [];
+            alert(data.message);
+            return;
+        }
         if (data.error) throw new Error(data.error);
 
         /* Clear the pill, keep it open — no separate surface to close */
@@ -1942,8 +1952,18 @@ window.discSubmitReply = async function(discId) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
 
     try {
-        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const res  = await fetch('api/learner/submit_reply.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken(), 'X-iSkool-Queue-User': window.learnerQueueUser || '' }, body: fd });
         const data = await res.json();
+        if (data.queued) {
+            if (ta) ta.value = '';
+            if (fi) fi.value = '';
+            discCancelReply();
+            discClearFile();
+            _discVoiceBlob = null;
+            _discAudioChunks = [];
+            alert(data.message);
+            return;
+        }
         if (data.error) throw new Error(data.error);
 
         if (ta) { ta.value = ''; ta.style.height = 'auto'; }
@@ -2217,16 +2237,25 @@ window.discSubmitReport = async function(replyId, discId) {
     const reason  = document.getElementById('discReportReason')?.value;
     const comment = document.getElementById('discReportComment')?.value;
     const fd = new FormData();
-    fd.append('action', 'report');
     fd.append('reply_id', replyId);
     fd.append('discussion_id', discId);
     fd.append('reason', reason);
     fd.append('comment', comment);
 
     try {
-        await fetch('view_discussion.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const response = await fetch('api/learner/submit_discussion_report.php', {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': getCsrfToken() },
+            body: fd
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Unable to submit the report. Please try again.');
+        }
         document.getElementById('discReportModal')?.remove();
-    } catch (e) {}
+    } catch (e) {
+        alert(e.message || 'Unable to submit the report. Please try again.');
+    }
 };
 
 // ─────────────────────────────────────────────
@@ -2347,8 +2376,14 @@ window.discSubmitCreate = async function() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
 
     try {
-        const res  = await fetch('api/learner/create_discussion.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const res  = await fetch('api/learner/create_discussion.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken(), 'X-iSkool-Queue-User': window.learnerQueueUser || '' }, body: fd });
         const data = await res.json();
+        if (data.queued) {
+            errorEl.textContent = data.message;
+            errorEl.style.display = 'block';
+            btn.innerHTML = '<i class="fas fa-clock"></i> Queued for sending';
+            return;
+        }
         if (data.error) throw new Error(data.error);
 
         // Bust cache and tear down the split shell so it rebuilds cleanly

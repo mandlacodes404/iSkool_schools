@@ -36,9 +36,9 @@ function wireLearnerManualScrollState() {
 
 window.fetchManual = async function() {
     // 1. Set State and Update UI Highlighting
-    localStorage.setItem("lastLearnerPage", "learner_manual.php");
+    localStorage.setItem("lastLearnerPage", "partials/manual.html");
     if (typeof window.setActive === 'function') {
-        window.setActive("learner_manual.php");
+        window.setActive("partials/manual.html");
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -56,8 +56,8 @@ window.fetchManual = async function() {
     if (loader) loader.style.display = 'flex';
 
     try {
-        // 4. Fetch the learner_manual.php file
-        const response = await fetch('learner_manual.php');
+        // 4. Fetch the current static manual fragment.
+        const response = await fetch('partials/manual.html');
         if (!response.ok) throw new Error('Manual not found');
         
         const htmlText = await response.text();

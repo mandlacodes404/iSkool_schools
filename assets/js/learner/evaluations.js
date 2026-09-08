@@ -737,11 +737,13 @@ window.handleEvalSubmit = async function(e, id) {
     try {
         const response = await fetch('api/learner/submit_evaluation.php', {
             method: 'POST',
-            headers: { 'X-CSRF-Token': getCsrfToken() },
+            headers: { 'X-CSRF-Token': getCsrfToken(), 'X-iSkool-Queue-User': window.learnerQueueUser || '' },
             body: new FormData(e.target)
         });
         const res = await response.json();
-        if (res.success) {
+        if (res.queued) {
+            alert(res.message);
+        } else if (res.success) {
             window.evaluationCache = null; // Clear cache so it fetches fresh "Completed" state
             fetchEvaluations(); 
         } else {

@@ -1299,6 +1299,7 @@ function getCsrfToken() {
         <!-- Quiz Form -->
         <form id="quizForm" action="submit_quiz.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <input type="hidden" name="queue_user" value="<?= htmlspecialchars($userEmail) ?>">
             <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
             <input type="hidden" name="start_time" value="<?= $startTime ?>">
 
@@ -1811,7 +1812,7 @@ function getCsrfToken() {
                 fd.append('selected_choice_ids', JSON.stringify(choiceIds));
             }
         }
-        fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
+        fetch('save_progress.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken(), 'X-iSkool-Queue-User': <?= json_encode($userEmail) ?> }, body: fd })
             .catch(e => console.warn('Save failed', e));
     }
 

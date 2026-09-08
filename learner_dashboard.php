@@ -669,6 +669,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 </div>
 
 <script>
+window.learnerQueueUser = <?= json_encode($learnerEmail) ?>;
 // A learner section can still be fetching when another section is selected.
 // Keep a single navigation identity so an older response cannot replace the
 // page the learner just chose (most noticeable when opening Calendar on mobile).
@@ -923,7 +924,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 // Emergency fallback if loadManual somehow isn't defined
                 iframe.style.display = "block";
-                iframe.src = "learner_manual.php";
+                iframe.src = "partials/manual.html";
             }
         } else {
             // Not an API-driven page and not the manual — load the saved
@@ -939,7 +940,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // Emergency Fallback
             iframe.style.display = "block";
-            iframe.src = "learner_manual.php";
+            iframe.src = "partials/manual.html";
         }
     }
 
@@ -2739,7 +2740,7 @@ if (desktopToggle) {
                     refresh: () => window.loadManual?.()
                 },
                 'learner_manual.php': {
-                    refresh: () => window.fetchManual?.()
+                    refresh: () => window.loadManual?.()
                 }
             };
 
@@ -3038,7 +3039,7 @@ window.returnToLearnerHome = function() {
     // to load, rather than leaving the learner stranded on a detail page.
     if (iframe) {
         iframe.style.display = 'block';
-        iframe.src = 'learner_manual.php';
+        iframe.src = 'partials/manual.html';
     }
     window.configureHeader?.({ title: 'Home', mode: 'standard' });
     window.setActive?.('partials/manual.html');
@@ -3287,6 +3288,27 @@ async function registerPushServiceWorker() {
     return navigator.serviceWorker.ready.then(() => registration);
 }
 
+if ('serviceWorker' in navigator) {
+    let learnerUpdateReloading = false;
+    const learnerHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data?.type !== 'iskool-update-available') return;
+        if (window.confirm('An iSkool update is available. Refresh now?')) {
+            navigator.serviceWorker.getRegistration('/').then(registration => {
+                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
+            });
+        }
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!learnerHadServiceWorkerController || learnerUpdateReloading) return;
+        learnerUpdateReloading = true;
+        window.location.reload();
+    });
+    window.addEventListener('online', () => {
+        navigator.serviceWorker.controller?.postMessage({ type: 'iskool-replay-queued-writes' });
+    });
+}
+
 // Saves the browser subscription before any teacher sends a notification.
 // The server identifies the signed-in user from the session; no email address
 // is trusted from the browser request.
@@ -3373,12 +3395,12 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.10"></script>
 <script src="assets/js/learner/quiz.js?v=11.1"></script>
-<script src="assets/js/learner/assignments.js?v=9.5"></script>
+<script src="assets/js/learner/assignments.js?v=9.6"></script>
 <script src="assets/js/learner/resources.js?v=8.3"></script>
 <script src="assets/js/learner/announcements.js?v=8.9"></script>
 <script src="assets/js/learner/grades.js?v=8.8"></script>
-<script src="assets/js/learner/evaluations.js?v=6.7"></script>
-<script src="assets/js/learner/discussions.js?v=10.8"></script>
+<script src="assets/js/learner/evaluations.js?v=6.8"></script>
+<script src="assets/js/learner/discussions.js?v=10.9"></script>
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <?php include 'includes/global_viewer.php'; ?>

@@ -10,6 +10,30 @@ Offline-first behavior appropriate for a school app: the shell and recently view
 
 A service worker intercepts every request the app makes (API calls, images, CSS/JS files) and decides how to respond. The "strategy" is that decision logic.
 
+## Open Items — next work
+
+### Warn before logout discards pending offline work — NOT YET IMPLEMENTED
+
+The worker correctly clears queued writes on logout, and discards a queue when its stored learner identity does not match the currently signed-in learner. There is **no learner-visible warning yet**, so an unsent assignment submission or quiz-progress save could currently disappear without a warning.
+
+The agreed next implementation is:
+
+1. When online, try to sync pending work before allowing logout.
+2. When offline, warn that logging out will discard unsent work and require explicit confirmation.
+3. If a queue is discarded because the identity check fails, show a "some work wasn't saved" notice on the next login.
+
+Do not treat this item as complete until those learner-facing messages and logout controls exist.
+
+---
+
+## Implementation status
+
+The caching and offline-write routing below is **IMPLEMENTED**. [`/service-worker.js`](../service-worker.js) is the source of truth for the current request-path routing and queue eligibility; this document records the intended policy and implementation context.
+
+Important implementation detail: the authenticated `learner_dashboard.php` document is **network-first**, not stale-while-revalidate, because it contains learner-specific HTML. Its static shell assets are cache-first, while the Home data APIs use stale-while-revalidate.
+
+---
+
 ### Cache-first
 Check cache. If present, serve instantly — never touch the network. Only fetch from network if missing, then save it for next time.
 
@@ -54,12 +78,23 @@ Request → fetch from network → SUCCESS: serve it
 
 ## Strategy map for iSkool
 
+**Status: IMPLEMENTED.** [`/service-worker.js`](../service-worker.js) is the source of truth for current route-level routing.
+
 | Content | Strategy | Why |
 |---|---|---|
 | App shell (JS, CSS, logo, fonts) | Cache-first | Never changes between deploys (versioned filenames) |
 | Dashboard, course/lesson lists | Stale-while-revalidate | Instant open, quietly self-updates |
 | Grades, announcements | Network-first | Freshness matters; offline fallback still available |
 | Assignment submission, login, exam answers | Network-only + background sync queue | Must never fake-succeed against cached/stale data |
+
+---
+
+Current route-level decisions, including exceptions and the authoritative path lists, live in [`/service-worker.js`](../service-worker.js). Notable implemented exceptions are:
+
+- Learner Home data, My Class metadata, resources, and syllabus use stale-while-revalidate.
+- The authenticated dashboard document, quizzes, assignments, grades, announcements, evaluations, discussions, calendar, and profile reads use network-first as appropriate.
+- Reports, account/profile changes, class joining, typing, push subscription, logout, and auth routes are network-only.
+- Resource files and local static assets use cache-first.
 
 ---
 
@@ -74,6 +109,18 @@ A learner submitting an assignment with no signal should not see a hard failure.
 5. Once synced, update the UI (remove the "pending" indicator) and optionally notify the user it went through.
 
 Same pattern applies to a teacher grading offline — grade entries queue locally and sync when back online.
+
+---
+
+### Implemented queue scope and security rules
+
+The worker stores eligible failed writes in IndexedDB and retries them through Background Sync; it also retries when the learner page comes back online. Currently queue-eligible learner writes are quiz progress/final submission, assignment submission, evaluation submission, discussion creation, and discussion replies.
+
+Discussion reports are deliberately **network-only and not queued** because moderation timing matters. Logout, profile changes/uploads, parent links, class joining, typing indicators, push subscriptions, and authentication changes are also never queued.
+
+Queued requests are bound to the learner identity captured at queue time. Before replay, the worker calls `api/learner/get_session_identity.php` and discards a queued record if its stored learner does not match the currently signed-in learner. Queues are also cleared on normal logout. These controls prevent a shared device from replaying one learner's submission under another learner's account.
+
+The current clients show an immediate queued/offline state for supported fetch submissions; the remaining learner-visible logout/discard warning is the open item above.
 
 ---
 
@@ -97,7 +144,7 @@ Service workers cache aggressively by design, which means a shipped update can s
 
 ---
 
-## Build order
+## Build order — implementation progress
 
 1. Register a basic service worker + cache the app shell (cache-first) — biggest immediate win, foundation for everything else.
 2. Add stale-while-revalidate for dashboard/content routes.
@@ -106,7 +153,31 @@ Service workers cache aggressively by design, which means a shipped update can s
 5. Add IndexedDB queue + Background Sync for offline submissions.
 6. Add the update-available prompt so future deploys don't get silently stuck.
 
-## Open items / files still needed to finalize
+## Bugs found and fixed during implementation
+
+### Missing learner manual fallback
+
+`learner_dashboard.php` and the legacy learner-manual loader referenced `learner_manual.php`, which no longer exists outside archived code. The current manual content is [`/partials/manual.html`](../partials/manual.html), and all active fallback references now use that path.
+
+### Missing discussion-report endpoint
+
+`assets/js/learner/discussions.js` posted reports to `view_discussion.php`, which only existed under `old_files/` and was unsuitable for the current AJAX flow. It now posts to the new [`/api/learner/submit_discussion_report.php`](../api/learner/submit_discussion_report.php), which uses the current session, CSRF, class/year/reply authorization, prepared statements, and duplicate-report handling.
+
+---
+
+## Files touched in this implementation
+
+- `service-worker.js`
+- `learner_dashboard.php`
+- `assets/js/learner/assignments.js`
+- `assets/js/learner/discussions.js`
+- `assets/js/learner/evaluations.js`
+- `assets/js/learner/learner_manual.js`
+- `take_quiz.php`
+- `api/learner/get_session_identity.php`
+- `api/learner/submit_discussion_report.php`
+
+## Superseded discovery items
 
 - Confirm which endpoints are submission/grading-related so they can be explicitly excluded from any caching (network-only)
 - Confirm current service worker file, if one already exists, so this can extend rather than replace it

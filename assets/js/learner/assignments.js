@@ -94,10 +94,20 @@ window.submitLearnerAssignmentInline = async function(event, form) {
     try {
         const response = await fetch(form.action, {
             method: 'POST',
-            headers: { 'X-CSRF-Token': typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '' },
+            headers: {
+                'X-CSRF-Token': typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '',
+                'X-iSkool-Queue-User': window.learnerQueueUser || ''
+            },
             body: new FormData(form)
         });
         const result = await response.json();
+        if (result.queued) {
+            if (error) {
+                error.textContent = result.message;
+                error.hidden = false;
+            }
+            return;
+        }
         if (!response.ok || !result.success) {
             throw new Error(result.error || 'Your submission could not be saved. Please try again.');
         }
