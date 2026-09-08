@@ -12,6 +12,20 @@ A service worker intercepts every request the app makes (API calls, images, CSS/
 
 ## Open Items — next work
 
+### Offline splash screen on the root document (`/`) — FIXED
+
+**The problem:** the root document (`/`, which serves the splash/login shell) was being routed through the same `isAuthenticationRoute` bucket as actual login/session actions (`/index.php`, `/dashboard.php`, `/auth/*`) — all sent straight to `fetch(request)` with no cache fallback. This is correct for login *actions* (a failed login POST should fail loudly, not silently serve cached HTML), but wrong for the shell *document itself*. Result: a learner opening the app with zero network connection got the browser's own offline error, even though `/` was already sitting in `APP_SHELL` and precached at install — the routing logic just never gave it a chance to be read from cache.
+
+**The fix:** `/` now has its own navigation-request handler (`isShellNavigationRoute`), separate from `isAuthenticationRoute`. It tries the network first — so a signed-in learner still gets the live, correct server-side redirect to their dashboard — and only falls back to the precached shell if there's no network at all. `/index.php` as a direct path, `/dashboard.php`, and `/auth/*` are untouched and remain strictly network-only, as before.
+
+**Cache versions bumped** (`iskool-static-v1` → `v2`, and `content`/`network` caches to match) so browsers treat this as a new service worker and re-run the install step against the updated logic, rather than potentially continuing to serve the old cached behavior. This is the same mechanism the "Update handling" section below already documents — this deploy is a live test of that update-prompt flow.
+
+**Known, expected limitation (not a bug):** the cached fallback for `/` reflects whatever the shell looked like the first time it was precached — typically the unauthenticated splash/login shell. If a learner is logged in and goes offline before ever having the app cached while authenticated, the offline fallback will briefly show the splash shell rather than their dashboard, until any local/client-side session check resolves. This is consistent with how every other cache-first fallback in this plan behaves, and is preferable to a blank browser error.
+
+**Still to test:** confirm this in the actual browser with network fully disabled (not just throttled) — open once online to populate the cache, then go offline, force-close, and reopen.
+
+---
+
 ### Warn before logout discards pending offline work — NOT YET IMPLEMENTED
 
 The worker correctly clears queued writes on logout, and discards a queue when its stored learner identity does not match the currently signed-in learner. There is **no learner-visible warning yet**, so an unsent assignment submission or quiz-progress save could currently disappear without a warning.
@@ -167,7 +181,7 @@ Service workers cache aggressively by design, which means a shipped update can s
 
 ## Files touched in this implementation
 
-- `service-worker.js`
+- `service-worker.js` *(further updated after initial implementation — see "Offline splash screen on the root document" above; cache versions bumped v1 → v2)*
 - `learner_dashboard.php`
 - `assets/js/learner/assignments.js`
 - `assets/js/learner/discussions.js`

@@ -1,7 +1,7 @@
 /* iSkool learner offline-support service worker. */
-const STATIC_CACHE = 'iskool-static-v1';
-const CONTENT_CACHE = 'iskool-content-v1';
-const NETWORK_CACHE = 'iskool-network-v1';
+const STATIC_CACHE = 'iskool-static-v2';
+const CONTENT_CACHE = 'iskool-content-v2';
+const NETWORK_CACHE = 'iskool-network-v2';
 const QUEUE_DB = 'iskool-offline-writes-v1';
 const QUEUE_STORE = 'requests';
 const SYNC_TAG = 'iskool-retry-writes';
@@ -86,7 +86,13 @@ self.addEventListener('fetch', event => {
         return;
     }
     if (url.origin !== self.location.origin && !isThirdPartyStatic(url)) return;
-    if (NETWORK_ONLY_PATHS.has(url.pathname) || isAuthenticationRoute(url.pathname)) {
+    if (request.mode === 'navigate' && isShellNavigationRoute(url.pathname)) {
+        // The splash/login shell document. Prefer the network so a signed-in
+        // learner always gets the live server-side redirect to the dashboard,
+        // but fall back to the precached shell if there is no connection at
+        // all, instead of leaving the browser's own offline error on screen.
+        event.respondWith(networkFirst(request, STATIC_CACHE));
+    } else if (NETWORK_ONLY_PATHS.has(url.pathname) || isAuthenticationRoute(url.pathname)) {
         if (url.origin === self.location.origin && isAuthenticationRoute(url.pathname)) event.waitUntil(clearLearnerDataCaches());
         event.respondWith(fetch(request));
     } else if (isStaticAsset(url)) {
@@ -133,6 +139,14 @@ self.addEventListener('notificationclick', event => {
 
 function isAuthenticationRoute(pathname) {
     return pathname === '/index.php' || pathname === '/dashboard.php' || pathname.startsWith('/auth/');
+}
+function isShellNavigationRoute(pathname) {
+    // Only the precached root document falls back to cache when offline.
+    // Direct requests to /index.php, /dashboard.php, and /auth/* (actual
+    // login/session actions) stay strictly network-only via
+    // isAuthenticationRoute above — a failed auth action should fail
+    // loudly, not silently serve cached HTML.
+    return pathname === '/';
 }
 function isThirdPartyStatic(url) {
     return ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com'].includes(url.hostname);
