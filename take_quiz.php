@@ -58,6 +58,7 @@ if ($status === 'Open') {
 if (!$isQuizAvailable) { ?>
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#20201f">
 <title>Quiz Unavailable</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -69,6 +70,7 @@ body{font-family:'Nunito',sans-serif;background:#0d1117;color:#e2e8f0;display:fl
 h1{font-size:22px;font-weight:800;color:#f85149;margin-bottom:10px}
 p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 a{background:#4fd1c5;color:#0d1117;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;display:inline-block}
+@media (max-width:768px){body{background:#20201f}}
 </style><script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -158,6 +160,7 @@ $actualTimeLeft = $durationSeconds - $elapsedSeconds;
 if ($actualTimeLeft <= 0) { ?>
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#20201f">
 <title>Time Expired</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -169,6 +172,7 @@ h1{font-size:22px;font-weight:800;color:#f85149;margin-bottom:10px}
 p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.06);border-top:3px solid #4fd1c5;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:768px){body{background:#20201f}}
 </style><script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -371,6 +375,7 @@ function build_word_bank(array $fitb): array {
     <meta charset="UTF-8">
     <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#20201f">
     <title><?= htmlspecialchars($quizTitle) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1155,6 +1160,8 @@ function build_word_bank(array $fitb): array {
            MOBILE
         ═══════════════════════════════════════════════ */
         @media (max-width: 768px) {
+            html, body { background: #20201f; }
+
             .sidebar { display: none; }
 
             .main-content {
