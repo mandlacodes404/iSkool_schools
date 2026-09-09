@@ -1165,7 +1165,7 @@ if (fullPage &&
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                  onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
-                <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                <div style="width:36px;height:36px;border-radius:9px;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1186,7 +1186,7 @@ if (fullPage &&
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                  onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
-                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                <div style="width:36px;height:36px;border-radius:9px;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
                         <polyline points="3 6 5 6 21 6"></polyline>
@@ -1212,7 +1212,7 @@ if (fullPage &&
                     border-radius:14px;overflow:hidden;margin-bottom:28px;">
             <div style="padding:14px 16px;">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-                    <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                    <div style="width:36px;height:36px;border-radius:9px;
                                 display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         <span style="font-size:18px;line-height:1;">💡</span>
                     </div>
@@ -1229,7 +1229,7 @@ if (fullPage &&
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                  onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
-                <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
+                <div style="width:36px;height:36px;border-radius:9px;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -1256,7 +1256,7 @@ if (fullPage &&
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
                  onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
-                <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
+                <div style="width:36px;height:36px;border-radius:9px;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f85149" stroke-width="2" fill="none">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
