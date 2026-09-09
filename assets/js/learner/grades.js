@@ -2022,7 +2022,7 @@ function renderProgressReport(data) {
                     <div class="pr-hero-class">${escHtmlPr(data.learner_class)}</div>
                 </div>
                 <div class="pr-hero-avgblock">
-                    <div class="pr-hero-avgnum" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '—'}</div>
+                    <div class="pr-hero-avgnum" id="pr-hero-avgnum" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '—'}</div>
                     <div class="pr-hero-avglabel">overall</div>
                 </div>
             </div>
@@ -2459,6 +2459,14 @@ window.prSwitchTerm = function (term) {
     if (avgNum) {
         avgNum.textContent = selectedTermAvg !== null ? selectedTermAvg + '%' : '—';
         avgNum.style.color = c.text;
+    }
+
+    // Mobile hero's "overall" number — same value/color as pr-avg-num above,
+    // just rendered in the compact hero block instead of the desktop strip.
+    const heroAvgNum = document.getElementById('pr-hero-avgnum');
+    if (heroAvgNum) {
+        heroAvgNum.textContent = selectedTermAvg !== null ? selectedTermAvg + '%' : '—';
+        heroAvgNum.style.color = c.text;
     }
 
     const stripTerm = document.getElementById('pr-strip-term');
