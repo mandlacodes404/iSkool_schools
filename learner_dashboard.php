@@ -356,7 +356,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
         
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); const _sb = document.querySelector('.sidebar'); if(_sb){ _sb.classList.remove('active','desktop-open'); const _ov = document.getElementById('mobileOverlay'); if(_ov) _ov.style.display='none'; }">
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); if(typeof toggleSidebar === 'function') toggleSidebar(true);">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
