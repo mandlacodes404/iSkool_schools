@@ -1130,11 +1130,11 @@ if (fullPage &&
         <!-- ── PROFILE CARD ── -->
         <div onclick="loadLearnerPersonalInfo()"
              style="display:flex;align-items:center;gap:16px;
-                    background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+                    background:transparent;border:1px solid rgba(255,255,255,0.06);
                     border-radius:14px;padding:16px;cursor:pointer;
                     transition:background 0.2s ease;margin-bottom:28px;"
-             onmouseover="this.style.background='#21262d'"
-             onmouseout="this.style.background='#1b1b1b'">
+             onmouseover="this.style.background='rgba(255,255,255,0.04)'"
+             onmouseout="this.style.background='transparent'">
             <div style="position:relative;width:64px;height:64px;border-radius:50%;
                         background:#6f1d1b;border:none;
                         overflow:hidden;flex-shrink:0;">
@@ -1159,11 +1159,11 @@ if (fullPage &&
         <!-- SECTION: PROFILE -->
         <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
                     letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Profile</div>
-        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+        <div style="background:transparent;border:1px solid rgba(255,255,255,0.06);
                     border-radius:14px;overflow:hidden;margin-bottom:28px;">
             <div onclick="document.getElementById('profileInput').click()"
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                 onmouseover="this.style.background='#21262d'"
+                 onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
                 <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -1184,7 +1184,7 @@ if (fullPage &&
             <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
             <div onclick="removeLearnerProfilePicture()"
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                 onmouseover="this.style.background='#21262d'"
+                 onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
                 <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -1208,7 +1208,7 @@ if (fullPage &&
         <!-- SECTION: NOTIFICATIONS -->
         <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
                     letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Notifications</div>
-        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+        <div style="background:transparent;border:1px solid rgba(255,255,255,0.06);
                     border-radius:14px;overflow:hidden;margin-bottom:28px;">
             <div style="padding:14px 16px;">
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
@@ -1227,7 +1227,7 @@ if (fullPage &&
             <div style="height:1px;background:rgba(255,255,255,0.06);margin-left:64px;"></div>
             <div onclick="requestIphonePush()"
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                 onmouseover="this.style.background='#21262d'"
+                 onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
                 <div style="width:36px;height:36px;border-radius:9px;background:rgba(79,209,197,0.12);
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -1250,11 +1250,11 @@ if (fullPage &&
         <!-- SECTION: ACCOUNT -->
         <div style="font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;
                     letter-spacing:0.08em;padding:0 4px;margin-bottom:8px;">Account</div>
-        <div style="background:#1b1b1b;border:1px solid rgba(255,255,255,0.06);
+        <div style="background:transparent;border:1px solid rgba(255,255,255,0.06);
                     border-radius:14px;overflow:hidden;">
             <div onclick="sessionStorage.removeItem('lastLearnerPage'); window.location.href='logout.php';"
                  style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;transition:background 0.2s ease;"
-                 onmouseover="this.style.background='#21262d'"
+                 onmouseover="this.style.background='rgba(255,255,255,0.04)'"
                  onmouseout="this.style.background='transparent'">
                 <div style="width:36px;height:36px;border-radius:9px;background:rgba(248,81,73,0.1);
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
