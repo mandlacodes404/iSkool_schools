@@ -1409,11 +1409,15 @@ function ensurePrStylesInjected() {
                 align-items: center;
                 gap: 7px;
                 min-width: 0;
+                flex: 1;
                 font-size: 12px;
                 color: #8b949e;
+            }
+            .pr-hero-school > span {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                min-width: 0;
             }
             .pr-hero-status {
                 font-size: 10px;
@@ -1928,6 +1932,134 @@ function ensurePrStylesInjected() {
                 .pr-footer-legend { padding: 12px 16px; gap: 12px; }
                 .pr-grade-pills { margin-left: 0; }
             }
+
+            /* ── "LEARN MORE" TRIGGER (next to the Progress Report title) ── */
+            .pr-learn-more-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.12);
+                color: #8b949e;
+                font-family: 'Nunito', sans-serif;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 5px 11px;
+                border-radius: 20px;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.2s;
+            }
+            .pr-learn-more-btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); color: #c9d1d9; }
+            .pr-learn-more-btn svg { flex-shrink: 0; }
+            .pr-hero-school .pr-learn-more-btn { flex-shrink: 0; }
+
+            /* ── STATUS PILL: chevron affordance (signals it's tappable) ── */
+            .pr-status-badge, .pr-strip-status, .pr-hero-status {
+                cursor: pointer;
+            }
+            .pr-status-chevron {
+                display: inline-flex;
+                margin-left: 2px;
+                transition: transform 0.15s;
+            }
+            .pr-status-badge:hover .pr-status-chevron,
+            .pr-strip-status:hover .pr-status-chevron,
+            .pr-hero-status:hover .pr-status-chevron { transform: translateY(1px); }
+
+            /* ── INFO MODALS (shared shell: "Learn more" + status explainer) ── */
+            .pr-info-modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.6);
+                z-index: 9500;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .pr-info-modal-overlay.pr-info-modal-visible { display: flex; }
+            .pr-info-modal-box {
+                background: #20201f;
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px;
+                max-width: 440px;
+                width: 100%;
+                max-height: 85vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 24px 22px;
+                box-sizing: border-box;
+                font-family: 'Nunito', sans-serif;
+                position: relative;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            }
+            .pr-info-modal-close {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.06);
+                border: none;
+                color: #8b949e;
+                font-size: 18px;
+                line-height: 1;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+            .pr-info-modal-close:hover { background: rgba(255,255,255,0.12); color: #e2e8f0; }
+            .pr-info-modal-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+                font-weight: 800;
+                padding: 5px 12px;
+                border-radius: 20px;
+                margin-bottom: 14px;
+            }
+            .pr-info-modal-title {
+                font-size: 18px;
+                font-weight: 800;
+                color: #e2e8f0;
+                margin: 0 0 12px;
+                padding-right: 24px;
+                line-height: 1.3;
+            }
+            .pr-info-modal-body { font-size: 14px; line-height: 1.6; color: #c9d1d9; }
+            .pr-info-modal-body p { margin: 0 0 12px; }
+            .pr-info-modal-body p:last-child { margin-bottom: 0; }
+            .pr-info-modal-body strong { color: #e2e8f0; }
+            .pr-info-modal-notes {
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                padding: 13px 14px;
+                margin-top: 14px;
+            }
+            .pr-info-modal-notes-title {
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                color: #8b949e;
+                margin-bottom: 8px;
+            }
+            .pr-info-modal-notes ul { margin: 0; padding-left: 18px; }
+            .pr-info-modal-notes li { font-size: 13px; line-height: 1.55; color: #c9d1d9; margin-bottom: 6px; }
+            .pr-info-modal-notes li:last-child { margin-bottom: 0; }
+
+            @media (max-width: 480px) {
+                .pr-info-modal-box { padding: 20px 18px; border-radius: 14px; }
+                .pr-info-modal-title { font-size: 16.5px; }
+                .pr-info-modal-body { font-size: 13.5px; }
+            }
         `;
     document.head.appendChild(style);
 }
@@ -2012,8 +2144,16 @@ function renderProgressReport(data) {
             <div class="pr-hero-topline">
                 <div class="pr-hero-school">
                     <span>${escHtmlPr(data.school_name)} &middot; Term ${currentTerm}</span>
+                    <button class="pr-learn-more-btn" onclick="prOpenInfoModal('about')" style="padding:3px 9px;font-size:11px;">
+                        <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        Learn more
+                    </button>
                 </div>
-                <span class="pr-hero-status" id="pr-hero-status" style="color:${st.text};background:${st.bg};">${st.label}</span>
+                <span class="pr-hero-status" id="pr-hero-status" onclick="prOpenInfoModal('status')" style="color:${st.text};background:${st.bg};">${st.label}<span class="pr-status-chevron"><svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span></span>
             </div>
             <div class="pr-hero-idrow">
                 <div class="pr-hero-avatar">${initials(data.learner_name)}</div>
@@ -2124,14 +2264,24 @@ function renderProgressReport(data) {
                     </svg>
                     Back to Grades
                 </button>
-                <button class="pr-print-btn" onclick="window.print()">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="6 9 6 2 18 2 18 9"/>
-                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                        <rect x="6" y="14" width="12" height="8"/>
-                    </svg>
-                    Print Report
-                </button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="pr-learn-more-btn" onclick="prOpenInfoModal('about')">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        Learn more
+                    </button>
+                    <button class="pr-print-btn" onclick="window.print()">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="6 9 6 2 18 2 18 9"/>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                            <rect x="6" y="14" width="12" height="8"/>
+                        </svg>
+                        Print Report
+                    </button>
+                </div>
             </div>
 
             <div class="pr-card">
@@ -2161,12 +2311,13 @@ function renderProgressReport(data) {
                         <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
                         <div class="pr-learner-meta">${escHtmlPr(data.learner_class)}</div>
                     </div>
-                    <div class="pr-status-badge" id="pr-status-badge" style="color:${st.text};background:${st.bg};border-color:${st.border};">
+                    <div class="pr-status-badge" id="pr-status-badge" onclick="prOpenInfoModal('status')" style="color:${st.text};background:${st.bg};border-color:${st.border};">
                         <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
                             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                             <polyline points="17 6 23 6 23 12"/>
                         </svg>
                         ${st.label}
+                        <span class="pr-status-chevron"><svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
                     </div>
                 </div>
 
@@ -2191,11 +2342,12 @@ function renderProgressReport(data) {
                     <div class="pr-strip-divider"></div>
                     <div class="pr-strip-item">
                         <div class="pr-strip-label">Status</div>
-                        <div class="pr-strip-status" id="pr-strip-status" style="color:${st.text};background:${st.bg};border-color:${st.border};">
+                        <div class="pr-strip-status" id="pr-strip-status" onclick="prOpenInfoModal('status')" style="color:${st.text};background:${st.bg};border-color:${st.border};">
                             <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none">
                                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                             </svg>
                             ${st.label}
+                            <span class="pr-status-chevron"><svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
                         </div>
                     </div>
                 </div>
@@ -2262,7 +2414,90 @@ function renderProgressReport(data) {
     apiArea._statusForPct      = statusForPct;
     apiArea._termAvg           = termAvg;
     apiArea._currentTerm       = currentTerm;
+    // Info-modal state: mirrors whatever is currently on screen (status pill
+    // colour/label + overall %) so the "status" modal always explains the
+    // term actually selected. prSwitchTerm keeps this updated on every switch.
+    apiArea._prCurrentStatus   = st;
+    apiArea._prCurrentAvg      = overallAvg;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INFO MODALS ("Learn more" + tappable status pill explainer)
+//
+// Both share one small centred dialog (.pr-info-modal-*, injected via
+// ensurePrStylesInjected) built fresh into its own overlay on <body> --
+// same pattern as #prReportModal -- so it always renders above the mobile
+// full-screen sheet instead of being nested/clipped inside it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function prAboutModalHtml() {
+    return `
+        <div class="pr-info-modal-title">What is a Progress Report?</div>
+        <div class="pr-info-modal-body">
+            <p>Your Progress Report shows how you're doing <strong>right now</strong>, while the term is still happening.</p>
+            <p>It works together with your <strong>Syllabus</strong>: at the start of the term, your Syllabus tells you what marks are coming up and how much each one counts. Your Progress Report then fills in the marks as your teachers grade them — so as the term goes on, you can see your mark building up assessment by assessment, instead of only finding out at the end.</p>
+            <p><strong>The number and status at the top are your overall average</strong> — combining all your subjects together for this term. <strong>The list further down breaks that down subject by subject</strong>, so if your overall status says you need to improve, that's where you'll see exactly which subjects are pulling it down.</p>
+            <p><strong>Why it matters:</strong> it helps you see early — not just at the end of term — whether you're on track, or whether you need to put in more work before it's too late to catch up.</p>
+            <div class="pr-info-modal-notes">
+                <div class="pr-info-modal-notes-title">A few important things to know</div>
+                <ul>
+                    <li>This is <strong>not your final, official report</strong>. It only shows what's been marked so far — some assessments for the term might not be recorded yet.</li>
+                    <li>Your official report only comes from the school once everything for the term has been marked and released.</li>
+                    <li>"Covered" tells you how much of a subject's total mark has been assessed so far — not your final mark in that subject.</li>
+                </ul>
+            </div>
+        </div>`;
+}
+
+function prStatusModalHtml(status, avg) {
+    const avgTxt = avg !== null && avg !== undefined ? avg + '%' : '—';
+    const copyByLabel = {
+        'On Track': 'Your overall average across all your subjects this term is strong so far. Keep it up.',
+        'Needs Improvement': `Your overall average across all your subjects this term is a bit below where it should be.
+            <br><br>This is an overall number — it doesn't say which subject is the issue. Check your Subject Results below to see which ones are pulling your average down, and speak to those teachers if you're unsure where to focus.`,
+        'At Risk': `Your overall average across all your subjects this term is low enough that you're at risk of not passing the term overall.
+            <br><br>This is an overall number — it doesn't say which subject is the issue. Look at your Subject Results below to see which subjects need the most attention, and speak to your teachers soon about extra support.`,
+        'No Data': 'There are no assessed marks for this term yet, so a status can\'t be calculated. Check back once your teachers have recorded some marks.'
+    };
+    const body = copyByLabel[status.label] || '';
+    return `
+        <div class="pr-info-modal-badge" style="color:${status.text};background:${status.bg};border:1px solid ${status.border};">${escHtmlPr(status.label)}</div>
+        <div class="pr-info-modal-title">Overall average: ${avgTxt}</div>
+        <div class="pr-info-modal-body"><p>${body}</p></div>`;
+}
+
+window.prOpenInfoModal = function (type) {
+    const apiArea = document.getElementById('api-content-area');
+    ensurePrStylesInjected();
+
+    let modal = document.getElementById('prInfoModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'prInfoModal';
+        modal.className = 'pr-info-modal-overlay';
+        modal.onclick = function (e) { if (e.target === modal) window.prCloseInfoModal(); };
+        document.body.appendChild(modal);
+    }
+
+    const status = (apiArea && apiArea._prCurrentStatus) || null;
+    const avg    = apiArea ? apiArea._prCurrentAvg : null;
+
+    const bodyHtml = type === 'status' && status
+        ? prStatusModalHtml(status, avg)
+        : prAboutModalHtml();
+
+    modal.innerHTML = `
+        <div class="pr-info-modal-box" onclick="event.stopPropagation()">
+            <button class="pr-info-modal-close" onclick="prCloseInfoModal()">×</button>
+            ${bodyHtml}
+        </div>`;
+    modal.classList.add('pr-info-modal-visible');
+};
+
+window.prCloseInfoModal = function () {
+    const modal = document.getElementById('prInfoModal');
+    if (modal) modal.classList.remove('pr-info-modal-visible');
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MOBILE SHEET: keep the browser/status bar in sync with the dimmed overlay
@@ -2483,18 +2718,29 @@ window.prSwitchTerm = function (term) {
         el.style.color = st.text;
         el.style.background = st.bg;
         el.style.borderColor = st.border;
-        // Preserve the leading <svg> icon, only swap the trailing label text.
+        // Preserve the leading <svg> icon and the trailing chevron <span>,
+        // only swap the label text sitting between them.
         const svg = el.querySelector('svg');
+        const chevron = el.querySelector('.pr-status-chevron');
         el.textContent = st.label;
         if (svg) el.prepend(svg);
+        if (chevron) el.appendChild(chevron);
     });
 
     const heroStatus = document.getElementById('pr-hero-status');
     if (heroStatus) {
+        const heroChevron = heroStatus.querySelector('.pr-status-chevron');
         heroStatus.textContent = st.label;
         heroStatus.style.color = st.text;
         heroStatus.style.background = st.bg;
+        if (heroChevron) heroStatus.appendChild(heroChevron);
     }
+
+    // Keep the info-modal content in sync with whichever term is now
+    // selected, so tapping the status pill always explains the CURRENT
+    // on-screen status/mark rather than the term the report first loaded with.
+    apiArea._prCurrentStatus = st;
+    apiArea._prCurrentAvg    = selectedTermAvg;
 };
 
 window.prBackToGrades = function () {

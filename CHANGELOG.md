@@ -1,6 +1,10 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Added
+- Learner Grades (Progress Report): Added a "Learn more" button (next to the report title on desktop, next to the school name on mobile) that opens a plain-language explainer covering what the Progress Report is, how it relates to the Syllabus, what the overall number/status at the top mean versus the per-subject breakdown below, and that it's an unofficial, in-progress view rather than the school's final report. Aimed at learners and parents who haven't used a school platform like this before (`grades.js`).
+- Learner Grades (Progress Report): The overall status pill (On Track / Needs Improvement / At Risk) is now tappable — shown by a small chevron and pointer cursor — and opens a short explainer of what that specific status means, written around the fact that it's an *overall* average across all subjects, not any one subject; the "Needs Improvement"/"At Risk" copy explicitly points the reader to the Subject Results list below to find which subjects are affecting it. Content follows whichever term is currently selected (`grades.js`).
+
 ### Changed
 - Learner Dashboard (Mobile): Settings page Profile, Notifications, and Account boxes no longer have a filled `#1b1b1b` background — now transparent, keeping only their existing border outline for separation; row hover/tap state switched from a solid `#21262d` fill to a subtle `rgba(255,255,255,0.04)` overlay so rows still show interactivity (`learner_dashboard.php`).
 - Learner Dashboard (Mobile): Settings page icons (Update/Remove Profile Picture, Notification Help, Sync Notifications, Sign Out) no longer sit inside a tinted colour box — the wrapping `background: rgba(...)` behind each icon was removed so the icon itself renders flat with no background colour around it (`learner_dashboard.php`).
