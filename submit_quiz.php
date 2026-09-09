@@ -479,6 +479,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#20201f">
     <title>
         <?php
         if ($type === 'closed')  echo 'Quiz Closed';
@@ -531,6 +532,10 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
         @keyframes cardIn {
             from { opacity: 0; transform: translateY(24px) scale(0.97); }
             to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
+
+        @media (max-width: 768px) {
+            body { background: #20201f; }
         }
 
         /* ── TOP ACCENT BAR ───────────────────────────────── */

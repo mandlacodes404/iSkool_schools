@@ -1176,6 +1176,8 @@ function build_word_bank(array $fitb): array {
             .q-text { font-size: 15px; }
             .choice-item { padding: 12px 14px; }
 
+            .modal-box { background: #20201f; }
+
             .submit-btn { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 0; z-index: 100; margin: 0; }
 
             .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; background: var(--surface); border-top: 1px solid var(--border); margin: 0; z-index: 100; }
