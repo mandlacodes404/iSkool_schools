@@ -59,6 +59,7 @@ if (!$isQuizAvailable) { ?>
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#20201f">
+ <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
 <title>Quiz Unavailable</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
