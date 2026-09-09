@@ -2075,7 +2075,7 @@ function renderProgressReport(data) {
             const coveredTxt = covered !== null ? covered + '%' : '—';
             const codeText   = escHtmlPr(s.code || (td.count + ' assessment' + (td.count !== 1 ? 's' : '')));
             const countText  = td.count + ' assessment' + (td.count !== 1 ? 's' : '');
-            const v2MetaText = countText + (covered !== null ? ' &middot; ' + coveredTxt + ' covered' : '');
+            const v2MetaText = countText + (covered !== null ? ' &middot; ' + coveredTxt + ' covered for this term' : '');
 
             return '<div class="pr-subject-row">' +
                 '<div class="pr-subject-icon" style="background:' + c.bg + ';color:' + c.text + ';">' +
