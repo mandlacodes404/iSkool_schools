@@ -48,7 +48,7 @@ $ls->execute();
 $learner = $ls->get_result()->fetch_assoc();
 $ls->close();
 
-$learnerName  = trim(($learner['title'] ?? '') . ' ' . ($learner['name'] ?? '') . ' ' . ($learner['surname'] ?? ''));
+$learnerName  = trim(($learner['name'] ?? '') . ' ' . ($learner['surname'] ?? ''));
 $learnerClass = $learner['class_name'] ?? 'Not enrolled';
 
 // ── Academic year & term ──

@@ -1216,14 +1216,14 @@ function ensurePrStylesInjected() {
             /* ── SCHOOL BAND (coloured top strip) ── */
             .pr-school-band {
                 background: #0d5c3a;
-                padding: 18px 22px;
+                padding: 20.7px 25.3px;
                 display: flex;
                 align-items: center;
-                gap: 14px;
+                gap: 16.1px;
             }
             .pr-logo-wrap {
-                width: 46px;
-                height: 46px;
+                width: 52.9px;
+                height: 52.9px;
                 border-radius: 50%;
                 background: rgba(255,255,255,0.15);
                 display: flex;
@@ -1234,60 +1234,60 @@ function ensurePrStylesInjected() {
                 border: 2px solid rgba(255,255,255,0.2);
             }
             .pr-logo {
-                width: 46px;
-                height: 46px;
+                width: 52.9px;
+                height: 52.9px;
                 border-radius: 50%;
                 object-fit: cover;
             }
             .pr-logo-fallback {
-                font-size: 20px;
+                font-size: 23px;
                 color: rgba(255,255,255,0.9);
             }
             .pr-school-name {
-                font-size: 15px;
+                font-size: 17.25px;
                 font-weight: 800;
                 color: #d1fae5;
                 margin: 0;
                 line-height: 1.2;
             }
             .pr-school-sub {
-                font-size: 12px;
+                font-size: 13.8px;
                 color: #6ee7b7;
                 margin-top: 3px;
             }
 
             /* ── STUDENT ROW ── */
             .pr-student-row {
-                padding: 18px 22px;
+                padding: 20.7px 25.3px;
                 display: flex;
                 align-items: center;
-                gap: 14px;
+                gap: 16.1px;
                 border-bottom: 1px solid rgba(255,255,255,0.06);
             }
             .pr-avatar {
-                width: 48px;
-                height: 48px;
+                width: 55.2px;
+                height: 55.2px;
                 border-radius: 50%;
                 background: rgba(104,211,145,0.12);
                 border: 1px solid rgba(104,211,145,0.25);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 17px;
+                font-size: 19.55px;
                 font-weight: 800;
                 color: #68d391;
                 flex-shrink: 0;
                 letter-spacing: -0.5px;
             }
             .pr-learner-name {
-                font-size: 17px;
+                font-size: 19.55px;
                 font-weight: 800;
                 color: #e2e8f0;
                 margin: 0 0 3px;
                 line-height: 1.2;
             }
             .pr-learner-meta {
-                font-size: 13px;
+                font-size: 14.95px;
                 color: #8b949e;
             }
             .pr-status-badge {
@@ -1298,9 +1298,9 @@ function ensurePrStylesInjected() {
                 background: rgba(34,197,94,0.12);
                 border: 1px solid rgba(34,197,94,0.25);
                 color: #22c55e;
-                font-size: 12px;
+                font-size: 13.8px;
                 font-weight: 700;
-                padding: 5px 12px;
+                padding: 5.75px 13.8px;
                 border-radius: 20px;
                 white-space: nowrap;
                 flex-shrink: 0;
@@ -1351,18 +1351,18 @@ function ensurePrStylesInjected() {
             /* ── TERM TABS ── */
             .pr-term-tabs {
                 display: flex;
-                gap: 8px;
-                padding: 16px 22px 0;
+                gap: 9.2px;
+                padding: 18.4px 25.3px 0;
                 flex-wrap: wrap;
             }
             .pr-term-tab {
                 flex: 1;
-                min-width: 70px;
-                padding: 10px 8px;
+                min-width: 80.5px;
+                padding: 11.5px 9.2px;
                 text-align: center;
                 background: rgba(255,255,255,0.02);
                 border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
+                border-radius: 11.5px;
                 cursor: pointer;
                 transition: all 0.2s;
                 position: relative;
@@ -1373,7 +1373,7 @@ function ensurePrStylesInjected() {
                 border-color: rgba(104,211,145,0.35);
             }
             .pr-term-tab-label {
-                font-size: 10px;
+                font-size: 11.5px;
                 font-weight: 800;
                 letter-spacing: 1px;
                 text-transform: uppercase;
@@ -1381,9 +1381,9 @@ function ensurePrStylesInjected() {
                 margin-bottom: 4px;
             }
             .pr-term-tab.active .pr-term-tab-label { color: #68d391; }
-            .pr-term-tab-avg { font-size: 17px; font-weight: 900; color: #e2e8f0; }
+            .pr-term-tab-avg { font-size: 19.55px; font-weight: 900; color: #e2e8f0; }
             .pr-term-tab.active .pr-term-tab-avg { color: #68d391; }
-            .pr-term-tab-sub { font-size: 10px; color: #555e6a; margin-top: 2px; }
+            .pr-term-tab-sub { font-size: 11.5px; color: #555e6a; margin-top: 2px; }
 
             /* Hidden by default (desktop); shown only inside .pr-modal-sheet
                on mobile, see the ≤899px media query below. */
@@ -1415,7 +1415,6 @@ function ensurePrStylesInjected() {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .pr-hero-school i { font-size: 15px; color: #68d391; flex-shrink: 0; }
             .pr-hero-status {
                 font-size: 10px;
                 font-weight: 800;
@@ -1496,46 +1495,46 @@ function ensurePrStylesInjected() {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 16px 22px 10px;
+                padding: 18.4px 25.3px 11.5px;
             }
             .pr-subjects-title {
-                font-size: 11px;
+                font-size: 12.65px;
                 font-weight: 800;
                 letter-spacing: 1px;
                 text-transform: uppercase;
                 color: #8b949e;
             }
             .pr-subjects-col-hint {
-                font-size: 11px;
+                font-size: 12.65px;
                 color: #555e6a;
             }
 
             /* ── SUBJECT ROWS ── */
-            .pr-subjects-list { padding: 0 22px 6px; }
+            .pr-subjects-list { padding: 0 25.3px 6.9px; }
             .pr-subject-row {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 13px 0;
+                gap: 13.8px;
+                padding: 14.95px 0;
                 border-top: 1px solid rgba(255,255,255,0.05);
             }
             .pr-subject-row:first-child { border-top: none; }
             .pr-subject-icon {
-                width: 32px;
-                height: 32px;
-                border-radius: 8px;
+                width: 36.8px;
+                height: 36.8px;
+                border-radius: 9.2px;
                 background: rgba(104,211,145,0.1);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                font-size: 14px;
+                font-size: 16.1px;
                 color: #68d391;
                 font-weight: 800;
             }
-            .pr-subject-info { min-width: 0; flex: 0 0 130px; }
+            .pr-subject-info { min-width: 0; flex: 0 0 149.5px; }
             .pr-subject-name {
-                font-size: 13px;
+                font-size: 14.95px;
                 font-weight: 800;
                 color: #e2e8f0;
                 white-space: nowrap;
@@ -1543,27 +1542,27 @@ function ensurePrStylesInjected() {
                 text-overflow: ellipsis;
                 margin-bottom: 2px;
             }
-            .pr-subject-code { font-size: 11px; color: #555e6a; }
-            .pr-subject-bars { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-            .pr-bar-row { display: flex; align-items: center; gap: 8px; }
-            .pr-bar-tag { font-size: 10px; color: #555e6a; min-width: 46px; flex-shrink: 0; }
+            .pr-subject-code { font-size: 12.65px; color: #555e6a; }
+            .pr-subject-bars { flex: 1; display: flex; flex-direction: column; gap: 5.75px; }
+            .pr-bar-row { display: flex; align-items: center; gap: 9.2px; }
+            .pr-bar-tag { font-size: 11.5px; color: #555e6a; min-width: 52.9px; flex-shrink: 0; }
             .pr-bar-bg {
                 flex: 1;
-                height: 5px;
+                height: 5.75px;
                 background: rgba(255,255,255,0.06);
                 border-radius: 100px;
                 overflow: hidden;
             }
             .pr-bar-fill { height: 100%; border-radius: 100px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
-            .pr-bar-pct { font-size: 11px; font-weight: 700; min-width: 32px; text-align: right; flex-shrink: 0; }
+            .pr-bar-pct { font-size: 12.65px; font-weight: 700; min-width: 36.8px; text-align: right; flex-shrink: 0; }
             .pr-subject-grade {
-                width: 30px;
-                height: 26px;
-                border-radius: 7px;
+                width: 34.5px;
+                height: 29.9px;
+                border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 12px;
+                font-size: 13.8px;
                 font-weight: 800;
                 flex-shrink: 0;
             }
@@ -1571,7 +1570,7 @@ function ensurePrStylesInjected() {
             .pr-grade-b { background: rgba(59,130,246,0.14); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
             .pr-grade-c { background: rgba(245,158,11,0.14); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
             .pr-grade-d { background: rgba(248,81,73,0.14);  color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
-            .pr-subject-no-data { font-size: 12px; color: #555e6a; font-style: italic; flex: 1; }
+            .pr-subject-no-data { font-size: 13.8px; color: #555e6a; font-style: italic; flex: 1; }
 
             /* ── SUBJECT ROWS v2 (mobile-only, bar-free) ──
                Design 2: grade badge leads, name + coverage as plain muted
@@ -1620,17 +1619,17 @@ function ensurePrStylesInjected() {
 
             /* ── FOOTER LEGEND ── */
             .pr-footer-legend {
-                padding: 12px 22px;
+                padding: 13.8px 25.3px;
                 border-top: 1px solid rgba(255,255,255,0.06);
                 display: flex;
-                gap: 20px;
+                gap: 23px;
                 flex-wrap: wrap;
                 align-items: center;
             }
-            .pr-legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #8b949e; }
-            .pr-legend-bar { width: 22px; height: 5px; border-radius: 100px; }
-            .pr-grade-pills { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
-            .pr-grade-pill { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 6px; }
+            .pr-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.65px; color: #8b949e; }
+            .pr-legend-bar { width: 25.3px; height: 5.75px; border-radius: 100px; }
+            .pr-grade-pills { margin-left: auto; display: flex; gap: 9.2px; flex-wrap: wrap; }
+            .pr-grade-pill { font-size: 12.65px; font-weight: 700; padding: 2.3px 10.35px; border-radius: 7px; }
 
             /* ── EMPTY STATE ── */
             .pr-empty { text-align: center; color: #555e6a; padding: 50px 20px; font-size: 14px; }
@@ -2012,10 +2011,6 @@ function renderProgressReport(data) {
         <div class="pr-hero">
             <div class="pr-hero-topline">
                 <div class="pr-hero-school">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="1.8" fill="none">
-                        <path d="M22 10v12H2V10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                        <path d="M7 9.5v5M17 9.5v5M12 14.5v5"/>
-                    </svg>
                     <span>${escHtmlPr(data.school_name)} &middot; Term ${currentTerm}</span>
                 </div>
                 <span class="pr-hero-status" id="pr-hero-status" style="color:${st.text};background:${st.bg};">${st.label}</span>
