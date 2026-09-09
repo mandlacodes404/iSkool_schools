@@ -1,6 +1,12 @@
 # iSkool Changelog
 
 ## [Unreleased]
+### Changed
+- Learner Dashboard (Mobile): Settings page Profile, Notifications, and Account boxes no longer have a filled `#1b1b1b` background — now transparent, keeping only their existing border outline for separation; row hover/tap state switched from a solid `#21262d` fill to a subtle `rgba(255,255,255,0.04)` overlay so rows still show interactivity (`learner_dashboard.php`).
+- Learner Dashboard (Mobile): Settings page icons (Update/Remove Profile Picture, Notification Help, Sync Notifications, Sign Out) no longer sit inside a tinted colour box — the wrapping `background: rgba(...)` behind each icon was removed so the icon itself renders flat with no background colour around it (`learner_dashboard.php`).
+
+### Fixed
+- Learner Dashboard (Mobile): Fixed the header (and its hamburger menu button) becoming unresponsive after tapping the sidebar avatar to open Settings. The avatar's `onclick` was closing the sidebar manually by stripping its classes directly instead of calling the shared `toggleSidebar()` function, so `mainHeader.style.pointerEvents`, set to `none` while the menu is open, was never reset back — leaving the header permanently unclickable. Avatar now closes the sidebar via `toggleSidebar(true)`, the same path already used by the X button and overlay (`learner_dashboard.php`).
 
 ## [v1.2.4] - 2026-09-07
 ### Added
