@@ -1169,10 +1169,10 @@ function build_word_bank(array $fitb): array {
                 padding: 16px 14px 100px;
             }
 
-            .topbar { padding: 0 14px; }
+            .topbar { padding: 0 14px; background: #20201f; }
             .topbar-meta { display: none; }
 
-            .question-card { padding: 20px 18px; }
+            .question-card { padding: 20px 18px; background: #20201f; }
             .q-text { font-size: 15px; }
             .choice-item { padding: 12px 14px; }
 
