@@ -1942,12 +1942,25 @@ function renderProgressReport(data) {
     const currentTerm = data.current_term || 1;
     const subjects    = data.subjects || [];
 
+    // Thresholds and colors here MUST match the legend key rendered in
+    // .pr-grade-pills (pr-grade-a/b/c/d, see ensurePrStylesInjected) and the
+    // status-band logic in statusForPct() below. Keep all three in sync.
     function pctColor(v) {
         if (v === null) return { text: '#555e6a', bg: 'rgba(74,85,104,0.15)', border: '#555e6a' };
-        if (v >= 80)   return { text: '#22c55e', bg: 'rgba(34,197,94,0.15)',   border: '#22c55e' };
-        if (v >= 60)   return { text: '#68d391', bg: 'rgba(104,211,145,0.15)',  border: '#68d391' };
-        if (v >= 40)   return { text: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: '#f59e0b' };
-        return           { text: '#f85149', bg: 'rgba(248,81,73,0.15)',    border: '#f85149' };
+        if (v >= 80)   return { text: '#22c55e', bg: 'rgba(34,197,94,0.15)',  border: '#22c55e' }; // A: green
+        if (v >= 60)   return { text: '#60a5fa', bg: 'rgba(59,130,246,0.15)', border: '#60a5fa' }; // B: blue
+        if (v >= 40)   return { text: '#f59e0b', bg: 'rgba(245,158,11,0.15)', border: '#f59e0b' }; // C/D band: amber
+        return           { text: '#f85149', bg: 'rgba(248,81,73,0.15)',   border: '#f85149' };     // At risk: red
+    }
+
+    // Status badge text/color, driven by the SAME thresholds as pctColor()
+    // and the grade legend, so "On Track" / color / letter grade never
+    // disagree with each other for a given percentage.
+    function statusForPct(v) {
+        if (v === null)  return { label: 'No Data',           text: '#555e6a', bg: 'rgba(74,85,104,0.15)',  border: 'rgba(85,94,106,0.35)' };
+        if (v >= 60)     return { label: 'On Track',          text: '#22c55e', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.25)' };
+        if (v >= 40)     return { label: 'Needs Improvement', text: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)' };
+        return              { label: 'At Risk',                text: '#f85149', bg: 'rgba(248,81,73,0.12)', border: 'rgba(248,81,73,0.25)' };
     }
 
     function termAvg(termNum) {
@@ -1957,6 +1970,7 @@ function renderProgressReport(data) {
 
     const overallAvg = data.overall_avg;
     const oc = pctColor(overallAvg);
+    const st = statusForPct(overallAvg);
 
     const termTabsHtml = [1,2,3,4].map(t => {
         const avg = termAvg(t);
@@ -2004,7 +2018,7 @@ function renderProgressReport(data) {
                     </svg>
                     <span>${escHtmlPr(data.school_name)} &middot; Term ${currentTerm}</span>
                 </div>
-                <span class="pr-hero-status">On Track</span>
+                <span class="pr-hero-status" id="pr-hero-status" style="color:${st.text};background:${st.bg};">${st.label}</span>
             </div>
             <div class="pr-hero-idrow">
                 <div class="pr-hero-avatar">${initials(data.learner_name)}</div>
@@ -2142,7 +2156,7 @@ function renderProgressReport(data) {
                     </div>
                     <div>
                         <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
-                        <div class="pr-school-sub">Progress Report &nbsp;&middot;&nbsp; Term ${currentTerm}, ${escHtmlPr(data.date)}</div>
+                        <div class="pr-school-sub">Progress Report &nbsp;&middot;&nbsp; Term <span id="pr-school-sub-term">${currentTerm}</span>, ${escHtmlPr(data.date)}</div>
                     </div>
                 </div>
 
@@ -2152,12 +2166,12 @@ function renderProgressReport(data) {
                         <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
                         <div class="pr-learner-meta">${escHtmlPr(data.learner_class)}</div>
                     </div>
-                    <div class="pr-status-badge">
+                    <div class="pr-status-badge" id="pr-status-badge" style="color:${st.text};background:${st.bg};border-color:${st.border};">
                         <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
                             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                             <polyline points="17 6 23 6 23 12"/>
                         </svg>
-                        On Track
+                        ${st.label}
                     </div>
                 </div>
 
@@ -2165,14 +2179,14 @@ function renderProgressReport(data) {
                     <div class="pr-avg-block">
                         <div class="pr-avg-label">Overall average</div>
                         <div style="display:flex;align-items:baseline;gap:4px;">
-                            <div class="pr-avg-num" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '&mdash;'}</div>
+                            <div class="pr-avg-num" id="pr-avg-num" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '&mdash;'}</div>
                             <span class="pr-avg-denom">/ 100</span>
                         </div>
                     </div>
                     <div class="pr-strip-divider"></div>
                     <div class="pr-strip-item">
                         <div class="pr-strip-label">Term</div>
-                        <div class="pr-strip-val">Term ${currentTerm}</div>
+                        <div class="pr-strip-val" id="pr-strip-term">Term ${currentTerm}</div>
                     </div>
                     <div class="pr-strip-divider"></div>
                     <div class="pr-strip-item">
@@ -2182,11 +2196,11 @@ function renderProgressReport(data) {
                     <div class="pr-strip-divider"></div>
                     <div class="pr-strip-item">
                         <div class="pr-strip-label">Status</div>
-                        <div class="pr-strip-status">
+                        <div class="pr-strip-status" id="pr-strip-status" style="color:${st.text};background:${st.bg};border-color:${st.border};">
                             <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none">
                                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                             </svg>
-                            On Track
+                            ${st.label}
                         </div>
                     </div>
                 </div>
@@ -2250,6 +2264,9 @@ function renderProgressReport(data) {
     apiArea._prData            = data;
     apiArea._buildSubjectCards = buildSubjectCards;
     apiArea._pctColor          = pctColor;
+    apiArea._statusForPct      = statusForPct;
+    apiArea._termAvg           = termAvg;
+    apiArea._currentTerm       = currentTerm;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2420,6 +2437,9 @@ function wireSheetDragToClose(modal, onClose) {
 window.prSwitchTerm = function (term) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea || !apiArea._prData) return;
+
+    apiArea._currentTerm = term;
+
     document.querySelectorAll('.pr-term-tab').forEach((tab, i) => {
         tab.classList.toggle('active', i + 1 === term);
     });
@@ -2428,8 +2448,50 @@ window.prSwitchTerm = function (term) {
     document.querySelectorAll('.pr-hero-trenditem').forEach((item, i) => {
         item.classList.toggle('pr-hero-trend-current', i + 1 === term);
     });
+
+    // Re-render subject cards for the selected term.
     const grid = document.getElementById('pr-subjects-grid');
     if (grid) grid.innerHTML = apiArea._buildSubjectCards(term);
+
+    // Recompute the term average, color and status for the SELECTED term
+    // (not the term the report originally loaded on) and push them into
+    // every place that previously showed a frozen "Term 1 / On Track".
+    const selectedTermAvg = apiArea._termAvg(term);
+    const c  = apiArea._pctColor(selectedTermAvg);
+    const st = apiArea._statusForPct(selectedTermAvg);
+
+    const avgNum = document.getElementById('pr-avg-num');
+    if (avgNum) {
+        avgNum.textContent = selectedTermAvg !== null ? selectedTermAvg + '%' : '—';
+        avgNum.style.color = c.text;
+    }
+
+    const stripTerm = document.getElementById('pr-strip-term');
+    if (stripTerm) stripTerm.textContent = 'Term ' + term;
+
+    const schoolSubTerm = document.getElementById('pr-school-sub-term');
+    if (schoolSubTerm) schoolSubTerm.textContent = term;
+
+    [
+        document.getElementById('pr-status-badge'),
+        document.getElementById('pr-strip-status'),
+    ].forEach((el) => {
+        if (!el) return;
+        el.style.color = st.text;
+        el.style.background = st.bg;
+        el.style.borderColor = st.border;
+        // Preserve the leading <svg> icon, only swap the trailing label text.
+        const svg = el.querySelector('svg');
+        el.textContent = st.label;
+        if (svg) el.prepend(svg);
+    });
+
+    const heroStatus = document.getElementById('pr-hero-status');
+    if (heroStatus) {
+        heroStatus.textContent = st.label;
+        heroStatus.style.color = st.text;
+        heroStatus.style.background = st.bg;
+    }
 };
 
 window.prBackToGrades = function () {
