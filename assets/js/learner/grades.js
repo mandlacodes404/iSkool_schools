@@ -1162,48 +1162,6 @@ function ensurePrStylesInjected() {
                 box-sizing: border-box;
             }
 
-            /* ── TOPBAR ── */
-            .pr-topbar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            .pr-back-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: #c9d1d9;
-                padding: 9px 16px;
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 700;
-                font-family: 'Nunito', sans-serif;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .pr-back-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
-            .pr-print-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 7px;
-                background: rgba(104,211,145,0.1);
-                border: 1px solid rgba(104,211,145,0.3);
-                color: #68d391;
-                padding: 9px 16px;
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 700;
-                font-family: 'Nunito', sans-serif;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .pr-print-btn:hover { background: rgba(104,211,145,0.2); }
-
             /* ── MAIN CARD ── */
             .pr-card {
                 background: #161b22;
@@ -1213,190 +1171,12 @@ function ensurePrStylesInjected() {
                 margin-bottom: 20px;
             }
 
-            /* ── SCHOOL BAND (coloured top strip) ── */
-            .pr-school-band {
-                background: #0d5c3a;
-                padding: 20.7px 25.3px;
-                display: flex;
-                align-items: center;
-                gap: 16.1px;
-            }
-            .pr-logo-wrap {
-                width: 52.9px;
-                height: 52.9px;
-                border-radius: 50%;
-                background: rgba(255,255,255,0.15);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                overflow: hidden;
-                border: 2px solid rgba(255,255,255,0.2);
-            }
-            .pr-logo {
-                width: 52.9px;
-                height: 52.9px;
-                border-radius: 50%;
-                object-fit: cover;
-            }
-            .pr-logo-fallback {
-                font-size: 23px;
-                color: rgba(255,255,255,0.9);
-            }
-            .pr-school-name {
-                font-size: 17.25px;
-                font-weight: 800;
-                color: #d1fae5;
-                margin: 0;
-                line-height: 1.2;
-            }
-            .pr-school-sub {
-                font-size: 13.8px;
-                color: #6ee7b7;
-                margin-top: 3px;
-            }
-
-            /* ── STUDENT ROW ── */
-            .pr-student-row {
-                padding: 20.7px 25.3px;
-                display: flex;
-                align-items: center;
-                gap: 16.1px;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
-            }
-            .pr-avatar {
-                width: 55.2px;
-                height: 55.2px;
-                border-radius: 50%;
-                background: rgba(104,211,145,0.12);
-                border: 1px solid rgba(104,211,145,0.25);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 19.55px;
-                font-weight: 800;
-                color: #68d391;
-                flex-shrink: 0;
-                letter-spacing: -0.5px;
-            }
-            .pr-learner-name {
-                font-size: 19.55px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 3px;
-                line-height: 1.2;
-            }
-            .pr-learner-meta {
-                font-size: 14.95px;
-                color: #8b949e;
-            }
-            .pr-status-badge {
-                margin-left: auto;
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                background: rgba(34,197,94,0.12);
-                border: 1px solid rgba(34,197,94,0.25);
-                color: #22c55e;
-                font-size: 13.8px;
-                font-weight: 700;
-                padding: 5.75px 13.8px;
-                border-radius: 20px;
-                white-space: nowrap;
-                flex-shrink: 0;
-            }
-
-            /* ── AVERAGE STRIP ── */
-            .pr-avg-strip {
-                padding: 16px 22px;
-                display: flex;
-                align-items: center;
-                gap: 0;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
-                flex-wrap: wrap;
-            }
-            .pr-avg-block { padding-right: 24px; }
-            .pr-avg-label { font-size: 12px; color: #8b949e; margin-bottom: 3px; }
-            .pr-avg-num {
-                font-size: 32px;
-                font-weight: 900;
-                color: #22c55e;
-                line-height: 1;
-            }
-            .pr-avg-denom { font-size: 13px; color: #555e6a; margin-left: 3px; }
-            .pr-strip-divider {
-                width: 1px;
-                height: 36px;
-                background: rgba(255,255,255,0.07);
-                margin: 0 24px 0 0;
-                flex-shrink: 0;
-            }
-            .pr-strip-item { padding-right: 24px; }
-            .pr-strip-label { font-size: 11px; color: #8b949e; margin-bottom: 3px; }
-            .pr-strip-val { font-size: 14px; font-weight: 700; color: #e2e8f0; }
-            .pr-strip-status {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                background: rgba(34,197,94,0.12);
-                border: 1px solid rgba(34,197,94,0.22);
-                color: #22c55e;
-                font-size: 12px;
-                font-weight: 700;
-                padding: 3px 10px;
-                border-radius: 20px;
-                margin-top: 2px;
-            }
-
-            /* ── TERM TABS ── */
-            .pr-term-tabs {
-                display: flex;
-                gap: 9.2px;
-                padding: 18.4px 25.3px 0;
-                flex-wrap: wrap;
-            }
-            .pr-term-tab {
-                flex: 1;
-                min-width: 80.5px;
-                padding: 11.5px 9.2px;
-                text-align: center;
-                background: rgba(255,255,255,0.02);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 11.5px;
-                cursor: pointer;
-                transition: all 0.2s;
-                position: relative;
-            }
-            .pr-term-tab:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); }
-            .pr-term-tab.active {
-                background: rgba(104,211,145,0.08);
-                border-color: rgba(104,211,145,0.35);
-            }
-            .pr-term-tab-label {
-                font-size: 11.5px;
-                font-weight: 800;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-                color: #8b949e;
-                margin-bottom: 4px;
-            }
-            .pr-term-tab.active .pr-term-tab-label { color: #68d391; }
-            .pr-term-tab-avg { font-size: 19.55px; font-weight: 900; color: #e2e8f0; }
-            .pr-term-tab.active .pr-term-tab-avg { color: #68d391; }
-            .pr-term-tab-sub { font-size: 11.5px; color: #555e6a; margin-top: 2px; }
-
-            /* Hidden by default (desktop); shown only inside .pr-modal-sheet
-               on mobile, see the ≤899px media query below. */
-            .pr-hero { display: none; }
-
-            /* ── MOBILE HEADER REDESIGN (Design B: single hero card) ──
-               Replaces school band + student row + avg strip + term tabs
-               with one compressed block: top line (school/term + status),
-               name + overall average sharing a row, then a slim term-trend
-               line. Subjects keep their existing markup/CSS untouched —
-               this only reorganizes what comes before them. Mobile-only
-               (≤899px, matching the existing full-screen sheet breakpoint);
-               desktop keeps the original school band / strip / tabs. */
+            /* The report's only header, shown on every viewport (desktop
+               right panel and the mobile sheet alike): top line
+               (school/term + status), name + overall average sharing a
+               row, then a slim term-trend line that also drives term
+               switching (see prSwitchTerm). */
+            .pr-hero { display: block; }
             .pr-hero-topline {
                 display: flex;
                 align-items: center;
@@ -1484,16 +1264,6 @@ function ensurePrStylesInjected() {
             .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #68d391; }
             .pr-hero-trenditem.pr-hero-trend-disabled { opacity: 0.4; }
 
-            .pr-current-dot {
-                position: absolute;
-                top: 7px;
-                right: 7px;
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: #68d391;
-            }
-
             /* ── SUBJECTS SECTION ── */
             .pr-subjects-header {
                 display: flex;
@@ -1508,96 +1278,28 @@ function ensurePrStylesInjected() {
                 text-transform: uppercase;
                 color: #8b949e;
             }
-            .pr-subjects-col-hint {
-                font-size: 12.65px;
-                color: #555e6a;
-            }
 
-            /* ── SUBJECT ROWS ── */
+            /* ── SUBJECT ROWS ── grade-letter colors, shared by the v2
+               subject badges below and the footer's grade-pill legend. */
             .pr-subjects-list { padding: 0 25.3px 6.9px; }
-            .pr-subject-row {
-                display: flex;
-                align-items: center;
-                gap: 13.8px;
-                padding: 14.95px 0;
-                border-top: 1px solid rgba(255,255,255,0.05);
-            }
-            .pr-subject-row:first-child { border-top: none; }
-            .pr-subject-icon {
-                width: 36.8px;
-                height: 36.8px;
-                border-radius: 9.2px;
-                background: rgba(104,211,145,0.1);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                font-size: 16.1px;
-                color: #68d391;
-                font-weight: 800;
-            }
-            .pr-subject-info { min-width: 0; flex: 0 0 149.5px; }
-            .pr-subject-name {
-                font-size: 14.95px;
-                font-weight: 800;
-                color: #e2e8f0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                margin-bottom: 2px;
-            }
-            .pr-subject-code { font-size: 12.65px; color: #555e6a; }
-            .pr-subject-bars { flex: 1; display: flex; flex-direction: column; gap: 5.75px; }
-            .pr-bar-row { display: flex; align-items: center; gap: 9.2px; }
-            .pr-bar-tag { font-size: 11.5px; color: #555e6a; min-width: 52.9px; flex-shrink: 0; }
-            .pr-bar-bg {
-                flex: 1;
-                height: 5.75px;
-                background: rgba(255,255,255,0.06);
-                border-radius: 100px;
-                overflow: hidden;
-            }
-            .pr-bar-fill { height: 100%; border-radius: 100px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
-            .pr-bar-pct { font-size: 12.65px; font-weight: 700; min-width: 36.8px; text-align: right; flex-shrink: 0; }
-            .pr-subject-grade {
-                width: 34.5px;
-                height: 29.9px;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 13.8px;
-                font-weight: 800;
-                flex-shrink: 0;
-            }
             .pr-grade-a { background: rgba(34,197,94,0.14);  color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
             .pr-grade-b { background: rgba(59,130,246,0.14); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
             .pr-grade-c { background: rgba(245,158,11,0.14); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
             .pr-grade-d { background: rgba(248,81,73,0.14);  color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
-            .pr-subject-no-data { font-size: 13.8px; color: #555e6a; font-style: italic; flex: 1; }
 
-            /* ── SUBJECT ROWS v2 (mobile-only, bar-free) ──
+            /* ── SUBJECT ROWS v2 (bar-free) ──
                Design 2: grade badge leads, name + coverage as plain muted
                text, mark % on the right -- no progress bars, no legend
-               needed to decode them. Hidden by default (desktop keeps the
-               original two-bar .pr-subject-row); shown only inside
-               .pr-modal-sheet on mobile, see the ≤899px media query below.
-               Rendered alongside the original row for the same subject so
-               prSwitchTerm's innerHTML re-render keeps working unchanged
-               for both variants at once. */
+               needed to decode them. This is the simplified card design
+               used on both mobile and desktop. */
             .pr-subject-row-v2 {
-                display: none;
+                display: flex;
                 align-items: center;
                 gap: 10px;
                 padding: 10px 0;
                 border-top: 1px solid rgba(255,255,255,0.05);
             }
-            /* .pr-subject-row (hidden on mobile) always sits immediately
-               before each subject's .pr-subject-row-v2 as a DOM sibling, so
-               :first-of-type (tag-based, not class-based) would never match
-               the first v2 row -- it'd always see .pr-subject-row there
-               first. Target the actual first visible row explicitly. */
-            .pr-subjects-list > .pr-subject-row:first-child + .pr-subject-row-v2 { border-top: none; }
+            .pr-subjects-list > .pr-subject-row-v2:first-child { border-top: none; }
             .pr-subject-v2-badge {
                 width: 30px;
                 height: 24px;
@@ -1630,8 +1332,6 @@ function ensurePrStylesInjected() {
                 flex-wrap: wrap;
                 align-items: center;
             }
-            .pr-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.65px; color: #8b949e; }
-            .pr-legend-bar { width: 25.3px; height: 5.75px; border-radius: 100px; }
             .pr-grade-pills { margin-left: auto; display: flex; gap: 9.2px; flex-wrap: wrap; }
             .pr-grade-pill { font-size: 12.65px; font-weight: 700; padding: 2.3px 10.35px; border-radius: 7px; }
 
@@ -1640,29 +1340,15 @@ function ensurePrStylesInjected() {
 
             /* ── PRINT ── */
             @media print {
-                .pr-topbar { display: none !important; }
-                .pr-term-tabs { display: none !important; }
                 .pr-wrap { padding: 0; max-width: 100%; }
                 .pr-card { background: #fff !important; border: 1px solid #ddd !important; }
-                .pr-school-band { background: #0d5c3a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                .pr-learner-name, .pr-subject-name { color: #111 !important; }
-                .pr-avg-num { color: #16a34a !important; }
+                .pr-subject-v2-name { color: #111 !important; }
             }
 
             /* ── MOBILE ── */
             @media (max-width: 600px) {
                 .pr-wrap { padding-bottom: 80px; }
                 .pr-card { border: none; }
-                .pr-school-band { padding: 14px 16px; gap: 12px; }
-                .pr-school-name { font-size: 14px; }
-                .pr-student-row { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
-                .pr-status-badge { margin-left: 0; }
-                .pr-avg-strip { padding: 14px 16px; gap: 0; flex-wrap: wrap; row-gap: 10px; }
-                .pr-strip-divider { display: none; }
-                .pr-avg-block { width: 100%; padding-right: 0; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-                .pr-strip-item { flex: 1; min-width: 90px; padding-right: 0; }
-                .pr-term-tabs { padding: 14px 16px 0; gap: 6px; }
-                .pr-term-tab { min-width: calc(50% - 4px); flex: none; padding: 10px 6px; }
             }
 
             /* ── MOBILE: PROGRESS REPORT AS FULL-SCREEN MODAL ── */
@@ -1720,8 +1406,10 @@ function ensurePrStylesInjected() {
                     padding: 4px 0 0;
                 }
 
-                /* Inside the modal, the report no longer needs its own topbar/back-button */
-                .pr-modal-sheet .pr-topbar { display: none !important; }
+                /* The simplified card (hero header, bar-free subject rows,
+                   grade-pill legend only) is now the only layout, rendered
+                   the same way inside the mobile sheet and directly in the
+                   desktop right panel -- nothing left to switch on/off here. */
                 .pr-modal-sheet .pr-wrap { padding-top: 4px; max-width: 100%; }
 
                 /* Flat style: the report's content sits directly on the sheet's
@@ -1732,27 +1420,6 @@ function ensurePrStylesInjected() {
                     border-radius: 0;
                     margin-bottom: 0;
                 }
-
-                /* Design B header redesign: swap school band / student row /
-                   avg strip / term tabs for the single compressed hero
-                   block. Subjects section below is untouched. Scoped to
-                   the mobile sheet only -- desktop keeps the original
-                   layout entirely. */
-                .pr-modal-sheet .pr-school-band,
-                .pr-modal-sheet .pr-student-row,
-                .pr-modal-sheet .pr-avg-strip,
-                .pr-modal-sheet .pr-term-tabs { display: none !important; }
-                .pr-modal-sheet .pr-hero { display: block; }
-
-                /* Subject rows Design 2: bar-free, mobile-only. The
-                   "Mark · Covered" column hint and the two-bar legend item
-                   both exist only to decode the bars, so they're hidden
-                   here too -- nothing left needing a legend. Grade-scale
-                   pills (A 80-100 etc.) stay, they're independently useful. */
-                .pr-modal-sheet .pr-subject-row { display: none !important; }
-                .pr-modal-sheet .pr-subject-row-v2 { display: flex; }
-                .pr-modal-sheet .pr-subjects-col-hint { display: none !important; }
-                .pr-modal-sheet .pr-legend-item { display: none !important; }
 
                 /* ── QUIZ REVIEW: same modal sheet treatment ── */
                 .pr-modal-sheet.review-modal-sheet {
@@ -1926,9 +1593,6 @@ function ensurePrStylesInjected() {
                 }
                 .pr-subjects-header { padding: 14px 16px 8px; flex-direction: column; align-items: flex-start; gap: 4px; }
                 .pr-subjects-list { padding: 0 16px 6px; }
-                .pr-subject-info { flex: 0 0 100px; }
-                .pr-subject-row { gap: 8px; }
-                .pr-bar-tag { font-size: 9px; min-width: 38px; }
                 .pr-footer-legend { padding: 12px 16px; gap: 12px; }
                 .pr-grade-pills { margin-left: 0; }
             }
@@ -2103,28 +1767,12 @@ function renderProgressReport(data) {
     const oc = pctColor(overallAvg);
     const st = statusForPct(overallAvg);
 
-    const termTabsHtml = [1,2,3,4].map(t => {
-        const avg = termAvg(t);
-        const c   = pctColor(avg);
-        const hasData = subjects.some(s => s.terms[t]?.pct !== null);
-        return `
-            <div class="pr-term-tab ${t === currentTerm ? 'active' : ''} ${!hasData ? 'pr-term-disabled' : ''}"
-                 onclick="prSwitchTerm(${t})"
-                 style="${!hasData ? 'opacity:0.35;pointer-events:none;' : ''}">
-                ${t === currentTerm ? '<div class="pr-current-dot"></div>' : ''}
-                <div class="pr-term-tab-label">Term ${t}</div>
-                <div class="pr-term-tab-avg" style="color:${hasData ? c.text : '#555e6a'};">
-                    ${avg !== null ? avg + '%' : '—'}
-                </div>
-                <div class="pr-term-tab-sub">${t === currentTerm ? 'Current' : (hasData ? 'Completed' : 'Upcoming')}</div>
-            </div>`;
-    }).join('');
-
-    // ── MOBILE HEADER REDESIGN (Design B) ──
-    // Same underlying data as termTabsHtml above (termAvg/pctColor/currentTerm)
-    // so the two never disagree, just laid out as one compressed hero block
-    // instead of separate school band / student row / avg strip / term tabs.
-    // Shown on mobile only -- see .pr-hero / .pr-modal-sheet CSS above.
+    // ── HERO HEADER ──
+    // One compressed block (top line, name + overall average, term-trend
+    // row) is the report's only header now, on every viewport. The
+    // term-trend items double as the term switcher (onclick -> prSwitchTerm),
+    // replacing the old separate term-tabs row. Shown on every viewport --
+    // see .pr-hero CSS above.
     const heroTrendItemsHtml = [1,2,3,4].map(t => {
         const avg = termAvg(t);
         const c = pctColor(avg);
@@ -2180,10 +1828,6 @@ function renderProgressReport(data) {
         return { letter: 'D', cls: 'pr-grade-d' };
     }
 
-    function subjectInitial(name) {
-        return (name || '?')[0].toUpperCase();
-    }
-
     function buildSubjectCards(termNum) {
         if (!subjects.length) return '<div class="pr-empty">No assessments found.</div>';
         return subjects.map(function(s) {
@@ -2194,15 +1838,7 @@ function renderProgressReport(data) {
             const gl      = gradeLabel(pct);
 
             if (pct === null) {
-                return '<div class="pr-subject-row">' +
-                    '<div class="pr-subject-icon">' + subjectInitial(s.name) + '</div>' +
-                    '<div class="pr-subject-info">' +
-                        '<div class="pr-subject-name">' + escHtmlPr(s.name) + '</div>' +
-                        '<div class="pr-subject-code">' + escHtmlPr(s.code || '') + '</div>' +
-                    '</div>' +
-                    '<div class="pr-subject-no-data">No assessments this term</div>' +
-                '</div>' +
-                '<div class="pr-subject-row-v2">' +
+                return '<div class="pr-subject-row-v2">' +
                     '<div class="pr-subject-v2-badge" style="background:rgba(255,255,255,0.05);color:#555e6a;border:1px solid rgba(255,255,255,0.08);">?</div>' +
                     '<div class="pr-subject-v2-info">' +
                         '<div class="pr-subject-v2-name">' + escHtmlPr(s.name) + '</div>' +
@@ -2211,35 +1847,11 @@ function renderProgressReport(data) {
                 '</div>';
             }
 
-            const coveredPct = covered !== null ? covered : 0;
             const coveredTxt = covered !== null ? covered + '%' : '—';
-            const codeText   = escHtmlPr(s.code || (td.count + ' assessment' + (td.count !== 1 ? 's' : '')));
             const countText  = td.count + ' assessment' + (td.count !== 1 ? 's' : '');
             const v2MetaText = countText + (covered !== null ? ' &middot; ' + coveredTxt + ' covered for this term' : '');
 
-            return '<div class="pr-subject-row">' +
-                '<div class="pr-subject-icon" style="background:' + c.bg + ';color:' + c.text + ';">' +
-                    subjectInitial(s.name) +
-                '</div>' +
-                '<div class="pr-subject-info">' +
-                    '<div class="pr-subject-name">' + escHtmlPr(s.name) + '</div>' +
-                    '<div class="pr-subject-code">' + codeText + '</div>' +
-                '</div>' +
-                '<div class="pr-subject-bars">' +
-                    '<div class="pr-bar-row">' +
-                        '<span class="pr-bar-tag">Mark</span>' +
-                        '<div class="pr-bar-bg"><div class="pr-bar-fill" style="width:' + Math.round(pct) + '%;background:' + c.text + ';"></div></div>' +
-                        '<span class="pr-bar-pct" style="color:' + c.text + ';">' + Math.round(pct) + '%</span>' +
-                    '</div>' +
-                    '<div class="pr-bar-row">' +
-                        '<span class="pr-bar-tag">Covered</span>' +
-                        '<div class="pr-bar-bg"><div class="pr-bar-fill" style="width:' + coveredPct + '%;background:' + c.text + ';opacity:0.35;"></div></div>' +
-                        '<span class="pr-bar-pct" style="color:' + c.text + ';opacity:0.7;">' + coveredTxt + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="pr-subject-grade ' + gl.cls + '">' + gl.letter + '</div>' +
-            '</div>' +
-            '<div class="pr-subject-row-v2">' +
+            return '<div class="pr-subject-row-v2">' +
                 '<div class="pr-subject-v2-badge ' + gl.cls + '">' + gl.letter + '</div>' +
                 '<div class="pr-subject-v2-info">' +
                     '<div class="pr-subject-v2-name">' + escHtmlPr(s.name) + '</div>' +
@@ -2257,119 +1869,17 @@ function renderProgressReport(data) {
     const reportInnerHtml = `
         <div class="pr-wrap" id="pr-wrap">
 
-            <div class="pr-topbar">
-                <button class="pr-back-btn" onclick="prBackToGrades()">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="15 18 9 12 15 6"/>
-                    </svg>
-                    Back to Grades
-                </button>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <button class="pr-learn-more-btn" onclick="prOpenInfoModal('about')">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="16" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        Learn more
-                    </button>
-                    <button class="pr-print-btn" onclick="window.print()">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="6 9 6 2 18 2 18 9"/>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                            <rect x="6" y="14" width="12" height="8"/>
-                        </svg>
-                        Print Report
-                    </button>
-                </div>
-            </div>
-
             <div class="pr-card">
 
                 ${heroHtml}
 
-                <div class="pr-school-band">
-                    <div class="pr-logo-wrap">
-                        <img src="${escAttr(data.school_logo)}" alt="School Logo" class="pr-logo"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                        <span class="pr-logo-fallback" style="display:none;">
-                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="rgba(255,255,255,0.85)" stroke-width="1.8" fill="none">
-                                <path d="M22 10v12H2V10"/><path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                                <path d="M7 9.5v5M17 9.5v5M12 14.5v5"/>
-                            </svg>
-                        </span>
-                    </div>
-                    <div>
-                        <div class="pr-school-name">${escHtmlPr(data.school_name)}</div>
-                        <div class="pr-school-sub">Progress Report &nbsp;&middot;&nbsp; Term <span id="pr-school-sub-term">${currentTerm}</span>, ${escHtmlPr(data.date)}</div>
-                    </div>
-                </div>
-
-                <div class="pr-student-row">
-                    <div class="pr-avatar">${initials(data.learner_name)}</div>
-                    <div>
-                        <div class="pr-learner-name">${escHtmlPr(data.learner_name)}</div>
-                        <div class="pr-learner-meta">${escHtmlPr(data.learner_class)}</div>
-                    </div>
-                    <div class="pr-status-badge" id="pr-status-badge" onclick="prOpenInfoModal('status')" style="color:${st.text};background:${st.bg};border-color:${st.border};">
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                            <polyline points="17 6 23 6 23 12"/>
-                        </svg>
-                        ${st.label}
-                        <span class="pr-status-chevron"><svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
-                    </div>
-                </div>
-
-                <div class="pr-avg-strip">
-                    <div class="pr-avg-block">
-                        <div class="pr-avg-label">Overall average</div>
-                        <div style="display:flex;align-items:baseline;gap:4px;">
-                            <div class="pr-avg-num" id="pr-avg-num" style="color:${oc.text};">${overallAvg !== null ? overallAvg + '%' : '&mdash;'}</div>
-                            <span class="pr-avg-denom">/ 100</span>
-                        </div>
-                    </div>
-                    <div class="pr-strip-divider"></div>
-                    <div class="pr-strip-item">
-                        <div class="pr-strip-label">Term</div>
-                        <div class="pr-strip-val" id="pr-strip-term">Term ${currentTerm}</div>
-                    </div>
-                    <div class="pr-strip-divider"></div>
-                    <div class="pr-strip-item">
-                        <div class="pr-strip-label">Report date</div>
-                        <div class="pr-strip-val">${escHtmlPr(data.date)}</div>
-                    </div>
-                    <div class="pr-strip-divider"></div>
-                    <div class="pr-strip-item">
-                        <div class="pr-strip-label">Status</div>
-                        <div class="pr-strip-status" id="pr-strip-status" onclick="prOpenInfoModal('status')" style="color:${st.text};background:${st.bg};border-color:${st.border};">
-                            <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2.5" fill="none">
-                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                            </svg>
-                            ${st.label}
-                            <span class="pr-status-chevron"><svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pr-term-tabs" id="pr-term-tabs">${termTabsHtml}</div>
-
                 <div class="pr-subjects-header">
                     <span class="pr-subjects-title">Subject results</span>
-                    <span class="pr-subjects-col-hint">Mark earned &nbsp;&middot;&nbsp; Mark covered</span>
                 </div>
 
                 <div class="pr-subjects-list" id="pr-subjects-grid">${buildSubjectCards(currentTerm)}</div>
 
                 <div class="pr-footer-legend">
-                    <div class="pr-legend-item">
-                        <div class="pr-legend-bar" style="background:#22c55e;"></div>
-                        Mark earned so far
-                    </div>
-                    <div class="pr-legend-item">
-                        <div class="pr-legend-bar" style="background:rgba(34,197,94,0.3);"></div>
-                        % of mark covered this term
-                    </div>
                     <div class="pr-grade-pills">
                         <span class="pr-grade-pill pr-grade-a">A 80&ndash;100</span>
                         <span class="pr-grade-pill pr-grade-b">B 60&ndash;79</span>
@@ -2670,11 +2180,8 @@ window.prSwitchTerm = function (term) {
 
     apiArea._currentTerm = term;
 
-    document.querySelectorAll('.pr-term-tab').forEach((tab, i) => {
-        tab.classList.toggle('active', i + 1 === term);
-    });
-    // Keep the mobile hero's term-trend row in sync too, since it renders
-    // its own "current" highlight independently of .pr-term-tab.
+    // Highlight the selected term in the hero's term-trend row (its only
+    // remaining "current term" indicator now that .pr-term-tab is gone).
     document.querySelectorAll('.pr-hero-trenditem').forEach((item, i) => {
         item.classList.toggle('pr-hero-trend-current', i + 1 === term);
     });
@@ -2703,29 +2210,6 @@ window.prSwitchTerm = function (term) {
         heroAvgNum.textContent = selectedTermAvg !== null ? selectedTermAvg + '%' : '—';
         heroAvgNum.style.color = c.text;
     }
-
-    const stripTerm = document.getElementById('pr-strip-term');
-    if (stripTerm) stripTerm.textContent = 'Term ' + term;
-
-    const schoolSubTerm = document.getElementById('pr-school-sub-term');
-    if (schoolSubTerm) schoolSubTerm.textContent = term;
-
-    [
-        document.getElementById('pr-status-badge'),
-        document.getElementById('pr-strip-status'),
-    ].forEach((el) => {
-        if (!el) return;
-        el.style.color = st.text;
-        el.style.background = st.bg;
-        el.style.borderColor = st.border;
-        // Preserve the leading <svg> icon and the trailing chevron <span>,
-        // only swap the label text sitting between them.
-        const svg = el.querySelector('svg');
-        const chevron = el.querySelector('.pr-status-chevron');
-        el.textContent = st.label;
-        if (svg) el.prepend(svg);
-        if (chevron) el.appendChild(chevron);
-    });
 
     const heroStatus = document.getElementById('pr-hero-status');
     if (heroStatus) {
