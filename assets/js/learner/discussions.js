@@ -2325,9 +2325,23 @@ function renderCreateForm() {
                 .disc-form-title-icon { display:none; }
 
                 /* Discussion Type select was rendering visually slimmer than the
-                   other fields (native select ignores some padding) — force the
-                   same height as the title input/textarea. */
-                #discType { padding:14px; min-height:48px; }
+                   other fields. Cause: mobile browsers (esp. iOS Safari) draw the
+                   select with native appearance, which ignores custom padding/
+                   height entirely — the box model rule alone (padding/min-height)
+                   has no visual effect until the native control skin is turned
+                   off via appearance:none. Custom chevron added since removing
+                   native appearance also removes the OS's own dropdown arrow. */
+                #discType {
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none;
+                    padding: 14px 36px 14px 14px;
+                    min-height: 48px;
+                    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 12px center;
+                    background-size: 16px;
+                }
 
                 /* Tinted teal instead of solid teal */
                 .disc-submit-btn { background:rgba(79,209,197,0.16); color:#4fd1c5; }
