@@ -56,9 +56,22 @@ $result = $conn->query("SELECT setting_value, school_logo FROM school_name WHERE
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
     $logoPath   = trim((string)($row['school_logo'] ?? ''));
-    // Treat the shared default placeholder as "not uploaded" too, in case
-    // older rows still have it saved as the literal school_logo value.
-    if ($logoPath !== '' && stripos($logoPath, 'default_school.png') === false) {
+
+    // Treat the shared default placeholder as "not uploaded".
+    $isDefaultPlaceholder = ($logoPath === '' || stripos($logoPath, 'default_school.png') !== false);
+
+    // A path saved in the DB doesn't guarantee the file is still there
+    // (deleted upload, bad path, etc). Verify it actually exists on disk —
+    // otherwise the <img> just shows the browser's broken-image icon
+    // instead of falling back to the initials avatar.
+    $logoFileExists = false;
+    if (!$isDefaultPlaceholder) {
+        $logoRelative    = ltrim(str_replace('\\', '/', $logoPath), '/');
+        $logoFullPath    = __DIR__ . '/' . $logoRelative;
+        $logoFileExists  = is_file($logoFullPath);
+    }
+
+    if (!$isDefaultPlaceholder && $logoFileExists) {
         $schoolLogo = $logoPath;
     }
 }
@@ -236,7 +249,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.3">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.4">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -3020,7 +3033,7 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         }
         
         if (backBtn) backBtn.style.display = 'none';
-        if (logoEl) logoEl.style.display = 'block';
+        if (logoEl) logoEl.style.display = (logoEl.tagName === 'IMG') ? 'block' : 'flex';
 if (window.innerWidth <= 768 && titleEl) titleEl.style.display = 'none'; // ← HIDE TEXT on mobile in standard mode
         if (rightSide) rightSide.style.visibility = 'visible';
 
