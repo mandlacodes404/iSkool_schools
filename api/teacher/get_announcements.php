@@ -53,7 +53,8 @@ $schoolStmt = $conn->prepare("
         a.id,
         a.title,
         a.message,
-        a.created_at
+        a.created_at,
+        a.edited_at
     FROM announcements a
     WHERE a.class_id IS NULL
       AND a.academic_year_id = ?
@@ -72,6 +73,8 @@ while ($row = $schoolRes->fetch_assoc()) {
         'message'      => $row['message'] ?? '',
         'created_at'   => $row['created_at'],
         'display_date' => date('d M Y, H:i', strtotime($row['created_at'])),
+        'is_edited'    => !empty($row['edited_at']),
+        'edited_date'  => !empty($row['edited_at']) ? date('d M Y, H:i', strtotime($row['edited_at'])) : null,
     ];
 }
 $schoolStmt->close();
@@ -95,6 +98,7 @@ $teacherStmt = $conn->prepare("
         a.title,
         a.message,
         a.created_at,
+        a.edited_at,
         c.id   AS class_id,
         c.name AS class_name
     FROM announcements a
@@ -123,6 +127,8 @@ while ($row = $teacherRes->fetch_assoc()) {
         'message'      => $row['message'] ?? '',
         'created_at'   => $row['created_at'],
         'display_date' => date('d M Y, H:i', strtotime($row['created_at'])),
+        'is_edited'    => !empty($row['edited_at']),
+        'edited_date'  => !empty($row['edited_at']) ? date('d M Y, H:i', strtotime($row['edited_at'])) : null,
     ];
 }
 $teacherStmt->close();

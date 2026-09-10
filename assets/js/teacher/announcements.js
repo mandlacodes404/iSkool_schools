@@ -100,6 +100,8 @@ function renderTeacherAnnouncements(data) {
                 // School items get a slightly different icon colour (orange = school broadcast)
                 const iconStroke = group.is_school ? '#f59e0b' : '#4fd1c5';
 
+                const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
+
                 itemsHtml += `
                     <div class="an-sidebar-item${group.is_school ? ' an-school-item' : ''}" id="an-sidebar-${flatIndex}"
                         onclick="selectDesktopAnnouncement(${flatIndex})">
@@ -110,7 +112,7 @@ function renderTeacherAnnouncements(data) {
                             </svg>
                         </div>
                         <div class="an-sidebar-item-info">
-                            <div class="an-sidebar-item-title">${ann.title}</div>
+                            <div class="an-sidebar-item-title">${ann.title}${editedTag}</div>
                             <div class="an-sidebar-item-meta">${preview}</div>
                         </div>
                     </div>`;
@@ -268,8 +270,14 @@ window.selectDesktopAnnouncement = function(flatIndex) {
            </span> &bull;`
         : '';
 
-    const deleteBtn = ann.is_school ? '' : `
+    const panelActions = ann.is_school ? '' : `
         <div class="an-panel-actions">
+            <button class="an-panel-edit-btn" onclick="openEditAnnouncementPanel(${ann.id})">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path>
+                </svg>
+                Edit
+            </button>
             <button class="an-panel-delete-btn" onclick="confirmDeleteAnnouncement(${ann.id})">
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -282,6 +290,10 @@ window.selectDesktopAnnouncement = function(flatIndex) {
             </button>
         </div>`;
 
+    const editedMeta = ann.is_edited
+        ? `<span>&bull;</span><span class="an-panel-edited-meta">Edited ${ann.edited_date}</span>`
+        : '';
+
     panel.innerHTML = `
         <div class="an-panel-content">
             <div class="an-panel-header">
@@ -292,12 +304,98 @@ window.selectDesktopAnnouncement = function(flatIndex) {
                         <span>${ann.class_name}</span>
                         <span>&bull;</span>
                         <span>${ann.display_date}</span>
+                        ${editedMeta}
                     </div>
                 </div>
-                ${deleteBtn}
+                ${panelActions}
             </div>
             <div class="an-panel-message">${ann.message.replace(/\n/g, '<br>')}</div>
         </div>`;
+};
+
+// ─────────────────────────────────────────────
+// EDIT ANNOUNCEMENT (desktop panel)
+// ─────────────────────────────────────────────
+window.openEditAnnouncementPanel = function(id) {
+    const ann = (window._allAnnouncementsFlat || []).find(a => a.id === id);
+    if (!ann) return;
+
+    const panel = document.getElementById('an-main-panel');
+    if (!panel) return;
+
+    // Escape so existing angle-bracket-sensitive characters in the title/message
+    // don't break the editable form fields.
+    const escapeForAttr = (str) => String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    panel.innerHTML = `
+        <div class="an-panel-content">
+            <div class="an-panel-form-header">
+                <div class="an-panel-form-title">Edit Announcement</div>
+                <button onclick="selectDesktopAnnouncement(${window._allAnnouncementsFlat.findIndex(a => a.id === id)})" class="an-panel-form-close-btn">&times;</button>
+            </div>
+
+            <label class="teacher-modal-label">Title</label>
+            <input type="text" id="editAnnTitle" class="teacher-modal-input" value="${escapeForAttr(ann.title)}">
+
+            <label class="teacher-modal-label">Message</label>
+            <textarea id="editAnnMessage" class="teacher-modal-input an-form-textarea" rows="5">${ann.message}</textarea>
+
+            <p class="an-edit-hint">Learners will see this announcement marked as edited, with the changed text highlighted.</p>
+
+            <div id="editAnnError" class="an-form-error"></div>
+
+            <div class="an-panel-form-actions">
+                <button onclick="selectDesktopAnnouncement(${window._allAnnouncementsFlat.findIndex(a => a.id === id)})"
+                    class="teacher-modal-cancel an-panel-form-cancel-btn">
+                    Cancel
+                </button>
+                <button onclick="submitEditAnnouncement(${ann.id})"
+                    class="teacher-modal-submit an-panel-form-submit-btn" id="editAnnSubmitBtn">
+                    Save Changes
+                </button>
+            </div>
+        </div>`;
+};
+
+window.submitEditAnnouncement = async function(id) {
+    const title     = document.getElementById('editAnnTitle').value.trim();
+    const message   = document.getElementById('editAnnMessage').value.trim();
+    const errorDiv  = document.getElementById('editAnnError');
+    const submitBtn = document.getElementById('editAnnSubmitBtn');
+
+    errorDiv.style.display = 'none';
+
+    if (!title)   { errorDiv.textContent = 'Please enter a title.';   errorDiv.style.display = 'block'; return; }
+    if (!message) { errorDiv.textContent = 'Please enter a message.'; errorDiv.style.display = 'block'; return; }
+
+    const fd = new FormData();
+    fd.append('id',      id);
+    fd.append('title',   title);
+    fd.append('message', message);
+
+    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
+
+    try {
+        const res  = await fetch('api/teacher/edit_announcement.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            window.teacherAnnouncementCache = null;
+            await fetchTeacherAnnouncements();
+        } else {
+            errorDiv.textContent  = data.error || 'Failed to save changes.';
+            errorDiv.style.display = 'block';
+        }
+    } catch (e) {
+        errorDiv.textContent  = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        hideSubmitLoader();
+    }
 };
 
 async function loadAnnouncementClasses(panel) {

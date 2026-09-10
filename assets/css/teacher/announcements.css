@@ -1909,6 +1909,54 @@
 }
 .an-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
 
+/* ── Edit button (panel) ── */
+.an-panel-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(79,209,197,0.1);
+    border: 1px solid rgba(79,209,197,0.25);
+    color: #4fd1c5;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.an-panel-edit-btn:hover { background: rgba(79,209,197,0.18); }
+
+/* ── "Edited" tag (sidebar item title) ──
+   Orange accent (Claude-logo orange, #d97757) marks anything edit-related,
+   matching the highlight colour learners will see on changed text. */
+.an-edited-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #d97757;
+    background: rgba(217,119,87,0.12);
+    border: 1px solid rgba(217,119,87,0.3);
+    border-radius: 20px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── "Edited <date>" meta text (panel header) ── */
+.an-panel-edited-meta {
+    color: #d97757;
+}
+
+/* ── Edit form helper text ── */
+.an-edit-hint {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+
 /* ── Delete modal ── */
 .an-modal-hidden {
     display: none;
