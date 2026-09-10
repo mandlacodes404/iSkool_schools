@@ -2315,10 +2315,28 @@ function renderCreateForm() {
             .disc-submit-btn:hover { background:#38b2ac; }
             .disc-submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
             .disc-error { background:rgba(248,81,73,0.1); border:1px solid rgba(248,81,73,0.3); color:#f85149; padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:16px; display:none; }
+
+            /* Mobile-only overrides for the create-discussion form — placed after
+               the base rules above so they win the cascade on mobile without
+               touching desktop. */
+            @media (max-width: 767px) {
+                /* Plain whitish title, no icon */
+                .disc-form-title { color:#f5f5f5; }
+                .disc-form-title-icon { display:none; }
+
+                /* Discussion Type select was rendering visually slimmer than the
+                   other fields (native select ignores some padding) — force the
+                   same height as the title input/textarea. */
+                #discType { padding:14px; min-height:48px; }
+
+                /* Tinted teal instead of solid teal */
+                .disc-submit-btn { background:rgba(79,209,197,0.16); color:#4fd1c5; }
+                .disc-submit-btn:hover { background:rgba(79,209,197,0.24); }
+            }
         </style>
 
         <div class="disc-form-wrap" style="overflow-y:auto;height:100%;box-sizing:border-box;">
-            <h2><i class="fas fa-comments" style="color:#4fd1c5;margin-right:8px;"></i> Start a New Discussion</h2>
+            <h2 class="disc-form-title"><i class="fas fa-comments disc-form-title-icon" style="color:#4fd1c5;margin-right:8px;"></i> Start a New Discussion</h2>
             <div class="disc-error" id="discFormError"></div>
             <div class="disc-field">
                 <label>Discussion Title *</label>
