@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 21, 2026 at 06:52 AM
--- Server version: 11.4.10-MariaDB-cll-lve
--- PHP Version: 8.4.21
+-- Generation Time: Sep 10, 2026 at 10:20 AM
+-- Server version: 11.4.13-MariaDB-cll-lve
+-- PHP Version: 8.4.24
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -46,7 +46,9 @@ INSERT INTO `academic_events` (`id`, `title`, `event_date`, `event_type`, `class
 (1, 'Filters', '2026-03-20', 'test', 1, 5, 'lerato.patel@iskool.demo', '2026-03-02 16:05:03'),
 (2, 'Maths test', '2026-03-30', 'test', 1, 5, 'sibusiso.mokoena@iskool.demo', '2026-03-26 09:20:38'),
 (3, 'Maths revision', '2026-04-30', 'event', 1, 5, 'sibusiso.mokoena@iskool.demo', '2026-04-20 11:48:33'),
-(4, 'Maths revision', '2026-05-29', 'exam', 1, 5, 'lerato.patel@iskool.demo', '2026-05-13 18:25:18');
+(4, 'Maths revision', '2026-05-29', 'exam', 1, 5, 'lerato.patel@iskool.demo', '2026-05-13 18:25:18'),
+(5, 'Maths Class', '2026-08-28', 'test', 1, 5, 'sibusiso.mokoena@iskool.demo', '2026-08-25 10:35:33'),
+(6, 'Maths Revision', '2026-09-30', 'exam', 1, 5, 'sibusiso.mokoena@iskool.demo', '2026-08-26 09:43:17');
 
 -- --------------------------------------------------------
 
@@ -205,7 +207,17 @@ INSERT INTO `announcements` (`id`, `class_id`, `title`, `message`, `created_by`,
 (82, 1, 'June exams', 'We will commence the june exams on the first week of june but we will release the time table soon, latest by next week monday have a good weekend.', 'sibusiso.mokoena@iskool.demo', '2026-05-17 08:48:12', 5, 1, 'learners', 'all'),
 (83, 1, 'iSkool v1.1.3', 'We have released a new version of iSkool now the teachers can connect with the parents directly through a feature called threads', 'sibusiso.mokoena@iskool.demo', '2026-05-17 09:16:43', 5, 1, 'learners', 'all'),
 (84, 1, 'Testing Announcement', 'This is an announcement to test that we have successfully added .env file to the server and we have successfully secure the passwords successfully as we anticipated okay, you can ignone the message if you receive it, this is just a testing alert. have a good weekend to you all', 'sibusiso.mokoena@iskool.demo', '2026-05-24 15:13:59', 5, 1, 'learners', 'all'),
-(85, 1, 'iSkool Workflows', 'We are testing the iSkool workflows', 'sibusiso.mokoena@iskool.demo', '2026-05-24 18:23:39', 5, 1, 'learners', 'all');
+(85, 1, 'iSkool Workflows', 'We are testing the iSkool workflows', 'sibusiso.mokoena@iskool.demo', '2026-05-24 18:23:39', 5, 1, 'learners', 'all'),
+(86, 1, 'New Version', 'we are going to release a new model today', 'sibusiso.mokoena@iskool.demo', '2026-07-28 05:07:43', 5, 1, 'learners', 'all'),
+(87, 1, 'iSkool v.1.2.0', 'Today by the end of the day we are going to release a new version for iSkool, with this version we aggressively paid the technical debt and and also polished the UI both on desktop and mobile view and we also did some small improvements, since we took more than two weeks to release the unreleased section in the changelog was starting to pile up and to avoid having long document of release notes we have decided that it is only fair that we release today and then jump some version and call it v.1.2.0 based on the I have already given above...', 'sibusiso.mokoena@iskool.demo', '2026-07-28 05:16:35', 5, 1, 'learners', 'all'),
+(89, 1, 'Deep linking', 'This announcement was made in other to test and make sure that deep linking is working well on mobile view, and make sure that linking goes to the actual content and not just to the page', 'sibusiso.mokoena@iskool.demo', '2026-08-21 06:19:31', 5, 1, 'learners', 'all'),
+(90, 1, 'Email Testing', 'We are testing the email notifications so please ignore this message if you get it', 'sibusiso.mokoena@iskool.demo', '2026-09-01 08:20:50', 5, 1, 'learners', 'all'),
+(91, 1, 'Email Testing', 'We are testing the email notifications so please ignore this message if you get it', 'sibusiso.mokoena@iskool.demo', '2026-09-01 08:24:56', 5, 1, 'learners', 'all'),
+(92, 1, 'Email Testing 2', 'We are testing the emails', 'sibusiso.mokoena@iskool.demo', '2026-09-03 10:50:08', 5, 1, 'learners', 'all'),
+(93, 1, 'Email Testing 3', 'We are testing emails', 'sibusiso.mokoena@iskool.demo', '2026-09-03 10:50:40', 5, 1, 'learners', 'all'),
+(94, 1, 'Email Testing 3', 'We are still testing the emails', 'sibusiso.mokoena@iskool.demo', '2026-09-07 05:29:51', 5, 1, 'learners', 'all'),
+(95, 1, 'Email Testing 4', 'We are still testing the emails assignments', 'sibusiso.mokoena@iskool.demo', '2026-09-07 05:48:24', 5, 1, 'learners', 'all'),
+(96, 1, 'Test week', 'We have a test on Friday morning please arrive exaclty at 08:00 so we can finish early, goodluck', 'sibusiso.mokoena@iskool.demo', '2026-09-07 06:02:52', 5, 1, 'learners', 'all');
 
 -- --------------------------------------------------------
 
@@ -270,9 +282,12 @@ INSERT INTO `assignments` (`id`, `title`, `description`, `file_url`, `due_date`,
 (21, 'Diagonals', 'We have diagonals that we need to do as an assignment guys for the term mark', 'assignment_Uploads/sandbox_high_school/1776686011_Tutorial.pdf', '2026-04-28 13:52:00', 1, 0, 5, 1, 0, '2026-04-20 11:53:31', 'sibusiso.mokoena@iskool.demo'),
 (22, 'Chapter 8', 'This is a term mark assignment', 'assignment_Uploads/sandbox_high_school/1777369095_Tutorial.pdf', '2026-04-30 11:42:00', 1, 0, 5, 1, 0, '2026-04-28 09:38:15', 'sibusiso.mokoena@iskool.demo'),
 (23, 'State Space', 'This is an assignment for state space analysis and it will cover 30% of the term mark like i said in the syllabus overview', 'assignment_Uploads/sandbox_high_school/1778669669_api resource.pdf', '2026-05-30 12:53:00', 1, 0, 5, 1, 0, '2026-05-13 10:54:29', 'sibusiso.mokoena@iskool.demo'),
-(24, 'Chapter 10', 'iSkool has released a new version which includes the basic language model, we believe this is a cool feature and will help the schools immensely', 'assignment_Uploads/sandbox_high_school/1778670126_api resource.pdf', '2026-05-26 13:01:00', 1, 0, 5, 1, 0, '2026-05-13 11:02:06', 'sibusiso.mokoena@iskool.demo'),
 (25, 'Quantum Physics', 'This is a quantum physics assignments okay', 'assignment_Uploads/sandbox_high_school/1779653070_create_quiz.php', '2026-06-06 00:03:00', 1, 0, 5, 1, 0, '2026-05-24 20:04:30', 'sibusiso.mokoena@iskool.demo'),
-(26, 'Quantum Physics II', 'This is a quantum physics term test okay', 'assignment_Uploads/sandbox_high_school/1779653228_api resource.pdf', '2026-06-04 00:06:00', 1, 0, 5, 1, 0, '2026-05-24 20:07:08', 'sibusiso.mokoena@iskool.demo');
+(26, 'Quantum Physics II', 'This is a quantum physics term test okay', 'assignment_Uploads/sandbox_high_school/1779653228_api resource.pdf', '2026-06-04 00:06:00', 1, 0, 5, 1, 0, '2026-05-24 20:07:08', 'sibusiso.mokoena@iskool.demo'),
+(27, 'Surds', 'This is an assignment on surds and it will be our only assignment this term', 'assignment_Uploads/sandbox_high_school/1785665050_api_resource.pdf', '2026-08-31 12:01:00', 1, 0, 5, 1, 0, '2026-08-02 10:04:10', 'sibusiso.mokoena@iskool.demo'),
+(28, 'Deep linking', 'We are testing deep linking for resources in mobile view', 'assignment_Uploads/sandbox_high_school/1787307813_api_resource.pdf', '2026-09-30 12:26:00', 1, 0, 5, 1, 0, '2026-08-21 10:23:33', 'sibusiso.mokoena@iskool.demo'),
+(29, 'Branch Cuts', 'This is our 3rd term assignment', 'assignment_Uploads/sandbox_high_school/1788443562_api_resource.pdf', '2026-10-30 15:49:00', 1, 0, 5, 1, 0, '2026-09-03 13:52:42', 'sibusiso.mokoena@iskool.demo'),
+(30, 'Chapter 13', 'This will be our last assignment it carries 20% of the term mark', 'assignment_Uploads/sandbox_high_school/1788773627_Mandla_Mahlangu_Cover_Page.pdf', '2026-10-31 11:33:00', 1, 0, 5, 1, 0, '2026-09-07 09:33:47', 'sibusiso.mokoena@iskool.demo');
 
 -- --------------------------------------------------------
 
@@ -843,7 +858,11 @@ INSERT INTO `choices` (`id`, `question_id`, `choice_text`, `is_correct`) VALUES
 (553, 542, '1', 1),
 (554, 542, '2', 0),
 (555, 542, '3', 0),
-(556, 542, '4', 1);
+(556, 542, '4', 1),
+(557, 543, '1', 1),
+(558, 543, '2', 0),
+(559, 543, '3', 0),
+(560, 543, '4', 0);
 
 -- --------------------------------------------------------
 
@@ -879,6 +898,7 @@ CREATE TABLE `class_discussions` (
   `id` int(11) NOT NULL,
   `title` varchar(200) NOT NULL,
   `initial_message` text NOT NULL,
+  `type` enum('homework','general','off_topic') NOT NULL DEFAULT 'general',
   `class_id` int(11) NOT NULL,
   `academic_year_id` int(11) DEFAULT NULL,
   `creator_email` varchar(100) NOT NULL,
@@ -892,38 +912,44 @@ CREATE TABLE `class_discussions` (
 -- Dumping data for table `class_discussions`
 --
 
-INSERT INTO `class_discussions` (`id`, `title`, `initial_message`, `class_id`, `academic_year_id`, `creator_email`, `creator_anonymous`, `creator_name`, `created_at`, `attachment`) VALUES
-(1, 'Quadratic Equations', 'Can you guys please help me with 5.1 of exercise 5', 5, 1, 'lungile.buthelezi@iskool.demo', 1, NULL, '2025-12-23 16:34:46', NULL),
-(2, 'Functions', 'hi guys can you please help me with exercise 5 please', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-03 10:29:32', NULL),
-(3, 'Chemistry', 'Can you guys assist me with finding empirical formula', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 15:53:37', NULL),
-(4, 'Momentum', 'Can you guys please assist', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 15:55:41', NULL),
-(5, 'Quadratic fuo', 'Please help 5.1', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 16:00:42', NULL),
-(6, 'Empirical formula', 'Hi guys can you assist me with exercise 2.4', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-07 04:50:27', NULL),
-(7, 'Formula sheets', 'can someone help me with navigating these formula sheets...', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-07 05:15:41', NULL),
-(8, 'Polynomials', 'Can you help please', 1, 1, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-12 06:56:17', NULL),
-(9, 'Brain funtions', 'can you guys please', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-12 06:58:32', NULL),
-(10, 'djkdj', 'jxcvblf', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-12 07:00:17', NULL),
-(11, 'djjjjjjjjjjjjjjjjj', 'dvkrhtttttttt', 1, 1, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-12 07:02:08', NULL),
-(12, 'Vertical Motion', 'Can you guys please help me with vertical projectile motion questions please', 1, 1, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-13 08:35:34', NULL),
-(13, 'Vertical Motion 2', 'when an object is thrown upward will it come back to the same point at the same speed it was thrown up ?', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-13 08:44:35', NULL),
-(14, 'Polynomials', 'can you guys please assist me with the attached picture', 1, NULL, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 05:40:40', 'disc_1768387240_696772a877a86.jpg'),
-(15, 'Polynomials', 'Can you help with the attached document', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 05:56:01', 'disc_1768388161_69677641dba55.jpg'),
-(16, 'New', 'kdchtmyyyyyyyylcy', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 06:30:43', 'disc_1768390243_69677e633a2e5.jpg'),
-(17, 'jvhhj', 'ctdjuvjkdhjv', 1, 5, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-14 06:36:20', 'disc_1768390580_69677fb4c4c53.jpg'),
-(18, 'Financial Maths', 'Can you help me please', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-24 08:32:33', NULL),
-(19, 'Quadratic Sequence', 'Explain to me how this works please', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-25 04:48:16', NULL),
-(20, 'Newton Laws', 'Can you explain Newton’s Law of University Gravitation', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-25 14:38:42', NULL),
-(21, 'Momentum', 'Can you explain please', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-26 14:01:58', NULL),
-(22, 'Vertical Motion', 'explain this concept please', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-26 14:03:19', NULL),
-(23, 'Testing', 'Yes', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi', '2026-01-26 14:08:47', NULL),
-(24, 'Bschdbc', 'Abxbxb', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-28 07:22:20', NULL),
-(25, 'Filters', 'Can you guys please explain the concept of bandwidth in filters particularly exercise 3.5', 1, 5, 'mandi.vava@iskool.demo', 1, NULL, '2026-03-04 03:10:59', 'disc_1772611859_69a7e913744fa.pdf'),
-(26, 'Matrices', 'can you guys please help me with some matrices please.', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:12:17', NULL),
-(27, 'Gauss Jordan', 'help please', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:24:07', NULL),
-(28, 'Chartilier\'s Principle', 'can someone explain please', 1, 5, 'mandi.vava@iskool.demo', 1, NULL, '2026-03-04 09:43:44', NULL),
-(29, 'Last Test', 'can someone share the memo please', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:46:14', NULL),
-(30, 'Last Test', 'When is the lab test and what are we expected to do please someone respond as soon as you can so i dont miss the deadline okay.', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-05-13 10:24:12', NULL),
-(31, 'Filters Lab', 'When is the lab test and what are we expected to do please someone respond as soon as you can so i dont miss the deadline okay.', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-05-13 10:25:24', NULL);
+INSERT INTO `class_discussions` (`id`, `title`, `initial_message`, `type`, `class_id`, `academic_year_id`, `creator_email`, `creator_anonymous`, `creator_name`, `created_at`, `attachment`) VALUES
+(1, 'Quadratic Equations', 'Can you guys please help me with 5.1 of exercise 5', 'general', 5, 1, 'lungile.buthelezi@iskool.demo', 1, NULL, '2025-12-23 16:34:46', NULL),
+(2, 'Functions', 'hi guys can you please help me with exercise 5 please', 'general', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-03 10:29:32', NULL),
+(3, 'Chemistry', 'Can you guys assist me with finding empirical formula', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 15:53:37', NULL),
+(4, 'Momentum', 'Can you guys please assist', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 15:55:41', NULL),
+(5, 'Quadratic fuo', 'Please help 5.1', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-06 16:00:42', NULL),
+(6, 'Empirical formula', 'Hi guys can you assist me with exercise 2.4', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-07 04:50:27', NULL),
+(7, 'Formula sheets', 'can someone help me with navigating these formula sheets...', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-07 05:15:41', NULL),
+(8, 'Polynomials', 'Can you help please', 'general', 1, 1, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-12 06:56:17', NULL),
+(9, 'Brain funtions', 'can you guys please', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-12 06:58:32', NULL),
+(10, 'djkdj', 'jxcvblf', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-12 07:00:17', NULL),
+(11, 'djjjjjjjjjjjjjjjjj', 'dvkrhtttttttt', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-12 07:02:08', NULL),
+(12, 'Vertical Motion', 'Can you guys please help me with vertical projectile motion questions please', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-13 08:35:34', NULL),
+(13, 'Vertical Motion 2', 'when an object is thrown upward will it come back to the same point at the same speed it was thrown up ?', 'general', 1, 1, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-13 08:44:35', NULL),
+(14, 'Polynomials', 'can you guys please assist me with the attached picture', 'general', 1, NULL, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 05:40:40', 'disc_1768387240_696772a877a86.jpg'),
+(15, 'Polynomials', 'Can you help with the attached document', 'general', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 05:56:01', 'disc_1768388161_69677641dba55.jpg'),
+(16, 'New', 'kdchtmyyyyyyyylcy', 'general', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle', '2026-01-14 06:30:43', 'disc_1768390243_69677e633a2e5.jpg'),
+(17, 'jvhhj', 'ctdjuvjkdhjv', 'general', 1, 5, 'zinhle.mkhathini@iskool.demo', 1, NULL, '2026-01-14 06:36:20', 'disc_1768390580_69677fb4c4c53.jpg'),
+(18, 'Financial Maths', 'Can you help me please', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-24 08:32:33', NULL),
+(19, 'Quadratic Sequence', 'Explain to me how this works please', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-25 04:48:16', NULL),
+(20, 'Newton Laws', 'Can you explain Newton’s Law of University Gravitation', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-25 14:38:42', NULL),
+(21, 'Momentum', 'Can you explain please', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-26 14:01:58', NULL),
+(22, 'Vertical Motion', 'explain this concept please', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-26 14:03:19', NULL),
+(23, 'Testing', 'Yes', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi', '2026-01-26 14:08:47', NULL),
+(24, 'Bschdbc', 'Abxbxb', 'general', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla', '2026-01-28 07:22:20', NULL),
+(25, 'Filters', 'Can you guys please explain the concept of bandwidth in filters particularly exercise 3.5', 'general', 1, 5, 'mandi.vava@iskool.demo', 1, NULL, '2026-03-04 03:10:59', 'disc_1772611859_69a7e913744fa.pdf'),
+(26, 'Matrices', 'can you guys please help me with some matrices please.', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:12:17', NULL),
+(27, 'Gauss Jordan', 'help please', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:24:07', NULL),
+(28, 'Chartilier\'s Principle', 'can someone explain please', 'general', 1, 5, 'mandi.vava@iskool.demo', 1, NULL, '2026-03-04 09:43:44', NULL),
+(29, 'Last Test', 'can someone share the memo please', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-03-04 09:46:14', NULL),
+(30, 'Last Test', 'When is the lab test and what are we expected to do please someone respond as soon as you can so i dont miss the deadline okay.', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-05-13 10:24:12', NULL),
+(31, 'Filters Lab', 'When is the lab test and what are we expected to do please someone respond as soon as you can so i dont miss the deadline okay.', 'general', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-05-13 10:25:24', NULL),
+(32, 'Last Test', 'Please help me with the date for the lab test, is it this week or next week ?', 'off_topic', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-06-21 08:35:44', NULL),
+(33, 'Gauss Jordan', 'Can someone please help me with exercise 4.5 please', 'homework', 1, 5, 'mandi.vava@iskool.demo', 0, 'Mandi Vava', '2026-06-21 08:37:52', NULL),
+(34, 'Exam', 'when is the exam date for Physics?', 'off_topic', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle Mkhathini', '2026-06-21 09:05:34', NULL),
+(35, 'Mechanics', 'When are we going to choose partners for the lab ?', 'general', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle Mkhathini', '2026-06-21 09:10:33', NULL),
+(36, 'Help Me With Quadratics Please', 'Help me with chapter 8 please', 'homework', 1, 5, 'zinhle.mkhathini@iskool.demo', 0, 'Zinhle Mkhathini', '2026-08-20 15:46:21', NULL),
+(37, 'Can you guys please help me with this question that is in practise 3 please', 'Can you guys please help me with this question that is in practise 3 please', 'off_topic', 1, 5, 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', '2026-08-20 16:05:40', NULL);
 
 -- --------------------------------------------------------
 
@@ -1083,7 +1109,11 @@ INSERT INTO `discussion_replies` (`id`, `discussion_id`, `parent_reply_id`, `mes
 (33, 17, NULL, 'When are the exams ?', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:38:24'),
 (34, 17, NULL, 'I mean the time table', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:44:28'),
 (35, 17, NULL, 'Yes', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:44:49'),
-(36, 17, NULL, 'No', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:45:31');
+(36, 17, NULL, 'No', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-05-24 16:45:31'),
+(37, 33, NULL, 'What exactly?', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-06-21 08:39:51'),
+(38, 34, NULL, 'I don’t know', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-06-21 09:07:56'),
+(39, 35, NULL, 'We will check first', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-06-21 09:11:42'),
+(40, 33, NULL, 'When ?', 'mandlasimphiwe99@gmail.com', 0, 'Mandla Mahlangu', NULL, '2026-07-08 21:06:06');
 
 -- --------------------------------------------------------
 
@@ -1177,11 +1207,14 @@ CREATE TABLE `discussion_typing` (
 
 INSERT INTO `discussion_typing` (`discussion_id`, `user_email`, `updated_at`) VALUES
 (17, 'mandi.vava@iskool.demo', '2026-05-07 13:53:57'),
-(17, 'mandlasimphiwe99@gmail.com', '2026-05-24 20:45:29'),
+(17, 'mandlasimphiwe99@gmail.com', '2026-06-22 02:01:43'),
 (24, 'mandlasimphiwe99@gmail.com', '2026-03-04 09:46:30'),
 (25, 'mandi.vava@iskool.demo', '2026-03-04 09:45:24'),
-(25, 'mandlasimphiwe99@gmail.com', '2026-05-06 12:37:38'),
-(31, 'mandlasimphiwe99@gmail.com', '2026-05-13 14:28:08');
+(25, 'mandlasimphiwe99@gmail.com', '2026-07-09 01:05:13'),
+(31, 'mandlasimphiwe99@gmail.com', '2026-05-13 14:28:08'),
+(33, 'mandlasimphiwe99@gmail.com', '2026-07-09 01:06:03'),
+(34, 'mandlasimphiwe99@gmail.com', '2026-06-21 13:07:55'),
+(35, 'mandlasimphiwe99@gmail.com', '2026-06-21 13:11:38');
 
 -- --------------------------------------------------------
 
@@ -1413,7 +1446,31 @@ INSERT INTO `evaluation_statements` (`id`, `evaluation_id`, `statement`, `order_
 (183, 17, 'The teacher treats students with respect.', 5),
 (184, 17, 'Lessons are engaging and interesting.', 6),
 (185, 17, 'The teacher manages class time effectively.', 7),
-(186, 17, 'I feel supported in this subject.', 8);
+(186, 17, 'I feel supported in this subject.', 8),
+(187, 18, 'The teacher explains concepts clearly.', 1),
+(188, 18, 'The teacher is well-prepared for lessons.', 2),
+(189, 18, 'The teacher encourages student participation.', 3),
+(190, 18, 'The teacher provides helpful feedback on work.', 4),
+(191, 18, 'The teacher treats students with respect.', 5),
+(192, 18, 'Lessons are engaging and interesting.', 6),
+(193, 18, 'The teacher manages class time effectively.', 7),
+(194, 18, 'I feel supported in this subject.', 8),
+(202, 19, 'The teacher explains concepts clearly.', 1),
+(203, 19, 'The teacher is well-prepared for lessons.', 2),
+(204, 19, 'The teacher encourages student participation.', 3),
+(205, 19, 'The teacher provides helpful feedback on work.', 4),
+(206, 19, 'The teacher treats students with respect.', 5),
+(207, 19, 'Lessons are engaging and interesting.', 6),
+(208, 19, 'The teacher manages class time effectively.', 7),
+(209, 19, 'I feel supported in this subject.', 8),
+(217, 20, 'The teacher explains concepts clearly.', 1),
+(218, 20, 'The teacher is well-prepared for lessons.', 2),
+(219, 20, 'The teacher encourages student participation.', 3),
+(220, 20, 'The teacher provides helpful feedback on work.', 4),
+(221, 20, 'The teacher treats students with respect.', 5),
+(222, 20, 'Lessons are engaging and interesting.', 6),
+(223, 20, 'The teacher manages class time effectively.', 7),
+(224, 20, 'I feel supported in this subject.', 8);
 
 -- --------------------------------------------------------
 
@@ -1530,7 +1587,7 @@ INSERT INTO `open_ended_grades` (`id`, `attempt_id`, `question_id`, `user_email`
 (2, 1180, 529, 'mandlasimphiwe99@gmail.com', 115, 5.00, 'good work', 'sibusiso.mokoena@iskool.demo', '2026-05-26 08:34:56'),
 (4, 1181, 529, 'mandi.vava@iskool.demo', 115, 3.50, 'good but not good enough', 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:27:43'),
 (5, 1182, 531, 'mandi.vava@iskool.demo', 116, 4.00, 'not good enough', 'sibusiso.mokoena@iskool.demo', '2026-05-26 11:32:42'),
-(7, 1183, 532, 'mandlasimphiwe99@gmail.com', 117, 7.00, 'this is outstanding!', 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:50:49'),
+(7, 1183, 532, 'mandlasimphiwe99@gmail.com', 117, 7.00, 'this is outstanding!', 'sibusiso.mokoena@iskool.demo', '2026-07-16 06:48:55'),
 (8, 1184, 532, 'mandi.vava@iskool.demo', 117, 5.00, 'this was good', 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:50:21'),
 (9, 1185, 532, 'zinhle.mkhathini@iskool.demo', 117, 3.00, 'not good enough', 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:50:00'),
 (15, 1189, 538, 'mandlasimphiwe99@gmail.com', 120, 0.00, NULL, NULL, '2026-05-30 07:07:29');
@@ -1610,7 +1667,9 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`) VALUES
 (16, 'mandla_mahlangu@icloud.com', 'dcd202b082cdec885b5235abfbd8f89030047f0a04f20779f59e4ee00d806b8b', '2026-05-04 14:08:50'),
 (17, 'mandlasimphiwe99@gmail.com', '498bad35e5d739b61cf6fbb71b93fbab7423c6713306bf1fa613886bd1b0df98', '2026-05-24 22:15:53'),
 (18, 'mandlasimphiwe99@gmail.com', '702d60e794315fe1dd1e838d48c019bb3a7cd3eebdc5be088a3c35f7c66989cf', '2026-06-01 18:05:10'),
-(19, 'mandlasimphiwe99@gmail.com', '60fa7686048d29a9b2703e07b2864ef9e69b7d46e4313bc1ca743e3e56f3b74f', '2026-06-01 18:15:37');
+(19, 'mandlasimphiwe99@gmail.com', '60fa7686048d29a9b2703e07b2864ef9e69b7d46e4313bc1ca743e3e56f3b74f', '2026-06-01 18:15:37'),
+(20, 'mandlasimphiwe99@gmail.com', '2d730a53eede312cbc766b1e3dd346a7d5e0a47fda17406609f4d07107085c0c', '2026-09-03 15:44:08'),
+(21, 'mandlasimphiwe99@gmail.com', '0f30133a636f72d8c1ec4d61d295377f2f387791b94dbf7168ce1081894e6e04', '2026-09-03 16:37:10');
 
 -- --------------------------------------------------------
 
@@ -2217,7 +2276,8 @@ INSERT INTO `quizquestions` (`id`, `quiz_id`, `question_text`, `image_path`, `po
 (539, 120, 'The capital of France is {blank} and the language the speak is  {blank}.', NULL, 10, 'fill_in_blank'),
 (540, 120, 'The capital of France is {blank} and the language the speak is  {blank}.', NULL, 10, 'fill_in_blank'),
 (541, 121, 'WHAT IS IN THE IMAGE', NULL, 6, 'multiple_answer'),
-(542, 121, 'WHAT IS IN THE IMAGE', NULL, 10, 'multiple_answer');
+(542, 121, 'WHAT IS IN THE IMAGE', NULL, 10, 'multiple_answer'),
+(543, 123, 'WHAT IS IN THE IMAGE', NULL, 10, 'mcq');
 
 -- --------------------------------------------------------
 
@@ -2368,11 +2428,13 @@ INSERT INTO `quizzes` (`id`, `title`, `duration`, `publish_marks`, `created_by`,
 (114, 'Induction', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-25 20:07:20', 1, 5, 1, 1, '2026-05-25 22:10:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0, 0),
 (115, 'Open ended', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 09:54:19', 1, 5, 1, 1, '2026-05-26 11:56:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0, 1),
 (116, 'Maths', 25, 0, 'sibusiso.mokoena@iskool.demo', '2026-05-26 12:05:34', 1, 5, 1, 1, '2026-05-26 14:07:00', 0, 0, 'Closed', 0, NULL, 'single_page', 0, 0, 1),
-(117, 'Maths II', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-26 13:34:17', 1, 5, 1, 1, '2026-05-26 15:36:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 1),
+(117, 'Maths II', 25, 0, 'sibusiso.mokoena@iskool.demo', '2026-05-26 13:34:17', 1, 5, 1, 1, '2026-05-26 15:36:00', 0, 0, 'Closed', 0, NULL, 'single_page', 0, 0, 1),
 (118, 'Exam', 25, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-29 13:05:37', 1, 5, 1, 1, '2026-05-29 15:07:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0),
 (119, 'Physics', 25, 0, 'lerato.patel@iskool.demo', '2026-05-30 10:43:08', 1, 5, 1, 1, '2026-05-30 12:47:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0),
 (120, 'Exam', 25, 0, 'lerato.patel@iskool.demo', '2026-05-30 10:58:56', 1, 5, 1, 1, '2026-05-30 13:02:00', 0, 0, 'Scheduled', 0, NULL, 'multi_page', 1, 1, 1),
-(121, 'Exam 3', 30, 1, 'sibusiso.mokoena@iskool.demo', '2026-05-31 11:36:47', 1, 5, 1, 1, '2026-05-31 13:40:00', 0, 0, 'Scheduled', 0, NULL, 'single_page', 0, 0, 0);
+(121, 'Exam 3', 30, 0, 'sibusiso.mokoena@iskool.demo', '2026-05-31 11:36:47', 1, 5, 1, 1, '2026-05-31 13:40:00', 0, 0, 'Closed', 0, NULL, 'single_page', 0, 0, 0),
+(122, 'Test 2', 0, 0, 'sibusiso.mokoena@iskool.demo', '2026-08-30 18:18:21', 1, 5, 1, 1, NULL, 0, 0, 'Closed', 0, NULL, 'single_page', 0, 0, 0),
+(123, 'Quadratics', 10, 1, 'sibusiso.mokoena@iskool.demo', '2026-09-03 14:48:57', 1, 5, 1, 1, '2026-09-03 17:45:00', 0, 0, 'Open', 0, NULL, 'single_page', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -3576,7 +3638,7 @@ INSERT INTO `quiz_attempts` (`attempt_id`, `id`, `user_email`, `quiz_id`, `attem
 (1172, 1172, 'zinhle.mkhathini@iskool.demo', 100, 0, 1, '2026-03-08 13:20:36', '2026-03-08 15:20:36', 'submitted', 1, '[514,515]', NULL),
 (1173, 1173, 'zinhle.mkhathini@iskool.demo', 101, 0, 1, '2026-03-08 13:22:08', '2026-03-08 15:22:08', 'submitted', 1, NULL, NULL),
 (1174, 1174, 'mandlasimphiwe99@gmail.com', 105, 0, 1, '2026-03-30 09:57:52', '2026-03-30 11:57:52', 'submitted', 0, NULL, NULL),
-(1175, 1175, 'mandlasimphiwe99@gmail.com', 102, 0, 1, '2026-04-06 12:24:57', '2026-04-06 14:24:57', 'in_progress', 0, '[]', NULL),
+(1175, 1175, 'mandlasimphiwe99@gmail.com', 102, 0, 1, '2026-04-06 12:24:57', '2026-04-06 14:24:57', 'submitted', 0, '[]', NULL),
 (1176, 1176, 'mandlasimphiwe99@gmail.com', 90, 0, 1, '2026-04-06 12:25:15', '2026-04-06 14:25:15', 'submitted', 0, NULL, NULL),
 (1177, 1177, 'mandlasimphiwe99@gmail.com', 109, 0, 1, '2026-05-01 22:20:30', '2026-05-02 00:20:30', 'submitted', 1, NULL, NULL),
 (1178, 0, 'mandlasimphiwe99@gmail.com', 114, 1, 1, '2026-05-25 20:13:22', '2026-05-25 22:13:22', 'submitted', 1, NULL, NULL),
@@ -3592,7 +3654,12 @@ INSERT INTO `quiz_attempts` (`attempt_id`, `id`, `user_email`, `quiz_id`, `attem
 (1188, 0, 'zinhle.mkhathini@iskool.demo', 118, 1, 1, '2026-05-29 13:41:23', '2026-05-29 15:41:23', 'submitted', 2, NULL, NULL),
 (1189, 0, 'mandlasimphiwe99@gmail.com', 120, 1, 1, '2026-05-30 11:03:41', '2026-05-30 13:03:41', 'submitted', 4, '[539,540,538,537]', '{\"539\":[],\"540\":[],\"538\":[],\"537\":[546,548,545,547]}'),
 (1190, 0, 'mandlasimphiwe99@gmail.com', 121, 1, 1, '2026-05-31 11:41:02', '2026-05-31 13:41:02', 'submitted', 2, NULL, NULL),
-(1191, 0, 'mandi.vava@iskool.demo', 121, 1, 1, '2026-05-31 11:47:54', '2026-05-31 13:47:54', 'submitted', 2, NULL, NULL);
+(1191, 0, 'mandi.vava@iskool.demo', 121, 1, 1, '2026-05-31 11:47:54', '2026-05-31 13:47:54', 'submitted', 2, NULL, NULL),
+(1192, 0, 'mandlasimphiwe99@gmail.com', 119, 1, 1, '2026-07-17 10:41:59', '2026-07-17 12:41:59', 'submitted', 1, NULL, NULL),
+(1193, 0, 'mandlasimphiwe99@gmail.com', 89, 1, 1, '2026-08-31 09:17:05', '2026-08-31 11:17:05', 'submitted', 1, NULL, NULL),
+(1194, 0, 'mandlasimphiwe99@gmail.com', 123, 1, 1, '2026-09-08 23:50:53', '2026-09-09 01:50:53', 'submitted', 1, NULL, NULL),
+(1195, 0, 'mandlasimphiwe99@gmail.com', 110, 1, 1, '2026-09-09 13:13:17', '2026-09-09 15:13:17', 'submitted', 1, NULL, NULL),
+(1196, 0, 'mandlasimphiwe99@gmail.com', 112, 1, 1, '2026-09-09 13:46:18', '2026-09-09 15:46:18', 'submitted', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -4870,7 +4937,13 @@ INSERT INTO `quiz_results` (`id`, `user_email`, `quiz_id`, `attempt_id`, `academ
 (1191, 'mandlasimphiwe99@gmail.com', 120, 1189, 5, 10.00, 22.00, 228, '2026-05-30 07:07:29'),
 (1192, 'mandlasimphiwe99@gmail.com', 121, 1190, 5, 10.00, 16.00, 145, '2026-05-31 07:43:27'),
 (1193, 'mandi.vava@iskool.demo', 121, 1191, 5, 0.00, 16.00, 115, '2026-05-31 07:49:49'),
-(1194, 'mandlasimphiwe99@gmail.com', 109, 1177, 5, 0.00, 1.00, 2746437, '2026-06-02 13:14:27');
+(1194, 'mandlasimphiwe99@gmail.com', 109, 1177, 5, 0.00, 1.00, 2746437, '2026-06-02 13:14:27'),
+(1195, 'mandlasimphiwe99@gmail.com', 102, 1175, 5, 0.00, 0.00, 6761566, '2026-06-23 14:37:43'),
+(1196, 'mandlasimphiwe99@gmail.com', 119, 1192, 5, 0.00, 1.00, 919, '2026-07-17 06:57:18'),
+(1197, 'mandlasimphiwe99@gmail.com', 89, 1193, 5, 0.00, 7.00, 668, '2026-08-31 05:28:13'),
+(1198, 'mandlasimphiwe99@gmail.com', 123, 1194, 5, 10.00, 10.00, 438, '2026-09-08 19:58:11'),
+(1199, 'mandlasimphiwe99@gmail.com', 110, 1195, 5, 1.00, 1.00, 1508, '2026-09-09 09:38:25'),
+(1200, 'mandlasimphiwe99@gmail.com', 112, 1196, 5, 1.00, 1.00, 46, '2026-09-09 09:47:04');
 
 -- --------------------------------------------------------
 
@@ -4924,7 +4997,14 @@ INSERT INTO `resources` (`id`, `title`, `filename`, `class_id`, `uploaded_by`, `
 (26, 'Surds simplification II', 'sandbox_high_school/1776686242_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-20 11:57:22', 'file', NULL),
 (27, 'Chapter 8', 'sandbox_high_school/1777369298_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-28 09:41:38', 'file', NULL),
 (28, 'Chapter 9', 'sandbox_high_school/1777369478_Tutorial.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-04-28 09:44:38', 'file', NULL),
-(29, 'Workflows PDF', 'sandbox_high_school/1779661510_apiresource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-05-24 22:25:10', 'file', NULL);
+(29, 'Workflows PDF', 'sandbox_high_school/1779661510_apiresource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-05-24 22:25:10', 'file', NULL),
+(30, 'Chapter 10', 'sandbox_high_school/1785665303_api_resource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-08-02 10:08:23', 'file', NULL),
+(31, 'Chapter 11', 'sandbox_high_school/1785665531_api_resource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-08-02 10:12:11', 'file', NULL),
+(33, 'Deep linking', 'sandbox_high_school/1787308003_api_resource.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-08-21 10:26:43', 'file', NULL),
+(34, 'Chapter 12', 'sandbox_high_school/1788773497_Mandla_Mahlangu_Cover_Page.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-09-07 09:31:37', 'file', NULL),
+(35, 'Chapter 14', 'sandbox_high_school/1788774602_Mandla_Mahlangu_Cover_Page.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-09-07 09:50:02', 'file', NULL),
+(36, 'Test Scope', 'sandbox_high_school/1788775546_Mandla_Mahlangu_Cover_Page.pdf', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-09-07 10:05:46', 'file', NULL),
+(37, 'Chapter 15', '', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, '2026-09-07 10:10:10', 'video', 'https://www.youtube.com/embed/HFacSL--vps?rel=0&modestbranding=1');
 
 -- --------------------------------------------------------
 
@@ -5000,7 +5080,9 @@ CREATE TABLE `submissions` (
 
 INSERT INTO `submissions` (`id`, `assignment_id`, `student_email`, `submission_type`, `file_url`, `text_answer`, `audio_url`, `submitted_at`, `is_late`) VALUES
 (1, 11, 'mandlasimphiwe99@gmail.com', 'file', 'assignment_submissions/1770733406_namecheap-order-190158192.pdf', '', NULL, '2026-02-10 14:23:26', 0),
-(2, 12, 'mandlasimphiwe99@gmail.com', 'file', 'assignment_submissions/1770736296_IEC-Contract.pdf', '', NULL, '2026-02-10 15:11:36', 0);
+(2, 12, 'mandlasimphiwe99@gmail.com', 'file', 'assignment_submissions/1770736296_IEC-Contract.pdf', '', NULL, '2026-02-10 15:11:36', 0),
+(3, 27, 'mandlasimphiwe99@gmail.com', 'file', 'assignment_submissions/1785679831_api_resource.pdf', 'This is my submission', NULL, '2026-08-02 14:10:31', 0),
+(4, 28, 'mandlasimphiwe99@gmail.com', 'file', NULL, NULL, NULL, '2026-09-08 14:37:38', 0);
 
 -- --------------------------------------------------------
 
@@ -5041,7 +5123,10 @@ INSERT INTO `teacher_evaluations` (`id`, `title`, `description`, `class_id`, `cr
 (14, 'Term 3', 'This is term 3 evaluation please respond', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, 1, '2026-03-22 08:06:32'),
 (15, 'English Evaluation', 'new evaluation please try and participate', 1, 'lerato.patel@iskool.demo', 5, 1, 1, '2026-04-08 10:08:39'),
 (16, 'Term 2', 'This is for the term 2 feedback', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, 1, '2026-04-20 07:47:15'),
-(17, 'Signals and Systems', 'This is the evaluation for signals and systems please take it for your own benefit', 1, 'lerato.patel@iskool.demo', 5, 1, 1, '2026-05-14 06:59:32');
+(17, 'Signals and Systems', 'This is the evaluation for signals and systems please take it for your own benefit', 1, 'lerato.patel@iskool.demo', 5, 1, 1, '2026-05-14 06:59:32'),
+(18, 'Term 3', 'This is an evaluation for the term 3 feedback please complete it as soon as possible', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, 1, '2026-09-07 05:37:29'),
+(19, 'Term 4', 'This is a term feedback please respond as quickly as you can', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, 1, '2026-09-07 05:47:06'),
+(20, 'Term 4 feedback', 'This is another term 4 feedback evaluation for this term please complete as soon as you can', 1, 'sibusiso.mokoena@iskool.demo', 5, 1, 1, '2026-09-07 06:04:28');
 
 -- --------------------------------------------------------
 
@@ -5063,7 +5148,8 @@ CREATE TABLE `teacher_reminders` (
 
 INSERT INTO `teacher_reminders` (`id`, `user_email`, `title`, `event_date`, `created_at`) VALUES
 (1, 'lerato.patel@iskool.demo', 'Create Test', '2026-02-28', '2026-02-26 14:12:36'),
-(2, 'thabo.nkosi@iskool.demo', 'Filters scope', '2026-03-19', '2026-03-02 16:14:08');
+(2, 'thabo.nkosi@iskool.demo', 'Filters scope', '2026-03-19', '2026-03-02 16:14:08'),
+(3, 'sibusiso.mokoena@iskool.demo', 'Maths Class', '2026-08-28', '2026-08-25 10:36:16');
 
 -- --------------------------------------------------------
 
@@ -5241,7 +5327,15 @@ INSERT INTO `users` (`id`, `name`, `second_name`, `title`, `surname`, `email`, `
 (110, 'Thando', NULL, 'Mr', 'Mokoena', 'thando.mokoena@iskool.demo', '$2y$10$Mb2GxnN46c.wA6t0oh9JCujUeTEq8i8VaCRZ3EIFGhAVTu7qHxpo.', 'teacher', 'uploads/default_profile.png', 'male', 32, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-03-22 12:53:53', 0, NULL),
 (111, 'Mandla', NULL, 'Mr', 'Mahlangu2', 'johannesmahlangu102@gmail.com', '$2y$10$ZpWAkPN0h.8F4G.B5mfqLOhZF6coQQPlVYaJeEARNsYNCjHQjcC7y', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 09:55:40', 0, NULL),
 (112, 'Mandla2', NULL, 'Mrs', 'Mahlangu2', 'mandlasimphiwe099@gmail.com', '$2y$10$.SHSfR0LRehoZmb//d7POO75Bj563uNwD3PNVUet2rrFLFNWeqTq2', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:16:47', 0, NULL),
-(113, 'Mandla', NULL, 'Mr', 'Mahlangu', 'mandla_mahlangu@icloud.com', '$2y$10$fOUxZJDWJdawGnRO3hEgmOgG9GjgRWmTfnMjeVePLjUsb9maW8Csy', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:19:00', 0, NULL);
+(113, 'Mandla', NULL, 'Mr', 'Mahlangu', 'mandla_mahlangu@icloud.com', '$2y$10$fOUxZJDWJdawGnRO3hEgmOgG9GjgRWmTfnMjeVePLjUsb9maW8Csy', 'learner', 'uploads/default_profile.png', 'male', 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-05-04 10:19:00', 0, NULL),
+(114, 'Sonnyboy', '', 'Mr', 'Mahlangu', 'sonnyboym981@gmail.com', '$2y$10$Z09oFAlG69giaH4EgHny8eB5W.ksX9kxNz03qncHZIOzbG5QN6TRe', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-08-31 18:08:03', 0, NULL),
+(115, 'Mandla', '', 'Mr', 'Mahlangu', 'sonnyboym98100@gmail.com', '$2y$10$.KgtegKshBFIPVYiY16y8uAPd6b5TK7hWHRvpkH3v9tVKAb4i9WOq', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-08-31 18:16:14', 0, NULL),
+(116, 'Mandla', '', 'Mr', 'Mahlangu', 'mandla_mahlanguu@icloud.com', '$2y$10$1qQmJWPCH7Ak6VUEFQrA0OZWB3DfBKGwXq3CHG3kvIB2I8OQZPFsy', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-01 07:53:30', 0, NULL),
+(117, 'Mandla', '', 'Mr', 'Mahlangu', 'mandlasimphiwe9990@gmail.com', '$2y$10$pOeJ/zRM9AWBnG7luUPP/.RN8b5m/yEBZXb82Eull3klsO6D1NM5G', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-01 08:14:02', 0, NULL),
+(118, 'Mandla', '', 'Mr', 'Mahlangu', 'mandlasimphiwe9991@gmail.com', '$2y$10$Ygv5PQBx84sshygsEcNVaOi2RlJHPs8gMpjR.9DaX3gfw9jzMCRnG', 'learner', 'uploads/default_profile.png', 'male', 17, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-01 11:31:06', 0, NULL),
+(119, 'Mandla', '', 'Mr', 'Mahlangu', 'mandlasimphiwe9993@gmail.com', '$2y$10$pejSU30QdkLPtNeZnwV9.uKluvioLdU9h3CDCPj6SdBlgvaFukMtq', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-03 12:19:28', 0, NULL),
+(120, 'Mandla', '', 'Mr', 'Mahlangu', 'mandlamahlangu9994@gmail.co', '$2y$10$e7cueCKGwGilNCZo3VjkaeceTVZMN7YQU811Bim9ADuk9Ze26NXu.', 'learner', 'uploads/default_profile.png', 'male', 18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-03 12:21:28', 0, NULL),
+(121, 'Mandla', '', 'Mr', 'Mahlangu', 'mandlasimphiwe9995@gmail.com', '$2y$10$S4q2iNSeDP8K0YOPnFffze3Wnc8wf9CiP/2k5nSWYkhtGoO2uUS1C', 'learner', 'uploads/default_profile.png', 'male', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'incomplete', NULL, NULL, NULL, '2026-09-03 19:40:47', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -5532,7 +5626,11 @@ INSERT INTO `user_answers` (`id`, `user_email`, `quiz_id`, `attempt_id`, `result
 (817, 'mandlasimphiwe99@gmail.com', 121, 1190, 1192, 541, NULL, '[549,552]'),
 (819, 'mandlasimphiwe99@gmail.com', 121, 1190, 1192, 542, NULL, '[553,556]'),
 (827, 'mandi.vava@iskool.demo', 121, 1191, 1193, 541, NULL, '[549,550]'),
-(829, 'mandi.vava@iskool.demo', 121, 1191, 1193, 542, NULL, '[553,554]');
+(829, 'mandi.vava@iskool.demo', 121, 1191, 1193, 542, NULL, '[553,554]'),
+(833, 'mandlasimphiwe99@gmail.com', 119, 1192, 1196, 536, 542, NULL),
+(835, 'mandlasimphiwe99@gmail.com', 123, 1194, 1198, 543, 557, NULL),
+(838, 'mandlasimphiwe99@gmail.com', 110, 1195, 1199, 525, 517, NULL),
+(841, 'mandlasimphiwe99@gmail.com', 112, 1196, 1200, 526, 521, NULL);
 
 -- --------------------------------------------------------
 
@@ -5573,7 +5671,11 @@ INSERT INTO `user_subscriptions` (`id`, `user_email`, `endpoint`, `p256dh`, `aut
 (809, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QB9PM0Ch7nt7juAxIaFiZ3e22hPLiplZqNy0xVWM37efaRlPexTR8hfing65mn9M1tGmit9S9wSbUjNwRxtX3A_hlL9AuWy1k19ghnkGnvM0M4qhS5y4cZKW7p4U8PGGXWilGwkdEjTpFNT7v2CC0A5ZrN3OQX-yIJopjDCAGtQ', 'BKTH3I5Z697zyR16xC5APGdI1GfplmnXyNYPHcyH-CDE4e-Lzfb-3m6MXG_p1EY-mR-9UiFpENGezw4C3473Orc', 'Rf4we8-tLAaeva76nPenHQ', '2026-04-20 11:29:15'),
 (967, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QM8mg4J0GDZ6ecjptMQMVpFUZTkijqobtDdLRLz8UmLM87Gynkr2rCUsaGRwAteZS5GFaAwCbvHr7_jeI9Edtl5WPULMVJ05-_GXgz15zVhjJvA7RANsJEZa7CE931e3BMBFhjqZsSaV9_PEGbZ4jujb9leQT8gQ48ZDhI3V-Ho', 'BNgrLj-eITFguTGzlXsM3h3QoWmYyBbkfagfPYAKLtG9IcFExI_cGHQWAxUOiOLQQ5TilULi7fcLidskKv82q8U', 'mDrRJJS2f82O9Cs_OdD0ig', '2026-05-13 10:51:26'),
 (1054, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QFv9AbHdxMW08wRMJvaJmMEO-RWL893hbC9M9gF-A8K_xVgnK2F2UzSPb8JqlwgW7q2sfslMZf7WBU-vdpWM6K48VSHFoQ5bsoZKXiwJ2aWu5bb5vpEjDI_AgT4BvhLyPCkkkcGRBwmfbx7ZzOaenW5YBuSp4L6b5F3Hy8bIjto', 'BI8e6vbuwfHSd3FR5eR8gwMkvucSaeAfI7GsroVus9QNs3GYHNMlkQ1z5kebeBwZm5PwonDG-9H71hX22YeSPxg', 'Q0JYCyDXgHSIg6WfGlWjWw', '2026-05-17 12:47:46'),
-(1059, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QErw6ucEvQfhao-EyqRdLPCqmj5rw-QXpW7QAtdILst6o2y2dRASzImXF-yVbF_As7BlQc7p1RdpcZk7OHpHA3RGbQF4kQEX7QNmEFM6rx-5hY9aiQRxboX57q88vkSlS2NRhb5l-whmM-3HvdLuxao_Cjc9QoZ2fP9ZKAw0ZkY', 'BISUEpAkZ9-PJXkMunGpzmrPRDhfcnc9j6YryvYsNiGXqIDIz_mxIwsdlStXFhTjuanvscBxsrRHjz5X-WLBLvA', 'SFm-OyQalb9T9tJAVw--rQ', '2026-05-17 13:15:05');
+(1059, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QErw6ucEvQfhao-EyqRdLPCqmj5rw-QXpW7QAtdILst6o2y2dRASzImXF-yVbF_As7BlQc7p1RdpcZk7OHpHA3RGbQF4kQEX7QNmEFM6rx-5hY9aiQRxboX57q88vkSlS2NRhb5l-whmM-3HvdLuxao_Cjc9QoZ2fP9ZKAw0ZkY', 'BISUEpAkZ9-PJXkMunGpzmrPRDhfcnc9j6YryvYsNiGXqIDIz_mxIwsdlStXFhTjuanvscBxsrRHjz5X-WLBLvA', 'SFm-OyQalb9T9tJAVw--rQ', '2026-08-11 10:52:00'),
+(1197, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QHVCgGvLB2HHekc1dv5PvWV-1ExcXls3sTRLPyZ3-GFO1EaWAkH0G6tQ2PlCWNhXJKr-BKiLbNVcVQybDDLDVnQSdaez1JOC5GUaExAEAHbI2vQ6e4RUsx-wX9qWxWechDjrv3TtX8E8nSjg7YvukooGsVnBIKPFcB9uG8ijK5g', 'BMdmgNkrnK8fxHWjeBphYqM2cMc9FT8zImpZbtPpihXuK8QkeQLziv6Nw4G-2FkRaEt88Z5EVNLbbmblcznQJao', '7002sfr6W5fmAOYfIqMPhQ', '2026-09-08 18:31:49'),
+(1232, 'zinhle.mkhathini@iskool.demo', 'https://web.push.apple.com/QHVCgGvLB2HHekc1dv5PvWV-1ExcXls3sTRLPyZ3-GFO1EaWAkH0G6tQ2PlCWNhXJKr-BKiLbNVcVQybDDLDVnQSdaez1JOC5GUaExAEAHbI2vQ6e4RUsx-wX9qWxWechDjrv3TtX8E8nSjg7YvukooGsVnBIKPFcB9uG8ijK5g', 'BMdmgNkrnK8fxHWjeBphYqM2cMc9FT8zImpZbtPpihXuK8QkeQLziv6Nw4G-2FkRaEt88Z5EVNLbbmblcznQJao', '7002sfr6W5fmAOYfIqMPhQ', '2026-08-20 19:44:10'),
+(1438, 'mandlasimphiwe9990@gmail.com', 'https://web.push.apple.com/QHVCgGvLB2HHekc1dv5PvWV-1ExcXls3sTRLPyZ3-GFO1EaWAkH0G6tQ2PlCWNhXJKr-BKiLbNVcVQybDDLDVnQSdaez1JOC5GUaExAEAHbI2vQ6e4RUsx-wX9qWxWechDjrv3TtX8E8nSjg7YvukooGsVnBIKPFcB9uG8ijK5g', 'BMdmgNkrnK8fxHWjeBphYqM2cMc9FT8zImpZbtPpihXuK8QkeQLziv6Nw4G-2FkRaEt88Z5EVNLbbmblcznQJao', '7002sfr6W5fmAOYfIqMPhQ', '2026-09-03 12:17:44'),
+(1671, 'mandlasimphiwe99@gmail.com', 'https://web.push.apple.com/QCKHMoOK21abX8-NInv0Gi2hZv2KSv77RobAhpbL5Fw5EFQ4Qd_RNxKXBJyhmnKNf_dIh5pR03XZE-oewMqCQQqTonP-iA7aWIJeA3tRFpWU1l3etBf3VGwXB9nNQ5peAJw1Rnjq_sPgjyjPaVrYt4aKag3oTEnCLWKIO2UoQx8', 'BEBUruTeJ9LBgt8wTneOxME7Ne9zrlXS4FvbQYZsJ-tA7EH4zLupOeFpE669ATdCzewbEIklTYQQvy5meMFLO80', 'NPW5mdaCqH2pezwJ3TKa8A', '2026-09-10 13:37:23');
 
 -- --------------------------------------------------------
 
@@ -5616,7 +5718,11 @@ INSERT INTO `user_tokens` (`id`, `selector`, `hashed_validator`, `user_email`, `
 (66, 'c39dffb7ecb2', 'ca3ecefa7104005385b1ebe994003b4930bfc6b468d6f17eb82676b3c4122528', 'mandlasimphiwe99@gmail.com', '2026-06-15 15:31:08'),
 (67, '9c05159c8ed6', '4df46649533e9666ced5622123890d1eba86ae05457ee20f9207af8c31779d6b', 'mandlasimphiwe99@gmail.com', '2026-06-16 14:27:41'),
 (68, '2e512548b39b', 'c3274c83de85043870bb31b7bc3e720e9e789bc7d2e04dfe0b2013e5b1812082', 'mandlasimphiwe99@gmail.com', '2026-06-16 15:14:50'),
-(73, '341ec587a390', '9abce373726c3dd8c047ce0c6319030486c2f7e774d4c3f30f3825b588badfae', 'mandlasimphiwe99@gmail.com', '2026-06-29 13:01:25');
+(79, 'f35c3b70d747', '3588fd7a2fbbecafae89aa11f418a91a80eaa2e4ca7326bb70e4e96a86003637', 'mandlasimphiwe99@gmail.com', '2026-08-27 20:22:50'),
+(80, 'c021b44e995d', '56c6553023b86fcb815d7aa61b3128bd9ff8f3c365bf0f1ec4edf514d75eccb3', 'mandlasimphiwe99@gmail.com', '2026-08-30 13:08:23'),
+(88, 'e6327d278cc5', 'bfc052a61bc03f99f7e3fa697c627e9a7f3b52a33a60d89a624ab31fa80efff1', 'mandlasimphiwe99@gmail.com', '2026-10-03 15:52:16'),
+(89, 'b33fa4bae14d', 'e8120c44488585edc54fe3d6d8e54577587987ec427204643bfc3a55b1d6b102', 'mandlasimphiwe99@gmail.com', '2026-10-08 16:44:24'),
+(90, '211232bb0795', '9328f65ff8dc9c39c2ced0b93319942b5ca54be970d366b061ff3df18068f59b', 'mandlasimphiwe99@gmail.com', '2026-10-08 20:59:03');
 
 --
 -- Indexes for dumped tables
@@ -5964,7 +6070,7 @@ ALTER TABLE `user_tokens`
 -- AUTO_INCREMENT for table `academic_events`
 --
 ALTER TABLE `academic_events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `academic_years`
@@ -5982,7 +6088,7 @@ ALTER TABLE `access_keys`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
 
 --
 -- AUTO_INCREMENT for table `answers`
@@ -5994,13 +6100,13 @@ ALTER TABLE `answers`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `choices`
 --
 ALTER TABLE `choices`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=557;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=561;
 
 --
 -- AUTO_INCREMENT for table `classes`
@@ -6012,7 +6118,7 @@ ALTER TABLE `classes`
 -- AUTO_INCREMENT for table `class_discussions`
 --
 ALTER TABLE `class_discussions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `class_students`
@@ -6024,7 +6130,7 @@ ALTER TABLE `class_students`
 -- AUTO_INCREMENT for table `discussion_replies`
 --
 ALTER TABLE `discussion_replies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `discussion_reports`
@@ -6054,7 +6160,7 @@ ALTER TABLE `evaluation_responses`
 -- AUTO_INCREMENT for table `evaluation_statements`
 --
 ALTER TABLE `evaluation_statements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=225;
 
 --
 -- AUTO_INCREMENT for table `fitb_blanks`
@@ -6084,19 +6190,19 @@ ALTER TABLE `multiple_answer_questions`
 -- AUTO_INCREMENT for table `open_ended_grades`
 --
 ALTER TABLE `open_ended_grades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `parent_links`
 --
 ALTER TABLE `parent_links`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
@@ -6120,19 +6226,19 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT for table `quizquestions`
 --
 ALTER TABLE `quizquestions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=543;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=544;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
-  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1192;
+  MODIFY `attempt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1197;
 
 --
 -- AUTO_INCREMENT for table `quiz_integrity_logs`
@@ -6144,13 +6250,13 @@ ALTER TABLE `quiz_integrity_logs`
 -- AUTO_INCREMENT for table `quiz_results`
 --
 ALTER TABLE `quiz_results`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1195;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1201;
 
 --
 -- AUTO_INCREMENT for table `resources`
 --
 ALTER TABLE `resources`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `subject_briefs`
@@ -6162,19 +6268,19 @@ ALTER TABLE `subject_briefs`
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `teacher_evaluations`
 --
 ALTER TABLE `teacher_evaluations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `teacher_reminders`
 --
 ALTER TABLE `teacher_reminders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `teacher_subjects`
@@ -6192,25 +6298,25 @@ ALTER TABLE `top_achievers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT for table `user_answers`
 --
 ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=833;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=843;
 
 --
 -- AUTO_INCREMENT for table `user_subscriptions`
 --
 ALTER TABLE `user_subscriptions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1143;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1723;
 
 --
 -- AUTO_INCREMENT for table `user_tokens`
 --
 ALTER TABLE `user_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- Constraints for dumped tables
