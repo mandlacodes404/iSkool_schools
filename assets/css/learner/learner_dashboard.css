@@ -473,7 +473,7 @@ iframe {
     justify-content: center;
     flex-shrink: 0;
     font-family: 'Nunito', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 800;
     letter-spacing: 0;
     color: #9a9a97; /* light grey, readable against the #20201f tint */
