@@ -48,14 +48,29 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
 $learnerEmail = $_SESSION['email'];
 
 //──────────────────────────────────────────────────────────────────
-//           Get learner school name
+//           Get learner school name + logo
 //──────────────────────────────────────────────────────────────────
 $schoolName = 'My School'; // fallback only
-$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolLogo = null; // null = no logo uploaded yet -> show initials avatar instead
+$result = $conn->query("SELECT setting_value, school_logo FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
+    $logoPath   = trim((string)($row['school_logo'] ?? ''));
+    // Treat the shared default placeholder as "not uploaded" too, in case
+    // older rows still have it saved as the literal school_logo value.
+    if ($logoPath !== '' && stripos($logoPath, 'default_school.png') === false) {
+        $schoolLogo = $logoPath;
+    }
 }
-$schoolLogo = 'uploads/schools/default_school.png?v=1.2';
+
+// Build 2-letter school initials from the first two words of the school name
+// e.g. "Landulwazi Highschool" -> LH, "Thoko Thaba Highschool" -> TT
+$schoolNameWords = preg_split('/\s+/', trim($schoolName), -1, PREG_SPLIT_NO_EMPTY);
+$schoolInitials  = '';
+foreach (array_slice($schoolNameWords, 0, 2) as $word) {
+    $schoolInitials .= strtoupper(substr($word, 0, 1));
+}
+if ($schoolInitials === '') { $schoolInitials = '??'; }
 
 //──────────────────────────────────────────────────────────────────────────────
 //        Get current active academic year (no school_id needed) 
@@ -221,7 +236,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.0">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.2">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.3">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -514,9 +529,13 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 
     <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
-        <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>" 
-             alt="School Logo" 
-             style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:0.5px solid rgba(255,255,255,0.2);">
+        <?php if ($schoolLogo): ?>
+            <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>"
+                 alt="School Logo"
+                 style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:0.5px solid rgba(255,255,255,0.2);">
+        <?php else: ?>
+            <span id="headerLogo" class="school-logo-initials" aria-label="School Logo"><?= htmlspecialchars($schoolInitials) ?></span>
+        <?php endif; ?>
         <span class="school-name" id="headerTitle"><?= htmlspecialchars($schoolName) ?></span>
     </div>
 

@@ -459,6 +459,28 @@ iframe {
     display: none;                      /* hidden on mobile – already good */
 }
 
+/* Fallback avatar shown in place of #headerLogo when the school hasn't
+   uploaded a logo yet. Same footprint/shape as the <img> it replaces
+   (40px, rounded-square) so layout doesn't shift either way. */
+.school-logo-initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    background: #20201f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #9a9a97; /* light grey, readable against the #20201f tint */
+    text-transform: uppercase;
+    user-select: none;
+}
+
 @media (min-width: 769px) {
     .main-header {
         background: #12161c;
