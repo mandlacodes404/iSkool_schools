@@ -1191,7 +1191,7 @@ iframe {
         margin-bottom: 3px;
         border-radius: 12px;
         min-height: 48px;
-        font-size: 18px;
+        font-size: 22px;
     }
 
     .sidebar .footer {
@@ -1834,8 +1834,8 @@ iframe {
 @media (max-width: 768px) {
     .sidebar-links a svg,
     .sidebar-links button svg {
-        width: 20px !important;
-        height: 20px !important;
+        width: 24px !important;
+        height: 24px !important;
         flex-shrink: 0;
         color: inherit;
         margin-right: 12px;
