@@ -1409,8 +1409,9 @@ iframe {
     }
     .sidebar .footer {
         bottom: auto !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
         opacity: 0.8 !important; /* Makes it a bit easier to see */
+        margin-bottom: 6px;
     }
 }
 
@@ -1836,6 +1837,7 @@ iframe {
         height: 16px !important;
         flex-shrink: 0;
         color: inherit;
+        margin-right: 12px;
     }
 }
 
