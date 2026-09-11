@@ -854,7 +854,8 @@ body {
     }
 }
 
-#iskool-brand {
+#iskool-brand,
+#register-iskool-brand {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -865,15 +866,25 @@ body {
 }
 
 #iskool-brand svg,
-#iskool-brand img {
+#iskool-brand img,
+#register-iskool-brand svg,
+#register-iskool-brand img {
     width: 90px;
     height: 90px;
 }
 
-/* Wordmark next to the logo, mobile-only (see below). Hidden by default /
+/* Register form's brand lockup is mobile-only from the start — desktop
+   keeps the original "Register" heading with no logo above it. */
+#register-iskool-brand {
+    display: none;
+}
+
+/* Wordmark next to the logo, mobile-only (see below). Hidden by default
    on desktop so it has no effect there — desktop hides #iskool-brand
-   entirely anyway (see the display:none !important rule above). */
-#iskool-brand-wordmark {
+   entirely anyway (see the display:none !important rule above), and
+   #register-iskool-brand is display:none by default too. */
+#iskool-brand-wordmark,
+.iskool-brand-wordmark {
     display: none;
     font-family: 'Nunito', sans-serif;
     font-weight: 600;
@@ -882,31 +893,51 @@ body {
     line-height: 1;
 }
 
-/* Mobile: show logo + "iSkool" wordmark side-by-side above the login form,
-   matching the splash screen's #loader-logo / #splash-wordmark pairing,
-   just smaller. Desktop is untouched. */
+/* Mobile: show logo + "iSkool" wordmark side-by-side above the login form
+   and the register form, matching the splash screen's #loader-logo /
+   #splash-wordmark pairing, just smaller. Desktop is untouched. */
 @media (max-width: 480px) {
-    #iskool-brand {
+    #iskool-brand,
+    #register-iskool-brand {
+        display: flex;
         gap: 10px;
         margin-bottom: 25px;
         max-width: 95vw;
+        transform: translateX(-8px);
     }
     #iskool-brand svg,
-    #iskool-brand img { width: 52px; height: 52px; }
-    #iskool-brand-wordmark {
+    #iskool-brand img,
+    #register-iskool-brand svg,
+    #register-iskool-brand img { width: 52px; height: 52px; }
+    #iskool-brand-wordmark,
+    .iskool-brand-wordmark {
         display: block;
         font-size: 24px;
+    }
+    /* "Register" heading shrinks and sits centered under the new lockup */
+    #register-form h2 {
+        font-size: 18px;
+        text-align: center;
+        margin-top: 0;
     }
 }
 
 @media (max-width: 360px) {
-    #iskool-brand {
+    #iskool-brand,
+    #register-iskool-brand {
         gap: 8px;
+        transform: translateX(-6px);
     }
     #iskool-brand svg,
-    #iskool-brand img { width: 46px; height: 46px; }
-    #iskool-brand-wordmark {
+    #iskool-brand img,
+    #register-iskool-brand svg,
+    #register-iskool-brand img { width: 46px; height: 46px; }
+    #iskool-brand-wordmark,
+    .iskool-brand-wordmark {
         font-size: 21px;
+    }
+    #register-form h2 {
+        font-size: 17px;
     }
 }
 
