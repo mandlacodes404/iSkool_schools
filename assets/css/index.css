@@ -900,7 +900,7 @@ body {
     #iskool-brand,
     #register-iskool-brand {
         display: flex;
-        gap: 10px;
+        gap: 6px;
         margin-bottom: 25px;
         max-width: 95vw;
         transform: translateX(-8px);
@@ -914,18 +914,24 @@ body {
         display: block;
         font-size: 24px;
     }
-    /* "Register" heading shrinks and sits centered under the new lockup */
+    /* "Register" heading text removed on mobile — the logo + wordmark
+       lockup above takes its place. Kept in the DOM but visually hidden
+       (rather than display:none) so we can still control the gap between
+       the lockup and the fields below via explicit margin (h2's default
+       margin is font-size-relative, so it would collapse once the text
+       is shrunk to font-size: 0). */
     #register-form h2 {
-        font-size: 18px;
-        text-align: center;
-        margin-top: 0;
+        font-size: 0;
+        line-height: 0;
+        color: transparent;
+        margin: 0 0 20px 0;
     }
 }
 
 @media (max-width: 360px) {
     #iskool-brand,
     #register-iskool-brand {
-        gap: 8px;
+        gap: 5px;
         transform: translateX(-6px);
     }
     #iskool-brand svg,
@@ -937,7 +943,8 @@ body {
         font-size: 21px;
     }
     #register-form h2 {
-        font-size: 17px;
+        font-size: 0;
+        margin: 0 0 18px 0;
     }
 }
 
