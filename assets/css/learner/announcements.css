@@ -594,3 +594,44 @@
 @media (min-width: 900px) {
     .lan-mobile-detail { display: none; }
 }
+
+/* ══════════════════════════════════════
+   EDITED ANNOUNCEMENTS
+   Orange accent (#d97757 — Claude logo orange) marks anything related to
+   an edit: the "Edited" tag next to a title, the "Edited <date>" meta
+   line, and the highlighted new/changed words inside an edited message.
+   Deliberately a different orange from the existing #f28c38 (teacher
+   accent) and #d29522 (school-wide accent) already used in this file, so
+   "this was edited" reads as its own distinct signal.
+   ══════════════════════════════════════ */
+
+.lan-edited-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #d97757;
+    background: rgba(217,119,87,0.12);
+    border: 1px solid rgba(217,119,87,0.35);
+    border-radius: 20px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.lan-edited-meta {
+    color: #d97757;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Sits between the desktop panel title and the message body */
+.lan-panel-title + .lan-edited-meta { margin-bottom: 2px; }
+
+/* Highlighted new/changed words within an edited message body */
+.an-edited-highlight {
+    color: #d97757;
+    font-weight: 600;
+}

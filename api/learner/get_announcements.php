@@ -63,6 +63,98 @@ function getInitials(string $text): string {
     return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr(end($words), 0, 1));
 }
 
+/**
+ * Word-level diff for edited announcements: returns $current as safe HTML,
+ * with words/punctuation runs that are new relative to $original wrapped
+ * in a highlight span (styled orange on the frontend). Deleted text is not
+ * shown — learners only ever see the current message, just with the new
+ * or changed parts called out.
+ *
+ * Tokenizes into word-runs vs. everything-else-runs (whitespace, punctuation)
+ * so exact spacing is preserved, then finds the longest common subsequence
+ * of tokens between the two versions. Anything in $current not part of
+ * that common subsequence is "new" and gets wrapped. Consecutive new
+ * tokens are merged into a single span rather than one span per word.
+ *
+ * All output is passed through htmlspecialchars — the returned string is
+ * safe to inject directly (no further escaping should be applied to it).
+ */
+function buildAnnouncementDiffHtml(string $original, string $current): string {
+    if ($original === $current) {
+        return nl2br(htmlspecialchars($current));
+    }
+
+    $tokenize = function (string $text): array {
+        preg_match_all("/[\p{L}\p{N}']+|[^\p{L}\p{N}']+/u", $text, $matches);
+        return $matches[0];
+    };
+
+    $origTokens = $tokenize($original);
+    $curTokens  = $tokenize($current);
+
+    $n = count($origTokens);
+    $m = count($curTokens);
+
+    // LCS length table over tokens (exact match per token).
+    $dp = array_fill(0, $n + 1, array_fill(0, $m + 1, 0));
+    for ($i = 1; $i <= $n; $i++) {
+        for ($j = 1; $j <= $m; $j++) {
+            if ($origTokens[$i - 1] === $curTokens[$j - 1]) {
+                $dp[$i][$j] = $dp[$i - 1][$j - 1] + 1;
+            } else {
+                $dp[$i][$j] = max($dp[$i - 1][$j], $dp[$i][$j - 1]);
+            }
+        }
+    }
+
+    // Walk back marking which $curTokens indices are part of the LCS
+    // (i.e. unchanged / carried over from the original).
+    $keptInCurrent = array_fill(0, $m, false);
+    $i = $n;
+    $j = $m;
+    while ($i > 0 && $j > 0) {
+        if ($origTokens[$i - 1] === $curTokens[$j - 1]) {
+            $keptInCurrent[$j - 1] = true;
+            $i--;
+            $j--;
+        } elseif ($dp[$i - 1][$j] >= $dp[$i][$j - 1]) {
+            $i--;
+        } else {
+            $j--;
+        }
+    }
+
+    // Walk forward through $curTokens, grouping consecutive new/unchanged
+    // runs so we emit one span per run rather than one span per word.
+    $html = '';
+    $buffer = '';
+    $bufferIsNew = null;
+
+    $flush = function () use (&$html, &$buffer, &$bufferIsNew) {
+        if ($buffer === '') return;
+        if ($bufferIsNew) {
+            $html .= '<span class="an-edited-highlight">' . htmlspecialchars($buffer) . '</span>';
+        } else {
+            $html .= htmlspecialchars($buffer);
+        }
+        $buffer = '';
+    };
+
+    foreach ($curTokens as $idx => $token) {
+        $isNew = !$keptInCurrent[$idx];
+        if ($bufferIsNew === null) {
+            $bufferIsNew = $isNew;
+        } elseif ($isNew !== $bufferIsNew) {
+            $flush();
+            $bufferIsNew = $isNew;
+        }
+        $buffer .= $token;
+    }
+    $flush();
+
+    return nl2br($html);
+}
+
 // ── Active academic year ──
 $yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 $current_academic_year_id = ($yearRes && $yearRes->num_rows > 0)
@@ -98,7 +190,9 @@ $schoolStmt = $conn->prepare("
         a.id,
         a.title,
         a.message,
+        a.original_message,
         a.created_at,
+        a.edited_at,
         a.target_role
     FROM announcements a
     WHERE a.class_id IS NULL
@@ -111,12 +205,20 @@ $schoolStmt->execute();
 $schoolRes = $schoolStmt->get_result();
 
 while ($row = $schoolRes->fetch_assoc()) {
+    $message  = $row['message'] ?? '';
+    $isEdited = !empty($row['edited_at']);
+
     $schoolAnnouncements[] = [
         'id'              => (int)$row['id'],
         'title'           => $row['title']   ?? '(No Title)',
-        'message'         => $row['message'] ?? '',
+        'message'         => $message,
+        'message_html'    => $isEdited
+            ? buildAnnouncementDiffHtml($row['original_message'] ?? $message, $message)
+            : null,
         'created_at'      => $row['created_at'],
         'display_date'    => date('j M \a\t H:i', strtotime($row['created_at'])),
+        'is_edited'       => $isEdited,
+        'edited_date'     => $isEdited ? date('j M \a\t H:i', strtotime($row['edited_at'])) : null,
         'sender'          => $schoolName,
         'sender_initials' => getInitials($schoolName),
     ];
@@ -135,7 +237,9 @@ if ($classId) {
             a.id,
             a.title,
             a.message,
+            a.original_message,
             a.created_at,
+            a.edited_at,
             u.title       AS t_title,
             u.name        AS t_name,
             u.second_name AS t_second_name,
@@ -159,13 +263,21 @@ if ($classId) {
             $row['t_surname']
         );
         $teacher = $nameParts['display'];
+        $message  = $row['message'] ?? '';
+        $isEdited = !empty($row['edited_at']);
+
         $teacherGrouped[$teacher] = $teacherGrouped[$teacher] ?? [];
         $teacherGrouped[$teacher][] = [
             'id'              => (int)$row['id'],
             'title'           => $row['title']   ?? '(No Title)',
-            'message'         => $row['message'] ?? '',
+            'message'         => $message,
+            'message_html'    => $isEdited
+                ? buildAnnouncementDiffHtml($row['original_message'] ?? $message, $message)
+                : null,
             'created_at'      => $row['created_at'],
             'display_date'    => date('j M \a\t H:i', strtotime($row['created_at'])),
+            'is_edited'       => $isEdited,
+            'edited_date'     => $isEdited ? date('j M \a\t H:i', strtotime($row['edited_at'])) : null,
             'teacher_initials'=> $nameParts['initials'],
         ];
     }

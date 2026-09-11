@@ -316,7 +316,7 @@ function renderAnnouncements(data) {
                         </svg>
                     </div>
                     <div class="lan-sidebar-item-info">
-                        <div class="lan-sidebar-item-title">${ann.title}</div>
+                        <div class="lan-sidebar-item-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
                         <div class="lan-sidebar-item-meta">${ann.display_date}</div>
                     </div>
                     ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
@@ -357,7 +357,7 @@ function renderAnnouncements(data) {
                             </svg>
                         </div>
                         <div class="lan-sidebar-item-info">
-                            <div class="lan-sidebar-item-title">${ann.title}</div>
+                            <div class="lan-sidebar-item-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
                             <div class="lan-sidebar-item-meta">${ann.display_date}</div>
                         </div>
                         ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
@@ -446,6 +446,7 @@ function renderAnnouncements(data) {
                     <div class="lan-mobile-card-body">
                         <div class="lan-mobile-card-title">
                             <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                            ${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}
                         </div>
                         <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                     </div>
@@ -497,6 +498,7 @@ function renderAnnouncements(data) {
                         <div class="lan-mobile-card-body">
                             <div class="lan-mobile-card-title">
                                 <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                                ${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}
                             </div>
                             <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
@@ -638,6 +640,20 @@ function formatLearnerAnnouncementMessage(message) {
     return escapeLearnerAnnouncementHtml(message).replace(/\n/g, '<br>');
 }
 
+// For edited announcements, the backend sends `message_html`: the current
+// message already escaped and rendered to HTML server-side, with the
+// changed/new words wrapped in a highlight span. That HTML is trusted
+// (built server-side from an escaped string, not user input at this layer)
+// and must NOT be re-escaped here, or the <span> tags would show up as
+// literal text. Unedited announcements have no message_html and fall back
+// to the normal escape-and-linebreak path.
+function renderLearnerAnnouncementBody(ann) {
+    if (ann && ann.is_edited && ann.message_html) {
+        return ann.message_html;
+    }
+    return formatLearnerAnnouncementMessage(ann ? ann.message : '');
+}
+
 function getLearnerAnnouncementInitials(name) {
     const clean = String(name ?? '').trim();
     if (!clean) return '?';
@@ -685,8 +701,9 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
                     <div class="lan-mobile-detail-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                 </div>
             </div>
-            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
-            <div class="lan-mobile-detail-message">${formatLearnerAnnouncementMessage(ann.message)}</div>
+            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</h1>
+            ${ann.is_edited ? `<div class="lan-edited-meta">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}</div>` : ''}
+            <div class="lan-mobile-detail-message">${renderLearnerAnnouncementBody(ann)}</div>
         </article>`;
 
     if (mainContent) mainContent.scrollTop = 0;
@@ -749,12 +766,13 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
                             <div class="lan-panel-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
                         </div>
                     </div>
-                    <div class="lan-panel-title">${ann.title}</div>
+                    <div class="lan-panel-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
+                    ${ann.is_edited ? `<div class="lan-edited-meta">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}</div>` : ''}
                 </div>
                 ${isNew ? '<span class="lan-panel-new-badge">NEW</span>' : ''}
             </div>
             <div class="lan-panel-message">
-                ${ann.message.replace(/\n/g, '<br>')}
+                ${renderLearnerAnnouncementBody(ann)}
             </div>
         </div>`;
 };
