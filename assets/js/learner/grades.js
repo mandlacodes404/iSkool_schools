@@ -1915,7 +1915,16 @@ function renderProgressReport(data) {
             </div>`;
         wireSheetDragToClose(modal, () => prBackToGrades());
     } else {
-        apiArea.innerHTML = reportInnerHtml;
+        // Desktop: #api-content-area is the OUTER page shell (sidebar +
+        // main panel together, see fetchGrades()'s grades-desktop-layout
+        // markup) -- writing the report there would wipe out the sidebar
+        // along with it and center the card against the full shell width
+        // instead of the actual right column. #grades-dt-panel is that
+        // right column (.grades-dt-panel-scroll), so the report replaces
+        // only its contents (the .grades-dt-empty placeholder) and the
+        // sidebar stays exactly where it was.
+        const panel = document.getElementById('grades-dt-panel');
+        (panel || apiArea).innerHTML = reportInnerHtml;
     }
 
     apiArea._prData            = data;

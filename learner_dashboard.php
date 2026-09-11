@@ -3430,7 +3430,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=9.6"></script>
 <script src="assets/js/learner/resources.js?v=8.3"></script>
 <script src="assets/js/learner/announcements.js?v=9.0"></script>
-<script src="assets/js/learner/grades.js?v=9.4"></script>
+<script src="assets/js/learner/grades.js?v=9.5"></script>
 <script src="assets/js/learner/evaluations.js?v=6.8"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
