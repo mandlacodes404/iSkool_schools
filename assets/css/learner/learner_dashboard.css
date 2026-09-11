@@ -1431,6 +1431,15 @@ iframe {
     border-left: none; /* Remove the old border */
 }
 
+/* Plain highlighter on mobile — no inset accent line on the left, just the
+   background fill. Desktop keeps the inset accent line above untouched. */
+@media (max-width: 768px) {
+    .sidebar a.active,
+    .sidebar button.active {
+        box-shadow: none;
+    }
+}
+
 .sidebar span {
     opacity: 1;
     transition: opacity var(--transition-speed) ease;
