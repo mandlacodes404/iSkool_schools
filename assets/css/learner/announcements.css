@@ -630,6 +630,11 @@
 /* Sits between the desktop panel title and the message body */
 .lan-panel-title + .lan-edited-meta { margin-bottom: 2px; }
 
+/* Mobile detail view only (.lan-mobile-detail is hidden ≥900px, see above) —
+   adds breathing room between the "Edited <date>" line and the message
+   body below it, which otherwise sat right up against each other. */
+.lan-mobile-detail .lan-edited-meta { margin-bottom: 16px; }
+
 /* Highlighted new/changed words within an edited message body */
 .an-edited-highlight {
     color: #d97757;

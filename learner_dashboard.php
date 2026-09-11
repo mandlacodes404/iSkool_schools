@@ -243,7 +243,7 @@ if (!empty($joinedClassIds)) {
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.4">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.6">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.7">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
