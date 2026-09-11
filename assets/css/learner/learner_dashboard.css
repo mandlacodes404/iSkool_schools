@@ -1824,9 +1824,10 @@ iframe {
     }
 }
 
-/* ── SIDEBAR MOBILE: coloured icon boxes — mobile only ───────────────────
-   Each .sidebar-links a/button gets a coloured pill box behind its SVG,
-   matching the bottom nav style. Desktop is unaffected (max-width:768px).
+/* ── SIDEBAR MOBILE: plain icons, no tint — mobile only ───────────────────
+   SVGs use stroke="currentColor" in the markup, so they simply inherit
+   whatever color .sidebar a/button already has (incl. hover/active states).
+   Desktop is unaffected (max-width:768px).
 ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .sidebar-links a svg,
@@ -1834,32 +1835,7 @@ iframe {
         width: 16px !important;
         height: 16px !important;
         flex-shrink: 0;
-    }
-
-    /* Each link/button gets a box behind the SVG */
-    .sidebar-links a[data-nav],
-    .sidebar-links button[data-nav] {
-        gap: 12px;
-    }
-
-    .sidebar-links a[data-nav]::before,
-    .sidebar-links button[data-nav]::before {
-        content: '';
-        display: none; /* we use the svg wrapper approach instead */
-    }
-
-    /* Icon box wrapper — inserted via JS below */
-    .sidebar-nav-box {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-right: 10px;
-        transition: background 0.2s;
-        background: rgba(26, 25, 25, 0.92);
+        color: inherit;
     }
 }
 

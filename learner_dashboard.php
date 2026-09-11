@@ -249,7 +249,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.7">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.8">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -2413,40 +2413,6 @@ if (desktopToggle) {
 }
     loader.style.display = "none";
 
-    // ── SIDEBAR MOBILE: wrap each SVG in a coloured box ──────────────────
-    // Only runs on mobile. Maps each nav link to its colour, wraps the
-    // existing SVG in a .sidebar-nav-box div. Desktop sidebar untouched.
-    if (window.innerWidth <= 768) {
-        const sidebarNavConfig = [
-            { selector: '#nav-home-sidebar',          color: '#4fd1c5' },
-            { selector: '#nav-quiz-sidebar',          color: '#fdd663' },
-            { selector: '#nav-assignments-sidebar',   color: '#a78bfa' },
-            { selector: '#nav-resources-sidebar',     color: '#f28c38' },
-            { selector: '#nav-grades-sidebar',        color: '#68d391' },
-            { selector: '#nav-announcements-sidebar', color: '#f28c38' },
-            { selector: '#nav-evaluations-sidebar',   color: '#fc8181' },
-            { selector: '#nav-syllabus-sidebar',      color: '#63b3ed' },
-            { selector: '#nav-discussions-sidebar',   color: '#f85149' },
-            { selector: '#nav-calendar-sidebar',      color: '#f472b6' },
-            { selector: '#nav-joinclass-sidebar',     color: '#48bb78' },
-            { selector: '#nav-myclass-sidebar',       color: '#63b3ed' },
-        ];
-        sidebarNavConfig.forEach(({ selector, color }) => {
-            const el  = document.querySelector(selector);
-            if (!el) return;
-            const svg = el.querySelector('svg');
-            if (!svg) return;
-            // Colour the SVG stroke
-            svg.style.stroke = color;
-            // Wrap in a box
-            const box = document.createElement('div');
-            box.className = 'sidebar-nav-box';
-            box.style.background = color + '18';
-            box.style.border     = '1px solid ' + color + '30';
-            svg.parentNode.insertBefore(box, svg);
-            box.appendChild(svg);
-        });
-    }
     // ─────────────────────────────────────────────────────────────────────
     // Watches .main-content (the mobile scroll container).
     // Header:   transparent at top  → glass when scrolled DOWN past threshold.
