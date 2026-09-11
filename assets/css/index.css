@@ -870,10 +870,44 @@ body {
     height: 90px;
 }
 
+/* Wordmark next to the logo, mobile-only (see below). Hidden by default /
+   on desktop so it has no effect there — desktop hides #iskool-brand
+   entirely anyway (see the display:none !important rule above). */
+#iskool-brand-wordmark {
+    display: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    line-height: 1;
+}
+
+/* Mobile: show logo + "iSkool" wordmark side-by-side above the login form,
+   matching the splash screen's #loader-logo / #splash-wordmark pairing,
+   just smaller. Desktop is untouched. */
 @media (max-width: 480px) {
+    #iskool-brand {
+        gap: 10px;
+        margin-bottom: 25px;
+        max-width: 95vw;
+    }
     #iskool-brand svg,
-    #iskool-brand img { width: 65px; height: 65px; }
-    #iskool-brand { margin-bottom: 25px; max-width: 95vw; }
+    #iskool-brand img { width: 52px; height: 52px; }
+    #iskool-brand-wordmark {
+        display: block;
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 360px) {
+    #iskool-brand {
+        gap: 8px;
+    }
+    #iskool-brand svg,
+    #iskool-brand img { width: 46px; height: 46px; }
+    #iskool-brand-wordmark {
+        font-size: 21px;
+    }
 }
 
     @keyframes fadeSlideIn {

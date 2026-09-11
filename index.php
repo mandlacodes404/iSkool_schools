@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=8.3">
+    <link rel="stylesheet" href="assets/css/index.css?v=8.4">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -475,6 +475,7 @@ function getCsrfToken() {
                 <!-- iSkool brand text -->
                 <div id="iskool-brand">
                    <img src="/icon.svg?v=1.4" width="120" height="120" alt="iSkool logo">
+                   <span id="iskool-brand-wordmark">iSkool</span>
                 </div>
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="login-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
