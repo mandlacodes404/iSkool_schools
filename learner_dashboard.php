@@ -241,14 +241,14 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.4">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.5">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.7">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.5">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.6">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.0">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.0">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.1">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=10.7">
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
@@ -3426,7 +3426,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.10"></script>
-<script src="assets/js/learner/quiz.js?v=11.1"></script>
+<script src="assets/js/learner/quiz.js?v=11.2"></script>
 <script src="assets/js/learner/assignments.js?v=9.6"></script>
 <script src="assets/js/learner/resources.js?v=8.3"></script>
 <script src="assets/js/learner/announcements.js?v=9.0"></script>
