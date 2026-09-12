@@ -229,23 +229,47 @@ function renderTeacherAnnouncements(data) {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 90 ? ann.message.substring(0, 90) + '...' : ann.message;
                 const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
+                // Same megaphone glyph as the desktop sidebar icon/empty-state
+                // icon above, just resized to match assignments' 20x20 row
+                // icon. Stroke colour keeps the existing teal-vs-orange
+                // school/class distinction (previously carried by the
+                // school-row left border, now dropped in favour of the
+                // flat assignments-style row).
+                const iconStroke = isSchool ? '#f59e0b' : '#4fd1c5';
 
                 itemsHtml += `
-                    <div class="an-mobile-row${isSchool ? ' school-row' : ''}"
-                        onclick="openMobileTeacherAnnouncement(${flatIndex})">
-                        <div class="an-mobile-row-title">${ann.title}${editedTag}</div>
-                        <div class="an-mobile-row-msg">${preview}</div>
-                        <div class="an-mobile-row-date">${ann.display_date}</div>
+                    <div class="an-mobile-row" role="button" tabindex="0"
+                        onclick="openMobileTeacherAnnouncement(${flatIndex})"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAnnouncement(${flatIndex});}">
+                        <div class="an-mobile-row-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="${iconStroke}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                            </svg>
+                        </div>
+                        <div class="an-mobile-row-body">
+                            <div class="an-mobile-row-title">${ann.title}${editedTag}</div>
+                            <div class="an-mobile-row-msg">${preview}</div>
+                            <div class="an-mobile-row-date">${ann.display_date}</div>
+                        </div>
+                        <div class="an-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
                     </div>`;
             });
 
+            // Matches assignments' .as-mobile-folder-count badge for visual
+            // consistency between the two mobile list pages.
+            const countBadge = `<span class="an-mobile-folder-count">${group.items.length}</span>`;
             const labelInnerHtml = isSchool
                 ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-school-icon">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>
-                    From School`
-                : group.class_name;
+                    From School${countBadge}`
+                : `${group.class_name}${countBadge}`;
             const labelClass = isSchool
                 ? 'an-mobile-folder-label an-mobile-folder-label--school'
                 : 'an-mobile-folder-label';
