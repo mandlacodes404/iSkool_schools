@@ -23,6 +23,14 @@ window.fetchTeacherEvaluations = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_evaluations");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_evaluations");
 
+    // Restore standard chrome any time this list is (re)loaded — also the
+    // mobile "back" target dispatched from handleTeacherHeaderBack when
+    // detailType === 'Evaluation'. Applied up front (see Assignments
+    // back-button fix in PROJECT_NOTES.md for why this matters).
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Evaluations', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -175,7 +183,7 @@ function renderTeacherEvaluations(data) {
 
             group.evaluations.forEach((ev, evIndex) => {
                 html += `
-                    <div class="teacher-resource-card" onclick="openEvaluationResults(${groupIndex}, ${evIndex})">
+                    <div class="teacher-resource-card" onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})">
                         <div class="teacher-resource-icon">
                             <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -202,21 +210,10 @@ function renderTeacherEvaluations(data) {
 
     html += `</div>`;
 
-    // Results Modal (shared by both desktop panel and mobile)
+    // Release Evaluation modal (mobile). evalResultsModal was removed —
+    // mobile now uses openMobileTeacherEvaluation's detail page instead
+    // of a results popup (2026-09-12).
     html += `
-        <div id="evalResultsModal" class="teacher-modal-overlay ev-modal-hidden">
-            <div class="teacher-modal-box ev-modal-box--results">
-                <div class="teacher-modal-header">
-                    <span id="evalResultsTitle">Results</span>
-                    <button onclick="closeEvalResultsModal()" class="teacher-modal-close">&times;</button>
-                </div>
-                <div class="teacher-modal-body" id="evalResultsBody"></div>
-                <div class="teacher-modal-footer">
-                    <button onclick="closeEvalResultsModal()" class="teacher-modal-cancel">Close</button>
-                </div>
-            </div>
-        </div>
-
         <div id="releaseEvalModal" class="teacher-modal-overlay ev-modal-hidden">
             <div class="teacher-modal-box ev-modal-box--release">
                 <div class="teacher-modal-header">
@@ -365,17 +362,60 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
 };
 
 // ─────────────────────────────────────────────
-// RESULTS MODAL (mobile)
+// MOBILE DETAIL VIEW: tap -> detail page
+// Replaces the old evalResultsModal popup with a real detail page,
+// matching Assignments/Announcements/Quizzes. Body-building logic
+// (statement bars, comments) mirrors selectDesktopEval's — same
+// underlying data shape, just rendered into a page instead of a panel.
+// Delete added here (desktop parity, confirmed with the user) — the old
+// mobile modal was view-only.
 // ─────────────────────────────────────────────
-window.openEvaluationResults = function(groupIndex, evIndex) {
-    const ev = window.teacherEvaluationCache[groupIndex].evaluations[evIndex];
-    
-    document.getElementById('evalResultsTitle').textContent = ev.title;
+window.openMobileTeacherEvaluation = function(flatIndex) {
+    if (window.innerWidth > 899) return;
 
-    let body = `<p class="ev-mobile-results-subtitle">
-        ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
-        ${ev.description ? ' &mdash; ' + ev.description : ''}
-    </p>`;
+    const entry = (window._allEvalsFlat || [])[flatIndex];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (!entry || !apiArea) return;
+
+    const ev = window.teacherEvaluationCache[entry.groupIndex].evaluations[entry.evIndex];
+    if (!ev) return;
+
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+
+    sessionStorage.setItem('lastTeacherPage', 'teacher_evaluations');
+    window.teacherSectionState.selection.evaluations = { groupIndex: entry.groupIndex, evIndex: entry.evIndex };
+    window.persistTeacherSectionState();
+
+    window.configureTeacherHeader({
+        title: 'Evaluation',
+        mode: 'detail',
+        detailType: 'Evaluation',
+        backLabel: 'Evaluations'
+    });
+
+    let body = `
+        <article class="ev-mobile-detail">
+            <div class="ev-mobile-detail-header">
+                <div>
+                    <div class="ev-mobile-detail-title">${ev.title}</div>
+                    <div class="ev-mobile-detail-meta">
+                        ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
+                        ${ev.description ? ' &mdash; ' + ev.description : ''}
+                    </div>
+                </div>
+                <button class="ev-panel-delete-btn" onclick="confirmDeleteEvaluation(${ev.id})">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                    Delete
+                </button>
+            </div>`;
 
     ev.statements.forEach(s => {
         body += `<div class="eval-question-block">
@@ -410,14 +450,18 @@ window.openEvaluationResults = function(groupIndex, evIndex) {
         });
     }
 
-    body += `</div>`;
+    body += `</div></article>`;
 
-    document.getElementById('evalResultsBody').innerHTML = body;
-    document.getElementById('evalResultsModal').style.display = 'flex';
+    apiArea.innerHTML = body;
+    apiArea.scrollTop = 0;
 };
 
-window.closeEvalResultsModal = function() {
-    document.getElementById('evalResultsModal').style.display = 'none';
+window.openMobileTeacherEvaluationById = function(evaluationId) {
+    const idx = (window._allEvalsFlat || []).findIndex(entry => {
+        const ev = window.teacherEvaluationCache?.[entry.groupIndex]?.evaluations?.[entry.evIndex];
+        return ev && String(ev.id) === String(evaluationId);
+    });
+    if (idx >= 0) window.openMobileTeacherEvaluation(idx);
 };
 
 // ─────────────────────────────────────────────

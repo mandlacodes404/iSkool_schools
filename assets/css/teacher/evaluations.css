@@ -165,19 +165,21 @@
     display: none;
 }
 
-/* Mobile results preview subtitle */
-.ev-mobile-results-subtitle {
-    color: #8b949e;
-    font-size: 14px;
+/* Mobile detail page (openMobileTeacherEvaluation) — replaces the old
+   evalResultsModal popup + .ev-mobile-results-subtitle (2026-09-12). */
+.ev-mobile-detail { padding: 16px; }
+.ev-mobile-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 20px;
 }
+.ev-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; margin: 0 0 6px; }
+.ev-mobile-detail-meta { font-size: 13px; color: #8b949e; }
 
-/* Modal size variants (evalResultsModal / releaseEvalModal) */
-.ev-modal-box--results {
-    max-width: 640px;
-    max-height: 85vh;
-    overflow-y: auto;
-}
+/* Modal size variant (releaseEvalModal only now — the results modal
+   this used to also size was removed) */
 .ev-modal-box--release {
     max-width: 560px;
     max-height: 85vh;

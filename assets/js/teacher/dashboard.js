@@ -309,9 +309,9 @@ window.handleTeacherHeaderBack = function(event) {
         }
     }
 
-    if (detailType === 'Grade') {
-        if (typeof window.fetchTeacherGrades === 'function') {
-            window.fetchTeacherGrades();
+    if (detailType === 'Evaluation') {
+        if (typeof window.fetchTeacherEvaluations === 'function') {
+            window.fetchTeacherEvaluations();
             return false;
         }
     }
