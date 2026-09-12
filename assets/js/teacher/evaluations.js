@@ -178,11 +178,11 @@ function renderTeacherEvaluations(data) {
         html += `<p class="teacher-empty-state">No evaluations released yet.</p>`;
     } else {
         data.forEach((group, groupIndex) => {
-            html += `<div class="teacher-resource-section">
-                <div class="teacher-resource-class-label">${group.class_name}</div>`;
+            const mobileGroupId = `ev-mobile-class-group-${groupIndex}`;
+            let itemsHtml = '';
 
             group.evaluations.forEach((ev, evIndex) => {
-                html += `
+                itemsHtml += `
                     <div class="teacher-resource-card" onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})">
                         <div class="teacher-resource-icon">
                             <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -198,13 +198,15 @@ function renderTeacherEvaluations(data) {
                                 ${ev.description ? ' &middot; ' + ev.description : ''}
                             </div>
                         </div>
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
                     </div>`;
             });
 
-            html += `</div>`;
+            html += window.buildCollapsibleClassGroup(
+                mobileGroupId,
+                'teacher-resource-class-label',
+                group.class_name,
+                itemsHtml
+            );
         });
     }
 
