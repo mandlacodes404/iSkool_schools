@@ -695,42 +695,10 @@
     margin-bottom: 20px;
 }
 
-.teacher-term-card {
-    background: #1a1919;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    padding: 20px;
-}
-
-.teacher-term-card.term-active {
-    border-color: #22c55e;
-    box-shadow: 0 0 20px rgba(34,197,94,0.2);
-}
-
-.teacher-term-card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.teacher-term-card-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #4fd1c5;
-}
-
-.teacher-term-active-badge {
-    background: #22c55e;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
+/* .teacher-term-card / .teacher-term-card-header / .teacher-term-card-title /
+   .teacher-term-active-badge removed — Quizzes mobile no longer groups or
+   labels by term (2026-09-12); confirmed via grep these were used only by
+   quizzes.js's mobile term wrapper, nothing else referenced them. */
 
 .teacher-quiz-card {
     background: rgba(255,255,255,0.02);
@@ -820,6 +788,47 @@
 .teacher-quiz-action-btn.reopen   { background: #22c55e; color: white; }
 .teacher-quiz-action-btn.results  { background: rgba(79,209,197,0.1); color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); }
 .teacher-quiz-action-btn.integrity { background: rgba(243,156,18,0.1); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
+
+/* ── QUIZZES MOBILE — grouped by class only (no term wrapper), tap into
+   a detail page. Added 2026-09-12. Chevron/collapse behaviour comes from
+   the shared .tchr-sidebar-class-* classes in dashboard.css
+   (buildCollapsibleClassGroup), same as Assignments/Announcements —
+   only sized here, not redefining collapse mechanics. ── */
+.qz-mobile-folder-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #8b949e;
+    padding: 10px 4px; margin-top: 8px;
+}
+.qz-mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #161b22; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+    cursor: pointer; transition: border-color 0.15s;
+}
+.qz-mobile-row:hover { border-color: rgba(79,209,197,0.2); }
+
+/* Mobile detail page (openMobileTeacherQuiz). Reuses .teacher-quiz-card
+   as its outer class so the shared action-button/status-badge/publish-
+   status rules above still apply without duplication — this block only
+   adds the page-level layout the old inline expand didn't need. */
+.qz-mobile-detail.teacher-quiz-card {
+    padding: 16px;
+    margin: 16px;
+}
+.qz-mobile-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.qz-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; }
+.qz-mobile-detail-meta {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-size: 12.5px; color: #8b949e;
+}
 
 /* ── QUIZ REVIEW ── */
 .teacher-review-score-card {
@@ -1752,49 +1761,25 @@
     color: #f59e0b;
 }
 
-/* Mobile list — grouped-by-class folders, tap-to-detail-page rows.
-   Replaces the old flat, non-interactive .an-mobile-card list. Chevron/
-   collapse behaviour comes from the shared .tchr-sidebar-class-* classes
-   in dashboard.css (buildCollapsibleClassGroup) — only sized for full
-   mobile width here, not redefining the collapse mechanics themselves.
-   Mirrors .as-mobile-folder-.as-mobile-row-* in assignments.css. */
+/* Mobile list */
 .an-mobile-list { padding: 12px; }
-.an-mobile-folder-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+.an-mobile-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
     text-transform: uppercase; color: #8b949e;
-    padding: 10px 4px; margin-top: 8px;
+    margin: 16px 4px 8px; padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.an-mobile-folder-label--school { color: #f59e0b; }
-.an-mobile-row {
+.an-mobile-section-label.school { color: #f59e0b; }
+.an-mobile-card {
     background: #161b22; border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 14px 16px; margin-bottom: 8px;
     cursor: pointer; transition: border-color 0.15s;
 }
-.an-mobile-row:hover { border-color: rgba(255,255,255,0.15); }
-.an-mobile-row.school-row { border-left: 3px solid #f59e0b; }
-.an-mobile-row-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
-.an-mobile-row-msg   { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 6px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.an-mobile-row-date  { font-size: 11px; color: #484f58; }
-
-/* Mobile detail page (openMobileTeacherAnnouncement) */
-.an-mobile-detail { padding: 16px; }
-.an-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; margin: 0 0 8px; }
-.an-mobile-detail-meta {
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-    font-size: 12.5px; color: #8b949e; margin-bottom: 16px;
-}
-.an-mobile-detail-edited-meta { font-style: italic; }
-.an-mobile-detail-actions { display: flex; gap: 10px; margin-bottom: 18px; }
-.an-mobile-detail-delete-btn {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,85,85,0.1); border: 1px solid rgba(255,85,85,0.3);
-    color: #ff5555; border-radius: 8px; padding: 8px 14px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-}
-.an-mobile-detail-message {
-    font-size: 14.5px; line-height: 1.7; color: #c9d1d9;
-    white-space: pre-wrap;
-}
+.an-mobile-card:hover { border-color: rgba(255,255,255,0.15); }
+.an-mobile-card.school-card { border-left: 3px solid #f59e0b; }
+.an-mobile-card-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+.an-mobile-card-msg   { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 6px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.an-mobile-card-date  { font-size: 11px; color: #484f58; }
 
 /* ── New button (matches pattern used in assignments/resources) ── */
 .an-new-btn {
