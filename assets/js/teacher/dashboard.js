@@ -295,6 +295,13 @@ window.handleTeacherHeaderBack = function(event) {
         }
     }
 
+    if (detailType === 'Announcement') {
+        if (typeof window.fetchTeacherAnnouncements === 'function') {
+            window.fetchTeacherAnnouncements();
+            return false;
+        }
+    }
+
     // Fallback: no known detail type / page cache function missing.
     // Return to Home rather than leaving the teacher stranded on a
     // detail page with a back button that does nothing.

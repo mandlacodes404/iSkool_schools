@@ -30,6 +30,16 @@ window.fetchTeacherAnnouncements = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_announcements");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_announcements");
 
+    // Restore standard chrome (hamburger, brand, bottom nav) any time this
+    // list is (re)loaded. This is also the mobile "back" target dispatched
+    // from handleTeacherHeaderBack when detailType === 'Announcement', so
+    // without this reset the header/bottom nav would stay stuck in
+    // whatever 'detail' mode openMobileTeacherAnnouncement last left them
+    // in (see the Assignments back-button bug in PROJECT_NOTES.md).
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Announcements', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -200,22 +210,52 @@ function renderTeacherAnnouncements(data) {
         <!-- MOBILE -->
         <div class="an-mobile-list">`;
 
-    // Mobile list — school group first, then class groups
+    // Mobile list — grouped by class (school-wide group first, since it's
+    // first in the source array), same tap-to-detail-page pattern as
+    // Assignments, replacing the old static/non-interactive card list.
+    // Reuses the existing per-item flatIndex lookup (same one the desktop
+    // sidebar already uses) so mobile and desktop share one flat array —
+    // no separate mobile flat array needed, consistent with how
+    // Assignments' mobile rebuild kept a single _allAssignmentsFlat.
     if (!data || data.length === 0) {
         html += `<p class="an-mobile-empty-state">No announcements yet.</p>`;
     } else {
-        data.forEach(group => {
+        data.forEach((group, groupIdx) => {
             const isSchool = group.is_school || false;
-            html += `<div class="an-mobile-section-label${isSchool ? ' school' : ''}">${group.class_name}</div>`;
+            const mobileGroupId = `an-mobile-class-group-${groupIdx}`;
+
+            let itemsHtml = '';
             group.items.forEach(ann => {
+                const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 90 ? ann.message.substring(0, 90) + '...' : ann.message;
-                html += `
-                    <div class="an-mobile-card${isSchool ? ' school-card' : ''}">
-                        <div class="an-mobile-card-title">${ann.title}</div>
-                        <div class="an-mobile-card-msg">${preview}</div>
-                        <div class="an-mobile-card-date">${ann.display_date}</div>
+                const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
+
+                itemsHtml += `
+                    <div class="an-mobile-row${isSchool ? ' school-row' : ''}"
+                        onclick="openMobileTeacherAnnouncement(${flatIndex})">
+                        <div class="an-mobile-row-title">${ann.title}${editedTag}</div>
+                        <div class="an-mobile-row-msg">${preview}</div>
+                        <div class="an-mobile-row-date">${ann.display_date}</div>
                     </div>`;
             });
+
+            const labelInnerHtml = isSchool
+                ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-school-icon">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    From School`
+                : group.class_name;
+            const labelClass = isSchool
+                ? 'an-mobile-folder-label an-mobile-folder-label--school'
+                : 'an-mobile-folder-label';
+
+            html += window.buildCollapsibleClassGroup(
+                mobileGroupId,
+                labelClass,
+                labelInnerHtml,
+                itemsHtml
+            );
         });
     }
 
@@ -311,6 +351,88 @@ window.selectDesktopAnnouncement = function(flatIndex) {
             </div>
             <div class="an-panel-message">${ann.message.replace(/\n/g, '<br>')}</div>
         </div>`;
+};
+
+// ─────────────────────────────────────────────
+// MOBILE DETAIL VIEW: tap -> detail page
+// ─────────────────────────────────────────────
+window.openMobileTeacherAnnouncement = function(flatIndex) {
+    if (window.innerWidth > 899) return;
+
+    const ann = (window._allAnnouncementsFlat || [])[flatIndex];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (!ann || !apiArea) return;
+
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+
+    sessionStorage.setItem('lastTeacherPage', 'teacher_announcements');
+    window.teacherSectionState.selection.announcements = ann.id;
+    window.persistTeacherSectionState();
+
+    window.configureTeacherHeader({
+        title: 'Announcement',
+        mode: 'detail',
+        detailType: 'Announcement',
+        backLabel: 'Announcements'
+    });
+
+    const schoolBadge = ann.is_school
+        ? `<span class="an-school-badge">
+               <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2.5" fill="none">
+                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                   <polyline points="9 22 9 12 15 12 15 22"/>
+               </svg>
+               School
+           </span> &bull;`
+        : '';
+
+    // School-wide announcements aren't editable/deletable from here, same
+    // rule as the desktop panel (selectDesktopAnnouncement). Edit is
+    // desktop-only for now (openEditAnnouncementPanel targets #an-main-panel,
+    // which doesn't exist in the mobile DOM) — see PROJECT_NOTES.md, flagged
+    // as a follow-up rather than wired to a dead button or silently
+    // reimplemented as a new mobile form outside this task's scope.
+    const detailActions = ann.is_school ? '' : `
+        <div class="an-mobile-detail-actions">
+            <button class="an-mobile-detail-delete-btn" onclick="confirmDeleteAnnouncement(${ann.id})">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                </svg>
+                Delete
+            </button>
+        </div>`;
+
+    const editedMeta = ann.is_edited
+        ? `<span>&bull;</span><span class="an-mobile-detail-edited-meta">Edited ${ann.edited_date}</span>`
+        : '';
+
+    apiArea.innerHTML = `
+        <article class="an-mobile-detail">
+            <h1 class="an-mobile-detail-title">${ann.title}</h1>
+            <div class="an-mobile-detail-meta">
+                ${schoolBadge}
+                <span>${ann.class_name}</span>
+                <span>&bull;</span>
+                <span>${ann.display_date}</span>
+                ${editedMeta}
+            </div>
+            ${detailActions}
+            <div class="an-mobile-detail-message">${ann.message.replace(/\n/g, '<br>')}</div>
+        </article>`;
+
+    apiArea.scrollTop = 0;
+};
+
+window.openMobileTeacherAnnouncementById = function(announcementId) {
+    const targetId = String(announcementId || '');
+    const idx = (window._allAnnouncementsFlat || []).findIndex(a => String(a.id) === targetId);
+    if (idx >= 0) window.openMobileTeacherAnnouncement(idx);
 };
 
 // ─────────────────────────────────────────────
