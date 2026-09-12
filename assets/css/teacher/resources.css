@@ -89,6 +89,21 @@
 .rs-sidebar-item.active .rs-sidebar-item-title { color: #e2e8f0; }
 .rs-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
 
+/* ── Mobile: class-grouped folders ──
+   Reuses the shared tchr-sidebar-class-* chevron/collapse behavior from
+   dashboard.css (buildCollapsibleClassGroup) — this rule only sizes the
+   label for full mobile width instead of a 300px sidebar column, same
+   convention as Grades' gr-mobile-class-label. */
+.rs-mobile-class-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c9d1d9;
+}
+
 .rs-main-panel {
     flex: 1;
     overflow-y: auto;

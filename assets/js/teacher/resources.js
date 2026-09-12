@@ -136,15 +136,18 @@ function renderTeacherResources(data) {
             `) : ''}
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST: class-grouped collapsible folders ═══ -->
         <div class="rs-mobile-list">`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No resources uploaded yet.</p>`;
     } else {
-        data.forEach(group => {
-            html += `<div class="teacher-resource-section">
-                <div class="teacher-resource-class-label">${group.class_name}</div>`;
+        data.forEach((group, groupIdx) => {
+            // Separate id namespace from desktop's rs-class-group-{groupIdx}
+            // so mobile folder collapse-state / DOM ids never collide with
+            // the desktop sidebar's groups (same convention as Grades).
+            const mobileGroupId = `rs-mobile-class-group-${groupIdx}`;
+            let itemsHtml = '';
 
             group.items.forEach(item => {
                 const isVideo = item.resource_type === 'video';
@@ -152,7 +155,7 @@ function renderTeacherResources(data) {
                 const clickAction = isVideo
                     ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
                     : `openTeacherResource('resources/${item.filename}')`;
-                html += `
+                itemsHtml += `
                     <div class="teacher-resource-card" onclick="${clickAction}">
                         <div class="teacher-resource-icon">${icon}</div>
                         <div class="teacher-resource-info">
@@ -170,7 +173,12 @@ function renderTeacherResources(data) {
                     </div>`;
             });
 
-            html += `</div>`;
+            html += window.buildCollapsibleClassGroup(
+                mobileGroupId,
+                'rs-mobile-class-label',
+                group.class_name,
+                itemsHtml
+            );
         });
     }
 
