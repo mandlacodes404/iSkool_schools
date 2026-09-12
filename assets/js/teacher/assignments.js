@@ -26,6 +26,15 @@ window.fetchTeacherAssignments = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_assignments");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_assignments");
 
+    // Restore standard chrome (hamburger, brand, bottom nav) any time this
+    // list is (re)loaded. This is also the mobile "back" target dispatched
+    // from handleTeacherHeaderBack when detailType === 'Assignment', so
+    // without this reset the header/bottom nav stay stuck in whatever
+    // 'detail' mode openMobileTeacherAssignment last left them in.
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Assignments', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
