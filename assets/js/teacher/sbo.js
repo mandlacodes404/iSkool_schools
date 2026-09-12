@@ -255,7 +255,7 @@ function buildMobileSBOFolders(briefs) {
 
         let itemsHtml = '';
         group.items.forEach(brief => {
-            const flatIndex = (window._allSBOBriefs || []).findIndex(b => b.id === brief.id);
+            const flatIndex = briefs.findIndex(b => b.id === brief.id);
             const updatedDate = brief.updated_at
                 ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
                 : '';
