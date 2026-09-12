@@ -156,13 +156,15 @@ function renderTeacherResources(data) {
                     ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
                     : `openTeacherResource('resources/${item.filename}')`;
                 itemsHtml += `
-                    <div class="teacher-resource-card" onclick="${clickAction}">
-                        <div class="teacher-resource-icon">${icon}</div>
-                        <div class="teacher-resource-info">
-                            <div class="teacher-resource-name">${item.title}</div>
-                            <div class="teacher-resource-meta">${isVideo ? '▶ Video' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                    <div class="rs-mobile-row" role="button" tabindex="0"
+                        onclick="${clickAction}"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${clickAction}}">
+                        <div class="rs-mobile-row-icon">${icon}</div>
+                        <div class="rs-mobile-row-body">
+                            <div class="rs-mobile-row-title">${item.title}</div>
+                            <div class="rs-mobile-row-meta">${isVideo ? '▶ Video' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
                         </div>
-                        <button class="teacher-resource-delete" onclick="event.stopPropagation(); confirmDeleteResource(${item.id})">
+                        <button class="rs-mobile-row-delete" onclick="event.stopPropagation(); confirmDeleteResource(${item.id})" aria-label="Delete resource">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6l-1 14H6L5 6"></path>
@@ -175,8 +177,8 @@ function renderTeacherResources(data) {
 
             html += window.buildCollapsibleClassGroup(
                 mobileGroupId,
-                'rs-mobile-class-label',
-                group.class_name,
+                'rs-mobile-folder-label',
+                `${group.class_name} <span class="rs-mobile-folder-count">${group.items.length}</span>`,
                 itemsHtml
             );
         });
