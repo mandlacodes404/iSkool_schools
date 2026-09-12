@@ -213,11 +213,28 @@
     padding: 4px 0 24px;
 }
 
+/* #api-content-area carries a 20px padding on mobile (zeroed only at
+   >=900px, see dashboard.css). That 20px gutter is what pushed the
+   folder/row borders in from the screen edges. Cancelling it here with
+   matching negative margins lets .as-mobile-list span the full device
+   width, so child borders (folder label + row) can run edge-to-edge.
+   Horizontal inset for the *content* inside each row is then re-applied
+   directly on .as-mobile-folder-label / .as-mobile-row below (16px),
+   independent of whatever #api-content-area's own padding is. */
+@media (max-width: 899px) {
+    .as-mobile-list {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
+
 /* Folder header reuses the shared .tchr-sidebar-class-label--toggle /
    .tchr-sidebar-class-chevron behavior via buildCollapsibleClassGroup —
    this just gives the mobile folder its own visual sizing, since the
    desktop sidebar version is tuned for a narrow 280px column, not a
-   full-width mobile list. */
+   full-width mobile list. Border-bottom runs edge-to-edge (see
+   .as-mobile-list negative margin above); 16px horizontal padding here
+   sets the content inset independently of that. */
 .as-mobile-folder-label {
     display: flex;
     align-items: center;
@@ -227,6 +244,7 @@
     font-weight: 800;
     color: #c9d1d9;
     border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-sizing: border-box;
 }
 .as-mobile-folder-count {
     margin-left: auto;
@@ -236,6 +254,7 @@
     background: rgba(255,255,255,0.06);
     border-radius: 999px;
     padding: 2px 8px;
+    flex-shrink: 0;
 }
 
 .as-mobile-row {
@@ -246,6 +265,7 @@
     cursor: pointer;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     transition: background 0.15s ease;
+    box-sizing: border-box;
 }
 .as-mobile-row:active { background: rgba(255,255,255,0.03); }
 .as-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
