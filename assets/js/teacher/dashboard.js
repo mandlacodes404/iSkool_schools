@@ -309,6 +309,13 @@ window.handleTeacherHeaderBack = function(event) {
         }
     }
 
+    if (detailType === 'Grade') {
+        if (typeof window.fetchTeacherGrades === 'function') {
+            window.fetchTeacherGrades();
+            return false;
+        }
+    }
+
     // Fallback: no known detail type / page cache function missing.
     // Return to Home rather than leaving the teacher stranded on a
     // detail page with a back button that does nothing.

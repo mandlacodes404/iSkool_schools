@@ -37,6 +37,14 @@ window.fetchTeacherGrades = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_grades");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_grades");
 
+    // Reset header chrome back to standard mode. Needed whether this is
+    // the initial load (no-op, already standard) or a return trip from
+    // the mobile detail page (back button, hidden bottom nav) via
+    // handleTeacherHeaderBack's 'Grade' branch.
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -186,14 +194,17 @@ function renderTeacherGrades(data) {
         data.forEach(termData => {
             html += `<div class="teacher-term-divider">Term ${termData.term}</div>`;
 
-            termData.classes.forEach(cls => {
-                html += `
-                    <div class="teacher-resource-section">
-                        <div class="teacher-resource-class-label">${escapeHtml(cls.class_name)}</div>`;
+            termData.classes.forEach((cls, clsIdx) => {
+                // Separate id namespace from desktop's gr-class-group-{term}-{idx}
+                // so mobile folder collapse-state / DOM ids never collide with the
+                // desktop sidebar's groups when both happen to be in the DOM
+                // during a resize.
+                const mobileGroupId = `gr-mobile-class-group-${termData.term}-${clsIdx}`;
+                let itemsHtml = '';
 
                 cls.quizzes.forEach(quiz => {
-                    html += `
-                        <div class="teacher-resource-card" data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}" onclick="openQuizGradesFromElement(this)">
+                    itemsHtml += `
+                        <div class="gr-mobile-row" data-quiz-id="${quiz.id}" onclick="openMobileTeacherGradeQuiz(${quiz.id})">
                             <div class="teacher-resource-icon">
                                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -212,7 +223,12 @@ function renderTeacherGrades(data) {
                         </div>`;
                 });
 
-                html += `</div>`;
+                html += window.buildCollapsibleClassGroup(
+                    mobileGroupId,
+                    'gr-mobile-class-label',
+                    escapeHtml(cls.class_name),
+                    itemsHtml
+                );
             });
         });
     }
@@ -445,15 +461,41 @@ window.openEditMarksInPanel = function(email, name, quizId, quizTitle, currentSc
 };
 
 // ─────────────────────────────────────────────
-// QUIZ GRADES VIEW (mobile — replaces full apiArea)
+// QUIZ GRADES VIEW (mobile detail page — view only)
 // ─────────────────────────────────────────────
-window.openQuizGrades = async function(quizId, quizTitle) {
+// Mobile grading/editing was deliberately removed: teachers view marks
+// on mobile but grade and edit only on desktop. This mirrors
+// Assignments' detail-page navigation (configureTeacherHeader +
+// handleTeacherHeaderBack) but renders read-only content — no Edit
+// buttons, no open-ended grading form, no publish/unpublish toggle.
+window.openMobileTeacherGradeQuiz = async function(quizId) {
+    if (window.innerWidth > 899) return; // mobile-only guard, same convention as Assignments
     const apiArea = document.getElementById('api-content-area');
+    if (!apiArea) return;
+
+    window.teacherSectionState.selection.grades = quizId;
+    window.persistTeacherSectionState();
+
+    apiArea.innerHTML = `
+        <div class="gr-panel-empty">
+            <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
+                class="gr-panel-loading-spinner">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
+            </svg>
+            <p>Loading grades...</p>
+        </div>`;
 
     try {
+        // Reuse the same cache desktop already fills — no separate mobile
+        // cache, same as Assignments unifying its flat array.
+        const cached = window._teacherGradeQuizCache[quizId];
+        if (cached) {
+            renderMobileGradeDetail(cached.type, cached.data, apiArea);
+            return;
+        }
+
         const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
         const data = await res.json();
-
         if (data.error) throw new Error(data.error);
 
         const resultRes = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
@@ -461,35 +503,129 @@ window.openQuizGrades = async function(quizId, quizTitle) {
         });
         const resultPayload = await resultRes.json();
         const resultData = normalizeQuizResultsPayload(resultPayload);
+
         if (resultData && resultData.has_open_ended == 1) {
-            window.currentOpenEndedQuizData = resultData;
-            renderOpenEndedGrades(resultData, apiArea, false);
+            window._teacherGradeQuizCache[quizId] = { type: 'open_ended', data: resultData };
+            renderMobileGradeDetail('open_ended', resultData, apiArea);
         } else {
-            window.currentQuizData = data;
-            renderQuizGrades(data);
+            window._teacherGradeQuizCache[quizId] = { type: 'standard', data: data };
+            renderMobileGradeDetail('standard', data, apiArea);
         }
     } catch (e) {
-        if (apiArea) apiArea.innerHTML = `
-            <p class="gr-error-message">
-                Error loading grades.
-            </p>`;
+        apiArea.innerHTML = `<div class="gr-panel-empty"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
     }
 };
 
-window.openEditMarksInPanelFromElement = function(el) {
-    openEditMarksInPanel(
-        el.dataset.email || '',
-        el.dataset.name || '',
-        parseInt(el.dataset.quizId, 10),
-        el.dataset.quizTitle || '',
-        el.dataset.score === '' ? null : parseFloat(el.dataset.score),
-        parseFloat(el.dataset.total || '100')
-    );
-};
+function renderMobileGradeDetail(type, data, apiArea) {
+    window.configureTeacherHeader({
+        title: data.quiz_title || 'Assessment',
+        mode: 'detail',
+        detailType: 'Grade',
+        backLabel: 'Grades'
+    });
 
-window.openQuizGradesFromElement = function(el) {
-    openQuizGrades(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
-};
+    if (type === 'open_ended') {
+        renderMobileOpenEndedGrades(data, apiArea);
+    } else {
+        renderMobileStandardGrades(data, apiArea);
+    }
+}
+
+// Read-only table: same columns as the desktop/legacy table minus the
+// Edit column entirely (not just visually hidden, since mobile never
+// calls openEditMarksFromElement at all).
+function renderMobileStandardGrades(data, apiArea) {
+    let html = `
+        <div class="gr-panel-content">
+            <div class="gr-panel-header">
+                <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
+                <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
+            </div>`;
+
+    if (data.learners.length === 0) {
+        html += `<p class="teacher-empty-state">No learners found in this class.</p>`;
+    } else {
+        html += `<div class="teacher-grades-table-wrapper">
+            <table class="teacher-grades-table">
+                <thead>
+                    <tr>
+                        <th>Learner</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        data.learners.forEach(learner => {
+            const score = learner.score !== null
+                ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
+                : '<span class="gr-cell-muted">Not recorded</span>';
+            const perc  = learner.percentage
+                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
+                : '<span class="gr-cell-muted">—</span>';
+
+            html += `
+                <tr>
+                    <td>${escapeHtml(learner.name)}</td>
+                    <td>${score}</td>
+                    <td>${perc}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+    }
+
+    html += `</div>`;
+    apiArea.innerHTML = html;
+}
+
+// Read-only open-ended summary: score/status per learner only. No
+// per-learner accordion (that only ever housed the grading form), no
+// Release/Unpublish toggle.
+function renderMobileOpenEndedGrades(data, apiArea) {
+    const results = data.results || [];
+    const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
+
+    let html = `
+        <div class="gr-panel-content">
+            <div class="gr-panel-header">
+                <div>
+                    <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
+                    <div class="gr-panel-meta">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</div>
+                </div>
+            </div>`;
+
+    if (results.length === 0) {
+        html += `<p class="teacher-empty-state">No submitted attempts found for this assessment.</p>`;
+    } else {
+        results.forEach(learner => {
+            const openQuestions = learner.open_ended || [];
+            const pendingCount = openQuestions.filter(question => !question.grade).length;
+            const scoreDisplay = data.has_open_ended == 1 && !fullyGraded
+                ? '***'
+                : escapeHtml(learner.score ?? '0');
+            const badge = learner.is_fully_graded
+                ? `<span class="gr-oe-badge gr-oe-badge--graded">Fully Graded</span>`
+                : `<span class="gr-oe-badge gr-oe-badge--pending">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
+
+            html += `
+                <div class="gr-oe-learner-card">
+                    <div class="gr-oe-learner-card-top">
+                        <div>
+                            <div class="gr-oe-learner-name">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
+                            <div class="gr-oe-learner-score">Score: ${scoreDisplay} / ${escapeHtml(learner.total ?? '0')}</div>
+                        </div>
+                        <div class="gr-oe-learner-actions">
+                            ${badge}
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    html += `</div>`;
+    apiArea.innerHTML = html;
+}
 
 function renderQuizGrades(data) {
     const apiArea = document.getElementById('api-content-area');
