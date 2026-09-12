@@ -222,100 +222,11 @@
     color: #555e6a;
 }
 
-/* Mobile filter bar */
-.sbo-filter-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-.sbo-filter-select {
-    background: #21262d;
-    border: 1px solid #30363d;
-    color: #e2e8f0;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    min-width: 160px;
-}
-.sbo-filter-select--term {
-    min-width: 140px;
-}
-
-/* Mobile syllabus card */
-.sbo-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 18px;
-}
-.sbo-card-top-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-.sbo-card-top-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.sbo-card-term-badge {
-    background: rgba(79,209,197,0.1);
-    color: #4fd1c5;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-.sbo-card-section-title {
-    font-size: 11px;
-    font-weight: 800;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: 6px;
-}
-.sbo-card-section-title--tight {
-    margin-bottom: 4px;
-}
-.sbo-card-topics-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-}
-.sbo-card-topic-chip {
-    background: rgba(79,209,197,0.1);
-    color: #4fd1c5;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-}
-.sbo-card-more-topics {
-    font-size: 11px;
-    color: #8b949e;
-    margin-left: 4px;
-}
-.sbo-card-divider-section {
-    width: 100%;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    padding-top: 10px;
-}
-.sbo-card-assess-summary {
-    font-size: 13px;
-    color: #c9d1d9;
-}
-.sbo-card-notes-text {
-    font-size: 13px;
-    color: #8b949e;
-    line-height: 1.5;
-}
+/* Mobile filter bar + card (.sbo-filter-*, .sbo-card*) removed
+   2026-09-12 — mobile now groups by class into collapsible folders
+   (buildMobileSBOFolders) instead of filter dropdowns over a flat card
+   list. See .sbo-mobile-detail below for the new detail-page rules.
+   Desktop's own .sbo-panel-*/
 
 /* Panel: topics/assessments empty states */
 .sbo-topics-empty-text {
@@ -534,6 +445,19 @@
     transition: background 0.15s;
 }
 .sbo-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+
+/* ── SYLLABUS MOBILE — grouped by class only, tap into a detail page.
+   Added 2026-09-12. Chevron/collapse behaviour comes from the shared
+   .tchr-sidebar-class-* classes in dashboard.css
+   (buildCollapsibleClassGroup), same as Assignments/Announcements/
+   Quizzes/Evaluations — only sized here, not redefining collapse
+   mechanics. Rows reuse the shared .teacher-resource-card/-icon/-info/
+   -name/-meta classes (no new row CSS needed here). ── */
+
+
+.sbo-mobile-detail {
+    padding: 16px;
+}
 
 /* ── Delete modal ── */
 .sbo-modal-hidden {

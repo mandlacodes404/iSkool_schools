@@ -25,6 +25,14 @@ window.fetchTeacherSyllabus = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_syllabus");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_syllabus");
 
+    // Restore standard chrome any time this list is (re)loaded — also the
+    // mobile "back" target dispatched from handleTeacherHeaderBack when
+    // detailType === 'SBO'. Applied up front (see Assignments back-button
+    // fix in PROJECT_NOTES.md for why this matters).
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Syllabus', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -86,13 +94,7 @@ function renderTeacherSyllabus(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
-    const classes = data.classes || [];
     const briefs  = data.briefs  || [];
-
-    // Build class options
-    const classOptions = classes.map(c =>
-        `<option value="${c.id}">${c.name}</option>`
-    ).join('');
 
     // ── Build left sidebar list ──
     let sidebarHtml = '';
@@ -198,39 +200,23 @@ function renderTeacherSyllabus(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST ═══ -->
+        <!-- ═══ MOBILE LIST — grouped by class only (2026-09-12: replaced
+             the class/term filter dropdowns + flat card list with
+             class-grouped folders, matching Assignments/Announcements/
+             Quizzes/Evaluations). Desktop sidebar/panel above is
+             untouched — still term-then-class grouped, per instruction
+             that this change is mobile-view only. ═══ -->
         <div class="sbo-mobile-list">
-            <!-- FILTERS -->
-            <div class="sbo-filter-bar">
-                <select id="sboFilterClass" onchange="filterSyllabus()" class="sbo-filter-select">
-                    <option value="">All Classes</option>
-                    ${classOptions}
-                </select>
-
-                <select id="sboFilterTerm" onchange="filterSyllabus()" class="sbo-filter-select sbo-filter-select--term">
-                    <option value="">All Terms</option>
-                    <option value="1">Term 1</option>
-                    <option value="2">Term 2</option>
-                    <option value="3">Term 3</option>
-                    <option value="4">Term 4</option>
-                </select>
-            </div>
-
-            <!-- RESULTS -->
-            <div id="sboResultsContainer">
-                ${buildSBOCards(briefs)}
-            </div>
+            ${buildMobileSBOFolders(briefs)}
         </div>`;
 
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
-    // Store briefs globally for desktop panel and mobile filter
+    // Store briefs globally — shared by the desktop panel (selectDesktopSBO)
+    // and the mobile detail page (openMobileTeacherSBO), both index into
+    // this same flat, ungrouped array.
     window._allSBOBriefs = briefs;
-
-    // Also keep dataset on results container for mobile filter
-    const rc = document.getElementById('sboResultsContainer');
-    if (rc) rc.dataset.briefs = JSON.stringify(briefs);
 
     const sidebarScrollEl = apiArea.querySelector('.sbo-sidebar-scroll');
     window.wireTeacherSectionScroll('sbo-sidebar', sidebarScrollEl);
@@ -246,90 +232,64 @@ function renderTeacherSyllabus(data) {
     }
 }
 
-function buildSBOCards(briefs) {
+function buildMobileSBOFolders(briefs) {
     if (!briefs.length) {
         return `<p class="teacher-empty-state">No syllabus briefs found.</p>`;
     }
 
-    return briefs.map(brief => {
-        const topicCount      = brief.topics?.length || 0;
-        const assessmentCount = brief.assessments?.length || 0;
-        const updatedDate     = brief.updated_at
-            ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
-            : '';
+    // Group by class only (2026-09-12) — replaces the old flat card list
+    // with class/term filter dropdowns. Desktop's own term-then-class
+    // sidebar grouping (built separately above, in renderTeacherSyllabus)
+    // is untouched — mobile-only change, per instruction.
+    const byClass = new Map();
+    briefs.forEach(brief => {
+        if (!byClass.has(brief.class_id)) byClass.set(brief.class_id, { class_name: brief.class_name, items: [] });
+        byClass.get(brief.class_id).items.push(brief);
+    });
 
-        // Build assessments summary
-        const assessSummary = brief.assessments?.length
-            ? brief.assessments.map(a => `${a.type} ${a.weight}%`).join(' &middot; ')
-            : 'No assessments';
+    let html = '';
+    let groupIdx = 0;
+    byClass.forEach(group => {
+        const mobileGroupId = `sbo-mobile-class-group-${groupIdx}`;
+        groupIdx++;
 
-        // Topics preview — first 3
-        const topicsPreview = brief.topics?.slice(0, 3).map(t =>
-            `<span class="sbo-card-topic-chip">${t}</span>`
-        ).join('') || '';
+        let itemsHtml = '';
+        group.items.forEach(brief => {
+            const flatIndex = (window._allSBOBriefs || []).findIndex(b => b.id === brief.id);
+            const updatedDate = brief.updated_at
+                ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
+                : '';
 
-        const moreTopics = topicCount > 3
-            ? `<span class="sbo-card-more-topics">+${topicCount - 3} more</span>`
-            : '';
-
-        return `
-            <div class="teacher-resource-card sbo-card">
-                
-                <!-- TOP ROW -->
-                <div class="sbo-card-top-row">
-                    <div class="sbo-card-top-left">
-                        <div class="teacher-resource-icon">
-                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                                <line x1="12" y1="6"  x2="16" y2="6"/>
-                                <line x1="12" y1="10" x2="16" y2="10"/>
-                                <line x1="12" y1="14" x2="16" y2="14"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="teacher-resource-name">${brief.subject}</div>
-                            <div class="teacher-resource-meta">
-                                ${brief.class_name} &middot; Term ${brief.term}
-                                ${updatedDate ? ' &middot; Updated ' + updatedDate : ''}
-                            </div>
+            itemsHtml += `
+                <div class="teacher-resource-card" onclick="openMobileTeacherSBO(${flatIndex})">
+                    <div class="teacher-resource-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            <line x1="12" y1="6"  x2="16" y2="6"/>
+                            <line x1="12" y1="10" x2="16" y2="10"/>
+                            <line x1="12" y1="14" x2="16" y2="14"/>
+                        </svg>
+                    </div>
+                    <div class="teacher-resource-info">
+                        <div class="teacher-resource-name">${brief.subject}</div>
+                        <div class="teacher-resource-meta">
+                            Term ${brief.term}
+                            ${updatedDate ? ' &middot; Updated ' + updatedDate : ''}
                         </div>
                     </div>
-                    <span class="sbo-card-term-badge">
-                        Term ${brief.term}
-                    </span>
-                </div>
+                </div>`;
+        });
 
-                <!-- TOPICS -->
-                ${topicCount ? `
-                <div>
-                    <div class="sbo-card-section-title">
-                        Topics (${topicCount})
-                    </div>
-                    <div class="sbo-card-topics-row">
-                        ${topicsPreview}${moreTopics}
-                    </div>
-                </div>` : ''}
+        html += window.buildCollapsibleClassGroup(
+            mobileGroupId,
+            'teacher-resource-class-label',
+            group.class_name,
+            itemsHtml
+        );
+    });
 
-                <!-- ASSESSMENTS -->
-                <div class="sbo-card-divider-section">
-                    <div class="sbo-card-section-title sbo-card-section-title--tight">
-                        Assessment Weighting
-                    </div>
-                    <div class="sbo-card-assess-summary">${assessSummary}</div>
-                </div>
-
-                <!-- NOTES -->
-                ${brief.notes ? `
-                <div class="sbo-card-divider-section">
-                    <div class="sbo-card-section-title sbo-card-section-title--tight">
-                        Notes
-                    </div>
-                    <div class="sbo-card-notes-text">${brief.notes}</div>
-                </div>` : ''}
-
-            </div>`;
-    }).join('');
+    return html;
 }
 
 // ── DESKTOP PANEL: SELECT BRIEF ──────────────────────────────────────────────
@@ -339,6 +299,7 @@ window.selectDesktopSBO = function(idx) {
     if (newBtn) newBtn.classList.remove('active');
     const sidebarItem = document.getElementById(`sbo-sidebar-${idx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
+
 
     window._activeSBOBriefIndex = idx;
 
@@ -411,18 +372,99 @@ window.selectDesktopSBO = function(idx) {
         </div>`;
 };
 
-// ── CLIENT-SIDE FILTER (mobile only) ────────────────────────────────────────
-window.filterSyllabus = function() {
-    const classFilter = document.getElementById('sboFilterClass').value;
-    const termFilter  = document.getElementById('sboFilterTerm').value;
-    const container   = document.getElementById('sboResultsContainer');
+// ─────────────────────────────────────────────
+// MOBILE DETAIL VIEW: tap -> detail page
+// Body-building logic mirrors selectDesktopSBO's exactly (topics,
+// assessments, notes, Delete) — same underlying data, rendered into a
+// page instead of the desktop panel.
+// ─────────────────────────────────────────────
+window.openMobileTeacherSBO = function(flatIndex) {
+    if (window.innerWidth > 899) return;
 
-    let briefs = JSON.parse(container.dataset.briefs || '[]');
+    const brief = (window._allSBOBriefs || [])[flatIndex];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (!brief || !apiArea) return;
 
-    if (classFilter) briefs = briefs.filter(b => b.class_id == classFilter);
-    if (termFilter)  briefs = briefs.filter(b => b.term == termFilter);
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
 
-    container.innerHTML = buildSBOCards(briefs);
+    sessionStorage.setItem('lastTeacherPage', 'teacher_syllabus');
+    window.teacherSectionState.selection.sbo = brief.class_id;
+    window.persistTeacherSectionState();
+
+    window.configureTeacherHeader({
+        title: 'Syllabus',
+        mode: 'detail',
+        detailType: 'SBO',
+        backLabel: 'Syllabus'
+    });
+
+    const topicCount  = brief.topics?.length || 0;
+    const updatedDate = brief.updated_at
+        ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
+        : '';
+
+    const topicsHtml = topicCount
+        ? brief.topics.map(t => `<span class="sbo-topic-chip">${t}</span>`).join('')
+        : '<span class="sbo-topics-empty-text">No topics listed.</span>';
+
+    const assessHtml = brief.assessments?.length
+        ? brief.assessments.map(a => `
+            <div class="sbo-assess-row">
+                <span class="sbo-assess-row-type">${a.type}</span>
+                <span class="sbo-assess-row-weight">${a.weight}%</span>
+            </div>`).join('')
+        : '<p class="sbo-assess-empty-text">No assessments listed.</p>';
+
+    apiArea.innerHTML = `
+        <article class="sbo-mobile-detail">
+            <div class="sbo-panel-header">
+                <div>
+                    <div class="sbo-panel-title">${brief.subject}</div>
+                    <div class="sbo-panel-meta">
+                        <span>${brief.class_name}</span>
+                        ${updatedDate ? `<span>&bull;</span><span>Updated ${updatedDate}</span>` : ''}
+                    </div>
+                </div>
+                <div class="sbo-panel-actions">
+                    <span class="sbo-term-badge">Term ${brief.term}</span>
+                    <button class="sbo-panel-delete-btn" onclick="confirmDeleteSBO(${brief.id})">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="sbo-topics-section">
+                <div class="sbo-section-label">Topics (${topicCount})</div>
+                <div class="sbo-topics-wrap">${topicsHtml}</div>
+            </div>
+
+            <div>
+                <div class="sbo-section-label">Assessment Weighting</div>
+                ${assessHtml}
+            </div>
+
+            ${brief.notes ? `
+            <div class="sbo-notes-block">
+                <div class="sbo-section-label">Notes</div>
+                ${brief.notes}
+            </div>` : ''}
+        </article>`;
+
+    apiArea.scrollTop = 0;
+};
+
+window.openMobileTeacherSBOById = function(briefId) {
+    const idx = (window._allSBOBriefs || []).findIndex(b => String(b.id) === String(briefId));
+    if (idx >= 0) window.openMobileTeacherSBO(idx);
 };
 
 // ── ROUTER ───────────────────────────────────────────────────────────────────
