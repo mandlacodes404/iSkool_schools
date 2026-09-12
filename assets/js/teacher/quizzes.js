@@ -42,6 +42,15 @@ window.fetchTeacherQuizzes = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_quizzes");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_quizzes");
 
+    // Restore standard chrome any time this list is (re)loaded — also the
+    // mobile "back" target dispatched from handleTeacherHeaderBack when
+    // detailType === 'Quiz'. Applied up front this time rather than
+    // discovered as a bug afterward (see Assignments back-button fix in
+    // PROJECT_NOTES.md).
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Quizzes', mode: 'standard' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -417,112 +426,69 @@ function renderTeacherQuizzes(data) {
             `) : ''}
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST — grouped by class only, tap into detail page ═══ -->
         <div class="qz-mobile-list">`;
 
-    if (!terms || terms.length === 0) {
+    // Mobile view intentionally drops the term wrapper/active badge that
+    // the desktop sidebar still shows — classes are flattened across all
+    // terms into one grouped-by-class list. Term is still tracked per-quiz
+    // in window._allQuizzesFlat (used by openMobileTeacherQuiz's detail
+    // meta line), just not shown as its own grouping/heading on mobile.
+    const mobileClassMap = new Map();
+    terms.forEach(termData => {
+        termData.classes.forEach(cls => {
+            if (!mobileClassMap.has(cls.class_name)) {
+                mobileClassMap.set(cls.class_name, []);
+            }
+            mobileClassMap.get(cls.class_name).push(...cls.quizzes.map(q => ({ ...q, term: termData.term })));
+        });
+    });
+
+    if (mobileClassMap.size === 0) {
         html += `<p class="teacher-empty-state">No quizzes found for this year.</p>`;
     } else {
-        terms.forEach(termData => {
-            const isActive = termData.term === currentTerm;
-            html += `
-                <div class="teacher-term-card ${isActive ? 'term-active' : ''}">
-                    <div class="teacher-term-card-header">
-                        <span class="teacher-term-card-title">TERM ${termData.term}</span>
-                        ${isActive ? '<span class="teacher-term-active-badge">ACTIVE</span>' : ''}
+        let groupIdx = 0;
+        mobileClassMap.forEach((quizzes, className) => {
+            const mobileGroupId = `qz-mobile-class-group-${groupIdx}`;
+            groupIdx++;
+
+            let itemsHtml = '';
+            quizzes.forEach(quiz => {
+                const flatIndex = window._allQuizzesFlat.findIndex(q => q.id === quiz.id);
+                const statusColor = quiz.status === 'Open'
+                    ? '#f28c38'
+                    : quiz.status === 'Scheduled'
+                    ? '#1e90ff'
+                    : '#6b7280';
+
+                itemsHtml += `
+                    <div class="qz-mobile-row" onclick="openMobileTeacherQuiz(${flatIndex})">
+                        <div class="teacher-resource-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </div>
+                        <div class="teacher-resource-info">
+                            <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
+                            <div class="teacher-resource-meta">
+                                ${escapeHtml(quiz.duration)} min &middot; ${escapeHtml(quiz.start_time)}
+                            </div>
+                        </div>
+                        <span class="teacher-quiz-status-badge"
+                            style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
+                            ${escapeHtml(quiz.status)}
+                        </span>
                     </div>`;
-
-            termData.classes.forEach(cls => {
-                html += `
-                    <div class="teacher-resource-section" style="margin-top:0;">
-                        <div class="teacher-resource-class-label">${escapeHtml(cls.class_name)}</div>`;
-
-                cls.quizzes.forEach(quiz => {
-                    const statusColor = quiz.status === 'Open'
-                        ? '#f28c38'
-                        : quiz.status === 'Scheduled'
-                        ? '#1e90ff'
-                        : '#6b7280';
-
-                    html += `
-                        <div class="teacher-quiz-card" data-quiz-id="${quiz.id}">
-                            <div class="teacher-quiz-card-main" onclick="toggleQuizDetails(${quiz.id})">
-                                <div class="teacher-resource-icon">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                                    </svg>
-                                </div>
-                                <div class="teacher-resource-info">
-                                    <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
-                                    <div class="teacher-resource-meta">
-                                        ${escapeHtml(quiz.duration)} min &middot; ${escapeHtml(quiz.start_time)}
-                                    </div>
-                                </div>
-                                <span class="teacher-quiz-status-badge" 
-                                    style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
-                                    ${escapeHtml(quiz.status)}
-                                </span>
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"
-                                    class="teacher-quiz-chevron" id="chevron-${quiz.id}">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                </svg>
-                            </div>
-
-                            <div class="teacher-quiz-details" id="details-${quiz.id}" style="display:none;">
-                                <div class="teacher-quiz-detail-row">
-                                    <span class="teacher-quiz-detail-label">Marks</span>
-                                    <span class="teacher-quiz-publish-status ${quiz.publish_marks ? 'published' : 'hidden'}"
-                                        id="publish-label-${quiz.id}">
-                                        ${quiz.publish_marks ? 'Published' : 'Hidden'}
-                                    </span>
-                                </div>
-
-                                <div class="teacher-quiz-actions">
-                                    <button class="teacher-quiz-action-btn publish"
-                                        id="publish-btn-${quiz.id}"
-                                        onclick="togglePublishMarks(${quiz.id})">
-                                        ${quiz.publish_marks ? 'Unpublish Marks' : 'Publish Marks'}
-                                    </button>
-                                    <button class="teacher-quiz-action-btn ${quiz.status === 'Closed' ? 'reopen' : 'close'}"
-                                        id="status-btn-${quiz.id}"
-                                        data-quiz-id="${quiz.id}" data-quiz-status="${escapeHtml(quiz.status)}"
-                                        onclick="toggleQuizStatusFromElement(this)">
-                                        ${quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz'}
-                                    </button>
-                                    <button class="teacher-quiz-action-btn results qz-desktop-only-btn"
-                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
-                                        onclick="openQuizResultsFromElement(this)">
-                                        View Results
-                                    </button>
-                                    <button class="teacher-quiz-action-btn edit qz-desktop-only-btn"
-                                        data-action="edit-quiz"
-                                        data-quiz-id="${quiz.id}">
-                                        Edit Quiz
-                                    </button>
-                                    <button class="teacher-quiz-action-btn delete"
-                                        data-action="delete-quiz"
-                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}">
-                                        Delete Quiz
-                                    </button>
-                                    <button class="teacher-quiz-action-btn integrity"
-                                        data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
-                                        onclick="openIntegrityModalFromElement(this)">
-                                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                        </svg>
-                                        Integrity Report
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-
-                html += `</div>`;
             });
 
-            html += `</div>`;
+            html += window.buildCollapsibleClassGroup(
+                mobileGroupId,
+                'qz-mobile-folder-label',
+                escapeHtml(className),
+                itemsHtml
+            );
         });
     }
 
@@ -617,6 +583,177 @@ function renderTeacherQuizzes(data) {
 
 // Note: class-group collapsing is handled by the shared
 // window.toggleSidebarClassGroup (see dashboard.js)
+
+// ─────────────────────────────────────────────
+// MOBILE DETAIL VIEW: tap -> detail page
+// Reuses the exact same button IDs/classes the old in-place expand used
+// (publish-btn-${id}, status-btn-${id}, .teacher-quiz-card[data-quiz-id]),
+// so togglePublishMarks / toggleQuizStatusFromElement /
+// openIntegrityModalFromElement all keep working completely unmodified —
+// only the container changed (a full detail page instead of an inline
+// expand), not the action handlers.
+// ─────────────────────────────────────────────
+window.openMobileTeacherQuiz = function(flatIndex) {
+    if (window.innerWidth > 899) return;
+
+    const quiz = (window._allQuizzesFlat || [])[flatIndex];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (!quiz || !apiArea) return;
+
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+
+    sessionStorage.setItem('lastTeacherPage', 'teacher_quizzes');
+    window.teacherSectionState.selection.quizzes = quiz.id;
+    window.persistTeacherSectionState();
+
+    window.configureTeacherHeader({
+        title: 'Quiz',
+        mode: 'detail',
+        detailType: 'Quiz',
+        backLabel: 'Quizzes'
+    });
+
+    const statusColor = quiz.status === 'Open' ? '#f28c38'
+        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
+    const publishLabel   = quiz.publish_marks ? 'Published' : 'Hidden';
+    const publishBtnText = quiz.publish_marks ? 'Unpublish Marks' : 'Publish Marks';
+    const statusBtnClass = quiz.status === 'Closed' ? 'reopen' : 'close';
+    const statusBtnText  = quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+
+    // Edit Quiz / View Results stay excluded here too — they were already
+    // desktop-only on mobile before this rebuild (qz-desktop-only-btn),
+    // so this keeps that same existing behaviour, not a new restriction.
+    apiArea.innerHTML = `
+        <article class="qz-mobile-detail teacher-quiz-card" data-quiz-id="${quiz.id}">
+            <div class="qz-mobile-detail-header">
+                <div class="qz-mobile-detail-title">${escapeHtml(quiz.title)}</div>
+                <span class="teacher-quiz-status-badge"
+                    style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
+                    ${escapeHtml(quiz.status)}
+                </span>
+            </div>
+            <div class="qz-mobile-detail-meta">
+                <span>${escapeHtml(quiz.class_name)}</span>
+                <span>&bull;</span>
+                <span>${escapeHtml(quiz.duration)} min</span>
+                <span>&bull;</span>
+                <span>${escapeHtml(quiz.start_time)}</span>
+            </div>
+
+            <div class="teacher-quiz-detail-row" style="margin-top:18px;">
+                <span class="teacher-quiz-detail-label">Marks</span>
+                <span class="teacher-quiz-publish-status ${quiz.publish_marks ? 'published' : 'hidden'}"
+                    id="publish-label-${quiz.id}">
+                    ${publishLabel}
+                </span>
+            </div>
+
+            <div class="teacher-quiz-actions">
+                <button class="teacher-quiz-action-btn publish"
+                    id="publish-btn-${quiz.id}"
+                    onclick="togglePublishMarks(${quiz.id})">
+                    ${publishBtnText}
+                </button>
+                <button class="teacher-quiz-action-btn ${statusBtnClass}"
+                    id="status-btn-${quiz.id}"
+                    data-quiz-id="${quiz.id}" data-quiz-status="${escapeHtml(quiz.status)}"
+                    onclick="toggleQuizStatusFromElement(this)">
+                    ${statusBtnText}
+                </button>
+                <button class="teacher-quiz-action-btn delete"
+                    data-action="delete-quiz"
+                    data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}">
+                    Delete Quiz
+                </button>
+                <button class="teacher-quiz-action-btn integrity"
+                    data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                    onclick="openIntegrityModalFromElement(this)">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Integrity Report
+                </button>
+            </div>
+        </article>
+
+        <div id="integrityModal" class="teacher-modal-overlay" style="display:none;">
+            <div class="teacher-modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;">
+                <div class="teacher-modal-header">
+                    <span id="integrityModalTitle">Integrity Report</span>
+                    <button onclick="closeIntegrityModal()" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body" id="integrityModalBody">
+                    <div id="integrityWarning">
+                        <div style="text-align:center;margin-bottom:24px;">
+    <svg viewBox="0 0 24 24" width="44" height="44" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="margin-bottom:12px;">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    </svg>
+    <h3 style="color:#e2e8f0;margin:0 0 6px;letter-spacing:2px;font-size:16px;">INTEGRITY MONITOR</h3>
+    <p style="color:#4fd1c5;font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
+</div>
+
+<p style="line-height:1.8;color:#cbd5e0;font-size:14px;margin-bottom:20px;">
+    Every quiz session is recorded in real time. When a learner leaves the quiz environment — 
+    whether by switching tabs, minimizing the browser, or navigating away — the 
+    <strong style="color:#e2e8f0;">exact question they were on is logged and timestamped.</strong>
+</p>
+
+<div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:16px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span style="color:#4fd1c5;font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
+    </div>
+    <p style="margin:0;font-size:13px;color:#cbd5e0;line-height:1.7;">
+        This report shows you <strong style="color:#e2e8f0;">precisely where interruptions happened, 
+        question by question.</strong> No guesswork. No approximations. 
+        Each finding is backed by a timestamped session log.
+    </p>
+</div>
+
+<button class="teacher-modal-submit" style="width:100%;padding:15px;font-size:15px;letter-spacing:1px;"
+    id="decodeBtn" onclick="decodeIntegrity()">
+    VIEW SESSION REPORT
+</button>
+                    </div>
+                    <div id="integrityResults" style="display:none;"></div>
+                </div>
+                <div class="teacher-modal-footer" id="integrityFooter" style="display:none;">
+                    <button onclick="closeIntegrityModal()" class="teacher-modal-cancel">Dismiss</button>
+                </div>
+            </div>
+        </div>
+        <div id="deleteQuizModal" class="teacher-modal-overlay" style="display:none;">
+            <div class="teacher-modal-box" style="max-width:420px;">
+                <div class="teacher-modal-header">
+                    <span>Delete Quiz</span>
+                    <button data-action="close-delete-quiz" class="teacher-modal-close">&times;</button>
+                </div>
+                <div class="teacher-modal-body">
+                    <p style="color:#cbd5e0;line-height:1.6;margin-top:0;">
+                        Delete <strong id="deleteQuizTitle" style="color:#e2e8f0;"></strong>?
+                    </p>
+                    <p style="color:#f85149;font-size:13px;margin-bottom:0;">This action cannot be undone.</p>
+                    <div id="deleteQuizError" style="color:#ff5555;font-size:14px;margin-top:12px;display:none;"></div>
+                </div>
+                <div class="teacher-modal-footer">
+                    <button data-action="close-delete-quiz" class="teacher-modal-cancel">Cancel</button>
+                    <button data-action="confirm-delete-quiz" class="teacher-modal-submit"
+                        style="background:#f85149;color:#fff;">Delete Quiz</button>
+                </div>
+            </div>
+        </div>`;
+
+    apiArea.scrollTop = 0;
+};
+
+window.openMobileTeacherQuizById = function(quizId) {
+    const idx = (window._allQuizzesFlat || []).findIndex(q => String(q.id) === String(quizId));
+    if (idx >= 0) window.openMobileTeacherQuiz(idx);
+};
 
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT QUIZ
@@ -2584,11 +2721,20 @@ window.confirmDeleteQuiz = async function() {
         });
         const data = await res.json();
         if (data.status === 'success') {
-            const row = document.querySelector(`.teacher-quiz-card[data-quiz-id="${activeDeleteQuizId}"]`);
-            if (row) row.remove();
             window.teacherQuizzesCache = null;
             closeDeleteQuizModal();
-            if (document.getElementById('qz-main-panel')) fetchTeacherQuizzes();
+
+            if (window.innerWidth <= 899) {
+                // Mobile: deleting from the detail page leaves nothing
+                // sensible to remove in place (the whole page IS the
+                // deleted quiz) — go back to the list, which refetches
+                // since the cache was just cleared above.
+                fetchTeacherQuizzes();
+            } else {
+                const row = document.querySelector(`.teacher-quiz-card[data-quiz-id="${activeDeleteQuizId}"]`);
+                if (row) row.remove();
+                if (document.getElementById('qz-main-panel')) fetchTeacherQuizzes();
+            }
         } else if (error) {
             error.textContent = data.message || 'Failed to delete quiz.';
             error.style.display = 'block';
