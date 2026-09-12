@@ -309,6 +309,13 @@ window.handleTeacherHeaderBack = function(event) {
         }
     }
 
+    if (detailType === 'Grade') {
+        if (typeof window.fetchTeacherGrades === 'function') {
+            window.fetchTeacherGrades();
+            return false;
+        }
+    }
+
     if (detailType === 'Evaluation') {
         if (typeof window.fetchTeacherEvaluations === 'function') {
             window.fetchTeacherEvaluations();
