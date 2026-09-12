@@ -200,6 +200,238 @@
     .as-desktop-only-btn { display: none !important; }
 }
 
+/* ═══════════════════════════════════════════
+   MOBILE LIST — class folders + row + detail page
+   Replaces the old .teacher-assignment-card /
+   .as-submissions-collapsible drawer-in-place pattern.
+   Structurally mirrors the learner side's
+   .las-mobile-folder-* / .las-mobile-row-* / .las-mobile-detail-*
+   (assignments.css, learner), just under this file's own as- prefix.
+   ═══════════════════════════════════════════ */
+
+.as-mobile-list {
+    padding: 4px 0 24px;
+}
+
+/* Folder header reuses the shared .tchr-sidebar-class-label--toggle /
+   .tchr-sidebar-class-chevron behavior via buildCollapsibleClassGroup —
+   this just gives the mobile folder its own visual sizing, since the
+   desktop sidebar version is tuned for a narrow 280px column, not a
+   full-width mobile list. */
+.as-mobile-folder-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c9d1d9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.as-mobile-folder-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: #8b949e;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+.as-mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s ease;
+}
+.as-mobile-row:active { background: rgba(255,255,255,0.03); }
+.as-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
+.as-mobile-row-body { flex: 1; min-width: 0; }
+.as-mobile-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.as-mobile-row-meta {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 2px;
+}
+.as-mobile-row-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+.as-mobile-row-progress-bar {
+    flex: 1;
+    max-width: 120px;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.as-mobile-row-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: var(--as-progress-width, 0%);
+    background: var(--as-progress-color, #4fd1c5);
+}
+.as-mobile-row-progress-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--as-progress-color, #4fd1c5);
+    white-space: nowrap;
+}
+.as-mobile-row-chevron {
+    flex-shrink: 0;
+    color: #555e6a;
+}
+
+.as-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+    padding: 48px 24px;
+    color: #8b949e;
+}
+.as-mobile-empty svg { opacity: 0.35; margin-bottom: 6px; }
+.as-mobile-empty-title { font-size: 15px; font-weight: 700; color: #c9d1d9; margin: 0; }
+.as-mobile-empty-body { font-size: 13px; margin: 0; max-width: 280px; }
+
+/* ── Mobile detail page (openMobileTeacherAssignment) ── */
+.as-mobile-detail {
+    padding: 16px 16px 32px;
+}
+.as-mobile-detail-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin: 0 0 8px;
+}
+.as-mobile-detail-meta {
+    font-size: 13px;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.as-mobile-detail-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+.as-mobile-detail-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.as-mobile-detail-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: var(--as-progress-width, 0%);
+    background: var(--as-progress-color, #4fd1c5);
+}
+.as-mobile-detail-progress-label {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--as-progress-color, #4fd1c5);
+}
+.as-mobile-detail-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.as-mobile-detail-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79,209,197,0.1);
+    border: 1px solid rgba(79,209,197,0.25);
+    color: #4fd1c5;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+.as-mobile-detail-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.25);
+    color: #f85149;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.as-mobile-detail-desc {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+.as-mobile-detail-table-wrapper {
+    overflow-x: auto;
+}
+
+/* ── Detail-mode header (mobile) ──
+   Mirrors learner's #headerBackBtn / .mobile-detail-mode approach,
+   adapted to teacher's own #teacherHeaderBackBtn / .top-nav-brand--detail
+   elements (see configureTeacherHeader in dashboard.js). */
+@media (max-width: 768px) {
+    #teacherHeaderBackBtn {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: none;
+        color: #e2e8f0;
+        cursor: pointer;
+        padding: 4px 6px 4px 0;
+    }
+    #teacherHeaderBackLabel {
+        font-size: 13px;
+        font-weight: 600;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .top-nav-brand--detail .top-nav-school-name {
+        font-size: 16px;
+        font-weight: 800;
+    }
+}
+
 /* ── Formerly inline styles ── */
 
 .as-new-btn {

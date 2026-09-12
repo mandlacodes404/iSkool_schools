@@ -60,6 +60,38 @@ window.fetchTeacherAssignments = async function() {
     }
 };
 
+/**
+ * Groups the flat assignments array by class_name, keeping each item's
+ * original index into window._allAssignmentsFlat so any code working
+ * off that flat array (selectDesktopAssignment, the mobile detail view)
+ * keeps working unchanged regardless of how the list is grouped for
+ * display. Shared by both the desktop sidebar and the mobile folder
+ * list so grouping logic — and the resulting group order — only exists
+ * in one place.
+ * @param {Array} data - the flat assignments array (window._allAssignmentsFlat)
+ * @returns {Map<string, Array<{assignment: object, index: number}>>}
+ */
+function groupTeacherAssignmentsByClass(data) {
+    const groupsByClass = new Map();
+    (data || []).forEach((assignment, index) => {
+        const key = assignment.class_name || 'Other';
+        if (!groupsByClass.has(key)) groupsByClass.set(key, []);
+        groupsByClass.get(key).push({ assignment, index });
+    });
+    return groupsByClass;
+}
+
+/** submitted_count/total_learners -> a percent + the traffic-light color
+ * used consistently across sidebar dots, mobile rows, and both detail
+ * panels. Centralised so the three thresholds only ever live in one place. */
+function getTeacherAssignmentProgress(assignment) {
+    const total = assignment.total_learners || 0;
+    const submitted = assignment.submitted_count || 0;
+    const percent = total > 0 ? Math.round((submitted / total) * 100) : 0;
+    const color = percent === 100 ? '#22c55e' : percent >= 50 ? '#f39c12' : '#4fd1c5';
+    return { percent, color, submitted, total };
+}
+
 function renderTeacherAssignments(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -67,31 +99,19 @@ function renderTeacherAssignments(data) {
     // ── Store flat list for desktop panel lookup ──
     window._allAssignmentsFlat = data || [];
 
-    // ── Build left sidebar list ──
+    const groupsByClass = groupTeacherAssignmentsByClass(data);
+
+    // ── Build left sidebar list (desktop) ──
     let sidebarHtml = '';
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="teacher-empty-state as-empty-state-inline">No assignments created yet.</p>`;
     } else {
-        // Group by class_name for display, but keep each item's original
-        // index into window._allAssignmentsFlat so selectDesktopAssignment(index)
-        // and mobile-list logic (which use that flat array) keep working unchanged.
-        const groupsByClass = new Map();
-        data.forEach((assignment, index) => {
-            const key = assignment.class_name || 'Other';
-            if (!groupsByClass.has(key)) groupsByClass.set(key, []);
-            groupsByClass.get(key).push({ assignment, index });
-        });
-
         let classGroupIdx = 0;
         groupsByClass.forEach((entries, className) => {
             const classGroupId = `as-class-group-${classGroupIdx++}`;
             let itemsHtml = '';
             entries.forEach(({ assignment, index }) => {
-                const subPercent = assignment.total_learners > 0
-                    ? Math.round((assignment.submitted_count / assignment.total_learners) * 100)
-                    : 0;
-                const dotColor = subPercent === 100 ? '#22c55e'
-                    : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+                const { color: dotColor } = getTeacherAssignmentProgress(assignment);
 
                 itemsHtml += `
                     <div class="as-sidebar-item" id="as-sidebar-${index}"
@@ -172,132 +192,77 @@ function renderTeacherAssignments(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LIST (unchanged) ═══ -->
+        <!-- ═══ MOBILE LIST ═══
+             Grouped by class (same grouping as the desktop sidebar,
+             built once above and reused here) with tap-to-detail-page
+             navigation, matching the learner app's pattern instead of
+             the old inline expand/collapse drawer. -->
         <div class="as-mobile-list">`;
 
     if (!data || data.length === 0) {
-        html += `<p class="teacher-empty-state">No assignments created yet.</p>`;
+        html += `
+            <div class="as-mobile-empty">
+                <svg viewBox="0 0 24 24" width="46" height="46" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <p class="as-mobile-empty-title">No assignments yet</p>
+                <p class="as-mobile-empty-body">Create an assignment to see it listed here by class.</p>
+            </div>`;
     } else {
-        data.forEach((assignment, index) => {
-            const dueDate     = assignment.due_date;
-            const subCount    = assignment.submitted_count;
-            const totalCount  = assignment.total_learners;
-            const subPercent  = totalCount > 0
-                ? Math.round((subCount / totalCount) * 100)
-                : 0;
-            const progressColor = subPercent === 100
-                ? '#22c55e'
-                : subPercent >= 50
-                ? '#f39c12'
-                : '#4fd1c5';
+        let mobileGroupIdx = 0;
+        groupsByClass.forEach((entries, className) => {
+            // Separate id namespace from the desktop groups
+            // (as-class-group-N) so the two never collide if both
+            // happen to be in the DOM at once (e.g. during a resize),
+            // and so collapse state persisted per-id in
+            // teacherSectionState.collapsedGroups doesn't get shared
+            // between a desktop sidebar group and its mobile folder
+            // counterpart for the same class.
+            const groupId = `as-mobile-class-group-${mobileGroupIdx++}`;
 
-            html += `
-                <div class="teacher-assignment-card" id="acard-${index}">
-                    <div class="teacher-assignment-main" onclick="toggleAssignmentSubmissions(${index})">
-                        <div class="teacher-resource-icon">
-                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+            let itemsHtml = '';
+            entries.forEach(({ assignment, index }) => {
+                const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =
+                    getTeacherAssignmentProgress(assignment);
+
+                itemsHtml += `
+                    <div class="as-mobile-row" role="button" tabindex="0"
+                        onclick="openMobileTeacherAssignment(${index})"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAssignment(${index});}">
+                        <div class="as-mobile-row-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
                             </svg>
                         </div>
-                        <div class="teacher-resource-info">
-                            <div class="teacher-resource-name">${assignment.title}</div>
-                            <div class="teacher-resource-meta">
-                                ${assignment.class_name} &middot; Due ${dueDate}
-                            </div>
-                            <div class="teacher-assignment-progress">
-                                <div class="teacher-assignment-progress-bar">
-                                    <div class="teacher-assignment-progress-fill"
-                                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};">
-                                    </div>
+                        <div class="as-mobile-row-body">
+                            <div class="as-mobile-row-title">${escapeTeacherAssignmentHtml(assignment.title)}</div>
+                            <div class="as-mobile-row-meta">Due ${escapeTeacherAssignmentHtml(assignment.due_date)}</div>
+                            <div class="as-mobile-row-progress">
+                                <div class="as-mobile-row-progress-bar">
+                                    <div class="as-mobile-row-progress-fill"
+                                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};"></div>
                                 </div>
-                                <span class="teacher-assignment-progress-label" style="--as-progress-color:${progressColor};">
-                                    ${subCount}/${totalCount} submitted
-                                </span>
+                                <span class="as-mobile-row-progress-label" style="--as-progress-color:${progressColor};">${subCount}/${totalCount}</span>
                             </div>
                         </div>
-                        <div class="as-card-side-actions">
-                            ${assignment.file_url ? `
-                                <a href="${assignment.file_url}" target="_blank"
-                                    onclick="event.stopPropagation()"
-                                    class="teacher-assignment-file-link as-desktop-only-btn">
-                                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                                    </svg>
-                                    Attachment
-                                </a>` : ''}
-                            <button class="teacher-assignment-download-btn as-desktop-only-btn"
-                                onclick="event.stopPropagation(); downloadSubmissions(${assignment.id})">
-                                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                Download All
-                            </button>
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none"
-                                class="teacher-assignment-chevron as-chevron" id="achevron-${index}">
+                        <div class="as-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </div>
-                    </div>
-
-                    <div class="teacher-assignment-submissions as-submissions-collapsible" id="asubs-${index}">
-                        <div class="teacher-assignment-desc">
-                            ${assignment.description.replace(/\n/g, '<br>')}
-                        </div>
-                        <div class="teacher-grades-table-wrapper">
-                            <table class="teacher-grades-table">
-                                <thead>
-                                    <tr>
-                                        <th>Learner</th>
-                                        <th>Status</th>
-                                        <th>Type</th>
-                                        <th>Submission</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
-
-            assignment.submissions.forEach(sub => {
-                const statusBadge = sub.submitted
-                    ? `<span class="teacher-sub-badge submitted">Submitted</span>
-                       <div class="as-sub-timestamp">${sub.submitted_at}</div>`
-                    : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
-
-                let subContent = '—';
-                if (sub.submitted) {
-                    if (sub.submission_type === 'file' && sub.file_url) {
-                        subContent = `<a href="${sub.file_url}" target="_blank" class="teacher-sub-file-link">View File</a>`;
-                    } else if (sub.submission_type === 'text' && sub.text_answer) {
-                        subContent = `
-                            <div class="teacher-sub-text">
-                                ${sub.text_answer.replace(/\n/g, '<br>')}
-                            </div>`;
-                    } else if (sub.submission_type === 'audio' && sub.audio_url) {
-                        subContent = `
-                            <audio controls class="as-sub-audio">
-                                <source src="${sub.audio_url}" type="audio/mpeg">
-                            </audio>`;
-                    }
-                }
-
-                html += `
-                    <tr>
-                        <td>${sub.name}</td>
-                        <td>${statusBadge}</td>
-                        <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
-                        <td>${subContent}</td>
-                    </tr>`;
+                    </div>`;
             });
 
-            html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>`;
+            html += window.buildCollapsibleClassGroup(
+                groupId,
+                'as-mobile-folder-label',
+                `${escapeTeacherAssignmentHtml(className)} <span class="as-mobile-folder-count">${entries.length}</span>`,
+                itemsHtml
+            );
         });
     }
 
@@ -325,6 +290,63 @@ function renderTeacherAssignments(data) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ASSIGNMENT
 // ─────────────────────────────────────────────
+/**
+ * Escapes text for safe HTML interpolation. The rest of this file
+ * predates this rebuild and interpolates most fields unescaped — left
+ * as-is here since fixing that everywhere is a separate, larger cleanup
+ * outside this task's scope. New mobile markup added as part of this
+ * rebuild uses this helper for anything derived from teacher/learner-
+ * entered text (titles, class names, due dates as free text).
+ */
+function escapeTeacherAssignmentHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[char]));
+}
+
+/**
+ * Builds the <tr> rows of the learner submissions table for one
+ * assignment. Shared by the desktop panel (selectDesktopAssignment)
+ * and the mobile detail view (openMobileTeacherAssignment) so this
+ * table's markup only exists in one place instead of being kept in
+ * sync by hand in two.
+ * @param {Array} submissions - assignment.submissions
+ * @param {string} audioClass - extra class for the <audio> element,
+ *   since desktop and the old mobile card used slightly different
+ *   sizing (as-sub-audio--panel vs as-sub-audio). Pass '' for the
+ *   plain .as-sub-audio sizing.
+ * @returns {string}
+ */
+function buildTeacherSubmissionsTableRows(submissions, audioClass) {
+    let tableRows = '';
+    (submissions || []).forEach(sub => {
+        const statusBadge = sub.submitted
+            ? `<span class="teacher-sub-badge submitted">Submitted</span>
+               <div class="as-sub-timestamp">${sub.submitted_at}</div>`
+            : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
+
+        let subContent = '—';
+        if (sub.submitted) {
+            if (sub.submission_type === 'file' && sub.file_url) {
+                subContent = `<a href="${sub.file_url}" target="_blank" class="teacher-sub-file-link">View File</a>`;
+            } else if (sub.submission_type === 'text' && sub.text_answer) {
+                subContent = `<div class="teacher-sub-text">${sub.text_answer.replace(/\n/g, '<br>')}</div>`;
+            } else if (sub.submission_type === 'audio' && sub.audio_url) {
+                subContent = `<audio controls class="as-sub-audio ${audioClass || ''}"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
+            }
+        }
+
+        tableRows += `
+            <tr>
+                <td>${sub.name}</td>
+                <td>${statusBadge}</td>
+                <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
+                <td>${subContent}</td>
+            </tr>`;
+    });
+    return tableRows;
+}
+
 window.selectDesktopAssignment = function(index) {
     // Update sidebar active state
     document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -342,39 +364,10 @@ window.selectDesktopAssignment = function(index) {
     const panel = document.getElementById('as-main-panel');
     if (!panel) return;
 
-    const subCount   = assignment.submitted_count;
-    const totalCount = assignment.total_learners;
-    const subPercent = totalCount > 0 ? Math.round((subCount / totalCount) * 100) : 0;
-    const progressColor = subPercent === 100 ? '#22c55e'
-        : subPercent >= 50 ? '#f39c12' : '#4fd1c5';
+    const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =
+        getTeacherAssignmentProgress(assignment);
 
-    // Build submissions table rows
-    let tableRows = '';
-    assignment.submissions.forEach(sub => {
-        const statusBadge = sub.submitted
-            ? `<span class="teacher-sub-badge submitted">Submitted</span>
-               <div class="as-sub-timestamp">${sub.submitted_at}</div>`
-            : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
-
-        let subContent = '—';
-        if (sub.submitted) {
-            if (sub.submission_type === 'file' && sub.file_url) {
-                subContent = `<a href="${sub.file_url}" target="_blank" class="teacher-sub-file-link">View File</a>`;
-            } else if (sub.submission_type === 'text' && sub.text_answer) {
-                subContent = `<div class="teacher-sub-text">${sub.text_answer.replace(/\n/g, '<br>')}</div>`;
-            } else if (sub.submission_type === 'audio' && sub.audio_url) {
-                subContent = `<audio controls class="as-sub-audio as-sub-audio--panel"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
-            }
-        }
-
-        tableRows += `
-            <tr>
-                <td>${sub.name}</td>
-                <td>${statusBadge}</td>
-                <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
-                <td>${subContent}</td>
-            </tr>`;
-    });
+    const tableRows = buildTeacherSubmissionsTableRows(assignment.submissions, 'as-sub-audio--panel');
 
     panel.innerHTML = `
         <div class="as-panel-content">
@@ -451,14 +444,113 @@ window.selectDesktopAssignment = function(index) {
 };
 
 // ─────────────────────────────────────────────
-// TOGGLE SUBMISSIONS (mobile)
+// MOBILE DETAIL PAGE
 // ─────────────────────────────────────────────
-window.toggleAssignmentSubmissions = function(index) {
-    const subs    = document.getElementById(`asubs-${index}`);
-    const chevron = document.getElementById(`achevron-${index}`);
-    const isOpen  = subs.style.display === 'block';
-    subs.style.display      = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+// Replaces the old toggleAssignmentSubmissions drawer/chevron
+// expand-in-place behaviour. Tapping a row in the mobile list now
+// navigates to a real detail page — same pattern as the learner
+// app's openMobileLearnerAssignment — instead of expanding an inline
+// panel on the list itself.
+window.openMobileTeacherAssignment = function(index) {
+    if (window.innerWidth > 899) return;
+
+    const assignment = (window._allAssignmentsFlat || [])[index];
+    const apiArea = document.getElementById('api-content-area');
+    const iframe  = document.getElementById('mainFrame');
+    if (!assignment || !apiArea) return;
+
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+
+    sessionStorage.setItem('lastTeacherPage', 'teacher_assignments');
+    window.teacherSectionState.selection.assignments = assignment.id;
+    window.persistTeacherSectionState();
+
+    window.configureTeacherHeader({
+        title: 'Assignment',
+        mode: 'detail',
+        detailType: 'Assignment',
+        backLabel: 'Assignments'
+    });
+
+    const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =
+        getTeacherAssignmentProgress(assignment);
+
+    const tableRows = buildTeacherSubmissionsTableRows(assignment.submissions, '');
+
+    apiArea.innerHTML = `
+        <article class="as-mobile-detail">
+            <h1 class="as-mobile-detail-title">${escapeTeacherAssignmentHtml(assignment.title)}</h1>
+            <div class="as-mobile-detail-meta">
+                <span>${escapeTeacherAssignmentHtml(assignment.class_name)}</span>
+                <span>&bull;</span>
+                <span>Due ${escapeTeacherAssignmentHtml(assignment.due_date)}</span>
+            </div>
+
+            <div class="as-mobile-detail-progress-row">
+                <div class="as-mobile-detail-progress-bar">
+                    <div class="as-mobile-detail-progress-fill"
+                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};"></div>
+                </div>
+                <span class="as-mobile-detail-progress-label" style="--as-progress-color:${progressColor};">
+                    ${subCount}/${totalCount} submitted
+                </span>
+            </div>
+
+            <div class="as-mobile-detail-actions">
+                ${assignment.file_url ? `
+                    <a class="as-mobile-detail-link" href="${assignment.file_url}" target="_blank">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        </svg>
+                        Attachment
+                    </a>` : ''}
+                <button class="as-mobile-detail-link" onclick="downloadSubmissions(${assignment.id})">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download All
+                </button>
+                <button class="as-mobile-detail-delete-btn" onclick="confirmDeleteAssignment(${assignment.id})">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                    Delete
+                </button>
+            </div>
+
+            <div class="as-mobile-detail-desc">
+                ${assignment.description ? assignment.description.replace(/\n/g, '<br>') : 'No description provided.'}
+            </div>
+
+            <div class="as-mobile-detail-table-wrapper teacher-grades-table-wrapper">
+                <table class="teacher-grades-table">
+                    <thead>
+                        <tr>
+                            <th>Learner</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Submission</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </article>`;
+
+    apiArea.scrollTop = 0;
+};
+
+window.openMobileTeacherAssignmentById = function(assignmentId) {
+    const targetId = String(assignmentId || '');
+    const idx = (window._allAssignmentsFlat || []).findIndex(a => String(a.id) === targetId);
+    if (idx >= 0) window.openMobileTeacherAssignment(idx);
 };
 
 // ─────────────────────────────────────────────

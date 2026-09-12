@@ -58,10 +58,10 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#161b22">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=1.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=5.2">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.5">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.2">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.3">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.5">
@@ -265,17 +265,31 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
                         <line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
+
+                <!-- Detail-mode back button (hidden unless configureTeacherHeader
+                     sets mode:'detail' — see dashboard.js). Mirrors the learner
+                     side's #headerBackBtn/#headerBackLabel. -->
+                <button id="teacherHeaderBackBtn" onclick="window.handleTeacherHeaderBack(event)" style="display:none;">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor"
+                         stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span id="teacherHeaderBackLabel"></span>
+                </button>
             </div>
 
-            <!-- Centre: logo + school name -->
-            <div class="top-nav-brand">
-                <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo">
+            <!-- Centre: logo + school name (standard mode) / detail title (detail mode) -->
+            <div class="top-nav-brand" id="teacherHeaderBrand">
+                <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo" id="teacherHeaderLogo">
                 <span class="top-nav-school-name"><?= htmlspecialchars($schoolName) ?></span>
+            </div>
+            <div class="top-nav-brand top-nav-brand--detail" id="teacherHeaderDetailTitle" style="display:none;">
+                <span class="top-nav-school-name" id="teacherHeaderTitle"></span>
             </div>
 
             <!-- Right: avatar + dropdown -->
          <!-- Search + Avatar -->
-<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;" id="teacherHeaderRight">
 
     <!-- SEARCH BAR -->
     <div style="position:relative;" id="teacherSearchWrapper">
@@ -1103,14 +1117,14 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=7.1"></script>
+<script src="assets/js/teacher/dashboard.js?v=7.2"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=6.3"></script>
 <script src="assets/js/teacher/announcements.js?v=4.8"></script>
 <script src="assets/js/teacher/evaluations.js?v=3.9"></script>
 <script src="assets/js/teacher/resources.js?v=3.4"></script>
 <script src="assets/js/teacher/grades.js?v=4.0"></script>
-<script src="assets/js/teacher/assignments.js?v=3.8"></script>
+<script src="assets/js/teacher/assignments.js?v=3.9"></script>
 <script src="assets/js/teacher/sbo.js?v=3.7"></script>
 <script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>

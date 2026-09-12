@@ -183,6 +183,129 @@ window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml
 
 /**
  * ─────────────────────────────────────────────
+ * SHARED: TEACHER MOBILE DETAIL-MODE HEADER
+ * ─────────────────────────────────────────────
+ * Teacher-side equivalent of the learner app's configureHeader/
+ * handleHeaderBack (learner_dashboard.php). Learner had this built
+ * in from the start; teacher never had it, so this is new
+ * infrastructure, not a port of existing teacher code.
+ *
+ * Lives here (not in teacher_dashboard.php) deliberately, so it sits
+ * alongside the other shared, cross-page teacher helpers already in
+ * this file (teacherSectionState, buildCollapsibleClassGroup,
+ * buildInfoRail) rather than growing the PHP shell file. See
+ * PROJECT_NOTES.md §6 for the reasoning.
+ *
+ * Usage from any teacher list page, mirroring the learner pattern:
+ *   window.configureTeacherHeader({ title: 'Assignment', mode: 'detail', detailType: 'Assignment' });
+ *   ...on the way back into the list...
+ *   window.configureTeacherHeader({ title: 'Assignments', mode: 'standard' });
+ *
+ * mode: 'standard' -> normal browsing chrome (hamburger + brand visible,
+ *   bottom nav visible on mobile, back button hidden).
+ * mode: 'detail'   -> hides hamburger + bottom nav, shows the back
+ *   button and a detail title in place of the brand, on mobile. Desktop
+ *   is intentionally left alone here — every teacher page's desktop
+ *   view is a sidebar+panel split, not a page navigation, so desktop
+ *   never enters "detail mode" (same as learner's own convention).
+ *
+ * Row 2 (#topNavRow2, the Syllabus/Evaluations/Analytics/Calendar/
+ * Settings tab bar) is already "desktop only" by its own CSS (see the
+ * "ROW 2: tab links (desktop only)" comment in teacher_dashboard.php)
+ * — confirmed no JS anywhere currently shows/hides it, so this
+ * controller does not need to touch it for mobile detail mode.
+ */
+window.configureTeacherHeader = function(config) {
+    const { title, mode } = config || {};
+
+    const backBtn      = document.getElementById('teacherHeaderBackBtn');
+    const backLabelEl  = document.getElementById('teacherHeaderBackLabel');
+    const brandEl      = document.getElementById('teacherHeaderBrand');
+    const detailTitleEl = document.getElementById('teacherHeaderDetailTitle');
+    const titleEl      = document.getElementById('teacherHeaderTitle');
+    const mobileBtn    = document.getElementById('mobileToggle');
+    const rightSide    = document.getElementById('teacherHeaderRight');
+    const mobileBottomNav = document.getElementById('mobileBottomNav');
+
+    const isMobile = window.innerWidth <= 768;
+
+    if (mode === 'detail') {
+        window.teacherHeaderDetailType = config.detailType || title || null;
+        window.teacherHeaderBackAction = typeof config.backAction === 'function'
+            ? config.backAction
+            : null;
+
+        const backLabel = config.backLabel || '';
+        if (backLabelEl) backLabelEl.innerText = backLabel;
+        if (titleEl) titleEl.innerText = title || '';
+
+        if (isMobile) {
+            if (backBtn) backBtn.style.display = 'flex';
+            if (mobileBtn) mobileBtn.style.display = 'none';
+            if (brandEl) brandEl.style.display = 'none';
+            if (detailTitleEl) detailTitleEl.style.display = 'flex';
+            if (rightSide) rightSide.style.visibility = 'hidden';
+            if (mobileBottomNav) mobileBottomNav.style.setProperty('display', 'none', 'important');
+        }
+        // Desktop: intentionally no-op. Desktop teacher pages use the
+        // sidebar+panel split, not page navigation, so there is no
+        // desktop "detail mode" to enter (mirrors learner's convention).
+    } else {
+        window.teacherHeaderDetailType = null;
+        window.teacherHeaderBackAction = null;
+
+        if (backBtn) backBtn.style.display = 'none';
+        if (brandEl) brandEl.style.display = '';
+        if (detailTitleEl) detailTitleEl.style.display = 'none';
+        if (rightSide) rightSide.style.visibility = 'visible';
+        if (mobileBtn) mobileBtn.style.display = isMobile ? 'block' : 'none';
+        if (mobileBottomNav) {
+            mobileBottomNav.style.display = isMobile ? 'flex' : 'none';
+        }
+    }
+};
+
+/**
+ * Shared back-button handler wired to #teacherHeaderBackBtn's onclick.
+ * Same dispatch shape as learner's handleHeaderBack: a page-specific
+ * backAction callback (set via configureTeacherHeader's backAction
+ * option) always wins if present; otherwise dispatch on detailType.
+ *
+ * Add one branch here per teacher page as each one gets a mobile
+ * detail view — Assignments is the first.
+ */
+window.handleTeacherHeaderBack = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    const backAction = window.teacherHeaderBackAction;
+    if (typeof backAction === 'function') {
+        backAction();
+        return false;
+    }
+
+    const detailType = window.teacherHeaderDetailType;
+
+    if (detailType === 'Assignment') {
+        if (typeof window.fetchTeacherAssignments === 'function') {
+            window.fetchTeacherAssignments();
+            return false;
+        }
+    }
+
+    // Fallback: no known detail type / page cache function missing.
+    // Return to Home rather than leaving the teacher stranded on a
+    // detail page with a back button that does nothing.
+    if (typeof window.loadTeacherManual === 'function') {
+        window.loadTeacherManual();
+    }
+    return false;
+};
+
+/**
+ * ─────────────────────────────────────────────
  * SHARED TEACHER SECTION STATE
  * ─────────────────────────────────────────────
  * One place to remember "where the teacher was" on each section so
