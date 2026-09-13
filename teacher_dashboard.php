@@ -51,11 +51,11 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta charset="UTF-8">
     <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#161b22">
+    <meta name="theme-color" content="#0d1117">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="msapplication-navbutton-color" content="#161b22">
+    <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=1.5">
