@@ -110,7 +110,7 @@ window.fetchQuizzes = async function() {
 
     // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663', blendOpacity: 0.25 });
+        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663' });
     }
 
     // 2. Sidebar & UI Management

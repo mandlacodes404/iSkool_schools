@@ -2904,29 +2904,8 @@ function toggleJoinClassForm() {
 // the browser bar in sync without resetting it to black on every scroll.
 window.learnerCurrentPageColor = '#20201f';
 
-// Blends a hex colour at the given opacity (0-1) over the dashboard's
-// dark base surface (#20201f). The browser status bar (theme-color meta)
-// can't render real alpha transparency — it only accepts solid colours —
-// so a "15% opacity" look has to be pre-mixed into one flat hex ahead of
-// time. Same blended value then gets reused for the header background so
-// both surfaces read as the same tint. Callers that don't need this just
-// skip the blendOpacity param and get their colour at full strength,
-// exactly as before.
-function blendPageColorForHeader(hex, opacity) {
-    const bg = { r: 0x20, g: 0x20, b: 0x1f };
-    const clean = hex.replace('#', '');
-    const fg = {
-        r: parseInt(clean.substring(0, 2), 16),
-        g: parseInt(clean.substring(2, 4), 16),
-        b: parseInt(clean.substring(4, 6), 16)
-    };
-    const mix = (a, b) => Math.round(a * opacity + b * (1 - opacity));
-    const toHex = (n) => n.toString(16).padStart(2, '0');
-    return '#' + toHex(mix(fg.r, bg.r)) + toHex(mix(fg.g, bg.g)) + toHex(mix(fg.b, bg.b));
-}
-
 window.configureHeader = function(config) {
-    let { title, mode, color, blendOpacity } = config;
+    let { title, mode, color } = config;
 
     // ── Mobile colour theming ──────────────────────────────────────────
     // Only applies on mobile. Home has no colour (stays dark surface).
@@ -2935,11 +2914,6 @@ window.configureHeader = function(config) {
         const mainHeader     = document.querySelector('.main-header');
 
         if (color) {
-            // blendOpacity is opt-in per page (e.g. Quizzes passes 0.15).
-            // Pages that omit it keep their existing full-strength colour.
-            if (typeof blendOpacity === 'number') {
-                color = blendPageColorForHeader(color, blendOpacity);
-            }
             window.learnerCurrentPageColor = color;
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             // Header bottom accent + tinted glass background when scrolled
@@ -3418,7 +3392,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=10.10"></script>
-<script src="assets/js/learner/quiz.js?v=11.6"></script>
+<script src="assets/js/learner/quiz.js?v=11.7"></script>
 <script src="assets/js/learner/assignments.js?v=9.6"></script>
 <script src="assets/js/learner/resources.js?v=8.3"></script>
 <script src="assets/js/learner/announcements.js?v=9.0"></script>
