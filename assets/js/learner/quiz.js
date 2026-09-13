@@ -1141,11 +1141,12 @@ function renderQuizCards(groupedData) {
             }
             const rowAttrs = rowClick ? `role="button" tabindex="0" ${rowClick} ${rowKeydown}` : '';
 
-            const dotColor = quiz.attempt_status === 'submitted' ? '#22c55e'
+            const dotColor = quiz.attempt_status === 'submitted'
+                ? ((quiz.publish_marks === 0 || quiz.result_label === 'Pending') ? '#fdd663' : '#6b7280')
                 : isClosed ? '#6b7280'
                 : isScheduled ? '#fdd663'
                 : quiz.attempt_status === 'in_progress' ? '#e67e22'
-                : '#4fd1c5';
+                : '#22c55e';
 
             const metaPoints = (quiz.total_points > 0 || quiz.question_count > 0)
                 ? `${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''}`
