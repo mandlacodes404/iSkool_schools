@@ -32,7 +32,7 @@
 .full-cal-page-title {
     font-size: 22px;
     font-weight: 900;
-    color: #4fd1c5;
+    color: #e2e8f0;
     margin: 0;
 }
 
@@ -95,6 +95,11 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px;
     overflow: hidden;
+}
+@media (max-width: 900px) {
+    .full-cal-main {
+        background: transparent;
+    }
 }
 
 .full-cal-nav-row {
@@ -285,6 +290,11 @@
     padding: 12px 14px;
     transition: border-color 0.2s, transform 0.2s;
 }
+@media (max-width: 900px) {
+    .full-cal-upcoming-card {
+        background: transparent;
+    }
+}
 
 .full-cal-upcoming-card:hover {
     border-color: rgba(79,209,197,0.2);
@@ -334,6 +344,11 @@
     text-align: center;
     font-size: 13px;
     color: #555e6a;
+}
+@media (max-width: 900px) {
+    .full-cal-upcoming-empty {
+        background: transparent;
+    }
 }
 
 /* ── MODAL (full-page version) ── */
@@ -435,6 +450,16 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
     .full-cal-body { flex-direction: column; }
+    .full-cal-main {
+        /* .full-cal-main is flex:1 inside .full-cal-body, which controls
+           flex-grow along the row layout's horizontal axis on desktop.
+           Once .full-cal-body switches to flex-direction:column here,
+           flex:1 instead controls vertical grow — width silently falls
+           back to shrink-to-fit, which is what made the calendar look
+           shrunk with empty space beside it. Setting width explicitly
+           fixes that regardless of flex-direction. */
+        width: 100%;
+    }
     .full-cal-upcoming { width: 100%; }
 }
 
