@@ -789,33 +789,35 @@
 .teacher-quiz-action-btn.results  { background: rgba(79,209,197,0.1); color: #4fd1c5; border: 1px solid rgba(79,209,197,0.3); }
 .teacher-quiz-action-btn.integrity { background: rgba(243,156,18,0.1); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
 
-/* ── QUIZZES MOBILE — grouped by class only (no term wrapper), tap into
-   a detail page. Added 2026-09-12. Chevron/collapse behaviour comes from
-   the shared .tchr-sidebar-class-* classes in dashboard.css
-   (buildCollapsibleClassGroup), same as Assignments/Announcements —
-   only sized here, not redefining collapse mechanics. ── */
-.qz-mobile-folder-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; color: #8b949e;
-    padding: 10px 4px; margin-top: 8px;
-}
-.qz-mobile-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #161b22; border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
-    cursor: pointer; transition: border-color 0.15s;
-}
-.qz-mobile-row:hover { border-color: rgba(79,209,197,0.2); }
+/* .qz-mobile-folder-label / .qz-mobile-row removed from here (2026-09-13) —
+   these were a stale rounded-card rule set that conflicted with the flat,
+   edge-to-edge rules quizzes.js now defines for itself in its own <style>
+   block (same pattern as assignments/announcements/resources). Keeping
+   both around let the old card look leak back in depending on stylesheet
+   load order. Quizzes' mobile list styling now lives entirely in
+   quizzes.js — see .qz-mobile-list / .qz-mobile-folder-label /
+   .qz-mobile-row there. */
 
 /* Mobile detail page (openMobileTeacherQuiz). Reuses .teacher-quiz-card
    as its outer class so the shared action-button/status-badge/publish-
-   status rules above still apply without duplication — this block only
-   adds the page-level layout the old inline expand didn't need. */
+   status rules above still apply without duplication — but the base
+   .teacher-quiz-card visuals (background/border/border-radius/margin)
+   are a boxed-card look, so they're overridden to flat/full-bleed here,
+   consistent with the assignments/announcements/resources mobile
+   pattern: no card, just padding + a single edge-to-edge divider under
+   the header. */
 .qz-mobile-detail.teacher-quiz-card {
-    padding: 16px;
-    margin: 16px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 20px 16px;
+}
+@media (max-width: 899px) {
+    .qz-mobile-detail.teacher-quiz-card {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
 }
 .qz-mobile-detail-header {
     display: flex;
@@ -823,6 +825,8 @@
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .qz-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; }
 .qz-mobile-detail-meta {
