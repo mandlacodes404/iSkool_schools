@@ -887,6 +887,14 @@ function renderQuizCards(groupedData) {
                 border-radius: 50%;
                 flex-shrink: 0;
             }
+            .lqz-mobile-row-status {
+                flex-shrink: 0;
+                padding: 3px 9px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
             .lqz-mobile-row-title-text {
                 min-width: 0;
                 overflow: hidden;
@@ -1140,7 +1148,7 @@ function renderQuizCards(groupedData) {
                 : '#4fd1c5';
 
             const metaPoints = (quiz.total_points > 0 || quiz.question_count > 0)
-                ? `${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''} &bull; `
+                ? `${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''}`
                 : '';
 
             html += `
@@ -1152,8 +1160,12 @@ function renderQuizCards(groupedData) {
                         <div class="lqz-mobile-row-title">
                             <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                         </div>
-                        <div class="lqz-mobile-row-meta">${metaPoints}<span>${statusText}</span></div>
+                        <div class="lqz-mobile-row-meta">${metaPoints}</div>
                     </div>
+                    <span class="lqz-mobile-row-status"
+                        style="background:${dotColor}20;color:${dotColor};border:1px solid ${dotColor}50;">
+                        ${escapeHtml(statusText)}
+                    </span>
                     <div class="lqz-mobile-row-chevron">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
                             <polyline points="9 18 15 12 9 6"></polyline>
