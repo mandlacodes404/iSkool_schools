@@ -261,9 +261,11 @@ function buildMobileSBOFolders(briefs) {
                 : '';
 
             itemsHtml += `
-                <div class="teacher-resource-card" onclick="openMobileTeacherSBO(${flatIndex})">
-                    <div class="teacher-resource-icon">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                <div class="sbo-mobile-row" role="button" tabindex="0"
+                    onclick="openMobileTeacherSBO(${flatIndex})"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherSBO(${flatIndex});}">
+                    <div class="sbo-mobile-row-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                             <line x1="12" y1="6"  x2="16" y2="6"/>
@@ -271,20 +273,25 @@ function buildMobileSBOFolders(briefs) {
                             <line x1="12" y1="14" x2="16" y2="14"/>
                         </svg>
                     </div>
-                    <div class="teacher-resource-info">
-                        <div class="teacher-resource-name">${brief.subject}</div>
-                        <div class="teacher-resource-meta">
+                    <div class="sbo-mobile-row-body">
+                        <div class="sbo-mobile-row-title">${brief.subject}</div>
+                        <div class="sbo-mobile-row-meta">
                             Term ${brief.term}
                             ${updatedDate ? ' &middot; Updated ' + updatedDate : ''}
                         </div>
+                    </div>
+                    <div class="sbo-mobile-row-chevron">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>`;
         });
 
         html += window.buildCollapsibleClassGroup(
             mobileGroupId,
-            'teacher-resource-class-label',
-            group.class_name,
+            'sbo-mobile-folder-label',
+            `${group.class_name} <span class="sbo-mobile-folder-count">${group.items.length}</span>`,
             itemsHtml
         );
     });

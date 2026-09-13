@@ -183,28 +183,35 @@ function renderTeacherEvaluations(data) {
 
             group.evaluations.forEach((ev, evIndex) => {
                 itemsHtml += `
-                    <div class="teacher-resource-card" onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})">
-                        <div class="teacher-resource-icon">
-                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                    <div class="ev-mobile-row" role="button" tabindex="0"
+                        onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)});}">
+                        <div class="ev-mobile-row-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
                             </svg>
                         </div>
-                        <div class="teacher-resource-info">
-                            <div class="teacher-resource-name">${ev.title}</div>
-                            <div class="teacher-resource-meta">
+                        <div class="ev-mobile-row-body">
+                            <div class="ev-mobile-row-title">${ev.title}</div>
+                            <div class="ev-mobile-row-meta">
                                 ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
                                 ${ev.description ? ' &middot; ' + ev.description : ''}
                             </div>
+                        </div>
+                        <div class="ev-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
                         </div>
                     </div>`;
             });
 
             html += window.buildCollapsibleClassGroup(
                 mobileGroupId,
-                'teacher-resource-class-label',
-                group.class_name,
+                'ev-mobile-folder-label',
+                `${group.class_name} <span class="ev-mobile-folder-count">${group.evaluations.length}</span>`,
                 itemsHtml
             );
         });

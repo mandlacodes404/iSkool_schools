@@ -447,13 +447,78 @@
 .sbo-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
 
 /* ── SYLLABUS MOBILE — grouped by class only, tap into a detail page.
-   Added 2026-09-12. Chevron/collapse behaviour comes from the shared
-   .tchr-sidebar-class-* classes in dashboard.css
-   (buildCollapsibleClassGroup), same as Assignments/Announcements/
-   Quizzes/Evaluations — only sized here, not redefining collapse
-   mechanics. Rows reuse the shared .teacher-resource-card/-icon/-info/
-   -name/-meta classes (no new row CSS needed here). ── */
+   Flat, edge-to-edge folders + rows, matching the assignments/
+   announcements/resources/quizzes/grades/evaluations mobile pattern
+   exactly (.as-mobile-folder-label / .as-mobile-row in
+   assignments.css) instead of the old .teacher-resource-card look
+   (those legacy classes lived in announcements.css and are no longer
+   used by this page). Chevron/collapse behaviour still comes from the
+   shared .tchr-sidebar-class-* classes in dashboard.css
+   (buildCollapsibleClassGroup) — only sized for full mobile width
+   here, not redefining the collapse mechanics themselves.
 
+   #api-content-area carries a 20px padding on mobile (zeroed only at
+   >=900px, see dashboard.css). That 20px gutter is what pushed the
+   old card list in from the screen edges. Cancelling it here with
+   matching negative margins lets .sbo-mobile-list span the full
+   device width, so child borders (folder label + row) can run
+   edge-to-edge. Horizontal inset for the *content* inside each row is
+   then re-applied directly on .sbo-mobile-folder-label /
+   .sbo-mobile-row below (16px), independent of whatever
+   #api-content-area's own padding is. ── */
+.sbo-mobile-list { padding: 4px 0 24px; }
+@media (max-width: 899px) {
+    .sbo-mobile-list {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
+
+.sbo-mobile-folder-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c9d1d9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-sizing: border-box;
+}
+.sbo-mobile-folder-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: #8b949e;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+}
+
+.sbo-mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s ease;
+    box-sizing: border-box;
+}
+.sbo-mobile-row:active { background: rgba(255,255,255,0.03); }
+.sbo-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
+.sbo-mobile-row-body { flex: 1; min-width: 0; }
+.sbo-mobile-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sbo-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
+.sbo-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
 
 .sbo-mobile-detail {
     padding: 16px;
