@@ -32,7 +32,7 @@ window.fetchTeacherAssignments = async function() {
     // without this reset the header/bottom nav stay stuck in whatever
     // 'detail' mode openMobileTeacherAssignment last left them in.
     if (typeof window.configureTeacherHeader === 'function') {
-        window.configureTeacherHeader({ title: 'Assignments', mode: 'standard' });
+        window.configureTeacherHeader({ title: 'Assignments', mode: 'standard', color: '#a78bfa' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -242,7 +242,7 @@ function renderTeacherAssignments(data) {
                         onclick="openMobileTeacherAssignment(${index})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAssignment(${index});}">
                         <div class="as-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
@@ -479,7 +479,8 @@ window.openMobileTeacherAssignment = function(index) {
         title: 'Assignment',
         mode: 'detail',
         detailType: 'Assignment',
-        backLabel: 'Assignments'
+        backLabel: 'Assignments',
+        color: '#a78bfa'
     });
 
     const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =

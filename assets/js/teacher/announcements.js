@@ -37,7 +37,7 @@ window.fetchTeacherAnnouncements = async function() {
     // whatever 'detail' mode openMobileTeacherAnnouncement last left them
     // in (see the Assignments back-button bug in PROJECT_NOTES.md).
     if (typeof window.configureTeacherHeader === 'function') {
-        window.configureTeacherHeader({ title: 'Announcements', mode: 'standard' });
+        window.configureTeacherHeader({ title: 'Announcements', mode: 'standard', color: '#d891ae' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -229,13 +229,13 @@ function renderTeacherAnnouncements(data) {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 90 ? ann.message.substring(0, 90) + '...' : ann.message;
                 const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
-                // Same megaphone glyph as the desktop sidebar icon/empty-state
-                // icon above, just resized to match assignments' 20x20 row
-                // icon. Stroke colour keeps the existing teal-vs-orange
-                // school/class distinction (previously carried by the
-                // school-row left border, now dropped in favour of the
-                // flat assignments-style row).
-                const iconStroke = isSchool ? '#f59e0b' : '#4fd1c5';
+                // Row icon now uses the page's own signature colour
+                // (dusty rose) instead of the previous teal-vs-orange
+                // school/class distinction — that distinction is still
+                // shown via the group label text above and the
+                // an-school-badge in the detail view, so no information
+                // is lost, just no longer carried by icon colour.
+                const iconStroke = '#d891ae';
 
                 itemsHtml += `
                     <div class="an-mobile-row" role="button" tabindex="0"
@@ -399,7 +399,8 @@ window.openMobileTeacherAnnouncement = function(flatIndex) {
         title: 'Announcement',
         mode: 'detail',
         detailType: 'Announcement',
-        backLabel: 'Announcements'
+        backLabel: 'Announcements',
+        color: '#d891ae'
     });
 
     const schoolBadge = ann.is_school
