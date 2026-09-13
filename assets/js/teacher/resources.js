@@ -23,6 +23,14 @@ window.fetchTeacherResources = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_resources");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_resources");
 
+    // Resources previously never called this at all, so mobile never
+    // got a title or (now) a signature colour set for it. Adding it
+    // here matches the pattern every other teacher page already
+    // follows (see evaluations.js/grades.js/quizzes.js/sbo.js).
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ title: 'Resources', mode: 'standard', color: '#f28c38' });
+    }
+
     const apiArea = document.getElementById('api-content-area');
     const iframe  = document.getElementById('mainFrame');
 
@@ -151,7 +159,7 @@ function renderTeacherResources(data) {
 
             group.items.forEach(item => {
                 const isVideo = item.resource_type === 'video';
-                const icon = getTeacherFileIcon(item.ext, isVideo);
+                const icon = getTeacherFileIcon(item.ext, isVideo, '#f28c38');
                 const clickAction = isVideo
                     ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
                     : `openTeacherResource('resources/${item.filename}')`;
@@ -694,8 +702,7 @@ window.openTeacherResource = function(path) {
     window.open(path, '_blank');
 };
 
-function getTeacherFileIcon(ext, isVideo = false) {
-    const color = "#4fd1c5";
+function getTeacherFileIcon(ext, isVideo = false, color = "#4fd1c5") {
     if (isVideo) return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>`;
     if (ext === 'pdf') return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15h3a2 2 0 0 1 0 4h-3V15z"></path></svg>`;
     if (['jpg','jpeg','png'].includes(ext)) return `<svg viewBox="0 0 24 24" width="22" height="22" stroke="${color}" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;

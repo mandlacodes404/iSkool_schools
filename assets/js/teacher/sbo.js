@@ -30,7 +30,7 @@ window.fetchTeacherSyllabus = async function() {
     // detailType === 'SBO'. Applied up front (see Assignments back-button
     // fix in PROJECT_NOTES.md for why this matters).
     if (typeof window.configureTeacherHeader === 'function') {
-        window.configureTeacherHeader({ title: 'Syllabus', mode: 'standard' });
+        window.configureTeacherHeader({ title: 'Syllabus', mode: 'standard', color: '#a67c52' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -265,7 +265,7 @@ function buildMobileSBOFolders(briefs) {
                     onclick="openMobileTeacherSBO(${flatIndex})"
                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherSBO(${flatIndex});}">
                     <div class="sbo-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a67c52" stroke-width="2" fill="none">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                             <line x1="12" y1="6"  x2="16" y2="6"/>
@@ -404,7 +404,8 @@ window.openMobileTeacherSBO = function(flatIndex) {
         title: 'Syllabus',
         mode: 'detail',
         detailType: 'SBO',
-        backLabel: 'Syllabus'
+        backLabel: 'Syllabus',
+        color: '#a67c52'
     });
 
     const topicCount  = brief.topics?.length || 0;

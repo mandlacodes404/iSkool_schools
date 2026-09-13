@@ -42,7 +42,7 @@ window.fetchTeacherGrades = async function() {
     // the mobile detail page (back button, hidden bottom nav) via
     // handleTeacherHeaderBack's 'Grade' branch.
     if (typeof window.configureTeacherHeader === 'function') {
-        window.configureTeacherHeader({ mode: 'standard' });
+        window.configureTeacherHeader({ mode: 'standard', color: '#22c55e' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -208,7 +208,7 @@ function renderTeacherGrades(data) {
                             onclick="openMobileTeacherGradeQuiz(${quiz.id})"
                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherGradeQuiz(${quiz.id});}">
                             <div class="gr-mobile-row-icon">
-                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#22c55e" stroke-width="2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -525,7 +525,8 @@ function renderMobileGradeDetail(type, data, apiArea) {
         title: data.quiz_title || 'Assessment',
         mode: 'detail',
         detailType: 'Grade',
-        backLabel: 'Grades'
+        backLabel: 'Grades',
+        color: '#22c55e'
     });
 
     if (type === 'open_ended') {

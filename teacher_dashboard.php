@@ -62,11 +62,11 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.0">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.6">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=1.9">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1117,15 +1117,15 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=7.8"></script>
+<script src="assets/js/teacher/dashboard.js?v=7.9"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=6.7"></script>
+<script src="assets/js/teacher/quizzes.js?v=6.8"></script>
 <script src="assets/js/teacher/announcements.js?v=5.0"></script>
-<script src="assets/js/teacher/evaluations.js?v=4.2"></script>
-<script src="assets/js/teacher/resources.js?v=3.6"></script>
-<script src="assets/js/teacher/grades.js?v=4.2"></script>
+<script src="assets/js/teacher/evaluations.js?v=4.3"></script>
+<script src="assets/js/teacher/resources.js?v=3.7"></script>
+<script src="assets/js/teacher/grades.js?v=4.3"></script>
 <script src="assets/js/teacher/assignments.js?v=4.0"></script>
-<script src="assets/js/teacher/sbo.js?v=4.1"></script>
+<script src="assets/js/teacher/sbo.js?v=4.2"></script>
 <script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 </body>

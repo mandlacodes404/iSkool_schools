@@ -216,7 +216,7 @@ window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml
  * controller does not need to touch it for mobile detail mode.
  */
 window.configureTeacherHeader = function(config) {
-    const { title, mode } = config || {};
+    const { title, mode, color } = config || {};
 
     const backBtn      = document.getElementById('teacherHeaderBackBtn');
     const backLabelEl  = document.getElementById('teacherHeaderBackLabel');
@@ -226,8 +226,34 @@ window.configureTeacherHeader = function(config) {
     const mobileBtn    = document.getElementById('mobileToggle');
     const rightSide    = document.getElementById('teacherHeaderRight');
     const mobileBottomNav = document.getElementById('mobileBottomNav');
+    const topNavWrapper   = document.querySelector('.top-nav-wrapper');
 
     const isMobile = window.innerWidth <= 768;
+
+    // ── Mobile signature-colour theming ─────────────────────────────────
+    // Mirrors the learner side's configureHeader colour handling
+    // (learner_dashboard.php): each page can pass its own accent
+    // colour, stored globally so the scroll handler
+    // (recalcTeacherMobileScrollUI) can keep the top nav background and
+    // the browser's theme-color meta in sync with it once scrolled.
+    // Pages that omit color leave teacherCurrentPageColor untouched —
+    // NOT reset to the dark default — matching the learner convention
+    // where only an explicit call (or mode:'standard' with no colour,
+    // e.g. Home) clears it back to the base surface.
+    if (isMobile && topNavWrapper) {
+        if (color) {
+            window.teacherCurrentPageColor = color;
+            topNavWrapper.style.borderBottom = '2px solid ' + color + '55';
+            topNavWrapper.setAttribute('data-page-color', color);
+        } else {
+            window.teacherCurrentPageColor = '#0d1117';
+            topNavWrapper.style.borderBottom = '';
+            topNavWrapper.removeAttribute('data-page-color');
+        }
+        if (typeof window.recalcTeacherMobileScrollUI === 'function') {
+            window.recalcTeacherMobileScrollUI();
+        }
+    }
 
     if (mode === 'detail') {
         window.teacherHeaderDetailType = config.detailType || title || null;
@@ -947,11 +973,24 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             const clientHeight   = apiArea.clientHeight;
             const distFromBottom = scrollHeight - scrollTop - clientHeight;
 
-            // Top nav: border appears once scrolled down, transparent at top
+            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+            const pageColor      = topNavWrapper.getAttribute('data-page-color');
+
+            // Top nav: border appears once scrolled down, transparent at top.
+            // Once a page has a signature colour (data-page-color, set by
+            // configureTeacherHeader), scrolling also tints the header
+            // background and the browser's status bar to match it —
+            // mirrors the learner side's recalcMobileScrollUI exactly.
             if (scrollTop > SCROLL_THRESHOLD) {
                 topNavWrapper.classList.add('header-scrolled');
+                if (pageColor) {
+                    topNavWrapper.style.background = pageColor;
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', pageColor);
+                }
             } else {
                 topNavWrapper.classList.remove('header-scrolled');
+                topNavWrapper.style.background = '';
+                if (themeColorMeta) themeColorMeta.setAttribute('content', '#0d1117');
             }
 
             // Bottom nav: transparent near bottom, glass background when scrolled up

@@ -48,7 +48,7 @@ window.fetchTeacherQuizzes = async function() {
     // discovered as a bug afterward (see Assignments back-button fix in
     // PROJECT_NOTES.md).
     if (typeof window.configureTeacherHeader === 'function') {
-        window.configureTeacherHeader({ title: 'Quizzes', mode: 'standard' });
+        window.configureTeacherHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -568,7 +568,7 @@ function renderTeacherQuizzes(data) {
                         onclick="openMobileTeacherQuiz(${flatIndex})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherQuiz(${flatIndex});}">
                         <div class="qz-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -721,7 +721,8 @@ window.openMobileTeacherQuiz = function(flatIndex) {
         title: 'Quiz',
         mode: 'detail',
         detailType: 'Quiz',
-        backLabel: 'Quizzes'
+        backLabel: 'Quizzes',
+        color: '#fdd663'
     });
 
     const statusColor = quiz.status === 'Open' ? '#f28c38'

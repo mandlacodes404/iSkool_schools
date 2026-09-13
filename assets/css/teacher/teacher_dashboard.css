@@ -484,10 +484,16 @@
                 right: 0;
                 width: 100%;
                 z-index: 3500;
-                border-bottom-color: transparent !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
-                transition: border-color 0.28s ease, backdrop-filter 0.28s ease;
+                transition: border-color 0.28s ease, backdrop-filter 0.28s ease, background 0.28s ease;
+            }
+            /* Colourless pages (no data-page-color — e.g. Home) stay
+               transparent at rest, same as before. Pages with a
+               signature colour get their border from the inline style
+               configureTeacherHeader sets instead (color + '55'). */
+            .top-nav-wrapper:not([data-page-color]) {
+                border-bottom-color: transparent !important;
             }
 
             /* Content now needs to start below the fixed top nav instead
@@ -498,13 +504,21 @@
                 margin-top: var(--teacher-top-nav-height, 112px);
             }
 
-            /* Scrolled state: border (and matching blur) locks in. Border
-               colour is the same one already used at rest today — only
-               when it appears has changed, not the colour itself. */
+            /* Scrolled state: border (and matching blur) locks in. When a
+               page has no signature colour (data-page-color unset — e.g.
+               Home), the border stays the neutral grey used at rest.
+               When a page DOES have a colour (configureTeacherHeader's
+               color param), that colour's own inline border (set in
+               configureTeacherHeader/recalcTeacherMobileScrollUI) is
+               left to show through instead — this rule only supplies
+               the grey fallback, so it must NOT carry !important on
+               border-bottom the way the colourless case still does. */
             .top-nav-wrapper.header-scrolled {
-                border-bottom: 1px solid rgba(255,255,255,0.07) !important;
                 backdrop-filter: blur(10px) !important;
                 -webkit-backdrop-filter: blur(10px) !important;
+            }
+            .top-nav-wrapper.header-scrolled:not([data-page-color]) {
+                border-bottom: 1px solid rgba(255,255,255,0.07) !important;
             }
         }
 
