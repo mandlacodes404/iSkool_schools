@@ -99,31 +99,82 @@
 .gr-sidebar-item.active .gr-sidebar-item-title { color: #e2e8f0; }
 .gr-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
 
-/* ── Mobile: class-grouped folders ──
-   Reuses the shared tchr-sidebar-class-* chevron/collapse behavior from
-   dashboard.css (buildCollapsibleClassGroup) — these rules only size the
-   label for full mobile width instead of a 280px sidebar column, same
-   convention as Assignments' as-mobile-folder-*. */
-.gr-mobile-class-label {
+/* ── Mobile: flat, edge-to-edge folders + rows ──
+   Matches the assignments/announcements/resources/quizzes mobile
+   pattern exactly (.as-mobile-folder-label / .as-mobile-row in
+   assignments.css) instead of the old .gr-mobile-row, which had no
+   background/border of its own but was borrowing icon/info layout
+   from the legacy .teacher-resource-icon / .teacher-resource-info /
+   .teacher-resource-name / .teacher-resource-meta classes (defined in
+   announcements.css) — same borrowed-class issue found and fixed on
+   Quizzes. This gives grades its own scoped rules instead. Chevron/
+   collapse behaviour still comes from the shared .tchr-sidebar-class-*
+   classes in dashboard.css (buildCollapsibleClassGroup) — only sized
+   for full mobile width here, not redefining the collapse mechanics
+   themselves.
+
+   #api-content-area carries a 20px padding on mobile (zeroed only at
+   >=900px, see dashboard.css). That 20px gutter is what pushed row
+   content in from the screen edges. Cancelling it here with matching
+   negative margins lets .gr-mobile-list span the full device width,
+   so child borders (folder label + row) can run edge-to-edge.
+   Horizontal inset for the *content* inside each row is then
+   re-applied directly on .gr-mobile-folder-label / .gr-mobile-row
+   below (16px), independent of whatever #api-content-area's own
+   padding is. */
+.gr-mobile-list { padding: 4px 0 24px; }
+@media (max-width: 899px) {
+    .gr-mobile-list {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
+
+.gr-mobile-folder-label {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     padding: 14px 16px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: #c9d1d9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-sizing: border-box;
 }
+.gr-mobile-folder-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: #8b949e;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+}
+
 .gr-mobile-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px 12px 32px;
+    padding: 14px 16px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s ease;
+    box-sizing: border-box;
 }
-.gr-mobile-row:active {
-    background: rgba(255,255,255,0.04);
+.gr-mobile-row:active { background: rgba(255,255,255,0.03); }
+.gr-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
+.gr-mobile-row-body { flex: 1; min-width: 0; }
+.gr-mobile-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+.gr-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
+.gr-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
 
 /* Right panel */
 .gr-main-panel {

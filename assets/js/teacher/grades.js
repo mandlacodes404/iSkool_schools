@@ -204,29 +204,33 @@ function renderTeacherGrades(data) {
 
                 cls.quizzes.forEach(quiz => {
                     itemsHtml += `
-                        <div class="gr-mobile-row" data-quiz-id="${quiz.id}" onclick="openMobileTeacherGradeQuiz(${quiz.id})">
-                            <div class="teacher-resource-icon">
-                                <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                        <div class="gr-mobile-row" data-quiz-id="${quiz.id}" role="button" tabindex="0"
+                            onclick="openMobileTeacherGradeQuiz(${quiz.id})"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherGradeQuiz(${quiz.id});}">
+                            <div class="gr-mobile-row-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
                                 </svg>
                             </div>
-                            <div class="teacher-resource-info">
-                                <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
-                                <div class="teacher-resource-meta">${escapeHtml(quiz.created_at)}</div>
+                            <div class="gr-mobile-row-body">
+                                <div class="gr-mobile-row-title">${escapeHtml(quiz.title)}</div>
+                                <div class="gr-mobile-row-meta">${escapeHtml(quiz.created_at)}</div>
                             </div>
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
+                            <div class="gr-mobile-row-chevron">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
                         </div>`;
                 });
 
                 html += window.buildCollapsibleClassGroup(
                     mobileGroupId,
-                    'gr-mobile-class-label',
-                    escapeHtml(cls.class_name),
+                    'gr-mobile-folder-label',
+                    `${escapeHtml(cls.class_name)} <span class="gr-mobile-folder-count">${cls.quizzes.length}</span>`,
                     itemsHtml
                 );
             });

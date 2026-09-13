@@ -539,6 +539,14 @@
     margin-top: 8px;
     letter-spacing: 0.5px;
 }
+/* Direct child of .gr-mobile-list, which is now full-bleed (edge-to-edge
+   negative margins, see grades.css) — same 16px inset restoration as
+   .teacher-grades-info above, so the pill doesn't sit flush on the edge. */
+@media (max-width: 899px) {
+    .teacher-term-divider {
+        margin-left: 16px;
+    }
+}
 
 .teacher-grades-info {
     display: flex;
@@ -552,6 +560,17 @@
     color: #8b949e;
     margin-bottom: 20px;
     line-height: 1.5;
+}
+/* .teacher-grades-info sits as a direct child of .gr-mobile-list, which
+   is now full-bleed (edge-to-edge negative margins, see grades.css) —
+   without its own horizontal margin here it would stretch edge-to-edge
+   too and lose its "banner" look. This restores the same 16px inset
+   used by the folder/row content next to it. */
+@media (max-width: 899px) {
+    .teacher-grades-info {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
 }
 
 .teacher-grades-info strong {
