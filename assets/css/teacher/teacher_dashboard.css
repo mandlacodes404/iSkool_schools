@@ -453,6 +453,7 @@
             .sidebar.active { left: 0; width: 300px; }
             .main-content { margin-left: 0 !important; }
             .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
+            .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(300px); filter: blur(3px); }
             .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
             iframe { height: calc(100vh - 120px) !important; }
             #mobileBottomNav { display: flex !important; }
@@ -464,6 +465,76 @@
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
+        }
+
+        /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
+           Mirrors the learner side's collapsing header: pinned to the top
+           of the viewport, transparent border at rest, and only gains its
+           border (+ blur) once #api-content-area has been scrolled down
+           past a small threshold (see recalcTeacherMobileScrollUI in
+           dashboard.js). Colour/background are intentionally left alone —
+           only border visibility toggles, per spec. Desktop is never
+           touched — every rule below sits inside the same max-width:768px
+           query already used elsewhere in this file. */
+        @media (max-width: 768px) {
+            .top-nav-wrapper {
+                position: fixed;
+                top: env(safe-area-inset-top, 0);
+                left: 0;
+                right: 0;
+                width: 100%;
+                z-index: 3500;
+                border-bottom-color: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                transition: border-color 0.28s ease, backdrop-filter 0.28s ease;
+            }
+
+            /* Content now needs to start below the fixed top nav instead
+               of underneath it. Height is applied inline by JS (see
+               applyTeacherTopNavOffset in dashboard.js) since row 1 + row
+               2 height can vary; this is just a safe fallback. */
+            #api-content-area {
+                margin-top: var(--teacher-top-nav-height, 112px);
+            }
+
+            /* Scrolled state: border (and matching blur) locks in. Border
+               colour is the same one already used at rest today — only
+               when it appears has changed, not the colour itself. */
+            .top-nav-wrapper.header-scrolled {
+                border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+                backdrop-filter: blur(10px) !important;
+                -webkit-backdrop-filter: blur(10px) !important;
+            }
+        }
+
+        /* ── DYNAMIC BOTTOM NAV — mobile only ───────────────────────────
+           Mirrors the learner side's bottom nav: transparent at rest
+           (near the bottom of the page) and only gains its glass
+           background once the teacher scrolls up away from the bottom.
+           Background/blur/border values below are the exact ones already
+           in use above (see #mobileBottomNav base rules) — only their
+           visibility now toggles. */
+        @media (max-width: 768px) {
+            #mobileBottomNav {
+                background: transparent !important;
+                border-top-color: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                box-shadow: none !important;
+                transition: background 0.28s ease,
+                            border-color 0.28s ease,
+                            box-shadow 0.28s ease,
+                            backdrop-filter 0.28s ease;
+            }
+
+            #mobileBottomNav.nav-scrolled {
+                background: rgba(66,65,65,0.35) !important;
+                border-top: 1px solid rgba(255,255,255,0.1) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.3) !important;
+            }
         }
 
         @media (min-width: 769px) {
@@ -556,6 +627,7 @@
         @media (max-width: 480px) {
             .sidebar { width: 80% !important; }
             .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
+            .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(80vw) !important; }
             .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
             .sidebar-footer { margin-bottom: 30px !important; }
             .profile-picture-wrapper { width: 70px !important; height: 70px !important; border: none !important; }

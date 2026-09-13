@@ -263,6 +263,16 @@ window.configureTeacherHeader = function(config) {
             mobileBottomNav.style.display = isMobile ? 'flex' : 'none';
         }
     }
+
+    // Switching modes changes the top nav's rendered height (back button
+    // + detail title vs. hamburger + brand), and the fixed top nav on
+    // mobile relies on #api-content-area's offset matching that height
+    // exactly (see recalcTeacherMobileScrollUI setup). Recheck on the
+    // next frame so the offset and border/background state stay correct
+    // immediately after a mode switch, not just after the next scroll.
+    if (isMobile && typeof window.scheduleTeacherContentScrollUIRecheck === 'function') {
+        window.scheduleTeacherContentScrollUIRecheck();
+    }
 };
 
 /**
@@ -891,6 +901,159 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     // that shows the loader (loadTeacherManual, the settings button handler,
     // the iframe 'load' listener) is responsible for hiding it again itself,
     // the same way the learner dashboard already does it.
+
+    // ─────────────────────────────────────────────────────────────────────
+    // DYNAMIC TOP NAV / BOTTOM NAV — mobile only
+    // Mirrors the learner side's recalcMobileScrollUI: watches
+    // #api-content-area's scroll position and toggles two classes,
+    // border/background only (no colour changes):
+    //   .top-nav-wrapper  gets 'header-scrolled' once scrolled down past
+    //                     a small threshold (border fades in).
+    //   #mobileBottomNav  gets 'nav-scrolled' whenever NOT within a small
+    //                     distance of the bottom of the page (background
+    //                     fades in); it's removed again once back near
+    //                     the bottom.
+    // Exposed globally (window.recalcTeacherMobileScrollUI) so
+    // page-specific scripts (assignments.js, announcements.js, etc.) can
+    // trigger a recalculation after anything that changes the page's
+    // scrollable height without a real scroll event — e.g. expanding an
+    // accordion, a class-group collapsing, or content swapping in via
+    // fetch. Without that, the nav could get stuck showing a background
+    // that no longer matches whether the page can actually scroll.
+    // ─────────────────────────────────────────────────────────────────────
+    if (window.innerWidth <= 768) {
+        const topNavWrapper = document.querySelector('.top-nav-wrapper');
+        const bottomNav     = document.getElementById('mobileBottomNav');
+        const SCROLL_THRESHOLD = 10; // px before top nav border solidifies
+        const BOTTOM_THRESHOLD = 10; // px from bottom before bottom nav fades out
+
+        // Sets #api-content-area's top offset to the fixed top nav's
+        // actual rendered height, since row 1 + row 2 height can vary
+        // (e.g. school name wrapping, safe-area insets on notched
+        // devices) — the CSS fallback value only covers the common case.
+        window.applyTeacherTopNavOffset = function() {
+            if (!topNavWrapper || !apiArea) return;
+            const height = topNavWrapper.getBoundingClientRect().height;
+            if (height > 0) {
+                apiArea.style.marginTop = height + 'px';
+            }
+        };
+
+        window.recalcTeacherMobileScrollUI = function recalcTeacherMobileScrollUI() {
+            if (!apiArea || !topNavWrapper) return;
+
+            const scrollTop      = apiArea.scrollTop;
+            const scrollHeight   = apiArea.scrollHeight;
+            const clientHeight   = apiArea.clientHeight;
+            const distFromBottom = scrollHeight - scrollTop - clientHeight;
+
+            // Top nav: border appears once scrolled down, transparent at top
+            if (scrollTop > SCROLL_THRESHOLD) {
+                topNavWrapper.classList.add('header-scrolled');
+            } else {
+                topNavWrapper.classList.remove('header-scrolled');
+            }
+
+            // Bottom nav: transparent near bottom, glass background when scrolled up
+            if (bottomNav) {
+                if (distFromBottom <= BOTTOM_THRESHOLD) {
+                    bottomNav.classList.remove('nav-scrolled');
+                } else {
+                    bottomNav.classList.add('nav-scrolled');
+                }
+            }
+        };
+        const recalcTeacherMobileScrollUI = window.recalcTeacherMobileScrollUI;
+
+        if (apiArea && topNavWrapper) {
+            window.applyTeacherTopNavOffset();
+            apiArea.addEventListener('scroll', recalcTeacherMobileScrollUI, { passive: true });
+
+            // Not every teacher section uses the loader or has its own
+            // recheck helper, and pages render into #api-content-area via
+            // very different paths (innerHTML swap, async fetch, cache
+            // hit, accordion toggle, filter change). Observing that
+            // shared container means the nav settles on the correct state
+            // regardless of which path populated it, without requiring
+            // the teacher to scroll first. The delayed checks also cover
+            // CSS height transitions, whose final size isn't available
+            // inside the mutation callback itself.
+            let contentRecheckFrame = null;
+            let contentRecheckTimers = [];
+            const scheduleTeacherContentScrollUIRecheck = () => {
+                if (contentRecheckFrame !== null) {
+                    cancelAnimationFrame(contentRecheckFrame);
+                }
+                contentRecheckTimers.forEach(clearTimeout);
+                contentRecheckTimers = [];
+
+                contentRecheckFrame = requestAnimationFrame(() => {
+                    contentRecheckFrame = requestAnimationFrame(() => {
+                        contentRecheckFrame = null;
+                        window.applyTeacherTopNavOffset();
+                        recalcTeacherMobileScrollUI();
+                    });
+                });
+
+                [150, 400].forEach(delay => {
+                    contentRecheckTimers.push(setTimeout(() => {
+                        window.applyTeacherTopNavOffset();
+                        recalcTeacherMobileScrollUI();
+                    }, delay));
+                });
+            };
+            window.scheduleTeacherContentScrollUIRecheck = scheduleTeacherContentScrollUIRecheck;
+
+            const contentObserver = new MutationObserver(scheduleTeacherContentScrollUIRecheck);
+            contentObserver.observe(apiArea, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class', 'style', 'hidden', 'open']
+            });
+
+            // Also observe the top nav itself, since row 2 tabs or the
+            // detail-mode back button (configureTeacherHeader) can change
+            // its rendered height independent of any #api-content-area
+            // mutation.
+            const topNavObserver = new MutationObserver(scheduleTeacherContentScrollUIRecheck);
+            topNavObserver.observe(topNavWrapper, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+
+            // Images, embedded content, and fonts can increase a page's
+            // height after its markup has already been inserted.
+            apiArea.addEventListener('load', scheduleTeacherContentScrollUIRecheck, true);
+            window.addEventListener('resize', scheduleTeacherContentScrollUIRecheck, { passive: true });
+            window.addEventListener('orientationchange', scheduleTeacherContentScrollUIRecheck, { passive: true });
+
+            // Set the correct state for whichever teacher page loads first.
+            scheduleTeacherContentScrollUIRecheck();
+
+            // Re-run once the loader overlay hides — the one centralised
+            // signal that reliably fires after ANY page's async content
+            // has actually finished loading, regardless of which specific
+            // fetch function (fetchTeacherAssignments, fetchTeacherQuizzes,
+            // etc.) populated it. A MutationObserver is used instead of a
+            // guessed setTimeout, since a fixed delay would either fire
+            // too early on slow connections or waste time on fast ones.
+            if (loader) {
+                let wasLoaderVisible = getComputedStyle(loader).display !== 'none';
+                const loaderObserver = new MutationObserver(() => {
+                    const isLoaderVisible = getComputedStyle(loader).display !== 'none';
+                    if (wasLoaderVisible && !isLoaderVisible) {
+                        requestAnimationFrame(() => requestAnimationFrame(() => {
+                            window.applyTeacherTopNavOffset();
+                            recalcTeacherMobileScrollUI();
+                        }));
+                    }
+                    wasLoaderVisible = isLoaderVisible;
+                });
+                loaderObserver.observe(loader, { attributes: true, attributeFilter: ['style'] });
+            }
+        }
+    }
 });
 
 // ── CALENDAR ──
