@@ -388,6 +388,93 @@ function renderTeacherQuizzes(data) {
             @media (max-width: 899px) {
                 .qz-desktop-only-btn { display: none !important; }
             }
+
+            /* ── Mobile: flat, edge-to-edge folders + rows ──
+               Matches the assignments/announcements/resources mobile
+               pattern exactly (.as-mobile-folder-label / .as-mobile-row
+               in assignments.css). .qz-mobile-row previously had no
+               dedicated rule of its own and only picked up icon/info
+               layout by borrowing the legacy .teacher-resource-icon /
+               .teacher-resource-info / .teacher-resource-name /
+               .teacher-resource-meta classes (defined in
+               announcements.css) — this gives it its own scoped rules
+               instead, plus the shared edge-to-edge fix. Chevron/collapse
+               behaviour still comes from the shared .tchr-sidebar-class-*
+               classes in dashboard.css (buildCollapsibleClassGroup) —
+               only sized for full mobile width here, not redefining the
+               collapse mechanics themselves.
+
+               #api-content-area carries a 20px padding on mobile (zeroed
+               only at >=900px, see dashboard.css). That 20px gutter is
+               what pushed row content in from the screen edges.
+               Cancelling it here with matching negative margins lets
+               .qz-mobile-list span the full device width, so child
+               borders (folder label + row) can run edge-to-edge.
+               Horizontal inset for the *content* inside each row is then
+               re-applied directly on .qz-mobile-folder-label /
+               .qz-mobile-row below (16px), independent of whatever
+               #api-content-area's own padding is. */
+            .qz-mobile-list { padding: 4px 0 24px; }
+            @media (max-width: 899px) {
+                .qz-mobile-list {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+            .qz-mobile-folder-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 14px 16px;
+                font-size: 13px;
+                font-weight: 800;
+                color: #c9d1d9;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+                box-sizing: border-box;
+            }
+            .qz-mobile-folder-count {
+                margin-left: auto;
+                font-size: 11px;
+                font-weight: 700;
+                color: #8b949e;
+                background: rgba(255,255,255,0.06);
+                border-radius: 999px;
+                padding: 2px 8px;
+                flex-shrink: 0;
+            }
+
+            .qz-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px 16px;
+                cursor: pointer;
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                transition: background 0.15s ease;
+                box-sizing: border-box;
+            }
+            .qz-mobile-row:active { background: rgba(255,255,255,0.03); }
+            .qz-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
+            .qz-mobile-row-body { flex: 1; min-width: 0; }
+            .qz-mobile-row-title {
+                font-size: 14px;
+                font-weight: 700;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .qz-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
+            .qz-mobile-row-status {
+                flex-shrink: 0;
+                padding: 3px 9px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+            .qz-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -462,31 +549,38 @@ function renderTeacherQuizzes(data) {
                     : '#6b7280';
 
                 itemsHtml += `
-                    <div class="qz-mobile-row" onclick="openMobileTeacherQuiz(${flatIndex})">
-                        <div class="teacher-resource-icon">
+                    <div class="qz-mobile-row" role="button" tabindex="0"
+                        onclick="openMobileTeacherQuiz(${flatIndex})"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherQuiz(${flatIndex});}">
+                        <div class="qz-mobile-row-icon">
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
                             </svg>
                         </div>
-                        <div class="teacher-resource-info">
-                            <div class="teacher-resource-name">${escapeHtml(quiz.title)}</div>
-                            <div class="teacher-resource-meta">
+                        <div class="qz-mobile-row-body">
+                            <div class="qz-mobile-row-title">${escapeHtml(quiz.title)}</div>
+                            <div class="qz-mobile-row-meta">
                                 ${escapeHtml(quiz.duration)} min &middot; ${escapeHtml(quiz.start_time)}
                             </div>
                         </div>
-                        <span class="teacher-quiz-status-badge"
+                        <span class="qz-mobile-row-status"
                             style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
                             ${escapeHtml(quiz.status)}
                         </span>
+                        <div class="qz-mobile-row-chevron">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
                     </div>`;
             });
 
             html += window.buildCollapsibleClassGroup(
                 mobileGroupId,
                 'qz-mobile-folder-label',
-                escapeHtml(className),
+                `${escapeHtml(className)} <span class="qz-mobile-folder-count">${quizzes.length}</span>`,
                 itemsHtml
             );
         });
