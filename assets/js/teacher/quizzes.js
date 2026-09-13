@@ -422,6 +422,21 @@ function renderTeacherQuizzes(data) {
                 }
             }
 
+            /* Clears the fixed mobile bottom nav (82px) + device safe
+               area, so the last row in the list isn't hidden behind it
+               when scrolled all the way down. Matches the convention
+               used on #api-content-area itself elsewhere in the app
+               (see quiz.css) — scoped to 768px here (rather than this
+               page's own 899px mobile-list breakpoint) since that's the
+               breakpoint #mobileBottomNav actually becomes visible at
+               (teacher_dashboard.css). Added on top of the 24px already
+               reserved above, not replacing it. */
+            @media (max-width: 768px) {
+                .qz-mobile-list {
+                    padding-bottom: calc(24px + 80px + env(safe-area-inset-bottom));
+                }
+            }
+
             .qz-mobile-folder-label {
                 display: flex;
                 align-items: center;
