@@ -1459,11 +1459,6 @@ iframe {
         border-radius: 999px;
         background: #101012;
     }
-
-    /* Profile avatar — mobile menu only, dark pill background instead of maroon */
-    .initials-avatar {
-        background-color: #101012;
-    }
 }
 
 @media (min-width: 769px) {
@@ -1681,6 +1676,13 @@ iframe {
     user-select: none;
     text-transform: uppercase;
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
+}
+
+/* Profile avatar — mobile menu only, dark pill background instead of maroon */
+@media (max-width: 767px) {
+    .initials-avatar {
+        background-color: #101012;
+    }
 }
 
 /* Adjust for the larger mobile view profile picture */
