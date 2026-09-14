@@ -1424,16 +1424,15 @@ iframe {
         align-items: center;
         justify-content: center;
         width: fit-content;
-        margin: 0 auto 8px auto;
-        padding: 6px 16px;
+        margin: 0 auto 10px auto;
+        padding: 10px 26px;
         border-radius: 999px;
         background: #1c1c1e;
-        border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .sidebar-role-badge span {
         color: #8e8e93;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         letter-spacing: 0.2px;
         white-space: nowrap;
