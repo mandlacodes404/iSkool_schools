@@ -363,8 +363,8 @@
     flex-shrink: 0;
 }
 .las-mobile-row-icon svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
 }
 .las-mobile-row-body { flex: 1; min-width: 0; }
 .las-mobile-row-title {

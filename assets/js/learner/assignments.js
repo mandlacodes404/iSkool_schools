@@ -504,7 +504,7 @@ function renderAssignmentCards(groupedData) {
                     onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }">
                     <div class="las-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#a78bfa" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#a78bfa" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
                             <rect x="4" y="3" width="11" height="18" rx="1.5"></rect>
                             <rect x="7" y="6.3" width="5" height="3" rx="0.6"></rect>
                             <line x1="7" y1="13" x2="11" y2="13"></line>
