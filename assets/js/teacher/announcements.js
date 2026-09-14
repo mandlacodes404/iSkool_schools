@@ -228,14 +228,11 @@ function renderTeacherAnnouncements(data) {
             group.items.forEach(ann => {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 90 ? ann.message.substring(0, 90) + '...' : ann.message;
-                const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
-                // Row icon now uses the page's own signature colour
-                // (dusty rose) instead of the previous teal-vs-orange
-                // school/class distinction — that distinction is still
-                // shown via the group label text above and the
-                // an-school-badge in the detail view, so no information
-                // is lost, just no longer carried by icon colour.
-                const iconStroke = '#d891ae';
+                const editedTag = ann.is_edited ? `<span class="an-edited-tag an-edited-tag--mobile">Edited</span>` : '';
+                // Row icon uses a second, deeper pink shade so it reads
+                // as distinct from the dusty-rose signature colour used
+                // on the "From School" label and the "Edited" tag below.
+                const iconStroke = '#c2618a';
 
                 itemsHtml += `
                     <div class="an-mobile-row" role="button" tabindex="0"

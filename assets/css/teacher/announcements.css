@@ -1834,7 +1834,7 @@
     border-bottom: 1px solid rgba(255,255,255,0.06);
     box-sizing: border-box;
 }
-.an-mobile-folder-label--school { color: #f59e0b; }
+.an-mobile-folder-label--school { color: #d891ae; }
 .an-mobile-folder-count {
     margin-left: auto;
     font-size: 11px;
@@ -1846,8 +1846,8 @@
     flex-shrink: 0;
 }
 .an-mobile-folder-label--school .an-mobile-folder-count {
-    color: #f59e0b;
-    background: rgba(245,158,11,0.12);
+    color: #d891ae;
+    background: rgba(216,145,174,0.12);
 }
 
 .an-mobile-row {
@@ -2058,6 +2058,13 @@
     padding: 1px 6px;
     margin-left: 6px;
     vertical-align: middle;
+}
+/* Mobile row variant only — matches the page's dusty-rose signature
+   colour instead of the shared orange used on the desktop sidebar. */
+.an-edited-tag--mobile {
+    color: #d891ae;
+    background: rgba(216,145,174,0.12);
+    border-color: rgba(216,145,174,0.3);
 }
 
 /* ── "Edited <date>" meta text (panel header) ── */
