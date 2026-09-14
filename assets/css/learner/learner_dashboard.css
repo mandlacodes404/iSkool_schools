@@ -1423,7 +1423,7 @@ iframe {
         align-items: center;
         justify-content: center;
         width: fit-content;
-        margin: auto auto 12px auto;
+        margin: auto auto 8px 0;
         padding: 10px 26px;
         border-radius: 999px;
         background: #101012;
@@ -1440,6 +1440,11 @@ iframe {
 
 @media (min-width: 769px) {
     #mobileToggle {
+        display: none;
+    }
+
+    /* Role badge is mobile-only — never show it in the desktop sidebar */
+    .sidebar-role-badge {
         display: none;
     }
 }
