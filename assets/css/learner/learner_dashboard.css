@@ -1467,6 +1467,15 @@ iframe {
     }
 }
 
+/* Thinner icon strokes in the mobile sidebar nav only — desktop keeps the
+   default stroke-width="2" set inline on each SVG in the markup. */
+@media (max-width: 767px) {
+    .sidebar a svg,
+    .sidebar button:not(.join-class-btn):not(.desktop-close-btn) svg {
+        stroke-width: 1.3;
+    }
+}
+
 .sidebar span {
     opacity: 1;
     transition: opacity var(--transition-speed) ease;
