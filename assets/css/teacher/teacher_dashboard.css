@@ -520,8 +520,37 @@
                 border-top: 1px solid #555555;
                 border-bottom: 1px solid #555555;
                 box-sizing: border-box;
+                position: relative; /* anchors the ::before seam-fill below */
+            }
+
+            /* The overlay itself must stay a translucent dim over the
+               actual page content (its base rule's rgba(0,0,0,0.55) +
+               blur) — it can't just be recoloured solid, or the dimming
+               effect over .main-content would be lost. But right at the
+               curved edge, that translucent dim reads as a visibly
+               darker strip than the sidebar's own flat #1a1919, which is
+               the mismatch in the screenshot. A ::before fills ONLY a
+               thin strip along that curved edge with the sidebar's exact
+               solid colour, so the sidebar and the seam blend into one
+               continuous surface — the dim/blur everywhere else on
+               #mobileOverlay is untouched. Width matches the curve radius
+               (35px) so the fill never intrudes past where the curve
+               itself stops being visible. Same radius as the parent so
+               the fill's own corners trace the curve exactly. */
+            .sidebar.active ~ #mobileOverlay::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 35px;
+                height: 100%;
+                background: #1a1919;
+                border-top-left-radius: 35px;
+                border-bottom-left-radius: 35px;
+                pointer-events: none;
             }
         }
+
 
         /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
            Mirrors the learner side's collapsing header: pinned to the top
