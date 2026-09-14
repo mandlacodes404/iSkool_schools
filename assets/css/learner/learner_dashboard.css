@@ -1436,6 +1436,23 @@ iframe {
         letter-spacing: 0.2px;
         white-space: nowrap;
     }
+
+    /* Join a Class (not yet joined) and Joined Class (already joined) —
+       mobile menu only, same dark rounded pill treatment as the role badge. */
+    #nav-joinclass-sidebar {
+        display: flex;
+        width: fit-content;
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: #101012;
+    }
+
+    .sidebar .join-status {
+        width: fit-content;
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: #101012;
+    }
 }
 
 @media (min-width: 769px) {
