@@ -45,6 +45,14 @@ function learnerQuizPencilSvg(width = 20, height = 20, color = 'currentColor') {
         .replace('stroke="currentColor"', `stroke="${color}"`);
 }
 
+// Mobile row-list only — thinner stroke for the folder-row icon.
+// Desktop sidebar / empty-state icons keep the original weight via
+// learnerQuizPencilSvg() above; don't repoint them at this helper.
+function learnerQuizPencilSvgThin(width = 20, height = 20, color = 'currentColor') {
+    return learnerQuizPencilSvg(width, height, color)
+        .replace('stroke-width="2"', 'stroke-width="1.3"');
+}
+
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
 // Called from the dashboard ~1 500 ms after home loads.
@@ -1155,7 +1163,7 @@ function renderQuizCards(groupedData) {
             html += `
                 <div class="lqz-mobile-row" ${rowAttrs} data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title).toLowerCase()}">
                     <div class="lqz-mobile-row-icon">
-                        ${learnerQuizPencilSvg(20, 20, '#fdd663')}
+                        ${learnerQuizPencilSvgThin(20, 20, '#fdd663')}
                     </div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
