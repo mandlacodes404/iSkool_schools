@@ -61,7 +61,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=1.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.0">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.9">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.9">
