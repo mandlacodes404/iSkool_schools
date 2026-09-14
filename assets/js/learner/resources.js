@@ -346,7 +346,7 @@ function renderResourceCards(data) {
         html += `
             <div class="lrs-mobile-folder-header lrs-mobile-folder-header--collapsed" onclick="toggleLrsMobileFolder('${gid}', this)">
                 <div class="lrs-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
