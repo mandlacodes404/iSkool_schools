@@ -1417,7 +1417,8 @@ iframe {
         bottom: auto !important;
         font-size: 15px !important;
         opacity: 0.8 !important; /* Makes it a bit easier to see */
-        margin-bottom: 6px;
+        margin-top: auto;
+        margin-bottom: 16px;
     }
 
     /* Join a Class (not yet joined) and Joined Class (already joined) —
