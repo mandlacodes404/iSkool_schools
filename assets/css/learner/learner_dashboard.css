@@ -1197,7 +1197,6 @@ iframe {
     .sidebar .footer {
         position: static;
         width: 100%;
-        margin-top: auto;
         padding: 8px 12px;
         flex-shrink: 0;
     }
@@ -1415,25 +1414,24 @@ iframe {
         margin-bottom: 6px;
     }
 
-    /* Role badge — mobile menu only, sits just above the iSkool footer.
-       Styled to match the dark rounded "Search" pill (same pill shape,
-       dark fill, muted grey label) rather than any existing sidebar
-       button style. */
+    /* Role badge — mobile menu only, sits below the iSkool footer at the
+       very bottom of the sidebar. Styled to match the dark rounded
+       "Search" pill (same pill shape, dark fill, muted grey label)
+       rather than any existing sidebar button style. */
     .sidebar-role-badge {
         display: flex;
         align-items: center;
         justify-content: center;
         width: fit-content;
-        margin: 0 auto 8px auto;
-        padding: 6px 16px;
+        margin: auto auto 12px auto;
+        padding: 10px 26px;
         border-radius: 999px;
-        background: #1c1c1e;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: #101012;
     }
 
     .sidebar-role-badge span {
         color: #8e8e93;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         letter-spacing: 0.2px;
         white-space: nowrap;
