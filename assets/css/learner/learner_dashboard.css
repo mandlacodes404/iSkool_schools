@@ -567,7 +567,7 @@ iframe {
 
 @media (max-width: 767px) {
     .top-nav-avatar {
-        background: #101012;
+        background: rgba(0, 0, 0, 0.35);
     }
 }
 
@@ -1421,9 +1421,9 @@ iframe {
     }
 
     /* Role badge — mobile menu only, sits below the iSkool footer at the
-       very bottom of the sidebar. Styled to match the dark rounded
-       "Search" pill (same pill shape, dark fill, muted grey label)
-       rather than any existing sidebar button style. */
+       very bottom of the sidebar. Translucent black so it reads as a
+       shadowed recess in the #20201f sidebar rather than a pasted-on
+       solid color — it darkens whatever sits underneath it. */
     .sidebar-role-badge {
         display: flex;
         align-items: center;
@@ -1432,7 +1432,7 @@ iframe {
         margin: auto auto 8px 0;
         padding: 10px 26px;
         border-radius: 999px;
-        background: #101012;
+        background: rgba(0, 0, 0, 0.35);
     }
 
     .sidebar-role-badge span {
@@ -1444,20 +1444,20 @@ iframe {
     }
 
     /* Join a Class (not yet joined) and Joined Class (already joined) —
-       mobile menu only, same dark rounded pill treatment as the role badge. */
+       mobile menu only, same translucent shadow-pill treatment as the role badge. */
     #nav-joinclass-sidebar {
         display: flex;
         width: fit-content;
         padding: 10px 20px;
         border-radius: 999px;
-        background: #101012;
+        background: rgba(0, 0, 0, 0.35);
     }
 
     .sidebar .join-status {
         width: fit-content;
         padding: 10px 20px;
         border-radius: 999px;
-        background: #101012;
+        background: rgba(0, 0, 0, 0.35);
     }
 }
 
@@ -1678,10 +1678,11 @@ iframe {
     letter-spacing: -1px; /* Tighter letters look more professional for initials */
 }
 
-/* Profile avatar — mobile menu only, dark pill background instead of maroon */
+/* Profile avatar — mobile menu only, translucent shadow-like background
+   instead of maroon; darkens the #20201f sidebar surface underneath it. */
 @media (max-width: 767px) {
     .initials-avatar {
-        background-color: #101012;
+        background-color: rgba(0, 0, 0, 0.35);
     }
 }
 
