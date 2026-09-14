@@ -565,6 +565,12 @@ iframe {
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
+@media (max-width: 767px) {
+    .top-nav-avatar {
+        background: #101012;
+    }
+}
+
 .top-nav-avatar:hover {
     border-color: #4fd1c5;
     transform: scale(1.02);
@@ -1452,6 +1458,11 @@ iframe {
         padding: 10px 20px;
         border-radius: 999px;
         background: #101012;
+    }
+
+    /* Profile avatar — mobile menu only, dark pill background instead of maroon */
+    .initials-avatar {
+        background-color: #101012;
     }
 }
 
