@@ -46,6 +46,13 @@
             box-shadow: 2px 0 8px rgba(0,0,0,0.2);
             transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
                         visibility var(--transition-speed), opacity var(--transition-speed);
+
+            /* THE CURVES: Only top-right and bottom-right — matches learner dashboard */
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+
+            /* THE BORDER: A subtle "rim" makes the curve look premium — matches learner dashboard */
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
         }
         .sidebar.desktop-open,
         .sidebar.active {
@@ -465,6 +472,55 @@
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
+
+            /* Kill the inherited curve/rim from the base .sidebar rule on
+               mobile — matches learner dashboard. .sidebar itself gets
+               blurred together with .main-content while the menu is open
+               (see .sidebar.active ~ .main-content above), and a blurred
+               border/radius renders as a fuzzy line instead of a crisp
+               curve. The seam now lives on #mobileOverlay instead (see
+               below), which is never blurred. */
+            .sidebar {
+                border-right: none;
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            /* ── CRISP CORNER SEAM (mobile menu open) ──────────────────────
+               #mobileOverlay is a plain sibling <div> with no inline
+               styles, already shown/hidden by JS (opacity + pointer-events)
+               exactly when the mobile menu opens/closes — see
+               toggleSidebar/closeMobileSidebar in teacher_dashboard.php.
+               Since it carries no `filter`, its own border/radius render
+               perfectly sharp, unlike .sidebar and .main-content which are
+               intentionally blurred while the menu is open.
+
+               By default #mobileOverlay covers the full screen (base rule
+               above: top:0; left:0; width:100vw; height:100vh) sitting
+               behind the sidebar, so its left corners sit at the screen
+               edge, hidden under the opaque sidebar. To make the curve
+               show up at the actual visible seam (where the sidebar's
+               straight edge ends), the overlay needs to start exactly
+               there instead — left/width match the sidebar's own width
+               (300px) at this breakpoint. z-index sits below .sidebar's
+               5000 (so the menu stays on top) but above #mobileBottomNav's
+               4000 (so the seam isn't cut off at the bottom of the
+               screen). No !important needed — #mobileOverlay carries no
+               inline styles here, unlike the learner side. */
+            .sidebar.active ~ #mobileOverlay {
+                left: 300px;
+                width: calc(100% - 300px);
+                z-index: 4500;
+                border-top-left-radius: 35px;
+                border-bottom-left-radius: 35px;
+                border-left: 1px solid #555555;
+                /* Same crisp-line trick extended to the top and bottom
+                   edges, so all three connect into one continuous frame
+                   (left + top + bottom) instead of just the left seam. */
+                border-top: 1px solid #555555;
+                border-bottom: 1px solid #555555;
+                box-sizing: border-box;
+            }
         }
 
         /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
@@ -642,6 +698,13 @@
             .sidebar { width: 80% !important; }
             .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
             .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(80vw) !important; }
+            /* Seam must track the sidebar's width at this narrower
+               breakpoint too, or it'd stay pinned at 300px (the 768px
+               breakpoint's value) while the sidebar itself is now 80vw. */
+            .sidebar.active ~ #mobileOverlay {
+                left: 80vw !important;
+                width: 20vw !important;
+            }
             .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
             .sidebar-footer { margin-bottom: 30px !important; }
             .profile-picture-wrapper { width: 70px !important; height: 70px !important; border: none !important; }
