@@ -242,7 +242,7 @@ function renderTeacherAnnouncements(data) {
                         onclick="openMobileTeacherAnnouncement(${flatIndex})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAnnouncement(${flatIndex});}">
                         <div class="an-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="${iconStroke}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="${iconStroke}" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                             </svg>
