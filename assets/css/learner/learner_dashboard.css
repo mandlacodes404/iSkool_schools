@@ -567,7 +567,7 @@ iframe {
 
 @media (max-width: 767px) {
     .top-nav-avatar {
-        background: rgba(0, 0, 0, 0.30);
+        background: rgba(0, 0, 0, 0.35);
     }
 }
 
@@ -1420,31 +1420,8 @@ iframe {
         margin-bottom: 6px;
     }
 
-    /* Role badge — mobile menu only, sits below the iSkool footer at the
-       very bottom of the sidebar. Translucent black so it reads as a
-       shadowed recess in the #20201f sidebar rather than a pasted-on
-       solid color — it darkens whatever sits underneath it. */
-    .sidebar-role-badge {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-        margin: auto auto 8px 0;
-        padding: 10px 26px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.35);
-    }
-
-    .sidebar-role-badge span {
-        color: #8e8e93;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.2px;
-        white-space: nowrap;
-    }
-
     /* Join a Class (not yet joined) and Joined Class (already joined) —
-       mobile menu only, same translucent shadow-pill treatment as the role badge. */
+       mobile menu only, translucent shadow-pill treatment. */
     #nav-joinclass-sidebar {
         display: flex;
         width: fit-content;
@@ -1463,11 +1440,6 @@ iframe {
 
 @media (min-width: 769px) {
     #mobileToggle {
-        display: none;
-    }
-
-    /* Role badge is mobile-only — never show it in the desktop sidebar */
-    .sidebar-role-badge {
         display: none;
     }
 }
