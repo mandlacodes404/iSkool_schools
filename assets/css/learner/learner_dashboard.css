@@ -1197,7 +1197,6 @@ iframe {
     .sidebar .footer {
         position: static;
         width: 100%;
-        margin-top: auto;
         padding: 8px 12px;
         flex-shrink: 0;
     }
@@ -1424,7 +1423,7 @@ iframe {
         align-items: center;
         justify-content: center;
         width: fit-content;
-        margin: 10px auto 0 auto;
+        margin: auto auto 12px auto;
         padding: 10px 26px;
         border-radius: 999px;
         background: #101012;
