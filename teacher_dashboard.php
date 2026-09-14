@@ -60,12 +60,12 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=1.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.0">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.1">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.0">
-    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.8">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=.2.4">
-    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.1">
@@ -1119,7 +1119,7 @@ window.removeTeacherProfilePicture = function() {
 
 <script src="assets/js/teacher/dashboard.js?v=7.9"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=6.8"></script>
+<script src="assets/js/teacher/quizzes.js?v=6.9"></script>
 <script src="assets/js/teacher/announcements.js?v=5.2"></script>
 <script src="assets/js/teacher/evaluations.js?v=4.4"></script>
 <script src="assets/js/teacher/resources.js?v=3.8"></script>

@@ -473,7 +473,7 @@ function renderTeacherQuizzes(data) {
             .qz-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
             .qz-mobile-row-body { flex: 1; min-width: 0; }
             .qz-mobile-row-title {
-                font-size: 14px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #e2e8f0;
                 white-space: nowrap;
