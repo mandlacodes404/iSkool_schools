@@ -64,7 +64,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.0">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=.2.4">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
