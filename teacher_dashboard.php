@@ -62,7 +62,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.0">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=1.9">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.0">
@@ -1124,7 +1124,7 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/evaluations.js?v=4.3"></script>
 <script src="assets/js/teacher/resources.js?v=3.7"></script>
 <script src="assets/js/teacher/grades.js?v=4.3"></script>
-<script src="assets/js/teacher/assignments.js?v=4.2"></script>
+<script src="assets/js/teacher/assignments.js?v=4.3"></script>
 <script src="assets/js/teacher/sbo.js?v=4.2"></script>
 <script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
