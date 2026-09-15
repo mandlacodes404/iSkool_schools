@@ -224,8 +224,11 @@
    line back up with row content — 16px, matching the folder-label/row
    inset those pages already use. Extend this selector list as future
    pages (Resources, Grades, etc.) add their own mobile search bar. */
-.an-mobile-list > .tchr-mobile-search-wrap,
-.as-mobile-list > .tchr-mobile-search-wrap {
+.an-mobile-list .tchr-mobile-search-wrap,
+.as-mobile-list .tchr-mobile-search-wrap,
+.ev-mobile-list .tchr-mobile-search-wrap,
+.gr-mobile-list .tchr-mobile-search-wrap,
+.rs-mobile-list .tchr-mobile-search-wrap {
     padding-left: 16px;
     padding-right: 16px;
 }
