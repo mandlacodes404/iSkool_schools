@@ -46,6 +46,13 @@
             box-shadow: 2px 0 8px rgba(0,0,0,0.2);
             transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
                         visibility var(--transition-speed), opacity var(--transition-speed);
+
+            /* THE CURVES: Only top-right and bottom-right — matches learner dashboard */
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+
+            /* THE BORDER: A subtle "rim" makes the curve look premium — matches learner dashboard */
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
         }
         .sidebar.desktop-open,
         .sidebar.active {
