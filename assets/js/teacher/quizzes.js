@@ -423,6 +423,19 @@ function renderTeacherQuizzes(data) {
                 }
             }
 
+            /* Search bar sits inside .qz-mobile-list too, so it inherits
+               that same edge-to-edge negative margin above. Re-apply the
+               16px inset here (same value as the folder-label/row content
+               below) so the search bar lines back up with row content
+               instead of touching the screen edges. Kept in this file
+               rather than dashboard.css's shared copy of this rule so
+               cascade order can never cause this page's inline <style>
+               (which loads after dashboard.css) to win and cancel it out. */
+            .qz-mobile-list .tchr-mobile-search-wrap {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
             /* Clears the fixed mobile bottom nav (82px) + device safe
                area, so the last row in the list isn't hidden behind it
                when scrolled all the way down. Matches the convention

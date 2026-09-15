@@ -222,8 +222,15 @@
    edge (see announcements.css/assignments.css). The search wrap sits
    inside that same container, so it needs its own horizontal inset to
    line back up with row content — 16px, matching the folder-label/row
-   inset those pages already use. Extend this selector list as future
-   pages (Resources, Grades, etc.) add their own mobile search bar. */
+   inset those pages already use.
+   Quizzes and Syllabus keep this same 16px inset rule too, but scoped
+   in their own stylesheet (quizzes.js's inline <style>, sbo.css)
+   right next to their own negative-margin rule, rather than listed
+   here — their negative margin lives in a page-loaded stylesheet that
+   can load after this shared one, and two equal-specificity rules in
+   that order would let the later one silently win. Keep future pages
+   with a search bar + edge-to-edge negative margin in their own
+   stylesheet in the same pattern, not added to this list. */
 .an-mobile-list .tchr-mobile-search-wrap,
 .as-mobile-list .tchr-mobile-search-wrap,
 .ev-mobile-list .tchr-mobile-search-wrap,
