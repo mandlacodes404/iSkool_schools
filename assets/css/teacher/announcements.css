@@ -1835,6 +1835,9 @@
     box-sizing: border-box;
 }
 .an-mobile-folder-label--school { color: #d891ae; }
+.an-mobile-folder-icon {
+    flex-shrink: 0;
+}
 .an-mobile-folder-count {
     margin-left: auto;
     font-size: 11px;

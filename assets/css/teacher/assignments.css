@@ -260,6 +260,9 @@
     border-bottom: 1px solid rgba(255,255,255,0.06);
     box-sizing: border-box;
 }
+.as-mobile-folder-icon {
+    flex-shrink: 0;
+}
 .as-mobile-folder-count {
     margin-left: auto;
     font-size: 11px;

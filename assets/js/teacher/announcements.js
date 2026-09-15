@@ -264,13 +264,23 @@ function renderTeacherAnnouncements(data) {
             // Matches assignments' .as-mobile-folder-count badge for visual
             // consistency between the two mobile list pages.
             const countBadge = `<span class="an-mobile-folder-count">${group.items.length}</span>`;
+            // Class groups get the same folder glyph as Assignments, tinted
+            // with this page's row-icon pink (#c2618a) so it reads as this
+            // page's own signature colour rather than reusing purple.
+            // "From School" keeps its distinct house icon instead of a
+            // folder, since it isn't a class folder — it's a school
+            // broadcast group.
+            const folderIcon = `
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#c2618a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-mobile-folder-icon">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>`;
             const labelInnerHtml = isSchool
                 ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-school-icon">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>
                     From School${countBadge}`
-                : `${group.class_name}${countBadge}`;
+                : `${folderIcon}${group.class_name}${countBadge}`;
             const labelClass = isSchool
                 ? 'an-mobile-folder-label an-mobile-folder-label--school'
                 : 'an-mobile-folder-label';
