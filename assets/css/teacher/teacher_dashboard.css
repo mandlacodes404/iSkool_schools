@@ -46,6 +46,13 @@
             box-shadow: 2px 0 8px rgba(0,0,0,0.2);
             transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
                         visibility var(--transition-speed), opacity var(--transition-speed);
+
+            /* THE CURVES: Only top-right and bottom-right — matches learner dashboard */
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+
+            /* THE BORDER: A subtle "rim" makes the curve look premium — matches learner dashboard */
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
         }
         .sidebar.desktop-open,
         .sidebar.active {
@@ -465,27 +472,6 @@
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
-
-            /* THE CURVE — mobile only. Drawn on #mobileOverlay (the dimmed
-               area next to the sidebar when the menu is open), not on
-               .sidebar itself. A curve on the sidebar's own edge just
-               rounds into its own flat background — it reads as a notch,
-               not a bulge. For it to actually look like it bulges outward
-               into the screen, the ROUNDED element has to be the one
-               representing the space beside the menu. #mobileOverlay by
-               default covers the full screen (base rule elsewhere in this
-               file); repositioning its left edge to match the sidebar's
-               own width (300px) puts its rounded corner exactly at the
-               visible seam. z-index 4500 sits below .sidebar's 5000 (menu
-               stays on top) but above #mobileBottomNav's 4000 (so the
-               curve isn't hidden at the bottom of the screen). */
-            .sidebar.active ~ #mobileOverlay {
-                left: 300px;
-                width: calc(100% - 300px);
-                z-index: 4500;
-                border-top-left-radius: 35px;
-                border-bottom-left-radius: 35px;
-            }
         }
 
         /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
