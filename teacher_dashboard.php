@@ -60,8 +60,8 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=2.8">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.3">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.4">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.2">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=1.8">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=1.9">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=.2.4">
@@ -1120,11 +1120,11 @@ window.removeTeacherProfilePicture = function() {
 <script src="assets/js/teacher/dashboard.js?v=8.0"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.1"></script>
-<script src="assets/js/teacher/announcements.js?v=5.5"></script>
+<script src="assets/js/teacher/announcements.js?v=5.6"></script>
 <script src="assets/js/teacher/evaluations.js?v=4.5"></script>
 <script src="assets/js/teacher/resources.js?v=3.9"></script>
 <script src="assets/js/teacher/grades.js?v=4.5"></script>
-<script src="assets/js/teacher/assignments.js?v=4.5"></script>
+<script src="assets/js/teacher/assignments.js?v=4.6"></script>
 <script src="assets/js/teacher/sbo.js?v=4.5"></script>
 <script src="assets/js/teacher/analytics.js?v=3.8"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
