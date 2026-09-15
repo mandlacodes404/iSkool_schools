@@ -179,6 +179,7 @@ function renderTeacherGrades(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="gr-mobile-list">
+            ${window.buildTeacherSearchBar('gr', { mobile: true, placeholder: 'Search assessments...' })}
             <div class="teacher-grades-info">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" class="gr-info-icon">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -204,7 +205,7 @@ function renderTeacherGrades(data) {
 
                 cls.quizzes.forEach(quiz => {
                     itemsHtml += `
-                        <div class="gr-mobile-row" data-quiz-id="${quiz.id}" role="button" tabindex="0"
+                        <div class="gr-mobile-row" data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title)}" role="button" tabindex="0"
                             onclick="openMobileTeacherGradeQuiz(${quiz.id})"
                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherGradeQuiz(${quiz.id});}">
                             <div class="gr-mobile-row-icon">
@@ -288,6 +289,7 @@ function renderTeacherGrades(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     loadGradesClasses();
+    window.wireTeacherSearchBar('gr');
 
     // Restore whichever quiz was selected before navigating away, and
     // the sidebar's scroll position, so switching back to Grades looks

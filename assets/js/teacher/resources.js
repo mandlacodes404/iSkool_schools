@@ -145,7 +145,8 @@ function renderTeacherResources(data) {
         </div>
 
         <!-- ═══ MOBILE LIST: class-grouped collapsible folders ═══ -->
-        <div class="rs-mobile-list">`;
+        <div class="rs-mobile-list">
+            ${window.buildTeacherSearchBar('rs', { mobile: true, placeholder: 'Search resources...' })}`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No resources uploaded yet.</p>`;
@@ -164,7 +165,7 @@ function renderTeacherResources(data) {
                     ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
                     : `openTeacherResource('resources/${item.filename}')`;
                 itemsHtml += `
-                    <div class="rs-mobile-row" role="button" tabindex="0"
+                    <div class="rs-mobile-row" data-title="${item.title}" role="button" tabindex="0"
                         onclick="${clickAction}"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${clickAction}}">
                         <div class="rs-mobile-row-icon">${icon}</div>
@@ -291,6 +292,7 @@ function renderTeacherResources(data) {
     fileInput?.addEventListener('change', updateFileName);
 
     loadResourceClasses();
+    window.wireTeacherSearchBar('rs');
 
     const sidebarScrollEl = apiArea.querySelector('.rs-sidebar-scroll');
     window.wireTeacherSectionScroll('resources-sidebar', sidebarScrollEl);

@@ -172,7 +172,8 @@ function renderTeacherEvaluations(data) {
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
-        <div class="ev-mobile-list">`;
+        <div class="ev-mobile-list">
+            ${window.buildTeacherSearchBar('ev', { mobile: true, placeholder: 'Search evaluations...' })}`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No evaluations released yet.</p>`;
@@ -183,7 +184,7 @@ function renderTeacherEvaluations(data) {
 
             group.evaluations.forEach((ev, evIndex) => {
                 itemsHtml += `
-                    <div class="ev-mobile-row" role="button" tabindex="0"
+                    <div class="ev-mobile-row" data-title="${ev.title}" role="button" tabindex="0"
                         onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)});}">
                         <div class="ev-mobile-row-icon">
@@ -275,6 +276,7 @@ function renderTeacherEvaluations(data) {
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
 
     loadEvalClasses();
+    window.wireTeacherSearchBar('ev');
 
     const sidebarScrollEl = apiArea.querySelector('.ev-sidebar-scroll');
     window.wireTeacherSectionScroll('evaluations-sidebar', sidebarScrollEl);
