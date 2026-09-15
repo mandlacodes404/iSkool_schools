@@ -124,6 +124,7 @@ function renderTeacherSyllabus(data) {
                     const updatedAt = formatSBOUpdatedDateTime(brief.updated_at);
                     itemsHtml += `
                         <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
+                            data-title="${brief.subject}"
                             onclick="selectDesktopSBO(${idx})">
                             <div class="sbo-sidebar-item-icon">
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -162,6 +163,7 @@ function renderTeacherSyllabus(data) {
                         New
                     </button>
                 </div>
+                ${typeof buildTeacherSearchBar === 'function' ? buildTeacherSearchBar('sbo') : ''}
                 <div class="sbo-sidebar-scroll">
                     ${sidebarHtml}
                 </div>
@@ -207,11 +209,13 @@ function renderTeacherSyllabus(data) {
              untouched — still term-then-class grouped, per instruction
              that this change is mobile-view only. ═══ -->
         <div class="sbo-mobile-list">
+            ${typeof buildTeacherSearchBar === 'function' ? buildTeacherSearchBar('sbo', { mobile: true, placeholder: 'Search syllabus...' }) : ''}
             ${buildMobileSBOFolders(briefs)}
         </div>`;
 
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
+    if (typeof wireTeacherSearchBar === 'function') wireTeacherSearchBar('sbo');
 
     // Store briefs globally — shared by the desktop panel (selectDesktopSBO)
     // and the mobile detail page (openMobileTeacherSBO), both index into
@@ -262,6 +266,7 @@ function buildMobileSBOFolders(briefs) {
 
             itemsHtml += `
                 <div class="sbo-mobile-row" role="button" tabindex="0"
+                    data-title="${brief.subject}"
                     onclick="openMobileTeacherSBO(${flatIndex})"
                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherSBO(${flatIndex});}">
                     <div class="sbo-mobile-row-icon">

@@ -127,6 +127,7 @@ function renderTeacherQuizzes(data) {
                         : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
                     itemsHtml += `
                         <div class="qz-sidebar-item" id="qz-sidebar-${quiz.id}"
+                            data-title="${escapeHtml(quiz.title)}"
                             onclick="selectDesktopQuiz(${quiz.id})">
                             <div class="qz-sidebar-item-icon">
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -507,6 +508,7 @@ function renderTeacherQuizzes(data) {
                         New
                     </button>
                 </div>
+                ${typeof buildTeacherSearchBar === 'function' ? buildTeacherSearchBar('qz') : ''}
                 <div class="qz-sidebar-scroll">${sidebarHtml}</div>
             </div>
 
@@ -529,7 +531,8 @@ function renderTeacherQuizzes(data) {
         </div>
 
         <!-- ═══ MOBILE LIST — grouped by class only, tap into detail page ═══ -->
-        <div class="qz-mobile-list">`;
+        <div class="qz-mobile-list">
+            ${typeof buildTeacherSearchBar === 'function' ? buildTeacherSearchBar('qz', { mobile: true, placeholder: 'Search quizzes...' }) : ''}`;
 
     // Mobile view intentionally drops the term wrapper/active badge that
     // the desktop sidebar still shows — classes are flattened across all
@@ -565,6 +568,7 @@ function renderTeacherQuizzes(data) {
 
                 itemsHtml += `
                     <div class="qz-mobile-row" role="button" tabindex="0"
+                        data-title="${escapeHtml(quiz.title)}"
                         onclick="openMobileTeacherQuiz(${flatIndex})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherQuiz(${flatIndex});}">
                         <div class="qz-mobile-row-icon">
@@ -677,6 +681,7 @@ function renderTeacherQuizzes(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+    if (typeof wireTeacherSearchBar === 'function') wireTeacherSearchBar('qz');
 
     // Restore whichever quiz was selected before navigating away, and
     // the sidebar's scroll position.
