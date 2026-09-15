@@ -271,7 +271,7 @@ function renderTeacherAnnouncements(data) {
             // folder, since it isn't a class folder — it's a school
             // broadcast group.
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#c2618a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#c2618a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
             const labelInnerHtml = isSchool
@@ -279,8 +279,8 @@ function renderTeacherAnnouncements(data) {
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>
-                    From School${countBadge}`
-                : `${folderIcon}${group.class_name}${countBadge}`;
+                    <span class="an-mobile-folder-name">From School</span>${countBadge}`
+                : `${folderIcon}<span class="an-mobile-folder-name">${group.class_name}</span>${countBadge}`;
             const labelClass = isSchool
                 ? 'an-mobile-folder-label an-mobile-folder-label--school'
                 : 'an-mobile-folder-label';

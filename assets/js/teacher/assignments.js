@@ -271,14 +271,14 @@ function renderTeacherAssignments(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="as-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="as-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 
             html += window.buildCollapsibleClassGroup(
                 groupId,
                 'as-mobile-folder-label',
-                `${folderIcon}${escapeTeacherAssignmentHtml(className)} <span class="as-mobile-folder-count">${entries.length}</span>`,
+                `${folderIcon}<span class="as-mobile-folder-name">${escapeTeacherAssignmentHtml(className)}</span><span class="as-mobile-folder-count">${entries.length}</span>`,
                 itemsHtml
             );
         });
