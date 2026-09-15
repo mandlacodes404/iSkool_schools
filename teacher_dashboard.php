@@ -72,7 +72,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=2.9">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -581,29 +581,6 @@ window.closeMobileSidebar = function() {
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
     }
-
-    // MENU CLOSED: restore the browser bar to whatever colour the current
-    // page should actually be showing right now. If the page is scrolled
-    // down past the header threshold on a coloured page, that's
-    // window.teacherCurrentPageColor — otherwise it's the dark default.
-    // Matches exactly what recalcTeacherMobileScrollUI does on its own
-    // (see dashboard.js) — mirrors the learner dashboard's toggleSidebar.
-    // This single close path is shared by the X/overlay-tap AND the
-    // nav-link auto-close below, so both get the restore for free.
-    if (window.innerWidth <= 768) {
-        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-        const topNavWrapper = document.querySelector('.top-nav-wrapper');
-        if (themeColorMeta) {
-            const isScrolledOnColoredPage =
-                topNavWrapper &&
-                topNavWrapper.classList.contains('header-scrolled') &&
-                topNavWrapper.getAttribute('data-page-color');
-            themeColorMeta.setAttribute(
-                'content',
-                isScrolledOnColoredPage ? window.teacherCurrentPageColor : '#0d1117'
-            );
-        }
-    }
 };
 
 window.toggleSidebar = function(forceClose = false) {
@@ -618,17 +595,6 @@ window.toggleSidebar = function(forceClose = false) {
         sidebar.classList.add('active');
         if (overlay) overlay.style.opacity = '1';
         if (overlay) overlay.style.pointerEvents = 'all';
-
-        // MENU OPEN: force the browser bar to match the menu's own dark
-        // background (#1a1919, the sidebar's background colour),
-        // regardless of whatever colour the current page had it set to —
-        // keeps the whole screen reading as one consistent dark surface
-        // while the menu is open. Restored back on close, above.
-        // Mirrors the learner dashboard's toggleSidebar.
-        if (window.innerWidth <= 768) {
-            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-            if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1919');
-        }
     }
 };
 

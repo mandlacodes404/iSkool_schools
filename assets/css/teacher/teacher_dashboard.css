@@ -46,13 +46,6 @@
             box-shadow: 2px 0 8px rgba(0,0,0,0.2);
             transition: left var(--transition-speed) ease, width var(--transition-speed) ease,
                         visibility var(--transition-speed), opacity var(--transition-speed);
-
-            /* THE CURVES: Only top-right and bottom-right — matches learner dashboard */
-            border-top-right-radius: 20px;
-            border-bottom-right-radius: 20px;
-
-            /* THE BORDER: A subtle "rim" makes the curve look premium — matches learner dashboard */
-            border-right: 1px solid rgba(255, 255, 255, 0.18);
         }
         .sidebar.desktop-open,
         .sidebar.active {
@@ -472,69 +465,6 @@
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
-
-            /* Kill the inherited curve/rim from the base .sidebar rule on
-               mobile. .sidebar's own straight right edge sits directly
-               against #mobileOverlay's dim — with the curve left here,
-               the corner rounds INTO the sidebar's own flat background,
-               which just looks like a notch cut out of a rectangle, not
-               a curve bulging outward into the dimmed screen. To actually
-               read as a curve, the ROUNDED element has to be the one
-               representing the dim/empty area, not the menu itself — so
-               the curve moves to #mobileOverlay below, same structural
-               approach as the learner dashboard. */
-            .sidebar {
-                border-right: none;
-                border-top-right-radius: 0;
-                border-bottom-right-radius: 0;
-            }
-
-            /* ── CRISP CORNER SEAM (mobile menu open) ──────────────────────
-               #mobileOverlay is a plain sibling <div>, already shown/
-               hidden by JS in sync with the menu (opacity + pointer-events
-               — see toggleSidebar/closeMobileSidebar in
-               teacher_dashboard.php). It carries no `filter`, so its own
-               border/radius render perfectly crisp — unlike .main-content,
-               which IS intentionally blurred while the menu is open.
-
-               By default #mobileOverlay covers the full screen (base rule
-               above: left:0, width:100vw), sitting behind the sidebar —
-               so its rounded left corner would sit at the screen's edge,
-               totally hidden under the opaque sidebar. To make the curve
-               appear at the actual visible seam (where the sidebar's
-               straight edge ends), the overlay needs to start exactly
-               there instead: left/width are repositioned to match the
-               sidebar's own width (300px) at this breakpoint. No
-               !important needed here — unlike the learner side,
-               #mobileOverlay carries no inline styles to fight.
-
-               z-index: 4500, below .sidebar's 5000 (menu stays on top)
-               but above #mobileBottomNav's 4000 (so the seam isn't cut
-               off at the bottom of the screen).
-
-               COLOUR: while the menu is open, this box's own background
-               is set to #1a1919 — the exact same value as .sidebar's own
-               background and the browser-bar colour below — instead of
-               keeping the base rule's translucent rgba(0,0,0,0.55) dim.
-               That's a real, direct match: the curved edge is drawn by
-               a box that IS the sidebar's colour, not a separate element
-               trying to approximate it. This does mean the blurred page
-               content that would normally show faintly through the dim
-               is now fully covered behind this box instead — the
-               trade-off for an exact colour match rather than an
-               approximation. */
-            .sidebar.active ~ #mobileOverlay {
-                left: 300px;
-                width: calc(100% - 300px);
-                z-index: 4500;
-                background: #1a1919;
-                border-top-left-radius: 35px;
-                border-bottom-left-radius: 35px;
-                border-left: 1px solid #555555;
-                border-top: 1px solid #555555;
-                border-bottom: 1px solid #555555;
-                box-sizing: border-box;
-            }
         }
 
         /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
@@ -712,14 +642,6 @@
             .sidebar { width: 80% !important; }
             .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
             .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(80vw) !important; }
-            /* Seam must track the sidebar's actual width at this narrower
-               breakpoint too, or it'd stay pinned at 300px (the 768px
-               breakpoint's value) while the sidebar itself is now 80vw
-               wide — leaving a gap or overlap between them. */
-            .sidebar.active ~ #mobileOverlay {
-                left: 80vw !important;
-                width: 20vw !important;
-            }
             .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
             .sidebar-footer { margin-bottom: 30px !important; }
             .profile-picture-wrapper { width: 70px !important; height: 70px !important; border: none !important; }
