@@ -114,6 +114,7 @@ function renderTeacherAnnouncements(data) {
 
                 itemsHtml += `
                     <div class="an-sidebar-item${group.is_school ? ' an-school-item' : ''}" id="an-sidebar-${flatIndex}"
+                        data-title="${ann.title.replace(/"/g, '&quot;')}"
                         onclick="selectDesktopAnnouncement(${flatIndex})">
                         <div class="an-sidebar-item-icon">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="${iconStroke}" stroke-width="2" fill="none">
@@ -165,6 +166,7 @@ function renderTeacherAnnouncements(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('an', { placeholder: 'Search announcements...' })}
                 <div class="an-sidebar-scroll">
                     ${sidebarHtml}
                 </div>
@@ -208,7 +210,8 @@ function renderTeacherAnnouncements(data) {
         </div>
 
         <!-- MOBILE -->
-        <div class="an-mobile-list">`;
+        <div class="an-mobile-list">
+            ${window.buildTeacherSearchBar('an', { mobile: true, placeholder: 'Search announcements...' })}`;
 
     // Mobile list — grouped by class (school-wide group first, since it's
     // first in the source array), same tap-to-detail-page pattern as
@@ -236,6 +239,7 @@ function renderTeacherAnnouncements(data) {
 
                 itemsHtml += `
                     <div class="an-mobile-row" role="button" tabindex="0"
+                        data-title="${ann.title.replace(/"/g, '&quot;')}"
                         onclick="openMobileTeacherAnnouncement(${flatIndex})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAnnouncement(${flatIndex});}">
                         <div class="an-mobile-row-icon">
@@ -286,6 +290,7 @@ function renderTeacherAnnouncements(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+    if (typeof window.wireTeacherSearchBar === 'function') window.wireTeacherSearchBar('an');
 
     const sidebarScrollEl = apiArea.querySelector('.an-sidebar-scroll');
     window.wireTeacherSectionScroll('announcements-sidebar', sidebarScrollEl);

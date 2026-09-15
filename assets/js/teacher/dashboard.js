@@ -183,6 +183,128 @@ window.buildCollapsibleClassGroup = function(groupId, labelClass, labelInnerHtml
 
 /**
  * ─────────────────────────────────────────────
+ * SHARED: TEACHER SEARCH BAR (desktop sidebar + mobile list)
+ * ─────────────────────────────────────────────
+ * Teacher-side port of the learner app's mobile/desktop search bar
+ * (assets/js/learner/announcements.js — lanMobileSearch/lanDesktopSearch),
+ * generalised so any teacher list page (Announcements, Assignments, and
+ * future pages built on the same sidebar + class-group pattern) can drop
+ * one in without re-implementing the markup, filtering, or auto-expand
+ * behaviour each time.
+ *
+ * Filtering is done against a `data-title` attribute you put on each
+ * filterable row/item when you build its HTML — this helper never reads
+ * visible text out of the DOM, so it works the same regardless of a
+ * row's internal markup. Class-group name text (the sidebar label or
+ * mobile folder label) is always matched too, so searching a class name
+ * surfaces that whole group even if no single item title matches it.
+ *
+ * Usage:
+ *   1) In your page's render function, drop the markup where you want
+ *      the bar to sit:
+ *        desktop (top of sidebar, before the scroll container):
+ *          window.buildTeacherSearchBar('an')
+ *        mobile (top of the mobile list, inside .an-mobile-list):
+ *          window.buildTeacherSearchBar('an', { mobile: true })
+ *   2) Give each filterable item a data-title attribute, e.g.:
+ *        <div class="an-sidebar-item" data-title="${escapeHtml(ann.title)}">
+ *      (lowercasing happens inside the filter, so pass the raw title.)
+ *   3) After apiArea.innerHTML = html, call once:
+ *        window.wireTeacherSearchBar('an')
+ *      This binds both the desktop and mobile inputs (whichever exist
+ *      in the current DOM) — safe to call even if only one is present.
+ *
+ * @param {string} prefix - page prefix, e.g. 'an' (announcements), 'as' (assignments)
+ * @param {object} [opts]
+ * @param {boolean} [opts.mobile] - build the mobile-styled bar instead of desktop
+ * @param {string}  [opts.placeholder] - override the input placeholder text
+ * @returns {string}
+ */
+window.buildTeacherSearchBar = function(prefix, opts) {
+    opts = opts || {};
+    const mobile = !!opts.mobile;
+    const placeholder = opts.placeholder || 'Search...';
+    const wrapClass  = mobile ? `tchr-mobile-search-wrap`  : `tchr-desktop-search-wrap`;
+    const inputClass = mobile ? `tchr-mobile-search`       : `tchr-desktop-search`;
+    const inputId    = mobile ? `${prefix}MobileSearch`    : `${prefix}DesktopSearch`;
+    return `
+        <div class="${wrapClass}">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="${inputClass}" id="${inputId}" placeholder="${placeholder}">
+        </div>`;
+};
+
+/**
+ * Binds the input(s) built by buildTeacherSearchBar() for a given page
+ * prefix. Call once per render, after the HTML is in the DOM. Filters
+ * whichever of desktop/mobile is present; harmless if only one exists
+ * (e.g. a page that hasn't added a mobile list yet).
+ *
+ * Desktop filtering targets `.tchr-sidebar-class-group` blocks (built by
+ * buildCollapsibleClassGroup) and their preceding
+ * `.tchr-sidebar-class-label--toggle` header. Mobile filtering targets
+ * the same pairing rendered in a page's mobile list. Both read each
+ * item's `data-title` attribute — see buildTeacherSearchBar's doc
+ * comment above for how to set that on your rows.
+ *
+ * A matching group auto-expands (same as the learner version) so a
+ * search result is never hidden inside a collapsed group; clearing the
+ * search restores each group to whatever collapsed/expanded state it
+ * had before (tracked via window.teacherSectionState.collapsedGroups,
+ * same store buildCollapsibleClassGroup already uses).
+ *
+ * @param {string} prefix - same prefix passed to buildTeacherSearchBar, e.g. 'an'
+ */
+window.wireTeacherSearchBar = function(prefix) {
+    const desktopInput = document.getElementById(`${prefix}DesktopSearch`);
+    const mobileInput  = document.getElementById(`${prefix}MobileSearch`);
+
+    function filterGroups(term) {
+        term = term.toLowerCase().trim();
+        document.querySelectorAll('.tchr-sidebar-class-group').forEach(group => {
+            const header = group.previousElementSibling;
+            const isHeader = header && header.classList.contains('tchr-sidebar-class-label--toggle');
+            const labelSpan = isHeader ? header.querySelector('span') : null;
+            const groupName = labelSpan ? labelSpan.textContent.toLowerCase() : '';
+
+            const items = group.querySelectorAll('[data-title]');
+            let visible = 0;
+            items.forEach(item => {
+                const title = (item.dataset.title || '').toLowerCase();
+                const show = !term || title.includes(term) || groupName.includes(term);
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            const groupShow = !term || visible > 0 || groupName.includes(term);
+            group.style.display = groupShow ? '' : 'none';
+            if (isHeader) header.style.display = groupShow ? '' : 'none';
+
+            if (!isHeader) return;
+            if (term && visible) {
+                group.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+                header.setAttribute('aria-expanded', 'true');
+            } else if (!term) {
+                // Restore each group's own remembered collapsed state
+                // rather than forcing everything open again.
+                const groupId = group.id;
+                const shouldBeCollapsed = groupId && window.teacherSectionState.collapsedGroups.has(groupId);
+                group.classList.toggle('collapsed', !!shouldBeCollapsed);
+                header.classList.toggle('collapsed', !!shouldBeCollapsed);
+                header.setAttribute('aria-expanded', shouldBeCollapsed ? 'false' : 'true');
+            }
+        });
+    }
+
+    if (desktopInput) desktopInput.addEventListener('input', () => filterGroups(desktopInput.value));
+    if (mobileInput)  mobileInput.addEventListener('input', () => filterGroups(mobileInput.value));
+};
+
+/**
+ * ─────────────────────────────────────────────
  * SHARED: TEACHER MOBILE DETAIL-MODE HEADER
  * ─────────────────────────────────────────────
  * Teacher-side equivalent of the learner app's configureHeader/

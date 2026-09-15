@@ -143,6 +143,91 @@
     padding-top: 20px !important;
 }
 
+/* ── SHARED: Teacher search bar (desktop sidebar + mobile list) ──
+   Ported from the learner app's mobile/desktop search bar
+   (assets/css/learner/announcements.css — .lan-mobile-search /
+   .lan-desktop-search), same visual language, restyled with the
+   teacher palette already used elsewhere in this file (#4fd1c5 teal
+   accent instead of learner's orange, #8b949e muted text). Markup
+   comes from window.buildTeacherSearchBar() in dashboard.js; any
+   teacher list page can use these classes as-is. */
+.tchr-desktop-search-wrap {
+    display: none;
+    position: relative;
+    padding: 10px 10px 8px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.tchr-desktop-search-wrap svg {
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.4;
+}
+.tchr-desktop-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px 8px 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #c9d1d9;
+    font-size: 12.5px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+.tchr-desktop-search:focus { outline: none; border-color: #4fd1c5; }
+.tchr-desktop-search::placeholder { color: #8b949e; }
+@media (min-width: 900px) {
+    .tchr-desktop-search-wrap { display: block; }
+}
+
+.tchr-mobile-search-wrap {
+    display: none;
+    position: relative;
+    margin: 0 0 10px;
+}
+.tchr-mobile-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.4;
+}
+.tchr-mobile-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 14px 9px 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: #c9d1d9;
+    font-size: 15px;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.tchr-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
+.tchr-mobile-search::placeholder { color: #8b949e; }
+@media (max-width: 899px) {
+    .tchr-mobile-search-wrap { display: block; }
+}
+
+/* Each page's mobile list (.an-mobile-list, .as-mobile-list, etc.) has
+   negative left/right margins on mobile so its rows can bleed edge to
+   edge (see announcements.css/assignments.css). The search wrap sits
+   inside that same container, so it needs its own horizontal inset to
+   line back up with row content — 16px, matching the folder-label/row
+   inset those pages already use. Extend this selector list as future
+   pages (Resources, Grades, etc.) add their own mobile search bar. */
+.an-mobile-list > .tchr-mobile-search-wrap,
+.as-mobile-list > .tchr-mobile-search-wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
 /* Right info rail — fixed width, always visible, shared across
    any page that calls buildInfoRail(). Same flat-divider
    convention as the sidebar (border, not a boxed card). Hidden

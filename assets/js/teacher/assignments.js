@@ -124,6 +124,7 @@ function renderTeacherAssignments(data) {
 
                 itemsHtml += `
                     <div class="as-sidebar-item" id="as-sidebar-${index}"
+                        data-title="${escapeTeacherAssignmentHtml(assignment.title)}"
                         onclick="selectDesktopAssignment(${index})">
                         <div class="as-sidebar-item-icon">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
@@ -163,6 +164,7 @@ function renderTeacherAssignments(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('as', { placeholder: 'Search assignments...' })}
                 <div class="as-sidebar-scroll">${sidebarHtml}</div>
             </div>
 
@@ -206,7 +208,8 @@ function renderTeacherAssignments(data) {
              built once above and reused here) with tap-to-detail-page
              navigation, matching the learner app's pattern instead of
              the old inline expand/collapse drawer. -->
-        <div class="as-mobile-list">`;
+        <div class="as-mobile-list">
+            ${window.buildTeacherSearchBar('as', { mobile: true, placeholder: 'Search assignments...' })}`;
 
     if (!data || data.length === 0) {
         html += `
@@ -239,6 +242,7 @@ function renderTeacherAssignments(data) {
 
                 itemsHtml += `
                     <div class="as-mobile-row" role="button" tabindex="0"
+                        data-title="${escapeTeacherAssignmentHtml(assignment.title)}"
                         onclick="openMobileTeacherAssignment(${index})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAssignment(${index});}">
                         <div class="as-mobile-row-icon">
@@ -280,6 +284,7 @@ function renderTeacherAssignments(data) {
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
     if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+    if (typeof window.wireTeacherSearchBar === 'function') window.wireTeacherSearchBar('as');
 
     const sidebarScrollEl = apiArea.querySelector('.as-sidebar-scroll');
     window.wireTeacherSectionScroll('assignments-sidebar', sidebarScrollEl);
