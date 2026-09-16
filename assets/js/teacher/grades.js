@@ -228,10 +228,15 @@ function renderTeacherGrades(data) {
                         </div>`;
                 });
 
+                const folderIcon = `
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="gr-mobile-folder-icon">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>`;
+
                 html += window.buildCollapsibleClassGroup(
                     mobileGroupId,
                     'gr-mobile-folder-label',
-                    `${escapeHtml(cls.class_name)} <span class="gr-mobile-folder-count">${cls.quizzes.length}</span>`,
+                    `${folderIcon}<span class="gr-mobile-folder-name">${escapeHtml(cls.class_name)}</span><span class="gr-mobile-folder-count">${cls.quizzes.length}</span>`,
                     itemsHtml
                 );
             });
