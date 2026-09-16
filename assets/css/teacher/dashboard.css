@@ -396,3 +396,270 @@
 .mini-cal-tab-panel-hidden {
     display: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE HOME PANEL (mh-*)
+   Teacher mobile Home: Recent activity trail, Upcoming week strip,
+   Your classes list. Rendered by renderMobileHomePanel() in
+   dashboard.js, mobile-only (isMobile branch of loadTeacherManual).
+   Follows the same flat, no-outer-card convention as .tchr-flat-*.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.mh-home {
+    padding: 4px 0 24px;
+}
+
+.mh-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6e7681;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 20px;
+    margin: 24px 0 12px;
+}
+.mh-section-label--first {
+    margin-top: 8px;
+}
+
+/* ── Recent activity trail ── */
+.mh-trail {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+.mh-trail-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    cursor: pointer;
+}
+.mh-trail-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 28px;
+}
+.mh-trail-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.mh-trail-connector {
+    width: 1.5px;
+    flex: 1;
+    min-height: 14px;
+    background: rgba(255,255,255,0.08);
+    margin-top: 2px;
+}
+.mh-trail-content {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 6px;
+}
+.mh-trail-text {
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: #c9d1d9;
+}
+.mh-trail-text b {
+    font-weight: 600;
+    color: #e6edf3;
+}
+.mh-trail-time {
+    font-size: 11.5px;
+    color: #6e7681;
+    margin-top: 2px;
+}
+
+/* ── Empty state (shared look for trail / week list) ── */
+.mh-empty-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 36px 20px;
+    margin: 0 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+}
+.mh-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #c9d1d9;
+}
+.mh-empty-sub {
+    font-size: 12.5px;
+    color: #6e7681;
+    line-height: 1.5;
+    max-width: 240px;
+}
+
+/* ── Upcoming: week strip + event rows ── */
+.mh-week-month-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #6e7681;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.mh-week-strip {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin: 0 0 12px;
+}
+.mh-week-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+.mh-week-day-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #6e7681;
+    letter-spacing: 0.03em;
+}
+.mh-week-day-num {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #c9d1d9;
+    border-radius: 50%;
+}
+.mh-week-day-today {
+    background: #4fd1c5;
+    color: #0d1117;
+    font-weight: 700;
+}
+.mh-week-day-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #4fd1c5;
+    margin-top: -4px;
+}
+
+.mh-week-rows {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+.mh-week-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.mh-week-row:last-child {
+    border-bottom: none;
+}
+.mh-week-row-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+.mh-week-row-content {
+    flex: 1;
+    min-width: 0;
+}
+.mh-week-row-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #e6edf3;
+}
+.mh-week-row-sub {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 2px;
+}
+.mh-week-row-pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.mh-week-empty {
+    padding: 20px;
+    text-align: center;
+    font-size: 12.5px;
+    color: #6e7681;
+}
+
+/* ── Your classes list ── */
+.mh-class-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+.mh-class-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+}
+.mh-class-row:last-child {
+    border-bottom: none;
+}
+.mh-class-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: rgba(79,209,197,0.14);
+    color: #4fd1c5;
+}
+.mh-class-info {
+    flex: 1;
+    min-width: 0;
+}
+.mh-class-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e6edf3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mh-class-sub {
+    font-size: 12.5px;
+    color: #8b949e;
+    margin-top: 2px;
+}
+.mh-chevron {
+    flex-shrink: 0;
+}
+.mh-class-loading {
+    padding: 20px 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: #6e7681;
+}

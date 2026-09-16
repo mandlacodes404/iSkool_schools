@@ -650,7 +650,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.teacherManualCache && window.teacherSnapshotCache) {
         const isMobileCached = window.innerWidth <= 768;
         if (isMobileCached) {
-            apiArea.innerHTML = window.teacherManualCache;
+            apiArea.innerHTML = renderMobileHomePanel(window.teacherSnapshotCache);
+            window.loadMobileHomeClasses();
         } else {
             apiArea.innerHTML = `
                 <div class="dashboard-home-layout">
@@ -681,11 +682,15 @@ document.addEventListener('DOMContentLoaded', function () {
         window.teacherManualCache   = manualHtml;
         window.teacherSnapshotCache = snapshot;
 
-        // Desktop: two column layout. Mobile: manual only
+        // Desktop: two column layout + manual. Mobile: activity trail,
+        // upcoming week strip, and class list — the manual page itself
+        // is still reachable from its own nav entry, it's just no
+        // longer what mobile Home shows.
         const isMobile = window.innerWidth <= 768;
 
         if (isMobile) {
-            apiArea.innerHTML = manualHtml;
+            apiArea.innerHTML = renderMobileHomePanel(snapshot);
+            window.loadMobileHomeClasses();
         } else {
             apiArea.innerHTML = `
                 <div class="dashboard-home-layout">
@@ -800,6 +805,207 @@ function renderSnapshotPanel(data) {
     html += `<div class="snap-panel-title snap-panel-title--spaced">Calendar & Reminders</div>
          <div id="snap-calendar"></div>`;
     return html;
+}
+
+// ─────────────────────────────────────────────
+// MOBILE HOME PANEL
+// Three sections: Recent activity (trail), Upcoming (week strip +
+// event rows), Your classes (name + learner count). Built from the
+// same get_dashboard_snapshot.php payload renderSnapshotPanel() uses
+// on desktop, plus a dedicated classes-with-counts fetch.
+// ─────────────────────────────────────────────
+
+const MOBILE_TRAIL_ICONS = {
+    quiz: {
+        color: '#4fd1c5',
+        svg: '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#4fd1c5" stroke-width="2" fill="none"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+    },
+    assignment: {
+        color: '#a78bfa',
+        svg: '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#a78bfa" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
+    },
+    announcement: {
+        color: '#f59e0b',
+        svg: '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#f59e0b" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'
+    },
+    resource: {
+        color: '#f472b6',
+        svg: '<svg viewBox="0 0 24 24" width="14" height="14" stroke="#f472b6" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'
+    }
+};
+
+const MOBILE_TRAIL_VERB = {
+    quiz:         'Created quiz',
+    assignment:   'Created assignment',
+    announcement: 'Posted announcement to',
+    resource:     'Uploaded resource'
+};
+
+// Where each trail-item type opens on tap. Mirrors openTeacherSnapshotDetail's
+// type dispatch — resources aren't wired into that function yet, so a
+// resource tap is a no-op until a resource detail route exists.
+function mobileTrailOnclick(item) {
+    if (item.type === 'resource') return '';
+    return `openTeacherSnapshotDetail('${item.type}', ${item.id})`;
+}
+
+function renderMobileTrail(trail) {
+    if (!trail || trail.length === 0) {
+        return `
+            <div class="mh-empty-card">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8b949e" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <div class="mh-empty-title">Nothing yet</div>
+                <div class="mh-empty-sub">Quizzes, assignments, announcements, and resources you create will show up here.</div>
+            </div>`;
+    }
+
+    return trail.map((item, i) => {
+        const meta  = MOBILE_TRAIL_ICONS[item.type] || MOBILE_TRAIL_ICONS.assignment;
+        const verb  = MOBILE_TRAIL_VERB[item.type] || 'Created';
+        const isLast = i === trail.length - 1;
+        const onclick = mobileTrailOnclick(item);
+        return `
+            <div class="mh-trail-item"${onclick ? ` onclick="${onclick}"` : ''}>
+                <div class="mh-trail-line">
+                    <div class="mh-trail-dot" style="background:${meta.color}22;">${meta.svg}</div>
+                    ${isLast ? '' : '<div class="mh-trail-connector"></div>'}
+                </div>
+                <div class="mh-trail-content">
+                    <div class="mh-trail-text">${verb} <b>${item.title}</b>${item.class_name ? ` &middot; ${item.class_name}` : ''}</div>
+                    <div class="mh-trail-time">${item.time_label}</div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+const WEEK_EVENT_META = {
+    assignment: { color: '#a78bfa', dot: 'dot-assignment' },
+    quiz:       { color: '#4fd1c5', dot: 'dot-quiz' },
+    academic:   { color: '#f472b6', dot: 'dot-academic' },
+    reminder:   { color: '#f59e0b', dot: 'dot-reminder' }
+};
+
+function renderMobileWeekStrip(weekEvents, weekStart) {
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const start = new Date(weekStart + 'T00:00:00');
+    // weekStart from the backend is a Monday; shift so the strip still
+    // renders Sun-first to match the existing learner week-strip look.
+    const monday = new Date(start);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() - 1);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const eventsByDate = {};
+    (weekEvents || []).forEach(e => {
+        if (!eventsByDate[e.date]) eventsByDate[e.date] = [];
+        eventsByDate[e.date].push(e);
+    });
+
+    let dayCells = '';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(sunday);
+        d.setDate(sunday.getDate() + i);
+        const dateStr = d.toISOString().slice(0,10);
+        const isToday = d.getTime() === today.getTime();
+        const hasEvents = !!eventsByDate[dateStr];
+        dayCells += `
+            <div class="mh-week-day">
+                <span class="mh-week-day-label">${days[i].toUpperCase()}</span>
+                <span class="mh-week-day-num${isToday ? ' mh-week-day-today' : ''}">${d.getDate()}</span>
+                ${hasEvents ? '<span class="mh-week-day-dot"></span>' : ''}
+            </div>`;
+    }
+
+    const monthLabel = sunday.toLocaleString('default', { month: 'short', year: 'numeric' }).toUpperCase();
+
+    let rowsHtml = '';
+    if (!weekEvents || weekEvents.length === 0) {
+        rowsHtml = `<div class="mh-week-empty">Nothing on the calendar this week.</div>`;
+    } else {
+        rowsHtml = weekEvents.map(e => {
+            const meta = WEEK_EVENT_META[e.type] || WEEK_EVENT_META.reminder;
+            const d = new Date(e.date + 'T00:00:00');
+            const dayLabel = d.toLocaleString('default', { weekday: 'short', day: 'numeric', month: 'short' });
+            return `
+                <div class="mh-week-row">
+                    <span class="mh-week-row-dot" style="background:${meta.color};"></span>
+                    <div class="mh-week-row-content">
+                        <div class="mh-week-row-title">${e.title}</div>
+                        <div class="mh-week-row-sub">
+                            <span class="mh-week-row-pill" style="background:${meta.color}22;color:${meta.color};">${e.label}</span>
+                            ${e.class_name ? ` &middot; ${e.class_name}` : ''} &middot; ${dayLabel}
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    return `
+        <div class="mh-week-month-label">${monthLabel}</div>
+        <div class="mh-week-strip">${dayCells}</div>
+        <div class="mh-week-rows">${rowsHtml}</div>`;
+}
+
+function renderMobileClassList() {
+    // Populated async by loadMobileHomeClasses() once the fetch resolves.
+    return `<div id="mh-class-list" class="mh-class-list"><div class="mh-class-loading">Loading classes...</div></div>`;
+}
+
+window.loadMobileHomeClasses = async function() {
+    const container = document.getElementById('mh-class-list');
+    if (!container) return;
+    try {
+        const res  = await fetch('api/teacher/get_teacher_classes_summary.php');
+        const data = await res.json();
+        const classes = data.classes || [];
+
+        if (classes.length === 0) {
+            container.innerHTML = `<div class="mh-class-loading">No classes assigned yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = classes.map(c => {
+            const initials = c.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase();
+            return `
+                <div class="mh-class-row" onclick="window.openTeacherClassFromHome(${c.id})">
+                    <div class="mh-class-avatar">${initials}</div>
+                    <div class="mh-class-info">
+                        <div class="mh-class-name">${c.name}${c.subject_name ? ` — ${c.subject_name}` : ''}</div>
+                        <div class="mh-class-sub">${c.learner_count} learner${c.learner_count !== 1 ? 's' : ''}</div>
+                    </div>
+                    <svg class="mh-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="#6e7681" stroke-width="2" fill="none"><path d="M9 18l6-6-6-6"/></svg>
+                </div>`;
+        }).join('');
+    } catch (e) {
+        container.innerHTML = `<div class="mh-class-loading">Failed to load classes.</div>`;
+    }
+};
+
+// Placeholder hook: wire this to whatever "open this class" flow
+// already exists for the class-picker (class-picker.js) once the
+// mobile class-hub destination is decided.
+window.openTeacherClassFromHome = function(classId) {
+    console.log('Open class', classId);
+};
+
+function renderMobileHomePanel(snapshot) {
+    const trailHtml = renderMobileTrail(snapshot.trail);
+    const weekHtml  = renderMobileWeekStrip(snapshot.week_events, snapshot.week_start);
+    const classesHtml = renderMobileClassList();
+
+    return `
+        <div class="mh-home">
+            <div class="mh-section-label mh-section-label--first">Recent activity</div>
+            <div class="mh-trail">${trailHtml}</div>
+
+            <div class="mh-section-label">Upcoming</div>
+            <div class="mh-upcoming">${weekHtml}</div>
+
+            <div class="mh-section-label">Your classes</div>
+            ${classesHtml}
+        </div>`;
 }
 
     // ─────────────────────────────────────────────
