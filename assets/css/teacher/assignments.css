@@ -252,8 +252,8 @@
 .as-mobile-folder-label {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
+    gap: 12px;
+    padding: 16px 18px;
     font-size: 13px;
     font-weight: 800;
     color: #c9d1d9;
@@ -262,15 +262,18 @@
 }
 /* The shared buildCollapsibleClassGroup component renders its chevron
    as the first child of this flex row, giving the desktop-sidebar
-   arrow-then-label order by default. Mobile wants folder-icon, class
-   name, count on the left and the chevron alone on the right (same
-   as the learner parent-folder row), so the chevron is reordered to
-   the end here without touching the shared component. Folder icon,
-   name and count are also explicitly ordered so their sequence
-   doesn't depend on DOM position. */
+   arrow-then-label order by default. The learner parent-folder row
+   (.las-mobile-folder-header in the learner CSS) instead writes its
+   chevron directly as the last child and gives the name flex:1, so
+   the name absorbs the row's remaining space and the count pill +
+   chevron land together on the right for free. Reproducing that here:
+   the name gets flex:1, and only the chevron needs reordering to the
+   end, since it's the one piece the shared component still puts out
+   of place. */
 .as-mobile-folder-label > .tchr-sidebar-class-chevron {
     order: 4;
-    margin-left: auto;
+    flex-shrink: 0;
+    color: #555e6a;
 }
 .as-mobile-folder-icon {
     order: 1;
@@ -280,14 +283,24 @@
 }
 .as-mobile-folder-name {
     order: 2;
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+/* Pill styled to match the learner side's .las-mobile-folder-count
+   exactly (same font-size, weight, background, radius, padding). */
 .as-mobile-folder-count {
     order: 3;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     color: #8b949e;
-    background: rgba(255,255,255,0.06);
-    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
     padding: 2px 8px;
     flex-shrink: 0;
 }
