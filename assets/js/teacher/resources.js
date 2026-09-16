@@ -146,7 +146,15 @@ function renderTeacherResources(data) {
 
         <!-- ═══ MOBILE LIST: class-grouped collapsible folders ═══ -->
         <div class="rs-mobile-list">
-            ${window.buildTeacherSearchBar('rs', { mobile: true, placeholder: 'Search resources...' })}`;
+            ${window.buildTeacherSearchBar('rs', { mobile: true, placeholder: 'Search resources...' })}
+            <div class="teacher-grades-info rs-mobile-info-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none" class="rs-info-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Teachers can only open/view resources on desktop.</span>
+            </div>`;
 
     if (!data || data.length === 0) {
         html += `<p class="teacher-empty-state">No resources uploaded yet.</p>`;

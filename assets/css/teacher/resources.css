@@ -135,6 +135,26 @@
     }
 }
 
+/* ── Mobile info pill: resources-scoped orange override ──
+   .teacher-grades-info is a shared class (borrowed from elsewhere,
+   see announcements.css) whose base border/background/icon are teal —
+   same borrowed-class pattern already fixed elsewhere in this app.
+   Scope the color override to resources only via this added class,
+   using resources' own signature orange (#f28c38, already used for
+   this page's file/folder icons) rather than touching the shared
+   class globally. Text color is left as the shared class's own
+   #8b949e — only the border, background tint, and icon go orange.
+   Mobile only. */
+@media (max-width: 899px) {
+    .rs-mobile-info-pill {
+        border-color: rgba(242,140,56,0.35) !important;
+        background: rgba(242,140,56,0.08) !important;
+    }
+    .rs-mobile-info-pill .rs-info-icon {
+        stroke: #f28c38 !important;
+    }
+}
+
 /* Real structure produced by buildCollapsibleClassGroup (dashboard.js):
    <div class="rs-mobile-folder-label tchr-sidebar-class-label--toggle">
        <svg class="tchr-sidebar-class-chevron">...</svg>
