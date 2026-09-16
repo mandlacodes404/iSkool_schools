@@ -293,10 +293,15 @@ function buildMobileSBOFolders(briefs) {
                 </div>`;
         });
 
+        const folderIcon = `
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sbo-mobile-folder-icon">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>`;
+
         html += window.buildCollapsibleClassGroup(
             mobileGroupId,
             'sbo-mobile-folder-label',
-            `${group.class_name} <span class="sbo-mobile-folder-count">${group.items.length}</span>`,
+            `${folderIcon}<span class="sbo-mobile-folder-name">${group.class_name}</span><span class="sbo-mobile-folder-count">${group.items.length}</span>`,
             itemsHtml
         );
     });

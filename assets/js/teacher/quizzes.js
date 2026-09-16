@@ -451,24 +451,81 @@ function renderTeacherQuizzes(data) {
                 }
             }
 
+            /* Real structure produced by buildCollapsibleClassGroup
+               (dashboard.js):
+               <div class="qz-mobile-folder-label tchr-sidebar-class-label--toggle">
+                   <svg class="tchr-sidebar-class-chevron">...</svg>
+                   <span>[folder icon][name][count]</span>
+               </div>
+               The chevron really is first in the DOM (this is the
+               desktop sidebar's arrow-then-label convention, reused
+               here). Our folder icon, name and count aren't direct
+               children of .qz-mobile-folder-label at all — the shared
+               component wraps them in one bare <span>. So the fix
+               isn't to reorder the chevron; it's to flip which side
+               of the row the chevron sits on, then make that inner
+               <span> its own flex row so the icon, name and count lay
+               out correctly inside it. Matches the fix already
+               applied to assignments.css / announcements.css /
+               evaluations.css / grades.css / resources.css. */
             .qz-mobile-folder-label {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 14px 16px;
+                /* .tchr-sidebar-class-label--toggle (dashboard.css)
+                   also sets gap: 6px on this same element. This inline
+                   <style> loads after dashboard.css (see note above on
+                   .qz-mobile-list .tchr-mobile-search-wrap), so this
+                   override always wins regardless — set explicitly
+                   anyway so the rule reads correctly on its own. */
+                gap: 0;
+                padding: 16px 18px;
                 font-size: 13px;
                 font-weight: 800;
                 color: #c9d1d9;
                 border-bottom: 1px solid rgba(255,255,255,0.06);
                 box-sizing: border-box;
             }
-            .qz-mobile-folder-count {
+            /* Push the chevron (first DOM child) to the far right,
+               matching the learner parent-folder row, without
+               touching the shared component. */
+            .qz-mobile-folder-label > .tchr-sidebar-class-chevron {
                 margin-left: auto;
-                font-size: 11px;
-                font-weight: 700;
+                flex-shrink: 0;
+                color: #555e6a;
+            }
+            /* The wrapper span becomes the real flex row for icon +
+               name + count. */
+            .qz-mobile-folder-label > span {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 1;
+                min-width: 0;
+            }
+            .qz-mobile-folder-icon {
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+            }
+            .qz-mobile-folder-name {
+                flex: 1;
+                min-width: 0;
+                font-size: 16px;
+                font-weight: 800;
+                color: #e2e8f0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            /* Pill styled to match the learner side's
+               .las-mobile-folder-count exactly (same font-size,
+               weight, background, radius, padding). */
+            .qz-mobile-folder-count {
+                font-size: 12px;
+                font-weight: 600;
                 color: #8b949e;
-                background: rgba(255,255,255,0.06);
-                border-radius: 999px;
+                background: rgba(255,255,255,0.05);
+                border-radius: 20px;
                 padding: 2px 8px;
                 flex-shrink: 0;
             }
@@ -609,10 +666,15 @@ function renderTeacherQuizzes(data) {
                     </div>`;
             });
 
+            const folderIcon = `
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="qz-mobile-folder-icon">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>`;
+
             html += window.buildCollapsibleClassGroup(
                 mobileGroupId,
                 'qz-mobile-folder-label',
-                `${escapeHtml(className)} <span class="qz-mobile-folder-count">${quizzes.length}</span>`,
+                `${folderIcon}<span class="qz-mobile-folder-name">${escapeHtml(className)}</span><span class="qz-mobile-folder-count">${quizzes.length}</span>`,
                 itemsHtml
             );
         });
