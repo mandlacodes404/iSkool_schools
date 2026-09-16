@@ -290,6 +290,27 @@
     font-size: 12px;
 }
 
+/* ── Mobile info pill + term pill: grades-scoped green override ──
+   .teacher-grades-info / .teacher-term-divider are shared classes
+   (borrowed from elsewhere) whose base border/background are teal.
+   Same borrowed-class pattern already fixed elsewhere on this page —
+   scope the color override to grades only via these added classes,
+   rather than touching the shared classes globally. Mobile only. */
+@media (max-width: 899px) {
+    .gr-mobile-info-pill {
+        border-color: rgba(34,197,94,0.35) !important;
+        background: rgba(34,197,94,0.08) !important;
+    }
+    .gr-mobile-info-pill .gr-info-icon {
+        stroke: #22c55e !important;
+    }
+
+    .gr-mobile-term-pill {
+        border-color: #22c55e !important;
+        background: rgba(34,197,94,0.08) !important;
+    }
+}
+
 /* ── Formerly inline styles ── */
 
 .gr-error-message {

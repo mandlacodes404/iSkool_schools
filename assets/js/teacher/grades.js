@@ -180,8 +180,8 @@ function renderTeacherGrades(data) {
         <!-- ═══ MOBILE LIST ═══ -->
         <div class="gr-mobile-list">
             ${window.buildTeacherSearchBar('gr', { mobile: true, placeholder: 'Search assessments...' })}
-            <div class="teacher-grades-info">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" class="gr-info-icon">
+            <div class="teacher-grades-info gr-mobile-info-pill">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#22c55e" stroke-width="2" fill="none" class="gr-info-icon">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -193,7 +193,7 @@ function renderTeacherGrades(data) {
         html += `<p class="teacher-empty-state">No assessments found.</p>`;
     } else {
         data.forEach(termData => {
-            html += `<div class="teacher-term-divider">Term ${termData.term}</div>`;
+            html += `<div class="teacher-term-divider gr-mobile-term-pill">Term ${termData.term}</div>`;
 
             termData.classes.forEach((cls, clsIdx) => {
                 // Separate id namespace from desktop's gr-class-group-{term}-{idx}
