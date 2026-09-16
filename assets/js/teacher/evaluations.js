@@ -210,7 +210,7 @@ function renderTeacherEvaluations(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="ev-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#1e90ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="ev-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 
