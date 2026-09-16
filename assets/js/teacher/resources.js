@@ -169,13 +169,11 @@ function renderTeacherResources(data) {
             group.items.forEach(item => {
                 const isVideo = item.resource_type === 'video';
                 const icon = getTeacherFileIcon(item.ext, isVideo, '#f28c38', 1.2);
-                const clickAction = isVideo
-                    ? `openTeacherVideoPanel(${JSON.stringify(item).replace(/"/g, '&quot;')})`
-                    : `openTeacherResource('resources/${item.filename}')`;
+                // Open/view is desktop-only (see rs-mobile-info-pill above the
+                // list) — the row itself is no longer clickable on mobile.
+                // Delete keeps working via its own button below, unaffected.
                 itemsHtml += `
-                    <div class="rs-mobile-row" data-title="${item.title}" role="button" tabindex="0"
-                        onclick="${clickAction}"
-                        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${clickAction}}">
+                    <div class="rs-mobile-row" data-title="${item.title}">
                         <div class="rs-mobile-row-icon">${icon}</div>
                         <div class="rs-mobile-row-body">
                             <div class="rs-mobile-row-title">${item.title}</div>

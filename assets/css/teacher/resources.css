@@ -230,12 +230,13 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    cursor: pointer;
+    /* No cursor: pointer / :active tap-feedback here — the row itself is
+       no longer clickable (open/view is desktop-only, see the info pill
+       above the list and resources.js). Only the delete button below
+       remains interactive, with its own cursor/hover/active states. */
     border-bottom: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.15s ease;
     box-sizing: border-box;
 }
-.rs-mobile-row:active { background: rgba(255,255,255,0.03); }
 .rs-mobile-row-icon { flex-shrink: 0; opacity: 0.9; }
 .rs-mobile-row-body { flex: 1; min-width: 0; }
 .rs-mobile-row-title {
