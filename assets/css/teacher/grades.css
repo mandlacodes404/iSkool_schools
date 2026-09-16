@@ -290,12 +290,15 @@
     font-size: 12px;
 }
 
-/* ── Mobile info pill + term pill: grades-scoped green override ──
-   .teacher-grades-info / .teacher-term-divider are shared classes
-   (borrowed from elsewhere) whose base border/background are teal.
-   Same borrowed-class pattern already fixed elsewhere on this page —
-   scope the color override to grades only via these added classes,
-   rather than touching the shared classes globally. Mobile only. */
+/* ── Mobile term pill: made to match the info pill's style ──
+   .teacher-term-divider is a shared class (solid teal chip, dark text —
+   see announcements.css). Per request, the term pill now takes on the
+   info pill's (.teacher-grades-info) look instead: a soft green-tinted
+   box with a green border and the same #8b949e muted text color,
+   rather than teal.
+   The info pill itself is untouched — its border/background become
+   green here, but its text stays the original #8b949e; it was never
+   supposed to turn green. Mobile only. */
 @media (max-width: 899px) {
     .gr-mobile-info-pill {
         border-color: rgba(34,197,94,0.35) !important;
@@ -306,8 +309,17 @@
     }
 
     .gr-mobile-term-pill {
-        border-color: #22c55e !important;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border: 1px solid rgba(34,197,94,0.35) !important;
         background: rgba(34,197,94,0.08) !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        color: #8b949e !important;
+        letter-spacing: normal !important;
     }
 }
 
