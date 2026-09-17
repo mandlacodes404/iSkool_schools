@@ -1127,9 +1127,13 @@ function renderMobileHomePanel(snapshot) {
     const trailHtml = renderMobileTrail(snapshot.trail);
     const weekHtml  = renderMobileWeekStrip(snapshot.week_events, snapshot.week_start);
     const classesHtml = renderMobileClassList();
+    const schoolHtml = snapshot.school_name
+        ? `<div class="mh-school-flat"><span class="mh-school-dot"></span>${snapshot.school_name}</div>`
+        : '';
 
     return `
         <div class="mh-home">
+            ${schoolHtml}
             <div class="mh-section-label mh-section-label--first">Recent activity</div>
             <div class="mh-trail">${trailHtml}</div>
 

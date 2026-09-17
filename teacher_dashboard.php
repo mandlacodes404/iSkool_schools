@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=3.9">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.6">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
@@ -1117,7 +1117,7 @@ window.removeTeacherProfilePicture = function() {
 })();
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=8.4"></script>
+<script src="assets/js/teacher/dashboard.js?v=8.5"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

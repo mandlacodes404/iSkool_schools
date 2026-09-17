@@ -270,6 +270,15 @@ usort($week_events, function ($a, $b) {
     return strtotime($a['date']) <=> strtotime($b['date']);
 });
 
+// ── NEW: School name for the mobile home header ──
+// Same source/fallback as the learner-side api/learner/get_my_class.php,
+// just without any class lookup alongside it.
+$school_name = 'My School'; // fallback only
+$schoolResult = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+if ($schoolRow = $schoolResult->fetch_assoc()) {
+    $school_name = $schoolRow['setting_value'];
+}
+
 echo json_encode([
     // Existing desktop payload — unchanged shape, still consumed by
     // renderSnapshotPanel() on desktop.
@@ -300,4 +309,5 @@ echo json_encode([
     'trail'       => $trail,
     'week_events' => $week_events,
     'week_start'  => $monday,
+    'school_name' => $school_name,
 ]);

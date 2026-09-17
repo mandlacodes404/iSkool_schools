@@ -451,6 +451,38 @@
     margin-top: 8px;
 }
 
+/* ── School name header (mobile home, teacher) ──
+   Same font recipe as the learner-side .lh-class-flat-school
+   (manual.css), school name only — no class line underneath. */
+.mh-school-flat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 20px;
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    color: #e2e8f0;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mh-school-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3fb950;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.6);
+    animation: lh-class-dot-pulse 2s ease-out infinite;
+}
+@keyframes lh-class-dot-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(63, 185, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+
 /* ── Recent activity trail ── */
 .mh-trail {
     display: flex;
