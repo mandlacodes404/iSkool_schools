@@ -409,6 +409,22 @@
     padding: 4px 0 24px;
 }
 
+/* #api-content-area carries a 20px padding on mobile (zeroed only at
+   >=900px, see the shared rule earlier in this file). Cancelling it
+   here with matching negative margins lets .mh-home span the full
+   device width — same edge-to-edge technique .an-mobile-list uses in
+   announcements.css. Horizontal inset is then re-applied directly:
+   .mh-section-label keeps its existing 20px (unchanged), while
+   .mh-trail / .mh-week-rows drop to 16px to match .an-mobile-row's
+   inset on the Announcements page — independent of whatever
+   #api-content-area's own padding is. */
+@media (max-width: 899px) {
+    .mh-home {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
+
 /* Clears the fixed mobile bottom nav (82px) + device safe area, so the
    last item in the home panel isn't hidden behind it when scrolled all
    the way down. Matches the convention used on .an-mobile-list
@@ -440,6 +456,11 @@
     display: flex;
     flex-direction: column;
     padding: 0 20px;
+}
+@media (max-width: 899px) {
+    .mh-trail {
+        padding: 0 16px;
+    }
 }
 .mh-trail-item {
     display: flex;
@@ -573,6 +594,11 @@
     flex-direction: column;
     padding: 0 20px;
 }
+@media (max-width: 899px) {
+    .mh-week-rows {
+        padding: 0 16px;
+    }
+}
 .mh-week-row {
     display: flex;
     align-items: flex-start;
@@ -625,6 +651,11 @@
     display: flex;
     flex-direction: column;
     padding: 0 20px;
+}
+@media (max-width: 899px) {
+    .mh-class-list {
+        padding: 0 16px;
+    }
 }
 .mh-class-row {
     display: flex;
