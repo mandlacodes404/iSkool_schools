@@ -972,7 +972,7 @@ window.loadMobileHomeClasses = async function() {
         container.innerHTML = classes.map(c => {
             const initials = c.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase();
             const subjectLine = c.needs_subject
-                ? `<span class="mh-class-add-subject" onclick="event.stopPropagation(); window.openAddSubjectFlow(${c.id})">+ Add subject</span>`
+                ? `<span class="mh-class-add-subject" onclick="event.stopPropagation(); window.openAddSubjectFlow(${c.id}, '${c.name.replace(/'/g, "\\'")}')">+ Add subject</span>`
                 : `${c.subject_name}`;
             return `
                 <div class="mh-class-row" onclick="window.openTeacherClassFromHome(${c.id})">
@@ -989,26 +989,139 @@ window.loadMobileHomeClasses = async function() {
     }
 };
 
-// Placeholder hooks — both need a real UI (modal or dedicated page).
-// openAddClassFlow: dropdown of the school's classes not yet linked to
-// this teacher via teacher_subjects, so the teacher can add one before
-// posting any content there. openAddSubjectFlow: same teacher_subjects
-// table, pre-filled to a specific class, just asking for subject_name.
-// Both should call loadMobileHomeClasses() again on success to refresh
-// the list without a full page reload.
+// ── Add class / Add subject modal ──
+// Both flows write to teacher_subjects via save_teacher_subject.php,
+// so they share one modal. "Add class" mode shows a class dropdown
+// (populated from get_unlinked_classes.php) plus a subject field.
+// "Add subject" mode locks the class (already known) and shows just
+// the subject field. Same open/close/save shape as reminderModal.
+
 window.openAddClassFlow = function() {
-    console.log('Open add-class flow');
-};
-window.openAddSubjectFlow = function(classId) {
-    console.log('Open add-subject flow for class', classId);
+    const modal = document.getElementById('teacherSubjectModal');
+    if (!modal) return;
+
+    document.getElementById('tsModalTitle').textContent = 'Add a class';
+    document.getElementById('tsClassFieldWrap').style.display = 'block';
+    document.getElementById('tsSubjectInput').value = '';
+    document.getElementById('tsError').style.display = 'none';
+    document.getElementById('tsLockedClassId').value = '';
+
+    window.loadUnlinkedClassesIntoModal();
+    modal.classList.add('open');
 };
 
-// Placeholder hook: wire this to whatever "open this class" flow
-// already exists for the class-picker (class-picker.js) once the
-// mobile class-hub destination is decided.
-window.openTeacherClassFromHome = function(classId) {
-    console.log('Open class', classId);
+window.openAddSubjectFlow = function(classId, className) {
+    const modal = document.getElementById('teacherSubjectModal');
+    if (!modal) return;
+
+    document.getElementById('tsModalTitle').textContent = `Add subject — ${className || 'this class'}`;
+    document.getElementById('tsClassFieldWrap').style.display = 'none';
+    document.getElementById('tsSubjectInput').value = '';
+    document.getElementById('tsError').style.display = 'none';
+    document.getElementById('tsLockedClassId').value = classId;
+
+    modal.classList.add('open');
 };
+
+window.closeTeacherSubjectModal = function() {
+    const modal = document.getElementById('teacherSubjectModal');
+    if (modal) modal.classList.remove('open');
+};
+
+window.loadUnlinkedClassesIntoModal = async function() {
+    const select = document.getElementById('tsClassSelect');
+    if (!select) return;
+    select.innerHTML = `<option value="">Loading classes...</option>`;
+    try {
+        const res  = await fetch('api/teacher/get_unlinked_classes.php');
+        const data = await res.json();
+        const classes = data.classes || [];
+        if (classes.length === 0) {
+            select.innerHTML = `<option value="">No more classes to add</option>`;
+            return;
+        }
+        select.innerHTML = `<option value="">Select a class</option>` +
+            classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    } catch (e) {
+        select.innerHTML = `<option value="">Failed to load classes</option>`;
+    }
+};
+
+window.saveTeacherSubject = async function() {
+    const lockedClassId = document.getElementById('tsLockedClassId').value;
+    const isAddClass = !lockedClassId;
+    const classId = isAddClass
+        ? document.getElementById('tsClassSelect').value
+        : lockedClassId;
+    const subjectName = document.getElementById('tsSubjectInput').value.trim();
+    const err = document.getElementById('tsError');
+
+    if (isAddClass && !classId) {
+        err.textContent = 'Please select a class.'; err.style.display = 'block'; return;
+    }
+    if (!subjectName) {
+        err.textContent = 'Please enter a subject.'; err.style.display = 'block'; return;
+    }
+
+    try {
+        const res = await fetch('api/teacher/save_teacher_subject.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+            body: JSON.stringify({ class_id: classId, subject_name: subjectName })
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeTeacherSubjectModal();
+            window.loadMobileHomeClasses();
+        } else {
+            err.textContent = data.error || 'Failed to save.';
+            err.style.display = 'block';
+        }
+    } catch (e) {
+        err.textContent = 'Connection error.';
+        err.style.display = 'block';
+    }
+};
+
+// Navigates to a class's mobile hub. Mirrors the class-picker's own
+// selection behaviour (class-picker.js) by writing the same session
+// value it reads, then routing to the shared class-scoped view — swap
+// the two lines below for whatever that view's actual entry point is
+// if it differs from this guess.
+window.openTeacherClassFromHome = function(classId) {
+    if (window.selectClassById) {
+        window.selectClassById(classId);
+    } else {
+        window.location.hash = `#class/${classId}`;
+    }
+};
+
+const TEACHER_SUBJECT_MODAL_HTML = `
+<div id="teacherSubjectModal" class="mini-cal-modal">
+    <div class="mini-cal-modal-box">
+        <div class="mini-cal-modal-header">
+            <span id="tsModalTitle" class="mini-cal-modal-title">Add a class</span>
+            <button onclick="closeTeacherSubjectModal()" class="mini-cal-modal-close">&times;</button>
+        </div>
+
+        <div id="tsClassFieldWrap">
+            <label class="teacher-modal-label">Class</label>
+            <select id="tsClassSelect" class="teacher-modal-input">
+                <option value="">Loading classes...</option>
+            </select>
+        </div>
+        <input type="hidden" id="tsLockedClassId" value="">
+
+        <label class="teacher-modal-label mini-cal-form-label-spaced">Subject</label>
+        <input type="text" id="tsSubjectInput" class="teacher-modal-input" placeholder="e.g. Mathematics">
+
+        <div id="tsError" class="mini-cal-form-error"></div>
+        <div class="mini-cal-form-actions">
+            <button onclick="closeTeacherSubjectModal()" class="teacher-modal-cancel mini-cal-form-btn-half">Cancel</button>
+            <button onclick="saveTeacherSubject()" class="teacher-modal-submit mini-cal-form-btn-half">Save</button>
+        </div>
+    </div>
+</div>`;
 
 function renderMobileHomePanel(snapshot) {
     const trailHtml = renderMobileTrail(snapshot.trail);
@@ -1037,6 +1150,7 @@ function renderMobileHomePanel(snapshot) {
                 <b>+ Add class</b>, and name your subject for each so learners see it instead of your name.
             </div>
             ${classesHtml}
+            ${TEACHER_SUBJECT_MODAL_HTML}
         </div>`;
 }
 
