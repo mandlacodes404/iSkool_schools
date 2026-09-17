@@ -459,6 +459,7 @@
     align-items: center;
     gap: 7px;
     padding: 0 20px;
+    margin-bottom: 8px;
     font-family: 'Fraunces', serif;
     font-size: 19px;
     font-weight: 500;
@@ -746,7 +747,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    margin: 24px 0 0;
+    margin: 32px 0 0;
 }
 .mh-classes-header .mh-section-label--inline {
     display: flex;
