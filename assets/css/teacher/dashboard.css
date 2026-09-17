@@ -490,6 +490,36 @@
     margin-top: 2px;
 }
 
+/* Mobile-only (~25% bump): larger trail icon/dot, trail text, trail
+   meta line, and upcoming row title. Desktop/tablet keep the base
+   sizes above untouched. Icon size is set via CSS here (not the
+   inline width/height on each MOBILE_TRAIL_ICONS svg string in
+   dashboard.js) since CSS width/height wins over an SVG's own
+   presentation attributes — no JS change needed. */
+@media (max-width: 768px) {
+    .mh-trail-line {
+        width: 35px;
+    }
+    .mh-trail-dot {
+        width: 35px;
+        height: 35px;
+    }
+    .mh-trail-dot svg {
+        width: 18px;
+        height: 18px;
+    }
+    .mh-trail-text {
+        font-size: 17px;
+    }
+    .mh-trail-time {
+        font-size: 14.5px;
+    }
+    .mh-week-row-title {
+        font-size: 17px;
+    }
+}
+
+
 /* ── Empty state (shared look for trail / week list) ── */
 .mh-empty-card {
     display: flex;
