@@ -663,3 +663,60 @@
     font-size: 12.5px;
     color: #6e7681;
 }
+
+/* ── "Your classes" header row: label + info icon + add-class button ── */
+.mh-classes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    margin: 24px 0 0;
+}
+.mh-classes-header .mh-section-label--inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+}
+.mh-info-icon {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.8;
+}
+.mh-info-icon:hover {
+    opacity: 1;
+}
+.mh-add-class-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4fd1c5;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.mh-classes-info {
+    margin: 10px 20px 4px;
+    padding: 12px 14px;
+    background: rgba(79,209,197,0.08);
+    border: 1px solid rgba(79,209,197,0.18);
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #9fb0b8;
+}
+.mh-classes-info b {
+    color: #4fd1c5;
+    font-weight: 600;
+}
+.mh-classes-info--hidden {
+    display: none;
+}
+
+/* ── Inline "+ Add subject" prompt inside a class row's subtitle ── */
+.mh-class-add-subject {
+    color: #4fd1c5;
+    font-weight: 600;
+    cursor: pointer;
+}

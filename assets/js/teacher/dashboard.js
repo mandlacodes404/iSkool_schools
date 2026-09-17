@@ -962,18 +962,24 @@ window.loadMobileHomeClasses = async function() {
         const classes = data.classes || [];
 
         if (classes.length === 0) {
-            container.innerHTML = `<div class="mh-class-loading">No classes assigned yet.</div>`;
+            container.innerHTML = `
+                <div class="mh-class-loading">
+                    No classes yet — post something to a class, or add one below.
+                </div>`;
             return;
         }
 
         container.innerHTML = classes.map(c => {
             const initials = c.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase();
+            const subjectLine = c.needs_subject
+                ? `<span class="mh-class-add-subject" onclick="event.stopPropagation(); window.openAddSubjectFlow(${c.id})">+ Add subject</span>`
+                : `${c.subject_name}`;
             return `
                 <div class="mh-class-row" onclick="window.openTeacherClassFromHome(${c.id})">
                     <div class="mh-class-avatar">${initials}</div>
                     <div class="mh-class-info">
-                        <div class="mh-class-name">${c.name}${c.subject_name ? ` — ${c.subject_name}` : ''}</div>
-                        <div class="mh-class-sub">${c.learner_count} learner${c.learner_count !== 1 ? 's' : ''}</div>
+                        <div class="mh-class-name">${c.name}</div>
+                        <div class="mh-class-sub">${subjectLine} &middot; ${c.learner_count} learner${c.learner_count !== 1 ? 's' : ''}</div>
                     </div>
                     <svg class="mh-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="#6e7681" stroke-width="2" fill="none"><path d="M9 18l6-6-6-6"/></svg>
                 </div>`;
@@ -981,6 +987,20 @@ window.loadMobileHomeClasses = async function() {
     } catch (e) {
         container.innerHTML = `<div class="mh-class-loading">Failed to load classes.</div>`;
     }
+};
+
+// Placeholder hooks — both need a real UI (modal or dedicated page).
+// openAddClassFlow: dropdown of the school's classes not yet linked to
+// this teacher via teacher_subjects, so the teacher can add one before
+// posting any content there. openAddSubjectFlow: same teacher_subjects
+// table, pre-filled to a specific class, just asking for subject_name.
+// Both should call loadMobileHomeClasses() again on success to refresh
+// the list without a full page reload.
+window.openAddClassFlow = function() {
+    console.log('Open add-class flow');
+};
+window.openAddSubjectFlow = function(classId) {
+    console.log('Open add-subject flow for class', classId);
 };
 
 // Placeholder hook: wire this to whatever "open this class" flow
@@ -1003,10 +1023,27 @@ function renderMobileHomePanel(snapshot) {
             <div class="mh-section-label">Upcoming</div>
             <div class="mh-upcoming">${weekHtml}</div>
 
-            <div class="mh-section-label">Your classes</div>
+            <div class="mh-classes-header">
+                <div class="mh-section-label mh-section-label--inline">
+                    Your classes
+                    <span class="mh-info-icon" onclick="window.toggleMobileHomeInfo()" title="How this list works">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="#6e7681" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    </span>
+                </div>
+                <span class="mh-add-class-btn" onclick="window.openAddClassFlow()">+ Add class</span>
+            </div>
+            <div id="mh-classes-info" class="mh-classes-info mh-classes-info--hidden">
+                Classes you've posted to appear here automatically. Add others you teach with
+                <b>+ Add class</b>, and name your subject for each so learners see it instead of your name.
+            </div>
             ${classesHtml}
         </div>`;
 }
+
+window.toggleMobileHomeInfo = function() {
+    const el = document.getElementById('mh-classes-info');
+    if (el) el.classList.toggle('mh-classes-info--hidden');
+};
 
     // ─────────────────────────────────────────────
     // RESTORE LAST PAGE ON REFRESH
