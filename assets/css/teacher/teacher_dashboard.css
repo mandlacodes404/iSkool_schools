@@ -483,6 +483,16 @@
             }
         }
 
+        /* Thinner icon strokes in the mobile sidebar nav only — desktop
+           keeps the default stroke-width="2" set inline on each SVG in
+           the markup. Matches the learner dashboard treatment. */
+        @media (max-width: 767px) {
+            .sidebar a svg,
+            .sidebar button:not(.desktop-close-btn):not(.round-toggle) svg {
+                stroke-width: 1.3;
+            }
+        }
+
         /* Settings — mobile sidebar only, always-on translucent pill
            (not tied to .active — Settings should look like this at rest,
            unlike the learner "My Class" pill which only lights up when
