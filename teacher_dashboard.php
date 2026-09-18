@@ -954,6 +954,22 @@ window.loadTeacherSettings = function() {
                     </svg>
                 </div>
 
+                <div class="teacher-resource-card" onclick="requestTeacherPush()" style="cursor:pointer;gap:14px;margin-top:8px;">
+                    <div class="teacher-resource-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5" stroke-width="2" fill="none">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
+                    <div class="teacher-resource-info">
+                        <div class="teacher-resource-name">Sync Notifications</div>
+                        <div class="teacher-resource-meta">Not receiving alerts? Tap to sync</div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#8b949e" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
                 <div class="teacher-resource-card" onclick="window.location.href='logout.php'" style="cursor:pointer;gap:14px;margin-top:8px;">
                     <div class="teacher-resource-icon">
                         <svg viewBox="0 0 24 24" width="22" height="22" stroke="#f85149" stroke-width="2" fill="none">
@@ -1115,6 +1131,113 @@ window.removeTeacherProfilePicture = function() {
     `;
     document.head.appendChild(style);
 })();
+</script>
+
+<script>
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+const PUSH_VAPID_PUBLIC_KEY = <?= json_encode(getenv('VAPID_PUBLIC_KEY') ?: 'BLl4HnUrajJk2h5w4P9RlQZpiGgBCO7ZKCwVR2D_jcuvbBEDsm9eBMic1CNa-4E_aoTn4FqjhaJmgS7QIyv7C1w') ?>;
+
+async function registerPushServiceWorker() {
+    const registration = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+    return navigator.serviceWorker.ready.then(() => registration);
+}
+
+if ('serviceWorker' in navigator) {
+    let teacherUpdateReloading = false;
+    const teacherHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data?.type !== 'iskool-update-available') return;
+        if (window.confirm('An iSkool update is available. Refresh now?')) {
+            navigator.serviceWorker.getRegistration('/').then(registration => {
+                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
+            });
+        }
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!teacherHadServiceWorkerController || teacherUpdateReloading) return;
+        teacherUpdateReloading = true;
+        window.location.reload();
+    });
+}
+
+// Saves the browser subscription so announcements/reminders can reach this teacher.
+// The server identifies the signed-in user from the session; no email address
+// is trusted from the browser request.
+async function sendToCatcher(subscription) {
+    const response = await fetch('subscribe_push.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': getCsrfToken(),
+        },
+        body: JSON.stringify({ subscription }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || 'Could not save notification subscription.');
+    }
+    return data;
+}
+
+/**
+ * Runs when the teacher taps "Sync Notifications" in Settings.
+ */
+async function requestTeacherPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        alert('Notifications are not supported by this browser.');
+        return;
+    }
+
+    try {
+        const permission = Notification.permission === 'default'
+            ? await Notification.requestPermission()
+            : Notification.permission;
+        if (permission !== 'granted') {
+            alert('Notifications are ' + permission + '. If blocked, enable them in your browser or device settings.');
+            return;
+        }
+
+        const registration = await registerPushServiceWorker();
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(PUSH_VAPID_PUBLIC_KEY),
+            });
+        }
+        await sendToCatcher(subscription);
+        alert('Notifications are synced.');
+    } catch (err) {
+        console.error('Push subscription failed:', err);
+        alert('Could not enable notifications. Please try Sync Notifications again.');
+    }
+}
+
+/**
+ * Checks if the teacher is already subscribed when the dashboard loads,
+ * and silently re-saves the subscription (e.g. after a browser reinstall).
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        registerPushServiceWorker()
+            .then(registration => registration.pushManager.getSubscription())
+            .then(existingSub => {
+                if (existingSub) return sendToCatcher(existingSub);
+            })
+            .catch(err => console.error('Push subscription sync failed:', err));
+    }
+});
 </script>
 
 <script src="assets/js/teacher/dashboard.js?v=8.5"></script>
