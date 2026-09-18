@@ -1,6 +1,8 @@
 # iSkool Changelog
 
 ## [Unreleased]
+
+## [v1.2.6] - 2026-09-18
 ### Changed
 - Teacher Assignments (Mobile): List separator lines now run edge-to-edge, touching both sides of the screen, instead of stopping short inside a ~20px gutter inherited from the page container. Row/folder-label content padding tightened to a consistent 16px inset on both sides to match, giving long assignment titles more room rather than less (`assignments.css`).
 - Teacher Announcements (Mobile): Rows switched from a rounded card list (background, border, border-radius, gap between cards) to a flat list matching Assignments — edge-to-edge separator lines, no card background. Each row now shows an announcement icon on the left (colour-coded teal for class announcements, orange for school-wide, replacing the previous left-border accent), and folder labels now show an item count badge (`announcements.js`, `announcements.css`).
@@ -20,8 +22,11 @@
 - Teacher Resources (Mobile): Added an info pill below the search bar, matching the style already used on Grades, reading "Teachers can only open/view resources on desktop." — styled in Resources' own orange signature colour (border and tinted background) rather than green (`resources.js`, `resources.css`).
 - Teacher Dashboard (Mobile Home): "Recent activity" and "Upcoming" row titles font-size increased from `13.5px` to `15.5px` for readability (`dashboard.css`).
 - Teacher Dashboard (Mobile Home): Added a school name header at the top of the panel, matching the learner Home's school name line (same font, colour, and pulsing dot), school only — no class name underneath. `get_dashboard_snapshot.php` now also returns `school_name`, sourced the same way as the learner-side `get_my_class.php`, so no extra request is needed on top of the snapshot call already made on load. Slightly increased the spacing below the school name (before "Recent activity") and above the "Your classes" header (after "Upcoming") (`get_dashboard_snapshot.php`, `dashboard.js`, `dashboard.css`).
+- Teacher Dashboard (Mobile): Mobile menu no longer has its right-side border (`border-right: 1px solid rgba(255,255,255,0.18)`) or its rounded right-hand corners (`border-top-right-radius` / `border-bottom-right-radius: 20px`) — both removed inside the `@media (max-width: 768px)` block only, so the desktop sidebar keeps its border and curves (`teacher_dashboard.css`).
+- Teacher Dashboard (Mobile): Browser address/status bar colour now matches the mobile menu while it's open. Added a `setBrowserBarColor()` helper that updates the `<meta name="theme-color">` tag; `toggleSidebar()` calls it with `#1a1919` (the menu's background colour) when the menu opens, and `closeMobileSidebar()` calls it with `#0d1117` (the default theme colour) to reset it when the menu closes (`teacher_dashboard.php`).
 
 ### Fixed
+- Teacher Dashboard (Mobile): Fixed the browser status bar colour being overwritten as soon as the mobile menu opened — `recalcTeacherMobileScrollUI()` (a scroll handler) was unconditionally resetting `theme-color` to the default/page colour on every scroll event, wiping out the menu's colour the moment it was set. The function now checks whether `.sidebar` has the `active` class and skips touching `theme-color` entirely while the menu is open, leaving that job to `toggleSidebar()` and `closeMobileSidebar()` (`dashboard.js`).
 - Teacher Resources (Mobile): Tapping a resource row no longer opens/views the file or video — open/view was already unsupported on mobile per the new info pill above, but the row was still wired to open it. The row's click/keyboard handlers and its `cursor: pointer`/tap-feedback styling were removed; the delete button in the same row is unaffected and still works via its own independent click handler (`resources.js`, `resources.css`).
 
 ## [v1.2.5] - 2026-09-11
