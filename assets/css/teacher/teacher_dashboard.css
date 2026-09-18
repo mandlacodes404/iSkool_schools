@@ -474,6 +474,26 @@
             .sidebar-footer { position: static; margin-top: auto; }
         }
 
+        /* Top nav avatar — mobile only, translucent shadow-like background
+           instead of maroon. Matches the learner dashboard treatment.
+           Letter colour (.initials-sm) is untouched — stays #f4e4e4. */
+        @media (max-width: 767px) {
+            .top-nav-avatar {
+                background: rgba(0, 0, 0, 0.35);
+            }
+        }
+
+        /* Settings — mobile sidebar only, always-on translucent pill
+           (not tied to .active — Settings should look like this at rest,
+           unlike the learner "My Class" pill which only lights up when
+           active). Same rgba(0,0,0,0.35) treatment used above. */
+        @media (max-width: 768px) {
+            .sidebar a[data-page="teacher_settings"] {
+                background: rgba(0, 0, 0, 0.35);
+                border-radius: 999px;
+            }
+        }
+
         /* ── DYNAMIC TOP NAV — mobile only ──────────────────────────────
            Mirrors the learner side's collapsing header: pinned to the top
            of the viewport, transparent border at rest, and only gains its
@@ -668,5 +688,14 @@
             text-transform: uppercase; letter-spacing: -1px;
         }
         @media (max-width: 480px) { .initials-avatar { font-size: 24px; } }
+
+        /* Sidebar profile avatar — mobile menu only, translucent
+           shadow-like background instead of maroon. Matches the learner
+           dashboard treatment. Letter colour is untouched — stays #f4e4e4. */
+        @media (max-width: 767px) {
+            .initials-avatar {
+                background-color: rgba(0, 0, 0, 0.35);
+            }
+        }
 
         .drawer-icon svg { transition: transform 0.3s ease; display: block; }
