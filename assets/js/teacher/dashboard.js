@@ -1459,6 +1459,15 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             const themeColorMeta = document.querySelector('meta[name="theme-color"]');
             const pageColor      = topNavWrapper.getAttribute('data-page-color');
 
+            // While the mobile menu drawer is open, its own toggle logic
+            // (toggleSidebar/closeMobileSidebar in teacher_dashboard.php)
+            // owns the browser's theme-color so it matches the drawer's
+            // background. Skip touching it here or a scroll recalculation
+            // firing while the drawer is open would immediately overwrite
+            // that colour back to the page's own value.
+            const sidebarEl = document.querySelector('.sidebar');
+            const sidebarOpen = sidebarEl && sidebarEl.classList.contains('active');
+
             // Top nav: border appears once scrolled down, transparent at top.
             // Once a page has a signature colour (data-page-color, set by
             // configureTeacherHeader), scrolling also tints the header
@@ -1468,12 +1477,12 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
                 topNavWrapper.classList.add('header-scrolled');
                 if (pageColor) {
                     topNavWrapper.style.background = pageColor;
-                    if (themeColorMeta) themeColorMeta.setAttribute('content', pageColor);
+                    if (themeColorMeta && !sidebarOpen) themeColorMeta.setAttribute('content', pageColor);
                 }
             } else {
                 topNavWrapper.classList.remove('header-scrolled');
                 topNavWrapper.style.background = '';
-                if (themeColorMeta) themeColorMeta.setAttribute('content', '#0d1117');
+                if (themeColorMeta && !sidebarOpen) themeColorMeta.setAttribute('content', '#0d1117');
             }
 
             // Bottom nav: transparent near bottom, glass background when scrolled up

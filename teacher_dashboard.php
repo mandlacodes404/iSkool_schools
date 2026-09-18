@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.6">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
@@ -72,7 +72,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=3.2">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -1252,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=8.7"></script>
+<script src="assets/js/teacher/dashboard.js?v=9.0"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

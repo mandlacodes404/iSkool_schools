@@ -456,7 +456,7 @@
             #mobileToggle { display: block; }
             .top-nav-school-name { display: none; }
             .sidebar-footer { width: calc(100% - 40px); }
-            .sidebar { left: -100%; width: 300px; border-right: none; }
+            .sidebar { left: -100%; width: 300px; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
             .sidebar.active { left: 0; width: 300px; }
             .main-content { margin-left: 0 !important; }
             .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
