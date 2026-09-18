@@ -58,7 +58,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.4">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.6">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
@@ -570,6 +570,16 @@ function updateAllAvatars(url) {
     }
 }
 
+// Default browser bar colour (matches <meta name="theme-color"> in <head>)
+const DEFAULT_THEME_COLOR = '#0d1117';
+// Mobile menu background colour (matches .sidebar background in teacher_dashboard.css)
+const SIDEBAR_THEME_COLOR = '#1a1919';
+
+function setBrowserBarColor(color) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', color);
+}
+
 window.closeMobileSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
@@ -581,6 +591,7 @@ window.closeMobileSidebar = function() {
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
     }
+    setBrowserBarColor(DEFAULT_THEME_COLOR);
 };
 
 window.toggleSidebar = function(forceClose = false) {
@@ -595,6 +606,7 @@ window.toggleSidebar = function(forceClose = false) {
         sidebar.classList.add('active');
         if (overlay) overlay.style.opacity = '1';
         if (overlay) overlay.style.pointerEvents = 'all';
+        setBrowserBarColor(SIDEBAR_THEME_COLOR);
     }
 };
 
