@@ -506,9 +506,16 @@
             /* Content now needs to start below the fixed top nav instead
                of underneath it. Height is applied inline by JS (see
                applyTeacherTopNavOffset in dashboard.js) since row 1 + row
-               2 height can vary; this is just a safe fallback. */
+               2 height can vary; this is just a safe fallback.
+               IMPORTANT: this is padding, not margin. Margin sits OUTSIDE
+               the element's box, so nothing paints it — that's what was
+               showing as a mismatched line/gap between the fixed nav and
+               the content underneath. Padding is INSIDE the box, so
+               #api-content-area's own background (set below) now fills
+               that space itself and the two blend with no seam. */
             #api-content-area {
-                margin-top: var(--teacher-top-nav-height, 112px);
+                padding-top: var(--teacher-top-nav-height, 112px);
+                background: var(--bg-color);
             }
 
             /* Scrolled state: border (and matching blur) locks in. When a

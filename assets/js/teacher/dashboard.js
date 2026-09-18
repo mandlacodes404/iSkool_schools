@@ -1444,7 +1444,10 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             if (!topNavWrapper || !apiArea) return;
             const height = topNavWrapper.getBoundingClientRect().height;
             if (height > 0) {
-                apiArea.style.marginTop = height + 'px';
+                // padding-top, not margin-top: margin sits outside the
+                // element's box so nothing paints it, which is what was
+                // showing as a mismatched gap under the fixed top nav.
+                apiArea.style.paddingTop = height + 'px';
             }
         };
 
