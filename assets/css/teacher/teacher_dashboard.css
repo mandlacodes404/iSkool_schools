@@ -485,11 +485,14 @@
 
         /* Thinner icon strokes in the mobile sidebar nav only — desktop
            keeps the default stroke-width="2" set inline on each SVG in
-           the markup. Matches the learner dashboard treatment. */
+           the markup. Matches the learner dashboard treatment. Also
+           slightly bumped the icon size up from the inline 20px. */
         @media (max-width: 767px) {
             .sidebar a svg,
             .sidebar button:not(.desktop-close-btn):not(.round-toggle) svg {
                 stroke-width: 1.3;
+                width: 22px;
+                height: 22px;
             }
         }
 
@@ -501,6 +504,14 @@
             .sidebar a[data-page="teacher_settings"] {
                 background: rgba(0, 0, 0, 0.35);
                 border-radius: 999px;
+            }
+        }
+
+        /* iSkool footer — mobile sidebar only, nudged up slightly from the
+           base bottom: 15px. */
+        @media (max-width: 767px) {
+            .sidebar .footer {
+                bottom: 20px;
             }
         }
 
