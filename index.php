@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=8.9">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.0">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -501,12 +501,18 @@ function getCsrfToken() {
                 </div>
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="login-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
-                <input type="email" name="email" placeholder="Email" required><br>
-                <div class="password-wrapper">
-                    <input type="password" name="password" id="login-password" placeholder="Password" required>
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
+                <div class="field">
+                    <label class="field-label" for="login-email">Email</label>
+                    <input type="email" name="email" id="login-email" placeholder="name@example.com" required>
                 </div>
-                 <div class="remember-me-row" style="display: flex; align-items: center; margin: 10px 0 15px 10px; text-align: left;">
+                <div class="field">
+                    <label class="field-label" for="login-password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="login-password" placeholder="Enter your password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
+                    </div>
+                </div>
+                <div class="remember-me-row" style="display: flex; align-items: center; margin: 0 0 15px 0; text-align: left;">
                   <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer;">
                   <label for="remember_me" style="font-size: 13px; color: #ccc; cursor: pointer; user-select: none;">Keep me logged in</label>
                 </div>
@@ -521,7 +527,7 @@ function getCsrfToken() {
                    <a href="#" onclick="showForm('register-form'); return false;">Register</a>
                 </p>
                 <p style="text-align:center; margin-top: 8px;">
-                    <a href="#" onclick="showForm('forgot-form'); return false;" style="color:#00bfff;">Forgot your password?</a>
+                    <a href="#" onclick="showForm('forgot-form'); return false;" style="color:#888;">Forgot your password?</a>
                 </p>
             </form><!-- /#login-form-el -->
         </div>
@@ -537,58 +543,88 @@ function getCsrfToken() {
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="register-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
-                <!-- NEW: Title + First Name + Second Name + Surname -->
+                <!-- Title + First Name + Second Name + Surname -->
                 <div class="name-row">
-                    <select name="title" required>
-                        <option value="" disabled selected>Title</option>
-                        <option value="Mr">Mr</option>
-                        <option value="Mrs">Mrs</option>
-                        <option value="Ms">Ms</option>
-                        <option value="Dr">Dr</option>
-                        <option value="Prof">Prof</option>
-                        <option value="Rev">Rev</option>
+                    <div class="field field-title">
+                        <label class="field-label" for="register-title">Title</label>
+                        <select name="title" id="register-title" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="Mr">Mr</option>
+                            <option value="Mrs">Mrs</option>
+                            <option value="Ms">Ms</option>
+                            <option value="Dr">Dr</option>
+                            <option value="Prof">Prof</option>
+                            <option value="Rev">Rev</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="register-first-name">First name</label>
+                        <input type="text" name="name" id="register-first-name" required>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="register-second-name">Second name</label>
+                        <input type="text" name="second_name" id="register-second-name">
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="register-surname">Surname</label>
+                        <input type="text" name="surname" id="register-surname" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="register-email">Email</label>
+                    <input type="email" name="email" id="register-email" placeholder="name@example.com" required>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="register-password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="register-password" placeholder="Min. 8 characters" required minlength="8">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
+                    </div>
+                    <div id="password-strength-msg" style="font-size:12px; color:#ff5555; margin: 6px 0 0; display:none;">Password must be at least 8 characters.</div>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="confirm-password">Confirm password</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="confirm_password" id="confirm-password" placeholder="Re-enter your password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm-password', this)"></i>
+                    </div>
+                    <div id="password-match-msg" style="font-size:12px; color:#ff5555; margin: 6px 0 0; display:none;">Passwords do not match.</div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="register-role">Role</label>
+                    <select name="role" id="register-role" required>
+                        <option value="">-- Select Role --</option>
+                        <option value="learner">Learner</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="parent">Parent</option>
+                        <option value="school_admin">Principal/School Admin</option>
                     </select>
-                    <input type="text" name="name" placeholder="First Name" required>
-                    <input type="text" name="second_name" placeholder="Second Name">
-                    <input type="text" name="surname" placeholder="Surname" required>
                 </div>
-
-                <input type="email" name="email" placeholder="Email" required>
-                <div class="password-wrapper">
-                    <input type="password" name="password" id="register-password" placeholder="Password (min. 8 characters)" required minlength="8">
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
+                <div class="field">
+                    <label class="field-label" for="gender">Gender</label>
+                    <select name="gender" id="gender" required>
+                        <option value="" disabled selected>Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
-                <div id="password-strength-msg" style="font-size:12px; color:#ff5555; margin: -6px 0 8px 12px; display:none;">Password must be at least 8 characters.</div>
-                <div class="password-wrapper">
-                    <input type="password" name="confirm_password" id="confirm-password" placeholder="Confirm Password" required>
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm-password', this)"></i>
+                <div class="field">
+                    <label class="field-label" for="age">Age</label>
+                    <input type="number" name="age" id="age" min="3" max="120" required placeholder="Enter your age">
                 </div>
-                <div id="password-match-msg" style="font-size:12px; color:#ff5555; margin: -6px 0 8px 12px; display:none;">Passwords do not match.</div>
-
-                <label>Select Role:</label>
-                <select name="role" required>
-                    <option value="">-- Select Role --</option>
-                    <option value="learner">Learner</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="parent">Parent</option>
-                    <option value="school_admin">Principal/School Admin</option>
-                </select><br>
-                <label for="gender">Gender:</label>
-                <select name="gender" id="gender" required>
-                    <option value="" disabled selected>Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                </select><br>
-                <label for="age">Age:</label>
-                <input type="number" name="age" id="age" min="3" max="120" required placeholder="Enter your age"><br>
-                <input type="text" name="access_key" placeholder="Enter Access Key" required><br>
+                <div class="field">
+                    <label class="field-label" for="register-access-key">Access key</label>
+                    <input type="text" name="access_key" id="register-access-key" placeholder="Enter your access key" required>
+                </div>
 
                 <!-- NEW: Notification Agreement Checkbox -->
-                <div style="margin: 15px 0; text-align: left; padding: 0 20px;">
-                    <label style="font-size: 13px; color: #ccc; cursor: pointer;">
-                        <input type="checkbox" name="agree_notifications" required style="margin-right: 8px;">
-                        I agree to receive notifications for important updates, replies, announcements, and grades.
+                <div style="margin: 15px 0; text-align: left;">
+                    <label style="display: flex; align-items: flex-start; font-size: 13px; line-height: 1.5; color: #ccc; cursor: pointer;">
+                        <input type="checkbox" name="agree_notifications" required style="width: 16px; height: 16px; margin: 2px 10px 0 0; padding: 0; flex-shrink: 0;">
+                        <span>I agree to receive notifications for important updates, replies, announcements, and grades.</span>
                     </label>
                 </div>
 
@@ -606,7 +642,10 @@ function getCsrfToken() {
             <div id="forgot-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
             <form id="forgot-form-el" novalidate>
-                <input type="email" name="email" id="forgot-email" placeholder="Email address" required>
+                <div class="field">
+                    <label class="field-label" for="forgot-email">Email</label>
+                    <input type="email" name="email" id="forgot-email" placeholder="name@example.com" required>
+                </div>
                 <button type="submit" id="forgot-btn">Send Reset Link</button>
             </form>
             <p style="text-align:center; margin-top:20px;">

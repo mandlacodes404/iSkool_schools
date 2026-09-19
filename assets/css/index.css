@@ -704,6 +704,13 @@ body {
         height: 145px;
         bottom: -12px;
     }
+
+    /* Register form is taller than the screen — top-align it so its top
+       (logo, heading, first fields) stays scrollable instead of being
+       clipped by vertical centering. Same idea as the desktop rule below. */
+    .form-panel:has(#register-form.active) {
+        justify-content: flex-start;
+    }
 }
 
 /* ── Desktop ── */
@@ -1015,9 +1022,9 @@ input[type="number"],
 select {
     background: #1E1F20;
     color: #fff;
-    border: 1px solid transparent;
-    padding: 12px 20px;
-    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 12px 16px;
+    border-radius: 12px;
     box-sizing: border-box;
     font-size: 16px;
     transition: all 0.3s ease;
@@ -1028,9 +1035,36 @@ select {
 
 input:focus, select:focus {
     background: #1E1F20;
-    border-color: #444746;
-    box-shadow: 0 0 0 1px #444746;
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07);
     outline: none;
+}
+
+/* ── Field = label above + control. Spacing lives here (not on the inputs)
+   so label-to-input and field-to-field gaps stay predictable. ── */
+.field {
+    margin-bottom: 16px;
+}
+
+.field-label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #c4c7c5;
+}
+
+.field input,
+.field select {
+    margin: 0;
+}
+
+/* The mobile `input, select, button` size rules sit below the input[type]
+   rule in specificity, so they only ever shrank <select>s (13px) while text
+   inputs stayed 16px. Pin selects to the input size so a row of mixed
+   controls lines up at every breakpoint. */
+.field select {
+    font-size: 16px;
+    padding: 12px 16px;
 }
 
   button {
@@ -1164,18 +1198,17 @@ button#login-btn.is-loading .btn-spinner {
     .name-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin: 8px 0;
+        gap: 16px 8px;
+        margin: 8px 0 16px;
     }
 
-    .name-row select,
-    .name-row input {
+    .name-row .field {
         flex: 1 1 110px;
         margin: 0;
     }
 
-    .name-row select {
-        flex: 0 1 82px;
+    .name-row .field-title {
+        flex: 0 1 100px;
     }
 
     #loaderOverlay {
@@ -1252,11 +1285,12 @@ button#login-btn.is-loading .btn-spinner {
 
         .name-row {
             flex-direction: column;
+            gap: 16px;
         }
 
-        .name-row select,
-        .name-row input {
-            margin: 4px 0;
+        .name-row .field,
+        .name-row .field-title {
+            flex: 0 0 auto;
         }
     }
 
