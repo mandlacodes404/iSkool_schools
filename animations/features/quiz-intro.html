@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iSkool — Quizzes</title>
+<style>
+
+:root{
+  --paper:#f7f6f2; --ink:#1c1d1f; --muted:#83837c; --line:#e2e0d8;
+  --card:#fff; --soft:#eeece5; --shadow:0 30px 80px rgba(28,29,31,.12);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--paper);color:var(--ink)
+}
+button{font:inherit}
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--paper)}
+.stage:after{
+  content:"";position:absolute;inset:-20%;pointer-events:none;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.scenes{position:absolute;inset:0}
+.scene{
+  position:absolute;inset:0;display:grid;place-items:center;
+  opacity:0;visibility:hidden;transform:scale(1.02);
+  transition:opacity .8s ease,transform 1s var(--ease),visibility .8s;
+}
+.scene.active{opacity:1;visibility:visible;transform:scale(1)}
+h1,h2{margin:0;letter-spacing:-.04em;font-weight:600;line-height:.98}
+h1{font-size:clamp(48px,6.4vw,92px)}
+h2{font-size:clamp(34px,4.2vw,58px)}
+p{color:var(--muted);line-height:1.55;font-size:16px}
+.eyebrow{font-size:12px;color:var(--muted);margin-bottom:18px}
+
+[data-enter]{opacity:0;transform:translateY(18px)}
+.active [data-enter]{animation:rise .8s var(--ease) forwards}
+.active [data-enter="1"]{animation-delay:.1s}
+.active [data-enter="2"]{animation-delay:.28s}
+.active [data-enter="3"]{animation-delay:.46s}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ---------------------------------------------------------------
+   THE OBJECT: one question card. It is written, marked, answered,
+   graded and released across the whole film. Every scene reuses
+   these same pieces so the card reads as one continuous thing.
+---------------------------------------------------------------- */
+.mark{                       /* the protagonist: a mark, as a small pill */
+  font-size:10px;font-weight:600;letter-spacing:.04em;font-variant-numeric:tabular-nums;
+  padding:3px 8px;border-radius:20px;background:var(--soft);color:#6f6f68;
+  transition:background .4s,color .4s
+}
+.mark.on{background:var(--ink);color:#fff}
+
+/* ---- 01 intro : almost nothing ---- */
+.intro{text-align:center}
+.intro h1{font-weight:560}
+.intro .line2{color:var(--muted);font-weight:400;text-wrap:balance;font-size:clamp(34px,4.6vw,66px);margin-top:6px;letter-spacing:-.035em}
+
+/* ---- 02 idea : a blank question card, waiting ---- */
+.idea{text-align:center}
+.qShell{
+  margin:46px auto 0;width:360px;border:1.5px dashed #cfcdc3;border-radius:16px;
+  padding:18px 20px;opacity:0;transform:translateY(14px);text-align:left
+}
+.active .qShell{animation:rise .7s .55s var(--ease) forwards}
+.qShell .row{display:flex;align-items:center;gap:8px;color:#b3b1a6;font-size:13px}
+.qShell .row + .row{margin-top:10px}
+.qShell .dash{width:15px;height:1.5px;background:#cfcdc3}
+.qShell .blink{
+  display:inline-block;width:1.5px;height:14px;background:var(--ink);margin-left:2px;
+  animation:blink 1s step-end infinite
+}
+@keyframes blink{50%{opacity:0}}
+
+.qcard{
+  border:1px solid #e4e2da;border-radius:14px;padding:12px 14px;margin-top:9px;position:relative;
+  background:#fff;opacity:0;transform:translateY(-14px) scale(.985);
+  transition:opacity .55s var(--ease),transform .6s var(--ease),border-color .3s,box-shadow .3s
+}
+.qcard.in{opacity:1;transform:none}
+.qcard.editing{border-color:var(--ink);box-shadow:0 0 0 3px rgba(28,29,31,.06)}
+.qtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qtype{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#9a9a92}
+.qtext{font-size:13px;font-weight:600;min-height:17px;letter-spacing:-.005em}
+.qtext .caret{display:none;width:1.5px;height:13px;background:var(--ink);margin-left:1px;vertical-align:middle;animation:blink 1s step-end infinite}
+.qcard.editing .qtext .caret{display:inline-block}
+.opts{margin-top:9px;display:grid;gap:5px}
+.opt{display:flex;align-items:center;gap:9px;font-size:11.5px;color:#6b6b64;border:1px solid #ece9e1;border-radius:9px;padding:7px 10px;opacity:0;transform:translateX(-6px);transition:opacity .4s var(--ease),transform .4s var(--ease),background .3s,border-color .3s,color .3s}
+.opt.in{opacity:1;transform:none}
+.opt i{width:11px;height:11px;border:1.5px solid #c9c7bd;border-radius:50%;flex-shrink:0;transition:background .25s,border-color .25s}
+.opt.sq i{border-radius:3px}
+.opt.right{background:#f3f2ec;border-color:#d8d6cc;color:var(--ink)}
+.opt.right i{background:var(--ink);border-color:var(--ink)}
+.oe-line{margin-top:9px;height:34px;border:1px dashed #d6d4ca;border-radius:9px;display:flex;align-items:center;padding:0 11px;font-size:11px;color:#b3b1a6;opacity:0;transition:opacity .5s}
+.oe-line.in{opacity:1}
+.fitb{margin-top:9px;font-size:13px}
+.gap{display:inline-block;min-width:74px;border-bottom:1.5px solid var(--ink);margin:0 3px;text-align:center;font-size:12px;font-weight:600;transition:all .3s}
+
+.toggle{width:40px;height:23px;border-radius:20px;background:#dedcd3;position:relative;flex-shrink:0;transition:background .4s var(--ease)}
+.toggle:after{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .45s var(--ease)}
+.toggle.on{background:var(--ink)}
+.toggle.on:after{transform:translateX(17px)}
+.weightbox{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .7s var(--ease),opacity .5s .1s,margin .5s var(--ease)
+}
+.weightbox.show{max-height:150px;opacity:1;margin-top:16px}
+.weightinner{border:1px solid #e4e2da;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.wl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9a9a92}
+.wv{font-size:34px;font-weight:600;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
+.wbar{width:170px;height:10px;border-radius:6px;background:#eeece5;overflow:hidden;display:flex;gap:2px}
+.wbar i{display:block;height:100%;background:#d9d7cd;transition:width 1.1s var(--ease),background .5s;width:0}
+.wbar i.me{background:var(--ink)}
+.wnote{font-size:10.5px;color:#9a9a92;margin-top:8px;text-align:right}
+
+.arow{
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+  padding:13px 4px;border-bottom:1px solid #f1efe9;opacity:0;transform:translateY(10px);
+  transition:opacity .5s var(--ease),transform .55s var(--ease)
+}
+.arow:last-child{border-bottom:0}
+.arow.in{opacity:1;transform:none}
+.aq{font-size:12.5px;font-weight:600}
+.aa{font-size:11px;color:#8b8b84;margin-top:3px;display:flex;align-items:center;gap:6px}
+.aa .chip{background:var(--soft);border-radius:6px;padding:2px 7px;color:#55554f}
+.verdict{
+  min-width:66px;text-align:right;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:#b3b1a6;
+  display:flex;justify-content:flex-end;align-items:center;gap:7px
+}
+.verdict .dot{width:6px;height:6px;border-radius:50%;background:#cfcdc3;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{transform:scale(1.7);opacity:.35}}
+.verdict.done{color:var(--ink)}
+.verdict.done .dot{animation:none;background:var(--ink)}
+.verdict.wait{color:#8a6a2f}
+.verdict.wait .dot{background:#d4a24c}
+.yourcall{
+  margin-top:8px;font-size:11px;color:#8a6a2f;background:#f6efe1;border:1px solid #ecdcb9;
+  border-radius:9px;padding:6px 10px;display:none;align-items:center;gap:7px;opacity:0;transition:opacity .5s
+}
+.yourcall.show{display:inline-flex}
+.yourcall.in{opacity:1}
+
+.rrow{
+  display:grid;grid-template-columns:1fr 70px 70px 74px;gap:10px;align-items:center;
+  padding:11px 4px;border-bottom:1px solid #f1efe9;font-size:12px;opacity:0;transform:translateY(8px);
+  transition:opacity .45s var(--ease),transform .5s var(--ease),background .3s
+}
+.rrow.in{opacity:1;transform:none}
+.rrow .nm{font-weight:600}
+.rrow .sc,.rrow .pc{color:#a8a69c;font-variant-numeric:tabular-nums;letter-spacing:.12em}
+.rrow .rv{justify-self:end;font-size:10px;border:1px solid #dedcd3;border-radius:8px;padding:4px 9px;color:#55554f;transition:background .3s,color .3s,border-color .3s}
+.rrow.hot{background:#faf9f5}
+.rrow.hot .rv{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rcol{display:grid;grid-template-columns:1fr 70px 70px 74px;gap:10px;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9a9a92;padding:12px 4px 6px}
+
+.script{
+  position:absolute;inset:14px;background:#fff;border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 20px 50px rgba(28,29,31,.12);padding:20px;opacity:0;transform:translateY(24px) scale(.97);
+  pointer-events:none;transition:opacity .55s var(--ease),transform .7s var(--ease)
+}
+.results.open .script{opacity:1;transform:none}
+.sphead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.spbody{overflow:hidden;position:absolute;left:20px;right:20px;top:58px;bottom:14px}
+.spinner{transition:transform .9s var(--ease)}
+.sphead b{font-size:15px;font-weight:600}
+.sphead span{font-size:11px;color:#8c8c84}
+.sq{border:1px solid #ece9e1;border-radius:12px;padding:11px 13px;margin-bottom:8px}
+.sq .qt{font-size:12px;font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.sq .qt em{font-style:normal;font-size:10px;color:#8c8c84;font-variant-numeric:tabular-nums}
+.sopts{margin-top:8px;display:grid;gap:4px}
+.so{display:flex;align-items:center;gap:8px;font-size:11px;color:#77776f;padding:5px 8px;border-radius:8px}
+.so i{width:9px;height:9px;border-radius:50%;border:1.5px solid #c9c7bd;flex-shrink:0}
+.so.ok{background:#f3f2ec;color:var(--ink)}
+.so.ok i{background:var(--ink);border-color:var(--ink)}
+.so.no{color:#9a9a92;text-decoration:line-through;text-decoration-color:#c9c7bd}
+.so .tagr{margin-left:auto;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#8c8c84}
+.sq.oe .qt em{color:#8a6a2f;background:#f6efe1;border:1px solid #ecdcb9;border-radius:6px;padding:2px 7px;transition:all .5s}
+.sq.oe.graded .qt em{color:var(--ink);background:var(--soft);border-color:#dedcd3}
+.oeans{margin-top:7px;font-size:11px;color:#77776f;line-height:1.5}
+
+.status{font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:4px 9px;border-radius:20px;background:var(--soft);color:#77776f;transition:background .5s,color .5s}
+.status.pub{background:var(--ink);color:#fff}
+.pubrow{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:10px 0;border-top:1px solid #f1efe9;font-size:12.5px}
+.pubrow:first-of-type{border-top:0}
+.pubrow .nm{font-weight:600}
+.flipnum{font-variant-numeric:tabular-nums;font-weight:600;min-width:46px;text-align:right;color:#a8a69c;letter-spacing:.12em;transition:color .4s,letter-spacing .5s}
+.flipnum.real{color:var(--ink);letter-spacing:0}
+.pubbtn{
+  margin-top:16px;width:100%;border:0;border-radius:12px;background:var(--ink);color:#fff;
+  padding:12px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center;
+  transition:transform .2s,box-shadow .2s,background .4s;position:relative
+}
+.pubbtn b{font-weight:400;opacity:.6}
+.pubbtn.is-clicked{transform:scale(.98);box-shadow:0 0 0 5px rgba(28,29,31,.08)}
+.pubbtn:after{content:"";position:absolute;inset:0;border-radius:inherit;border:1px solid rgba(255,255,255,.5);opacity:0;transform:scale(1)}
+.pubbtn.is-clicked:after{animation:pressRing .5s ease-out}
+@keyframes pressRing{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+.pubbtn.done{background:#f0efe9;color:var(--ink);border:1px solid #dedcd3}
+
+/* learner view of the same result: the card morphs, it is not a new screen */
+.learner{
+  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:20px 22px;
+  opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .8s var(--ease)
+}
+.learner.show{opacity:1;transform:none}
+.lrole{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.ltitle{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:12px 0 2px}
+.lmeta{font-size:12px;color:var(--muted)}
+.lscore{margin-top:14px;display:flex;align-items:baseline;gap:8px}
+.lscore .big{font-size:38px;font-weight:600;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.lscore .of{font-size:12px;color:#9a9a92}
+
+/* ---- 08 end ---- */
+.final{text-align:center;width:min(760px,90vw)}
+.final h2{font-weight:560}
+.final .line{width:0;height:1px;background:#c8c7c0;margin:26px auto 0}
+.active .line{animation:lineIn 1s .5s ease forwards}
+@keyframes lineIn{to{width:88px}}
+.final .sig{margin-top:22px;font-size:13px;color:var(--muted)}
+.final .quiet{margin-top:14px;font-size:13px;color:#a3a29a}
+
+
+/* ---- restored: shared pieces v2's faces still use ---- */
+.total{display:flex;align-items:baseline;gap:5px;font-variant-numeric:tabular-nums}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 0}
+.slabel{font-size:13px;font-weight:600}
+.ssub{font-size:11px;color:#9a9a92;margin-top:3px}
+.ahead{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8c8c84;padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid #eeece6}
+.ahead b{color:var(--ink);font-weight:600;font-size:14px}
+.rhead{display:flex;justify-content:space-between;font-size:12px;color:#8c8c84;padding-bottom:12px;border-bottom:1px solid #eeece6}
+.rhead b{color:var(--ink);font-size:14px;font-weight:600}
+
+
+/* =====================================================================
+   v2 : THE PAPER IS AN ACTOR
+   One persistent card lives on its own layer above the scenes. Scenes 3-7
+   only change the words beside it; the paper changes state in place.
+   built -> counts -> answered -> results -> published
+===================================================================== */
+.actor{
+  position:absolute;inset:0;pointer-events:none;z-index:5;
+  display:grid;place-items:center;
+}
+.paper{
+  position:absolute;left:50%;top:50%;
+  width:var(--paperW,min(500px,44vw));height:var(--ph,600px);
+  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+  padding:20px 22px 0;overflow:hidden;
+  opacity:0;
+  transform:translate(calc(-50% + var(--px,0px)),calc(-50% + var(--py,24px))) scale(var(--ps,.97));
+  transition:transform 1.25s var(--ease),opacity .7s ease,width 1s var(--ease),height 1s var(--ease);
+}
+.paper.here{opacity:1;--py:0px;--ps:1}
+/* where the paper stands for each beat: the copy is on the left, so it sits right of centre */
+.actor{--copyW:420px;--gap:72px;--paperW:min(500px,44vw)}
+/* the copy column and the paper form ONE group, centred as a unit:
+   group width = copyW + gap + paperW, so the paper's centre sits (copyW + gap)/2 right of centre. */
+.paper.at-right{--px:calc((var(--copyW) + var(--gap)) / 2)}
+.paper.at-center{--px:0px}
+.paper.at-left{--px:calc(-1 * clamp(150px,17vw,250px))}
+
+.paperhead{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid #eeece6;font-size:14px}
+.paperhead b{font-weight:600;letter-spacing:-.005em}
+.paperhead .who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;row-gap:6px}
+.paperhead .who b{white-space:nowrap}
+.tag{font-size:9px;text-transform:uppercase;letter-spacing:.09em;padding:3px 0;border-radius:20px;background:var(--soft);color:#77776f;
+  opacity:0;transform:translateY(4px);max-width:0;overflow:hidden;white-space:nowrap;
+  transition:opacity .35s ease,transform .5s var(--ease),max-width .6s var(--ease),padding .6s var(--ease)}
+.tag.show{opacity:1;transform:none;max-width:120px;padding:3px 8px;
+  transition:opacity .5s var(--ease),transform .6s var(--ease),max-width .7s var(--ease),padding .7s var(--ease),background .4s,color .4s}
+.tag[data-tone="ink"]{background:var(--ink);color:#fff}
+.total .n{font-size:26px;font-weight:600;letter-spacing:-.03em;display:inline-block;transition:transform .35s var(--ease)}
+.total .n.tick{transform:translateY(-3px)}
+.total .u{font-size:11px;color:#9a9a92}
+
+/* faces: the paper's stack of states. Leaving is quick and lifts UP; arriving
+   waits a beat and rises. They never overlap at full strength, so no ghosting. */
+.faces{position:absolute;left:22px;right:22px;top:66px;bottom:0}
+.face{
+  position:absolute;inset:0;opacity:0;transform:translateY(16px);pointer-events:none;
+  transition:opacity .26s ease,transform .3s ease;
+  overflow:hidden;padding-bottom:22px
+}
+.face.out{transform:translateY(-16px)}
+#fBuild{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 8px,#000 calc(100% - 22px),transparent 100%);
+               mask-image:linear-gradient(to bottom,transparent 0,#000 8px,#000 calc(100% - 22px),transparent 100%)}
+.face.on{opacity:1;transform:none;transition:opacity .6s .24s var(--ease),transform .85s .24s var(--ease)}
+.face-inner{transition:transform .8s var(--ease)}
+
+/* weight chip that lands on the paper in "counts" */
+.weightrow{
+  margin:14px 0 4px;border:1px solid #e4e2da;border-radius:14px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.weightrow .wv{font-size:34px}
+
+/* ---- faces reuse v1 classes (qcard, opt, arow, rrow, so, pubrow...) ---- */
+.results-list .rrow{grid-template-columns:1fr 62px 62px 68px}
+.results-list .rcol{grid-template-columns:1fr 62px 62px 68px}
+
+/* the cursor: a small dark dot with a soft ring, a software-imperfection touch */
+.cursor{
+  position:absolute;left:0;top:0;width:14px;height:14px;border-radius:50%;
+  background:var(--ink);box-shadow:0 0 0 5px rgba(28,29,31,.08);
+  opacity:0;z-index:9;pointer-events:none;
+  transform:translate(var(--cx,600px),var(--cy,600px));
+  transition:transform .9s var(--ease),opacity .4s,box-shadow .25s
+}
+.cursor.show{opacity:1}
+.cursor.press{box-shadow:0 0 0 9px rgba(28,29,31,.14)}
+
+/* scene copy sits left; the paper is on its own layer, so scene blocks just centre their text */
+.copyonly{display:grid;grid-template-columns:420px min(500px,44vw);gap:72px;align-items:center;justify-content:center}
+.copyonly .copy p{max-width:340px;margin-top:14px}
+.copyonly .spacer{min-height:1px}
+.copyonly.flip{grid-template-columns:1.05fr .95fr}
+
+/* the learner face: same paper, second view */
+.learnerview .ltitle{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:14px 0 2px}
+
+@media(max-width:900px){
+  .paper{width:min(400px,88vw);height:min(500px,56vh);
+    --px:0px;
+    top:auto;bottom:4vh;transform:translate(-50%,var(--py,24px)) scale(var(--ps,.97))}
+  .paper.here{--py:0px}
+  .copyonly{grid-template-columns:1fr;text-align:center;gap:10px;align-self:start;margin-top:5vh}
+  .copyonly .copy p{margin-left:auto;margin-right:auto}
+  .copyonly .spacer{display:none}
+}
+@media(max-width:520px){
+  .paperhead{align-items:flex-start;font-size:13px}
+  .paperhead .total{padding-top:1px}
+  .faces{top:74px}
+  .copyonly .copy p{display:none}
+  .paper{height:min(470px,60vh);padding:16px 16px 0}
+  .faces{left:16px;right:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+</style>
+</head>
+<body>
+
+<main class="stage" aria-label="iSkool Quizzes feature introduction">
+
+  <!-- scenes: only the words and the two paper-less moments (intro, idea, end) -->
+  <div class="scenes">
+
+    <section class="scene active" id="s1">
+      <div class="intro">
+        <h1 data-enter="1">Quizzes</h1>
+        <h1 class="line2" data-enter="2">for term tests, and everything else.</h1>
+      </div>
+    </section>
+
+    <section class="scene" id="s2">
+      <div class="idea">
+        <h2 data-enter="1">No marking pile.<br>No lost scripts.</h2>
+        <div class="qShell">
+          <div class="row"><span class="dash"></span> Question<span class="blink"></span></div>
+          <div class="row"><span class="dash"></span> Answer</div>
+          <div class="row"><span class="dash"></span> Marks</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" id="s3">
+      <div class="copyonly"><div class="copy">
+        <div class="eyebrow" data-enter="1">Build the paper</div>
+        <h2 data-enter="2">One question.<br>Then the next.</h2>
+      </div><div class="spacer"></div></div>
+    </section>
+
+    <section class="scene" id="s4">
+      <div class="copyonly"><div class="copy">
+        <div class="eyebrow" data-enter="1">Term mark</div>
+        <h2 data-enter="2">Make it<br>count.</h2>
+        <p data-enter="3">Flip one switch and it becomes part of the official term mark.</p>
+      </div><div class="spacer"></div></div>
+    </section>
+
+    <section class="scene" id="s5">
+      <div class="copyonly"><div class="copy">
+        <div class="eyebrow" data-enter="1">Submitted</div>
+        <h2 data-enter="2">Marked<br>for you.</h2>
+        <p data-enter="3">Answers are checked the moment they arrive. Only your judgement is left to you.</p>
+      </div><div class="spacer"></div></div>
+    </section>
+
+    <section class="scene" id="s6">
+      <div class="copyonly"><div class="copy">
+        <div class="eyebrow" data-enter="1">Term 2 Test</div>
+        <h2 data-enter="2">Every script.<br>Kept safe.</h2>
+        <p data-enter="3">Open any submission, question by question.</p>
+      </div><div class="spacer"></div></div>
+    </section>
+
+    <section class="scene" id="s7">
+      <div class="copyonly"><div class="copy">
+        <div class="eyebrow" data-enter="1">Marks</div>
+        <h2 data-enter="2">You decide<br>when.</h2>
+        <p data-enter="3">Hidden until you say so.</p>
+      </div><div class="spacer"></div></div>
+    </section>
+
+    <section class="scene" id="s8">
+      <div class="final">
+        <h2 data-enter="1">Set it once.<br>The rest is done.</h2>
+        <div class="line"></div>
+        <div class="sig" data-enter="2">iSkool</div>
+        <div class="quiet" data-enter="3">Homework and mock exams work the same way.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- THE ACTOR: one paper, on its own layer, alive from scene 3 to scene 7 -->
+  <div class="actor" aria-hidden="true">
+    <div class="paper" id="paper">
+      <div class="paperhead">
+        <div class="who"><b>Term 2 Test · Grade 10A</b><span class="tag" id="tagTerm">Counts 30%</span><span class="tag" id="tagState">Hidden</span></div>
+        <div class="total"><span class="n" id="totalN">0</span><span class="u">marks</span></div>
+      </div>
+
+      <div class="faces">
+
+        <!-- FACE 1 : building -->
+        <div class="face" id="fBuild"><div class="face-inner" id="pinner">
+          <div class="qcard" id="q1">
+            <div class="qtop"><span class="qtype">Multiple choice</span><span class="mark" id="m1">1 mark</span></div>
+            <div class="qtext" id="q1t"><span class="caret"></span></div>
+            <div class="opts">
+              <div class="opt" id="q1o1"><i></i>3x + 2</div>
+              <div class="opt right" id="q1o2"><i></i>3x + 4</div>
+              <div class="opt" id="q1o3"><i></i>3x − 4</div>
+            </div>
+          </div>
+          <div class="qcard" id="q2">
+            <div class="qtop"><span class="qtype">Multiple answer</span><span class="mark" id="m2">2 marks</span></div>
+            <div class="qtext" id="q2t"><span class="caret"></span></div>
+            <div class="opts">
+              <div class="opt sq" id="q2o1"><i></i>x = 1</div>
+              <div class="opt sq right" id="q2o2"><i></i>x = 2</div>
+              <div class="opt sq right" id="q2o3"><i></i>x = 3</div>
+            </div>
+          </div>
+          <div class="qcard" id="q3">
+            <div class="qtop"><span class="qtype">Fill in the blank</span><span class="mark" id="m3">2 marks</span></div>
+            <div class="qtext" id="q3t"><span class="caret"></span></div>
+            <div class="oe-line" id="q3a" style="border-style:solid;border-color:#e4e2da;color:#6b6b64;height:30px;font-size:11px;gap:6px">Accepted: <b style="color:var(--ink);font-weight:600">seven</b>&nbsp;·&nbsp;<b style="color:var(--ink);font-weight:600">7</b></div>
+          </div>
+          <div class="qcard" id="q4">
+            <div class="qtop"><span class="qtype">Open ended</span><span class="mark" id="m4">4 marks</span></div>
+            <div class="qtext" id="q4t"><span class="caret"></span></div>
+            <div class="oe-line" id="q4l">Learners type their answer here</div>
+          </div>
+        </div></div>
+
+        <!-- FACE 2 : counts -->
+        <div class="face" id="fCount"><div class="face-inner">
+          <div class="srow" style="padding:14px 2px 6px">
+            <div><div class="slabel">Counts toward the term mark</div><div class="ssub">This quiz affects the official term mark.</div></div>
+            <div class="toggle" id="tgl"></div>
+          </div>
+          <div class="weightbox" id="wbox"><div class="weightinner">
+            <div><div class="wl">Weight of term mark</div><div class="wv"><span id="wnum">0</span>%</div></div>
+            <div><div class="wbar"><i class="me" id="wfill"></i><i id="wrest"></i></div><div class="wnote">This quiz, within Term 2</div></div>
+          </div></div>
+        </div></div>
+
+        <!-- FACE 3 : answers arriving -->
+        <div class="face" id="fMark"><div class="face-inner">
+          <div class="ahead"><b>Thabo M.</b><span id="aTally">0 marks so far</span></div>
+          <div class="arow" id="a1"><div><div class="aq">Q1 · Multiple choice</div><div class="aa"><span class="chip">3x + 4</span></div></div><div class="verdict" id="v1"><i class="dot"></i><span>checking</span></div></div>
+          <div class="arow" id="a2"><div><div class="aq">Q2 · Multiple answer</div><div class="aa"><span class="chip">x = 2</span><span class="chip">x = 3</span></div></div><div class="verdict" id="v2"><i class="dot"></i><span>checking</span></div></div>
+          <div class="arow" id="a3"><div><div class="aq">Q3 · Fill in the blank</div><div class="aa"><span class="chip">seven</span></div></div><div class="verdict" id="v3"><i class="dot"></i><span>checking</span></div></div>
+          <div class="arow" id="a4"><div><div class="aq">Q4 · Open ended</div><div class="aa">"Both sides must stay balanced, so…"</div>
+            <div class="yourcall" id="yc"><i style="width:6px;height:6px;border-radius:50%;background:#d4a24c;display:inline-block"></i>Your call</div></div>
+            <div class="verdict" id="v4"><i class="dot"></i><span>checking</span></div></div>
+        </div></div>
+
+        <!-- FACE 4 : results list -> a script opens inside the same face -->
+        <div class="face" id="fResults"><div class="face-inner results-list" id="rInner">
+          <div class="rhead"><b>Results</b><span>5 submissions</span></div>
+          <div class="rcol"><span>Learner</span><span>Score</span><span>%</span><span></span></div>
+          <div class="rrow" id="r1"><span class="nm">Ayanda K.</span><span class="sc">***</span><span class="pc">***</span><span class="rv">Review</span></div>
+          <div class="rrow" id="r2"><span class="nm">Thabo M.</span><span class="sc">***</span><span class="pc">***</span><span class="rv">Review</span></div>
+          <div class="rrow" id="r3"><span class="nm">Lerato S.</span><span class="sc">***</span><span class="pc">***</span><span class="rv">Review</span></div>
+          <div class="rrow" id="r4"><span class="nm">Sipho D.</span><span class="sc">***</span><span class="pc">***</span><span class="rv">Review</span></div>
+          <div class="rrow" id="r5"><span class="nm">Naledi P.</span><span class="sc">***</span><span class="pc">***</span><span class="rv">Review</span></div>
+        </div></div>
+
+        <!-- FACE 5 : one script, opened -->
+        <div class="face" id="fScript"><div class="face-inner" id="spInner">
+          <div class="sphead"><b>Thabo M.</b><span>Submitted 09:41 · 38 min</span></div>
+          <div class="sq"><div class="qt"><span>Q1 · Simplify 2x + 4 + x</span><em>1 / 1</em></div><div class="sopts"><div class="so ok"><i></i>3x + 4<span class="tagr">Thabo · Correct</span></div></div></div>
+          <div class="sq"><div class="qt"><span>Q2 · Select every root of x² − 5x + 6</span><em>2 / 2</em></div><div class="sopts"><div class="so ok"><i></i>x = 2<span class="tagr">Correct</span></div><div class="so ok"><i></i>x = 3<span class="tagr">Correct</span></div></div></div>
+          <div class="sq"><div class="qt"><span>Q3 · 3 + 4 = {blank}</span><em>2 / 2</em></div><div class="sopts"><div class="so ok"><i></i>seven<span class="tagr">Accepted</span></div></div></div>
+          <div class="sq oe" id="spOE"><div class="qt"><span>Q4 · Explain why we balance equations</span><em id="spOEm">Not yet graded</em></div><div class="oeans">"Both sides must stay balanced, so whatever I do to one side…"</div></div>
+        </div></div>
+
+        <!-- FACE 6 : publish -> numbers become real -->
+        <div class="face" id="fPub"><div class="face-inner">
+          <div class="pubrow"><span class="nm">Ayanda K.</span><span class="flipnum" id="f1s">***</span><span class="flipnum" id="f1p">***</span></div>
+          <div class="pubrow"><span class="nm">Thabo M.</span><span class="flipnum" id="f2s">***</span><span class="flipnum" id="f2p">***</span></div>
+          <div class="pubrow"><span class="nm">Lerato S.</span><span class="flipnum" id="f3s">***</span><span class="flipnum" id="f3p">***</span></div>
+          <button class="pubbtn" id="pubBtn"><span id="pubLbl">Publish marks</span><b>↗</b></button>
+        </div></div>
+
+        <!-- FACE 7 : same result, learner's view -->
+        <div class="face" id="fLearner"><div class="face-inner learnerview">
+          <div class="lrole"><span>My results</span><span>Learner</span></div>
+          <div class="ltitle">Term 2 Test</div>
+          <div class="lmeta">Grade 10A · Mathematics</div>
+          <div class="lscore"><span class="big" id="lbig">8</span><span class="of">/ 9 · counts 30% of Term 2</span></div>
+        </div></div>
+
+      </div>
+    </div>
+    <div class="cursor" id="cursor"></div>
+  </div>
+
+</main>
+
+<script>
+
+const scenes=[...document.querySelectorAll('.scene')];
+/* Durations follow the audit of v1: scene 3 is trimmed (11s -> 8.6s), the
+   toggle now flips early in 4, and the publish click lands early in 7 so
+   the film's climax is no longer the slowest thing in it. */
+const DURATIONS=[4600,4400,8800,5000,6600,6600,7000,5200];
+const SETTLE=350;   /* how long scenes 4-7 wait before their first beat */
+let current=0,start=performance.now();
+const $=id=>document.getElementById(id);
+function sceneDuration(n){return DURATIONS[n]||6000;}
+
+let timers=[];
+function at(ms,fn){timers.push(setTimeout(fn,ms));}
+function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+
+/* ---------- the paper as an actor ---------- */
+const paper=$('paper');
+const FACES=['fBuild','fCount','fMark','fResults','fScript','fPub','fLearner'];
+let faceNow=null;
+/* paper height per face = measured content + header (66) + breathing room.
+   Explicit pixel heights animate reliably; height:auto does not. */
+const FACE_H={};                       /* filled by measureFaces(), not hardcoded */
+const HEAD_PAD=()=>{
+  const faces=$('paper').querySelector('.faces'), face=$('fBuild');
+  const top=parseFloat(getComputedStyle(faces).top);                 /* header height */
+  const pb=parseFloat(getComputedStyle(face).paddingBottom);         /* bottom breathing room */
+  const border=2;                                                    /* the paper's own 1px borders */
+  const first=$('q1');
+  const lead=first?parseFloat(getComputedStyle(first).marginTop):0;  /* first card's top margin */
+  return Math.ceil(top+pb+border+lead);
+};
+/* Measure each face's FINISHED height once (all its staged children revealed), so the
+   paper fits its content on any screen or font, not just the one I designed on. */
+function measureFaces(){
+  FACES.forEach(id=>{
+    const f=$(id),inner=f.querySelector('.face-inner');
+    const hidden=[...f.querySelectorAll('.qcard,.opt,.oe-line,.arow,.rrow,.weightbox,.yourcall')];
+    const saved=hidden.map(e=>[e,e.style.opacity,e.style.maxHeight,e.style.display,e.style.marginTop]);
+    hidden.forEach(e=>{
+      e.style.opacity=1;
+      if(e.classList.contains('weightbox')){e.style.maxHeight='150px';e.style.marginTop='16px';}
+      if(e.classList.contains('yourcall'))e.style.display='inline-flex';
+    });
+    const prevT=inner.style.transform;inner.style.transform='none';
+    FACE_H[id]=Math.ceil(inner.getBoundingClientRect().height)+HEAD_PAD();
+    inner.style.transform=prevT;
+    saved.forEach(([e,o,m,d,mt])=>{e.style.opacity=o;e.style.maxHeight=m;e.style.display=d;e.style.marginTop=mt;});
+  });
+}
+/* the build face grows one question at a time; measure each stage so the paper can follow */
+/* the text each question will end up showing. Measuring with the real text is what makes
+   the stored heights match the film; measuring the empty, still-to-be-typed headline was
+   about 19px short in total, which is what caused the stray scroll. */
+const Q_TEXT={q1:'Simplify: 2x + 4 + x',q2:'Select every root of x² − 5x + 6',q3:'3 + 4 = ______',q4:'Explain why we balance equations'};
+const BUILD_H=[];
+let BUILD_CHROME=0;   /* paper height minus card content; measured with BUILD_H so they cannot disagree */
+function measureBuildStages(){
+  const cards=['q1','q2','q3','q4'].map($);
+  const inner=$('pinner');
+  const saved=[];
+  cards.forEach(c=>{
+    const kids=[...c.querySelectorAll('.opt,.oe-line')];
+    saved.push([c,c.style.display,kids.map(k=>[k,k.style.opacity])]);
+    kids.forEach(k=>k.style.opacity=1);
+  });
+  const prevT=inner.style.transform;inner.style.transform='none';
+  const prevOpacity=cards.map(c=>c.style.opacity);cards.forEach(c=>c.style.opacity=1);
+  BUILD_CHROME=HEAD_PAD();
+  /* fill each headline with its final text while measuring, then put it back */
+  const filled=cards.map(c=>{
+    const t=$(c.id+'t'), before=t.innerHTML;
+    t.textContent=Q_TEXT[c.id];
+    return [t,before];
+  });
+  cards.forEach((c,i)=>{
+    cards.forEach((o,j)=>o.style.display=(j<=i)?'':'none');
+    BUILD_H[i]=Math.ceil(inner.getBoundingClientRect().height)+BUILD_CHROME;
+  });
+  cards.forEach((c,i)=>{c.style.display='';c.style.opacity=prevOpacity[i];});
+  filled.forEach(([t,before])=>{t.innerHTML=before;});   /* restores the empty headline + its caret */
+  inner.style.transform=prevT;
+  saved.forEach(([c,d,kids])=>{c.style.display=d;kids.forEach(([k,o])=>k.style.opacity=o);});
+}
+function heightCap(){
+  /* phones/tablets stack the copy above the paper, so the paper gets less; on desktop the
+     copy is beside it, so it can use almost the whole viewport (24px breathing room each side) */
+  return window.innerWidth<=900?window.innerHeight*0.62:window.innerHeight-48;
+}
+let buildTarget=0;   /* the height the paper is heading to, not the mid-animation one */
+function growPaperTo(stage){
+  /* stage 0..3 = after Q1..Q4 has appeared */
+  buildTarget=Math.round(Math.min(BUILD_H[stage]||400,heightCap()));
+  paper.style.setProperty('--ph',buildTarget+'px');
+}
+function paperHeight(id){
+  /* never taller than the space the screen actually offers */
+  return Math.round(Math.min(FACE_H[id]||400,heightCap()));
+}
+function face(id){
+  if(faceNow===id)return;
+  /* the build face manages its own height as cards land (see runBuild) */
+  if(id!=='fBuild')paper.style.setProperty('--ph',paperHeight(id)+'px');
+  FACES.forEach(f=>{
+    const el=$(f);
+    if(f===id){el.classList.remove('out');el.classList.add('on');}
+    else if(el.classList.contains('on')){el.classList.remove('on');el.classList.add('out');}
+    else el.classList.remove('out');
+  });
+  faceNow=id;
+}
+function place(pos){
+  paper.classList.remove('at-right','at-center','at-left');
+  if(pos)paper.classList.add('at-'+pos);
+}
+function tag(id,text,ink){
+  const el=$(id); if(text!=null)el.textContent=text;
+  el.dataset.tone=ink?'ink':'soft';       /* set on show, never cleared on hide */
+  el.classList.add('show');
+}
+function untag(id){$(id).classList.remove('show');}   /* colour untouched: fades out as itself */
+
+/* which scenes the paper is on stage for */
+const PAPER_SCENES=new Set([2,3,4,5,6]);
+
+/* ---------- the cursor: same actor across scenes ---------- */
+const cursor=$('cursor');
+function cursorTo(el,dx=0,dy=0,onArrive){
+  const stage=document.querySelector('.stage').getBoundingClientRect();
+  const r=el.getBoundingClientRect();
+  const x=r.left-stage.left+r.width/2+dx, y=r.top-stage.top+r.height/2+dy;
+  cursor.style.setProperty('--cx',(x-7)+'px');
+  cursor.style.setProperty('--cy',(y-7)+'px');
+  cursor.classList.add('show');
+  /* arrival = the move has settled. The ease is long-tailed, so ~65% of the
+     .9s transition is where it visibly stops; that is when a hand would press. */
+  if(onArrive)at(620,onArrive);
+}
+function cursorPress(after){
+  cursor.classList.add('press');
+  at(220,()=>{cursor.classList.remove('press');if(after)after();});
+}
+function cursorAway(){cursor.classList.remove('show','press');}
+
+/* one show(): resets, activates, then hands off to the scene's own runner */
+const RUNNERS={2:runBuild,3:runCount,4:runMarking,5:runScripts,6:runPublish};
+function show(n){
+  clearTimers();
+  scenes.forEach((s,i)=>s.classList.toggle('active',i===n));
+  current=n;
+  cursorAway();
+
+  /* the paper stays through 3..7 (indices 2..6) and leaves before the intro/idea/end */
+  if(PAPER_SCENES.has(n)||n===6){
+    paper.classList.add('here');
+  }else{
+    paper.classList.remove('here');
+    faceNow=null;
+    paper.style.setProperty('--ph',(BUILD_H[0]?Math.round(Math.min(BUILD_H[0],heightCap())):320)+'px');
+    FACES.forEach(f=>{$(f).classList.remove('on','out');});
+    [ 'tagTerm','tagState' ].forEach(untag);
+    $('totalN').textContent='0';
+    place(null);
+  }
+  /* .scene's enter transition (transform:scale) takes ~1s, which matters when a scene
+     measures layout. Scenes 4-7 only swap the paper's face; the paper is already
+     placed, so they need almost no settle time. Scene 3 places the paper and builds
+     from scratch, so it keeps the full wait. */
+  if(RUNNERS[n])at(n===2?1050:SETTLE,RUNNERS[n]);
+  /* the paper needs to be on stage BEFORE its runner starts; entering scene 3 places it now */
+  if(n===2){place('right');face('fBuild');}
+}
+
+function frame(now){
+  const elapsed=now-start;
+  if(elapsed>=sceneDuration(current)){
+    show((current+1)%scenes.length);
+    start=now;
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---- typewriter, with an optional slip: type, hesitate, fix ---- */
+function typeInto(el,text,perChar,done,slip){
+  const caret=el.querySelector('.caret');
+  let i=0,phase=0;
+  const set=t=>{const f=el.childNodes[0];if(f&&f.nodeType===3)el.removeChild(f);el.insertBefore(document.createTextNode(t),caret);};
+  (function step(){
+    if(slip&&phase===0&&i===slip.at){
+      /* the human moment: a wrong letter lands, a beat, then it is corrected */
+      set(text.slice(0,i)+slip.wrong);
+      phase=1;timers.push(setTimeout(step,300));return;
+    }
+    if(slip&&phase===1){set(text.slice(0,i));phase=2;timers.push(setTimeout(step,170));return;}
+    if(i<=text.length){
+      set(text.slice(0,i));i++;
+      if(i<=text.length)timers.push(setTimeout(step,perChar));
+      else if(done)done();
+    }
+  })();
+}
+function clearText(el){const c=el.querySelector('.caret');while(el.firstChild&&el.firstChild!==c)el.removeChild(el.firstChild);}
+
+function follow(id){
+  /* Scroll only when the content genuinely cannot fit. The face's future height is known
+     (the paper's target height minus the chrome), and the newest card's bottom edge is
+     measured live, so this compares two real numbers instead of predicting one.
+     10px of tolerance absorbs sub-pixel rounding, so a paper that fits never nudges. */
+  const inner=$('pinner'),card=$(id);
+  if(!inner||!card)return;
+  const room=buildTarget-BUILD_CHROME;
+  const bottom=card.offsetTop+card.offsetHeight;
+  const shortfall=bottom-room;
+  inner.style.transform=shortfall>10?'translateY('+(-shortfall)+'px)':'translateY(0)';
+}
+function bump(to){const n=$('totalN');n.textContent=to;n.classList.add('tick');at(260,()=>n.classList.remove('tick'));}
+
+/* ------------------------------------------------------------------
+   03  build : the mark total is the protagonist, it climbs as cards land
+------------------------------------------------------------------ */
+function runBuild(){
+  ['q1','q2','q3','q4'].forEach(id=>{$(id).classList.remove('in','editing');clearText($(id+'t'));});
+  document.querySelectorAll('#fBuild .opt').forEach(o=>o.classList.remove('in'));
+  ['q3a','q4l'].forEach(id=>$(id).classList.remove('in'));
+  ['m1','m2','m3','m4'].forEach(id=>$(id).classList.remove('on'));
+  $('pinner').style.transform='translateY(0)';
+  $('totalN').textContent='0';
+  untag('tagTerm');untag('tagState');
+  const PER=30;
+
+  growPaperTo(0);
+  at(0,()=>{$('q1').classList.add('in','editing');
+    /* the slip: types "3x + 3", catches it, fixes it -- the only one in the film */
+    typeInto($('q1t'),Q_TEXT.q1,PER,null,{at:13,wrong:'5'});});
+  at(1250,()=>$('q1o1').classList.add('in'));
+  at(1400,()=>$('q1o2').classList.add('in'));
+  at(1550,()=>{$('q1o3').classList.add('in');follow('q1');});
+  at(1950,()=>{$('q1').classList.remove('editing');$('m1').classList.add('on');bump(1);});
+
+  at(2350,()=>{growPaperTo(1);$('q2').classList.add('in','editing');typeInto($('q2t'),Q_TEXT.q2,PER);});
+  at(3450,()=>$('q2o1').classList.add('in'));
+  at(3590,()=>$('q2o2').classList.add('in'));
+  at(3730,()=>{$('q2o3').classList.add('in');follow('q2');});
+  at(4100,()=>{$('q2').classList.remove('editing');$('m2').classList.add('on');bump(3);});
+
+  at(4500,()=>{growPaperTo(2);$('q3').classList.add('in','editing');typeInto($('q3t'),Q_TEXT.q3,PER);});
+  at(5150,()=>{$('q3a').classList.add('in');follow('q3');});
+  at(5550,()=>{$('q3').classList.remove('editing');$('m3').classList.add('on');bump(5);});
+
+  at(5900,()=>{growPaperTo(3);$('q4').classList.add('in','editing');typeInto($('q4t'),Q_TEXT.q4,PER);});
+  at(6900,()=>{$('q4l').classList.add('in');follow('q4');});
+  at(7300,()=>{$('q4').classList.remove('editing');$('m4').classList.add('on');bump(9);});
+}
+
+/* ------------------------------------------------------------------
+   04  make it count : same paper, the face beneath the header changes
+------------------------------------------------------------------ */
+function runCount(){
+  place('right');
+  $('tgl').classList.remove('on');$('wbox').classList.remove('show');
+  $('wnum').textContent='0';$('wfill').style.width='0';$('wrest').style.width='0';
+  untag('tagTerm');
+  face('fCount');
+  /* the toggle flips early (audit: v1 waited 2.6s for this) */
+  at(300,()=>cursorTo($('tgl'),0,0,()=>{
+    /* arrived -> a small hesitation -> press -> the switch flips because it was pressed */
+    at(140,()=>cursorPress(()=>{
+      $('tgl').classList.add('on');$('wbox').classList.add('show');
+      tag('tagTerm','Counts 30%',true);
+      at(420,()=>{
+        let v=0;$('wfill').style.width='30%';$('wrest').style.width='calc(70% - 2px)';
+        (function up(){v+=2;$('wnum').textContent=Math.min(v,30);if(v<30)timers.push(setTimeout(up,32));})();
+      });
+      at(1500,cursorAway);
+    }));
+  }));
+}
+
+/* ------------------------------------------------------------------
+   05  marked for you
+------------------------------------------------------------------ */
+function resolve(id,text,cls){
+  const v=$(id);v.className='verdict '+(cls||'done');
+  v.innerHTML='<i class="dot"></i><span>'+text+'</span>';
+}
+function runMarking(){
+  place('right');
+  ['a1','a2','a3','a4'].forEach(id=>$(id).classList.remove('in'));
+  ['v1','v2','v3','v4'].forEach(id=>{const v=$(id);v.className='verdict';v.innerHTML='<i class="dot"></i><span>checking</span>';});
+  $('yc').classList.remove('show','in');
+  $('aTally').textContent='0 marks so far';
+  face('fMark');
+
+  at(300,()=>$('a1').classList.add('in'));
+  at(950,()=>{resolve('v1','1 / 1');$('aTally').textContent='1 mark so far';});
+  at(1400,()=>$('a2').classList.add('in'));
+  at(2050,()=>{resolve('v2','2 / 2');$('aTally').textContent='3 marks so far';});
+  at(2500,()=>$('a3').classList.add('in'));
+  at(3150,()=>{resolve('v3','2 / 2');$('aTally').textContent='5 marks so far';});
+  at(3600,()=>$('a4').classList.add('in'));
+  at(4400,()=>{resolve('v4','waiting','wait');$('yc').classList.add('show');at(60,()=>$('yc').classList.add('in'));});
+}
+
+/* ------------------------------------------------------------------
+   06  every script safe : list -> one script opens inside the paper
+------------------------------------------------------------------ */
+function runScripts(){
+  place('right');
+  ['r1','r2','r3','r4','r5'].forEach(id=>$(id).classList.remove('in','hot'));
+  $('spOE').classList.remove('graded');$('spOEm').textContent='Not yet graded';
+  $('spInner').style.transform='translateY(0)';
+  face('fResults');
+  ['r1','r2','r3','r4','r5'].forEach((id,i)=>at(160+i*140,()=>$(id).classList.add('in')));
+  at(1000,()=>{$('r2').classList.add('hot');cursorTo($('r2'),120,0,()=>{
+    at(120,()=>cursorPress(()=>{cursorAway();face('fScript');
+      /* the teacher grades the one open answer: 3 of 4 */
+      at(1700,()=>{$('spOE').classList.add('graded');$('spOEm').textContent='3 / 4';});
+    }));
+  });});
+}
+
+/* ------------------------------------------------------------------
+   07  you decide when : *** becomes real, then the learner sees the same result
+------------------------------------------------------------------ */
+function flip(idS,idP,s,p){const a=$(idS),b=$(idP);a.textContent=s;b.textContent=p;a.classList.add('real');b.classList.add('real');}
+function runPublish(){
+  place('right');
+  ['f1s','f1p','f2s','f2p','f3s','f3p'].forEach(id=>{const el=$(id);el.textContent='***';el.classList.remove('real');});
+  $('pubBtn').classList.remove('is-clicked','done');$('pubLbl').textContent='Publish marks';
+  untag('tagState');tag('tagState','Hidden',false);
+  face('fPub');
+  /* the press lands early now (audit: v1 spent 3.6s before this) */
+  at(500,()=>{const b=$('pubBtn').getBoundingClientRect();
+    cursorTo($('pubBtn'),b.width/2-46,0,()=>{
+      /* arrived -> a beat of hesitation -> press. This is the film's climax, so the pause is longer. */
+      at(260,()=>{$('pubBtn').classList.add('is-clicked');
+        cursorPress(()=>{
+          tag('tagState','Published',true);$('pubLbl').textContent='Published';$('pubBtn').classList.add('done');
+          at(80,()=>flip('f1s','f1p','9 / 9','100%'));
+          at(280,()=>flip('f2s','f2p','8 / 9','89%'));
+          at(480,()=>flip('f3s','f3p','6 / 9','67%'));
+          at(1000,cursorAway);
+          /* the same paper, now as the learner sees it: one system, two views */
+          at(2000,()=>{untag('tagState');face('fLearner');});
+        });
+      });
+    });
+  });
+}
+
+function measureAll(){measureFaces();measureBuildStages();}
+measureAll();
+addEventListener('resize',()=>{measureAll();if(faceNow&&faceNow!=='fBuild')paper.style.setProperty('--ph',paperHeight(faceNow)+'px');});
+/* fonts can change text metrics after first paint; re-measure once they are ready */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measureAll);
+show(0);
+requestAnimationFrame(frame);
+
+</script>
+</body>
+</html>

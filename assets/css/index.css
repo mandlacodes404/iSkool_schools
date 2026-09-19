@@ -348,6 +348,19 @@ body {
     min-height: 200px;
 }
 
+/* The preview animation now loads via <iframe src="animations/features/
+   login-preview.html">, replacing what used to be the inline .preview-wrap
+   card markup. Same footprint, same spot in the layout — swap which file
+   the iframe points at to show a different animation here. */
+.preview-frame {
+    display: block;
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    border: 0;
+    background: transparent;
+}
+
 .pv-header { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
 .pv-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .pv-icon.green  { background: #0e2e22; }
@@ -748,6 +761,10 @@ body {
     .preview-wrap {
         position: relative;
         width: 100%;
+        min-height: 280px;
+    }
+
+    .preview-frame {
         min-height: 280px;
     }
 

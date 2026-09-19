@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=8.6">
+    <link rel="stylesheet" href="assets/css/index.css?v=8.7">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -148,6 +148,27 @@ function getCsrfToken() {
                 </div>
             </div>
 
+            <!--
+                The preview animation used to be ~700 lines of hardcoded
+                cards + a matching JS state machine, inline right here.
+                It now lives in its own standalone, self-contained file —
+                currently animations/features/quiz-intro.html — loaded via
+                iframe. Swap the src to point at a different animation
+                (e.g. animations/features/login-preview.html) whenever you
+                want to show something else in this slot.
+            -->
+            <iframe
+                class="preview-frame"
+                src="animations/features/quiz-intro.html"
+                title="iSkool feature preview"
+                scrolling="no"
+                frameborder="0"
+            ></iframe>
+
+            <?php /* ───────────────────────────────────────────────────
+                ORIGINAL INLINE MARKUP — kept here, commented out, only
+                until the iframe version has been checked in production.
+                Safe to delete this whole comment block afterwards.
             <div class="preview-wrap">
 
                 <!-- Card 0: Typewriter Intro -->
@@ -457,6 +478,8 @@ function getCsrfToken() {
                 </div>
 
             </div>
+            */ ?>
+
             <div class="brand-panel-footer"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
         </div>
 
@@ -782,436 +805,11 @@ function getCsrfToken() {
             .catch(err => console.error("Service Worker failed", err));
     }
 
-    // ── Preview panel animation (5-card one-at-a-time loop) ──
-    const pvDelay = ms => new Promise(r => setTimeout(r, ms));
-
-    function pvCountUp(el, target, suffix, duration) {
-        let val = 0;
-        const steps = 40, inc = target / steps, iv = duration / steps;
-        const t = setInterval(() => {
-            val = Math.min(val + inc, target);
-            el.textContent = Math.round(val).toLocaleString() + suffix;
-            if (val >= target) clearInterval(t);
-        }, iv);
-    }
-
-    function pvAnimBar(fillEl, lblEl, pct, duration) {
-        fillEl.style.width = pct + '%';
-        let val = 0;
-        const steps = 40, inc = pct / steps, iv = duration / steps;
-        const t = setInterval(() => {
-            val = Math.min(val + inc, pct);
-            lblEl.textContent = Math.round(val) + '%';
-            if (val >= pct) clearInterval(t);
-        }, iv);
-    }
-
-    function pvShow(id) {
-        const el = document.getElementById(id);
-        el.style.transition = '';
-        el.classList.remove('pv-exit');
-        el.classList.add('pv-visible');
-    }
-
-    async function pvHide(id) {
-        const el = document.getElementById(id);
-        el.classList.add('pv-exit');
-        await pvDelay(450);
-        el.classList.remove('pv-visible', 'pv-exit');
-    }
-
-    // ── Card 1: Class Discussion ──
-    async function pvCard1() {
-        pvShow('pv1');
-        await pvDelay(500);
-        document.getElementById('pv-b1').classList.add('pv-vis');
-        await pvDelay(700);
-        document.getElementById('pv-typing').classList.add('pv-vis');
-        await pvDelay(1400);
-        // Dots shrink out just as the reply grows in, so it reads as "dots became the message"
-        document.getElementById('pv-typing').classList.add('pv-typing-out');
-        document.getElementById('pv-b2').classList.add('pv-vis');
-        await pvDelay(700);
-        document.getElementById('pv-b3').classList.add('pv-vis');
-        await pvDelay(600);
-        document.getElementById('pv-b4').classList.add('pv-vis');
-        await pvDelay(2200);
-        await pvHide('pv1');
-        // reset
-        ['pv-b1','pv-b2','pv-b3','pv-b4'].forEach(id => document.getElementById(id).classList.remove('pv-vis'));
-        document.getElementById('pv-typing').classList.remove('pv-vis', 'pv-typing-out');
-    }
-
-    // ── Card 2: Announcements ──
-    async function pvCard2() {
-        pvShow('pv2');
-        await pvDelay(400);
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(260);
-            document.getElementById('pv-a' + i).classList.add('pv-vis');
-        }
-        await pvDelay(2800);
-        await pvHide('pv2');
-        for (let i = 1; i <= 3; i++) document.getElementById('pv-a' + i).classList.remove('pv-vis');
-    }
-
-    // ── Card 3: Auto Quiz ──
-    async function pvCard3() {
-        pvShow('pv3');
-        await pvDelay(450);
-        document.getElementById('pv-qq').classList.add('pv-vis');
-        await pvDelay(400);
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(200);
-            document.getElementById('pv-qo' + i).classList.add('pv-vis');
-        }
-        await pvDelay(900);
-        // wrong answer selected first
-        document.getElementById('pv-qo1').classList.add('wrong');
-        await pvDelay(900);
-        document.getElementById('pv-qo1').classList.remove('wrong');
-        await pvDelay(300);
-        // correct answer
-        document.getElementById('pv-qo2').classList.add('selected');
-        await pvDelay(2400);
-        await pvHide('pv3');
-        document.getElementById('pv-qq').classList.remove('pv-vis');
-        for (let i = 1; i <= 3; i++) {
-            const o = document.getElementById('pv-qo' + i);
-            o.classList.remove('pv-vis','selected','wrong');
-        }
-    }
-
-    // ── Card 4: Teacher Analytics ──
-    async function pvCard4() {
-        pvShow('pv4');
-        await pvDelay(450);
-        pvCountUp(document.getElementById('pv-sn1'), 742, '', 900);
-        pvCountUp(document.getElementById('pv-sn2'), 58, '', 900);
-        pvCountUp(document.getElementById('pv-sn3'), 91, '%', 900);
-        await pvDelay(300);
-        pvAnimBar(document.getElementById('pv-bf1'), document.getElementById('pv-bl1'), 82, 1100);
-        await pvDelay(200);
-        pvAnimBar(document.getElementById('pv-bf2'), document.getElementById('pv-bl2'), 67, 1100);
-        await pvDelay(3200);
-        await pvHide('pv4');
-        document.getElementById('pv-sn1').textContent = '0';
-        document.getElementById('pv-sn2').textContent = '0';
-        document.getElementById('pv-sn3').textContent = '0%';
-        document.getElementById('pv-bf1').style.width = '0%'; document.getElementById('pv-bl1').textContent = '0%';
-        document.getElementById('pv-bf2').style.width = '0%'; document.getElementById('pv-bl2').textContent = '0%';
-    }
-
-    // ── Card 5: AI Invigilator ──
-    async function pvCard5() {
-        pvShow('pv5');
-        await pvDelay(400);
-        document.getElementById('pv-inv-screen').classList.add('pv-vis');
-        await pvDelay(1800);
-        // flash alert on face 4
-        document.getElementById('pv-if4').classList.add('alert');
-        document.getElementById('pv-inv-badge').className = 'pv-inv-badge warn';
-        document.getElementById('pv-inv-badge').textContent = '⚠ ALERT';
-        document.getElementById('pv-inv-sub').textContent = 'Suspicious activity flagged';
-        await pvDelay(500);
-        document.getElementById('pv-inv-alert').classList.add('pv-vis');
-        await pvDelay(2800);
-        await pvHide('pv5');
-        // reset
-        document.getElementById('pv-inv-screen').classList.remove('pv-vis');
-        document.getElementById('pv-if4').classList.remove('alert');
-        document.getElementById('pv-inv-badge').className = 'pv-inv-badge active';
-        document.getElementById('pv-inv-badge').textContent = '● LIVE';
-        document.getElementById('pv-inv-sub').textContent = 'Monitoring exam session';
-        document.getElementById('pv-inv-alert').classList.remove('pv-vis');
-    }
-
-    // ── Card 6: Academic Calendar ──
-    async function pvCard6() {
-        pvShow('pv6');
-        await pvDelay(350);
-        document.getElementById('pv-cal-month').classList.add('pv-vis');
-        await pvDelay(200);
-        for (let i = 1; i <= 14; i++) {
-            await pvDelay(60);
-            document.getElementById('pvc-' + i).classList.add('pv-vis');
-        }
-        await pvDelay(400);
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(250);
-            document.getElementById('pv-ev' + i).classList.add('pv-vis');
-        }
-        await pvDelay(2500);
-        await pvHide('pv6');
-        document.getElementById('pv-cal-month').classList.remove('pv-vis');
-        for (let i = 1; i <= 14; i++) document.getElementById('pvc-' + i).classList.remove('pv-vis');
-        for (let i = 1; i <= 3; i++) document.getElementById('pv-ev' + i).classList.remove('pv-vis');
-    }
-
-    // ── Card 7: Learner Dashboard ──
-    async function pvCard7() {
-        const subjects = [
-            { id: 1, pct: 88, label: '88%' },
-            { id: 2, pct: 74, label: '74%' },
-            { id: 3, pct: 71, label: '71%' },
-            { id: 4, pct: 68, label: '68%' },
-        ];
-        pvShow('pv7');
-        await pvDelay(400);
-        for (const s of subjects) {
-            await pvDelay(220);
-            document.getElementById('pv-sr' + s.id).classList.add('pv-vis');
-            await pvDelay(100);
-            document.getElementById('pv-sf' + s.id).style.width = s.pct + '%';
-            pvCountUp(document.getElementById('pv-sp' + s.id), s.pct, '%', 900);
-        }
-        await pvDelay(2600);
-        await pvHide('pv7');
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById('pv-sr' + i).classList.remove('pv-vis');
-            document.getElementById('pv-sf' + i).style.width = '0%';
-            document.getElementById('pv-sp' + i).textContent = '0%';
-        }
-    }
-
-    // ── Card 8: Admin Dashboard ──
-    async function pvCard8() {
-        pvShow('pv8');
-        await pvDelay(350);
-        for (let i = 1; i <= 4; i++) {
-            await pvDelay(150);
-            document.getElementById('pv-ab' + i).classList.add('pv-vis');
-        }
-        await pvDelay(300);
-        pvCountUp(document.getElementById('pv-an1'), 742, '', 1000);
-        pvCountUp(document.getElementById('pv-an2'), 58, '', 1000);
-        pvCountUp(document.getElementById('pv-an3'), 24, '', 1000);
-        pvCountUp(document.getElementById('pv-an4'), 91, '%', 1000);
-        await pvDelay(600);
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(200);
-            document.getElementById('pv-ar' + i).classList.add('pv-vis');
-        }
-        await pvDelay(2600);
-        await pvHide('pv8');
-        for (let i = 1; i <= 4; i++) document.getElementById('pv-ab' + i).classList.remove('pv-vis');
-        ['pv-an1','pv-an2','pv-an3'].forEach(id => document.getElementById(id).textContent = '0');
-        document.getElementById('pv-an4').textContent = '0%';
-        for (let i = 1; i <= 3; i++) document.getElementById('pv-ar' + i).classList.remove('pv-vis');
-    }
-
-    // ── Card 9: Auto Grading ──
-    async function pvCard9() {
-        const qs = [
-            { id: 1, scored: 9,  total: 10, pct: 90,  cls: 'correct', label: '9/10'  },
-            { id: 2, scored: 8,  total: 10, pct: 80,  cls: 'correct', label: '8/10'  },
-            { id: 3, scored: 10, total: 15, pct: 67,  cls: 'partial', label: '10/15' },
-            { id: 4, scored: 5,  total: 15, pct: 33,  cls: 'wrong',   label: '5/15'  },
-        ];
-        pvShow('pv9');
-        await pvDelay(350);
-        document.getElementById('pv-gh').classList.add('pv-vis');
-        await pvDelay(300);
-        let runningTotal = 0;
-        for (const q of qs) {
-            await pvDelay(280);
-            document.getElementById('pv-qr' + q.id).classList.add('pv-vis');
-            await pvDelay(120);
-            document.getElementById('pv-qb' + q.id).style.width = q.pct + '%';
-            document.getElementById('pv-qm' + q.id).textContent = q.label;
-            document.getElementById('pv-qm' + q.id).className = 'pv-q-mark ' + q.cls;
-            runningTotal += q.scored;
-            pvCountUp(document.getElementById('pv-gtotal'), runningTotal, '', 400);
-        }
-        await pvDelay(2500);
-        await pvHide('pv9');
-        document.getElementById('pv-gh').classList.remove('pv-vis');
-        document.getElementById('pv-gtotal').textContent = '0';
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById('pv-qr' + i).classList.remove('pv-vis');
-            document.getElementById('pv-qb' + i).style.width = '0%';
-            document.getElementById('pv-qm' + i).textContent = '0/' + (i <= 2 ? '10' : '15');
-        }
-    }
-
-    // ── Card 0: Typewriter Intro (plays once at start) ──
-    // Line 1's own type-in behavior is left exactly as-is (untouched).
-    async function pvTypewriter(elId, text, speed) {
-        const el = document.getElementById(elId);
-        el.innerHTML = '';
-        const cursor = document.createElement('span');
-        cursor.className = 'pv-tw-cursor';
-        el.appendChild(cursor);
-        for (let i = 0; i < text.length; i++) {
-            el.insertBefore(document.createTextNode(text[i]), cursor);
-            await pvDelay(speed);
-        }
-        return cursor;
-    }
-
-    // Natural, less mechanical typing: small randomized jitter per character,
-    // with a slightly longer breath after spaces/punctuation. Used for line 2
-    // only, so line 1's cadence/feel is unchanged.
-    async function pvTypewriterNatural(elId, text, baseSpeed) {
-        const el = document.getElementById(elId);
-        el.innerHTML = '';
-        const cursor = document.createElement('span');
-        cursor.className = 'pv-tw-cursor';
-        el.appendChild(cursor);
-        for (let i = 0; i < text.length; i++) {
-            const ch = text[i];
-            el.insertBefore(document.createTextNode(ch), cursor);
-            const jitter = (Math.random() - 0.5) * baseSpeed * 0.6; // ±30%
-            let wait = baseSpeed + jitter;
-            if (ch === ' ') wait += baseSpeed * 0.3;
-            if (/[.,!?]/.test(ch)) wait += baseSpeed * 1.4;
-            await pvDelay(Math.max(14, wait));
-        }
-        return cursor;
-    }
-
-    // Fade a cursor out smoothly instead of yanking it from the DOM.
-    async function pvCursorOut(cursor) {
-        if (!cursor) return;
-        cursor.classList.add('pv-tw-cursor-out');
-        await pvDelay(160);
-        cursor.remove();
-    }
-
-    async function pvCard0() {
-        pvShow('pv0');
-        await pvDelay(400);
-
-        // Line 1 — type-in untouched.
-        const line1El = document.getElementById('pv-tw1');
-        const line2El = document.getElementById('pv-tw2');
-        const c1 = await pvTypewriter('pv-tw1', 'Get a glimpse of iSkool', 52);
-        await pvDelay(700);
-
-        // Handoff: cursor 1 fades out as line 1 recedes (dims, doesn't vanish),
-        // giving line 2 a clear moment to take focus rather than a hard cut.
-        pvCursorOut(c1);
-        line1El.classList.add('pv-tw-dim');
-        await pvDelay(180);
-
-        // Line 2 container settles in (fade + rise + unblur) just before typing starts.
-        // We wait for the full transition to finish (0.4s in CSS) before typing the
-        // first character — starting mid-transition is what caused the visible stutter.
-        line2El.classList.add('pv-tw-in');
-        await pvDelay(430);
-
-        const c2 = await pvTypewriterNatural('pv-tw2', 'A smarter way to run your school.', 40);
-        await pvDelay(1200);
-        await pvCursorOut(c2);
-
-        await pvDelay(300);
-        await pvHide('pv0');
-
-        // Reset for next play-through.
-        line1El.innerHTML = '';
-        line1El.classList.remove('pv-tw-dim');
-        line2El.innerHTML = '';
-        line2El.classList.remove('pv-tw-in');
-    }
-
-
-    // ── Card 10: Teacher Evaluations ──
-    async function pvCard10() {
-        pvShow('pv10');
-        await pvDelay(350);
-        // Sidebar items slide in
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(200);
-            document.getElementById('pv-ev-i' + i).classList.add('pv-vis');
-        }
-        await pvDelay(300);
-        // Question fades in
-        document.getElementById('pv-eval-q').classList.add('pv-vis');
-        await pvDelay(300);
-        // Options appear
-        for (let i = 1; i <= 3; i++) {
-            await pvDelay(180);
-            document.getElementById('pv-eopt' + i).classList.add('pv-vis');
-        }
-        await pvDelay(800);
-        // User selects "Agree"
-        document.getElementById('pv-eopt2').classList.add('selected');
-        await pvDelay(2200);
-        await pvHide('pv10');
-        // Reset
-        for (let i = 1; i <= 3; i++) {
-            document.getElementById('pv-ev-i' + i).classList.remove('pv-vis');
-            document.getElementById('pv-eopt' + i).classList.remove('pv-vis', 'selected');
-        }
-        document.getElementById('pv-eval-q').classList.remove('pv-vis');
-    }
-
-    // ── Card 11: Subject Brief & Outline ──
-    async function pvCard11() {
-        pvShow('pv11');
-        await pvDelay(350);
-        // Tabs fade in
-        document.getElementById('pv11').querySelector('.pv-syl-tabs').classList.add('pv-vis');
-        await pvDelay(400);
-        // Brief card appears
-        document.getElementById('pv-syl-card').classList.add('pv-vis');
-        await pvDelay(350);
-        // Topics slide in
-        for (const id of ['pv-sta', 'pv-stb', 'pv-stc']) {
-            await pvDelay(220);
-            document.getElementById(id).classList.add('pv-vis');
-        }
-        await pvDelay(300);
-        // Assessment rows + bars
-        document.getElementById('pv-sa1').classList.add('pv-vis');
-        document.getElementById('pv-sab1').style.width = '40%';
-        await pvDelay(220);
-        document.getElementById('pv-sa2').classList.add('pv-vis');
-        document.getElementById('pv-sab2').style.width = '30%';
-        await pvDelay(2600);
-        await pvHide('pv11');
-        // Reset
-        document.getElementById('pv11').querySelector('.pv-syl-tabs').classList.remove('pv-vis');
-        document.getElementById('pv-syl-card').classList.remove('pv-vis');
-        for (const id of ['pv-sta', 'pv-stb', 'pv-stc']) document.getElementById(id).classList.remove('pv-vis');
-        document.getElementById('pv-sa1').classList.remove('pv-vis');
-        document.getElementById('pv-sa2').classList.remove('pv-vis');
-        document.getElementById('pv-sab1').style.width = '0%';
-        document.getElementById('pv-sab2').style.width = '0%';
-    }
-
-    async function runPreview() {
-        await pvDelay(2500);
-        // Play intro once, then loop cards
-        await pvCard0();
-        await pvDelay(350);
-        while (true) {
-            await pvCard1();
-            await pvDelay(350);
-            await pvCard2();
-            await pvDelay(350);
-            await pvCard3();
-            await pvDelay(350);
-            await pvCard4();
-            await pvDelay(350);
-            await pvCard5();
-            await pvDelay(350);
-            await pvCard6();
-            await pvDelay(350);
-            await pvCard7();
-            await pvDelay(350);
-            await pvCard8();
-            await pvDelay(350);
-            await pvCard9();
-            await pvDelay(350);
-            await pvCard10();
-            await pvDelay(350);
-            await pvCard11();
-            await pvDelay(350);
-        }
-    }
-
-    runPreview();</script>
+    // The brand-panel preview animation used to run here (~430 lines
+    // driving 12 cards). It now lives entirely inside
+    // animations/features/login-preview.html, loaded via the iframe
+    // in the brand-panel markup above — nothing to run on this page.
+    </script>
 
     <script>
     // ── AJAX Forgot Password ───────────────────────────────────────────────────
