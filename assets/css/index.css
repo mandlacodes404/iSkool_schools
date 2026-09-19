@@ -359,6 +359,8 @@ body {
     min-height: 200px;
     border: 0;
     background: transparent;
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
 }
 
 .pv-header { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
@@ -730,7 +732,7 @@ body {
     .brand-panel {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: stretch;
         flex: 0 0 48%;
         padding: 48px 40px;
@@ -764,8 +766,16 @@ body {
         min-height: 280px;
     }
 
+    /* stretch to fill the space between the "iSkool" eyebrow above and the
+       version footer below, instead of sitting at its natural size in the
+       middle of the panel — this is what "opens it up and down" */
     .preview-frame {
+        flex: 1 1 auto;
         min-height: 280px;
+        width: 100%;
+        margin-top: 28px;
+        margin-bottom: 56px; /* clears the absolutely-positioned footer */
+        overflow: hidden; /* clips the iframe's own content to the rounded corners */
     }
 
     .form-panel {
