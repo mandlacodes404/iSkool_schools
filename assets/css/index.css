@@ -752,14 +752,6 @@ body {
         display: none;
     }
 
-    .brand-panel-footer {
-        position: absolute;
-        bottom: 28px;
-        left: 40px;
-        font-size: 12px;
-        color: #7e7a7a;
-    }
-
     .preview-wrap {
         position: relative;
         width: 100%;
@@ -767,14 +759,14 @@ body {
     }
 
     /* stretch to fill the space between the "iSkool" eyebrow above and the
-       version footer below, instead of sitting at its natural size in the
-       middle of the panel — this is what "opens it up and down" */
+       bottom of the panel — the version footer that used to sit below this
+       is gone now, so the window can run almost to the panel's own edge */
     .preview-frame {
         flex: 1 1 auto;
         min-height: 280px;
         width: 100%;
         margin-top: 28px;
-        margin-bottom: 56px; /* clears the absolutely-positioned footer */
+        margin-bottom: 0;
         overflow: hidden; /* clips the iframe's own content to the rounded corners */
     }
 
