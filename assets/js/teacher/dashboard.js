@@ -1669,6 +1669,199 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             // Set the correct state for whichever teacher page loads first.
             scheduleTeacherContentScrollUIRecheck();
 
+            // ─────────────────────────────────────────────────────────────
+            // MOBILE SCROLL MEMORY — one mechanism for EVERY teacher section.
+            //
+            // Sections that restore scroll (e.g. assignments.js) attach to
+            // their DESKTOP sidebar element (.as-sidebar-scroll). That element
+            // is hidden on phones, so on mobile nothing was saved or restored
+            // and every list re-rendered at scroll 0 — most noticeably when
+            // opening an item and pressing back, since back rebuilds the list.
+            // On mobile the thing that actually scrolls is #api-content-area,
+            // so it is remembered here once, centrally, instead of patching
+            // each section file.
+            //
+            // Keyed by WHAT IS SHOWING, so a list and its detail each keep
+            // their own position:  <section>:list  |  <section>:<detailType>
+            // ─────────────────────────────────────────────────────────────
+            window.teacherMobileViewKey = function() {
+                const page = sessionStorage.getItem('lastTeacherPage') || 'teacher_manual';
+                const detail = window.teacherHeaderDetailType;
+                return page + ':' + (detail ? String(detail) : 'list');
+            };
+
+            const MOBILE_SCROLL_STORE = 'teacherMobileScroll';
+            const loadMobileScroll = () => {
+                try { return JSON.parse(sessionStorage.getItem(MOBILE_SCROLL_STORE) || '{}') || {}; }
+                catch (e) { return {}; }
+            };
+            let mobileScrollMemory = loadMobileScroll();
+            let mobileScrollPersistTimer = null;
+            const persistMobileScroll = () => {
+                try { sessionStorage.setItem(MOBILE_SCROLL_STORE, JSON.stringify(mobileScrollMemory)); }
+                catch (e) { /* quota / private mode: memory just won't survive a refresh */ }
+            };
+
+            // The view whose scroll we are currently tracking. Captured at the
+            // moment content changes, NOT read on every scroll event, so a
+            // section switching mid-scroll can never write into the wrong key.
+            let trackedViewKey = window.teacherMobileViewKey();
+
+            // Only record a position the TEACHER produced. The browser also
+            // changes scrollTop by itself — clamping the old offset to a
+            // shorter page, or resetting to 0 on a content swap — and fires
+            // a scroll event that is indistinguishable from real scrolling.
+            // That fires synchronously with the content change, BEFORE any
+            // MutationObserver callback can run, so a flag set from an
+            // observer is always one step too late (a list saved at 1240
+            // would be overwritten with 200 the instant a shorter detail
+            // opened). Gating on actual touch/wheel input avoids depending
+            // on that ordering at all: a finger down, or momentum from a
+            // flick that started with one, is the only thing that counts.
+            let userScrollActive = false;
+            let userScrollIdleTimer = null;
+            const markUserScroll = () => {
+                userScrollActive = true;
+                window._teacherUserScrolling = true;
+                clearTimeout(userScrollIdleTimer);
+                // Momentum keeps firing scroll events after the finger lifts,
+                // so hold the gate open briefly past the last input.
+                userScrollIdleTimer = setTimeout(() => {
+                    userScrollActive = false;
+                    window._teacherUserScrolling = false;
+                }, 900);
+            };
+            apiArea.addEventListener('touchstart', markUserScroll, { passive: true });
+            apiArea.addEventListener('touchmove',  markUserScroll, { passive: true });
+            apiArea.addEventListener('wheel',      markUserScroll, { passive: true });
+
+            // A layout-driven move (page got shorter, browser clamped the
+            // offset) always coincides with scrollHeight changing. A time
+            // window alone can't tell the two apart: tapping an item within
+            // a second of scrolling is normal, and the clamp then lands
+            // inside the momentum window. So compare scrollHeight too.
+            let _lastScrollHeight = apiArea.scrollHeight;
+            apiArea.addEventListener('scroll', () => {
+                const heightNow = apiArea.scrollHeight;
+                const layoutDriven = heightNow !== _lastScrollHeight;
+                _lastScrollHeight = heightNow;
+                if (layoutDriven) return;
+                if (!userScrollActive) return;
+                if (window._teacherNavResetInProgress || window._teacherScrollRestoring) return;
+                mobileScrollMemory[trackedViewKey] = apiArea.scrollTop;
+                clearTimeout(mobileScrollPersistTimer);
+                mobileScrollPersistTimer = setTimeout(persistMobileScroll, 250);
+            }, { passive: true });
+
+            // Restore once the new view's content is really laid out. Content
+            // arrives via many paths (cache hit, fetch, back-navigation), so
+            // this retries briefly until the page is tall enough to reach the
+            // saved offset, then stops. It never fights the teacher: any real
+            // touch on the container cancels the restore immediately.
+            let restoreTimers = [];
+            const cancelRestore = () => {
+                restoreTimers.forEach(clearTimeout);
+                restoreTimers = [];
+                window._teacherScrollRestoring = false;
+            };
+            apiArea.addEventListener('touchstart', cancelRestore, { passive: true });
+            apiArea.addEventListener('wheel', cancelRestore, { passive: true });
+
+            // When content is swapped, the browser itself moves scrollTop —
+            // it clamps the old offset to the new (often shorter) page, or
+            // resets it to 0 — and fires a scroll event that looks exactly
+            // like the teacher scrolling. Recorded as-is, it would overwrite
+            // the PREVIOUS view's saved position with a meaningless number
+            // (e.g. list saved at 1240 becomes 200 the moment a short detail
+            // opens). So: the instant a swap is detected, re-point tracking
+            // at the new view and ignore scroll events until layout settles.
+            let settleTimer = null;
+            const beginSettle = () => {
+                window._teacherScrollSettling = true;
+                clearTimeout(settleTimer);
+                settleTimer = setTimeout(() => { window._teacherScrollSettling = false; }, 350);
+            };
+
+            const restoreMobileScrollFor = (key) => {
+                cancelRestore();
+                const target = mobileScrollMemory[key];
+                if (!Number.isFinite(target) || target <= 0) {
+                    // Nothing saved for this view, so it should open at the
+                    // top. Doing nothing is NOT the same: when a shorter page
+                    // replaces a taller one the browser clamps the old offset
+                    // to the new page's maximum, leaving e.g. a detail opened
+                    // from a long list scrolled to its very bottom.
+                    if (apiArea.scrollTop !== 0) {
+                        apiArea.style.scrollBehavior = 'auto';
+                        apiArea.scrollTop = 0;
+                    }
+                    return;
+                }
+
+                window._teacherScrollRestoring = true;
+                const attempt = () => {
+                    const maxScroll = apiArea.scrollHeight - apiArea.clientHeight;
+                    // Content not tall enough yet (still rendering/images) -> wait.
+                    if (maxScroll >= target) {
+                        apiArea.style.scrollBehavior = 'auto';
+                        apiArea.scrollTop = target;
+                    }
+                };
+                [0, 60, 160, 320, 600].forEach(delay => {
+                    restoreTimers.push(setTimeout(attempt, delay));
+                });
+                // Release the guard after the last attempt has had a frame to land.
+                restoreTimers.push(setTimeout(() => {
+                    window._teacherScrollRestoring = false;
+                    trackedViewKey = window.teacherMobileViewKey();
+                }, 700));
+            };
+
+            // Detect "a different view is now showing" from the signals that
+            // always change with it, then retarget tracking and restore.
+            let lastSeenViewKey = trackedViewKey;
+            const onPossibleViewChange = () => {
+                const key = window.teacherMobileViewKey();
+                if (key === lastSeenViewKey) return;
+                beginSettle();
+                lastSeenViewKey = key;
+                trackedViewKey = key;
+                restoreMobileScrollFor(key);
+            };
+            const viewObserver = new MutationObserver(onPossibleViewChange);
+            viewObserver.observe(apiArea, { childList: true });
+            const headerBackWatcher = new MutationObserver(onPossibleViewChange);
+            headerBackWatcher.observe(topNavWrapper, { attributes: true, attributeFilter: ['style', 'class', 'data-page-color'] });
+
+            // A section can re-render itself (same key) — e.g. back-navigation
+            // rebuilds the list. The view key is unchanged so the observer above
+            // stays quiet, but the content was replaced and scroll fell to 0.
+            // Catch that by watching for the container being emptied/rebuilt.
+            let rerenderTimer = null;
+            const rerenderWatcher = new MutationObserver(() => {
+                if (window._teacherNavResetInProgress) return;
+                beginSettle();
+                clearTimeout(rerenderTimer);
+                rerenderTimer = setTimeout(() => {
+                    const key = window.teacherMobileViewKey();
+                    trackedViewKey = key;
+                    // Only restore if the container actually sits above the
+                    // remembered spot (i.e. it was reset), never yank someone
+                    // who is already scrolled further down.
+                    const target = mobileScrollMemory[key];
+                    if (Number.isFinite(target) && target > 0 && apiArea.scrollTop < 1) {
+                        restoreMobileScrollFor(key);
+                    }
+                }, 90);
+            });
+            rerenderWatcher.observe(apiArea, { childList: true });
+
+            // Persist on the way out so a refresh keeps the position too.
+            window.addEventListener('pagehide', persistMobileScroll);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') persistMobileScroll();
+            });
+
             // Re-run once the loader overlay hides — the one centralised
             // signal that reliably fires after ANY page's async content
             // has actually finished loading, regardless of which specific
