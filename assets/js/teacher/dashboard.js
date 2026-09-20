@@ -372,6 +372,16 @@ window.configureTeacherHeader = function(config) {
             topNavWrapper.style.borderBottom = '';
             topNavWrapper.removeAttribute('data-page-color');
         }
+        // Tell the mobile scroll layer which view is about to show, so the
+        // header/browser-bar state computed just below already reflects
+        // where that view will be scrolled to (see MOBILE VIEW TRANSITIONS
+        // in the DOMContentLoaded handler further down).
+        if (typeof window.teacherBeginViewTransition === 'function') {
+            const pageKey = sessionStorage.getItem('lastTeacherPage') || 'teacher_manual';
+            const detailKey = (mode === 'detail' && (config.detailType || title))
+                ? String(config.detailType || title) : 'list';
+            window.teacherBeginViewTransition(pageKey + ':' + detailKey);
+        }
         if (typeof window.recalcTeacherMobileScrollUI === 'function') {
             window.recalcTeacherMobileScrollUI();
         }
@@ -595,12 +605,6 @@ window.toggleSidebarClassGroup = function(labelEl) {
 let _teacherScrollPersistTimeout = null;
 window.saveTeacherScrollState = function(key, el) {
     if (!el) return;
-    // A scroll caused by prepareTeacherMobileNavigation() resetting the
-    // page to the top is not the teacher scrolling, so it must never be
-    // recorded as their position — otherwise tapping away from a section
-    // would overwrite the very value restoreTeacherScrollState() needs
-    // when they come back.
-    if (window._teacherNavResetInProgress) return;
     window.teacherSectionState.scrollTop[key] = el.scrollTop;
     clearTimeout(_teacherScrollPersistTimeout);
     _teacherScrollPersistTimeout = setTimeout(window.persistTeacherSectionState, 250);
@@ -647,6 +651,14 @@ document.addEventListener('DOMContentLoaded', function () {
    window.loadTeacherManual = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_manual");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_manual");
+    // Home has no signature colour. Every other page calls
+    // configureTeacherHeader, but Home never did, so after visiting any
+    // coloured section (Assignments, Resources, ...) Home kept that
+    // section's colour in the header and browser bar. Calling it with no
+    // colour is the documented way to clear back to the base surface.
+    if (typeof window.configureTeacherHeader === 'function') {
+        window.configureTeacherHeader({ mode: 'standard' });
+    }
     if (apiArea) apiArea.style.display = 'block';
     if (iframe)  iframe.style.display  = 'none';
 
@@ -968,10 +980,27 @@ function renderMobileWeekStrip(weekEvents, weekStart) {
 
 function renderMobileClassList() {
     // Populated async by loadMobileHomeClasses() once the fetch resolves.
-    return `<div id="mh-class-list" class="mh-class-list"><div class="mh-class-loading">Loading classes...</div></div>`;
+    // Until then, hold the height the list had last time. Without that,
+    // Home is too short to scroll back to where you left it, so the
+    // restored position could only be applied once the classes arrived,
+    // and you would watch Home sit at the top and then jump.
+    let reserve = 0;
+    try { reserve = parseInt(sessionStorage.getItem('teacherHomeClassListH') || '0', 10) || 0; } catch (e) {}
+    const style = reserve > 0 ? ` style="min-height:${reserve}px"` : '';
+    return `<div id="mh-class-list" class="mh-class-list"${style}><div class="mh-class-loading">Loading classes...</div></div>`;
 }
 
+// Wraps the loader below: once the list has its real content, drop the
+// reserved height and remember the real one for next time.
 window.loadMobileHomeClasses = async function() {
+    await window._loadMobileHomeClassesInner();
+    const box = document.getElementById('mh-class-list');
+    if (!box) return;
+    box.style.minHeight = '';
+    try { sessionStorage.setItem('teacherHomeClassListH', String(Math.round(box.getBoundingClientRect().height))); } catch (e) {}
+};
+
+window._loadMobileHomeClassesInner = async function() {
     const container = document.getElementById('mh-class-list');
     if (!container) return;
     try {
@@ -1319,11 +1348,6 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
-                // Fallback for input that never sent a touchstart (mouse,
-                // keyboard, assistive tech). Harmless if touchstart already ran.
-                if (typeof window.prepareTeacherMobileNavigation === 'function') {
-                    window.prepareTeacherMobileNavigation();
-                }
                 if (typeof window.closeMobileSidebar === 'function') {
                     window.closeMobileSidebar();
                 } else {
@@ -1454,86 +1478,39 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     // that no longer matches whether the page can actually scroll.
     // ─────────────────────────────────────────────────────────────────────
     // ─────────────────────────────────────────────────────────────────────
-    // MOBILE NAV STABILIZATION — runs the instant a nav link is touched,
-    // BEFORE the next section starts loading. Ported from the learner's
-    // prepareLearnerMobileNavigation (learner_dashboard.php).
+    // ACTIVE-TAB TAP — pressing the nav tab you are already on scrolls
+    // that page back to the top (same convention as the learner side).
     //
-    // Without it, the new section inherits whatever the old one left
-    // behind: the previous scroll offset, the previous section's header
-    // tint, and a bottom-nav state that was decided against the OLD
-    // content. The scroll-watching below only corrects that once the new
-    // content has rendered, so there was a visible stale frame first.
+    // This is deliberately the ONLY thing that happens on a nav press.
+    // An earlier version reset the scroll position, header tint and
+    // browser-bar colour the instant a link was touched. That made the
+    // current page visibly jump, and made the header/browser bar flash to
+    // their "at top" look and then flash back once a remembered scroll
+    // position was restored 100-700ms later. Everything that changes when
+    // you ARRIVE on a page (scroll offset, header tint, browser bar,
+    // bottom nav) now happens together, in one step, in the MOBILE VIEW
+    // TRANSITIONS block further down.
     //
-    // 1) scroll #api-content-area back to the top, instantly (no smooth
-    //    animation) and with iOS momentum scrolling briefly disabled —
-    //    otherwise a fling in progress carries into the new section
-    // 2) clear the old section's header tint/scrolled state
-    // 3) make sure the bottom nav is visible in its glass state
-    // 4) re-run the scroll-UI check a few times as content settles, since
-    //    cached sections swap in synchronously and fetched ones don't
-    //
-    // Per-section scroll positions saved by saveTeacherScrollState() are
-    // deliberately NOT cleared: this only resets the live scroll of the
-    // shared container. _teacherNavResetInProgress stops that reset from
-    // being recorded as the teacher's own position.
+    // Uses pointerdown rather than click: by the time click fires, the
+    // inline onclick has already loaded the page and rewritten
+    // lastTeacherPage, so "is this the page I was already on" can no
+    // longer be answered.
     // ─────────────────────────────────────────────────────────────────────
-    window.prepareTeacherMobileNavigation = function() {
-        if (window.innerWidth > 768) return;
-
-        const topNav = document.querySelector('.top-nav-wrapper');
-        const bottomNavEl = document.getElementById('mobileBottomNav');
-
-        window._teacherNavResetInProgress = true;
-
-        if (apiArea) {
+    window.prepareTeacherMobileNavigation = function(link) {
+        if (window.innerWidth > 768 || !apiArea) return;
+        const tapped  = link && link.getAttribute ? link.getAttribute('data-page') : null;
+        const current = sessionStorage.getItem('lastTeacherPage');
+        if (!tapped || tapped !== current || window.teacherHeaderDetailType) return;
+        if (apiArea.scrollTop > 0) {
             apiArea.style.scrollBehavior = 'auto';
             apiArea.scrollTop = 0;
-            apiArea.style.webkitOverflowScrolling = 'auto';
-            apiArea.style.overflowY = 'hidden';
-            void apiArea.offsetHeight;   // force reflow so the hidden state applies
-            apiArea.scrollTop = 0;
-
-            requestAnimationFrame(() => {
-                apiArea.style.overflowY = '';            // back to the stylesheet's auto
-                apiArea.style.webkitOverflowScrolling = 'touch';
-                apiArea.scrollTop = 0;
-                // Let the scroll event this causes flow through the saver
-                // guard first, THEN lift the guard on the following frame.
-                requestAnimationFrame(() => {
-                    window._teacherNavResetInProgress = false;
-                });
-            });
-        } else {
-            window._teacherNavResetInProgress = false;
         }
-
-        if (topNav) {
-            topNav.classList.remove('header-scrolled');
-            topNav.style.background = '';
-        }
-
-        if (bottomNavEl) {
-            // Only restore visibility when this is a normal (non-detail)
-            // page. Detail mode hides it with !important on purpose.
-            if (!window.teacherHeaderDetailType) {
-                bottomNavEl.style.setProperty('display', 'flex');
-            }
-            bottomNavEl.classList.add('nav-scrolled');
-        }
-
-        if (typeof window.recalcTeacherMobileScrollUI === 'function') {
-            [50, 150, 300, 500].forEach(delay => {
-                setTimeout(() => window.recalcTeacherMobileScrollUI(), delay);
-            });
-        }
+        if (typeof window.teacherForgetMobileScroll === 'function') window.teacherForgetMobileScroll();
     };
 
-    // Fire on touch so the reset happens ahead of the click (real touch
-    // devices), with click as the fallback for mouse/keyboard/assistive
-    // tech that never sends a touchstart. Same two-step the learner uses.
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
-        link.addEventListener('touchstart', () => {
-            window.prepareTeacherMobileNavigation();
+        link.addEventListener('pointerdown', () => {
+            window.prepareTeacherMobileNavigation(link);
         }, { passive: true });
     });
 
@@ -1558,10 +1535,21 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
         window.recalcTeacherMobileScrollUI = function recalcTeacherMobileScrollUI() {
             if (!apiArea || !topNavWrapper) return;
 
-            const scrollTop      = apiArea.scrollTop;
+            // While a page transition is in flight, judge the header, browser
+            // bar and bottom nav by where the incoming page is about to be
+            // scrolled to — not by the position the outgoing content
+            // happens to be at. That is what lets them go straight to their
+            // final look instead of flashing the "at top" look first. See
+            // MOBILE VIEW TRANSITIONS below.
+            const pending        = window._teacherPendingScroll;
+            const realScrollTop  = apiArea.scrollTop;
+            const scrollTop      = pending ? pending.target : realScrollTop;
             const scrollHeight   = apiArea.scrollHeight;
             const clientHeight   = apiArea.clientHeight;
-            const distFromBottom = scrollHeight - scrollTop - clientHeight;
+            let distFromBottom   = scrollHeight - realScrollTop - clientHeight;
+            if (pending && pending.atBottom !== undefined) {
+                distFromBottom = pending.atBottom ? 0 : BOTTOM_THRESHOLD + 1;
+            }
 
             const themeColorMeta = document.querySelector('meta[name="theme-color"]');
             const pageColor      = topNavWrapper.getAttribute('data-page-color');
@@ -1670,196 +1658,248 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             scheduleTeacherContentScrollUIRecheck();
 
             // ─────────────────────────────────────────────────────────────
-            // MOBILE SCROLL MEMORY — one mechanism for EVERY teacher section.
+            // MOBILE VIEW TRANSITIONS — scroll memory + flicker-free chrome
             //
-            // Sections that restore scroll (e.g. assignments.js) attach to
-            // their DESKTOP sidebar element (.as-sidebar-scroll). That element
-            // is hidden on phones, so on mobile nothing was saved or restored
-            // and every list re-rendered at scroll 0 — most noticeably when
-            // opening an item and pressing back, since back rebuilds the list.
-            // On mobile the thing that actually scrolls is #api-content-area,
-            // so it is remembered here once, centrally, instead of patching
-            // each section file.
+            // Two jobs, done as ONE step so they can never disagree:
+            //   1. Remember where each list was scrolled to and put it back.
+            //   2. Set the header tint, browser-bar colour and bottom-nav
+            //      glass for the page you are ARRIVING on, from the position
+            //      it is about to be restored to, before the first paint.
             //
-            // Keyed by WHAT IS SHOWING, so a list and its detail each keep
-            // their own position:  <section>:list  |  <section>:<detailType>
+            // Why one step: the header and browser bar are derived from
+            // scrollTop. If a page is first shown at the top and only later
+            // scrolled to its remembered spot, they show the "at top" look
+            // first and switch a moment later — and with CSS transitions on
+            // both, that switch is a visible fade out and back in.
+            //
+            // How it works
+            //   configureTeacherHeader() announces the incoming view
+            //   (teacherBeginViewTransition). From that moment,
+            //   recalcTeacherMobileScrollUI() judges the chrome by the
+            //   REMEMBERED position (window._teacherPendingScroll) rather
+            //   than the outgoing content's. When the new content actually
+            //   lands in #api-content-area, the scroll offset is applied in
+            //   the same task — before the browser paints — and stays under
+            //   watch until it sticks, because content can keep growing
+            //   after first render (Home's class list arrives from a fetch
+            //   into a NESTED element, which watching only direct children
+            //   never saw). CSS transitions on the two bars are switched off
+            //   for the duration so the state snaps rather than fades.
+            //
+            // Views are keyed  <section>:list  |  <section>:<detailType>.
+            // Only lists are remembered. Every detail page (all assignments
+            // share the one "Assignment" type) always opens at the top —
+            // remembering per type would open assignment #5 scrolled to
+            // wherever assignment #2 was left.
             // ─────────────────────────────────────────────────────────────
             window.teacherMobileViewKey = function() {
                 const page = sessionStorage.getItem('lastTeacherPage') || 'teacher_manual';
                 const detail = window.teacherHeaderDetailType;
                 return page + ':' + (detail ? String(detail) : 'list');
             };
+            const isListKey = (key) => /:list$/.test(key);
 
             const MOBILE_SCROLL_STORE = 'teacherMobileScroll';
-            const loadMobileScroll = () => {
-                try { return JSON.parse(sessionStorage.getItem(MOBILE_SCROLL_STORE) || '{}') || {}; }
+            const MOBILE_BOTTOM_STORE = 'teacherMobileScrollAtBottom';
+            const ARM_TIMEOUT_MS  = 4000;   // how long to wait for the new view's content to arrive
+            const LAND_TIMEOUT_MS = 4000;   // how long to keep waiting for the page to become tall enough
+            const HOLD_MS         = 500;    // keep re-asserting after landing (late layout, engine resets)
+
+            const readStore = (name) => {
+                try { return JSON.parse(sessionStorage.getItem(name) || '{}') || {}; }
                 catch (e) { return {}; }
             };
-            let mobileScrollMemory = loadMobileScroll();
-            let mobileScrollPersistTimer = null;
-            const persistMobileScroll = () => {
-                try { sessionStorage.setItem(MOBILE_SCROLL_STORE, JSON.stringify(mobileScrollMemory)); }
-                catch (e) { /* quota / private mode: memory just won't survive a refresh */ }
+            let scrollMemory = readStore(MOBILE_SCROLL_STORE);
+            let bottomMemory = readStore(MOBILE_BOTTOM_STORE);
+            let persistTimer = null;
+            const persistMemory = () => {
+                try {
+                    sessionStorage.setItem(MOBILE_SCROLL_STORE, JSON.stringify(scrollMemory));
+                    sessionStorage.setItem(MOBILE_BOTTOM_STORE, JSON.stringify(bottomMemory));
+                } catch (e) { /* quota / private mode: memory just won't survive a refresh */ }
+            };
+            const schedulePersist = () => { clearTimeout(persistTimer); persistTimer = setTimeout(persistMemory, 250); };
+            const atBottomNow = () =>
+                (apiArea.scrollHeight - apiArea.scrollTop - apiArea.clientHeight) <= BOTTOM_THRESHOLD;
+
+            // While a transition runs, the header and bottom nav must take
+            // their final state instantly, not fade through the wrong one.
+            if (!document.getElementById('teacher-nav-snap-style')) {
+                const snapStyle = document.createElement('style');
+                snapStyle.id = 'teacher-nav-snap-style';
+                snapStyle.textContent =
+                    'html.teacher-nav-snap .top-nav-wrapper,' +
+                    'html.teacher-nav-snap #mobileBottomNav{transition:none !important;}';
+                document.head.appendChild(snapStyle);
+            }
+            let snapOn = false;
+            const beginSnap = () => { snapOn = true; document.documentElement.classList.add('teacher-nav-snap'); };
+            const endSnap = () => {
+                if (!snapOn) return;
+                snapOn = false;
+                // Let the final state paint with transitions off, THEN turn them back on.
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (!snapOn) document.documentElement.classList.remove('teacher-nav-snap');
+                }));
             };
 
-            // The view whose scroll we are currently tracking. Captured at the
-            // moment content changes, NOT read on every scroll event, so a
-            // section switching mid-scroll can never write into the wrong key.
-            let trackedViewKey = window.teacherMobileViewKey();
-
-            // Only record a position the TEACHER produced. The browser also
-            // changes scrollTop by itself — clamping the old offset to a
-            // shorter page, or resetting to 0 on a content swap — and fires
-            // a scroll event that is indistinguishable from real scrolling.
-            // That fires synchronously with the content change, BEFORE any
-            // MutationObserver callback can run, so a flag set from an
-            // observer is always one step too late (a list saved at 1240
-            // would be overwritten with 200 the instant a shorter detail
-            // opened). Gating on actual touch/wheel input avoids depending
-            // on that ordering at all: a finger down, or momentum from a
-            // flick that started with one, is the only thing that counts.
-            let userScrollActive = false;
-            let userScrollIdleTimer = null;
-            const markUserScroll = () => {
-                userScrollActive = true;
-                window._teacherUserScrolling = true;
-                clearTimeout(userScrollIdleTimer);
-                // Momentum keeps firing scroll events after the finger lifts,
-                // so hold the gate open briefly past the last input.
-                userScrollIdleTimer = setTimeout(() => {
-                    userScrollActive = false;
-                    window._teacherUserScrolling = false;
-                }, 900);
+            const recalcNow = () => {
+                if (typeof window.recalcTeacherMobileScrollUI === 'function') window.recalcTeacherMobileScrollUI();
             };
-            apiArea.addEventListener('touchstart', markUserScroll, { passive: true });
-            apiArea.addEventListener('touchmove',  markUserScroll, { passive: true });
-            apiArea.addEventListener('wheel',      markUserScroll, { passive: true });
+            const setPending = (t) => {
+                window._teacherPendingScroll = t ? { target: t.target, atBottom: t.atBottom } : null;
+            };
 
-            // A layout-driven move (page got shorter, browser clamped the
-            // offset) always coincides with scrollHeight changing. A time
-            // window alone can't tell the two apart: tapping an item within
-            // a second of scrolling is normal, and the clamp then lands
-            // inside the momentum window. So compare scrollHeight too.
-            let _lastScrollHeight = apiArea.scrollHeight;
+            // One transition at a time:
+            //   { key, target, atBottom, swapped, swappedAt, landedAt }
+            //   swapped = the new view's content has been inserted
+            //   landedAt = when the remembered offset was successfully applied
+            let trans = null;
+            let rafId = 0;
+            let armTimer = 0;
+            let trackedKey = window.teacherMobileViewKey();   // view whose scroll we are recording
+            let lastSeenKey = null;                           // last view whose content we saw swapped in
+
+            const finish = () => {
+                cancelAnimationFrame(rafId); rafId = 0;
+                clearTimeout(armTimer);
+                trans = null;
+                setPending(null);
+                recalcNow();
+                endSnap();
+            };
+
+            // Apply the remembered offset. Returns false while the page is
+            // still too short to reach it.
+            const land = () => {
+                const want = trans.target;
+                const max = apiArea.scrollHeight - apiArea.clientHeight;
+                if (want > max + 1) return false;
+                if (Math.abs(apiArea.scrollTop - want) > 1) {
+                    if (want === 0) {
+                        // Going to the top: also stop any iOS momentum still
+                        // carrying the outgoing page's offset.
+                        apiArea.style.overflowY = 'hidden';
+                        apiArea.scrollTop = 0;
+                        void apiArea.offsetHeight;
+                        requestAnimationFrame(() => { apiArea.style.overflowY = ''; });
+                    } else {
+                        apiArea.style.scrollBehavior = 'auto';
+                        apiArea.scrollTop = want;
+                    }
+                }
+                return true;
+            };
+
+            const step = () => {
+                if (!trans || !trans.swapped) return;
+                if (land() && !trans.landedAt) {
+                    trans.landedAt = performance.now();
+                    setPending(null);   // real scrollTop now equals the target
+                    recalcNow();
+                }
+            };
+
+            const tick = () => {
+                rafId = 0;
+                if (!trans) return;
+                step();
+                const t = performance.now();
+                const expired = trans.landedAt
+                    ? (t - trans.landedAt > HOLD_MS)
+                    : (t - trans.swappedAt > LAND_TIMEOUT_MS);
+                if (expired) { finish(); return; }
+                rafId = requestAnimationFrame(tick);
+            };
+
+            const markSwapped = () => {
+                if (!trans || trans.swapped) return;
+                trans.swapped = true;
+                trans.swappedAt = performance.now();
+                lastSeenKey = trans.key;
+                trackedKey = trans.key;     // retarget recording BEFORE any scroll event for the new content is delivered
+                clearTimeout(armTimer);
+                step();                     // lands right now — same task, before first paint
+                if (!rafId && trans) rafId = requestAnimationFrame(tick);
+            };
+
+            const startTransition = (key, contentAlreadyHere) => {
+                if (trans && trans.key === key) {
+                    if (contentAlreadyHere) markSwapped();
+                    return;
+                }
+                if (trans) { cancelAnimationFrame(rafId); rafId = 0; clearTimeout(armTimer); }
+                const saved = isListKey(key) ? scrollMemory[key] : 0;
+                trans = {
+                    key,
+                    target: (Number.isFinite(saved) && saved > 0) ? saved : 0,
+                    atBottom: (key in bottomMemory) ? !!bottomMemory[key] : undefined,
+                    swapped: false, swappedAt: 0, landedAt: 0
+                };
+                setPending(trans);
+                beginSnap();
+                clearTimeout(armTimer);
+                // If the content never arrives (fetch failed, nothing rendered),
+                // don't leave the chrome judged by a position we never reached.
+                armTimer = setTimeout(() => { if (trans && !trans.swapped) finish(); }, ARM_TIMEOUT_MS);
+                if (contentAlreadyHere) markSwapped();
+            };
+            window.teacherBeginViewTransition = (key) => startTransition(key, false);
+
+            // A finger on the page always wins over anything restored.
+            const cancelTransition = () => { if (trans) finish(); };
+            apiArea.addEventListener('touchstart', cancelTransition, { passive: true });
+            apiArea.addEventListener('wheel', cancelTransition, { passive: true });
+
+            // Record where the teacher is, per list view.
             apiArea.addEventListener('scroll', () => {
-                const heightNow = apiArea.scrollHeight;
-                const layoutDriven = heightNow !== _lastScrollHeight;
-                _lastScrollHeight = heightNow;
-                if (layoutDriven) return;
-                if (!userScrollActive) return;
-                if (window._teacherNavResetInProgress || window._teacherScrollRestoring) return;
-                mobileScrollMemory[trackedViewKey] = apiArea.scrollTop;
-                clearTimeout(mobileScrollPersistTimer);
-                mobileScrollPersistTimer = setTimeout(persistMobileScroll, 250);
+                if (trans && trans.swapped) return;                       // our own landing / hold window
+                // Page identity changed (lastTeacherPage is written when a
+                // fetch STARTS) but the content hasn't been swapped in yet:
+                // what is scrolling is still the previous view. Attribute the
+                // scroll to neither.
+                if (window.teacherMobileViewKey() !== trackedKey) return;
+                if (!isListKey(trackedKey)) return;
+                scrollMemory[trackedKey] = apiArea.scrollTop;
+                bottomMemory[trackedKey] = atBottomNow();
+                schedulePersist();
             }, { passive: true });
 
-            // Restore once the new view's content is really laid out. Content
-            // arrives via many paths (cache hit, fetch, back-navigation), so
-            // this retries briefly until the page is tall enough to reach the
-            // saved offset, then stops. It never fights the teacher: any real
-            // touch on the container cancels the restore immediately.
-            let restoreTimers = [];
-            const cancelRestore = () => {
-                restoreTimers.forEach(clearTimeout);
-                restoreTimers = [];
-                window._teacherScrollRestoring = false;
-            };
-            apiArea.addEventListener('touchstart', cancelRestore, { passive: true });
-            apiArea.addEventListener('wheel', cancelRestore, { passive: true });
-
-            // When content is swapped, the browser itself moves scrollTop —
-            // it clamps the old offset to the new (often shorter) page, or
-            // resets it to 0 — and fires a scroll event that looks exactly
-            // like the teacher scrolling. Recorded as-is, it would overwrite
-            // the PREVIOUS view's saved position with a meaningless number
-            // (e.g. list saved at 1240 becomes 200 the moment a short detail
-            // opens). So: the instant a swap is detected, re-point tracking
-            // at the new view and ignore scroll events until layout settles.
-            let settleTimer = null;
-            const beginSettle = () => {
-                window._teacherScrollSettling = true;
-                clearTimeout(settleTimer);
-                settleTimer = setTimeout(() => { window._teacherScrollSettling = false; }, 350);
-            };
-
-            const restoreMobileScrollFor = (key) => {
-                cancelRestore();
-                const target = mobileScrollMemory[key];
-                if (!Number.isFinite(target) || target <= 0) {
-                    // Nothing saved for this view, so it should open at the
-                    // top. Doing nothing is NOT the same: when a shorter page
-                    // replaces a taller one the browser clamps the old offset
-                    // to the new page's maximum, leaving e.g. a detail opened
-                    // from a long list scrolled to its very bottom.
-                    if (apiArea.scrollTop !== 0) {
-                        apiArea.style.scrollBehavior = 'auto';
-                        apiArea.scrollTop = 0;
+            // New content inserted into the container = the view has swapped.
+            const onContentSwap = () => {
+                const key = window.teacherMobileViewKey();
+                if (trans && trans.key === key) {
+                    if (!trans.swapped) {
+                        markSwapped();
+                    } else {
+                        // Rendered again right after landing (loader -> content,
+                        // double render): re-apply and restart the hold window.
+                        trans.landedAt = 0;
+                        trans.swappedAt = performance.now();
+                        step();
                     }
                     return;
                 }
-
-                window._teacherScrollRestoring = true;
-                const attempt = () => {
-                    const maxScroll = apiArea.scrollHeight - apiArea.clientHeight;
-                    // Content not tall enough yet (still rendering/images) -> wait.
-                    if (maxScroll >= target) {
-                        apiArea.style.scrollBehavior = 'auto';
-                        apiArea.scrollTop = target;
-                    }
-                };
-                [0, 60, 160, 320, 600].forEach(delay => {
-                    restoreTimers.push(setTimeout(attempt, delay));
-                });
-                // Release the guard after the last attempt has had a frame to land.
-                restoreTimers.push(setTimeout(() => {
-                    window._teacherScrollRestoring = false;
-                    trackedViewKey = window.teacherMobileViewKey();
-                }, 700));
+                if (key !== lastSeenKey) startTransition(key, true);
+                // else: the same view re-rendered itself (filter, search, data
+                // refresh) — leave the scroll exactly where the teacher put it.
             };
+            new MutationObserver(onContentSwap).observe(apiArea, { childList: true });
 
-            // Detect "a different view is now showing" from the signals that
-            // always change with it, then retarget tracking and restore.
-            let lastSeenViewKey = trackedViewKey;
-            const onPossibleViewChange = () => {
+            // Tapping the tab you are already on: forget the position so it
+            // isn't restored over the scroll-to-top.
+            window.teacherForgetMobileScroll = function() {
                 const key = window.teacherMobileViewKey();
-                if (key === lastSeenViewKey) return;
-                beginSettle();
-                lastSeenViewKey = key;
-                trackedViewKey = key;
-                restoreMobileScrollFor(key);
+                if (!isListKey(key)) return;
+                scrollMemory[key] = 0;
+                bottomMemory[key] = atBottomNow();
+                schedulePersist();
             };
-            const viewObserver = new MutationObserver(onPossibleViewChange);
-            viewObserver.observe(apiArea, { childList: true });
-            const headerBackWatcher = new MutationObserver(onPossibleViewChange);
-            headerBackWatcher.observe(topNavWrapper, { attributes: true, attributeFilter: ['style', 'class', 'data-page-color'] });
-
-            // A section can re-render itself (same key) — e.g. back-navigation
-            // rebuilds the list. The view key is unchanged so the observer above
-            // stays quiet, but the content was replaced and scroll fell to 0.
-            // Catch that by watching for the container being emptied/rebuilt.
-            let rerenderTimer = null;
-            const rerenderWatcher = new MutationObserver(() => {
-                if (window._teacherNavResetInProgress) return;
-                beginSettle();
-                clearTimeout(rerenderTimer);
-                rerenderTimer = setTimeout(() => {
-                    const key = window.teacherMobileViewKey();
-                    trackedViewKey = key;
-                    // Only restore if the container actually sits above the
-                    // remembered spot (i.e. it was reset), never yank someone
-                    // who is already scrolled further down.
-                    const target = mobileScrollMemory[key];
-                    if (Number.isFinite(target) && target > 0 && apiArea.scrollTop < 1) {
-                        restoreMobileScrollFor(key);
-                    }
-                }, 90);
-            });
-            rerenderWatcher.observe(apiArea, { childList: true });
 
             // Persist on the way out so a refresh keeps the position too.
-            window.addEventListener('pagehide', persistMobileScroll);
+            window.addEventListener('pagehide', persistMemory);
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') persistMobileScroll();
+                if (document.visibilityState === 'hidden') persistMemory();
             });
 
             // Re-run once the loader overlay hides — the one centralised
