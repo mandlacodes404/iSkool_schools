@@ -669,7 +669,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    if (loader) loader.style.display = 'flex';
+    // Cold load right after the login splash: the splash itself is the
+    // loading state, so don't stack the pill loader on top of it. Mirrors
+    // the learner side's suppressInitialLoader. Any later, in-session
+    // navigation still shows the loader normally.
+    if (loader && !window.suppressInitialLoader) loader.style.display = 'flex';
 
     try {
         const [manualRes, snapshotRes] = await Promise.all([
@@ -724,6 +728,14 @@ document.addEventListener('DOMContentLoaded', function () {
 // doesn't compete with Home's own network traffic. Mirrors the learner
 // side's afterHomeRender() in manual.js.
 function afterTeacherHomeRender() {
+    // Home is now actually in the DOM — the signal the dashboard's splash
+    // handoff (teacher_dashboard.php) waits on before hiding the splash it
+    // inherited from index.php. Mirrors 'iskool:home-ready' on the learner
+    // side (afterHomeRender in manual.js).
+    try {
+        window.dispatchEvent(new CustomEvent('iskool:teacher-home-ready'));
+    } catch (e) {}
+
     setTimeout(() => {
         if (typeof window.prefetchTeacherQuizzes     === 'function') window.prefetchTeacherQuizzes();
         if (typeof window.prefetchTeacherAssignments === 'function') window.prefetchTeacherAssignments();

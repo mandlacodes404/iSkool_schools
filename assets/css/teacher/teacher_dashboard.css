@@ -349,6 +349,100 @@
             pointer-events: all;
         }
 
+        /* ── SPLASH HANDOFF ──────────────────────────────────────────────
+           Continuation of the splash started on index.php. Ported from
+           learner_dashboard.css so the login -> dashboard handoff is
+           identical for both roles: index.php shows the SAME splash to
+           everyone (it can't know the role yet), so this must match it
+           exactly — #0a0a0a on desktop, #20201f on mobile — NOT the
+           teacher palette. Only after the splash fades out does the
+           teacher's own #0d1117 surface show through.
+           Keep in sync with #dash-splash in learner_dashboard.css.
+           z-index sits above every teacher layer (max is 6000). ── */
+        #dash-splash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 1;
+            transition: opacity 0.35s ease;
+        }
+
+        #dash-splash.dash-splash-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #dash-splash-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            transform: translateX(-20px);
+        }
+
+        #dash-splash-logo img {
+            width: 104px;
+            height: 104px;
+        }
+
+        #dash-splash-wordmark {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 42px;
+            color: #ffffff;
+            letter-spacing: 0.2px;
+            line-height: 1;
+        }
+
+        #dash-splash-brand-wordmark {
+            position: absolute;
+            bottom: 1px;
+            height: 118px;
+            width: auto;
+            opacity: 0.92;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            #dash-splash-logo { gap: 10px; }
+            #dash-splash-logo img { width: 68px; height: 68px; }
+            #dash-splash-wordmark { font-size: 30px; }
+        }
+
+        @media (max-width: 360px) {
+            #dash-splash-logo { gap: 8px; }
+            #dash-splash-logo img { width: 60px; height: 60px; }
+            #dash-splash-wordmark { font-size: 26px; }
+        }
+
+        /* Same 899px breakpoint index.css uses — background #20201f and
+           the larger footer wordmark on mobile. */
+        @media (max-width: 899px) {
+            #dash-splash { background: #20201f; }
+            #dash-splash-brand-wordmark {
+                height: 145px;
+                bottom: -12px;
+            }
+        }
+
+        /* ── COLD-LOAD LOADER SUPPRESSION (mobile) ───────────────────────
+           While the splash is handing off, the pill loader must never
+           flash over Home. dashboard.js adds .splash-handoff to <html>
+           for the duration of the splash and removes it when the splash
+           finishes, so normal in-session loaders are untouched. */
+        @media (max-width: 768px) {
+            html.splash-handoff #loaderOverlay {
+                display: none !important;
+            }
+        }
+
         /* ── LOADER ── */
         /* ── SCOPED LOADER ── */
         #loaderOverlay {

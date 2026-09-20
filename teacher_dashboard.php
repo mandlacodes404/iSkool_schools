@@ -80,6 +80,110 @@ function getCsrfToken() {
 }
 </script></head>
 <body>
+<!-- ──────── SPLASH HANDOFF ────────
+     Continues the splash started on index.php so there is no blank flash
+     between the login page redirecting here and Home being ready. Ported
+     from learner_dashboard.php. Deliberately uses the SAME colours as the
+     learner splash: index.php shows one splash to every role before it
+     knows who is logging in, so a role-specific colour here would create
+     the very flash this is meant to remove. -->
+<style id="dash-splash-bg-override">
+    /* Match body to the splash so the dashboard's own background never
+       shows through around/under it during paint or fade-out. Removed
+       once the splash has finished hiding. */
+    body { background-color: #0a0a0a !important; }
+    @media (max-width: 899px) {
+        body { background-color: #20201f !important; }
+    }
+</style>
+<div id="dash-splash">
+    <div id="dash-splash-logo">
+        <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
+        <span id="dash-splash-wordmark">iSkool</span>
+    </div>
+    <img src="enthropy/enthropy_wordmark.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
+</div>
+<script>
+// ──────── SPLASH HANDOFF: hide once Home is actually ready ────────
+// Hides when BOTH are true, whichever finishes last:
+//   1) the remaining time on the 1300ms budget index.php already started
+//      (total splash stays ~1300ms across both pages, not 2600ms)
+//   2) Home is really rendered — 'iskool:teacher-home-ready', fired by
+//      afterTeacherHomeRender() in dashboard.js — or the mainFrame
+//      iframe's 'load' (when the restored page is iframe-based).
+// MAX_SPLASH_MS guarantees it can never hang.
+(function () {
+    var splash = document.getElementById('dash-splash');
+    if (!splash) return;
+
+    var root = document.documentElement;
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    var THEME_AFTER = themeMeta ? themeMeta.getAttribute('content') : '#0d1117';
+    var isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    function removeBgOverride() {
+        var styleTag = document.getElementById('dash-splash-bg-override');
+        if (styleTag) styleTag.remove();
+    }
+
+    function finishCleanup() {
+        splash.style.display = 'none';
+        removeBgOverride();
+        root.classList.remove('splash-handoff');
+        window.suppressInitialLoader = false;
+        // Hand the browser bar back to the teacher theme now the splash is gone.
+        if (themeMeta) themeMeta.setAttribute('content', THEME_AFTER);
+    }
+
+    var startedAtRaw = null;
+    try { startedAtRaw = sessionStorage.getItem('splashStartedAt'); } catch (e) {}
+
+    // No handoff flag → not arriving via the login splash (e.g. a plain
+    // refresh). Show no splash of our own.
+    if (!startedAtRaw) {
+        splash.style.display = 'none';
+        removeBgOverride();
+        return;
+    }
+    // Consume the flag so a later refresh never re-triggers the splash.
+    try { sessionStorage.removeItem('splashStartedAt'); } catch (e) {}
+
+    // Cold load: keep the pill loader from flashing over Home, and paint
+    // the browser bar the same colour as the splash for the duration.
+    window.suppressInitialLoader = true;
+    root.classList.add('splash-handoff');
+    if (isMobile && themeMeta) themeMeta.setAttribute('content', '#20201f');
+
+    var MIN_SPLASH_MS = 1300;
+    var MAX_SPLASH_MS = 6000;
+    var elapsed = Date.now() - parseInt(startedAtRaw, 10);
+    var remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
+
+    var hidden = false;
+    function hideSplash() {
+        if (hidden) return;
+        hidden = true;
+        splash.classList.add('dash-splash-hidden');
+        // Only hand background/theme back once the fade has finished, so
+        // no seam shows mid-fade.
+        setTimeout(finishCleanup, 400);
+    }
+
+    var minFloor = new Promise(function (resolve) { setTimeout(resolve, remaining); });
+    var homeReady = new Promise(function (resolve) {
+        window.addEventListener('iskool:teacher-home-ready', resolve, { once: true });
+        // #mainFrame is defined later in the body, so wait for
+        // DOMContentLoaded before attaching its 'load' listener.
+        document.addEventListener('DOMContentLoaded', function () {
+            var frame = document.getElementById('mainFrame');
+            if (frame) frame.addEventListener('load', resolve, { once: true });
+        }, { once: true });
+    });
+
+    Promise.all([minFloor, homeReady]).then(hideSplash);
+    setTimeout(hideSplash, MAX_SPLASH_MS);
+})();
+</script>
 <?php require_once __DIR__ . '/rotate-lock.php'; ?>
 <script>
 // Re-initialise in portrait so the mobile home layout is never inherited from
