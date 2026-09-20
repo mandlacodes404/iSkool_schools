@@ -1356,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=9.1"></script>
+<script src="assets/js/teacher/dashboard.js?v=9.2"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

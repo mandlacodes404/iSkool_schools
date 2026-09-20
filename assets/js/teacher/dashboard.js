@@ -595,6 +595,12 @@ window.toggleSidebarClassGroup = function(labelEl) {
 let _teacherScrollPersistTimeout = null;
 window.saveTeacherScrollState = function(key, el) {
     if (!el) return;
+    // A scroll caused by prepareTeacherMobileNavigation() resetting the
+    // page to the top is not the teacher scrolling, so it must never be
+    // recorded as their position — otherwise tapping away from a section
+    // would overwrite the very value restoreTeacherScrollState() needs
+    // when they come back.
+    if (window._teacherNavResetInProgress) return;
     window.teacherSectionState.scrollTop[key] = el.scrollTop;
     clearTimeout(_teacherScrollPersistTimeout);
     _teacherScrollPersistTimeout = setTimeout(window.persistTeacherSectionState, 250);
@@ -1313,6 +1319,11 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
+                // Fallback for input that never sent a touchstart (mouse,
+                // keyboard, assistive tech). Harmless if touchstart already ran.
+                if (typeof window.prepareTeacherMobileNavigation === 'function') {
+                    window.prepareTeacherMobileNavigation();
+                }
                 if (typeof window.closeMobileSidebar === 'function') {
                     window.closeMobileSidebar();
                 } else {
@@ -1442,6 +1453,90 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     // fetch. Without that, the nav could get stuck showing a background
     // that no longer matches whether the page can actually scroll.
     // ─────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────
+    // MOBILE NAV STABILIZATION — runs the instant a nav link is touched,
+    // BEFORE the next section starts loading. Ported from the learner's
+    // prepareLearnerMobileNavigation (learner_dashboard.php).
+    //
+    // Without it, the new section inherits whatever the old one left
+    // behind: the previous scroll offset, the previous section's header
+    // tint, and a bottom-nav state that was decided against the OLD
+    // content. The scroll-watching below only corrects that once the new
+    // content has rendered, so there was a visible stale frame first.
+    //
+    // 1) scroll #api-content-area back to the top, instantly (no smooth
+    //    animation) and with iOS momentum scrolling briefly disabled —
+    //    otherwise a fling in progress carries into the new section
+    // 2) clear the old section's header tint/scrolled state
+    // 3) make sure the bottom nav is visible in its glass state
+    // 4) re-run the scroll-UI check a few times as content settles, since
+    //    cached sections swap in synchronously and fetched ones don't
+    //
+    // Per-section scroll positions saved by saveTeacherScrollState() are
+    // deliberately NOT cleared: this only resets the live scroll of the
+    // shared container. _teacherNavResetInProgress stops that reset from
+    // being recorded as the teacher's own position.
+    // ─────────────────────────────────────────────────────────────────────
+    window.prepareTeacherMobileNavigation = function() {
+        if (window.innerWidth > 768) return;
+
+        const topNav = document.querySelector('.top-nav-wrapper');
+        const bottomNavEl = document.getElementById('mobileBottomNav');
+
+        window._teacherNavResetInProgress = true;
+
+        if (apiArea) {
+            apiArea.style.scrollBehavior = 'auto';
+            apiArea.scrollTop = 0;
+            apiArea.style.webkitOverflowScrolling = 'auto';
+            apiArea.style.overflowY = 'hidden';
+            void apiArea.offsetHeight;   // force reflow so the hidden state applies
+            apiArea.scrollTop = 0;
+
+            requestAnimationFrame(() => {
+                apiArea.style.overflowY = '';            // back to the stylesheet's auto
+                apiArea.style.webkitOverflowScrolling = 'touch';
+                apiArea.scrollTop = 0;
+                // Let the scroll event this causes flow through the saver
+                // guard first, THEN lift the guard on the following frame.
+                requestAnimationFrame(() => {
+                    window._teacherNavResetInProgress = false;
+                });
+            });
+        } else {
+            window._teacherNavResetInProgress = false;
+        }
+
+        if (topNav) {
+            topNav.classList.remove('header-scrolled');
+            topNav.style.background = '';
+        }
+
+        if (bottomNavEl) {
+            // Only restore visibility when this is a normal (non-detail)
+            // page. Detail mode hides it with !important on purpose.
+            if (!window.teacherHeaderDetailType) {
+                bottomNavEl.style.setProperty('display', 'flex');
+            }
+            bottomNavEl.classList.add('nav-scrolled');
+        }
+
+        if (typeof window.recalcTeacherMobileScrollUI === 'function') {
+            [50, 150, 300, 500].forEach(delay => {
+                setTimeout(() => window.recalcTeacherMobileScrollUI(), delay);
+            });
+        }
+    };
+
+    // Fire on touch so the reset happens ahead of the click (real touch
+    // devices), with click as the fallback for mouse/keyboard/assistive
+    // tech that never sends a touchstart. Same two-step the learner uses.
+    document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
+        link.addEventListener('touchstart', () => {
+            window.prepareTeacherMobileNavigation();
+        }, { passive: true });
+    });
+
     if (window.innerWidth <= 768) {
         const topNavWrapper = document.querySelector('.top-nav-wrapper');
         const bottomNav     = document.getElementById('mobileBottomNav');
