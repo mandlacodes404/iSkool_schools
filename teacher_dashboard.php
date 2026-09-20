@@ -72,7 +72,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=4.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=4.4">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -684,23 +684,54 @@ function setBrowserBarColor(color) {
     if (meta) meta.setAttribute('content', color);
 }
 
+// Header (.top-nav-wrapper) colour handling while the mobile menu is open.
+// Mirrors the learner dashboard: the header sits INSIDE .main-content and can
+// carry an inline page-colour background (set by dashboard.js once a coloured
+// page is scrolled). Left alone, that colour would show beside the open menu
+// and break the curved seam, so on open we recolour it to the menu's own
+// colour and remember what it was; on close we put back exactly what was
+// there. dashboard.js's scroll handler skips the browser-bar colour while the
+// menu is open, so it cannot fight this.
 window.closeMobileSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
+    const topNav  = document.querySelector('.top-nav-wrapper');
 
     if (sidebar) {
         sidebar.classList.remove('active');
     }
+    // Drives the body background that makes the curved corners blend (see
+    // body.menu-open in teacher_dashboard.css). Mobile-only rule, so this
+    // is a harmless no-op on desktop.
+    document.body.classList.remove('menu-open');
     if (overlay) {
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
     }
-    setBrowserBarColor(DEFAULT_THEME_COLOR);
+
+    // Put the header's background back to whatever it legitimately was.
+    if (topNav && topNav.dataset.bgBeforeMenu !== undefined) {
+        topNav.style.background = topNav.dataset.bgBeforeMenu;
+        delete topNav.dataset.bgBeforeMenu;
+    }
+
+    // Restore the browser bar to what the current page should be showing: the
+    // page's signature colour if it is scrolled on a coloured page, otherwise
+    // the default dark surface (same rule dashboard.js applies on scroll).
+    let barColor = DEFAULT_THEME_COLOR;
+    if (window.innerWidth <= 768 && topNav) {
+        const pageColor = topNav.getAttribute('data-page-color');
+        if (pageColor && topNav.classList.contains('header-scrolled')) {
+            barColor = pageColor;
+        }
+    }
+    setBrowserBarColor(barColor);
 };
 
 window.toggleSidebar = function(forceClose = false) {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
+    const topNav  = document.querySelector('.top-nav-wrapper');
 
     if (!sidebar) return;
 
@@ -708,8 +739,18 @@ window.toggleSidebar = function(forceClose = false) {
         closeMobileSidebar();
     } else {
         sidebar.classList.add('active');
+        document.body.classList.add('menu-open');
         if (overlay) overlay.style.opacity = '1';
         if (overlay) overlay.style.pointerEvents = 'all';
+
+        // Recolour the header to the menu colour (saving the original once).
+        if (window.innerWidth <= 768 && topNav) {
+            if (topNav.dataset.bgBeforeMenu === undefined) {
+                topNav.dataset.bgBeforeMenu = topNav.style.background || '';
+            }
+            topNav.style.background = SIDEBAR_THEME_COLOR;
+        }
+
         setBrowserBarColor(SIDEBAR_THEME_COLOR);
     }
 };
@@ -1356,7 +1397,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=9.4"></script>
+<script src="assets/js/teacher/dashboard.js?v=9.5"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

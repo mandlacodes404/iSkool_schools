@@ -550,11 +550,21 @@
             #mobileToggle { display: block; }
             .top-nav-school-name { display: none; }
             .sidebar-footer { width: calc(100% - 40px); }
-            .sidebar { left: -100%; width: 300px; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-            .sidebar.active { left: 0; width: 300px; }
+            /* Open-menu geometry now mirrors the learner dashboard: 79% of the
+               viewport wide (capped at 340px) instead of a fixed 300px, with
+               .main-content sliding across by exactly that same distance. */
+            .sidebar { left: -100%; width: 79%; max-width: 340px; border-right: none; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+            .sidebar.active { left: 0; width: 79%; max-width: 340px; }
             .main-content { margin-left: 0 !important; }
-            .sidebar.active ~ .main-content { transform: translateX(300px); filter: blur(3px); }
-            .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(300px); filter: blur(3px); }
+            .sidebar.active ~ .main-content { transform: translateX(min(79vw, 340px)); filter: blur(2px); }
+            /* NOTE: the old extra `.top-nav-wrapper { transform: translateX(...) }`
+               rule was removed on purpose. .top-nav-wrapper is position:fixed
+               INSIDE .main-content, and a transformed ancestor becomes the
+               containing block for fixed descendants — so the header was
+               already being carried across by .main-content. Shifting it a
+               second time pushed it entirely off-screen (past the right edge)
+               while the menu was open. It now travels with .main-content
+               exactly like the learner header does. */
             .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
             iframe { height: calc(100vh - 120px) !important; }
             #mobileBottomNav { display: flex !important; }
@@ -566,6 +576,60 @@
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
             .sidebar-footer { position: static; margin-top: auto; }
+        }
+
+        /* ── OPEN-MENU CURVED SEAM (mobile only) ─────────────────────────
+           Ported from the learner dashboard so the opened teacher menu
+           reads the same: the page beside the menu gets rounded, rimmed
+           "outward" top-left / bottom-left corners.
+
+           HOW IT WORKS (same trick as the learner side):
+           #mobileOverlay is a plain sibling <div> (NOT inside
+           .main-content), so it is not blurred by .main-content's
+           filter — its own border/radius therefore render perfectly
+           crisp. By default it covers the whole screen (behind the
+           menu), which would hide its corners under the opaque menu.
+           While the menu is open we start it exactly where the menu's
+           straight edge ends, so its rounded corners become the visible
+           seam.
+
+           - backdrop-filter is switched OFF here. The teacher overlay
+             used to carry blur(6px); a backdrop blur would soften the
+             very edge we are trying to keep sharp. The page beneath is
+             already blurred by .main-content's own filter, so the look
+             is unchanged apart from the crisp edge.
+           - z-index 4500: above #mobileBottomNav (4000) so the bottom
+             corner is not hidden by the bottom bar, below the menu
+             (5000) so the menu stays on top.
+           - The dim (rgba 0,0,0,0.55) is unchanged. */
+        @media (max-width: 768px) {
+            .sidebar.active ~ #mobileOverlay {
+                left: min(79vw, 340px);
+                width: calc(100% - min(79vw, 340px));
+                z-index: 4500;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border-top-left-radius: 35px;
+                border-bottom-left-radius: 35px;
+                border-left: 1px solid #555555;
+                border-top: 1px solid #555555;
+                border-bottom: 1px solid #555555;
+                box-sizing: border-box;
+            }
+
+            /* WEDGE COLOUR: the tiny sliver visible between each rounded
+               corner and the screen corner shows whatever is behind the
+               overlay. On the learner that is the body's #20201f — the
+               same colour as the menu — so the corners look carved out of
+               the menu. The teacher body is #0d1117 while the menu is
+               #1a1919, which would leave a visible colour mismatch at the
+               corners. While the menu is open (JS adds .menu-open to
+               <body>) the body takes the menu's colour so the curves
+               blend seamlessly. Closed state and all colours elsewhere
+               are untouched. */
+            body.menu-open {
+                background: #1a1919;
+            }
         }
 
         /* Top nav avatar — mobile only, translucent shadow-like background
@@ -781,9 +845,11 @@
         }
 
         @media (max-width: 480px) {
-            .sidebar { width: 80% !important; }
-            .sidebar.active ~ .main-content { transform: translateX(80vw) !important; }
-            .sidebar.active ~ .main-content .top-nav-wrapper { transform: translateX(80vw) !important; }
+            /* Same 79% / 340px geometry as the learner dashboard (was 80%).
+               The nested .top-nav-wrapper shift is gone for the same
+               double-transform reason explained in the 768px block above. */
+            .sidebar { width: 79% !important; max-width: 340px; }
+            .sidebar.active ~ .main-content { transform: translateX(min(79vw, 340px)) !important; }
             .sidebar-footer span { font-size: 16px !important; color: #bbb; font-weight: 700; }
             .sidebar-footer { margin-bottom: 30px !important; }
             .profile-picture-wrapper { width: 70px !important; height: 70px !important; border: none !important; }

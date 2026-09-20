@@ -1568,15 +1568,32 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             // configureTeacherHeader), scrolling also tints the header
             // background and the browser's status bar to match it —
             // mirrors the learner side's recalcMobileScrollUI exactly.
+            // While the menu is open, toggleSidebar (teacher_dashboard.php)
+            // has recoloured the header to the menu's own colour so it
+            // blends with the curved seam, and saved the real value in
+            // data-bg-before-menu to restore on close. So the header
+            // BACKGROUND is skipped here while open — same reason the
+            // browser bar is — otherwise a recalc firing mid-open (scroll,
+            // MutationObserver, timed rechecks) would repaint the page
+            // colour over the menu. When the menu is open, the value that
+            // will be restored on close is kept current instead.
             if (scrollTop > SCROLL_THRESHOLD) {
                 topNavWrapper.classList.add('header-scrolled');
                 if (pageColor) {
-                    topNavWrapper.style.background = pageColor;
+                    if (sidebarOpen) {
+                        topNavWrapper.dataset.bgBeforeMenu = pageColor;
+                    } else {
+                        topNavWrapper.style.background = pageColor;
+                    }
                     if (themeColorMeta && !sidebarOpen) themeColorMeta.setAttribute('content', pageColor);
                 }
             } else {
                 topNavWrapper.classList.remove('header-scrolled');
-                topNavWrapper.style.background = '';
+                if (sidebarOpen) {
+                    topNavWrapper.dataset.bgBeforeMenu = '';
+                } else {
+                    topNavWrapper.style.background = '';
+                }
                 if (themeColorMeta && !sidebarOpen) themeColorMeta.setAttribute('content', '#0d1117');
             }
 
