@@ -39,11 +39,40 @@ $tLastInitial    = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurn
 $teacherInitials = $tFirstInitial . $tLastInitial ?: '??';
 
 $schoolName = 'My School';
-$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
+$schoolLogo = null; // null = no logo uploaded yet -> show initials avatar instead (same as learner_dashboard.php)
+$result = $conn->query("SELECT setting_value, school_logo FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
 if ($row = $result->fetch_assoc()) {
     $schoolName = $row['setting_value'];
+    $logoPath   = trim((string)($row['school_logo'] ?? ''));
+
+    // Treat the shared default placeholder as "not uploaded".
+    $isDefaultPlaceholder = ($logoPath === '' || stripos($logoPath, 'default_school.png') !== false);
+
+    // A path saved in the DB doesn't guarantee the file is still there
+    // (deleted upload, bad path, etc). Verify it actually exists on disk,
+    // otherwise the <img> would show a broken-image icon instead of falling
+    // back to the initials avatar.
+    $logoFileExists = false;
+    if (!$isDefaultPlaceholder) {
+        $logoRelative   = ltrim(str_replace('\\', '/', $logoPath), '/');
+        $logoFullPath   = __DIR__ . '/' . $logoRelative;
+        $logoFileExists = is_file($logoFullPath);
+    }
+
+    if (!$isDefaultPlaceholder && $logoFileExists) {
+        $schoolLogo = $logoPath;
+    }
 }
-$schoolLogo = 'uploads/schools/default_school.png?v=1.1';
+
+// Build 2-letter school initials from the first two words of the school name
+// e.g. "Landulwazi Highschool" -> LH, "Thoko Thaba Highschool" -> TT
+// (identical logic to learner_dashboard.php)
+$schoolNameWords = preg_split('/\s+/', trim($schoolName), -1, PREG_SPLIT_NO_EMPTY);
+$schoolInitials  = '';
+foreach (array_slice($schoolNameWords, 0, 2) as $word) {
+    $schoolInitials .= strtoupper(substr($word, 0, 1));
+}
+if ($schoolInitials === '') { $schoolInitials = '??'; }
 ?>
 <!DOCTYPE html>
 <html>
@@ -72,7 +101,7 @@ $schoolLogo = 'uploads/schools/default_school.png?v=1.1';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=4.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.0">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -384,7 +413,11 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
             <!-- Centre: logo + school name (standard mode) / detail title (detail mode) -->
             <div class="top-nav-brand" id="teacherHeaderBrand">
-                <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo" id="teacherHeaderLogo">
+                <?php if ($schoolLogo): ?>
+                    <img src="<?= htmlspecialchars($schoolLogo) ?>" alt="School Logo" id="teacherHeaderLogo">
+                <?php else: ?>
+                    <span id="teacherHeaderLogo" class="school-logo-initials" aria-label="School Logo"><?= htmlspecialchars($schoolInitials) ?></span>
+                <?php endif; ?>
                 <span class="top-nav-school-name"><?= htmlspecialchars($schoolName) ?></span>
             </div>
             <div class="top-nav-brand top-nav-brand--detail" id="teacherHeaderDetailTitle" style="display:none;">
@@ -1397,7 +1430,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=9.5"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.0"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

@@ -193,6 +193,35 @@
             object-fit: cover;
             border: 0.5px solid #30363d;
         }
+
+        /* School logo fallback avatar — mirrors .school-logo-initials on the
+           learner dashboard (initials on a rounded square with a hairline
+           rim), shown when the school has not uploaded a logo. Same 36px
+           footprint as the <img> above so the top nav never changes height.
+           Applies to mobile AND desktop.
+           The background is transparent on purpose: it always takes on
+           whatever the bar is sitting on — the page colour on mobile,
+           #12161c on desktop, a page's signature colour once scrolled, or
+           the menu colour while the menu is open — instead of a fixed square
+           that would not match in every state. */
+        .school-logo-initials {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 0.5px solid rgba(255,255,255,0.2);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: 'Nunito', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 0;
+            color: #9a9a97;
+            text-transform: uppercase;
+            user-select: none;
+        }
         .top-nav-school-name {
             font-size: 16px;
             font-weight: 700;
@@ -630,6 +659,23 @@
             body.menu-open {
                 background: #1a1919;
             }
+
+            /* BOTTOM CORNER BLEND: the bottom-left curve sits over the bottom
+               nav bar exactly like the top-left curve sits over the header.
+               The header is recoloured to the menu colour on open (see JS),
+               so the top corner is flat. The bottom bar, however, kept its own
+               lighter "glass" fill (rgba 66,65,65 @ 0.35), which showed up as
+               a pale smudge in the gap between the curve and the screen
+               corner. While the menu is open the bar is now painted in the
+               menu colour too, so both corners blend identically. Its
+               backdrop blur is dropped as well: over an opaque fill it has no
+               visible effect, and removing it avoids iOS Safari compositing
+               artefacts when stacked with the bar's own blur() filter. */
+            .sidebar.active ~ #mobileBottomNav {
+                background: #1a1919 !important;
+                -webkit-backdrop-filter: none !important;
+                backdrop-filter: none !important;
+            }
         }
 
         /* Top nav avatar — mobile only, translucent shadow-like background
@@ -670,6 +716,37 @@
         @media (max-width: 767px) {
             .sidebar .footer {
                 bottom: 20px;
+            }
+        }
+
+        /* iSkool footer thickness — mobile sidebar only.
+           Both dashboards give the footer the same CSS (font-weight: 100, with
+           the version text wrapped in <strong>, which computes to 400). What
+           differs is the font files each page downloads: the learner page only
+           requests Nunito 600, so its 400 falls back to that 600 face and
+           renders semi-bold, while this page requests 200-600 and therefore
+           gets a true, thinner 400. Asking for 600 here renders the same
+           Nunito 600 face the learner footer ends up with. Desktop untouched. */
+        @media (max-width: 768px) {
+            .sidebar .footer,
+            .sidebar .footer strong {
+                font-weight: 600;
+            }
+        }
+
+        /* Footer opacity — mobile sidebar only, mirroring the learner dashboard
+           in both mobile ranges: 0.6 up to 768px, and 0.8 (!important, exactly
+           like the learner's own rule) on phones <=480px. The teacher footer
+           sat at 0.7 in both, so it read ~14% weaker than the learner's on a
+           phone even after the font weight was matched. Desktop untouched. */
+        @media (max-width: 768px) {
+            .sidebar .footer {
+                opacity: 0.6;
+            }
+        }
+        @media (max-width: 480px) {
+            .sidebar .footer {
+                opacity: 0.8 !important;
             }
         }
 
