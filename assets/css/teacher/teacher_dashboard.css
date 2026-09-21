@@ -226,17 +226,23 @@
            rim), shown when the school has not uploaded a logo. Same 36px
            footprint as the <img> above so the top nav never changes height.
            Applies to mobile AND desktop.
-           The background is transparent on purpose: it always takes on
-           whatever the bar is sitting on — the page colour on mobile,
-           #12161c on desktop, a page's signature colour once scrolled, or
-           the menu colour while the menu is open — instead of a fixed square
-           that would not match in every state. */
+
+           BACKGROUND — applied the way the learner applies it: a solid,
+           hard-coded fill equal to the surface the avatar sits on, not
+           `transparent`. On the learner, .school-logo-initials carries
+           `background: #20201f`, the colour of its header. Here the surface
+           is the page colour on mobile (var(--bg-color), #0d1117, which the
+           header shows through) and the #12161c top-nav colour on desktop
+           (override below, same value as the desktop .top-nav-wrapper rule).
+           As on the learner, the fill is a fixed colour: it does not follow
+           the header when a page's signature colour tints it on scroll, so
+           the avatar stays a solid chip in the base surface colour. */
         .school-logo-initials {
             width: 36px;
             height: 36px;
             border-radius: 8px;
             border: 0.5px solid rgba(255,255,255,0.2);
-            background: transparent;
+            background: var(--bg-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -248,6 +254,15 @@
             color: #9a9a97;
             text-transform: uppercase;
             user-select: none;
+        }
+
+        /* Desktop: the top nav is #12161c (see the min-width: 769px
+           .top-nav-wrapper rule further down), so the avatar's solid fill
+           follows it. */
+        @media (min-width: 769px) {
+            .school-logo-initials {
+                background: #12161c;
+            }
         }
         .top-nav-school-name {
             font-size: 16px;
