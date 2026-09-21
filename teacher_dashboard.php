@@ -93,7 +93,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.1">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.0">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=.2.5">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.6">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.7">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
@@ -101,7 +101,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.1">
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -788,6 +788,72 @@ window.toggleSidebar = function(forceClose = false) {
     }
 };
 
+// ── MOBILE SWIPE GESTURES ────────────────────────────────────────────────
+// Swipe right from the left screen edge to open the menu; swipe left while it
+// is open to close it. Same logic as learner_dashboard.php, so both
+// dashboards behave identically.
+//
+//   Open  : the touch starts within 28px of the left edge and finishes
+//           further right, with more horizontal than vertical movement.
+//           There is no minimum distance.
+//   Close : the menu is open and the touch finishes further left, with more
+//           horizontal than vertical movement.
+//   Mobile widths only (<= 768px). Vertical scrolling is never blocked.
+//
+// touchmove is registered NON-passive on purpose: an edge swipe that is moving
+// right is cancelled with preventDefault(), which stops the browser's own
+// gesture (back-navigation / reload / pull-to-refresh) from taking the touch
+// over — the intermittent "swiped to open the menu and the app refreshed".
+// The overscroll-behavior-x rules in teacher_dashboard.css cover the first few
+// pixels of the touch, where JS can lose the race against the OS gesture.
+(function initTeacherMenuSwipe() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+
+    const EDGE_ZONE = 28;    // px from the left edge where an open-swipe may begin
+    let startX   = 0;
+    let startY   = 0;
+    let tracking = false;
+    let isEdge   = false;    // true when the gesture started at the left edge
+
+    // Registered at every width and gated inside each handler, so the swipe
+    // also works after a rotation or resize into mobile width without a reload.
+    document.addEventListener('touchstart', function (e) {
+        if (window.innerWidth > 768) { tracking = false; return; }
+        const t = e.touches[0];
+        startX   = t.clientX;
+        startY   = t.clientY;
+        isEdge   = startX <= EDGE_ZONE;                                  // left-edge open gesture
+        tracking = isEdge || sidebar.classList.contains('active');
+    }, { passive: true });
+
+    // Non-passive so a rightward edge swipe can be cancelled (see above).
+    document.addEventListener('touchmove', function (e) {
+        if (!tracking || !isEdge) return;                                // only edge-open swipes are blocked
+        if (window.innerWidth > 768) return;
+        const deltaX = e.touches[0].clientX - startX;
+        const deltaY = e.touches[0].clientY - startY;
+        // Only cancel if the move is more horizontal than vertical
+        if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0) {
+            e.preventDefault();                                          // stops the browser back-swipe / refresh
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', function (e) {
+        if (!tracking || window.innerWidth > 768) return;
+        tracking = false;
+        const t      = e.changedTouches[0];
+        const deltaX = t.clientX - startX;
+        const deltaY = t.clientY - startY;
+        // Must be horizontal-dominant
+        if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
+        const isOpen = sidebar.classList.contains('active');
+        if (deltaX > 0 && !isOpen && isEdge) { window.toggleSidebar();     } // right-swipe from the edge -> open
+        if (deltaX < 0 &&  isOpen)           { window.toggleSidebar(true); } // left-swipe -> close
+        isEdge = false;
+    }, { passive: true });
+})();
+
 document.querySelectorAll('.sidebar-links a').forEach(link => {
     link.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
@@ -1430,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.0"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.1"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=7.3"></script>
 <script src="assets/js/teacher/announcements.js?v=5.7"></script>

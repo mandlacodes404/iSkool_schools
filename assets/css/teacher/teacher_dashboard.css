@@ -25,6 +25,33 @@
             overflow: hidden;
         }
 
+        /* ── MOBILE EDGE-SWIPE: keep the browser's own gesture out of the way ──
+           The menu opens with a swipe-right from the left screen edge (see
+           initTeacherMenuSwipe in teacher_dashboard.php). Browsers have their
+           own gesture on that same edge — back-navigation on iOS Safari and
+           the equivalent on some Android browsers — and it sometimes won,
+           which is the intermittent "swiped to open the menu and the app
+           navigated back / reloaded". overscroll-behavior-x: none switches
+           that horizontal gesture off at the browser level, which the JS
+           preventDefault() alone cannot guarantee: in the first pixels of a
+           touch the OS gesture recognizer can beat a JS handler.
+
+           Same rules as the learner dashboard, with two deliberate
+           differences:
+             - mobile widths only, so desktop (e.g. two-finger swipe-back on
+               a trackpad) behaves exactly as before;
+             - overscroll-behavior-y is left alone. The learner sets it to
+               `contain` because it has its own custom pull-to-refresh; this
+               page has none, so the browser's native pull-to-refresh keeps
+               working. */
+        @media (max-width: 768px) {
+            html,
+            body,
+            #api-content-area {
+                overscroll-behavior-x: none;
+            }
+        }
+
         /* ── SIDEBAR ── */
         .sidebar {
             width: var(--sidebar-width);
