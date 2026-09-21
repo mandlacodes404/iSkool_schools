@@ -718,73 +718,34 @@ window.isCurrentLearnerViewNavigation = function(navigation) {
         window.learnerViewNavigation.page === navigation.page;
 };
 
-window.prepareLearnerMobileNavigation = function() {
+// ACTIVE-TAB TAP: pressing the nav tab you are already on scrolls that page
+// back to the top. This is deliberately the ONLY thing that happens on a nav
+// press. It used to reset the scroll position, header tint and browser-bar
+// colour the instant a link was touched, which made the current page jump and
+// made the header/browser bar flash their "at top" look. Everything that
+// changes when you ARRIVE on a page (scroll offset, header tint, browser bar,
+// bottom nav) now happens together, in one step, in the MOBILE VIEW
+// TRANSITIONS block inside the mobile scroll-UI section further down.
+//
+// Called on pointerdown rather than click: by click time the page has already
+// started loading and rewritten lastLearnerPage, so "is this the page I was
+// already on" could no longer be answered.
+window.prepareLearnerMobileNavigation = function(link) {
     if (window.innerWidth > 768) return;
-
     const apiArea = document.getElementById('api-content-area');
-    const mainContent = document.querySelector('.main-content');
-    const mainHeader = document.querySelector('.main-header');
-    const bottomNav = document.getElementById('mobileBottomNav');
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
-    [apiArea, mainContent].forEach(el => {
-        if (!el) return;
-        el.style.scrollBehavior = 'auto';
-        el.scrollTop = 0;
-    });
-
-    if (apiArea) {
-        apiArea.style.webkitOverflowScrolling = 'auto';
-        apiArea.style.overflowY = 'hidden';
-        void apiArea.offsetHeight;
+    if (!apiArea) return;
+    const tapped  = link && link.getAttribute ? link.getAttribute('data-page') : null;
+    const current = sessionStorage.getItem('lastLearnerPage');
+    if (!tapped || tapped !== current || window.learnerHeaderDetailType) return;
+    if (apiArea.scrollTop > 0) {
+        apiArea.style.scrollBehavior = 'auto';
         apiArea.scrollTop = 0;
-
-        requestAnimationFrame(() => {
-            apiArea.style.overflowY = 'auto';
-            apiArea.style.webkitOverflowScrolling = 'touch';
-            apiArea.scrollTop = 0;
-            apiArea.dispatchEvent(new Event('scroll'));
-        });
     }
-
-    if (mainHeader) {
-        mainHeader.classList.remove('header-scrolled', 'detail-title-collapsed');
-        mainHeader.style.background = '';
-    }
-
-    if (bottomNav) {
-        bottomNav.style.setProperty('display', 'flex');
-        bottomNav.classList.add('nav-scrolled');
-    }
-
-    if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
-
-    // BOTTOM NAV / HEADER RECHECK ON PAGE SWITCH:
-    // The synthetic 'scroll' dispatch above (and the hardcoded
-    // nav-scrolled/header reset just above it) only reflect the CORRECT
-    // state once the new page's real content is actually in the DOM.
-    // This function fires immediately when a nav link is tapped — before
-    // fetchAssignments()/fetchQuizzes()/etc. have run — so on a cache hit
-    // (the common case once a page has been visited once this session)
-    // the content swaps in synchronously with NO loader shown at all,
-    // and on a fresh fetch it swaps in only once the request resolves.
-    // Either way, a single scroll dispatch fired this early can end up
-    // checking stale/empty content, and — because nothing else re-checks
-    // it afterward — the nav could stay stuck wrong until the person
-    // manually scrolled. Polling recalcMobileScrollUI a few times over
-    // ~500ms (rather than relying on the loader, which frequently never
-    // appears) means it settles on the right answer regardless of
-    // whether the new page came from cache or a real fetch.
-    if (typeof window.recalcMobileScrollUI === 'function') {
-        [50, 150, 300, 500].forEach(delay => {
-            setTimeout(() => window.recalcMobileScrollUI(), delay);
-        });
-    }
+    if (typeof window.learnerForgetMobileScroll === 'function') window.learnerForgetMobileScroll();
 };
 
 window.handleLearnerMobileBottomNav = function(event, loaderFn) {
     if (event) event.preventDefault();
-    window.prepareLearnerMobileNavigation();
 
     requestAnimationFrame(() => {
         if (typeof loaderFn === 'function') loaderFn();
@@ -988,8 +949,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // ────────────────────────────────────────────────────────────────────────
     
     document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
-        link.addEventListener('touchstart', () => {
-            window.prepareLearnerMobileNavigation();
+        link.addEventListener('pointerdown', () => {
+            window.prepareLearnerMobileNavigation(link);
         }, { passive: true });
     });
 
@@ -1061,12 +1022,6 @@ const isCached = (onClick.includes('loadManual') && window.manualCache && window
                 }
             }
         }
-
-        // 1b. MOBILE SCROLL STABILIZATION
-        // touchstart above already handles this on real touch devices, ahead
-        // of the click; this is the fallback for anything that reaches click
-        // without a preceding touchstart (mouse, keyboard, assistive tech).
-        window.prepareLearnerMobileNavigation();
 
         // 2. Detect same-page clicks
         let currentIframePage = '';
@@ -2470,10 +2425,21 @@ if (desktopToggle) {
             // theme-color meta are decided, closes that race instead of
             // relying on timing.
             if (document.querySelector('.pr-modal-overlay')) return;
-            const scrollTop    = apiArea.scrollTop;
-            const scrollHeight = apiArea.scrollHeight;
-            const clientHeight = apiArea.clientHeight;
-            const distFromBottom = scrollHeight - scrollTop - clientHeight;
+            // While a page transition is in flight, judge the header, browser
+            // bar and bottom nav by where the incoming page is about to be
+            // scrolled to -- not by the position the outgoing content happens
+            // to be at. That is what lets them go straight to their final look
+            // instead of flashing the "at top" look first. See MOBILE VIEW
+            // TRANSITIONS below.
+            const pending       = window._learnerPendingScroll;
+            const realScrollTop = apiArea.scrollTop;
+            const scrollTop     = pending ? pending.target : realScrollTop;
+            const scrollHeight  = apiArea.scrollHeight;
+            const clientHeight  = apiArea.clientHeight;
+            let distFromBottom  = scrollHeight - realScrollTop - clientHeight;
+            if (pending && pending.atBottom !== undefined) {
+                distFromBottom = pending.atBottom ? 0 : BOTTOM_THRESHOLD + 1;
+            }
 
             // Header: solid when scrolled down, transparent at top
             if (scrollTop > SCROLL_THRESHOLD) {
@@ -2559,6 +2525,285 @@ if (desktopToggle) {
 
             // Set the correct state for the initially rendered learner page too.
             scheduleContentScrollUIRecheck();
+
+            // ─────────────────────────────────────────────────────────────
+            // MOBILE VIEW TRANSITIONS — scroll memory + flicker-free chrome
+            //
+            // Two jobs, done as ONE step so they can never disagree:
+            //   1. Remember where each list was scrolled to and put it back.
+            //   2. Set the header tint, browser-bar colour and bottom-nav
+            //      glass for the page you are ARRIVING on, from the position
+            //      it is about to be restored to, before the first paint.
+            //
+            // Why one step: the header and browser bar are derived from
+            // scrollTop. If a page is first shown at the top and only later
+            // scrolled to its remembered spot, they show the "at top" look
+            // first and switch a moment later — and with CSS transitions on
+            // both, that switch is a visible fade out and back in.
+            //
+            // How it works
+            //   configureHeader() announces the incoming view
+            //   (learnerBeginViewTransition). From that moment,
+            //   recalcMobileScrollUI() judges the chrome by the
+            //   REMEMBERED position (window._learnerPendingScroll) rather
+            //   than the outgoing content's. When the new content actually
+            //   lands in #api-content-area, the scroll offset is applied in
+            //   the same task — before the browser paints — and stays under
+            //   watch until it sticks, because content can keep growing
+            //   after first render (Home's class list arrives from a fetch
+            //   into a NESTED element, which watching only direct children
+            //   never saw). CSS transitions on the two bars are switched off
+            //   for the duration so the state snaps rather than fades.
+            //
+            // Views are keyed  <lastLearnerPage>:list  |  <lastLearnerPage>:<detailType>.
+            // Only lists are remembered. Every detail page (all quizzes share
+            // the one "Quiz" type, and so on) always opens at the top —
+            // remembering per type would open quiz #5 scrolled to wherever
+            // quiz #2 was left.
+            // ─────────────────────────────────────────────────────────────
+            window.learnerViewKey = function() {
+                const page = sessionStorage.getItem('lastLearnerPage') || 'partials/manual.html';
+                const detail = window.learnerHeaderDetailType;
+                return page + ':' + (detail ? String(detail) : 'list');
+            };
+            const isListKey = (key) => /:list$/.test(key);
+
+            const MOBILE_SCROLL_STORE = 'learnerMobileScroll';
+            const MOBILE_BOTTOM_STORE = 'learnerMobileScrollAtBottom';
+            const ARM_TIMEOUT_MS  = 4000;   // how long to wait for the new view's content to arrive
+            const LAND_TIMEOUT_MS = 4000;   // how long to keep waiting for the page to become tall enough
+            const HOLD_MS         = 500;    // keep re-asserting after landing (late layout, engine resets)
+
+            const readStore = (name) => {
+                try { return JSON.parse(sessionStorage.getItem(name) || '{}') || {}; }
+                catch (e) { return {}; }
+            };
+            let scrollMemory = readStore(MOBILE_SCROLL_STORE);
+            let bottomMemory = readStore(MOBILE_BOTTOM_STORE);
+            let persistTimer = null;
+            const persistMemory = () => {
+                try {
+                    sessionStorage.setItem(MOBILE_SCROLL_STORE, JSON.stringify(scrollMemory));
+                    sessionStorage.setItem(MOBILE_BOTTOM_STORE, JSON.stringify(bottomMemory));
+                } catch (e) { /* quota / private mode: memory just won't survive a refresh */ }
+            };
+            const schedulePersist = () => { clearTimeout(persistTimer); persistTimer = setTimeout(persistMemory, 250); };
+            const atBottomNow = () =>
+                (apiArea.scrollHeight - apiArea.scrollTop - apiArea.clientHeight) <= BOTTOM_THRESHOLD;
+
+            // While a transition runs, the header and bottom nav must take
+            // their final state instantly, not fade through the wrong one.
+            if (!document.getElementById('learner-nav-snap-style')) {
+                const snapStyle = document.createElement('style');
+                snapStyle.id = 'learner-nav-snap-style';
+                snapStyle.textContent =
+                    'html.learner-nav-snap .main-header,' +
+                    'html.learner-nav-snap #mobileBottomNav{transition:none !important;}';
+                document.head.appendChild(snapStyle);
+            }
+            let snapOn = false;
+            const beginSnap = () => { snapOn = true; document.documentElement.classList.add('learner-nav-snap'); };
+            const endSnap = () => {
+                if (!snapOn) return;
+                snapOn = false;
+                // Let the final state paint with transitions off, THEN turn them back on.
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (!snapOn) document.documentElement.classList.remove('learner-nav-snap');
+                }));
+            };
+
+            const recalcNow = () => {
+                if (typeof window.recalcMobileScrollUI === 'function') window.recalcMobileScrollUI();
+            };
+            const setPending = (t) => {
+                window._learnerPendingScroll = t ? { target: t.target, atBottom: t.atBottom } : null;
+            };
+
+            // One transition at a time:
+            //   { key, target, atBottom, swapped, swappedAt, landedAt }
+            //   swapped = the new view's content has been inserted
+            //   landedAt = when the remembered offset was successfully applied
+            let trans = null;
+            let rafId = 0;
+            let armTimer = 0;
+            let trackedKey = window.learnerViewKey();   // view whose scroll we are recording
+            let lastSeenKey = null;                           // last view whose content we saw swapped in
+
+            // When a section renders from a requestAnimationFrame (the bottom nav
+            // does), its own "reopen the folders you had open" step runs one
+            // frame later, so the remembered offset can't be reached yet and
+            // the first painted frame would show the page collapsed at the top.
+            // Keep the new content invisible until the offset can land (its
+            // layout is unaffected, so the measuring still works), and never
+            // for longer than HIDE_MAX_MS.
+            const HIDE_MAX_MS = 350;
+            let heldBack = false;
+            let heldTimer = 0;
+            const holdBack = () => {
+                if (heldBack) return;
+                heldBack = true;
+                apiArea.style.visibility = 'hidden';
+                clearTimeout(heldTimer);
+                heldTimer = setTimeout(reveal, HIDE_MAX_MS);
+            };
+            const reveal = () => {
+                if (!heldBack) return;
+                heldBack = false;
+                clearTimeout(heldTimer);
+                apiArea.style.visibility = '';
+            };
+
+            const finish = () => {
+                cancelAnimationFrame(rafId); rafId = 0;
+                clearTimeout(armTimer);
+                trans = null;
+                reveal();
+                setPending(null);
+                recalcNow();
+                endSnap();
+            };
+
+            // Apply the remembered offset. Returns false while the page is
+            // still too short to reach it.
+            const land = () => {
+                const want = trans.target;
+                const max = apiArea.scrollHeight - apiArea.clientHeight;
+                if (want > max + 1) return false;
+                if (Math.abs(apiArea.scrollTop - want) > 1) {
+                    if (want === 0) {
+                        // Going to the top: also stop any iOS momentum still
+                        // carrying the outgoing page's offset.
+                        apiArea.style.overflowY = 'hidden';
+                        apiArea.scrollTop = 0;
+                        void apiArea.offsetHeight;
+                        requestAnimationFrame(() => { apiArea.style.overflowY = ''; });
+                    } else {
+                        apiArea.style.scrollBehavior = 'auto';
+                        apiArea.scrollTop = want;
+                    }
+                }
+                return true;
+            };
+
+            const step = () => {
+                if (!trans || !trans.swapped) return;
+                if (land() && !trans.landedAt) {
+                    trans.landedAt = performance.now();
+                    reveal();
+                    setPending(null);   // real scrollTop now equals the target
+                    recalcNow();
+                }
+            };
+
+            const tick = () => {
+                rafId = 0;
+                if (!trans) return;
+                step();
+                const t = performance.now();
+                const expired = trans.landedAt
+                    ? (t - trans.landedAt > HOLD_MS)
+                    : (t - trans.swappedAt > LAND_TIMEOUT_MS);
+                if (expired) { finish(); return; }
+                rafId = requestAnimationFrame(tick);
+            };
+
+            const markSwapped = () => {
+                if (!trans || trans.swapped) return;
+                trans.swapped = true;
+                trans.swappedAt = performance.now();
+                lastSeenKey = trans.key;
+                trackedKey = trans.key;     // retarget recording BEFORE any scroll event for the new content is delivered
+                clearTimeout(armTimer);
+                step();                     // lands right now — same task, before first paint
+                if (trans && !trans.landedAt && trans.target > 0) holdBack();   // can't reach it yet: don't paint the page at the top
+                if (!rafId && trans) rafId = requestAnimationFrame(tick);
+            };
+
+            const startTransition = (key, contentAlreadyHere) => {
+                if (trans && trans.key === key) {
+                    if (contentAlreadyHere) markSwapped();
+                    return;
+                }
+                if (trans) { cancelAnimationFrame(rafId); rafId = 0; clearTimeout(armTimer); }
+                const saved = isListKey(key) ? scrollMemory[key] : 0;
+                trans = {
+                    key,
+                    target: (Number.isFinite(saved) && saved > 0) ? saved : 0,
+                    atBottom: (key in bottomMemory) ? !!bottomMemory[key] : undefined,
+                    swapped: false, swappedAt: 0, landedAt: 0
+                };
+                setPending(trans);
+                beginSnap();
+                clearTimeout(armTimer);
+                // If the content never arrives (fetch failed, nothing rendered),
+                // don't leave the chrome judged by a position we never reached.
+                armTimer = setTimeout(() => { if (trans && !trans.swapped) finish(); }, ARM_TIMEOUT_MS);
+                if (contentAlreadyHere) markSwapped();
+            };
+            window.learnerBeginViewTransition = (key) => {
+                // The view being announced is already the one on screen (same
+                // tab tapped again, or a section that calls configureHeader
+                // after it has rendered): nothing is arriving, so don't arm a
+                // transition that would wait for content that never comes.
+                if (!trans && key === lastSeenKey) return;
+                startTransition(key, false);
+            };
+
+            // A finger on the page always wins over anything restored.
+            const cancelTransition = () => { if (trans) finish(); };
+            apiArea.addEventListener('touchstart', cancelTransition, { passive: true });
+            apiArea.addEventListener('wheel', cancelTransition, { passive: true });
+
+            // Record where the learner is, per list view.
+            apiArea.addEventListener('scroll', () => {
+                if (trans && trans.swapped) return;                       // our own landing / hold window
+                // Page identity changed (lastLearnerPage is written when a
+                // fetch STARTS) but the content hasn't been swapped in yet:
+                // what is scrolling is still the previous view. Attribute the
+                // scroll to neither.
+                if (window.learnerViewKey() !== trackedKey) return;
+                if (!isListKey(trackedKey)) return;
+                scrollMemory[trackedKey] = apiArea.scrollTop;
+                bottomMemory[trackedKey] = atBottomNow();
+                schedulePersist();
+            }, { passive: true });
+
+            // New content inserted into the container = the view has swapped.
+            const onContentSwap = () => {
+                const key = window.learnerViewKey();
+                if (trans && trans.key === key) {
+                    if (!trans.swapped) {
+                        markSwapped();
+                    } else {
+                        // Rendered again right after landing (loader -> content,
+                        // double render): re-apply and restart the hold window.
+                        trans.landedAt = 0;
+                        trans.swappedAt = performance.now();
+                        step();
+                    }
+                    return;
+                }
+                if (key !== lastSeenKey) startTransition(key, true);
+                // else: the same view re-rendered itself (filter, search, data
+                // refresh) — leave the scroll exactly where the learner put it.
+            };
+            new MutationObserver(onContentSwap).observe(apiArea, { childList: true });
+
+            // Tapping the tab you are already on: forget the position so it
+            // isn't restored over the scroll-to-top.
+            window.learnerForgetMobileScroll = function() {
+                const key = window.learnerViewKey();
+                if (!isListKey(key)) return;
+                scrollMemory[key] = 0;
+                bottomMemory[key] = atBottomNow();
+                schedulePersist();
+            };
+
+            // Persist on the way out so a refresh keeps the position too.
+            window.addEventListener('pagehide', persistMemory);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') persistMemory();
+            });
 
             // Re-run the same check once the loader overlay hides — that's
             // the one centralised signal that reliably fires after ANY
@@ -3011,6 +3256,19 @@ if (window.innerWidth <= 768 && titleEl) titleEl.style.display = 'none'; // ← 
             if (mobileBtn) mobileBtn.style.display = 'none';
             if (desktopBtn) desktopBtn.style.display = 'block';
         }
+    }
+
+    // Tell the mobile scroll layer which view is about to show, so the header
+    // and browser-bar state computed just below already reflects where that
+    // view will be scrolled to. Without the recalc, the browser bar sat on the
+    // flat #20201f set at the top of this function until a later scroll event.
+    if (typeof window.learnerBeginViewTransition === 'function') {
+        const pageKey   = sessionStorage.getItem('lastLearnerPage') || 'partials/manual.html';
+        const detailKey = window.learnerHeaderDetailType ? String(window.learnerHeaderDetailType) : 'list';
+        window.learnerBeginViewTransition(pageKey + ':' + detailKey);
+    }
+    if (typeof window.recalcMobileScrollUI === 'function') {
+        window.recalcMobileScrollUI();
     }
 };
 
