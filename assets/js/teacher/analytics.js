@@ -644,9 +644,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-term-tab.active {
-            background: rgba(var(--an-accent-rgb),0.12);
+            background: linear-gradient(135deg, rgba(var(--an-accent-rgb),0.2), rgba(var(--an-accent-rgb),0.08));
             border-color: rgba(var(--an-accent-rgb),0.4);
             color: var(--an-accent);
+            box-shadow: 0 0 0 1px rgba(var(--an-accent-rgb),0.05) inset;
         }
 
         .an-term-tab:focus-visible {
@@ -699,7 +700,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-class-item.active {
-            background: rgba(var(--an-accent-rgb),0.08);
+            background: linear-gradient(90deg, rgba(var(--an-accent-rgb),0.12), rgba(var(--an-accent-rgb),0.02));
             border-left-color: var(--an-accent);
         }
 
@@ -753,10 +754,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             flex-shrink: 0;
         }
 
-        .an-class-avg-badge.green  { background: rgba(var(--an-green-rgb),0.12);  color: var(--an-green); }
-        .an-class-avg-badge.orange { background: rgba(var(--an-orange-rgb),0.12); color: var(--an-orange); }
-        .an-class-avg-badge.red    { background: rgba(var(--an-red-rgb),0.12);  color: var(--an-red); }
-        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: var(--an-text-dim); }
+        .an-class-avg-badge.green  { background: rgba(var(--an-green-rgb),0.14);  color: var(--an-green);  border: 1px solid rgba(var(--an-green-rgb),0.25); }
+        .an-class-avg-badge.orange { background: rgba(var(--an-orange-rgb),0.14); color: var(--an-orange); border: 1px solid rgba(var(--an-orange-rgb),0.25); }
+        .an-class-avg-badge.red    { background: rgba(var(--an-red-rgb),0.14);   color: var(--an-red);    border: 1px solid rgba(var(--an-red-rgb),0.25); }
+        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: var(--an-text-dim); border: 1px solid rgba(255,255,255,0.08); }
 
         .an-class-edit-btn {
             position: absolute;
@@ -866,9 +867,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             letter-spacing: 1px;
             padding: 5px 12px;
             border-radius: 20px;
-            background: rgba(var(--an-accent-rgb),0.1);
-            border: 1px solid rgba(var(--an-accent-rgb),0.3);
+            background: linear-gradient(135deg, rgba(var(--an-accent-rgb),0.18), rgba(var(--an-accent-rgb),0.08));
+            border: 1px solid rgba(var(--an-accent-rgb),0.35);
             color: var(--an-accent);
+            box-shadow: 0 0 0 1px rgba(var(--an-accent-rgb),0.05) inset;
         }
 
         /* ── KPI CARDS ── */
@@ -880,8 +882,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-kpi-card {
-            background: var(--an-panel);
-            border: 1px solid rgba(255,255,255,0.07);
+            background:
+                linear-gradient(180deg, rgba(var(--an-kpi-accent-rgb, 255,255,255),0.07) 0%, rgba(var(--an-kpi-accent-rgb, 255,255,255),0) 55%),
+                var(--an-panel);
+            border: 1px solid rgba(var(--an-kpi-accent-rgb, 255,255,255),0.16);
             border-radius: 12px;
             padding: var(--an-card-pad);
             position: relative;
@@ -890,10 +894,9 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-kpi-card:hover {
-            border-color: rgba(255,255,255,0.12);
-            background: var(--an-panel-alt);
+            border-color: rgba(var(--an-kpi-accent-rgb, 255,255,255),0.32);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28);
         }
 
         /* ── TAP-TO-EXPLAIN ── shared across KPI cards, chart cards,
@@ -905,21 +908,33 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             box-shadow: 0 0 0 1px var(--an-accent) inset;
         }
 
-        /* Each variant sets ONE custom property on the card itself. ::before and
-           .an-kpi-value both just read it — so a dynamic inline override on the
-           card (used by the Gender Gap card) automatically keeps the top-border
-           accent and the value text in sync, instead of drifting apart. */
-        .an-kpi-card.teal  { --an-kpi-accent: var(--an-accent); }
-        .an-kpi-card.green { --an-kpi-accent: var(--an-green); }
-        .an-kpi-card.blue  { --an-kpi-accent: var(--an-blue); }
-        .an-kpi-card.pink  { --an-kpi-accent: var(--an-purple); }
+        /* Each variant sets its accent as both a solid color and an RGB triplet.
+           ::before, the tinted background above, and .an-kpi-value all read
+           these — so a dynamic inline override on the card (used by the Gender
+           Gap card) keeps the top border, wash, and value text in sync instead
+           of drifting apart. */
+        .an-kpi-card.teal  { --an-kpi-accent: var(--an-accent); --an-kpi-accent-rgb: var(--an-accent-rgb); }
+        .an-kpi-card.green { --an-kpi-accent: var(--an-green);  --an-kpi-accent-rgb: var(--an-green-rgb); }
+        .an-kpi-card.blue  { --an-kpi-accent: var(--an-blue);   --an-kpi-accent-rgb: var(--an-blue-rgb); }
+        .an-kpi-card.pink  { --an-kpi-accent: var(--an-purple); --an-kpi-accent-rgb: var(--an-purple-rgb); }
 
         .an-kpi-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 2px;
+            height: 2.5px;
             background: var(--an-kpi-accent, transparent);
+            box-shadow: 0 0 12px 0 rgba(var(--an-kpi-accent-rgb, 0,0,0), 0.6);
+        }
+
+        .an-kpi-card::after {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(var(--an-kpi-accent-rgb, 255,255,255),0.14) 0%, rgba(var(--an-kpi-accent-rgb, 255,255,255),0) 70%);
+            pointer-events: none;
         }
 
         .an-kpi-label {
@@ -958,11 +973,17 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         .an-chart-row.one-col { grid-template-columns: 1fr; }
 
         .an-chart-card {
-            background: var(--an-panel);
+            background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 90px), var(--an-panel);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
             padding: var(--an-card-pad);
             position: relative;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .an-chart-card.an-tappable:hover {
+            border-color: rgba(var(--an-accent-rgb),0.25);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
 
         .an-chart-title {
@@ -1129,7 +1150,13 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
             padding: var(--an-card-pad);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+
+        .an-performers-card.girls { background: linear-gradient(160deg, rgba(var(--an-purple-rgb),0.06) 0%, rgba(var(--an-purple-rgb),0) 60%), var(--an-panel); }
+        .an-performers-card.boys  { background: linear-gradient(160deg, rgba(var(--an-blue-rgb),0.06) 0%, rgba(var(--an-blue-rgb),0) 60%), var(--an-panel); }
+        .an-performers-card.girls:hover { border-color: rgba(var(--an-purple-rgb),0.3); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+        .an-performers-card.boys:hover  { border-color: rgba(var(--an-blue-rgb),0.3);  box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
 
         .an-performers-title {
             font-size: 12px;
@@ -1148,10 +1175,11 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             margin-bottom: 6px;
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s;
+            border-left-width: 2px;
+            transition: background 0.2s, transform 0.15s ease;
         }
 
-        .an-performer-item:hover { background: rgba(255,255,255,0.06); }
+        .an-performer-item:hover { background: rgba(255,255,255,0.06); transform: translateX(2px); }
 
         .an-performer-rank {
             font-size: 11px;
@@ -1203,7 +1231,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
 
         .an-pass-bar-track {
             height: 8px;
-            background: rgba(var(--an-red-rgb),0.2);
+            background: rgba(255,255,255,0.06);
             border-radius: 100px;
             overflow: hidden;
         }
@@ -1618,13 +1646,14 @@ function renderDashboard(cls, term, data) {
     const boysAvg  = boysScores.length  ? boysScores.reduce((s, v) => s + v, 0)  / boysScores.length  : null;
     const girlsAvg = girlsScores.length ? girlsScores.reduce((s, v) => s + v, 0) / girlsScores.length : null;
 
-    let gapValue = '—', gapSub = 'Based on quiz averages', gapColor = 'var(--an-text-dim)';
+    let gapValue = '—', gapSub = 'Based on quiz averages', gapColor = 'var(--an-text-dim)', gapColorRgb = '139,148,158';
     if (boysAvg !== null && girlsAvg !== null) {
         const diff = Math.abs(boysAvg - girlsAvg).toFixed(1);
         const leader = boysAvg >= girlsAvg ? 'Boys' : 'Girls';
         gapValue = `${diff}%`;
         gapSub   = `${leader} leading`;
-        gapColor = boysAvg >= girlsAvg ? 'var(--an-blue)' : 'var(--an-purple)';
+        gapColor    = boysAvg >= girlsAvg ? 'var(--an-blue)' : 'var(--an-purple)';
+        gapColorRgb = boysAvg >= girlsAvg ? 'var(--an-blue-rgb)' : 'var(--an-purple-rgb)';
     }
 
     // NOTE: this is NOT a real per-student pass rate — the backend doesn't
@@ -1685,7 +1714,7 @@ function renderDashboard(cls, term, data) {
                 <div class="an-kpi-value">${topOverall ? topOverall.avg + '%' : '—'}</div>
                 <div class="an-kpi-sub">${topOverall ? topOverall.name : 'No data'}</div>
             </div>
-            <div class="an-kpi-card pink an-tappable" style="--an-kpi-accent:${gapColor};" onclick="analyticsShowInfo('kpi-gender-gap', this)">
+            <div class="an-kpi-card pink an-tappable" style="--an-kpi-accent:${gapColor};--an-kpi-accent-rgb:${gapColorRgb};" onclick="analyticsShowInfo('kpi-gender-gap', this)">
                 <div class="an-kpi-label">Gender Gap</div>
                 <div class="an-kpi-value">${gapValue}</div>
                 <div class="an-kpi-sub">${gapSub}</div>
@@ -1763,26 +1792,26 @@ function renderDashboard(cls, term, data) {
 
         <!-- ROW 6: Top Performers -->
         <div class="an-performers-row">
-            <div class="an-performers-card an-tappable" onclick="analyticsShowInfo('performers-girls', this)">
+            <div class="an-performers-card girls an-tappable" onclick="analyticsShowInfo('performers-girls', this)">
                 <div class="an-performers-title" style="color:var(--an-purple);">
                     Top 5 Girls
                 </div>
                 ${topGirls.length
                     ? topGirls.map((p, i) => `
-                        <div class="an-performer-item">
+                        <div class="an-performer-item" style="border-left:2px solid rgba(var(--an-purple-rgb),${1 - i * 0.16});">
                             <span class="an-performer-rank">${i + 1}</span>
                             <span class="an-performer-name">${p.name}</span>
                             <span class="an-performer-avg" style="color:var(--an-purple);">${p.avg}%</span>
                         </div>`).join('')
                     : '<p style="color:var(--an-text-dimmer);font-size:13px;text-align:center;margin-top:16px;">No data</p>'}
             </div>
-            <div class="an-performers-card an-tappable" onclick="analyticsShowInfo('performers-boys', this)">
+            <div class="an-performers-card boys an-tappable" onclick="analyticsShowInfo('performers-boys', this)">
                 <div class="an-performers-title" style="color:var(--an-blue);">
                     Top 5 Boys
                 </div>
                 ${topBoys.length
                     ? topBoys.map((p, i) => `
-                        <div class="an-performer-item">
+                        <div class="an-performer-item" style="border-left:2px solid rgba(var(--an-blue-rgb),${1 - i * 0.16});">
                             <span class="an-performer-rank">${i + 1}</span>
                             <span class="an-performer-name">${p.name}</span>
                             <span class="an-performer-avg" style="color:var(--an-blue);">${p.avg}%</span>
@@ -1911,18 +1940,22 @@ function renderDashboard(cls, term, data) {
     if (passData.length) {
         const wrap = document.getElementById(`pass-fail-${cls.id}-${term}`);
         if (wrap) {
-            wrap.innerHTML = passData.map(q => `
+            wrap.innerHTML = passData.map(q => {
+                const rgb = q.strength >= 100 ? 'var(--an-green-rgb)' : q.strength >= 60 ? 'var(--an-orange-rgb)' : 'var(--an-red-rgb)';
+                const col = q.strength >= 100 ? 'var(--an-green)' : q.strength >= 60 ? 'var(--an-orange)' : 'var(--an-red)';
+                return `
                 <div class="an-pass-bar-wrap">
                     <div class="an-pass-bar-label">
                         <span style="color:var(--an-text);font-size:12px;">${q.title}</span>
-                        <span style="color:${q.strength >= 100 ? 'var(--an-green)' : q.strength >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};font-weight:800;font-size:12px;">${q.strength}% <span style="color:var(--an-text-dimmer);font-weight:600;">(avg ${q.avg}%)</span></span>
+                        <span style="color:${col};font-weight:800;font-size:12px;">${q.strength}% <span style="color:var(--an-text-dimmer);font-weight:600;">(avg ${q.avg}%)</span></span>
                     </div>
-                    <div class="an-pass-bar-track">
+                    <div class="an-pass-bar-track" style="background:rgba(${rgb},0.14);">
                         <div class="an-pass-bar-fill"
-                            style="width:${q.strength}%;background:${q.strength >= 100 ? 'var(--an-green)' : q.strength >= 60 ? 'var(--an-orange)' : 'var(--an-red)'};">
+                            style="width:${q.strength}%;background:linear-gradient(90deg, rgba(${rgb},0.75), ${col});box-shadow:0 0 8px 0 rgba(${rgb},0.5);">
                         </div>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
     }
 }
