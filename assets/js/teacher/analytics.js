@@ -903,22 +903,13 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         /* Each variant sets its accent as both a solid color and an RGB triplet.
-           The flat tinted background above, the top border, and .an-kpi-value
-           all read these — so a dynamic inline override on the card (used by
-           the Gender Gap card) keeps everything in sync instead of drifting
-           apart. */
+           The flat tinted background above and .an-kpi-value both read these —
+           so a dynamic inline override on the card (used by the Gender Gap
+           card) keeps everything in sync instead of drifting apart. */
         .an-kpi-card.teal  { --an-kpi-accent: var(--an-accent); --an-kpi-accent-rgb: var(--an-accent-rgb); }
         .an-kpi-card.green { --an-kpi-accent: var(--an-green);  --an-kpi-accent-rgb: var(--an-green-rgb); }
         .an-kpi-card.blue  { --an-kpi-accent: var(--an-blue);   --an-kpi-accent-rgb: var(--an-blue-rgb); }
         .an-kpi-card.pink  { --an-kpi-accent: var(--an-purple); --an-kpi-accent-rgb: var(--an-purple-rgb); }
-
-        .an-kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: var(--an-kpi-accent, transparent);
-        }
 
         .an-kpi-label {
             font-size: 10px;
