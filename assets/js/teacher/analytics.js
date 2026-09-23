@@ -644,10 +644,9 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-term-tab.active {
-            background: linear-gradient(135deg, rgba(var(--an-accent-rgb),0.2), rgba(var(--an-accent-rgb),0.08));
+            background: rgba(var(--an-accent-rgb),0.14);
             border-color: rgba(var(--an-accent-rgb),0.4);
             color: var(--an-accent);
-            box-shadow: 0 0 0 1px rgba(var(--an-accent-rgb),0.05) inset;
         }
 
         .an-term-tab:focus-visible {
@@ -700,7 +699,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-class-item.active {
-            background: linear-gradient(90deg, rgba(var(--an-accent-rgb),0.12), rgba(var(--an-accent-rgb),0.02));
+            background: rgba(var(--an-accent-rgb),0.1);
             border-left-color: var(--an-accent);
         }
 
@@ -754,10 +753,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             flex-shrink: 0;
         }
 
-        .an-class-avg-badge.green  { background: rgba(var(--an-green-rgb),0.14);  color: var(--an-green);  border: 1px solid rgba(var(--an-green-rgb),0.25); }
-        .an-class-avg-badge.orange { background: rgba(var(--an-orange-rgb),0.14); color: var(--an-orange); border: 1px solid rgba(var(--an-orange-rgb),0.25); }
-        .an-class-avg-badge.red    { background: rgba(var(--an-red-rgb),0.14);   color: var(--an-red);    border: 1px solid rgba(var(--an-red-rgb),0.25); }
-        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: var(--an-text-dim); border: 1px solid rgba(255,255,255,0.08); }
+        .an-class-avg-badge.green  { background: rgba(var(--an-green-rgb),0.14);  color: var(--an-green); }
+        .an-class-avg-badge.orange { background: rgba(var(--an-orange-rgb),0.14); color: var(--an-orange); }
+        .an-class-avg-badge.red    { background: rgba(var(--an-red-rgb),0.14);   color: var(--an-red); }
+        .an-class-avg-badge.gray   { background: rgba(255,255,255,0.06); color: var(--an-text-dim); }
 
         .an-class-edit-btn {
             position: absolute;
@@ -867,10 +866,9 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             letter-spacing: 1px;
             padding: 5px 12px;
             border-radius: 20px;
-            background: linear-gradient(135deg, rgba(var(--an-accent-rgb),0.18), rgba(var(--an-accent-rgb),0.08));
-            border: 1px solid rgba(var(--an-accent-rgb),0.35);
+            background: rgba(var(--an-accent-rgb),0.12);
+            border: 1px solid rgba(var(--an-accent-rgb),0.3);
             color: var(--an-accent);
-            box-shadow: 0 0 0 1px rgba(var(--an-accent-rgb),0.05) inset;
         }
 
         /* ── KPI CARDS ── */
@@ -882,21 +880,17 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         .an-kpi-card {
-            background:
-                linear-gradient(180deg, rgba(var(--an-kpi-accent-rgb, 255,255,255),0.07) 0%, rgba(var(--an-kpi-accent-rgb, 255,255,255),0) 55%),
-                var(--an-panel);
+            background: rgba(var(--an-kpi-accent-rgb, 255,255,255),0.06);
             border: 1px solid rgba(var(--an-kpi-accent-rgb, 255,255,255),0.16);
             border-radius: 12px;
             padding: var(--an-card-pad);
             position: relative;
-            overflow: hidden;
-            transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, background 0.2s;
         }
 
         .an-kpi-card:hover {
             border-color: rgba(var(--an-kpi-accent-rgb, 255,255,255),0.32);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+            background: rgba(var(--an-kpi-accent-rgb, 255,255,255),0.09);
         }
 
         /* ── TAP-TO-EXPLAIN ── shared across KPI cards, chart cards,
@@ -909,10 +903,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
 
         /* Each variant sets its accent as both a solid color and an RGB triplet.
-           ::before, the tinted background above, and .an-kpi-value all read
-           these — so a dynamic inline override on the card (used by the Gender
-           Gap card) keeps the top border, wash, and value text in sync instead
-           of drifting apart. */
+           The flat tinted background above, the top border, and .an-kpi-value
+           all read these — so a dynamic inline override on the card (used by
+           the Gender Gap card) keeps everything in sync instead of drifting
+           apart. */
         .an-kpi-card.teal  { --an-kpi-accent: var(--an-accent); --an-kpi-accent-rgb: var(--an-accent-rgb); }
         .an-kpi-card.green { --an-kpi-accent: var(--an-green);  --an-kpi-accent-rgb: var(--an-green-rgb); }
         .an-kpi-card.blue  { --an-kpi-accent: var(--an-blue);   --an-kpi-accent-rgb: var(--an-blue-rgb); }
@@ -922,19 +916,8 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 2.5px;
+            height: 2px;
             background: var(--an-kpi-accent, transparent);
-            box-shadow: 0 0 12px 0 rgba(var(--an-kpi-accent-rgb, 0,0,0), 0.6);
-        }
-
-        .an-kpi-card::after {
-            content: '';
-            position: absolute;
-            top: -30px; right: -30px;
-            width: 90px; height: 90px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(var(--an-kpi-accent-rgb, 255,255,255),0.14) 0%, rgba(var(--an-kpi-accent-rgb, 255,255,255),0) 70%);
-            pointer-events: none;
         }
 
         .an-kpi-label {
@@ -973,17 +956,16 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         .an-chart-row.one-col { grid-template-columns: 1fr; }
 
         .an-chart-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 90px), var(--an-panel);
+            background: var(--an-panel);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
             padding: var(--an-card-pad);
             position: relative;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
         }
 
         .an-chart-card.an-tappable:hover {
             border-color: rgba(var(--an-accent-rgb),0.25);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
         }
 
         .an-chart-title {
@@ -1150,13 +1132,13 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 12px;
             padding: var(--an-card-pad);
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
         }
 
-        .an-performers-card.girls { background: linear-gradient(160deg, rgba(var(--an-purple-rgb),0.06) 0%, rgba(var(--an-purple-rgb),0) 60%), var(--an-panel); }
-        .an-performers-card.boys  { background: linear-gradient(160deg, rgba(var(--an-blue-rgb),0.06) 0%, rgba(var(--an-blue-rgb),0) 60%), var(--an-panel); }
-        .an-performers-card.girls:hover { border-color: rgba(var(--an-purple-rgb),0.3); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
-        .an-performers-card.boys:hover  { border-color: rgba(var(--an-blue-rgb),0.3);  box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+        .an-performers-card.girls { background: rgba(var(--an-purple-rgb),0.05); }
+        .an-performers-card.boys  { background: rgba(var(--an-blue-rgb),0.05); }
+        .an-performers-card.girls:hover { border-color: rgba(var(--an-purple-rgb),0.3); }
+        .an-performers-card.boys:hover  { border-color: rgba(var(--an-blue-rgb),0.3); }
 
         .an-performers-title {
             font-size: 12px;
@@ -1179,7 +1161,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             transition: background 0.2s, transform 0.15s ease;
         }
 
-        .an-performer-item:hover { background: rgba(255,255,255,0.06); transform: translateX(2px); }
+        .an-performer-item:hover { background: rgba(255,255,255,0.06); }
 
         .an-performer-rank {
             font-size: 11px;
@@ -1951,7 +1933,7 @@ function renderDashboard(cls, term, data) {
                     </div>
                     <div class="an-pass-bar-track" style="background:rgba(${rgb},0.14);">
                         <div class="an-pass-bar-fill"
-                            style="width:${q.strength}%;background:linear-gradient(90deg, rgba(${rgb},0.75), ${col});box-shadow:0 0 8px 0 rgba(${rgb},0.5);">
+                            style="width:${q.strength}%;background:${col};">
                         </div>
                     </div>
                 </div>`;
