@@ -667,6 +667,7 @@ iframe {
        updated too. */
     .avatar-dropdown {
         background: #20201f;
+        border: none;
     }
 
     #headerBackBtn {
