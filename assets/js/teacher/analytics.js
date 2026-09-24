@@ -425,7 +425,7 @@ function analyticsBarGradient(ctx, hex) {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     gradient.addColorStop(0, hex);
-    gradient.addColorStop(1, `rgba(${r},${g},${b},0.15)`);
+    gradient.addColorStop(1, `rgba(${r},${g},${b},0.05)`);
     return gradient;
 }
 
