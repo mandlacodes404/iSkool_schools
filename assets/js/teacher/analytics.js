@@ -414,6 +414,21 @@ function analyticsBuildNormalCurve(distribution) {
     return points.some(v => v > 0) ? points : null;
 }
 
+// Builds a top-to-bottom canvas gradient for one bar: solid color at the
+// base fading to a faint tint at the top. Chart.js needs a real
+// CanvasGradient (not a CSS string) per bar, built against the chart's own
+// 2d context — so this takes the ctx and a hex color and returns the
+// gradient object to drop straight into a backgroundColor array.
+function analyticsBarGradient(ctx, hex) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    gradient.addColorStop(0, hex);
+    gradient.addColorStop(1, `rgba(${r},${g},${b},0.15)`);
+    return gradient;
+}
+
 /**
  * Renders the Score Distribution histogram. With no `compareClass` arg,
  * this is the normal single-class view: bucket bars coloured by the same
@@ -436,6 +451,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
 
     let datasets;
     let peakForAxis;
+    const distCtx = canvas.getContext('2d');
 
     if (compareClass) {
         const otherDist = compareClass.classData.score_distribution || [];
@@ -449,14 +465,14 @@ function renderScoreDistChart(classId, term, data, compareClass) {
             {
                 label: window._analyticsLastCls?.name || 'This class',
                 data: thisCounts,
-                backgroundColor: 'rgba(79,209,197,0.55)',
+                backgroundColor: thisCounts.map(() => analyticsBarGradient(distCtx, '#4fd1c5')),
                 borderColor: '#4fd1c5',
                 borderWidth: 1, borderRadius: 4, borderSkipped: false
             },
             {
                 label: compareClass.className,
                 data: otherCounts,
-                backgroundColor: 'rgba(245,158,11,0.55)',
+                backgroundColor: otherCounts.map(() => analyticsBarGradient(distCtx, '#f59e0b')),
                 borderColor: '#f59e0b',
                 borderWidth: 1, borderRadius: 4, borderSkipped: false
             }
@@ -472,9 +488,10 @@ function renderScoreDistChart(classId, term, data, compareClass) {
                 label: 'Learners',
                 data: counts,
                 backgroundColor: scoreDistribution.map(b =>
-                    b.bucket === '0-39'  ? 'rgba(248,81,73,0.58)' :
-                    b.bucket === '40-59' ? 'rgba(245,158,11,0.58)' :
-                                            'rgba(34,197,94,0.58)'),
+                    analyticsBarGradient(distCtx,
+                        b.bucket === '0-39'  ? '#f85149' :
+                        b.bucket === '40-59' ? '#f59e0b' :
+                                                '#22c55e')),
                 borderColor: scoreDistribution.map(b =>
                     b.bucket === '0-39'  ? '#f85149' :
                     b.bucket === '40-59' ? '#f59e0b' :
@@ -532,7 +549,7 @@ function renderScoreDistChart(classId, term, data, compareClass) {
         }
     };
 
-    window.analyticsCharts[key] = new Chart(canvas.getContext('2d'), {
+    window.analyticsCharts[key] = new Chart(distCtx, {
         type: 'bar',
         data: { labels: scoreDistribution.map(b => b.bucket + '%'), datasets },
         options: histogramOpts
@@ -1808,6 +1825,9 @@ function renderDashboard(cls, term, data) {
     if (quizAvgs.length) {
         const ctx = document.getElementById(`chart-quiz-avg-${cls.id}-${term}`)?.getContext('2d');
         if (ctx) {
+            const quizAvgColors = quizAvgs.map(q =>
+                q.avg >= 60 ? '#22c55e' :
+                q.avg >= 40 ? '#f59e0b' : '#f85149');
             window.analyticsCharts[`qa-${cls.id}-${term}`] = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1815,13 +1835,8 @@ function renderDashboard(cls, term, data) {
                     datasets: [{
                         label: 'Class Average %',
                         data: quizAvgs.map(q => q.avg),
-                        backgroundColor: quizAvgs.map(q =>
-                            q.avg >= 60 ? 'rgba(34,197,94,0.6)' :
-                            q.avg >= 40 ? 'rgba(245,158,11,0.6)' :
-                                          'rgba(248,81,73,0.6)'),
-                        borderColor: quizAvgs.map(q =>
-                            q.avg >= 60 ? '#22c55e' :
-                            q.avg >= 40 ? '#f59e0b' : '#f85149'),
+                        backgroundColor: quizAvgColors.map(hex => analyticsBarGradient(ctx, hex)),
+                        borderColor: quizAvgColors,
                         borderWidth: 2,
                         borderRadius: 6
                     }]
@@ -1847,6 +1862,8 @@ function renderDashboard(cls, term, data) {
     if (genderData.length) {
         const ctx = document.getElementById(`chart-quiz-gender-${cls.id}-${term}`)?.getContext('2d');
         if (ctx) {
+            const boysCount = genderData.length;
+            const girlsCount = genderData.length;
             window.analyticsCharts[`qg-${cls.id}-${term}`] = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1855,7 +1872,7 @@ function renderDashboard(cls, term, data) {
                         {
                             label: 'Boys %',
                             data: genderData.map(d => d.boys),
-                            backgroundColor: 'rgba(78,121,167,0.7)',
+                            backgroundColor: Array(boysCount).fill(0).map(() => analyticsBarGradient(ctx, '#4e79a7')),
                             borderColor: '#4e79a7',
                             borderWidth: 2,
                             borderRadius: 6
@@ -1863,7 +1880,7 @@ function renderDashboard(cls, term, data) {
                         {
                             label: 'Girls %',
                             data: genderData.map(d => d.girls),
-                            backgroundColor: 'rgba(175,122,161,0.7)',
+                            backgroundColor: Array(girlsCount).fill(0).map(() => analyticsBarGradient(ctx, '#af7aa1')),
                             borderColor: '#af7aa1',
                             borderWidth: 2,
                             borderRadius: 6

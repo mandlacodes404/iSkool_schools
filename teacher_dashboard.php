@@ -1505,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/grades.js?v=4.8"></script>
 <script src="assets/js/teacher/assignments.js?v=4.7"></script>
 <script src="assets/js/teacher/sbo.js?v=4.7"></script>
-<script src="assets/js/teacher/analytics.js?v=4.1"></script>
+<script src="assets/js/teacher/analytics.js?v=4.2"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 </body>
 </html>
