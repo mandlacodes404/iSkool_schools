@@ -1720,7 +1720,9 @@ function ensurePrStylesInjected() {
             .pr-info-modal-notes li:last-child { margin-bottom: 0; }
 
             @media (max-width: 480px) {
-                .pr-info-modal-box { padding: 20px 18px; border-radius: 14px; }
+                .pr-info-modal-box { padding: 20px 18px; border-radius: 14px; border: none; }
+                .pr-info-modal-notes { border: none; }
+                .pr-info-modal-badge { border: none !important; }
                 .pr-info-modal-title { font-size: 16.5px; }
                 .pr-info-modal-body { font-size: 13.5px; }
             }
@@ -1951,7 +1953,7 @@ function renderProgressReport(data) {
 
 function prAboutModalHtml() {
     return `
-        <div class="pr-info-modal-title">What is a Progress Report?</div>
+        <div class="pr-info-modal-title">About Progress Report</div>
         <div class="pr-info-modal-body">
             <p>Your Progress Report shows how you're doing <strong>right now</strong>, while the term is still happening.</p>
             <p>It works together with your <strong>Syllabus</strong>: at the start of the term, your Syllabus tells you what marks are coming up and how much each one counts. Your Progress Report then fills in the marks as your teachers grade them — so as the term goes on, you can see your mark building up assessment by assessment, instead of only finding out at the end.</p>
