@@ -703,17 +703,14 @@
     align-items: center;
     gap: 12px;
     padding: 14px;
-    background: #323231;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     cursor: pointer;
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,0.045) inset,
-        0 4px 12px -4px rgba(0,0,0,0.45),
-        0 10px 24px -10px rgba(0,0,0,0.4);
     -webkit-tap-highlight-color: transparent;
 }
 .lh-carousel-card:active {
-    background: #3C3C3B;
+    background: rgba(255, 255, 255, 0.03);
 }
 .lh-carousel-dots {
     display: flex;
@@ -890,12 +887,18 @@
    Scoped to .lh-card-recent, not all .lh-card, so the shared To-Do
    empty-state card stays at its normal 16px inset. */
 .lh-card-recent {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
     margin: 0 -17px;
 }
 .lh-card-recent .lh-row,
 .lh-card-recent .lh-empty-state {
     padding-left: 31px;
     padding-right: 31px;
+}
+.lh-card-recent .lh-row:active {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* Individual row — grouped inside .lh-card, divided by a hairline */
