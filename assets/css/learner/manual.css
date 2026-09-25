@@ -703,7 +703,7 @@
     align-items: center;
     gap: 12px;
     padding: 14px;
-    background: transparent;
+    background: #20201f;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     cursor: pointer;
@@ -872,7 +872,7 @@
 /* Card container — flat: no fill, no shadow, just an outer border holding
    all rows for a section together as one box. */
 .lh-card {
-    background: transparent;
+    background: #20201f;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     overflow: hidden;
@@ -884,7 +884,7 @@
    Scoped to .lh-card-recent, not all .lh-card, so the shared To-Do
    empty-state card stays at its normal 16px inset. */
 .lh-card-recent {
-    background: transparent;
+    background: #20201f;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     overflow: hidden;
