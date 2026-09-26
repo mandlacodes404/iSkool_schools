@@ -508,6 +508,8 @@
 }
 .gr-oe-learner-name {
     color: #e2e8f0;
+    /* Was 800. A name sitting directly beside a mark should be as quiet
+       as the mark — otherwise the eye reads the name, not the data. */
     font-weight: 600;
 }
 .gr-oe-learner-score {

@@ -607,11 +607,11 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    /* Record-keeping typography: override the page's Nunito with a
-       neutral system-UI stack. Academic marks read as fact, not
-       marketing content — see .teacher-grade-badge and
-       .gr-oe-learner-name below for the same reasoning applied to
-       the score pill and learner name. */
+    /* Deliberately NOT Nunito. A gradebook is a record, not editorial
+       content — plain system UI type reads as "trust me" (unambiguous
+       numerals, no rounded/decorative personality) the way Canvas,
+       PowerSchool etc. do. Scoped to this table only; the rest of the
+       app keeps Nunito. */
     font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
     font-variant-numeric: tabular-nums;
 }
@@ -644,6 +644,9 @@
     padding: 3px 10px;
     border-radius: 20px;
     font-size: 13px;
+    /* Was 700 — a percentage is a fact, not a callout. Pill shape and
+       color (grade-high/mid/low below) are untouched per request; only
+       the type weight steps back so it reads as reported, not designed. */
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
