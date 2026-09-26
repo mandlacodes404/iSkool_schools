@@ -180,10 +180,12 @@ function renderTeacherSyllabus(data) {
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopSBO() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Syllabus', `
                 <p>Each syllabus brief is tied to one class and term — release a new one per class if you teach the same subject across grades.</p>
                 <p>Learners see topics, assessments, and notes exactly as written here, so keep entries current as the term progresses.</p>
-            `) : ''}
+            `, 'sbo-rail') : ''}
         </div>
 
         <div id="deleteSBOModal" class="teacher-modal-overlay sbo-modal-hidden">
@@ -387,6 +389,23 @@ window.selectDesktopSBO = function(idx) {
                 ${brief.notes}
             </div>` : ''}
         </div>`;
+
+    // Swap the info rail to reflect this brief's completeness, instead
+    // of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        const assessCount = brief.assessments?.length || 0;
+        if (topicCount === 0 && assessCount === 0) {
+            updateInfoRail('sbo-rail', 'Brief Needs Detail', `
+                <p>This syllabus brief for <strong>${brief.class_name}</strong> has no topics or assessment weighting listed yet.</p>
+                <p>Learners see this brief exactly as written, so it's worth filling in before sharing it widely.</p>
+            `);
+        } else {
+            updateInfoRail('sbo-rail', 'About This Brief', `
+                <p><strong>${brief.class_name}</strong>, Term ${brief.term} &mdash; ${topicCount} topic${topicCount !== 1 ? 's' : ''} and ${assessCount} assessment${assessCount !== 1 ? 's' : ''} listed.</p>
+                <p>Learners see this exactly as written, so keep it current as the term progresses.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────

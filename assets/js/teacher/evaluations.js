@@ -149,10 +149,12 @@ function renderTeacherEvaluations(data) {
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopEval() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Evaluations', `
                 <p>Responses are always anonymous — you'll see the breakdown of answers per statement, but never which learner gave which response.</p>
                 <p>Comments are optional for learners, so a low response count doesn't necessarily mean few learners completed the evaluation.</p>
-            `) : ''}
+            `, 'ev-rail') : ''}
         </div>
 
         <div id="deleteEvaluationModal" class="teacher-modal-overlay ev-modal-hidden">
@@ -375,6 +377,22 @@ window.selectDesktopEval = function(groupIndex, evIndex) {
     body += `</div></div>`;
 
     panel.innerHTML = body;
+
+    // Swap the info rail to reflect this evaluation's response volume,
+    // instead of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        if (ev.response_count === 0) {
+            updateInfoRail('ev-rail', 'No Responses Yet', `
+                <p><strong>${ev.title}</strong> hasn't received any responses yet.</p>
+                <p>Results here will fill in as learners complete it — responses stay anonymous throughout.</p>
+            `);
+        } else {
+            updateInfoRail('ev-rail', 'About This Evaluation', `
+                <p><strong>${ev.response_count}</strong> anonymous response${ev.response_count !== 1 ? 's' : ''} so far, with ${ev.comments.length} comment${ev.comments.length !== 1 ? 's' : ''} left.</p>
+                <p>Individual responses are never linked back to a learner, even here.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────

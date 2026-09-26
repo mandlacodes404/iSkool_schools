@@ -171,10 +171,12 @@ function renderTeacherGrades(data) {
                 </div>
             </div>
 
+            <!-- railId lets renderGradesInPanel()/renderOpenEndedGrades()
+                 swap this to selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Grades', `
                 <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> for that assessment.</p>
                 <p>Use <strong>Progress Report</strong> in the sidebar footer to generate a printable term summary for the whole class.</p>
-            `) : ''}
+            `, 'gr-rail') : ''}
         </div>
 
         <!-- ═══ MOBILE LIST ═══ -->
@@ -419,6 +421,25 @@ function renderGradesInPanel(data, panel) {
 
     html += `</div>`;
     panel.innerHTML = html;
+
+    // Swap the info rail to reflect this assessment's grading progress,
+    // instead of leaving it on the generic page-level copy. Runs on
+    // every render (fresh fetch, cache hit, or "Back" from Edit Marks)
+    // since they all call this function.
+    if (typeof updateInfoRail === 'function') {
+        const ungraded = data.learners.filter(l => l.score === null).length;
+        if (ungraded > 0) {
+            updateInfoRail('gr-rail', 'Grading In Progress', `
+                <p><strong>${ungraded}</strong> of ${data.learners.length} learners still have no score recorded for ${escapeHtml(data.quiz_title)}.</p>
+                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> for this assessment.</p>
+            `);
+        } else {
+            updateInfoRail('gr-rail', 'Fully Graded', `
+                <p>Every learner in this class has a recorded score for ${escapeHtml(data.quiz_title)}.</p>
+                <p>Toggle <strong>Publish Marks</strong> when you're ready for learners to see their results.</p>
+            `);
+        }
+    }
 }
 
 // Edit marks inline within the desktop panel
@@ -814,6 +835,29 @@ function renderOpenEndedGrades(data, target, isPanel) {
 
     html += `</div>`;
     target.innerHTML = html;
+
+    // Swap the info rail to reflect this quiz's grading/publish state.
+    // Only applies on desktop (isPanel) — the non-panel call site has no
+    // rail. Runs on every render (fresh fetch, cache hit, or after a
+    // grade save via refreshOpenEndedGrades) since they all call this.
+    if (isPanel && typeof updateInfoRail === 'function') {
+        if (pendingLearners > 0) {
+            updateInfoRail('gr-rail', 'Manual Grading Needed', `
+                <p><strong>${pendingLearners}</strong> learner${pendingLearners !== 1 ? 's' : ''} still ${pendingLearners !== 1 ? 'have' : 'has'} open-ended responses waiting to be graded for ${escapeHtml(data.quiz_title || 'this assessment')}.</p>
+                <p>Marks can't be released until every learner is fully graded.</p>
+            `);
+        } else if (marksPublished) {
+            updateInfoRail('gr-rail', 'Marks Released', `
+                <p>All responses are graded and learners can currently see their results for ${escapeHtml(data.quiz_title || 'this assessment')}.</p>
+                <p>Use <strong>Unpublish Marks</strong> if you need to hide them again, e.g. to fix a grading issue.</p>
+            `);
+        } else {
+            updateInfoRail('gr-rail', 'Ready to Release', `
+                <p>Every learner is fully graded for ${escapeHtml(data.quiz_title || 'this assessment')}, but marks aren't released yet.</p>
+                <p>Use <strong>Release Marks</strong> when you're ready for learners to see their results.</p>
+            `);
+        }
+    }
 }
 
 async function refreshOpenEndedGrades(quizId, targetMode) {

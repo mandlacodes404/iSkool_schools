@@ -138,10 +138,12 @@ function renderTeacherResources(data) {
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopResource() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Resources', `
                 <p>Files and YouTube videos are both supported — learners can stream videos directly without leaving the page.</p>
                 <p>Resources are grouped by class here, but every resource still belongs to only one class at a time.</p>
-            `) : ''}
+            `, 'rs-rail') : ''}
         </div>
 
         <!-- ═══ MOBILE LIST: class-grouped collapsible folders ═══ -->
@@ -379,6 +381,13 @@ window.selectDesktopResource = function(flatIndex) {
                     Learners watch this video directly inside iSkool — no YouTube account needed.
                 </p>
             </div>`;
+
+        if (typeof updateInfoRail === 'function') {
+            updateInfoRail('rs-rail', 'About This Video', `
+                <p>Uploaded to <strong>${item.class_name}</strong> on ${item.uploaded_at}.</p>
+                <p>Learners stream this directly inside iSkool — no YouTube account or sign-in needed on their end.</p>
+            `);
+        }
         return;
     }
 
@@ -426,6 +435,13 @@ window.selectDesktopResource = function(flatIndex) {
                 </a>
             </div>
         </div>`;
+
+    if (typeof updateInfoRail === 'function') {
+        updateInfoRail('rs-rail', 'About This File', `
+            <p>This ${item.ext.toUpperCase()} file was uploaded to <strong>${item.class_name}</strong> on ${item.uploaded_at}.</p>
+            <p>Use <strong>Open File</strong> to preview it, or <strong>Delete</strong> to remove it from the class permanently.</p>
+        `);
+    }
 };
 
 // ─────────────────────────────────────────────
