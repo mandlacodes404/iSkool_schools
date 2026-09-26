@@ -181,10 +181,12 @@ function renderTeacherAssignments(data) {
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopAssignment() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Assignments', `
                 <p>The submissions table shows every learner in the class, even those who haven't submitted yet, so you can see who's still missing.</p>
                 <p>Use <strong>Download Submissions</strong> to export all files for a single assignment in one go.</p>
-            `) : ''}
+            `, 'as-rail') : ''}
         </div>
 
         <div id="deleteAssignmentModal" class="teacher-modal-overlay as-modal-hidden">
@@ -460,6 +462,23 @@ window.selectDesktopAssignment = function(index) {
                 </table>
             </div>
         </div>`;
+
+    // Swap the info rail to reflect this assignment's submission state,
+    // instead of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        const missing = totalCount - subCount;
+        if (missing > 0) {
+            updateInfoRail('as-rail', 'Submissions Pending', `
+                <p><strong>${missing}</strong> of ${totalCount} learners in ${assignment.class_name} haven't submitted yet — they're still shown in the table below so you can follow up.</p>
+                <p>Use <strong>Download Submissions</strong> once you're ready to grade what's in so far.</p>
+            `);
+        } else {
+            updateInfoRail('as-rail', 'All Submissions In', `
+                <p>All ${totalCount} learners in ${assignment.class_name} have submitted this assignment.</p>
+                <p>Use <strong>Download Submissions</strong> to export everything in one go.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────

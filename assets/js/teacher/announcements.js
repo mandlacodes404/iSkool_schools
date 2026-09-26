@@ -184,12 +184,14 @@ function renderTeacherAnnouncements(data) {
 
             <!-- ═══ RIGHT INFO RAIL ═══
                  Shared across pages via buildInfoRail() in dashboard.js.
-                 Could later hold an AI/chat assistant once Resources or
-                 similar exists to ground it. -->
+                 railId lets selectDesktopAnnouncement() swap this to
+                 selection-specific copy via updateInfoRail(). Could later
+                 hold an AI/chat assistant once Resources or similar
+                 exists to ground it. -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Announcements', `
                 <p>Announcements go to everyone in the selected class. Use <strong>Send To</strong> when creating one to reach learners, parents, or both.</p>
                 <p>School-wide announcements come from admin and appear at the top of your list — you can't edit or delete those from here.</p>
-            `) : ''}
+            `, 'an-rail') : ''}
 
         </div>
 
@@ -387,6 +389,22 @@ window.selectDesktopAnnouncement = function(flatIndex) {
             </div>
             <div class="an-panel-message">${ann.message.replace(/\n/g, '<br>')}</div>
         </div>`;
+
+    // Swap the info rail to explain the announcement that's now open,
+    // instead of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        if (ann.is_school) {
+            updateInfoRail('an-rail', 'School Announcement', `
+                <p>This announcement was posted by admin and goes to the whole school.</p>
+                <p>School-wide announcements can't be edited or deleted from a teacher account.</p>
+            `);
+        } else {
+            updateInfoRail('an-rail', 'About This Announcement', `
+                <p>This was posted to <strong>${ann.class_name}</strong>${ann.is_edited ? `, and edited on ${ann.edited_date}` : ''}.</p>
+                <p>Use <strong>Edit</strong> to change the message, or <strong>Delete</strong> to remove it for everyone in the class.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────

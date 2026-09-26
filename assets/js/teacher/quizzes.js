@@ -594,10 +594,12 @@ function renderTeacherQuizzes(data) {
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopQuiz() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Quizzes', `
                 <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> — closing a quiz doesn't publish its results automatically.</p>
                 <p>The <strong>Integrity Report</strong> uses AI to flag unusual patterns in submissions, like identical wrong answers across learners.</p>
-            `) : ''}
+            `, 'qz-rail') : ''}
         </div>
 
         <!-- ═══ MOBILE LIST — grouped by class only, tap into detail page ═══ -->
@@ -1097,6 +1099,27 @@ window.selectDesktopQuiz = function(quizId) {
                 </button>
             </div>
         </div>`;
+
+    // Swap the info rail to reflect this quiz's current state, instead
+    // of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        if (quiz.status !== 'Closed' && !quiz.publish_marks) {
+            updateInfoRail('qz-rail', 'Marks Hidden', `
+                <p>This quiz is still <strong>${escapeHtml(quiz.status)}</strong> and marks aren't published yet — learners can't see their results.</p>
+                <p>Toggle <strong>Publish Marks</strong> once you're ready for them to see their scores.</p>
+            `);
+        } else if (quiz.publish_marks) {
+            updateInfoRail('qz-rail', 'Marks Published', `
+                <p>Learners in <strong>${escapeHtml(quiz.class_name)}</strong> can currently see their results for this quiz.</p>
+                <p>Use <strong>Unpublish Marks</strong> if you need to hide them again, e.g. to fix a grading issue.</p>
+            `);
+        } else {
+            updateInfoRail('qz-rail', 'Quiz Closed', `
+                <p>This quiz is closed and marks are still hidden from learners.</p>
+                <p>Toggle <strong>Publish Marks</strong> when you're ready to release results.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────
