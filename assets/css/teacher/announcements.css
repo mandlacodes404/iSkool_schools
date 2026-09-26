@@ -607,12 +607,19 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    /* Record-keeping typography: override the page's Nunito with a
+       neutral system-UI stack. Academic marks read as fact, not
+       marketing content — see .teacher-grade-badge and
+       .gr-oe-learner-name below for the same reasoning applied to
+       the score pill and learner name. */
+    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
 }
 
 .teacher-grades-table th {
     background: rgba(255,255,255,0.04);
     color: #4fd1c5;
-    font-weight: 700;
+    font-weight: 600;
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -637,7 +644,8 @@
     padding: 3px 10px;
     border-radius: 20px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 .grade-high { background: rgba(30,215,96,0.15);  color: #1ed760; }
