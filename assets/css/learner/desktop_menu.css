@@ -409,7 +409,9 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 
 /* ── Header (companion changes: brand and account now live in the sidebar) ── */
 html body .main-header {
-  background: var(--bg-color, #000); padding: 0 24px; min-height: 62px;
+  /* Same surface as the sidebar. !important so a colour left inline by the mobile
+     scroll handler (window resized across the breakpoint) can never show on desktop. */
+  background: var(--dm-bg) !important; padding: 0 24px; min-height: 62px;
   box-sizing: border-box; gap: 12px;
 }
 html body .main-header #headerLeft,
