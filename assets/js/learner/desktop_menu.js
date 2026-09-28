@@ -1,11 +1,17 @@
 /* assets/js/learner/desktop_menu.js
-   Behaviour for the desktop sidebar: collapse to a rail (remembered), rail
-   tooltips, account menu, and quick search (Ctrl/Cmd + K).
+   Behaviour for the desktop sidebar: collapse to a rail (remembered),
+   rail tooltips, account menu, quick search (Ctrl/Cmd + K),
+   go-to shortcuts (G then a letter) and a shortcuts sheet (?).
 
-   It never re-implements navigation. Quick search clicks the real sidebar
-   links, so every existing onclick, loader and setActive() path still runs. */
+   It never re-implements navigation. Quick search and the shortcuts click the
+   real sidebar links, so every existing onclick, loader and setActive() path
+   still runs. */
 (function () {
   'use strict';
+
+  // Set to false to switch off the single-key shortcuts (G then a letter, and ?).
+  // Ctrl/Cmd + K and Ctrl/Cmd + B always stay on.
+  var SHORTCUTS_ENABLED = true;
 
   var root = document.documentElement;
   var sidebar = document.getElementById('dmSidebar');
@@ -19,11 +25,42 @@
   var desktop = window.matchMedia('(min-width: 769px)');
   var narrow = window.matchMedia('(max-width: 1099px)');
   var KEY = 'iskoolMenuCollapsed';
-  var IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || '');
+  var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
+  var IS_MAC = /Mac|iPhone|iPad/i.test(platform);
   var MOD = IS_MAC ? '\u2318' : 'Ctrl';
 
   function onChange(mq, fn) { if (mq.addEventListener) mq.addEventListener('change', fn); else mq.addListener(fn); }
   function call(name) { if (typeof window[name] === 'function') window[name](); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function inField(t) {
+    return !!(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""]'));
+  }
+
+  /* ── Navigation table ──────────────────────────────────────────────────
+     [sidebar id, icon key, go-to letter, extra search words]. Same order as
+     the sidebar, so the palette and the shortcuts sheet read the same way. */
+  var NAV = [
+    ['nav-home-sidebar',          'home',      'h', 'dashboard overview start'],
+    ['nav-quiz-sidebar',          'quiz',      'q', 'quizzes tests exams'],
+    ['nav-assignments-sidebar',   'assign',    'a', 'homework tasks submissions'],
+    ['nav-resources-sidebar',     'folder',    'r', 'files notes downloads materials'],
+    ['nav-syllabus-sidebar',      'book',      's', 'curriculum topics outline'],
+    ['nav-grades-sidebar',        'chart',     'g', 'grades marks results reports progress'],
+    ['nav-announcements-sidebar', 'megaphone', 'n', 'news notices updates'],
+    ['nav-evaluations-sidebar',   'star',      'e', 'feedback rate teacher survey'],
+    ['nav-myclass-sidebar',       'users',     'c', 'class classmates parent'],
+    ['nav-joinclass-sidebar',     'plus',      '',  'enrol register']
+  ];
+  function navEl(id) {
+    var n = $(id);
+    return n && sidebar.contains(n) && getComputedStyle(n).display !== 'none' ? n : null;
+  }
+  function goTo(id) { var n = navEl(id); if (n) n.click(); }
 
   /* ── Collapse / expand ─────────────────────────────────────────────── */
   function storedPref() {
@@ -51,12 +88,18 @@
   // Switch transitions on only after first paint, so a saved rail never animates on load.
   requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('dm-ready'); }); });
 
-  /* ── Current page for assistive tech ───────────────────────────────── */
+  /* ── Structure: navigation landmark (group headings live in the CSS) ── */
   var links = sidebar.querySelector('.sidebar-links');
+  if (links) {
+    links.setAttribute('role', 'navigation');
+    links.setAttribute('aria-label', 'Main');
+  }
+
+  /* ── Current page for assistive tech ───────────────────────────────── */
   function syncCurrent() {
-    sidebar.querySelectorAll('.dm-item').forEach(function (el) {
-      if (el.classList.contains('active')) el.setAttribute('aria-current', 'page');
-      else el.removeAttribute('aria-current');
+    sidebar.querySelectorAll('.dm-item').forEach(function (n) {
+      if (n.classList.contains('active')) n.setAttribute('aria-current', 'page');
+      else n.removeAttribute('aria-current');
     });
   }
   if (links && window.MutationObserver) {
@@ -64,10 +107,35 @@
   }
   syncCurrent();
 
+  /* ── Keyboard: arrows move through the menu in the order you see it ── */
+  function menuOrder() {
+    var items = Array.prototype.slice.call(sidebar.querySelectorAll('.sidebar-links .dm-item'))
+      .filter(function (n) { return n.offsetParent !== null; })
+      .map(function (n, i) { return { n: n, i: i, o: parseInt(getComputedStyle(n).order, 10) || 0 }; })
+      .sort(function (x, y) { return x.o - y.o || x.i - y.i; })
+      .map(function (x) { return x.n; });
+    return [searchBtn].concat(items);
+  }
+  sidebar.addEventListener('keydown', function (e) {
+    if (!desktop.matches) return;
+    var k = e.key;
+    if (k !== 'ArrowDown' && k !== 'ArrowUp' && k !== 'Home' && k !== 'End') return;
+    var cur = e.target.closest && e.target.closest('.dm-item, .dm-search');
+    if (!cur) return;
+    var order = menuOrder(), i = order.indexOf(cur);
+    if (i < 0) return;
+    var next = k === 'Home' ? 0 : k === 'End' ? order.length - 1 : Math.max(0, Math.min(order.length - 1, i + (k === 'ArrowDown' ? 1 : -1)));
+    e.preventDefault();
+    order[next].focus();
+  });
+
   /* ── Tooltips ──────────────────────────────────────────────────────── */
-  sidebar.querySelectorAll('.sidebar-links .dm-item').forEach(function (el) {
-    var l = el.querySelector('.dm-label');
-    if (l) el.setAttribute('data-tip', l.textContent.trim());
+  NAV.forEach(function (n) {
+    var item = $(n[0]);
+    if (!item || !sidebar.contains(item)) return;
+    var l = item.querySelector('.dm-label');
+    if (l) item.setAttribute('data-tip', l.textContent.trim());
+    if (n[2]) item.setAttribute('data-tip-kbd', 'G ' + n[2].toUpperCase());
   });
   var nameEl = sidebar.querySelector('.learner-name');
   acc.setAttribute('data-tip', nameEl ? nameEl.textContent.trim() : 'Account');
@@ -75,26 +143,36 @@
   searchBtn.setAttribute('data-tip-kbd', MOD + ' K');
   $('dmSearchKbd').textContent = IS_MAC ? '\u2318K' : 'Ctrl K';
 
-  function showTip(el) {
-    var text = el.getAttribute('data-tip');
-    if (!text || !desktop.matches) return;
-    if (!isCollapsed() && !el.hasAttribute('data-tip-always')) return;
-    var k = el.getAttribute('data-tip-kbd');
-    $('dmTipText').textContent = text;
+  // First tooltip waits a beat; moving to a neighbour swaps it instantly.
+  var tipTimer = 0, tipFor = null, tipLastHide = 0;
+  function placeTip(target) {
+    var k = target.getAttribute('data-tip-kbd');
+    $('dmTipText').textContent = target.getAttribute('data-tip');
     $('dmTipKbd').textContent = k || '';
     $('dmTipKbd').style.display = k ? '' : 'none';
-    var r = el.getBoundingClientRect();
+    var r = target.getBoundingClientRect();
     tip.style.left = Math.round(r.right + 10) + 'px';
     tip.style.top = Math.round(r.top + r.height / 2) + 'px';
     tip.classList.add('is-on');
   }
-  function hideTip() { tip.classList.remove('is-on'); }
+  function showTip(target, instant) {
+    if (!target.getAttribute('data-tip') || !desktop.matches) return;
+    if (!isCollapsed() && !target.hasAttribute('data-tip-always')) return;
+    if (tipFor === target && (tip.classList.contains('is-on') || tipTimer)) return;
+    clearTimeout(tipTimer); tipTimer = 0; tipFor = target;
+    if (instant || tip.classList.contains('is-on') || Date.now() - tipLastHide < 300) placeTip(target);
+    else tipTimer = setTimeout(function () { tipTimer = 0; placeTip(target); }, 350);
+  }
+  function hideTip() {
+    clearTimeout(tipTimer); tipTimer = 0; tipFor = null;
+    if (tip.classList.contains('is-on')) { tip.classList.remove('is-on'); tipLastHide = Date.now(); }
+  }
   sidebar.addEventListener('mouseover', function (e) {
-    var el = e.target.closest('[data-tip]');
-    if (el) showTip(el); else hideTip();
+    var t = e.target.closest('[data-tip]');
+    if (t) showTip(t, false); else hideTip();
   });
   sidebar.addEventListener('mouseleave', hideTip);
-  sidebar.addEventListener('focusin', function (e) { var el = e.target.closest('[data-tip]'); if (el) showTip(el); });
+  sidebar.addEventListener('focusin', function (e) { var t = e.target.closest('[data-tip]'); if (t) showTip(t, true); });
   sidebar.addEventListener('focusout', hideTip);
   sidebar.addEventListener('click', hideTip);
 
@@ -113,10 +191,25 @@
     profile:  function () { call('loadLearnerPersonalInfo'); },
     settings: function () { call('loadLearnerSettings'); },
     photo:    function () { call('triggerLearnerProfileUpload'); },
+    keys:     function () { openKeys(); },
     signout:  signOut
   };
 
   /* ── Account menu ──────────────────────────────────────────────────── */
+  // "Keyboard shortcuts" is added here so the PHP markup stays as it was.
+  (function () {
+    var sep = pop.querySelector('.dm-pop-sep');
+    if (!sep || pop.querySelector('[data-act="keys"]')) return;
+    var b = el('button', 'dm-pop-item');
+    b.type = 'button';
+    b.setAttribute('role', 'menuitem');
+    b.setAttribute('data-act', 'keys');
+    b.style.setProperty('--dm-ico', 'var(--dm-i-keyboard)');
+    b.appendChild(document.createTextNode('Keyboard shortcuts'));
+    b.appendChild(el('span', 'dm-pop-kbd', '?'));
+    pop.insertBefore(b, sep);
+  })();
+
   function popOpen() { return pop.classList.contains('is-open'); }
   function placePop() {
     var r = acc.getBoundingClientRect();
@@ -135,7 +228,7 @@
     placePop();
     pop.classList.add('is-open');
     acc.setAttribute('aria-expanded', 'true');
-    if (focusFirst) { var first = pop.querySelector('.dm-pop-item'); if (first) first.focus(); }
+    if (focusFirst) { var f = pop.querySelector('.dm-pop-item'); if (f) f.focus(); }
   }
   function closePop(returnFocus) {
     if (!popOpen()) return;
@@ -159,13 +252,16 @@
     var btn = e.target.closest('[data-act]');
     if (!btn) return;
     closePop(false);
-    ACTIONS[btn.getAttribute('data-act')]();
+    var run = ACTIONS[btn.getAttribute('data-act')];
+    if (run) setTimeout(run, 0);
   });
   pop.addEventListener('keydown', function (e) {
     var items = Array.prototype.slice.call(pop.querySelectorAll('.dm-pop-item'));
     var i = items.indexOf(document.activeElement);
     if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
     else if (e.key === 'Tab') { closePop(false); }
   });
   document.addEventListener('mousedown', function (e) {
@@ -174,79 +270,143 @@
   window.addEventListener('resize', function () { if (popOpen()) placePop(); });
 
   /* ── Quick search ──────────────────────────────────────────────────── */
-  // Same order as the sidebar. Each entry is [icon key, extra search words].
-  var NAV = {
-    'nav-home-sidebar':          ['home', 'dashboard overview start'],
-    'nav-quiz-sidebar':          ['quiz', 'quizzes tests exams'],
-    'nav-assignments-sidebar':   ['assign', 'homework tasks submissions'],
-    'nav-resources-sidebar':     ['folder', 'files notes downloads materials'],
-    'nav-syllabus-sidebar':      ['book', 'curriculum topics outline'],
-    'nav-grades-sidebar':        ['chart', 'grades marks results reports progress'],
-    'nav-announcements-sidebar': ['megaphone', 'news notices updates'],
-    'nav-evaluations-sidebar':   ['star', 'feedback rate teacher survey'],
-    'nav-myclass-sidebar':       ['users', 'class classmates parent'],
-    'nav-joinclass-sidebar':     ['plus', 'enrol register']
-  };
   var EXTRA = [
-    { label: 'Personal information', ico: 'user',    kw: 'profile details guardian emergency', run: ACTIONS.profile },
-    { label: 'Settings',             ico: 'sliders', kw: 'notifications account photo',        run: ACTIONS.settings },
-    { label: 'Sign out',             ico: 'logout',  kw: 'log out logout',                     run: ACTIONS.signout }
+    { group: 'Actions', label: 'Toggle sidebar',       ico: 'panel',    kw: 'collapse expand rail hide show menu', keys: [MOD, 'B'], run: function () { setCollapsed(!isCollapsed(), true); } },
+    { group: 'Actions', label: 'Keyboard shortcuts',   ico: 'keyboard', kw: 'keys hotkeys help commands',          keys: ['?'],      run: ACTIONS.keys },
+    { group: 'Actions', label: 'Upload profile photo', ico: 'upload',   kw: 'avatar picture image',                                     run: ACTIONS.photo },
+    { group: 'Account', label: 'Personal information', ico: 'user',     kw: 'profile details guardian emergency',                       run: ACTIONS.profile },
+    { group: 'Account', label: 'Settings',             ico: 'sliders',  kw: 'notifications account photo',                              run: ACTIONS.settings },
+    { group: 'Account', label: 'Sign out',             ico: 'logout',   kw: 'log out logout',                                           run: ACTIONS.signout }
   ];
-  var all = [], shown = [], sel = 0, before = null;
+  var all = [], shown = [], opts = [], sel = 0, before = null;
 
   function collect() {
     var out = [];
-    Object.keys(NAV).forEach(function (id) {
-      var el = document.getElementById(id);
+    NAV.forEach(function (n) {
+      var item = navEl(n[0]);
       // Skip anything absent or hidden on desktop (Discussions and Calendar live on Home there).
-      if (!el || !sidebar.contains(el) || getComputedStyle(el).display === 'none') return;
-      var l = el.querySelector('.dm-label');
+      if (!item) return;
+      var l = item.querySelector('.dm-label');
       out.push({
-        label: l ? l.textContent.trim() : el.textContent.trim(), ico: NAV[id][0], kw: NAV[id][1],
-        tag: el.classList.contains('active') ? 'Current' : '',
-        run: function () { el.click(); }
+        group: 'Pages', label: l ? l.textContent.trim() : item.textContent.trim(), ico: n[1], kw: n[3],
+        tag: item.classList.contains('active') ? 'Current' : '',
+        keys: n[2] ? ['G', n[2].toUpperCase()] : null,
+        run: function () { item.click(); }
       });
     });
-    EXTRA.forEach(function (a) { out.push({ label: a.label, ico: a.ico, kw: a.kw, tag: 'Account', run: a.run }); });
-    return out;
+    return out.concat(EXTRA);
   }
+
+  // One search word against one piece of text. Whole-string hits beat word-start
+  // hits beat mid-word hits; three or more letters may also match in order
+  // ("asg" finds Assignments). Returns { s: score, hits: [indexes] } or null.
+  function matchToken(text, tok) {
+    var i = text.indexOf(tok), h = [], c;
+    if (i > -1) {
+      for (c = 0; c < tok.length; c++) h.push(i + c);
+      return { s: i === 0 ? 100 : text.charAt(i - 1) === ' ' ? 80 : 60, hits: h };
+    }
+    if (tok.length < 3) return null;
+    var from = 0;
+    for (c = 0; c < tok.length; c++) {
+      var f = text.indexOf(tok.charAt(c), from);
+      if (f < 0) return null;
+      h.push(f); from = f + 1;
+    }
+    return { s: 30 - Math.min(20, h[h.length - 1] - h[0] - tok.length + 1), hits: h };
+  }
+  function rank(it, toks) {
+    var label = it.label.toLowerCase(), kw = it.kw.toLowerCase(), total = 0, hits = [];
+    for (var t = 0; t < toks.length; t++) {
+      var m = matchToken(label, toks[t]);
+      if (!m) {
+        if (kw.indexOf(toks[t]) === -1) return null;
+        m = { s: 40, hits: [] };
+      }
+      total += m.s; hits = hits.concat(m.hits);
+    }
+    return { s: total, hits: hits };
+  }
+
+  function fillLabel(node, text, hits) {
+    if (!hits.length) { node.textContent = text; return; }
+    var mark = {}, buf = '', on = false, i;
+    hits.forEach(function (h) { mark[h] = true; });
+    function flush() {
+      if (!buf) return;
+      if (on) node.appendChild(el('span', 'dm-hit', buf)); else node.appendChild(document.createTextNode(buf));
+      buf = '';
+    }
+    for (i = 0; i < text.length; i++) {
+      var m = !!mark[i];
+      if (m !== on) { flush(); on = m; }
+      buf += text.charAt(i);
+    }
+    flush();
+  }
+
   function palOpen() { return pal.classList.contains('is-open'); }
   function render(q) {
     q = q.trim().toLowerCase();
-    shown = all.filter(function (it) { return !q || (it.label + ' ' + it.kw).toLowerCase().indexOf(q) !== -1; });
-    if (q) shown.sort(function (a, b) {
-      return (a.label.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.label.toLowerCase().indexOf(q) === 0 ? 0 : 1);
-    });
+    var toks = q ? q.split(/\s+/) : [], rows = [];
+    if (!toks.length) {
+      rows = all.map(function (it) { return { it: it, hits: [] }; });
+    } else {
+      all.forEach(function (it, n) {
+        var r = rank(it, toks);
+        if (r) rows.push({ it: it, hits: r.hits, s: r.s - n * 0.001 });
+      });
+      rows.sort(function (x, y) { return y.s - x.s; });
+    }
+    shown = rows.map(function (r) { return r.it; });
+    opts = [];
     sel = 0;
     list.textContent = '';
-    shown.forEach(function (it, i) {
-      var li = document.createElement('li');
+    var lastGroup = null;
+    rows.forEach(function (r, i) {
+      var it = r.it;
+      if (!toks.length && it.group !== lastGroup) {
+        var h = el('li', 'dm-phead', it.group);
+        h.setAttribute('role', 'presentation');
+        list.appendChild(h);
+        lastGroup = it.group;
+      }
+      var li = el('li');
       li.id = 'dmOpt' + i;
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-      var ico = document.createElement('span'); ico.className = 'dm-pico'; ico.style.setProperty('--dm-ico', 'var(--dm-i-' + it.ico + ')');
-      var lab = document.createElement('span'); lab.className = 'dm-plabel'; lab.textContent = it.label;
+      var ico = el('span', 'dm-pico'); ico.style.setProperty('--dm-ico', 'var(--dm-i-' + it.ico + ')');
+      var lab = el('span', 'dm-plabel'); fillLabel(lab, it.label, r.hits);
       li.appendChild(ico); li.appendChild(lab);
-      if (it.tag) { var t = document.createElement('span'); t.className = 'dm-ptag'; t.textContent = it.tag; li.appendChild(t); }
+      if (it.tag) {
+        li.appendChild(el('span', 'dm-ptag', it.tag));
+      } else if (it.keys) {
+        var k = el('span', 'dm-pkeys');
+        it.keys.forEach(function (key) { k.appendChild(el('kbd', 'dm-pk', key)); });
+        li.appendChild(k);
+      }
       li.addEventListener('mousemove', function () { if (sel !== i) select(i); });
       li.addEventListener('click', function () { choose(i); });
       list.appendChild(li);
+      opts.push(li);
     });
+    list.scrollTop = 0;
     empty.hidden = shown.length > 0;
     empty.textContent = 'Nothing matches \u201C' + input.value.trim() + '\u201D. Try Quiz, Gradebook or Settings.';
     input.setAttribute('aria-activedescendant', shown.length ? 'dmOpt0' : '');
   }
   function select(i) {
-    if (!shown.length) return;
-    sel = (i + shown.length) % shown.length;
-    Array.prototype.forEach.call(list.children, function (li, n) { li.setAttribute('aria-selected', n === sel ? 'true' : 'false'); });
-    var cur = list.children[sel];
+    if (!opts.length) return;
+    sel = (i + opts.length) % opts.length;
+    opts.forEach(function (li, n) { li.setAttribute('aria-selected', n === sel ? 'true' : 'false'); });
+    var cur = opts[sel];
     input.setAttribute('aria-activedescendant', cur.id);
-    if (cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+    if (sel === 0) list.scrollTop = 0;
+    else if (cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
   }
   function openPalette() {
     if (!desktop.matches) return;
-    closePop(false); hideTip();
+    closePop(false); closeKeys(false); hideTip();
     before = document.activeElement;
     all = collect();
     input.value = '';
@@ -278,21 +438,111 @@
   });
   pal.addEventListener('mousedown', function (e) { if (e.target === pal) closePalette(); });
 
+  /* ── Keyboard shortcuts sheet ──────────────────────────────────────── */
+  var keysEl = null, keysPanel = null, keysBody = null, keysClose = null, keysBefore = null;
+  function keysOpen() { return !!keysEl && keysEl.classList.contains('is-open'); }
+  function buildKeys() {
+    if (keysEl) return;
+    keysEl = el('div', 'dm-keys'); keysEl.id = 'dmKeys'; keysEl.setAttribute('aria-hidden', 'true');
+    keysPanel = el('div', 'dm-keys-panel');
+    keysPanel.setAttribute('role', 'dialog'); keysPanel.setAttribute('aria-modal', 'true');
+    keysPanel.setAttribute('aria-labelledby', 'dmKeysTitle'); keysPanel.tabIndex = -1;
+    var head = el('div', 'dm-keys-head');
+    var h = el('h2', '', 'Keyboard shortcuts'); h.id = 'dmKeysTitle';
+    keysClose = el('button', 'dm-keys-x'); keysClose.type = 'button'; keysClose.setAttribute('aria-label', 'Close');
+    head.appendChild(h); head.appendChild(keysClose);
+    keysBody = el('div', 'dm-keys-body');
+    keysPanel.appendChild(head); keysPanel.appendChild(keysBody);
+    keysEl.appendChild(keysPanel);
+    document.body.appendChild(keysEl);
+
+    keysClose.addEventListener('click', function () { closeKeys(true); });
+    keysEl.addEventListener('mousedown', function (e) { if (e.target === keysEl) closeKeys(true); });
+    keysEl.addEventListener('keydown', function (e) { if (e.key === 'Tab') { e.preventDefault(); keysClose.focus(); } });
+  }
+  function keyRow(label, keys) {
+    var row = el('div', 'dm-krow');
+    row.appendChild(el('span', '', label));
+    var k = el('i');
+    keys.forEach(function (key) { k.appendChild(el('kbd', '', key)); });
+    row.appendChild(k);
+    return row;
+  }
+  function fillKeys() {
+    keysBody.textContent = '';
+    var gen = el('section', 'dm-keys-sec'); gen.appendChild(el('h3', '', 'General'));
+    [['Search pages and actions', [MOD, 'K']], ['Collapse or expand the sidebar', [MOD, 'B']],
+     ['Show this list', ['?']], ['Close a menu or dialog', ['Esc']]].forEach(function (r) { gen.appendChild(keyRow(r[0], r[1])); });
+    var go = el('section', 'dm-keys-sec'); go.appendChild(el('h3', '', 'Go to'));
+    NAV.forEach(function (n) {
+      var item = navEl(n[0]);
+      if (!item || !n[2]) return;
+      var l = item.querySelector('.dm-label');
+      go.appendChild(keyRow(l ? l.textContent.trim() : n[1], ['G', n[2].toUpperCase()]));
+    });
+    keysBody.appendChild(gen); keysBody.appendChild(go);
+    if (SHORTCUTS_ENABLED) keysBody.appendChild(el('p', 'dm-keys-note', 'For the Go to shortcuts, press G, then the letter. They pause while you are typing in a field.'));
+  }
+  function openKeys() {
+    if (!desktop.matches) return;
+    buildKeys();
+    var from = document.activeElement;
+    keysBefore = pop.contains(from) ? acc : from;
+    closePop(false); closePalette(); hideTip();
+    fillKeys();
+    keysEl.classList.add('is-open');
+    keysEl.setAttribute('aria-hidden', 'false');
+    keysPanel.focus();
+  }
+  function closeKeys(restore) {
+    if (!keysOpen()) return;
+    keysEl.classList.remove('is-open');
+    keysEl.setAttribute('aria-hidden', 'true');
+    if (restore !== false && keysBefore && keysBefore.focus && document.contains(keysBefore)) keysBefore.focus();
+    keysBefore = null;
+  }
+
   /* ── Global shortcuts ──────────────────────────────────────────────── */
+  var GO = {}, gArmed = false, gTimer = 0;
+  NAV.forEach(function (n) { if (n[2]) GO[n[2]] = n[0]; });
+
   document.addEventListener('keydown', function (e) {
     if (!desktop.matches) return;
     if (e.key === 'Escape') {
-      if (palOpen()) { e.preventDefault(); closePalette(); }
+      if (keysOpen()) { e.preventDefault(); closeKeys(true); }
+      else if (palOpen()) { e.preventDefault(); closePalette(); }
       else if (popOpen()) { e.preventDefault(); closePop(true); }
       return;
     }
-    if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) return;
-    var t = e.target;
-    var typing = t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]') && !pal.contains(t);
-    if (typing) return; // never hijack Ctrl+B / Ctrl+K while someone is typing an answer
-    var k = String(e.key).toLowerCase();
-    if (k === 'k') { e.preventDefault(); if (palOpen()) closePalette(); else openPalette(); }
-    else if (k === 'b') { e.preventDefault(); setCollapsed(!isCollapsed(), true); }
+
+    if (e.metaKey || e.ctrlKey) {
+      if (e.altKey || e.shiftKey) return;
+      // Never hijack Ctrl+B / Ctrl+K while someone is typing an answer (the search box is the exception).
+      if (inField(e.target) && !pal.contains(e.target)) return;
+      var k = String(e.key).toLowerCase();
+      if (k === 'k') { e.preventDefault(); closeKeys(false); if (palOpen()) closePalette(); else openPalette(); }
+      else if (k === 'b') { e.preventDefault(); setCollapsed(!isCollapsed(), true); }
+      return;
+    }
+
+    // Single-key shortcuts: only when nothing is being typed and nothing is open.
+    if (!SHORTCUTS_ENABLED || e.altKey || e.repeat || inField(e.target)) return;
+    if (keysOpen() || palOpen() || popOpen()) return;
+
+    if (gArmed) {
+      gArmed = false; clearTimeout(gTimer);
+      var id = GO[String(e.key).toLowerCase()];
+      if (id) { e.preventDefault(); goTo(id); }
+      return;
+    }
+    if (e.key === 'g') {
+      gArmed = true;
+      clearTimeout(gTimer);
+      gTimer = setTimeout(function () { gArmed = false; }, 1200);
+    } else if (e.key === '?') {
+      e.preventDefault();
+      openKeys();
+    }
   });
 
   /* ── Desktop / mobile switch ───────────────────────────────────────── */
@@ -304,8 +554,8 @@
       acc.setAttribute('aria-label', 'Account menu');
       acc.setAttribute('aria-expanded', popOpen() ? 'true' : 'false');
     } else {
-      ['role', 'tabindex', 'aria-haspopup', 'aria-label', 'aria-expanded'].forEach(function (a) { acc.removeAttribute(a); });
-      closePop(false); closePalette(); hideTip();
+      ['role', 'tabindex', 'aria-haspopup', 'aria-label', 'aria-expanded'].forEach(function (x) { acc.removeAttribute(x); });
+      closePop(false); closePalette(); closeKeys(false); hideTip();
     }
   }
   onChange(desktop, syncMode);
