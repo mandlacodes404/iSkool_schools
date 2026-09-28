@@ -250,6 +250,17 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.3">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.0">
+    <script>
+    // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
+    // With no saved choice, screens narrower than 1100px start as a rail.
+    (function () {
+        try {
+            var s = localStorage.getItem('iskoolMenuCollapsed');
+            if (s === '1' || (s === null && window.innerWidth < 1100)) document.documentElement.classList.add('dm-collapsed');
+        } catch (e) {}
+    })();
+    </script>
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -258,7 +269,7 @@ if (!empty($joinedClassIds)) {
     <meta name="msapplication-navbutton-color" content="#20201f">
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     
 <script>
 function getCsrfToken() {
@@ -380,11 +391,41 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 </script>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
-<div class="sidebar">
-    
+<?php
+// Desktop menu: name of the learner's class, shown beside "My Class".
+$dmClassName = '';
+if (!empty($joinedClassIds)) {
+    foreach ($classes as $dmC) {
+        if ((int)$dmC['id'] === (int)$joinedClassIds[0]) { $dmClassName = $dmC['name']; break; }
+    }
+}
+?>
+<div class="sidebar dm-menu" id="dmSidebar">
+
+    <!-- ══ DESKTOP ONLY: brand row + quick search (hidden on mobile by CSS) ══ -->
+    <div class="dm-brand">
+        <?php if ($schoolLogo): ?>
+            <img class="dm-mark" src="<?= htmlspecialchars($schoolLogo) ?>" alt="">
+        <?php else: ?>
+            <span class="dm-mark dm-mark--initials" aria-hidden="true"><?= htmlspecialchars($schoolInitials) ?></span>
+        <?php endif; ?>
+        <div class="dm-brand-text">
+            <span class="dm-brand-name" title="<?= htmlspecialchars($schoolName) ?>"><?= htmlspecialchars($schoolName) ?></span>
+            <?php if ($currentYearId > 0): ?><span class="dm-brand-sub"><?= htmlspecialchars($currentYearName) ?></span><?php endif; ?>
+        </div>
+        <button type="button" class="dm-toggle" id="dmToggle" aria-controls="dmSidebar" aria-expanded="true" aria-label="Collapse sidebar"></button>
+    </div>
+
+    <button type="button" class="dm-search" id="dmSearchBtn" aria-label="Search pages and actions">
+        <span class="dm-label">Search</span><kbd class="dm-kbd" id="dmSearchKbd"></kbd>
+    </button>
+
+    <!-- Profile block. Mobile: avatar, name and email at the top of the menu.
+         Desktop: the same three elements become the account button at the bottom. -->
+    <div class="dm-account-root" id="dmAccount">
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
         
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); if(typeof toggleSidebar === 'function') toggleSidebar(true);">
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(window.innerWidth <= 768){ if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); if(typeof toggleSidebar === 'function') toggleSidebar(true); }">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
@@ -409,48 +450,49 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
+    </div>
 
     <div class="sidebar-links" style="margin-top:50px;">
-      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" data-page="partials/manual.html" id="nav-home-sidebar">
+      <a href="javascript:void(0)" class="dm-item desktop-only" onclick="loadManual();" data-page="partials/manual.html" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
-</svg><span>Home</span>
+</svg><span class="dm-label">Home</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" data-page="quiz_list.php" class="desktop-only" id="nav-quiz-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
+        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" data-page="quiz_list.php" class="dm-item desktop-only" id="nav-quiz-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="dm-label">Quiz</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" data-page="assignment_list.php" class="desktop-only" id="nav-assignments-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
+        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" data-page="assignment_list.php" class="dm-item desktop-only" id="nav-assignments-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span class="dm-label">Assignments</span>
         </a>
 
-       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" data-page="resource_list.php" class="desktop-only" id="nav-resources-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
+       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" data-page="resource_list.php" class="dm-item desktop-only" id="nav-resources-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="dm-label">Resources</span>
         </a>
 
         <a href="javascript:void(0)"
    onclick="fetchGrades(); updateHeaderTitle('Gradebook')"
-   data-page="grades" id="nav-grades-sidebar">
+   data-page="grades" id="nav-grades-sidebar" class="dm-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="20" x2="18" y2="10"/>
         <line x1="12" y1="20" x2="12" y2="4"/>
         <line x1="6"  y1="20" x2="6"  y2="14"/>
     </svg>
-    <span>Gradebook</span>
+    <span class="dm-label">Gradebook</span>
 </a>
 
-        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" data-page="announcement_list.php" id="nav-announcements-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
+        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" data-page="announcement_list.php" id="nav-announcements-sidebar" class="dm-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dm-label">Announcements</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" data-page="evaluation_list.php" id="nav-evaluations-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Evaluations</span>
+        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" data-page="evaluation_list.php" id="nav-evaluations-sidebar" class="dm-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span class="dm-label">Evaluations</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar">
+        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar" class="dm-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -459,29 +501,30 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <line x1="12" y1="10" x2="16" y2="10"/>
         <line x1="12" y1="14" x2="16" y2="14"/>
     </svg>
-    <span>Syllabus</span>
+    <span class="dm-label">Syllabus</span>
 </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" data-page="discussion_list.php" class="mobile-only-discussions" id="nav-discussions-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" data-page="discussion_list.php" class="dm-item mobile-only-discussions" id="nav-discussions-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="dm-label">Discussions</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="return openLearnerCalendar(event)" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
+        <a href="javascript:void(0)" onclick="return openLearnerCalendar(event)" data-page="learner_calendar" class="dm-item mobile-only-calendar" id="nav-calendar-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
                 <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>Calendar</span>
+            <span class="dm-label">Calendar</span>
         </a>
-
+        <div class="dm-sep dm-sep--a" aria-hidden="true"></div>
+        <div class="dm-sep dm-sep--b" aria-hidden="true"></div>
         <?php if (empty($joinedClassIds)): ?>
             <button type="button" onclick="toggleJoinClassForm()" data-page="join-class" id="nav-joinclass-sidebar"
-                    class="<?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Join a Class</span>
+                    class="dm-item <?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="dm-label">Join a Class</span>
             </button>
             <div class="join-class-form" id="joinClassForm" style="display: none;">
-                <p style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
+                <p class="dm-note" style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
                     Warning: You can only choose your class *once*. Make sure you select the correct one.
                 </p>
                 <form method="POST">
@@ -496,8 +539,8 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
                 </form>
             </div>
         <?php else: ?>
-            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn" id="nav-myclass-sidebar">
-               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>My Class</span>
+            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn dm-item" id="nav-myclass-sidebar">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="dm-label">My Class</span><?php if ($dmClassName !== ''): ?><span class="dm-meta"><?= htmlspecialchars($dmClassName) ?></span><?php endif; ?>
             </button>
             <div class="join-status">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -508,7 +551,41 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <?php endif; ?>
     </div>
 
+    <div class="dm-sep dm-sep--c" aria-hidden="true"></div>
+
     <div class="footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
+</div>
+
+<!-- ══ DESKTOP ONLY: floating pieces. They sit outside .sidebar so its overflow can't clip them. ══ -->
+<div class="dm-tip" id="dmTip" role="tooltip"><span id="dmTipText"></span><kbd id="dmTipKbd"></kbd></div>
+
+<div class="dm-pop" id="dmAccountMenu" role="menu" aria-label="Account">
+    <div class="dm-pop-head">
+        <span class="dm-pop-name"><?= htmlspecialchars($learnerFullName) ?></span>
+        <span class="dm-pop-mail"><?= htmlspecialchars($learnerEmail ?: '') ?></span>
+    </div>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="profile" style="--dm-ico: var(--dm-i-user)">Personal information</button>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="settings" style="--dm-ico: var(--dm-i-sliders)">Settings</button>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="photo" style="--dm-ico: var(--dm-i-upload)">Upload photo</button>
+    <div class="dm-pop-sep" role="separator"></div>
+    <button type="button" class="dm-pop-item is-danger" role="menuitem" data-act="signout" style="--dm-ico: var(--dm-i-logout)">Sign out</button>
+    <div class="dm-pop-ver"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
+</div>
+
+<div class="dm-palette" id="dmPalette" aria-hidden="true">
+    <div class="dm-palette-panel" role="dialog" aria-modal="true" aria-label="Search pages and actions">
+        <div class="dm-palette-field">
+            <input id="dmPaletteInput" type="text" placeholder="Jump to a page or action" autocomplete="off" spellcheck="false"
+                   role="combobox" aria-expanded="true" aria-controls="dmPaletteList" aria-autocomplete="list" aria-label="Search pages and actions">
+        </div>
+        <ul id="dmPaletteList" role="listbox"></ul>
+        <p class="dm-palette-empty" id="dmPaletteEmpty" hidden></p>
+        <div class="dm-palette-foot">
+            <span><kbd>&uarr;</kbd><kbd>&darr;</kbd>Move</span>
+            <span><kbd>&crarr;</kbd>Open</span>
+            <span><kbd>Esc</kbd>Close</span>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">
@@ -3659,6 +3736,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
+<script src="assets/js/learner/desktop_menu.js?v=1.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
