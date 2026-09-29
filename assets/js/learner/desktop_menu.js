@@ -546,8 +546,43 @@
     }
   });
 
+  /* ── Header title: "Home" instead of the school name (desktop only) ─────
+     The page script puts the school name in the header whenever Home is
+     showing. On desktop the school already has its logo and name at the top
+     of the sidebar, so the header names the page instead, like every other
+     page does. Mobile is left alone and keeps the school name.
+     Only the visible text changes; the page script never sees a difference
+     in what it wrote, and it can rewrite the title as often as it likes. */
+  var HOME_TITLE = 'Home';
+  var titleEl = $('headerTitle');
+  var brandNameEl = sidebar.querySelector('.dm-brand-name');
+  var schoolName = brandNameEl ? brandNameEl.textContent.trim() : '';
+  var titleSwapped = false;
+
+  // The page script writes the name through htmlspecialchars(), so a name like
+  // "St. Mary's" can arrive as "St. Mary&#039;s". Accept both spellings.
+  function escapeHtml(t) {
+    return t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function isSchoolTitle(t) { return t === schoolName || t === escapeHtml(schoolName); }
+
+  function syncTitle() {
+    if (!titleEl || !schoolName) return;
+    var now = titleEl.textContent.trim();
+    if (now !== HOME_TITLE) titleSwapped = false;
+    if (desktop.matches) {
+      if (isSchoolTitle(now)) { titleEl.textContent = HOME_TITLE; titleSwapped = true; }
+    } else if (titleSwapped) {
+      titleEl.textContent = schoolName; titleSwapped = false; // window narrowed to mobile: put the name back
+    }
+  }
+  if (titleEl && window.MutationObserver) {
+    new MutationObserver(syncTitle).observe(titleEl, { childList: true, characterData: true, subtree: true });
+  }
+
   /* ── Desktop / mobile switch ───────────────────────────────────────── */
   function syncMode() {
+    syncTitle();
     if (desktop.matches) {
       acc.setAttribute('role', 'button');
       acc.setAttribute('tabindex', '0');
