@@ -92,16 +92,17 @@ html body .sidebar.dm-menu .footer { display: none; }
 /* ── Brand row ──────────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu .dm-brand {
   order: 1; position: relative; flex: none; box-sizing: border-box;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 12px;
   height: var(--dm-head);
-  margin: 0 calc(var(--dm-pad) * -1); padding: 0 calc(var(--dm-pad) + 2px) 0 calc(var(--dm-pad) + 5px);
+  margin: 0 calc(var(--dm-pad) * -1); padding: 0 calc(var(--dm-pad) + 2px) 0 calc(var(--dm-pad) - 1px);
   border-bottom: 1px solid var(--dm-line);
 }
-html body .sidebar.dm-menu .dm-mark { width: 28px; height: 28px; border-radius: 8px; object-fit: cover; flex: none; }
+/* 40px = exactly the width of the collapsed rail's content box, and its centre sits on the icon column. */
+html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 40px; height: 40px; border-radius: 10px; object-fit: cover; flex: none; }
 html body .sidebar.dm-menu .dm-mark--initials {
   display: grid; place-items: center;
   background: #20201f; border: 1px solid var(--dm-line);
-  color: #b9bcc1; font: 600 12px/1 var(--dm-font); text-transform: uppercase;
+  color: #b9bcc1; font: 600 15px/1 var(--dm-font); text-transform: uppercase;
 }
 html body .sidebar.dm-menu .dm-brand-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 html body .sidebar.dm-menu .dm-brand-name {
@@ -186,18 +187,18 @@ html body .sidebar.dm-menu .dm-sep--a {
   color: var(--dm-faint); font: 500 12px/1 var(--dm-font); letter-spacing: .01em;
   white-space: nowrap; user-select: none;
 }
-html body .sidebar.dm-menu .sidebar-links::before { content: 'Coursework'; order: 15; }
-html body .sidebar.dm-menu .dm-sep--a::before { content: 'Progress'; }
+html body .sidebar.dm-menu .sidebar-links::before { content: 'Learning'; order: 15; }
+html body .sidebar.dm-menu .dm-sep--a::before { content: 'Academics'; }
 
-/* Order: coursework, feedback, class */
+/* Order: Home / Learning / Academics / class */
 #nav-home-sidebar { order: 10; --dm-ico: var(--dm-i-home); }
 #nav-quiz-sidebar { order: 20; --dm-ico: var(--dm-i-quiz); }
 #nav-assignments-sidebar { order: 30; --dm-ico: var(--dm-i-assign); }
 #nav-resources-sidebar { order: 40; --dm-ico: var(--dm-i-folder); }
-#nav-syllabus-sidebar { order: 50; --dm-ico: var(--dm-i-book); }
+#nav-announcements-sidebar { order: 50; --dm-ico: var(--dm-i-megaphone); }
 html body .sidebar.dm-menu .dm-sep--a { order: 55; }
-#nav-grades-sidebar { order: 60; --dm-ico: var(--dm-i-chart); }
-#nav-announcements-sidebar { order: 70; --dm-ico: var(--dm-i-megaphone); }
+#nav-syllabus-sidebar { order: 60; --dm-ico: var(--dm-i-book); }
+#nav-grades-sidebar { order: 70; --dm-ico: var(--dm-i-chart); }
 #nav-evaluations-sidebar { order: 80; --dm-ico: var(--dm-i-star); }
 html body .sidebar.dm-menu .dm-sep--b { order: 85; }
 #nav-myclass-sidebar { order: 90; --dm-ico: var(--dm-i-users); }
@@ -272,6 +273,7 @@ html.dm-collapsed body .sidebar.dm-menu .dm-brand-text, html.dm-collapsed body .
 html.dm-collapsed body .sidebar.dm-menu .dm-brand { justify-content: center; padding: 0; }
 html.dm-collapsed body .sidebar.dm-menu .dm-toggle {
   position: absolute; inset: 0; margin: auto; opacity: 0;
+  width: 40px; height: 40px; border-radius: 10px;
   background: var(--dm-bg); color: var(--dm-soft);
 }
 html.dm-collapsed body .sidebar.dm-menu .dm-brand:hover .dm-toggle, html.dm-collapsed body .sidebar.dm-menu .dm-toggle:focus-visible { opacity: 1; }

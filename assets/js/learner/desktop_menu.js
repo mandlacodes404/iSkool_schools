@@ -49,9 +49,9 @@
     ['nav-quiz-sidebar',          'quiz',      'q', 'quizzes tests exams'],
     ['nav-assignments-sidebar',   'assign',    'a', 'homework tasks submissions'],
     ['nav-resources-sidebar',     'folder',    'r', 'files notes downloads materials'],
+    ['nav-announcements-sidebar', 'megaphone', 'n', 'news notices updates'],
     ['nav-syllabus-sidebar',      'book',      's', 'curriculum topics outline'],
     ['nav-grades-sidebar',        'chart',     'g', 'grades marks results reports progress'],
-    ['nav-announcements-sidebar', 'megaphone', 'n', 'news notices updates'],
     ['nav-evaluations-sidebar',   'star',      'e', 'feedback rate teacher survey'],
     ['nav-myclass-sidebar',       'users',     'c', 'class classmates parent'],
     ['nav-joinclass-sidebar',     'plus',      '',  'enrol register']
@@ -419,6 +419,7 @@
     if (!palOpen()) return;
     pal.classList.remove('is-open');
     pal.setAttribute('aria-hidden', 'true');
+    if (document.activeElement === input) input.blur(); // don't wait for the browser to notice it is hidden
     if (before && before.focus && document.contains(before)) before.focus();
     before = null;
   }
