@@ -250,7 +250,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.3">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.5">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -1603,12 +1603,12 @@ if (fullPage &&
             .ls-desktop {
                 display: grid;
                 grid-template-columns: 200px minmax(0, 1fr);
-                min-height: calc(100vh - 62px);
+                min-height: calc(100vh - var(--dm-chrome, 62px));
                 font-family: 'Nunito', sans-serif;
             }
             .ls-rail {
                 padding: 28px 12px;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
                 border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
@@ -1644,8 +1644,8 @@ if (fullPage &&
             .ls-panel {
                 padding: 32px 40px 56px;
                 overflow-y: auto;
-                max-height: calc(100vh - 62px);
-                background: #0a0e14;
+                max-height: calc(100vh - var(--dm-chrome, 62px));
+                background: var(--dm-page, #0a0e14);
             }
             .ls-panel-section {
                 display: none;
@@ -1971,11 +1971,11 @@ window.loadLearnerPersonalInfo = async function() {
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 14px;
                 overflow: hidden;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
             }
             .learner-personal-rail {
                 padding: 24px 22px;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
                 border-right: 1px solid rgba(255,255,255,0.07);
             }
             .learner-personal-main {

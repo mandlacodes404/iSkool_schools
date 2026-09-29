@@ -7,6 +7,10 @@
    Load it AFTER learner_dashboard.css. Every layout rule sits inside
    min-width: 769px, so the mobile menu is not affected.
 
+   The sidebar and top bar are one frame; the page is a rounded panel inset
+   into it (see "Inset page"), and the surfaces step up frame < page < card
+   (see "Re-tone" near the end).
+
    Once you are happy with it, the old desktop-only sidebar rules in
    learner_dashboard.css (the min-width: 769px blocks, .desktop-backdrop,
    #desktopMenuToggle, .desktop-close-btn) can be deleted and the few
@@ -24,8 +28,13 @@
 html {
   --dm-w: 268px;
   --dm-pad: 10px;
-  --dm-head: 62px; /* matches .main-header so the two divider lines meet */
+  --dm-head: 62px; /* brand row and .main-header share this height so their contents line up */
+  --dm-gap: 10px; /* space between the page panel and the window edge */
+  --dm-panel-r: 14px; /* page panel corner radius */
+  --dm-chrome: calc(var(--dm-head) + var(--dm-gap) + 2px); /* top bar + panel margin + panel border: what a page's own "100vh minus header" sum must subtract */
   --dm-bg: #0d1117;
+  --dm-page: #000000;
+  --dm-card: #0d1117;
   --dm-raise: #151a21;
   --dm-hover: rgba(255,255,255,.055);
   --dm-active: rgba(255,255,255,.095);
@@ -67,6 +76,23 @@ html.dm-ready body .main-content { transition: margin-left .22s var(--dm-ease) !
 html body #desktopMenuToggle,
 html body .desktop-backdrop { display: none !important; }
 
+/* ── Inset page: sidebar and top bar are one frame, the page is a panel set inside it ──
+   All three page panes get the same panel: #api-content-area (API pages), #mainFrame (iframe pages)
+   and .my-class-content (My class). Their scroll rules elsewhere are left alone; the panel only sets
+   size, edge and corners. flex-basis 0 makes the panel fill what the top bar leaves, so a fixed
+   height set on a pane elsewhere is ignored. */
+html body { background-color: var(--dm-bg); }
+html body .main-content { background-color: var(--dm-bg); }
+html body #api-content-area,
+html body #mainFrame,
+html body .my-class-content.active {
+  flex: 1 1 0; min-height: 0; box-sizing: border-box;
+  margin: 0 var(--dm-gap) var(--dm-gap) 0;
+  border: 1px solid rgba(255,255,255,.08); border-radius: var(--dm-panel-r);
+  background: var(--dm-page);
+}
+html body #mainFrame { width: calc(100% - var(--dm-gap)); }
+
 /* ── Sidebar shell ──────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu {
   width: var(--dm-w);
@@ -74,7 +100,7 @@ html body .sidebar.dm-menu {
   gap: 0;
   background: var(--dm-bg);
   color: var(--dm-soft);
-  border-right: 1px solid var(--dm-line);
+  border-right: 0;
   border-radius: 0;
   box-shadow: none;
   transform: none;
@@ -95,7 +121,6 @@ html body .sidebar.dm-menu .dm-brand {
   display: flex; align-items: center; gap: 12px;
   height: var(--dm-head);
   margin: 0 calc(var(--dm-pad) * -1); padding: 0 calc(var(--dm-pad) + 2px) 0 calc(var(--dm-pad) - 1px);
-  border-bottom: 1px solid var(--dm-line);
 }
 /* 40px = exactly the width of the collapsed rail's content box, and its centre sits on the icon column. */
 html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 40px; height: 40px; border-radius: 10px; object-fit: cover; flex: none; }
@@ -412,6 +437,8 @@ html body .main-header {
      scroll handler (window resized across the breakpoint) can never show on desktop. */
   background: var(--dm-bg) !important; padding: 0 24px; min-height: 62px;
   box-sizing: border-box; gap: 12px;
+  /* No divider: the page panel below has its own edge. !important for the same reason as the background. */
+  border-bottom: 0 !important;
 }
 html body .main-header #headerLeft,
 html body .main-header #headerRight { flex: 0 0 auto !important; }
@@ -424,6 +451,14 @@ html body .main-header .school-name {
   display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--dm-text); font: 600 15px/1.2 var(--dm-font); letter-spacing: -.005em;
 }
+
+/* ── Re-tone: frame < page < card ───────────────────────────────────────────
+   The frame (sidebar + top bar) is the darkest step, the page panel sits one step above it and
+   cards one step above that. Delete this whole block to fall back to the plain inset look (black
+   page, #0d1117 frame and cards). --card-bg is the token learner_dashboard.css already uses for
+   cards, so anything built on it follows. Colours hardcoded in other stylesheets do not follow. */
+html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
+html body { --card-bg: var(--dm-card); }
 
 @keyframes dm-pop { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes dm-fade { from { opacity: 0; } to { opacity: 1; } }
