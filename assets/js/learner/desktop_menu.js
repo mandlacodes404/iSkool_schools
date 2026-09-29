@@ -1,7 +1,7 @@
 /* assets/js/learner/desktop_menu.js
    Behaviour for the desktop sidebar: collapse to a rail (remembered),
    rail tooltips, account menu, quick search (Ctrl/Cmd + K),
-   go-to shortcuts (G then a letter) and a shortcuts sheet (?).
+   go-to shortcuts (G then a letter), a shortcuts sheet (?) and the Join a Class dialog.
 
    It never re-implements navigation. Quick search and the shortcuts click the
    real sidebar links, so every existing onclick, loader and setActive() path
@@ -175,12 +175,6 @@
   sidebar.addEventListener('focusin', function (e) { var t = e.target.closest('[data-tip]'); if (t) showTip(t, true); });
   sidebar.addEventListener('focusout', hideTip);
   sidebar.addEventListener('click', hideTip);
-
-  // "Join a Class" needs room for its form, so open the rail first.
-  var joinBtn = $('nav-joinclass-sidebar');
-  if (joinBtn) joinBtn.addEventListener('click', function () {
-    if (desktop.matches && isCollapsed()) setCollapsed(false, false);
-  }, true);
 
   /* ── Actions shared by the account menu and quick search ───────────── */
   function signOut() {
@@ -503,6 +497,121 @@
     keysBefore = null;
   }
 
+  /* ── Join a Class dialog ───────────────────────────────────────────────
+     The form is still the one PHP renders (same CSRF token, same POST, same handler). It is
+     moved into the dialog while the dialog is open and put back when it closes, so nothing is
+     duplicated and the sidebar never has to make room for it. Choosing a class asks for one
+     more confirmation first, because a learner can only choose their class once.
+     Below 769px toggleJoinClassForm() is left exactly as the page defines it. */
+  var joinEl = null, joinPanel = null, joinBody = null, joinWrap = null, joinFormEl = null;
+  var joinSelect = null, joinSubmit = null, joinX = null, joinBack = null, joinYes = null;
+  var joinAsk = null, joinConfirm = null, joinMark = null, joinSent = false;
+  var JOIN_YES = 'Yes, join this class';
+
+  function joinOpen() { return !!joinEl && joinEl.classList.contains('is-open'); }
+  function joinTargets() {
+    var t = joinPanel.classList.contains('is-confirming') ? [joinX, joinBack, joinYes] : [joinX, joinSelect, joinSubmit];
+    return t.filter(function (n) { return n && !n.disabled; });
+  }
+  function joinAskConfirm() {
+    var opt = joinSelect.options[joinSelect.selectedIndex];
+    joinAsk.textContent = '';
+    joinAsk.appendChild(document.createTextNode('Join '));
+    joinAsk.appendChild(el('strong', '', opt ? opt.textContent.trim() : ''));
+    joinAsk.appendChild(document.createTextNode('? You can only choose your class once, so make sure this is the right one.'));
+    joinPanel.classList.add('is-confirming');
+    joinYes.focus();
+  }
+  function buildJoin() {
+    if (joinEl) return true;
+    joinWrap = $('joinClassForm');
+    joinFormEl = joinWrap && joinWrap.querySelector('form');
+    joinSelect = joinFormEl && joinFormEl.querySelector('select');
+    joinSubmit = joinFormEl && joinFormEl.querySelector('.join-class-btn');
+    if (!joinSelect || !joinSubmit) return false;
+    joinSelect.setAttribute('aria-label', 'Class');
+
+    joinEl = el('div', 'dm-join'); joinEl.id = 'dmJoin'; joinEl.setAttribute('aria-hidden', 'true');
+    joinPanel = el('div', 'dm-join-panel');
+    joinPanel.setAttribute('role', 'dialog'); joinPanel.setAttribute('aria-modal', 'true');
+    joinPanel.setAttribute('aria-labelledby', 'dmJoinTitle'); joinPanel.tabIndex = -1;
+    var head = el('div', 'dm-join-head');
+    var h = el('h2', '', 'Join a class'); h.id = 'dmJoinTitle';
+    joinX = el('button', 'dm-keys-x'); joinX.type = 'button'; joinX.setAttribute('aria-label', 'Close');
+    head.appendChild(h); head.appendChild(joinX);
+    joinBody = el('div', 'dm-join-body');
+    joinConfirm = el('div', 'dm-join-confirm');
+    joinAsk = el('p', 'dm-join-ask');
+    var row = el('div', 'dm-join-actions');
+    joinBack = el('button', 'dm-join-btn', 'Go back'); joinBack.type = 'button';
+    joinYes = el('button', 'dm-join-btn dm-join-btn--go', JOIN_YES); joinYes.type = 'button';
+    row.appendChild(joinBack); row.appendChild(joinYes);
+    joinConfirm.appendChild(joinAsk); joinConfirm.appendChild(row);
+    joinBody.appendChild(joinConfirm);
+    joinPanel.appendChild(head); joinPanel.appendChild(joinBody);
+    joinEl.appendChild(joinPanel);
+    document.body.appendChild(joinEl);
+
+    joinX.addEventListener('click', function () { closeJoin(true); });
+    joinEl.addEventListener('mousedown', function (e) { if (e.target === joinEl) closeJoin(true); });
+    joinBack.addEventListener('click', function () { joinPanel.classList.remove('is-confirming'); joinSelect.focus(); });
+    joinYes.addEventListener('click', function () {
+      if (joinSent) return;
+      joinSent = true;
+      joinYes.disabled = true; joinBack.disabled = true; joinYes.textContent = 'Joining\u2026';
+      // form.submit() leaves the clicked button out of the POST, and the PHP handler looks for join_class.
+      var flag = joinFormEl.querySelector('input[name="join_class"]');
+      if (!flag) { flag = el('input'); flag.type = 'hidden'; flag.name = 'join_class'; flag.value = '1'; joinFormEl.appendChild(flag); }
+      joinFormEl.submit();
+    });
+    // The form's own submit button now opens the confirmation instead of posting straight away.
+    joinFormEl.addEventListener('submit', function (e) {
+      if (!joinOpen() || joinSent) return;
+      e.preventDefault();
+      if (joinSelect.value) joinAskConfirm(); else joinSelect.focus();
+    });
+    joinEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var t = joinTargets(), a = document.activeElement;
+      if (!t.length) { e.preventDefault(); joinPanel.focus(); return; }
+      if (e.shiftKey && (a === t[0] || a === joinPanel)) { e.preventDefault(); t[t.length - 1].focus(); }
+      else if (!e.shiftKey && a === t[t.length - 1]) { e.preventDefault(); t[0].focus(); }
+    });
+    return true;
+  }
+  function openJoin() {
+    if (!desktop.matches || !buildJoin() || joinOpen()) return;
+    closePop(false); closePalette(); closeKeys(false); hideTip();
+    joinMark = document.createComment('dm-join');
+    joinWrap.parentNode.insertBefore(joinMark, joinWrap);
+    joinBody.insertBefore(joinWrap, joinConfirm);
+    joinWrap.style.display = 'block';
+    joinEl.classList.add('is-open');
+    joinEl.setAttribute('aria-hidden', 'false');
+    joinSelect.focus();
+  }
+  function closeJoin(restore) {
+    if (!joinOpen()) return;
+    joinEl.classList.remove('is-open');
+    joinEl.setAttribute('aria-hidden', 'true');
+    joinWrap.style.display = 'none';
+    if (joinMark && joinMark.parentNode) { joinMark.parentNode.insertBefore(joinWrap, joinMark); joinMark.parentNode.removeChild(joinMark); }
+    joinMark = null;
+    joinPanel.classList.remove('is-confirming');
+    joinSent = false; joinYes.disabled = false; joinBack.disabled = false; joinYes.textContent = JOIN_YES;
+    joinSelect.value = '';
+    var from = $('nav-joinclass-sidebar');
+    if (restore !== false && from && from.focus) from.focus();
+  }
+  // The sidebar button, quick search and the account of the page script all reach this through
+  // the page's own toggleJoinClassForm(), so wrapping it covers every way of opening the form.
+  var pageToggleJoin = window.toggleJoinClassForm;
+  window.toggleJoinClassForm = function () {
+    if (desktop.matches && buildJoin()) { openJoin(); return; }
+    if (typeof pageToggleJoin === 'function') return pageToggleJoin.apply(this, arguments);
+  };
+  onChange(desktop, function (e) { if (!e.matches) closeJoin(false); });
+
   /* ── Global shortcuts ──────────────────────────────────────────────── */
   var GO = {}, gArmed = false, gTimer = 0;
   NAV.forEach(function (n) { if (n[2]) GO[n[2]] = n[0]; });
@@ -510,14 +619,15 @@
   document.addEventListener('keydown', function (e) {
     if (!desktop.matches) return;
     if (e.key === 'Escape') {
-      if (keysOpen()) { e.preventDefault(); closeKeys(true); }
+      if (joinOpen()) { e.preventDefault(); closeJoin(true); }
+      else if (keysOpen()) { e.preventDefault(); closeKeys(true); }
       else if (palOpen()) { e.preventDefault(); closePalette(); }
       else if (popOpen()) { e.preventDefault(); closePop(true); }
       return;
     }
 
     if (e.metaKey || e.ctrlKey) {
-      if (e.altKey || e.shiftKey) return;
+      if (e.altKey || e.shiftKey || joinOpen()) return;
       // Never hijack Ctrl+B / Ctrl+K while someone is typing an answer (the search box is the exception).
       if (inField(e.target) && !pal.contains(e.target)) return;
       var k = String(e.key).toLowerCase();
@@ -528,7 +638,7 @@
 
     // Single-key shortcuts: only when nothing is being typed and nothing is open.
     if (!SHORTCUTS_ENABLED || e.altKey || e.repeat || inField(e.target)) return;
-    if (keysOpen() || palOpen() || popOpen()) return;
+    if (keysOpen() || palOpen() || popOpen() || joinOpen()) return;
 
     if (gArmed) {
       gArmed = false; clearTimeout(gTimer);

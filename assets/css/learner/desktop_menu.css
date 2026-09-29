@@ -19,7 +19,7 @@
 
 /* Desktop-only pieces stay inert below 769px */
 .dm-brand, .dm-search, .dm-sep, .dm-meta, .dm-kbd,
-.dm-tip, .dm-pop, .dm-palette, .dm-keys { display: none; }
+.dm-tip, .dm-pop, .dm-palette, .dm-keys, .dm-join { display: none; }
 .dm-account-root { display: contents; }
 
 @media (min-width: 769px) {
@@ -431,6 +431,59 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 .dm-krow i { display: flex; gap: 4px; font-style: normal; }
 .dm-keys-note { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--dm-line); color: var(--dm-faint); font-size: 12px; line-height: 1.5; }
 
+/* ── Join a Class dialog ────────────────────────────────────────────────────
+   Same surface as the shortcuts sheet. The PHP form is moved in here while the dialog is open,
+   so its rules are scoped to the dialog rather than the sidebar. */
+.dm-join {
+  position: fixed; inset: 0; z-index: 6600; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  font-family: var(--dm-font);
+}
+.dm-join.is-open { display: flex; animation: dm-fade .12s ease-out; }
+.dm-join-panel {
+  width: min(420px, calc(100vw - 48px)); max-height: calc(100vh - 96px); overflow-y: auto; outline: 0;
+  background: var(--dm-raise); border: 1px solid var(--dm-line-strong); border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.6); animation: dm-pop .14s var(--dm-ease);
+}
+.dm-join-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 12px 20px; border-bottom: 1px solid var(--dm-line); }
+.dm-join-head h2 { margin: 0; color: var(--dm-text); font: 500 15px/1.2 var(--dm-font); }
+.dm-join-body { padding: 16px 20px 20px; }
+.dm-join-body .join-class-form { margin: 0; padding: 0; border: 0; background: none; }
+.dm-join-body form { margin: 0; }
+/* !important: the note carries an inline colour, weight and size in the markup */
+.dm-join-body .dm-note {
+  margin: 0 0 16px; padding: 10px 12px;
+  border: 1px solid rgba(244,119,111,.28); border-radius: 8px; background: rgba(244,119,111,.08);
+  color: var(--dm-soft) !important; font: 400 13px/1.5 var(--dm-font) !important;
+}
+.dm-join-body .dm-note strong { color: var(--dm-danger); font-weight: 600; }
+.dm-join-body select {
+  display: block; width: 100%; height: 40px; margin: 0; padding: 0 12px;
+  border: 1px solid var(--dm-line-strong); border-radius: 8px;
+  background: var(--dm-bg); color: var(--dm-text); font: 450 14px var(--dm-font);
+  box-shadow: none; color-scheme: dark; cursor: pointer;
+}
+.dm-join-body select:hover { border-color: rgba(255,255,255,.2); box-shadow: none; }
+.dm-join-body select:focus { border-color: var(--dm-accent); box-shadow: none; outline: none; }
+.dm-join-body .join-class-btn, .dm-join-btn {
+  display: block; width: 100%; height: 40px; margin: 12px 0 0; padding: 0;
+  border: 1px solid var(--dm-line-strong); border-radius: 8px; background: none; color: var(--dm-soft);
+  font: 500 14px/38px var(--dm-font); text-align: center; cursor: pointer; transform: none;
+  transition: background .12s ease, color .12s ease;
+}
+.dm-join-btn:hover { background: var(--dm-hover); color: var(--dm-text); }
+.dm-join-body .join-class-btn, .dm-join-btn--go { border: 0; background: var(--dm-text); color: var(--dm-bg); line-height: 40px; }
+.dm-join-body .join-class-btn:hover, .dm-join-btn--go:hover { background: #fff; color: var(--dm-bg); transform: none; }
+.dm-join-body .join-class-btn:focus-visible, .dm-join-btn:focus-visible { outline: 0; box-shadow: 0 0 0 2px var(--dm-accent); }
+.dm-join-btn:disabled { opacity: .6; cursor: default; }
+.dm-join-confirm { display: none; }
+.dm-join-panel.is-confirming .dm-join-confirm { display: block; }
+.dm-join-panel.is-confirming .join-class-form { display: none !important; }
+.dm-join-ask { margin: 0; color: var(--dm-soft); font: 400 14px/1.55 var(--dm-font); }
+.dm-join-ask strong { color: var(--dm-text); font-weight: 600; }
+.dm-join-actions { display: flex; gap: 8px; margin-top: 16px; }
+.dm-join-actions .dm-join-btn { flex: 1 1 0; margin: 0; }
+
 /* ── Header (companion changes: brand and account now live in the sidebar) ── */
 html body .main-header {
   /* Same surface as the sidebar. !important so a colour left inline by the mobile
@@ -466,7 +519,7 @@ html body { --card-bg: var(--dm-card); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html body .sidebar.dm-menu, html body .main-content, .dm-item, .dm-pop, .dm-palette, .dm-palette-panel, .dm-keys, .dm-keys-panel, .dm-tip {
+  html body .sidebar.dm-menu, html body .main-content, .dm-item, .dm-pop, .dm-palette, .dm-palette-panel, .dm-keys, .dm-keys-panel, .dm-join, .dm-join-panel, .dm-tip {
     transition: none !important; animation: none !important;
   }
 }

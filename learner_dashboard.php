@@ -249,8 +249,8 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.3">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.5">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -525,7 +525,7 @@ if (!empty($joinedClassIds)) {
             </button>
             <div class="join-class-form" id="joinClassForm" style="display: none;">
                 <p class="dm-note" style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
-                    Warning: You can only choose your class *once*. Make sure you select the correct one.
+                    Warning: You can only choose your class <strong>once</strong>. Make sure you select the correct one.
                 </p>
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
@@ -3216,9 +3216,170 @@ if (desktopToggle) {
     // ─────────────────────────────────────────────────────────────────────
 });
 
+// ────────────────────────────────────────────────────────────────────────
+// JOIN A CLASS: BOTTOM SHEET (phones, <= 768px)
+// Same #joinClassForm the menu has always had (same CSRF token, same POST,
+// same PHP handler). On a phone it is lifted out of the slide-in menu into a
+// bottom sheet while it is open and put back when it closes, so it can never
+// be squeezed or hidden by the menu. Picking a class asks for one more tap
+// first, because a learner can only choose their class once.
+// Desktop has its own dialog in desktop_menu.js.
+// ────────────────────────────────────────────────────────────────────────
+window.joinSheet = (function () {
+    var YES = 'Yes, join this class';
+    var phone = window.matchMedia('(max-width: 768px)');
+    var wrap, formEl, select, submit;
+    var root, panel, head, body, xBtn, yesBtn, backBtn, askEl, confirmEl;
+    var mark = null, sent = false;
+
+    function mk(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text) n.textContent = text;
+        return n;
+    }
+    function isOpen() { return !!root && root.classList.contains('is-open'); }
+    function targets() {
+        var t = panel.classList.contains('is-confirming') ? [xBtn, yesBtn, backBtn] : [xBtn, select, submit];
+        return t.filter(function (n) { return n && !n.disabled; });
+    }
+    function ask() {
+        var opt = select.options[select.selectedIndex];
+        askEl.textContent = '';
+        askEl.appendChild(document.createTextNode('Join '));
+        askEl.appendChild(mk('strong', '', opt ? opt.textContent.trim() : ''));
+        askEl.appendChild(document.createTextNode('? You can only choose your class once, so make sure this is the right one.'));
+        panel.classList.add('is-confirming');
+    }
+
+    function build() {
+        if (root) return true;
+        wrap = document.getElementById('joinClassForm');
+        formEl = wrap && wrap.querySelector('form');
+        select = formEl && formEl.querySelector('select');
+        submit = formEl && formEl.querySelector('.join-class-btn');
+        if (!select || !submit) return false;
+        select.setAttribute('aria-label', 'Class');
+
+        root = mk('div', 'jcs'); root.id = 'joinSheet'; root.setAttribute('aria-hidden', 'true');
+        panel = mk('div', 'jcs-panel');
+        panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true');
+        panel.setAttribute('aria-labelledby', 'jcsTitle'); panel.tabIndex = -1;
+        head = mk('div', 'jcs-head');
+        var grip = mk('span', 'jcs-grip'); grip.setAttribute('aria-hidden', 'true');
+        var h = mk('h2', '', 'Join a class'); h.id = 'jcsTitle';
+        xBtn = mk('button', 'jcs-x'); xBtn.type = 'button'; xBtn.setAttribute('aria-label', 'Close');
+        xBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+        head.appendChild(grip); head.appendChild(h); head.appendChild(xBtn);
+        body = mk('div', 'jcs-body');
+        confirmEl = mk('div', 'jcs-confirm');
+        askEl = mk('p', 'jcs-ask');
+        var row = mk('div', 'jcs-actions');
+        yesBtn = mk('button', 'jcs-btn jcs-btn--go', YES); yesBtn.type = 'button';
+        backBtn = mk('button', 'jcs-btn', 'Go back'); backBtn.type = 'button';
+        row.appendChild(yesBtn); row.appendChild(backBtn);
+        confirmEl.appendChild(askEl); confirmEl.appendChild(row);
+        body.appendChild(confirmEl);
+        panel.appendChild(head); panel.appendChild(body);
+        root.appendChild(panel);
+        document.body.appendChild(root);
+
+        xBtn.addEventListener('click', close);
+        root.addEventListener('click', function (e) { if (e.target === root) close(); });
+        backBtn.addEventListener('click', function () { panel.classList.remove('is-confirming'); });
+        yesBtn.addEventListener('click', function () {
+            if (sent) return;
+            sent = true;
+            yesBtn.disabled = true; backBtn.disabled = true; yesBtn.textContent = 'Joining\u2026';
+            // form.submit() leaves the clicked button out of the POST, and the PHP handler looks for join_class.
+            var flag = formEl.querySelector('input[name="join_class"]');
+            if (!flag) { flag = mk('input'); flag.type = 'hidden'; flag.name = 'join_class'; flag.value = '1'; formEl.appendChild(flag); }
+            formEl.submit();
+        });
+        // The form's own button now opens the confirmation instead of posting straight away.
+        formEl.addEventListener('submit', function (e) {
+            if (!isOpen() || sent) return;
+            e.preventDefault();
+            if (select.value) ask();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (!isOpen()) return;
+            if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+            if (e.key !== 'Tab') return;
+            var t = targets(), a = document.activeElement;
+            if (!t.length) { e.preventDefault(); panel.focus(); return; }
+            if (e.shiftKey && (a === t[0] || a === panel)) { e.preventDefault(); t[t.length - 1].focus(); }
+            else if (!e.shiftKey && a === t[t.length - 1]) { e.preventDefault(); t[0].focus(); }
+        });
+
+        // Keep the menu's edge-swipe handlers (document level) from seeing touches that start in the sheet.
+        ['touchstart', 'touchmove', 'touchend'].forEach(function (ev) {
+            root.addEventListener(ev, function (e) { e.stopPropagation(); }, { passive: true });
+        });
+        // Drag the header down to dismiss.
+        var y0 = null, dy = 0;
+        head.addEventListener('touchstart', function (e) {
+            y0 = e.touches[0].clientY; dy = 0;
+            panel.style.animation = 'none'; panel.style.transition = 'none';
+        }, { passive: true });
+        head.addEventListener('touchmove', function (e) {
+            if (y0 === null) return;
+            dy = Math.max(0, e.touches[0].clientY - y0);
+            panel.style.transform = 'translateY(' + dy + 'px)';
+        }, { passive: true });
+        head.addEventListener('touchend', function () {
+            if (y0 === null) return;
+            y0 = null;
+            panel.style.transition = '';
+            if (dy > 90) { panel.style.transform = 'translateY(100%)'; setTimeout(close, 180); }
+            else panel.style.transform = '';
+        }, { passive: true });
+        head.addEventListener('touchcancel', function () {
+            y0 = null; panel.style.transition = ''; panel.style.transform = '';
+        }, { passive: true });
+
+        if (phone.addEventListener) phone.addEventListener('change', function (e) { if (!e.matches) close(); });
+        else phone.addListener(function (e) { if (!e.matches) close(); });
+        return true;
+    }
+
+    // Returns true when the sheet took over, so the caller knows not to fall back to the inline form.
+    function open() {
+        if (!phone.matches || !build()) return false;
+        if (isOpen()) return true;
+        // The slide-in menu closes first, like every other item in it does.
+        if (document.querySelector('.sidebar.active') && typeof window.toggleSidebar === 'function') window.toggleSidebar(true);
+        mark = document.createComment('jcs');
+        wrap.parentNode.insertBefore(mark, wrap);
+        body.insertBefore(wrap, confirmEl);
+        wrap.style.display = 'block';
+        root.classList.add('is-open');
+        root.setAttribute('aria-hidden', 'false');
+        panel.focus();
+        return true;
+    }
+    function close() {
+        if (!isOpen()) return;
+        root.classList.remove('is-open');
+        root.setAttribute('aria-hidden', 'true');
+        wrap.style.display = 'none';
+        if (mark && mark.parentNode) { mark.parentNode.insertBefore(wrap, mark); mark.parentNode.removeChild(mark); }
+        mark = null;
+        panel.classList.remove('is-confirming');
+        panel.style.transform = ''; panel.style.transition = ''; panel.style.animation = '';
+        sent = false; yesBtn.disabled = false; backBtn.disabled = false; yesBtn.textContent = YES;
+        select.value = '';
+    }
+    return { open: open, close: close, isOpen: isOpen };
+})();
+
 function toggleJoinClassForm() {
     const form = document.getElementById("joinClassForm");
-    if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+    if (!form) return;
+    // Phones get the bottom sheet above. Desktop wraps this function in desktop_menu.js and
+    // opens its own dialog, so the inline toggle below is only the last-resort fallback.
+    if (window.innerWidth <= 768 && window.joinSheet && window.joinSheet.open()) return;
+    form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
 // --- DYNAMIC UI COMMAND CENTER ---
@@ -3736,7 +3897,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
-<script src="assets/js/learner/desktop_menu.js?v=1.3"></script>
+<script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

@@ -1971,3 +1971,151 @@ iframe {
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
     }
 }
+
+/* ── JOIN A CLASS: BOTTOM SHEET (phones only) ────────────────────────────────
+   Built by window.joinSheet in learner_dashboard.php. The PHP form is moved in here while the
+   sheet is open, so these rules are scoped to the sheet rather than to .sidebar. z-index 7000
+   sits above the bottom nav (4000) and the menu (5000) and below #loaderOverlay (8000).
+   Desktop uses .dm-join in desktop_menu.css instead. */
+.jcs { display: none; }
+
+@keyframes jcsFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes jcsRise { from { transform: translateY(100%); } to { transform: none; } }
+
+@media (max-width: 768px) {
+    .jcs {
+        position: fixed;
+        inset: 0;
+        z-index: 7000;
+        align-items: flex-end;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+        overscroll-behavior: contain;
+    }
+    .jcs.is-open { display: flex; animation: jcsFade 0.2s ease-out; }
+
+    .jcs-panel {
+        width: 100%;
+        max-width: 520px;
+        max-height: 88vh;
+        max-height: 88dvh;
+        overflow-y: auto;
+        box-sizing: border-box;
+        padding-bottom: env(safe-area-inset-bottom);
+        background: #20201f;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: none;
+        border-radius: 22px 22px 0 0;
+        box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55);
+        font-family: 'Nunito', sans-serif;
+        outline: 0;
+        transition: transform 0.2s ease;
+        animation: jcsRise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .jcs-head {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 14px 10px 20px;
+        touch-action: none; /* the header is the drag handle */
+    }
+    .jcs-grip {
+        position: absolute;
+        top: 9px;
+        left: 50%;
+        width: 38px;
+        height: 4px;
+        margin-left: -19px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.22);
+    }
+    .jcs-head h2 { margin: 0; font-size: 19px; font-weight: 800; color: #ffffff; }
+    .jcs-x {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.07);
+        color: #cfd3d8;
+        cursor: pointer;
+    }
+    .jcs-x svg { width: 18px; height: 18px; }
+
+    .jcs-body { padding: 4px 20px 22px; }
+    .jcs-body form { margin: 0; }
+    .jcs-body .join-class-form { margin: 0; padding: 0; background: none; }
+
+    /* !important: the note carries an inline colour, weight and size in the markup */
+    .jcs-body .dm-note {
+        margin: 0 0 16px;
+        padding: 12px 14px;
+        border: 1px solid rgba(246, 135, 122, 0.35);
+        border-radius: 14px;
+        background: rgba(246, 135, 122, 0.1);
+        color: #e2e8f0 !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 1.5;
+    }
+    .jcs-body .dm-note strong { color: #f6877a; font-weight: 800; }
+
+    .jcs-body select {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 52px;
+        margin: 0;
+        padding: 0 16px;
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        background-color: #161b22;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 16px; /* 16px stops iOS zooming the page when the picker opens */
+        color-scheme: dark;
+    }
+    .jcs-body select:focus { border-color: #4fd1c5; outline: none; box-shadow: none; }
+
+    .jcs-body .join-class-btn,
+    .jcs-btn {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 52px;
+        margin: 12px 0 0;
+        padding: 0 16px;
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        background: none;
+        color: #e2e8f0;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 800;
+        text-align: center;
+        cursor: pointer;
+    }
+    .jcs-body .join-class-btn,
+    .jcs-btn--go { border-color: transparent; background: #4fd1c5; color: #0d1117; }
+    .jcs-body .join-class-btn:active,
+    .jcs-btn--go:active { background: #38b2a6; transform: none; }
+    .jcs-btn:disabled { opacity: 0.6; }
+
+    .jcs-confirm { display: none; }
+    .jcs-panel.is-confirming .jcs-confirm { display: block; }
+    .jcs-panel.is-confirming .join-class-form { display: none !important; }
+    .jcs-ask { margin: 0 0 4px; color: #cfd3d8; font-size: 16px; line-height: 1.55; }
+    .jcs-ask strong { color: #ffffff; font-weight: 800; }
+    .jcs-actions { display: flex; flex-direction: column; }
+    .jcs-actions .jcs-btn:first-child { margin-top: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jcs, .jcs-panel { animation: none !important; transition: none !important; }
+}
