@@ -1,0 +1,570 @@
+/* assets/js/teacher/teacher_desktop_menu.js
+   Behaviour for the teacher desktop sidebar: collapse to a rail (remembered),
+   rail tooltips, account menu, quick search (Ctrl/Cmd + K), go-to shortcuts
+   (G then a letter), a shortcuts sheet (?), and the page title in the header.
+
+   Same behaviour as the learner side (assets/js/learner/desktop_menu.js).
+   It never re-implements navigation. Quick search and the shortcuts click the
+   real sidebar links, so every existing onclick, loader and setTeacherActive()
+   path still runs. It does not touch dashboard.js. */
+(function () {
+  'use strict';
+
+  // Set to false to switch off the single-key shortcuts (G then a letter, and ?).
+  // Ctrl/Cmd + K and Ctrl/Cmd + B always stay on.
+  var SHORTCUTS_ENABLED = true;
+
+  var root = document.documentElement;
+  var sidebar = document.getElementById('dmSidebar');
+  if (!sidebar) return;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var toggleBtn = $('dmToggle'), searchBtn = $('dmSearchBtn'), acc = $('dmAccount');
+  var pop = $('dmAccountMenu'), tip = $('dmTip'), pal = $('dmPalette');
+  var input = $('dmPaletteInput'), list = $('dmPaletteList'), empty = $('dmPaletteEmpty');
+
+  var desktop = window.matchMedia('(min-width: 769px)');
+  // Teacher pages can show a class list, the page and an info rail side by side,
+  // so the sidebar starts as a rail on anything narrower than a wide laptop.
+  var narrow = window.matchMedia('(max-width: 1439px)');
+  var KEY = 'iskoolTeacherMenuCollapsed';
+  var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
+  var IS_MAC = /Mac|iPhone|iPad/i.test(platform);
+  var MOD = IS_MAC ? '\u2318' : 'Ctrl';
+
+  function onChange(mq, fn) { if (mq.addEventListener) mq.addEventListener('change', fn); else mq.addListener(fn); }
+  function call(name) { if (typeof window[name] === 'function') window[name](); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function inField(t) {
+    return !!(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="textbox"]'));
+  }
+
+  /* ── Navigation table ──────────────────────────────────────────────────
+     [data-page, icon key, go-to letter, extra search words, label]. data-page is the
+     attribute setTeacherActive() already keys on, so no ids were added to the links.
+     Same order as the sidebar, so the palette and the shortcuts sheet read the same way. */
+  var NAV = [
+    ['teacher_manual',        'home',      'h', 'dashboard overview start',                       'Home'],
+    ['teacher_quizzes',       'quiz',      'q', 'quizzes tests exams questions',                  'Quizzes'],
+    ['teacher_assignments',   'assign',    'a', 'homework tasks submissions marking',             'Assignments'],
+    ['teacher_resources',     'folder',    'r', 'files notes upload materials documents',         'Resources'],
+    ['teacher_syllabus',      'book',      's', 'curriculum topics outline sbo',                  'Syllabus'],
+    ['teacher_grades',        'chart',     'g', 'marks results gradebook reports scores',         'Grades'],
+    ['teacher_evaluations',   'star',      'e', 'feedback review rating',                         'Evaluations'],
+    ['teacher_analytics',     'pie',       'y', 'statistics performance insights charts trends',  'Analytics'],
+    ['teacher_announcements', 'megaphone', 'n', 'news notices updates post',                      'Announcements'],
+    ['teacher_calendar',      'calendar',  'c', 'schedule events reminders dates',                'Calendar'],
+    ['teacher_settings',      'sliders',   '',  'account notifications photo preferences',        'Settings']
+  ];
+  function navEl(page) {
+    var n = sidebar.querySelector('.sidebar-links a[data-page="' + page + '"]');
+    return n && getComputedStyle(n).display !== 'none' ? n : null;
+  }
+  function goTo(page) { var n = navEl(page); if (n) n.click(); }
+
+  /* ── Collapse / expand ─────────────────────────────────────────────── */
+  function storedPref() {
+    try { var v = localStorage.getItem(KEY); return v === null ? null : v === '1'; } catch (e) { return null; }
+  }
+  function isCollapsed() { return root.classList.contains('dm-collapsed'); }
+  function setCollapsed(collapsed, persist) {
+    root.classList.toggle('dm-collapsed', collapsed);
+    if (persist) { try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch (e) {} }
+    var label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+    toggleBtn.setAttribute('aria-label', label);
+    toggleBtn.setAttribute('data-tip', label);
+    hideTip();
+    if (pop.classList.contains('is-open')) closePop(false);
+  }
+  toggleBtn.addEventListener('click', function () { setCollapsed(!isCollapsed(), true); });
+  toggleBtn.setAttribute('data-tip-always', '');
+  toggleBtn.setAttribute('data-tip-kbd', MOD + ' B');
+  setCollapsed(isCollapsed(), false);
+
+  // With no saved choice, follow the window: rail on narrower screens.
+  onChange(narrow, function (e) { if (storedPref() === null && desktop.matches) setCollapsed(e.matches, false); });
+
+  // Switch transitions on only after first paint, so a saved rail never animates on load.
+  requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('dm-ready'); }); });
+
+  /* ── Structure: navigation landmark (group headings live in the CSS) ── */
+  var links = sidebar.querySelector('.sidebar-links');
+  if (links) {
+    links.setAttribute('role', 'navigation');
+    links.setAttribute('aria-label', 'Main');
+  }
+
+  /* ── Current page: aria-current, and the page title in the header ─────
+     setTeacherActive() (dashboard.js) toggles .active on the links. Watching that class
+     is the one hook needed: it keeps aria-current right and names the page in the header
+     without dashboard.js or any page script knowing this file exists. */
+  var titleEl = $('dmPageTitle');
+  var TITLES = {};
+  NAV.forEach(function (n) { TITLES[n[0]] = n[4]; });
+  function syncCurrent() {
+    var current = null;
+    sidebar.querySelectorAll('.dm-item').forEach(function (n) {
+      if (n.classList.contains('active')) { n.setAttribute('aria-current', 'page'); current = n; }
+      else n.removeAttribute('aria-current');
+    });
+    // No active link (a page opened some other way): leave the last title in place.
+    if (titleEl && current) {
+      var page = current.getAttribute('data-page');
+      var lab = current.querySelector('.dm-label');
+      titleEl.textContent = TITLES[page] || (lab ? lab.textContent.trim() : '');
+    }
+  }
+  if (links && window.MutationObserver) {
+    new MutationObserver(syncCurrent).observe(links, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
+  syncCurrent();
+
+  /* ── Keyboard: arrows move through the menu in the order you see it ── */
+  function menuOrder() {
+    var items = Array.prototype.slice.call(sidebar.querySelectorAll('.sidebar-links .dm-item'))
+      .filter(function (n) { return n.offsetParent !== null; })
+      .map(function (n, i) { return { n: n, i: i, o: parseInt(getComputedStyle(n).order, 10) || 0 }; })
+      .sort(function (x, y) { return x.o - y.o || x.i - y.i; })
+      .map(function (x) { return x.n; });
+    return [searchBtn].concat(items);
+  }
+  sidebar.addEventListener('keydown', function (e) {
+    if (!desktop.matches) return;
+    var k = e.key;
+    if (k !== 'ArrowDown' && k !== 'ArrowUp' && k !== 'Home' && k !== 'End') return;
+    var cur = e.target.closest && e.target.closest('.dm-item, .dm-search');
+    if (!cur) return;
+    var order = menuOrder(), i = order.indexOf(cur);
+    if (i < 0) return;
+    var next = k === 'Home' ? 0 : k === 'End' ? order.length - 1 : Math.max(0, Math.min(order.length - 1, i + (k === 'ArrowDown' ? 1 : -1)));
+    e.preventDefault();
+    order[next].focus();
+  });
+
+  /* ── Tooltips ──────────────────────────────────────────────────────── */
+  NAV.forEach(function (n) {
+    var item = navEl(n[0]);
+    if (!item) return;
+    item.setAttribute('data-tip', n[4]);
+    if (n[2]) item.setAttribute('data-tip-kbd', 'G ' + n[2].toUpperCase());
+  });
+  var nameEl = sidebar.querySelector('.teacher-name');
+  acc.setAttribute('data-tip', nameEl ? nameEl.textContent.trim() : 'Account');
+  searchBtn.setAttribute('data-tip', 'Search');
+  searchBtn.setAttribute('data-tip-kbd', MOD + ' K');
+  $('dmSearchKbd').textContent = IS_MAC ? '\u2318K' : 'Ctrl K';
+
+  // First tooltip waits a beat; moving to a neighbour swaps it instantly.
+  var tipTimer = 0, tipFor = null, tipLastHide = 0;
+  function placeTip(target) {
+    var k = target.getAttribute('data-tip-kbd');
+    $('dmTipText').textContent = target.getAttribute('data-tip');
+    $('dmTipKbd').textContent = k || '';
+    $('dmTipKbd').style.display = k ? '' : 'none';
+    var r = target.getBoundingClientRect();
+    tip.style.left = Math.round(r.right + 10) + 'px';
+    tip.style.top = Math.round(r.top + r.height / 2) + 'px';
+    tip.classList.add('is-on');
+  }
+  function showTip(target, instant) {
+    if (!target.getAttribute('data-tip') || !desktop.matches) return;
+    if (!isCollapsed() && !target.hasAttribute('data-tip-always')) return;
+    if (tipFor === target && (tip.classList.contains('is-on') || tipTimer)) return;
+    clearTimeout(tipTimer); tipTimer = 0; tipFor = target;
+    if (instant || tip.classList.contains('is-on') || Date.now() - tipLastHide < 300) placeTip(target);
+    else tipTimer = setTimeout(function () { tipTimer = 0; placeTip(target); }, 350);
+  }
+  function hideTip() {
+    clearTimeout(tipTimer); tipTimer = 0; tipFor = null;
+    if (tip.classList.contains('is-on')) { tip.classList.remove('is-on'); tipLastHide = Date.now(); }
+  }
+  sidebar.addEventListener('mouseover', function (e) {
+    var t = e.target.closest('[data-tip]');
+    if (t) showTip(t, false); else hideTip();
+  });
+  sidebar.addEventListener('mouseleave', hideTip);
+  sidebar.addEventListener('focusin', function (e) { var t = e.target.closest('[data-tip]'); if (t) showTip(t, true); });
+  sidebar.addEventListener('focusout', hideTip);
+  sidebar.addEventListener('click', hideTip);
+
+  /* ── Actions shared by the account menu and quick search ───────────── */
+  function signOut() { window.location.href = 'logout.php'; }
+  var ACTIONS = {
+    // Settings goes through the real sidebar link, so the page title and the active state follow.
+    settings: function () { goTo('teacher_settings'); },
+    // Same uploader the old avatar dropdown used (it updates both avatars and reloads Settings).
+    photo:    function () { call('triggerTopNavUpload'); },
+    keys:     function () { openKeys(); },
+    signout:  signOut
+  };
+
+  /* ── Account menu ──────────────────────────────────────────────────── */
+  // "Keyboard shortcuts" is added here so the PHP markup stays as it was.
+  (function () {
+    var sep = pop.querySelector('.dm-pop-sep');
+    if (!sep || pop.querySelector('[data-act="keys"]')) return;
+    var b = el('button', 'dm-pop-item');
+    b.type = 'button';
+    b.setAttribute('role', 'menuitem');
+    b.setAttribute('data-act', 'keys');
+    b.style.setProperty('--dm-ico', 'var(--dm-i-keyboard)');
+    b.appendChild(document.createTextNode('Keyboard shortcuts'));
+    b.appendChild(el('span', 'dm-pop-kbd', '?'));
+    pop.insertBefore(b, sep);
+  })();
+
+  function popOpen() { return pop.classList.contains('is-open'); }
+  function placePop() {
+    var r = acc.getBoundingClientRect();
+    if (isCollapsed()) {
+      pop.style.width = '248px';
+      pop.style.left = Math.round(r.right + 8) + 'px';
+      pop.style.bottom = Math.round(window.innerHeight - r.bottom) + 'px';
+    } else {
+      pop.style.width = Math.round(Math.max(r.width, 240)) + 'px';
+      pop.style.left = Math.round(r.left) + 'px';
+      pop.style.bottom = Math.round(window.innerHeight - r.top + 6) + 'px';
+    }
+  }
+  function openPop(focusFirst) {
+    hideTip();
+    placePop();
+    pop.classList.add('is-open');
+    acc.setAttribute('aria-expanded', 'true');
+    if (focusFirst) { var f = pop.querySelector('.dm-pop-item'); if (f) f.focus(); }
+  }
+  function closePop(returnFocus) {
+    if (!popOpen()) return;
+    pop.classList.remove('is-open');
+    acc.setAttribute('aria-expanded', 'false');
+    if (returnFocus) acc.focus();
+  }
+  // Capture phase, on purpose. dashboard.js makes a click on the sidebar avatar open the
+  // file picker straight away; here the whole account block opens the menu instead
+  // ("Upload photo" is in it), so this handler runs first and stops the click from
+  // reaching the avatar. The hidden file input is left alone so "Upload photo" still works.
+  acc.addEventListener('click', function (e) {
+    if (!desktop.matches) return;
+    if (e.target.closest && e.target.closest('input')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (popOpen()) closePop(false); else openPop(false);
+  }, true);
+  acc.addEventListener('keydown', function (e) {
+    if (!desktop.matches || e.target !== acc) return;
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); openPop(true); }
+  });
+  pop.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    closePop(false);
+    var run = ACTIONS[btn.getAttribute('data-act')];
+    if (run) setTimeout(run, 0);
+  });
+  pop.addEventListener('keydown', function (e) {
+    var items = Array.prototype.slice.call(pop.querySelectorAll('.dm-pop-item'));
+    var i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (e.key === 'Tab') { closePop(false); }
+  });
+  document.addEventListener('mousedown', function (e) {
+    if (popOpen() && !pop.contains(e.target) && !acc.contains(e.target)) closePop(false);
+  });
+  window.addEventListener('resize', function () { if (popOpen()) placePop(); });
+
+  /* ── Quick search ──────────────────────────────────────────────────── */
+  var EXTRA = [
+    { group: 'Actions', label: 'Toggle sidebar',       ico: 'panel',    kw: 'collapse expand rail hide show menu', keys: [MOD, 'B'], run: function () { setCollapsed(!isCollapsed(), true); } },
+    { group: 'Actions', label: 'Keyboard shortcuts',   ico: 'keyboard', kw: 'keys hotkeys help commands',          keys: ['?'],      run: ACTIONS.keys },
+    { group: 'Actions', label: 'Upload profile photo', ico: 'upload',   kw: 'avatar picture image',                                     run: ACTIONS.photo },
+    { group: 'Account', label: 'Sign out',             ico: 'logout',   kw: 'log out logout',                                           run: ACTIONS.signout }
+  ];
+  var all = [], shown = [], opts = [], sel = 0, before = null;
+
+  function collect() {
+    var out = [];
+    NAV.forEach(function (n) {
+      var item = navEl(n[0]);
+      if (!item) return;
+      out.push({
+        group: 'Pages', label: n[4], ico: n[1], kw: n[3],
+        tag: item.classList.contains('active') ? 'Current' : '',
+        keys: n[2] ? ['G', n[2].toUpperCase()] : null,
+        run: function () { item.click(); }
+      });
+    });
+    return out.concat(EXTRA);
+  }
+
+  // One search word against one piece of text. Whole-string hits beat word-start
+  // hits beat mid-word hits; three or more letters may also match in order
+  // ("asg" finds Assignments). Returns { s: score, hits: [indexes] } or null.
+  function matchToken(text, tok) {
+    var i = text.indexOf(tok), h = [], c;
+    if (i > -1) {
+      for (c = 0; c < tok.length; c++) h.push(i + c);
+      return { s: i === 0 ? 100 : text.charAt(i - 1) === ' ' ? 80 : 60, hits: h };
+    }
+    if (tok.length < 3) return null;
+    var from = 0;
+    for (c = 0; c < tok.length; c++) {
+      var f = text.indexOf(tok.charAt(c), from);
+      if (f < 0) return null;
+      h.push(f); from = f + 1;
+    }
+    return { s: 30 - Math.min(20, h[h.length - 1] - h[0] - tok.length + 1), hits: h };
+  }
+  function rank(it, toks) {
+    var label = it.label.toLowerCase(), kw = it.kw.toLowerCase(), total = 0, hits = [];
+    for (var t = 0; t < toks.length; t++) {
+      var m = matchToken(label, toks[t]);
+      if (!m) {
+        if (kw.indexOf(toks[t]) === -1) return null;
+        m = { s: 40, hits: [] };
+      }
+      total += m.s; hits = hits.concat(m.hits);
+    }
+    return { s: total, hits: hits };
+  }
+
+  function fillLabel(node, text, hits) {
+    if (!hits.length) { node.textContent = text; return; }
+    var mark = {}, buf = '', on = false, i;
+    hits.forEach(function (h) { mark[h] = true; });
+    function flush() {
+      if (!buf) return;
+      if (on) node.appendChild(el('span', 'dm-hit', buf)); else node.appendChild(document.createTextNode(buf));
+      buf = '';
+    }
+    for (i = 0; i < text.length; i++) {
+      var m = !!mark[i];
+      if (m !== on) { flush(); on = m; }
+      buf += text.charAt(i);
+    }
+    flush();
+  }
+
+  function palOpen() { return pal.classList.contains('is-open'); }
+  function render(q) {
+    q = q.trim().toLowerCase();
+    var toks = q ? q.split(/\s+/) : [], rows = [];
+    if (!toks.length) {
+      rows = all.map(function (it) { return { it: it, hits: [] }; });
+    } else {
+      all.forEach(function (it, n) {
+        var r = rank(it, toks);
+        if (r) rows.push({ it: it, hits: r.hits, s: r.s - n * 0.001 });
+      });
+      rows.sort(function (x, y) { return y.s - x.s; });
+    }
+    shown = rows.map(function (r) { return r.it; });
+    opts = [];
+    sel = 0;
+    list.textContent = '';
+    var lastGroup = null;
+    rows.forEach(function (r, i) {
+      var it = r.it;
+      if (!toks.length && it.group !== lastGroup) {
+        var h = el('li', 'dm-phead', it.group);
+        h.setAttribute('role', 'presentation');
+        list.appendChild(h);
+        lastGroup = it.group;
+      }
+      var li = el('li');
+      li.id = 'dmOpt' + i;
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      var ico = el('span', 'dm-pico'); ico.style.setProperty('--dm-ico', 'var(--dm-i-' + it.ico + ')');
+      var lab = el('span', 'dm-plabel'); fillLabel(lab, it.label, r.hits);
+      li.appendChild(ico); li.appendChild(lab);
+      if (it.tag) {
+        li.appendChild(el('span', 'dm-ptag', it.tag));
+      } else if (it.keys) {
+        var k = el('span', 'dm-pkeys');
+        it.keys.forEach(function (key) { k.appendChild(el('kbd', 'dm-pk', key)); });
+        li.appendChild(k);
+      }
+      li.addEventListener('mousemove', function () { if (sel !== i) select(i); });
+      li.addEventListener('click', function () { choose(i); });
+      list.appendChild(li);
+      opts.push(li);
+    });
+    list.scrollTop = 0;
+    empty.hidden = shown.length > 0;
+    empty.textContent = 'Nothing matches \u201C' + input.value.trim() + '\u201D. Try Quizzes, Grades or Calendar.';
+    input.setAttribute('aria-activedescendant', shown.length ? 'dmOpt0' : '');
+  }
+  function select(i) {
+    if (!opts.length) return;
+    sel = (i + opts.length) % opts.length;
+    opts.forEach(function (li, n) { li.setAttribute('aria-selected', n === sel ? 'true' : 'false'); });
+    var cur = opts[sel];
+    input.setAttribute('aria-activedescendant', cur.id);
+    if (sel === 0) list.scrollTop = 0;
+    else if (cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+  }
+  function openPalette() {
+    if (!desktop.matches) return;
+    closePop(false); closeKeys(false); hideTip();
+    before = document.activeElement;
+    all = collect();
+    input.value = '';
+    render('');
+    pal.classList.add('is-open');
+    pal.setAttribute('aria-hidden', 'false');
+    input.focus();
+  }
+  function closePalette() {
+    if (!palOpen()) return;
+    pal.classList.remove('is-open');
+    pal.setAttribute('aria-hidden', 'true');
+    if (document.activeElement === input) input.blur(); // don't wait for the browser to notice it is hidden
+    if (before && before.focus && document.contains(before)) before.focus();
+    before = null;
+  }
+  function choose(i) {
+    var it = shown[i];
+    if (!it) return;
+    closePalette();
+    setTimeout(it.run, 0);
+  }
+  searchBtn.addEventListener('click', openPalette);
+  input.addEventListener('input', function () { render(input.value); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); select(sel + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); select(sel - 1); }
+    else if (e.key === 'Enter') { e.preventDefault(); choose(sel); }
+    else if (e.key === 'Tab') { e.preventDefault(); }
+  });
+  pal.addEventListener('mousedown', function (e) { if (e.target === pal) closePalette(); });
+
+  /* ── Keyboard shortcuts sheet ──────────────────────────────────────── */
+  var keysEl = null, keysPanel = null, keysBody = null, keysClose = null, keysBefore = null;
+  function keysOpen() { return !!keysEl && keysEl.classList.contains('is-open'); }
+  function buildKeys() {
+    if (keysEl) return;
+    keysEl = el('div', 'dm-keys'); keysEl.id = 'dmKeys'; keysEl.setAttribute('aria-hidden', 'true');
+    keysPanel = el('div', 'dm-keys-panel');
+    keysPanel.setAttribute('role', 'dialog'); keysPanel.setAttribute('aria-modal', 'true');
+    keysPanel.setAttribute('aria-labelledby', 'dmKeysTitle'); keysPanel.tabIndex = -1;
+    var head = el('div', 'dm-keys-head');
+    var h = el('h2', '', 'Keyboard shortcuts'); h.id = 'dmKeysTitle';
+    keysClose = el('button', 'dm-keys-x'); keysClose.type = 'button'; keysClose.setAttribute('aria-label', 'Close');
+    head.appendChild(h); head.appendChild(keysClose);
+    keysBody = el('div', 'dm-keys-body');
+    keysPanel.appendChild(head); keysPanel.appendChild(keysBody);
+    keysEl.appendChild(keysPanel);
+    document.body.appendChild(keysEl);
+
+    keysClose.addEventListener('click', function () { closeKeys(true); });
+    keysEl.addEventListener('mousedown', function (e) { if (e.target === keysEl) closeKeys(true); });
+    keysEl.addEventListener('keydown', function (e) { if (e.key === 'Tab') { e.preventDefault(); keysClose.focus(); } });
+  }
+  function keyRow(label, keys) {
+    var row = el('div', 'dm-krow');
+    row.appendChild(el('span', '', label));
+    var k = el('i');
+    keys.forEach(function (key) { k.appendChild(el('kbd', '', key)); });
+    row.appendChild(k);
+    return row;
+  }
+  function fillKeys() {
+    keysBody.textContent = '';
+    var gen = el('section', 'dm-keys-sec'); gen.appendChild(el('h3', '', 'General'));
+    [['Search pages and actions', [MOD, 'K']], ['Collapse or expand the sidebar', [MOD, 'B']],
+     ['Show this list', ['?']], ['Close a menu or dialog', ['Esc']]].forEach(function (r) { gen.appendChild(keyRow(r[0], r[1])); });
+    var go = el('section', 'dm-keys-sec'); go.appendChild(el('h3', '', 'Go to'));
+    NAV.forEach(function (n) {
+      if (!navEl(n[0]) || !n[2]) return;
+      go.appendChild(keyRow(n[4], ['G', n[2].toUpperCase()]));
+    });
+    keysBody.appendChild(gen); keysBody.appendChild(go);
+    if (SHORTCUTS_ENABLED) keysBody.appendChild(el('p', 'dm-keys-note', 'For the Go to shortcuts, press G, then the letter. They pause while you are typing in a field.'));
+  }
+  function openKeys() {
+    if (!desktop.matches) return;
+    buildKeys();
+    var from = document.activeElement;
+    keysBefore = pop.contains(from) ? acc : from;
+    closePop(false); closePalette(); hideTip();
+    fillKeys();
+    keysEl.classList.add('is-open');
+    keysEl.setAttribute('aria-hidden', 'false');
+    keysPanel.focus();
+  }
+  function closeKeys(restore) {
+    if (!keysOpen()) return;
+    keysEl.classList.remove('is-open');
+    keysEl.setAttribute('aria-hidden', 'true');
+    if (restore !== false && keysBefore && keysBefore.focus && document.contains(keysBefore)) keysBefore.focus();
+    keysBefore = null;
+  }
+
+  /* ── Global shortcuts ──────────────────────────────────────────────── */
+  var GO = {}, gArmed = false, gTimer = 0;
+  NAV.forEach(function (n) { if (n[2]) GO[n[2]] = n[0]; });
+
+  document.addEventListener('keydown', function (e) {
+    if (!desktop.matches) return;
+    if (e.key === 'Escape') {
+      if (keysOpen()) { e.preventDefault(); closeKeys(true); }
+      else if (palOpen()) { e.preventDefault(); closePalette(); }
+      else if (popOpen()) { e.preventDefault(); closePop(true); }
+      return;
+    }
+
+    if (e.metaKey || e.ctrlKey) {
+      if (e.altKey || e.shiftKey) return;
+      // Never hijack Ctrl+B / Ctrl+K while someone is typing (the search box is the exception).
+      if (inField(e.target) && !pal.contains(e.target)) return;
+      var k = String(e.key).toLowerCase();
+      if (k === 'k') { e.preventDefault(); closeKeys(false); if (palOpen()) closePalette(); else openPalette(); }
+      else if (k === 'b') { e.preventDefault(); setCollapsed(!isCollapsed(), true); }
+      return;
+    }
+
+    // Single-key shortcuts: only when nothing is being typed and nothing is open.
+    if (!SHORTCUTS_ENABLED || e.altKey || e.repeat || inField(e.target)) return;
+    if (keysOpen() || palOpen() || popOpen()) return;
+
+    if (gArmed) {
+      gArmed = false; clearTimeout(gTimer);
+      var page = GO[String(e.key).toLowerCase()];
+      if (page) { e.preventDefault(); goTo(page); }
+      return;
+    }
+    if (e.key === 'g') {
+      gArmed = true;
+      clearTimeout(gTimer);
+      gTimer = setTimeout(function () { gArmed = false; }, 1200);
+    } else if (e.key === '?') {
+      e.preventDefault();
+      openKeys();
+    }
+  });
+
+  /* ── Desktop / mobile switch ───────────────────────────────────────── */
+  function syncMode() {
+    if (desktop.matches) {
+      acc.setAttribute('role', 'button');
+      acc.setAttribute('tabindex', '0');
+      acc.setAttribute('aria-haspopup', 'menu');
+      acc.setAttribute('aria-label', 'Account menu');
+      acc.setAttribute('aria-expanded', popOpen() ? 'true' : 'false');
+    } else {
+      ['role', 'tabindex', 'aria-haspopup', 'aria-label', 'aria-expanded'].forEach(function (x) { acc.removeAttribute(x); });
+      closePop(false); closePalette(); closeKeys(false); hideTip();
+    }
+  }
+  onChange(desktop, syncMode);
+  syncMode();
+})();
