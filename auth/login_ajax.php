@@ -25,12 +25,22 @@ verify_csrf_token();
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/remember_me_functions.php';
+require_once __DIR__ . '/rate_limit_functions.php';
 
 $email    = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
 if (empty($email) || empty($password)) {
     echo json_encode(['success' => false, 'message' => 'Please enter your email and password.']);
+    exit();
+}
+
+$client_ip = auth_rate_limit_client_ip();
+$login_window_seconds = 15 * 60;
+
+if (auth_rate_limit_is_blocked($conn, 'login_failed', 'account', $email, 5, $login_window_seconds) ||
+    auth_rate_limit_is_blocked($conn, 'login_failed', 'ip', $client_ip, 20, $login_window_seconds)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
     exit();
 }
 
@@ -44,11 +54,14 @@ if ($stmt->num_rows === 1) {
     $stmt->fetch();
 
     if ($is_deleted == 1) {
-        echo json_encode(['success' => false, 'message' => 'Your account has been deleted.']);
+        auth_rate_limit_record_attempt($conn, 'login_failed', 'account', $email, $login_window_seconds);
+        auth_rate_limit_record_attempt($conn, 'login_failed', 'ip', $client_ip, $login_window_seconds);
+        echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
         exit();
     }
 
     if (password_verify($password, $hashed_password)) {
+        auth_rate_limit_clear($conn, 'login_failed', 'account', $email);
         // Regenerate session ID to prevent session fixation attacks
         session_regenerate_id(true);
 
@@ -81,11 +94,15 @@ if ($stmt->num_rows === 1) {
         exit();
 
     } else {
+        auth_rate_limit_record_attempt($conn, 'login_failed', 'account', $email, $login_window_seconds);
+        auth_rate_limit_record_attempt($conn, 'login_failed', 'ip', $client_ip, $login_window_seconds);
         // Generic — do not reveal whether email or password was the issue
         echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
         exit();
     }
 } else {
+    auth_rate_limit_record_attempt($conn, 'login_failed', 'account', $email, $login_window_seconds);
+    auth_rate_limit_record_attempt($conn, 'login_failed', 'ip', $client_ip, $login_window_seconds);
     // Generic — do not confirm account existence
     echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
     exit();

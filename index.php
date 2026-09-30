@@ -904,7 +904,7 @@ function getCsrfToken() {
             <i class="fas fa-paper-plane" style="font-size:3.2rem;color:#00ff99;margin-bottom:22px;filter:drop-shadow(0 0 10px rgba(0,255,153,0.35));"></i>
             <h2 style="margin-bottom:10px;">Check your inbox</h2>
             <p style="color:#888;font-size:15px;line-height:1.6;max-width:300px;margin:0 auto 32px;">
-                A reset link has been sent to your email. It expires in 1 hour.
+                If an account matches that address, a reset link will arrive shortly. It expires in 1 hour.
             </p>
             <a href="#" onclick="backToLoginFromReset(); return false;"
                style="display:inline-block;background:#ffffff;color:#131314;font-weight:700;font-size:15px;padding:14px 32px;border-radius:24px;text-decoration:none;">

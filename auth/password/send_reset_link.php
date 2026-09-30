@@ -22,38 +22,61 @@ require_once __DIR__ . '/../session_guard.php';
 require_once __DIR__ . '/../csrf_helper.php';
 require __DIR__ . '/../../config.php';
 require __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../rate_limit_functions.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 
 verify_csrf_token();
 
-$email = trim($_POST['email'] ?? '');
+$email = strtolower(trim($_POST['email'] ?? ''));
 
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['success' => false, 'message' => 'Please enter a valid email address.']);
     exit();
 }
 
-// 1. Check if user exists
-$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$generic_response = ['success' => true];
+$client_ip = auth_rate_limit_client_ip();
+$reset_window_seconds = 60 * 60;
+
+if (auth_rate_limit_is_blocked($conn, 'password_reset_request', 'account', $email, 3, $reset_window_seconds) ||
+    auth_rate_limit_is_blocked($conn, 'password_reset_request', 'ip', $client_ip, 10, $reset_window_seconds)) {
+    echo json_encode($generic_response);
+    exit();
+}
+
+auth_rate_limit_record_attempt($conn, 'password_reset_request', 'account', $email, $reset_window_seconds);
+auth_rate_limit_record_attempt($conn, 'password_reset_request', 'ip', $client_ip, $reset_window_seconds);
+
+// Always return the same response, regardless of whether the address belongs to an account.
+$stmt = $conn->prepare("SELECT email FROM users WHERE email = ? AND is_deleted = 0 LIMIT 1");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $stmt->store_result();
 
 if ($stmt->num_rows === 0) {
     // Generic message — don't reveal whether the email exists
-    echo json_encode(['success' => false, 'message' => 'No account found with that email.']);
+    echo json_encode($generic_response);
     exit();
 }
+$stmt->bind_result($account_email);
+$stmt->fetch();
 $stmt->close();
 
 // 2. Create token & expiry
 $token      = bin2hex(random_bytes(32));
+$token_hash = hash('sha256', $token);
 $expires_at = date("Y-m-d H:i:s", time() + 3600);
 
-// 3. Store token
+// A new request invalidates prior reset links for this account.
+$delete = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
+$delete->bind_param("s", $account_email);
+$delete->execute();
+$delete->close();
+
+// Store only a SHA-256 hash. The raw token exists only in the request and email.
 $stmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
-$stmt->bind_param("sss", $email, $token, $expires_at);
+$stmt->bind_param("sss", $account_email, $token_hash, $expires_at);
 $stmt->execute();
 $stmt->close();
 
@@ -74,7 +97,7 @@ try {
 
     $from_email = getenv('SMTP_FROM');
     $mail->setFrom($from_email, 'iSkool Support');
-    $mail->addAddress($email);
+    $mail->addAddress($account_email);
     $mail->isHTML(true);
     $mail->Subject = 'Reset Your iSkool Password';
 
@@ -145,7 +168,7 @@ try {
                 <a href="https://iskool.xyz" style="color:#9a9a9a;text-decoration:none;">iskool.xyz</a> &nbsp;&middot;&nbsp;
                 <a href="mailto:support@iskool.xyz" style="color:#9a9a9a;text-decoration:none;">support@iskool.xyz</a>
               </p>
-              <p style="margin:0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($email) . '. Please do not forward this email.</p>
+              <p style="margin:0;font-size:12px;color:#9a9a9a;">This email was sent to ' . htmlspecialchars($account_email) . '. Please do not forward this email.</p>
             </td>
           </tr>
         </table>
@@ -158,9 +181,10 @@ try {
 </html>';
 
     $mail->send();
-    echo json_encode(['success' => true]);
+    echo json_encode($generic_response);
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Email could not be sent. Please try again later.']);
+    error_log('[password_reset] Reset email could not be sent: ' . $e->getMessage());
+    echo json_encode($generic_response);
 }
 exit();
