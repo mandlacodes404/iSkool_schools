@@ -118,7 +118,9 @@ window.fetchQuizzes = async function() {
 
     // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663' });
+        // Desktop matches the mockup (white title); mobile keeps the yellow header.
+        const lqzIsDesktop = window.innerWidth >= 900;
+        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: lqzIsDesktop ? '#e6edf3' : '#fdd663' });
     }
 
     // 2. Sidebar & UI Management
@@ -449,7 +451,18 @@ function renderQuizCards(groupedData) {
                 display: flex;
                 gap: 0;
                 min-height: 500px;
+                font-family: 'Nunito', system-ui, sans-serif;
+                font-size: 14px;
+                line-height: normal;
+                color: #e6edf3;
             }
+            /* The mockup sizes everything border-box; without this the header is
+               65px instead of 64px and the rail is 321px instead of 280px. */
+            .lqz-desktop-layout,
+            .lqz-desktop-layout *,
+            .lqz-desktop-layout *::before,
+            .lqz-desktop-layout *::after { box-sizing: border-box; }
+            .lqz-desktop-layout :focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
 
             /* ── List pane ── */
             .lqz-sidebar {
@@ -462,7 +475,6 @@ function renderQuizCards(groupedData) {
                 flex-direction: column;
                 overflow: hidden;
                 background: #12161c;
-                border-right: 1px solid rgba(255,255,255,0.07);
             }
             .lqz-lh {
                 padding: 12px 12px 10px;
@@ -493,7 +505,7 @@ function renderQuizCards(groupedData) {
             }
             .lqz-desktop-search:focus { outline: none; border-color: #4fd1c5; }
             .lqz-desktop-search::placeholder { color: #7d8794; }
-            .lqz-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
+            .lqz-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
             .lqz-chip {
                 height: 26px;
                 padding: 0 10px;
@@ -602,7 +614,7 @@ function renderQuizCards(groupedData) {
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                color: #555e6a;
+                color: #7d8794;
                 gap: 12px;
                 padding: 40px;
             }
@@ -618,36 +630,68 @@ function renderQuizCards(groupedData) {
                 border-bottom: 1px solid rgba(255,255,255,0.07);
                 flex-shrink: 0;
             }
-            .lqz-dh-title {
+            /* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+            #lqz-main-panel .lqz-dh-title {
                 margin: 0;
                 min-width: 0;
+                font-family: inherit;
                 font-size: 18px;
                 font-weight: 800;
+                line-height: 1.25;
                 color: #e6edf3;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            /* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+               line-height the host page sets, and sits centred on the title. */
             .lqz-panel-status {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 flex-shrink: 0;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-                padding: 3px 8px;
+                height: 23px;
+                padding: 0 8px;
                 border-radius: 6px;
                 border: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: 800;
+                line-height: 1;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
                 color: #9aa4b2;
             }
-            .lqz-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+            .lqz-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+            .lqz-panel-status--sum {
+                background: rgba(79,209,197,0.1);
+                border-color: rgba(79,209,197,0.3);
+                color: #4fd1c5;
+            }
             .lqz-dsp { flex: 1; }
-            .lqz-act-text { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+            /* Non-clickable states (Completed / Pending / Closed / countdown) share the
+               primary button's 34px height so the right edge of the header lines up. */
+            .lqz-act-text {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                flex-shrink: 0;
+                height: 34px;
+                padding: 0 14px;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.07);
+                font-size: 13px;
+                font-weight: 700;
+                line-height: 1;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+            .lqz-act-text svg { flex-shrink: 0; }
             .lqz-pri {
                 display: inline-flex;
                 align-items: center;
+                justify-content: center;
+                line-height: 1;
                 height: 34px;
                 padding: 0 18px;
                 border-radius: 8px;
@@ -1148,27 +1192,30 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     const isInProgress = quiz.attempt_status === 'in_progress';
     const canTakeQuiz = !isClosed && !isScheduled && !isCompleted && !isPendingResult;
 
-    // ── Status badge (mirrors announcements/assignments panel pattern) ──
-    let statusDotColor = '#fdd663';
-    let statusLabel = 'Upcoming';
-    if (isCompleted) { statusDotColor = '#27ae60'; statusLabel = 'Completed'; }
-    else if (isPendingResult) { statusDotColor = '#fdd663'; statusLabel = 'Pending Result'; }
-    else if (isClosed) { statusDotColor = '#6b7280'; statusLabel = 'Closed'; }
-    else if (isScheduled) { statusDotColor = '#fdd663'; statusLabel = 'Scheduled'; }
-    else if (isInProgress) { statusDotColor = '#e67e22'; statusLabel = 'In Progress'; }
-    else { statusDotColor = '#4fd1c5'; statusLabel = 'Not Started'; }
+    // ── Status badge — colour comes from lqzQuizState(), the same helper the list
+    //    dots use, so a row's dot and the panel chip can never disagree. ──
+    const state = lqzQuizState(quiz);
+    const statusDotColor = state.color;
+    let statusLabel = 'Not Started';
+    if (isCompleted) statusLabel = 'Completed';
+    else if (isPendingResult) statusLabel = 'Pending Result';
+    else if (isClosed) statusLabel = 'Closed';
+    else if (isScheduled) statusLabel = 'Scheduled';
+    else if (isInProgress) statusLabel = 'In Progress';
+
+    const checkSvg = `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
 
     // ── Primary action (header, right-aligned) ──
     let actionBtn = '';
     if (isCompleted) {
-        actionBtn = `<span class="lqz-act-text" style="color:#27ae60;">✓ Completed</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:${state.color};">${checkSvg}Completed</span>`;
     } else if (isPendingResult) {
-        actionBtn = `<span class="lqz-act-text" style="color:#fdd663;">Pending</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:${state.color};">Pending</span>`;
     } else if (isClosed) {
-        actionBtn = `<span class="lqz-act-text" style="color:#8b949e;">Closed</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:#9aa4b2;">Closed</span>`;
     } else if (isScheduled) {
         const st = new Date(startTimeStr.replace(/-/g, "/"));
-        actionBtn = `<span class="quiz-countdown lqz-act-text" data-start="${st.getTime()}" data-quiz-id="${quiz.id}" style="color:#fdd663;">Calculating...</span>`;
+        actionBtn = `<span class="quiz-countdown lqz-act-text" data-start="${st.getTime()}" data-quiz-id="${quiz.id}" style="color:${state.color};">Calculating...</span>`;
     } else if (isInProgress) {
         actionBtn = `<a class="lqz-pri lqz-pri--warn" href="take_quiz.php?quiz_id=${quiz.id}">Continue quiz</a>`;
     } else {
@@ -1176,7 +1223,7 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     }
 
     const summativeBadge = quiz.is_summative
-        ? `<span class="lqz-panel-status" style="background:rgba(79,209,197,0.1);border-color:rgba(79,209,197,0.3);color:#4fd1c5;">Summative</span>`
+        ? `<span class="lqz-panel-status lqz-panel-status--sum">Summative</span>`
         : '';
 
     const sender = quiz.teacher || 'Teacher';
@@ -1520,10 +1567,16 @@ function startQuizCountdowns() {
     if (!countdowns.length) return;
 
     countdowns.forEach(el => {
+        // Already ticking (this runs on every panel select and list render)
+        if (el.dataset.cdRunning) return;
+        el.dataset.cdRunning = '1';
+
         const startMs = parseInt(el.dataset.startMs || el.dataset.start);
         const quizId  = el.dataset.quizId;
 
         const tick = setInterval(() => {
+            // Panel was re-rendered and this element is gone — stop its timer
+            if (!el.isConnected) { clearInterval(tick); return; }
             const diff = startMs - Date.now();
 
             if (diff <= 0) {
@@ -1532,8 +1585,13 @@ function startQuizCountdowns() {
                 el.style.transition = 'opacity 0.4s';
                 el.style.opacity = '0';
                 setTimeout(() => {
-                    el.outerHTML = `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;"
-                                         onclick="loadQuizInstructions(${quizId})">Start</span>`;
+                    if (!el.isConnected) return;
+                    // Desktop panel: swap in the same primary button the panel renders
+                    // for an open quiz. Mobile rows keep the text action.
+                    el.outerHTML = el.classList.contains('lqz-act-text')
+                        ? `<a class="lqz-pri" href="take_quiz.php?quiz_id=${quizId}">Start quiz</a>`
+                        : `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;"
+                                 onclick="loadQuizInstructions(${quizId})">Start</span>`;
                 }, 400);
                 return;
             }
