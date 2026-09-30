@@ -378,6 +378,17 @@ if (!data.isContinuing) {
     }
 };
 
+// Nunito 400/600/700 for the desktop quiz page. 600 is the medium weight above, so load it
+// explicitly instead of letting the browser quietly fall back to 400 or 700.
+function lqzEnsureFont() {
+    if (document.getElementById('lqz-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lqz-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}
+
 function renderQuizCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -448,6 +459,9 @@ function renderQuizCards(groupedData) {
 
             .lqz-desktop-layout {
                 --lqz-listw: 320px;
+                /* Type weights for the whole desktop quiz page. Tune here. */
+                --lqz-w-strong: 700;  /* title, status chip, group labels, primary button */
+                --lqz-w-medium: 600;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
@@ -515,7 +529,7 @@ function renderQuizCards(groupedData) {
                 color: #9aa4b2;
                 font-family: inherit;
                 font-size: 12px;
-                font-weight: 700;
+                font-weight: var(--lqz-w-medium);
                 white-space: nowrap;
                 cursor: pointer;
             }
@@ -543,7 +557,7 @@ function renderQuizCards(groupedData) {
                 z-index: 1;
                 background: #12161c;
                 font-size: 11px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 color: #7d8794;
@@ -567,7 +581,7 @@ function renderQuizCards(groupedData) {
             .lqz-sidebar-item-info { flex: 1; min-width: 0; }
             .lqz-sidebar-item-title {
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: var(--lqz-w-medium);
                 color: #e6edf3;
                 white-space: nowrap;
                 overflow: hidden;
@@ -581,7 +595,9 @@ function renderQuizCards(groupedData) {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .lqz-row-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+            .lqz-row-badge { font-size: 12px; font-weight: var(--lqz-w-medium); flex-shrink: 0; }
+            /* the selected row keeps one step more weight so it still reads as current */
+            .lqz-sidebar-item.active .lqz-sidebar-item-title { font-weight: var(--lqz-w-strong); }
             .lqz-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 
             /* ── Resize handle ── */
@@ -636,7 +652,7 @@ function renderQuizCards(groupedData) {
                 min-width: 0;
                 font-family: inherit;
                 font-size: 18px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 line-height: 1.25;
                 color: #e6edf3;
                 white-space: nowrap;
@@ -655,7 +671,7 @@ function renderQuizCards(groupedData) {
                 border-radius: 6px;
                 border: 1px solid rgba(255,255,255,0.07);
                 font-size: 11px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 line-height: 1;
                 letter-spacing: 0.5px;
                 text-transform: uppercase;
@@ -681,7 +697,7 @@ function renderQuizCards(groupedData) {
                 border-radius: 8px;
                 border: 1px solid rgba(255,255,255,0.07);
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: var(--lqz-w-medium);
                 line-height: 1;
                 white-space: nowrap;
                 font-variant-numeric: tabular-nums;
@@ -697,7 +713,7 @@ function renderQuizCards(groupedData) {
                 border-radius: 8px;
                 background: #4fd1c5;
                 color: #0d1117;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 font-size: 13px;
                 text-decoration: none;
                 flex-shrink: 0;
@@ -728,13 +744,14 @@ function renderQuizCards(groupedData) {
                 border-radius: 8px;
             }
             .lqz-panel-marks-note svg { flex-shrink: 0; margin-top: 3px; }
-            .lqz-panel-marks-note strong { color: #c9d1d9; font-weight: 700; }
+            .lqz-panel-marks-note strong { color: #c9d1d9; font-weight: var(--lqz-w-medium); }
+            .lqz-panel-inst-list strong, .lqz-panel-inst-note strong { font-weight: var(--lqz-w-medium); }
             .lqz-panel-marks-note--ready, .lqz-panel-marks-note--ready strong { color: #6fcf97; }
 
             .lqz-panel-instructions-loading { color: #7d8794; font-size: 13px; }
             .lqz-panel-inst-label {
                 font-size: 12px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 color: #7d8794;
@@ -756,7 +773,7 @@ function renderQuizCards(groupedData) {
             .lqz-rail h4 {
                 margin: 0 0 14px;
                 font-size: 12px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 color: #7d8794;
@@ -770,7 +787,7 @@ function renderQuizCards(groupedData) {
                 font-size: 13px;
             }
             .lqz-kv span { color: #9aa4b2; }
-            .lqz-kv b { font-weight: 700; text-align: right; color: #e6edf3; }
+            .lqz-kv b { font-weight: var(--lqz-w-medium); text-align: right; color: #e6edf3; }
             @container (max-width: 899px) { .lqz-rail { display: none; } }
 
             /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
@@ -1159,6 +1176,7 @@ function renderQuizCards(groupedData) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lqzEnsureFont();
     window.lqzInitDesktop();
     startQuizCountdowns();
 }
