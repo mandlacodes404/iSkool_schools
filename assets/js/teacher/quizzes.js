@@ -318,7 +318,6 @@ function renderTeacherQuizzes(data) {
             }
             #qz-main-panel .qz2 {
                 width:100%;
-                max-width:720px;
                 margin:0;
                 padding:40px 32px 72px;
                 box-sizing:border-box;
@@ -656,7 +655,6 @@ function renderTeacherQuizzes(data) {
                 70%, 100% { box-shadow: 0 0 0 6px rgba(242,140,56,0); }
             }
             @media (max-width: 1100px) {
-                #qz-main-panel .qz2 { padding: 32px 24px 56px; }
                 #qz-main-panel .qz2-nums { gap: 28px; }
             }
             @media (prefers-reduced-motion: reduce) {
