@@ -141,7 +141,7 @@ function getCsrfToken() {
         <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
         <span id="dash-splash-wordmark">iSkool</span>
     </div>
-    <img src="enthropy/wiggle_coloured.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
+    <img src="enthropy/wiggle_colored.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
 </div>
 <script>
 // ──────── SPLASH HANDOFF: hide once Home is actually ready ────────
