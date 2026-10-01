@@ -319,8 +319,8 @@ function renderTeacherQuizzes(data) {
             #qz-main-panel .qz2 {
                 width:100%;
                 max-width:720px;
-                margin:0 auto;
-                padding:40px 40px 72px;
+                margin:0;
+                padding:40px 32px 72px;
                 box-sizing:border-box;
                 color:var(--q-text);
                 font-family:var(--q-font);
@@ -884,9 +884,12 @@ function renderTeacherQuizzes(data) {
                 </div>
             </div>
 
-            <!-- The "About Quizzes" info rail that used to sit here is gone:
-                 its two explanations now live inline in the panel, next to
-                 the controls they describe (Learner access, Integrity). -->
+            <!-- railId lets selectDesktopQuiz() swap this to
+                 selection-specific copy via updateInfoRail(). -->
+            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Quizzes', `
+                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> — closing a quiz doesn't publish its results automatically.</p>
+                <p>The <strong>Integrity Report</strong> uses AI to flag unusual patterns in submissions, like identical wrong answers across learners.</p>
+            `, 'qz-rail') : ''}
         </div>
 
         <!-- ═══ MOBILE LIST — grouped by class only, tap into detail page ═══ -->
@@ -1051,8 +1054,7 @@ function renderTeacherQuizzes(data) {
         document.head.appendChild(fontLink);
     }
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
-    // The quiz page no longer renders an info rail, so guard the shared call
-    try { if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState(); } catch (e) {}
+    if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
     if (typeof wireTeacherSearchBar === 'function') wireTeacherSearchBar('qz');
 
     // Restore whichever quiz was selected before navigating away, and
@@ -1387,6 +1389,27 @@ window.qz2LoadSubmissions = async function(quizId) {
     }
 };
 
+// The info rail's per-quiz copy (same wording as before the redesign).
+window.qz2UpdateRail = function(quiz) {
+    if (typeof updateInfoRail !== 'function') return;
+    if (quiz.status !== 'Closed' && !Number(quiz.publish_marks)) {
+        updateInfoRail('qz-rail', 'Marks Hidden', `
+            <p>This quiz is still <strong>${escapeHtml(quiz.status)}</strong> and marks aren't published yet — learners can't see their results.</p>
+            <p>Toggle <strong>Publish Marks</strong> once you're ready for them to see their scores.</p>
+        `);
+    } else if (Number(quiz.publish_marks)) {
+        updateInfoRail('qz-rail', 'Marks Published', `
+            <p>Learners in <strong>${escapeHtml(quiz.class_name)}</strong> can currently see their results for this quiz.</p>
+            <p>Use <strong>Unpublish Marks</strong> if you need to hide them again, e.g. to fix a grading issue.</p>
+        `);
+    } else {
+        updateInfoRail('qz-rail', 'Quiz Closed', `
+            <p>This quiz is closed and marks are still hidden from learners.</p>
+            <p>Toggle <strong>Publish Marks</strong> when you're ready to release results.</p>
+        `);
+    }
+};
+
 window.selectDesktopQuiz = function(quizId, opts) {
     // opts.quiet: re-render in place after a status change (no fade, keep scroll)
     const quiet = !!(opts && opts.quiet);
@@ -1517,6 +1540,9 @@ window.selectDesktopQuiz = function(quizId, opts) {
 
     panel.scrollTop = scrollTop;
 
+    // Swap the info rail to reflect this quiz's current state
+    window.qz2UpdateRail(quiz);
+
     if (!isScheduled && !cached) window.qz2LoadSubmissions(id);
 };
 
@@ -1562,6 +1588,7 @@ window.togglePublishMarks = async function(quizId) {
                 actionButton.setAttribute('aria-checked', published ? 'true' : 'false');
                 const desc = document.getElementById(`publish-desc-${quizId}`);
                 if (desc && q) desc.textContent = window.qz2MarksCopy(q);
+                if (q) window.qz2UpdateRail(q);
                 window.qz2Toast(published ? 'Marks published' : 'Marks hidden');
             } else {
                 const label = document.getElementById(`publish-label-${quizId}`);
