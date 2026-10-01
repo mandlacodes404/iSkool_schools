@@ -569,15 +569,15 @@ function renderTeacherQuizzes(data) {
             #qz-main-panel .qz2-btn.qz2-dng:hover {
                 background:rgba(244,119,111,0.08);
             }
-            #qz-main-panel .qz2-btn:disabled,
-            #qz-main-panel .qz2-btn:disabled:hover {
+            #qz-main-panel .qz2-btn:disabled:not(.is-loading),
+            #qz-main-panel .qz2-btn:disabled:not(.is-loading):hover {
                 opacity:.4;
                 cursor:not-allowed;
                 filter:none;
                 background:none;
             }
-            #qz-main-panel .qz2-btn.qz2-pri:disabled,
-            #qz-main-panel .qz2-btn.qz2-pri:disabled:hover {
+            #qz-main-panel .qz2-btn.qz2-pri:disabled:not(.is-loading),
+            #qz-main-panel .qz2-btn.qz2-pri:disabled:not(.is-loading):hover {
                 background:var(--q-accent);
             }
             #qz-main-panel .qz2-sw {
@@ -593,8 +593,8 @@ function renderTeacherQuizzes(data) {
                 cursor:pointer;
                 transition:background .18s;
             }
-            #qz-main-panel .qz2-sw::after {
-                content:"";
+            #qz-main-panel .qz2-sw i {
+                display:block;
                 position:absolute;
                 top:3px;
                 left:3px;
@@ -603,14 +603,15 @@ function renderTeacherQuizzes(data) {
                 border-radius:50%;
                 background:#fff;
                 transition:transform .18s;
+                pointer-events:none;
             }
             #qz-main-panel .qz2-sw[aria-checked="true"] {
                 background:var(--q-accent);
             }
-            #qz-main-panel .qz2-sw[aria-checked="true"]::after {
+            #qz-main-panel .qz2-sw[aria-checked="true"] i {
                 transform:translateX(16px);
             }
-            #qz-main-panel .qz2-sw:disabled {
+            #qz-main-panel .qz2-sw:disabled:not(.is-loading) {
                 opacity:.6;
                 cursor:progress;
             }
@@ -1271,8 +1272,14 @@ window.qz2AccessCopy = function(q) {
     return 'Learners can start and submit.';
 };
 
-// Disables a control while its request is in flight. Returns a function that
-// puts it back. (The app-wide button loader isn't used on the new controls.)
+// Button loader: the app's own showTeacherButtonLoader (the one the create
+// quiz submit button uses). Falls back to a plain disabled state only if that
+// helper isn't on the page.
+window.qz2Loader = function(btn) {
+    if (btn && typeof window.showTeacherButtonLoader === 'function') return window.showTeacherButtonLoader(btn);
+    return window.qz2Busy(btn);
+};
+
 window.qz2Busy = function(btn) {
     if (!btn) return function() {};
     btn.disabled = true;
@@ -1509,7 +1516,7 @@ window.selectDesktopQuiz = function(quizId, opts) {
                         <button class="qz2-sw" type="button" role="switch"
                             id="publish-btn-${id}" aria-checked="${published}"
                             aria-label="Publish marks to learners"
-                            onclick="togglePublishMarks(${id})"></button>
+                            onclick="togglePublishMarks(${id})"><i></i></button>
                     </div>
                     <div class="qz2-row">
                         <div>
@@ -1565,7 +1572,7 @@ window.toggleQuizDetails = function(quizId) {
 window.togglePublishMarks = async function(quizId) {
     const actionButton = document.getElementById(`publish-btn-${quizId}`);
     const isDesktop = !!actionButton && actionButton.classList.contains('qz2-sw');
-    const hideLoader = isDesktop ? window.qz2Busy(actionButton) : window.showTeacherButtonLoader(actionButton);
+    const hideLoader = isDesktop ? window.qz2Loader(actionButton) : window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_publish_marks.php', {
@@ -1623,7 +1630,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
     const newStatus = currentStatus === 'Closed' ? 'Open' : 'Closed';
     const actionButton = document.getElementById(`status-btn-${quizId}`);
     const isDesktop = !!actionButton && actionButton.classList.contains('qz2-btn');
-    const hideLoader = isDesktop ? window.qz2Busy(actionButton) : window.showTeacherButtonLoader(actionButton);
+    const hideLoader = isDesktop ? window.qz2Loader(actionButton) : window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_quiz_status.php', {
@@ -1702,8 +1709,14 @@ window.openQuizResults = async function(quizId, quizTitle) {
     }
 };
 
-window.openQuizResultsFromElement = function(el) {
-    openQuizResults(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
+window.openQuizResultsFromElement = async function(el) {
+    // Same button loader the other quiz actions use, while the results load
+    const hideLoader = (el && window.showTeacherButtonLoader) ? window.showTeacherButtonLoader(el) : function() {};
+    try {
+        await openQuizResults(parseInt(el.dataset.quizId, 10), el.dataset.quizTitle || '');
+    } finally {
+        hideLoader();
+    }
 };
 
 function renderQuizResults(data) {

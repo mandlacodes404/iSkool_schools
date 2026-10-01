@@ -1572,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script src="assets/js/teacher/dashboard.js?v=13.3"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=7.7"></script>
+<script src="assets/js/teacher/quizzes.js?v=7.8"></script>
 <script src="assets/js/teacher/announcements.js?v=5.8"></script>
 <script src="assets/js/teacher/evaluations.js?v=4.8"></script>
 <script src="assets/js/teacher/resources.js?v=4.4"></script>
