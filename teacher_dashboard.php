@@ -90,7 +90,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.8">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.5">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.1">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.0">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.6">
@@ -1577,7 +1577,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/evaluations.js?v=4.8"></script>
 <script src="assets/js/teacher/resources.js?v=4.4"></script>
 <script src="assets/js/teacher/grades.js?v=4.9"></script>
-<script src="assets/js/teacher/assignments.js?v=4.8"></script>
+<script src="assets/js/teacher/assignments.js?v=4.9"></script>
 <script src="assets/js/teacher/sbo.js?v=4.8"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
