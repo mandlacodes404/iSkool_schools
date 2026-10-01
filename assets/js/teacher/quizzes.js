@@ -154,6 +154,24 @@ function renderTeacherQuizzes(data) {
         });
     }
 
+    // ── Empty state for the main panel (nothing selected yet) ──
+    const qzThisTerm  = window._allQuizzesFlat.filter(q => q.term === currentTerm);
+    const qzStillLive = qzThisTerm.filter(q => q.status !== 'Closed').length;
+    let qzEmptyTitle, qzEmptyBody, qzEmptyCta;
+    if (window._allQuizzesFlat.length === 0) {
+        qzEmptyTitle = 'No quizzes yet';
+        qzEmptyBody  = 'Create a quiz and it will show up here, ready to schedule for a class.';
+        qzEmptyCta   = 'Create a quiz';
+    } else if (qzThisTerm.length === 0) {
+        qzEmptyTitle = 'No quizzes this term yet';
+        qzEmptyBody  = 'Pick one from an earlier term in the list, or start a new one.';
+        qzEmptyCta   = 'Create a quiz';
+    } else {
+        qzEmptyTitle = 'Pick a quiz to manage';
+        qzEmptyBody  = `${qzThisTerm.length} quiz${qzThisTerm.length === 1 ? '' : 'zes'} this term, ${qzStillLive === 0 ? 'none' : qzStillLive} still open or scheduled. Choose one from the list, or start a new one.`;
+        qzEmptyCta   = 'Create a quiz';
+    }
+
     // ── Build full HTML: header + split layout ──
     let html = `
         <style>
@@ -281,109 +299,384 @@ function renderTeacherQuizzes(data) {
             .qz-main-panel::-webkit-scrollbar-track { background: transparent; }
             .qz-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
-            .qz-panel-empty {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #555e6a;
-                gap: 12px;
-                padding: 40px;
+            /* ── Quiz main panel (desktop) ──
+               Tokens and every rule below are scoped to #qz-main-panel, so
+               nothing here leaks into the left list, the results table or
+               the create/edit forms that render into the same container. */
+            #qz-main-panel {
+                --q-font:'Geist','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+                --q-line:rgba(255,255,255,0.07);
+                --q-line2:rgba(255,255,255,0.14);
+                --q-hover:rgba(255,255,255,0.055);
+                --q-active:rgba(255,255,255,0.095);
+                --q-text:#e8eaed;
+                --q-soft:#b6bbc3;
+                --q-muted:#8a9099;
+                --q-faint:#5f656e;
+                --q-accent:#4fd1c5;
+                --q-danger:#f4776f;
             }
-            .qz-panel-empty svg { opacity: 0.3; }
-            .qz-panel-empty p { font-size: 14px; margin: 0; }
+            #qz-main-panel .qz2 {
+                width:100%;
+                max-width:720px;
+                margin:0 auto;
+                padding:40px 40px 72px;
+                box-sizing:border-box;
+                color:var(--q-text);
+                font-family:var(--q-font);
+                font-size:14px;
+                font-weight:400;
+                line-height:1.5;
+                -webkit-font-smoothing:antialiased;
+            }
+            #qz-main-panel .qz2 *,
+            #qz-main-panel .qz2-empty * {
+                box-sizing:border-box;
+            }
+            #qz-main-panel .qz2.qz2-enter {
+                animation:qz2-fade .18s ease;
+            }
+            #qz-main-panel .qz2 svg,
+            #qz-main-panel .qz2-empty svg {
+                width:1em;
+                height:1em;
+                fill:none;
+                stroke:currentColor;
+                stroke-width:1.75;
+                stroke-linecap:round;
+                stroke-linejoin:round;
+                flex:none;
+            }
+            #qz-main-panel .qz2 :focus-visible,
+            #qz-main-panel .qz2-empty :focus-visible {
+                outline:2px solid var(--q-accent);
+                outline-offset:2px;
+            }
+            #qz-main-panel .qz2-crumb {
+                color:var(--q-muted);
+                font-size:13px;
+                margin-bottom:8px;
+            }
+            #qz-main-panel .qz2-hd {
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:24px;
+            }
+            #qz-main-panel .qz2 h1 {
+                margin:0;
+                padding:0;
+                min-width:0;
+                font-family:inherit;
+                font-size:28px;
+                line-height:1.15;
+                font-weight:500;
+                letter-spacing:-0.025em;
+                color:var(--q-text);
+                text-transform:none;
+                overflow-wrap:anywhere;
+            }
+            #qz-main-panel .qz2-acts {
+                display:flex;
+                gap:8px;
+                flex:none;
+                padding-top:2px;
+            }
+            #qz-main-panel .qz2-sl {
+                display:flex;
+                align-items:center;
+                flex-wrap:wrap;
+                gap:12px;
+                margin-top:14px;
+                color:var(--q-muted);
+                font-size:13px;
+            }
+            #qz-main-panel .qz2-pill {
+                display:inline-flex;
+                align-items:center;
+                gap:7px;
+                border:1px solid var(--q-line2);
+                border-radius:999px;
+                padding:2px 11px 2px 9px;
+                color:var(--q-soft);
+                font-weight:500;
+            }
+            #qz-main-panel .qz2-dot {
+                width:7px;
+                height:7px;
+                border-radius:50%;
+                flex:none;
+            }
+            #qz-main-panel .qz2-dot-Open {
+                background:#f28c38;
+                animation:qz2-pulse 2.4s ease-out infinite;
+            }
+            #qz-main-panel .qz2-dot-Scheduled {
+                background:#1e90ff;
+            }
+            #qz-main-panel .qz2-dot-Closed {
+                background:#6b7280;
+            }
+            #qz-main-panel .qz2-sec {
+                margin-top:38px;
+            }
+            #qz-main-panel .qz2 h2 {
+                margin:0 0 10px;
+                padding:0;
+                font-family:inherit;
+                font-size:14px;
+                line-height:1.5;
+                font-weight:500;
+                letter-spacing:0;
+                color:var(--q-text);
+                text-transform:none;
+            }
+            #qz-main-panel .qz2-rows {
+                border-top:1px solid var(--q-line);
+            }
+            #qz-main-panel .qz2-rows > * {
+                border-bottom:1px solid var(--q-line);
+            }
+            #qz-main-panel .qz2-kv {
+                display:grid;
+                grid-template-columns:160px 1fr;
+                padding:11px 0;
+            }
+            #qz-main-panel .qz2-kv span {
+                color:var(--q-muted);
+            }
+            #qz-main-panel .qz2-row {
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:32px;
+                padding:15px 0;
+            }
+            #qz-main-panel .qz2-row-t {
+                font-weight:500;
+            }
+            #qz-main-panel .qz2-row-s {
+                color:var(--q-muted);
+                font-size:13px;
+                max-width:440px;
+            }
+            #qz-main-panel .qz2-sub {
+                padding:18px 0 20px;
+            }
+            #qz-main-panel .qz2-sub-l {
+                display:flex;
+                justify-content:space-between;
+                color:var(--q-soft);
+                margin-bottom:10px;
+            }
+            #qz-main-panel .qz2-sub b {
+                font-weight:500;
+                color:var(--q-text);
+                font-variant-numeric:tabular-nums;
+            }
+            #qz-main-panel .qz2-track {
+                height:4px;
+                border-radius:4px;
+                background:var(--q-active);
+                overflow:hidden;
+            }
+            #qz-main-panel .qz2-track i {
+                display:block;
+                height:100%;
+                background:var(--q-accent);
+                border-radius:4px;
+            }
+            #qz-main-panel .qz2-sub-l.qz2-nobar {
+                margin-bottom:0;
+            }
+            #qz-main-panel .qz2-sub-l.qz2-nobar + .qz2-nums {
+                margin-top:14px;
+            }
+            #qz-main-panel .qz2-nums {
+                display:flex;
+                gap:44px;
+                margin-top:20px;
+            }
+            #qz-main-panel .qz2-nums b {
+                font-size:22px;
+                font-weight:500;
+                letter-spacing:-0.02em;
+                margin-right:8px;
+                color:var(--q-text);
+                font-variant-numeric:tabular-nums;
+            }
+            #qz-main-panel .qz2-nums span {
+                color:var(--q-muted);
+                font-size:13px;
+            }
+            #qz-main-panel .qz2-note {
+                padding:16px 0;
+                color:var(--q-muted);
+            }
+            #qz-main-panel .qz2-hint {
+                margin-top:14px;
+                color:var(--q-muted);
+                font-size:13px;
+            }
+            #qz-main-panel .qz2-hint.qz2-first {
+                margin-top:0;
+            }
+            #qz-main-panel .qz2-link {
+                background:none;
+                border:0;
+                padding:0;
+                margin:0;
+                color:var(--q-accent);
+                font:inherit;
+                cursor:pointer;
+                text-decoration:underline;
+                text-underline-offset:2px;
+            }
+            #qz-main-panel .qz2-btn {
+                height:32px;
+                padding:0 14px;
+                margin:0;
+                border-radius:8px;
+                border:1px solid var(--q-line2);
+                background:none;
+                color:var(--q-text);
+                font-family:inherit;
+                font-size:13px;
+                font-weight:500;
+                line-height:1;
+                display:inline-flex;
+                align-items:center;
+                gap:7px;
+                cursor:pointer;
+                white-space:nowrap;
+                transition:background .15s;
+            }
+            #qz-main-panel .qz2-btn:hover {
+                background:var(--q-hover);
+            }
+            #qz-main-panel .qz2-btn.qz2-pri {
+                background:var(--q-accent);
+                border-color:var(--q-accent);
+                color:#04211f;
+            }
+            #qz-main-panel .qz2-btn.qz2-pri:hover {
+                background:var(--q-accent);
+                filter:brightness(1.08);
+            }
+            #qz-main-panel .qz2-btn.qz2-dng {
+                color:var(--q-danger);
+                border-color:rgba(244,119,111,0.35);
+            }
+            #qz-main-panel .qz2-btn.qz2-dng:hover {
+                background:rgba(244,119,111,0.08);
+            }
+            #qz-main-panel .qz2-btn:disabled,
+            #qz-main-panel .qz2-btn:disabled:hover {
+                opacity:.4;
+                cursor:not-allowed;
+                filter:none;
+                background:none;
+            }
+            #qz-main-panel .qz2-btn.qz2-pri:disabled,
+            #qz-main-panel .qz2-btn.qz2-pri:disabled:hover {
+                background:var(--q-accent);
+            }
+            #qz-main-panel .qz2-sw {
+                width:38px;
+                height:22px;
+                padding:0;
+                margin:0;
+                border-radius:999px;
+                border:0;
+                background:var(--q-line2);
+                position:relative;
+                flex:none;
+                cursor:pointer;
+                transition:background .18s;
+            }
+            #qz-main-panel .qz2-sw::after {
+                content:"";
+                position:absolute;
+                top:3px;
+                left:3px;
+                width:16px;
+                height:16px;
+                border-radius:50%;
+                background:#fff;
+                transition:transform .18s;
+            }
+            #qz-main-panel .qz2-sw[aria-checked="true"] {
+                background:var(--q-accent);
+            }
+            #qz-main-panel .qz2-sw[aria-checked="true"]::after {
+                transform:translateX(16px);
+            }
+            #qz-main-panel .qz2-sw:disabled {
+                opacity:.6;
+                cursor:progress;
+            }
+            #qz-main-panel .qz2-empty {
+                flex:1;
+                min-height:100%;
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:center;
+                text-align:center;
+                gap:6px;
+                padding:40px;
+                color:var(--q-text);
+                font-family:var(--q-font);
+                font-size:14px;
+                line-height:1.5;
+                -webkit-font-smoothing:antialiased;
+            }
+            #qz-main-panel .qz2-empty h1 {
+                margin:0;
+                padding:0;
+                font-family:inherit;
+                font-size:20px;
+                font-weight:500;
+                letter-spacing:-0.015em;
+                line-height:1.2;
+                color:var(--q-text);
+                text-transform:none;
+            }
+            #qz-main-panel .qz2-empty p {
+                margin:0;
+                color:var(--q-muted);
+                max-width:340px;
+            }
+            #qz-main-panel .qz2-empty .qz2-btn {
+                margin-top:16px;
+            }
+            @keyframes qz2-fade { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes qz2-pulse {
+                0%   { box-shadow: 0 0 0 0 rgba(242,140,56,0.5); }
+                70%, 100% { box-shadow: 0 0 0 6px rgba(242,140,56,0); }
+            }
+            @media (max-width: 1100px) {
+                #qz-main-panel .qz2 { padding: 32px 24px 56px; }
+                #qz-main-panel .qz2-nums { gap: 28px; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                #qz-main-panel .qz2,
+                #qz-main-panel .qz2 * { animation: none !important; transition: none !important; }
+            }
 
-            .qz-panel-content { padding: 28px 32px; }
-
-            .qz-panel-quiz-header {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 16px;
-                margin-bottom: 24px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
+            /* Toast lives on <body>, so it is not scoped to the panel */
+            .qz2-toast {
+                position: fixed; bottom: 30px; left: 50%;
+                transform: translate(-50%, 8px);
+                background: #151a21; border: 1px solid rgba(255,255,255,0.14);
+                border-radius: 9px; padding: 9px 14px;
+                font: 400 13px/1.4 'Geist','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+                color: #e8eaed; opacity: 0; pointer-events: none; z-index: 9999;
+                transition: opacity .2s, transform .2s;
             }
-            .qz-panel-quiz-title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 6px;
-            }
-            .qz-panel-quiz-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            .qz-panel-status-badge {
-                padding: 3px 10px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: 700;
-            }
-
-            .qz-marks-row {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: rgba(255,255,255,0.03);
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 10px;
-                padding: 14px 18px;
-                margin-bottom: 12px;
-            }
-            .qz-marks-label {
-                font-size: 13px;
-                color: #8b949e;
-                font-weight: 600;
-            }
-
-            .qz-actions-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-                margin-top: 8px;
-            }
-            .qz-action-card {
-                background: transparent;
-                border: 1px solid rgba(255,255,255,0.12);
-                border-radius: 12px;
-                padding: 18px 20px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                gap: 14px;
-                font-size: 14px;
-                font-weight: 700;
-                color: #c9d1d9;
-            }
-            .qz-action-card:hover {
-                background: rgba(255,255,255,0.06);
-                border-color: #ffffff;
-                transform: translateY(-1px);
-            }
-            .qz-action-card.publish { border-color: rgba(79,209,197,0.2); }
-            .qz-action-card.publish:hover { border-color: #4fd1c5; background: rgba(79,209,197,0.08); color: #4fd1c5; }
-            .qz-action-card.close   { border-color: rgba(248,81,73,0.2); }
-            .qz-action-card.close:hover   { border-color: #f85149; background: rgba(248,81,73,0.08); color: #f85149; }
-            .qz-action-card.reopen  { border-color: rgba(34,197,94,0.2); }
-            .qz-action-card.reopen:hover  { border-color: #22c55e; background: rgba(34,197,94,0.08); color: #22c55e; }
-            .qz-action-card.results { border-color: rgba(30,144,255,0.2); }
-            .qz-action-card.results:hover { border-color: #1e90ff; background: rgba(30,144,255,0.08); color: #1e90ff; }
-            .qz-action-card.integrity { border-color: rgba(242,140,56,0.2); }
-            .qz-action-card.integrity:hover { border-color: #f28c38; background: rgba(242,140,56,0.08); color: #f28c38; }
-            .qz-action-card.edit { border-color: rgba(79,209,197,0.2); }
-            .qz-action-card.edit:hover { border-color: #4fd1c5; background: rgba(79,209,197,0.08); color: #4fd1c5; }
-            .qz-action-card.delete { border-color: rgba(248,81,73,0.2); }
-            .qz-action-card.delete:hover { border-color: #f85149; background: rgba(248,81,73,0.08); color: #f85149; }
-            .qz-action-card-icon { flex-shrink: 0; }
-            .qz-action-card-text { display: flex; flex-direction: column; gap: 2px; }
-            .qz-action-card-sub  { font-size: 11px; font-weight: 400; color: #555e6a; }
+            .qz2-toast.on { opacity: 1; transform: translate(-50%, 0); }
+            .qz2-toast.qz2-toast-err { border-color: rgba(244,119,111,0.45); color: #f4776f; }
+            @media (prefers-reduced-motion: reduce) { .qz2-toast { transition: none; } }
             .teacher-quiz-action-btn.edit { background: rgba(79,209,197,0.1); color: #4fd1c5; border-color: rgba(79,209,197,0.25); }
             .teacher-quiz-action-btn.delete { background: rgba(248,81,73,0.1); color: #f85149; border-color: rgba(248,81,73,0.25); }
             @media (max-width: 899px) {
@@ -584,22 +877,16 @@ function renderTeacherQuizzes(data) {
 
             <!-- Right Main Panel -->
             <div class="qz-main-panel tchr-flat-panel" id="qz-main-panel">
-                <div class="qz-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                    <p>Select a quiz from the left to manage it</p>
+                <div class="qz2-empty">
+                    <h1>${qzEmptyTitle}</h1>
+                    <p>${qzEmptyBody}</p>
+                    <button class="qz2-btn qz2-pri" onclick="openCreateQuiz()">${window.qz2Icon('plus')}${qzEmptyCta}</button>
                 </div>
             </div>
 
-            <!-- railId lets selectDesktopQuiz() swap this to
-                 selection-specific copy via updateInfoRail(). -->
-            ${typeof buildInfoRail === 'function' ? buildInfoRail('About Quizzes', `
-                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> — closing a quiz doesn't publish its results automatically.</p>
-                <p>The <strong>Integrity Report</strong> uses AI to flag unusual patterns in submissions, like identical wrong answers across learners.</p>
-            `, 'qz-rail') : ''}
+            <!-- The "About Quizzes" info rail that used to sit here is gone:
+                 its two explanations now live inline in the panel, next to
+                 the controls they describe (Learner access, Integrity). -->
         </div>
 
         <!-- ═══ MOBILE LIST — grouped by class only, tap into detail page ═══ -->
@@ -756,8 +1043,16 @@ function renderTeacherQuizzes(data) {
         </div>`;
 
     apiArea.innerHTML = html;
+    if (!document.getElementById('qz2-font')) {
+        const fontLink = document.createElement('link');
+        fontLink.id   = 'qz2-font';
+        fontLink.rel  = 'stylesheet';
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@400..600&display=swap';
+        document.head.appendChild(fontLink);
+    }
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
-    if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState();
+    // The quiz page no longer renders an info rail, so guard the shared call
+    try { if (typeof applyTeacherRailCollapsedState === 'function') applyTeacherRailCollapsedState(); } catch (e) {}
     if (typeof wireTeacherSearchBar === 'function') wireTeacherSearchBar('qz');
 
     // Restore whichever quiz was selected before navigating away, and
@@ -950,7 +1245,152 @@ window.openMobileTeacherQuizById = function(quizId) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT QUIZ
 // ─────────────────────────────────────────────
-window.selectDesktopQuiz = function(quizId) {
+// Small helpers for the redesigned panel. Everything is namespaced qz2*
+// so it can't collide with the rest of the teacher dashboard.
+window._qz2Stats = window._qz2Stats || {};
+
+window.qz2Icon = function(name) {
+    const paths = {
+        plus: '<path d="M12 5v14M5 12h14"/>',
+        edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || ''}</svg>`;
+};
+
+// Copy for the Marks row. Used on first render and again when the switch
+// flips, so the sentence is always in sync with the state.
+window.qz2MarksCopy = function(q) {
+    if (Number(q.publish_marks)) return `Learners in ${q.class_name} can see their scores.`;
+    if (q.status === 'Closed') return 'Scores are hidden. Closing a quiz does not publish them.';
+    return 'Scores are hidden from learners.';
+};
+
+window.qz2AccessCopy = function(q) {
+    if (q.status === 'Scheduled') return q.start_time ? `Opens on ${q.start_time}.` : 'Opens at the scheduled time.';
+    if (q.status === 'Closed') return 'Learners can no longer start or submit.';
+    return 'Learners can start and submit.';
+};
+
+// Disables a control while its request is in flight. Returns a function that
+// puts it back. (The app-wide button loader isn't used on the new controls.)
+window.qz2Busy = function(btn) {
+    if (!btn) return function() {};
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    return function() {
+        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+    };
+};
+
+// One toast element, reused. Centred on the main panel.
+window.qz2Toast = function(message, isError) {
+    let el = document.getElementById('qz2-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'qz2-toast';
+        el.className = 'qz2-toast';
+        el.setAttribute('role', 'status');
+        document.body.appendChild(el);
+    }
+    const panel = document.getElementById('qz-main-panel');
+    if (panel) {
+        const r = panel.getBoundingClientRect();
+        el.style.left = (r.left + r.width / 2) + 'px';
+    }
+    el.textContent = message;
+    el.classList.toggle('qz2-toast-err', !!isError);
+    el.classList.add('on');
+    clearTimeout(window._qz2ToastTimer);
+    window._qz2ToastTimer = setTimeout(function() { el.classList.remove('on'); }, isError ? 3200 : 1800);
+};
+
+// ── Submissions: numbers come from get_quiz_results.php ──
+// A learner with several attempts is counted once, using their best score.
+function qz2ComputeStats(d) {
+    const rows = Array.isArray(d.results) ? d.results : [];
+    const best = new Map();
+    rows.forEach(function(r) {
+        const total = Number(r.total);
+        const score = Number(r.score);
+        const pct = total > 0 ? (score / total) * 100 : null;
+        const key = r.user_email || ('result-' + r.result_id);
+        const prev = best.get(key);
+        if (!prev || (pct !== null && (prev.pct === null || pct > prev.pct))) best.set(key, { pct: pct });
+    });
+    const pcts = Array.from(best.values()).map(function(v) { return v.pct; }).filter(function(v) { return v !== null; });
+    return {
+        submitted: best.size,
+        avg: pcts.length ? Math.round(pcts.reduce(function(a, b) { return a + b; }, 0) / pcts.length) : null,
+        high: pcts.length ? Math.round(Math.max.apply(null, pcts)) : null,
+        pendingGrading: Number(d.has_open_ended) === 1 && d.quiz_fully_graded === false,
+        t: Date.now()
+    };
+}
+
+function qz2CachedStats(quizId) {
+    const s = window._qz2Stats[quizId];
+    return s && (Date.now() - s.t) < 30000 ? s : null;
+}
+
+window.qz2SubsHtml = function(quiz, s) {
+    // Class size is optional: the bar only appears when the list API
+    // supplies it (quiz.class_size).
+    const size = Number(quiz.class_size) || 0;
+    const n = s.submitted;
+    let h = '<div class="qz2-sub">';
+    if (size > 0) {
+        const pct = Math.min(100, Math.round(n / size * 100));
+        h += `<div class="qz2-sub-l"><span><b>${n}</b> of ${size} learners submitted</span><b>${pct}%</b></div>
+              <div class="qz2-track"><i style="width:${pct}%"></i></div>`;
+    } else if (n === 0) {
+        h += `<div class="qz2-sub-l qz2-nobar"><span>No one has submitted yet.</span></div>`;
+    } else {
+        h += `<div class="qz2-sub-l qz2-nobar"><span><b>${n}</b> ${n === 1 ? 'learner has' : 'learners have'} submitted</span></div>`;
+    }
+    if (n > 0 && s.avg !== null) {
+        h += `<div class="qz2-nums">
+                <div><b>${s.avg}%</b><span>Class average</span></div>
+                <div><b>${s.high}%</b><span>Highest score</span></div>
+              </div>`;
+    }
+    if (s.pendingGrading) {
+        h += `<div class="qz2-hint">Open-ended answers are still being graded, so these figures may change.</div>`;
+    }
+    return h + '</div>';
+};
+
+window.qz2LoadSubmissions = async function(quizId) {
+    const id = Number(quizId);
+    const slot = document.getElementById(`qz2-subs-${id}`);
+    if (slot) slot.innerHTML = '<div class="qz2-note">Loading submissions...</div>';
+    try {
+        const res = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${encodeURIComponent(id)}`, {
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
+        const payload = await res.json();
+        if (payload.status === 'error' || payload.error) throw new Error(payload.message || payload.error);
+        const stats = qz2ComputeStats(payload.data || payload);
+        window._qz2Stats[id] = stats;
+        const quiz = (window._allQuizzesFlat || []).find(function(q) { return q.id == id; });
+        const target = document.getElementById(`qz2-subs-${id}`);
+        // Only paint if this quiz is still the one on screen.
+        if (target && quiz && String(window._activeDesktopQuizId) === String(id)) {
+            target.innerHTML = window.qz2SubsHtml(quiz, stats);
+        }
+    } catch (e) {
+        const target = document.getElementById(`qz2-subs-${id}`);
+        if (target) {
+            target.innerHTML = `<div class="qz2-note">Couldn't load submissions.
+                <button type="button" class="qz2-link" onclick="qz2LoadSubmissions(${id})">Try again</button></div>`;
+        }
+    }
+};
+
+window.selectDesktopQuiz = function(quizId, opts) {
+    // opts.quiet: re-render in place after a status change (no fade, keep scroll)
+    const quiet = !!(opts && opts.quiet);
+
     // Update sidebar active state
     document.querySelectorAll('.qz-sidebar-item').forEach(el => el.classList.remove('active'));
     const newBtn = document.getElementById('qz-new-btn');
@@ -968,158 +1408,116 @@ window.selectDesktopQuiz = function(quizId) {
     const panel = document.getElementById('qz-main-panel');
     if (!panel) return;
 
-    const statusColor = quiz.status === 'Open' ? '#f28c38'
-        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
+    const id          = Number(quiz.id);
+    const isScheduled = quiz.status === 'Scheduled';
+    const isClosed    = quiz.status === 'Closed';
+    const statusKey   = ['Open', 'Scheduled', 'Closed'].includes(quiz.status) ? quiz.status : 'Closed';
+    const startLabel  = quiz.start_time
+        ? (isScheduled ? `Opens ${quiz.start_time}` : (isClosed ? `Opened ${quiz.start_time}` : `Started ${quiz.start_time}`))
+        : '';
+    const minutes     = Number(quiz.duration);
+    const durationTxt = minutes ? `${minutes} minute${minutes === 1 ? '' : 's'}` : escapeHtml(quiz.duration);
 
-    const publishLabel = quiz.publish_marks ? 'Published' : 'Hidden';
-    const publishBtnText = quiz.publish_marks ? 'Unpublish Marks' : 'Publish Marks';
-    const statusBtnClass = quiz.status === 'Closed' ? 'reopen' : 'close';
-    const statusBtnText  = quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+    // Attempts only shows when the list API provides attempt_limit.
+    let attemptsRow = '';
+    if (quiz.attempt_limit !== undefined && quiz.attempt_limit !== null && quiz.attempt_limit !== '') {
+        const a = Number(quiz.attempt_limit);
+        attemptsRow = `<div class="qz2-kv"><span>Attempts</span>${a === 1 ? 'One attempt' : `${a} attempts`}</div>`;
+    }
+
+    const cached = isScheduled ? null : qz2CachedStats(id);
+    const subsInner = cached ? window.qz2SubsHtml(quiz, cached) : '<div class="qz2-note">Loading submissions...</div>';
+
+    const submissionsBody = isScheduled
+        ? `<div class="qz2-note">Submissions appear here once the quiz opens.</div>`
+        : `<div id="qz2-subs-${id}">${subsInner}</div>
+           <div class="qz2-row">
+               <div>
+                   <div class="qz2-row-t">Integrity report</div>
+                   <div class="qz2-row-s">See where learners left the quiz window, question by question.</div>
+               </div>
+               <button class="qz2-btn" type="button"
+                   data-quiz-id="${id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                   onclick="openIntegrityModalFromElement(this)">Open report</button>
+           </div>`;
+
+    const published = !!Number(quiz.publish_marks);
+    const scrollTop = quiet ? panel.scrollTop : 0;
 
     panel.innerHTML = `
-        <div class="qz-panel-content">
-            <div class="qz-panel-quiz-header">
-                <div>
-                    <div class="qz-panel-quiz-title" id="qz-panel-title-${quizId}">${escapeHtml(quiz.title)}</div>
-                    <div class="qz-panel-quiz-meta">
-                        <span>${escapeHtml(quiz.class_name)}</span>
-                        <span>&bull;</span>
-                        <span>${escapeHtml(quiz.duration)} min</span>
-                        <span>&bull;</span>
-                        <span>${escapeHtml(quiz.start_time)}</span>
-                        <span class="qz-panel-status-badge" id="qz-panel-status-badge-${quizId}"
-                            style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
-                            ${escapeHtml(quiz.status)}
-                        </span>
-                    </div>
+        <div class="qz2${quiet ? '' : ' qz2-enter'}">
+            <div class="qz2-crumb">${escapeHtml(quiz.class_name)}${quiz.term ? ` / Term ${escapeHtml(quiz.term)}` : ''}</div>
+            <div class="qz2-hd">
+                <h1 id="qz-panel-title-${id}">${escapeHtml(quiz.title)}</h1>
+                <div class="qz2-acts">
+                    <button class="qz2-btn" type="button" data-action="edit-quiz" data-quiz-id="${id}">${window.qz2Icon('edit')}Edit</button>
+                    <button class="qz2-btn qz2-pri" type="button"
+                        ${isScheduled ? 'disabled title="No submissions yet"' : ''}
+                        data-quiz-id="${id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                        onclick="openQuizResultsFromElement(this)">View results</button>
                 </div>
             </div>
-
-            <!-- Marks Status Row -->
-            <div class="qz-marks-row">
-                <span class="qz-marks-label">Marks Visibility</span>
-                <span class="teacher-quiz-publish-status ${quiz.publish_marks ? 'published' : 'hidden'}"
-                    id="publish-label-${quizId}">${publishLabel}</span>
+            <div class="qz2-sl">
+                <span class="qz2-pill"><span class="qz2-dot qz2-dot-${statusKey}"></span>${escapeHtml(quiz.status)}</span>
+                ${startLabel ? escapeHtml(startLabel) : ''}
             </div>
 
-            <!-- Action Cards Grid -->
-            <div class="qz-actions-grid">
-                <button class="qz-action-card publish"
-                    id="publish-btn-${quizId}"
-                    onclick="togglePublishMarks(${quizId})">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
-                    <div class="qz-action-card-text">
-                        <span>${publishBtnText}</span>
-                        <span class="qz-action-card-sub">Toggle mark visibility</span>
-                    </div>
-                </button>
+            <section class="qz2-sec">
+                <h2>Details</h2>
+                <div class="qz2-rows">
+                    <div class="qz2-kv"><span>Class</span>${escapeHtml(quiz.class_name)}</div>
+                    ${quiz.start_time ? `<div class="qz2-kv"><span>Starts</span>${escapeHtml(quiz.start_time)}</div>` : ''}
+                    <div class="qz2-kv"><span>Duration</span>${durationTxt}</div>
+                    ${attemptsRow}
+                </div>
+            </section>
 
-                <button class="qz-action-card ${statusBtnClass}"
-                    id="status-btn-${quizId}"
-                    data-quiz-id="${quizId}" data-quiz-status="${escapeHtml(quiz.status)}"
-                    onclick="toggleQuizStatusFromElement(this)">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            ${quiz.status === 'Closed'
-                                ? '<polygon points="10 8 16 12 10 16 10 8"></polygon>'
-                                : '<rect x="9" y="9" width="6" height="6"></rect>'}
-                        </svg>
-                    </div>
-                    <div class="qz-action-card-text">
-                        <span>${statusBtnText}</span>
-                        <span class="qz-action-card-sub">Change quiz access</span>
-                    </div>
-                </button>
+            <section class="qz2-sec">
+                <h2>Submissions</h2>
+                <div class="qz2-rows">${submissionsBody}</div>
+            </section>
 
-                <button class="qz-action-card results"
-                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}"
-                    onclick="openQuizResultsFromElement(this)">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                        </svg>
+            <section class="qz2-sec">
+                <h2>Learner access</h2>
+                <div class="qz2-rows">
+                    <div class="qz2-row">
+                        <div>
+                            <div class="qz2-row-t">Marks</div>
+                            <div class="qz2-row-s" id="publish-desc-${id}">${escapeHtml(window.qz2MarksCopy(quiz))}</div>
+                        </div>
+                        <button class="qz2-sw" type="button" role="switch"
+                            id="publish-btn-${id}" aria-checked="${published}"
+                            aria-label="Publish marks to learners"
+                            onclick="togglePublishMarks(${id})"></button>
                     </div>
-                    <div class="qz-action-card-text">
-                        <span>View Results</span>
-                        <span class="qz-action-card-sub">See submissions & scores</span>
+                    <div class="qz2-row">
+                        <div>
+                            <div class="qz2-row-t">Quiz access</div>
+                            <div class="qz2-row-s">${escapeHtml(window.qz2AccessCopy(quiz))}</div>
+                        </div>
+                        <button class="qz2-btn" type="button"
+                            id="status-btn-${id}"
+                            data-quiz-id="${id}" data-quiz-status="${escapeHtml(quiz.status)}"
+                            onclick="toggleQuizStatusFromElement(this)">${isClosed ? 'Reopen quiz' : 'Close quiz'}</button>
                     </div>
-                </button>
+                </div>
+            </section>
 
-                <button class="qz-action-card edit"
-                    data-action="edit-quiz"
-                    data-quiz-id="${quizId}">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <path d="M12 20h9"></path>
-                            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
-                        </svg>
+            <section class="qz2-sec">
+                <h2>Delete</h2>
+                <div class="qz2-rows">
+                    <div class="qz2-row">
+                        <div class="qz2-row-s">Permanently remove this quiz. This can't be undone.</div>
+                        <button class="qz2-btn qz2-dng" type="button" data-action="delete-quiz"
+                            data-quiz-id="${id}" data-quiz-title="${escapeHtml(quiz.title)}">Delete quiz</button>
                     </div>
-                    <div class="qz-action-card-text">
-                        <span>Edit Quiz</span>
-                        <span class="qz-action-card-sub">Update content</span>
-                    </div>
-                </button>
-
-                <button class="qz-action-card delete"
-                    data-action="delete-quiz"
-                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14H6L5 6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                        </svg>
-                    </div>
-                    <div class="qz-action-card-text">
-                        <span>Delete Quiz</span>
-                        <span class="qz-action-card-sub">Remove draft quiz</span>
-                    </div>
-                </button>
-
-                <button class="qz-action-card integrity"
-                    data-quiz-id="${quizId}" data-quiz-title="${escapeHtml(quiz.title)}"
-                    onclick="openIntegrityModalFromElement(this)">
-                    <div class="qz-action-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                    </div>
-                    <div class="qz-action-card-text">
-                        <span>Integrity Report</span>
-                        <span class="qz-action-card-sub">AI-powered analysis</span>
-                    </div>
-                </button>
-            </div>
+                </div>
+            </section>
         </div>`;
 
-    // Swap the info rail to reflect this quiz's current state, instead
-    // of leaving it on the generic page-level copy.
-    if (typeof updateInfoRail === 'function') {
-        if (quiz.status !== 'Closed' && !quiz.publish_marks) {
-            updateInfoRail('qz-rail', 'Marks Hidden', `
-                <p>This quiz is still <strong>${escapeHtml(quiz.status)}</strong> and marks aren't published yet — learners can't see their results.</p>
-                <p>Toggle <strong>Publish Marks</strong> once you're ready for them to see their scores.</p>
-            `);
-        } else if (quiz.publish_marks) {
-            updateInfoRail('qz-rail', 'Marks Published', `
-                <p>Learners in <strong>${escapeHtml(quiz.class_name)}</strong> can currently see their results for this quiz.</p>
-                <p>Use <strong>Unpublish Marks</strong> if you need to hide them again, e.g. to fix a grading issue.</p>
-            `);
-        } else {
-            updateInfoRail('qz-rail', 'Quiz Closed', `
-                <p>This quiz is closed and marks are still hidden from learners.</p>
-                <p>Toggle <strong>Publish Marks</strong> when you're ready to release results.</p>
-            `);
-        }
-    }
+    panel.scrollTop = scrollTop;
+
+    if (!isScheduled && !cached) window.qz2LoadSubmissions(id);
 };
 
 // ─────────────────────────────────────────────
@@ -1135,10 +1533,15 @@ window.toggleQuizDetails = function(quizId) {
 
 // ─────────────────────────────────────────────
 // TOGGLE PUBLISH MARKS
+// Shared by two UIs that use the same element IDs:
+//   desktop: a switch (.qz2-sw) in the main panel
+//   mobile:  a text button on the detail page
+// Each branch below only touches its own markup.
 // ─────────────────────────────────────────────
 window.togglePublishMarks = async function(quizId) {
     const actionButton = document.getElementById(`publish-btn-${quizId}`);
-    const hideLoader = window.showTeacherButtonLoader(actionButton);
+    const isDesktop = !!actionButton && actionButton.classList.contains('qz2-sw');
+    const hideLoader = isDesktop ? window.qz2Busy(actionButton) : window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_publish_marks.php', {
@@ -1150,34 +1553,33 @@ window.togglePublishMarks = async function(quizId) {
 
         if (data.success) {
             const published = data.newStatus == 1;
-            const label     = document.getElementById(`publish-label-${quizId}`);
-            const btn       = document.getElementById(`publish-btn-${quizId}`);
 
-            if (label) {
-                label.textContent = published ? 'Published' : 'Hidden';
-                label.className   = `teacher-quiz-publish-status ${published ? 'published' : 'hidden'}`;
-            }
-            if (btn) {
-                // Desktop card button keeps full text; mobile button keeps short text
-                const isDesktopBtn = btn.classList.contains('qz-action-card');
-                btn.querySelector ? btn.querySelector('.qz-action-card-text span:first-child')
-                    && (btn.querySelector('.qz-action-card-text span:first-child').textContent = published ? 'Unpublish Marks' : 'Publish Marks')
-                    : (btn.textContent = published ? 'Unpublish Marks' : 'Publish Marks');
-                if (!btn.classList.contains('qz-action-card')) {
-                    btn.textContent = published ? 'Unpublish Marks' : 'Publish Marks';
-                }
-            }
             // Update cached quiz data so desktop re-select shows correct state
-            if (window._allQuizzesFlat) {
-                const q = window._allQuizzesFlat.find(q => q.id == quizId);
-                if (q) q.publish_marks = published ? 1 : 0;
+            const q = (window._allQuizzesFlat || []).find(q => q.id == quizId);
+            if (q) q.publish_marks = published ? 1 : 0;
+
+            if (isDesktop) {
+                actionButton.setAttribute('aria-checked', published ? 'true' : 'false');
+                const desc = document.getElementById(`publish-desc-${quizId}`);
+                if (desc && q) desc.textContent = window.qz2MarksCopy(q);
+                window.qz2Toast(published ? 'Marks published' : 'Marks hidden');
+            } else {
+                const label = document.getElementById(`publish-label-${quizId}`);
+                if (label) {
+                    label.textContent = published ? 'Published' : 'Hidden';
+                    label.className   = `teacher-quiz-publish-status ${published ? 'published' : 'hidden'}`;
+                }
+                if (actionButton) actionButton.textContent = published ? 'Unpublish Marks' : 'Publish Marks';
             }
             window.teacherQuizzesCache = null;
+        } else if (isDesktop) {
+            window.qz2Toast(data.message || "Couldn't update marks. Try again.", true);
         } else {
             alert(data.message || 'Failed to update');
         }
     } catch (e) {
-        alert('Connection error');
+        if (isDesktop) window.qz2Toast('Connection error. Check your internet and try again.', true);
+        else alert('Connection error');
     } finally {
         hideLoader();
     }
@@ -1185,6 +1587,8 @@ window.togglePublishMarks = async function(quizId) {
 
 // ─────────────────────────────────────────────
 // TOGGLE QUIZ STATUS
+// Same split: desktop re-renders the panel (status touches the pill, the
+// copy, and the button), mobile patches its badge and button in place.
 // ─────────────────────────────────────────────
 window.toggleQuizStatusFromElement = function(el) {
     toggleQuizStatus(parseInt(el.dataset.quizId, 10), el.dataset.quizStatus || '');
@@ -1193,7 +1597,8 @@ window.toggleQuizStatusFromElement = function(el) {
 window.toggleQuizStatus = async function(quizId, currentStatus) {
     const newStatus = currentStatus === 'Closed' ? 'Open' : 'Closed';
     const actionButton = document.getElementById(`status-btn-${quizId}`);
-    const hideLoader = window.showTeacherButtonLoader(actionButton);
+    const isDesktop = !!actionButton && actionButton.classList.contains('qz2-btn');
+    const hideLoader = isDesktop ? window.qz2Busy(actionButton) : window.showTeacherButtonLoader(actionButton);
 
     try {
         const res  = await fetch('api/teacher/toggle_quiz_status.php', {
@@ -1209,50 +1614,44 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
                 ? '#f28c38' : updatedStatus === 'Scheduled'
                 ? '#1e90ff' : '#6b7280';
 
-            const badge = document.querySelector(
-                `.teacher-quiz-card[data-quiz-id="${quizId}"] .teacher-quiz-status-badge`
-            );
-            const panelBadge = document.getElementById(`qz-panel-status-badge-${quizId}`);
-            const btn = document.getElementById(`status-btn-${quizId}`);
-
-            if (badge) {
-                badge.textContent   = updatedStatus;
-                badge.style.color   = statusColor;
-                badge.style.background = `${statusColor}20`;
-                badge.style.border  = `1px solid ${statusColor}50`;
-            }
-            if (panelBadge) {
-                panelBadge.textContent = updatedStatus;
-                panelBadge.style.color = statusColor;
-                panelBadge.style.background = `${statusColor}20`;
-                panelBadge.style.border = `1px solid ${statusColor}50`;
-            }
-            if (btn) {
-                const newBtnText = updatedStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
-                const newBtnClass = updatedStatus === 'Closed' ? 'reopen' : 'close';
-                // Handle both desktop card and mobile button
-                if (btn.classList.contains('qz-action-card')) {
-                    const span = btn.querySelector('.qz-action-card-text span:first-child');
-                    if (span) span.textContent = newBtnText;
-                    btn.className = `qz-action-card ${newBtnClass} btn-loadable is-loading`;
-                } else {
-                    btn.textContent = newBtnText;
-                    btn.className   = `teacher-quiz-action-btn ${newBtnClass}`;
-                }
-                btn.dataset.quizStatus = updatedStatus;
-                btn.onclick = () => toggleQuizStatus(quizId, updatedStatus);
-            }
             // Update cached quiz data
-            if (window._allQuizzesFlat) {
-                const q = window._allQuizzesFlat.find(q => q.id == quizId);
-                if (q) q.status = updatedStatus;
+            const q = (window._allQuizzesFlat || []).find(q => q.id == quizId);
+            if (q) q.status = updatedStatus;
+
+            if (isDesktop) {
+                // Keep the left list's status dot in step with the panel
+                const dot = document.querySelector(`#qz-sidebar-${quizId} .qz-sidebar-status-dot`);
+                if (dot) dot.style.background = statusColor;
+                if (String(window._activeDesktopQuizId) === String(quizId)) {
+                    window.selectDesktopQuiz(quizId, { quiet: true });
+                }
+                window.qz2Toast(updatedStatus === 'Closed' ? 'Quiz closed' : 'Quiz reopened');
+            } else {
+                const badge = document.querySelector(
+                    `.teacher-quiz-card[data-quiz-id="${quizId}"] .teacher-quiz-status-badge`
+                );
+                if (badge) {
+                    badge.textContent   = updatedStatus;
+                    badge.style.color   = statusColor;
+                    badge.style.background = `${statusColor}20`;
+                    badge.style.border  = `1px solid ${statusColor}50`;
+                }
+                if (actionButton) {
+                    actionButton.textContent = updatedStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+                    actionButton.className   = `teacher-quiz-action-btn ${updatedStatus === 'Closed' ? 'reopen' : 'close'}`;
+                    actionButton.dataset.quizStatus = updatedStatus;
+                    actionButton.onclick = () => toggleQuizStatus(quizId, updatedStatus);
+                }
             }
             window.teacherQuizzesCache = null;
+        } else if (isDesktop) {
+            window.qz2Toast(data.message || "Couldn't update access. Try again.", true);
         } else {
             alert(data.message || 'Failed to update status');
         }
     } catch (e) {
-        alert('Connection error');
+        if (isDesktop) window.qz2Toast('Connection error. Check your internet and try again.', true);
+        else alert('Connection error');
     } finally {
         hideLoader();
     }
