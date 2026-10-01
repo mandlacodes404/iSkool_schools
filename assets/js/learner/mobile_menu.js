@@ -163,6 +163,13 @@
     });
   }
 
+  /* ── Profile picture file input ──────────────────────────────────────── */
+  // #profileInput sits inside #dmAccount. When something calls profileInput.click() (Upload photo in the sheet,
+  // the change-photo buttons in Settings), that click bubbles up to the account row above, whose handler calls
+  // preventDefault() (which cancels the file picker) and opens the sheet. Keep the input's own click to itself.
+  var photoInput = $('profileInput');
+  if (photoInput) photoInput.addEventListener('click', function (e) { if (isMobile()) e.stopPropagation(); });
+
   /* ── Search ──────────────────────────────────────────────────────────── */
   var ICON = {
     'nav-home-sidebar': 'home', 'nav-quiz-sidebar': 'quiz', 'nav-assignments-sidebar': 'assign', 'nav-resources-sidebar': 'folder',

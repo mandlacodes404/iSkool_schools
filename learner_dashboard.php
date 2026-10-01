@@ -251,7 +251,7 @@ if (!empty($joinedClassIds)) {
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.4">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -3899,7 +3899,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/syllabus.js?v=3.6"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_menu.js?v=1.0"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

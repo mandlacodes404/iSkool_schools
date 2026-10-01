@@ -142,7 +142,7 @@ html body .sidebar.dm-menu .dm-toggle, html body .sidebar.dm-menu .dm-kbd { disp
 /* -- Search ---------------------------------------------------------------- */
 html body .sidebar.dm-menu .dm-search {
   order: 2; flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box;
-  width: calc(100% - 28px) !important; height: 44px; min-height: 0; margin: 0 14px 18px !important; padding: 0 12px !important;
+  width: calc(100% - 28px) !important; height: 44px; min-height: 0; margin: 0 14px 28px !important; padding: 0 12px !important;
   border: 1px solid var(--dm-line); border-radius: 12px !important; background: rgba(255,255,255,.05);
   color: var(--dm-muted); font: 450 16px/1 var(--dm-font); font-size: 16px !important; font-weight: 450 !important;
   text-align: left; text-transform: none; cursor: pointer;
