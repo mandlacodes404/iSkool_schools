@@ -129,7 +129,7 @@ function getCsrfToken() {
           <span id="splash-wordmark">iSkool</span>
         </div>
         <div class="branding splash-version-footer">
-            <img src="enthropy/enthropy_wordmark.svg" alt="ENTHROPY" id="splash-brand-wordmark">
+            <img src="enthropy/wordmarking.svg" alt="ENTHROPY" id="splash-brand-wordmark">
         </div>
     </div>
     <!-- Login/Register container -->
