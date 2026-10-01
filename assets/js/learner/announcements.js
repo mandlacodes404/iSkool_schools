@@ -101,7 +101,7 @@ function saveAnnouncementPageState() {
         selectedIdx:   window._learnerAnnouncementSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
-        panelScroll:   panel ? panel.scrollTop : 0,
+        panelScroll:   (document.querySelector('.lan-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lan-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -116,7 +116,7 @@ function saveAnnouncementPageState() {
 function wireAnnouncementScrollState() {
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.lan-sidebar-scroll');
-    const panel = document.getElementById('lan-main-panel');
+    const panel = document.querySelector('.lan-body');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.lanScrollWired === '1') return;
         el.dataset.lanScrollWired = '1';
@@ -130,6 +130,7 @@ function restoreAnnouncementPageState() {
             ? window.learnerPageState.get('announcements')
             : JSON.parse(sessionStorage.getItem('announcementPageState') || '{}');
         if (!state || Object.keys(state).length === 0) {
+            window.lanEnsureSelection();
             wireAnnouncementScrollState();
             return;
         }
@@ -174,8 +175,9 @@ function restoreAnnouncementPageState() {
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
-            const panel = document.getElementById('lan-main-panel');
-            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+            const panelBody = document.querySelector('.lan-body');
+            if (panelBody && Number.isFinite(state.panelScroll)) panelBody.scrollTop = state.panelScroll;
+            window.lanEnsureSelection();
             wireAnnouncementScrollState();
             saveAnnouncementPageState();
         });
@@ -224,20 +226,22 @@ function renderAnnouncements(data) {
     if (!hasSchoolWide && !hasTeacher) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
-            <div class="lan-desktop-layout lqz-flat-layout">
-                <div class="lan-sidebar lqz-flat-sidebar">
-                    <div class="lan-desktop-search-wrap">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
-                            placeholder="Search announcements..." oninput="lanDesktopSearch(this.value)">
+            <div class="lan-desktop-layout lqz-flat-layout" id="lan-desktop-layout">
+                <div class="lan-sidebar">
+                    <div class="lan-lh">
+                        <div class="lan-desktop-search-wrap">
+                            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" class="lan-desktop-search" id="lanDesktopSearch" placeholder="Filter announcements" disabled>
+                        </div>
                     </div>
-                    <div class="lan-sidebar-scroll"></div>
+                    <div class="lan-sidebar-scroll" id="lan-list"></div>
                 </div>
+                <div class="lan-split" aria-hidden="true"></div>
                 <div class="lan-main-panel lqz-flat-panel" id="lan-main-panel">
                     <div class="lan-panel-empty">
-                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M11 5L6 9H2v6h4l5 4V5z"/>
                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
                         </svg>
@@ -283,108 +287,32 @@ function renderAnnouncements(data) {
         });
     }
 
-    // ── Build sidebar HTML ──
-    let sidebarHtml = '';
-    let flatIdx = 0;
-
-    // School-wide section
-    if (hasSchoolWide) {
-        sidebarHtml += `
-            <div class="lan-desktop-teacher-group">
-                <button type="button" class="lan-desktop-teacher-header lan-desktop-teacher-header--school" onclick="toggleLanDesktopGroup('lan-dg-school', this)">
-                    <svg class="lan-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                    <svg class="lan-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span class="lan-desktop-teacher-name">School-wide</span>
-                    <span class="lan-desktop-teacher-count">${schoolWide.length}</span>
-                </button>
-                <div class="lan-desktop-teacher-body collapsed" id="lan-dg-school">`;
-
-        schoolWide.forEach(ann => {
-            const isNew = new Date(ann.created_at) > sevenDaysAgo;
-            sidebarHtml += `
-                <div class="lan-sidebar-item lan-sidebar-item--school" id="lan-sidebar-${flatIdx}"
-                    data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
-                    onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
-                    <div class="lan-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                            <polyline points="9 22 9 12 15 12 15 22"/>
-                        </svg>
-                    </div>
-                    <div class="lan-sidebar-item-info">
-                        <div class="lan-sidebar-item-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
-                        <div class="lan-sidebar-item-meta">${ann.display_date}</div>
-                    </div>
-                    ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
-                </div>`;
-            flatIdx++;
-        });
-        sidebarHtml += `</div></div>`;
-    }
-
-    // Teacher section
-    if (hasTeacher) {
-        let desktopGroupIdx = 0;
-        for (const { teacher, items } of teacherEntries) {
-            const groupId = `lan-dg-teacher-${desktopGroupIdx++}`;
-            sidebarHtml += `
-                <div class="lan-desktop-teacher-group">
-                    <button type="button" class="lan-desktop-teacher-header" onclick="toggleLanDesktopGroup('${groupId}', this)">
-                        <svg class="lan-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                        <svg class="lan-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span class="lan-desktop-teacher-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
-                        <span class="lan-desktop-teacher-count">${items.length}</span>
-                    </button>
-                    <div class="lan-desktop-teacher-body collapsed" id="${groupId}">`;
-            items.forEach(ann => {
-                const isNew = new Date(ann.created_at) > sevenDaysAgo;
-                sidebarHtml += `
-                    <div class="lan-sidebar-item" id="lan-sidebar-${flatIdx}"
-                        data-title="${escapeLearnerAnnouncementHtml(ann.title || '').toLowerCase()}"
-                        onclick="selectDesktopLearnerAnnouncement(${flatIdx})">
-                        <div class="lan-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                            </svg>
-                        </div>
-                        <div class="lan-sidebar-item-info">
-                            <div class="lan-sidebar-item-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
-                            <div class="lan-sidebar-item-meta">${ann.display_date}</div>
-                        </div>
-                        ${isNew ? '<span class="lan-sidebar-new-badge">NEW</span>' : ''}
-                    </div>`;
-                flatIdx++;
-            });
-            sidebarHtml += `</div></div>`;
-        }
-    }
-
     // ── Build full HTML ──
     // (Styles for this markup now live in assets/css/learner/announcements.css
     // — the ~440-line inline <style> block that used to be injected here was
     // removed as part of the inline-style cleanup.)
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lan-desktop-layout lqz-flat-layout">
-            <div class="lan-sidebar lqz-flat-sidebar">
-                <div class="lan-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
-                        placeholder="Search announcements..." oninput="lanDesktopSearch(this.value)">
+        <div class="lan-desktop-layout lqz-flat-layout" id="lan-desktop-layout">
+            <div class="lan-sidebar">
+                <div class="lan-lh">
+                    <div class="lan-lh-row">
+                        <div class="lan-desktop-search-wrap">
+                            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" class="lan-desktop-search" id="lanDesktopSearch"
+                                placeholder="Filter announcements" oninput="lanDesktopSearch(this.value)">
+                        </div>
+                        <button type="button" class="lan-markall" id="lan-markall" title="Mark all as read" aria-label="Mark all as read" onclick="lanMarkAllRead()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+                        </button>
+                    </div>
+                    <div class="lan-chips" id="lan-chips"></div>
                 </div>
-                <div class="lan-sidebar-scroll">${sidebarHtml}</div>
+                <div class="lan-sidebar-scroll" id="lan-list" tabindex="0" onkeydown="lanListKeydown(event)"></div>
             </div>
+            <div class="lan-split" id="lan-split" role="separator" aria-orientation="vertical" aria-label="Resize announcement list" tabindex="0"></div>
             <div class="lan-main-panel lqz-flat-panel" id="lan-main-panel">
                 <div class="lan-panel-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
@@ -518,6 +446,7 @@ function renderAnnouncements(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    window.lanInitDesktop();
 }
 
 window.lanMobileSearch = function(val) {
@@ -541,39 +470,6 @@ window.lanMobileSearch = function(val) {
             if (header) header.classList.remove('lan-mobile-folder-header--collapsed');
             const chev = header ? header.querySelector('.lan-mobile-folder-chevron') : null;
             if (chev) chev.classList.add('open');
-        }
-    });
-};
-
-window.lanDesktopSearch = function(val) {
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lan-desktop-teacher-group').forEach(group => {
-        const header = group.querySelector('.lan-desktop-teacher-header');
-        const body   = group.querySelector('.lan-desktop-teacher-body');
-        const nameEl = group.querySelector('.lan-desktop-teacher-name');
-        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
-        if (!header || !body) return;
-
-        const items = body.querySelectorAll('.lan-sidebar-item');
-        let visible = 0;
-        items.forEach(item => {
-            const title = (item.dataset.title || '');
-            const show = !term || title.includes(term) || groupName.includes(term);
-            item.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-
-        const groupShow = visible > 0 || !term || groupName.includes(term);
-        group.style.display = groupShow ? '' : 'none';
-
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            const chev = header.querySelector('.lan-desktop-teacher-chevron');
-            if (chev) chev.classList.add('open');
-        } else if (!term) {
-            body.classList.add('collapsed');
-            const chev = header.querySelector('.lan-desktop-teacher-chevron');
-            if (chev) chev.classList.remove('open');
         }
     });
 };
@@ -608,21 +504,6 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     // background (and header) never got re-checked against the new
     // height — it could stay stuck showing whatever state it was in
     // before the folder toggled.
-    recheckMobileNavAfterToggle();
-};
-
-window.toggleLanDesktopGroup = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.lan-desktop-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveAnnouncementPageState();
-
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there —
-    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
     recheckMobileNavAfterToggle();
 };
 
@@ -722,57 +603,310 @@ window.openMobileLearnerAnnouncementById = function(announcementId, scope = '') 
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ANNOUNCEMENT
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// DESKTOP LIST: time groups, filter chips, unread state
+// ─────────────────────────────────────────────
+window._lanFilter = 'all';
+window._lanTerm = '';
+window._lanRead = null;
+window._lanReadTimer = null;
+
+function lanKey(ann) { return `${ann._type || 'teacher'}:${ann.id}`; }
+function lanReadStoreKey() { return 'lan.read.' + (window.learnerQueueUser || ''); }
+
+// Read state lives in this browser. First visit: anything older than 7 days
+// counts as read (the same window the old NEW badge used).
+function lanLoadRead() {
+    const items = window._allLearnerAnnouncementsFlat || [];
+    try {
+        const stored = JSON.parse(localStorage.getItem(lanReadStoreKey()));
+        if (Array.isArray(stored)) { window._lanRead = new Set(stored); return; }
+    } catch (e) {}
+    const cutoff = Date.now() - 7 * 86400000;
+    window._lanRead = new Set(items.filter(a => getLearnerAnnouncementTime(a) < cutoff).map(lanKey));
+    lanSaveRead();
+}
+function lanSaveRead() {
+    try { localStorage.setItem(lanReadStoreKey(), JSON.stringify(Array.from(window._lanRead))); } catch (e) {}
+}
+
+function lanDaysAgo(ann) {
+    const t = getLearnerAnnouncementTime(ann);
+    if (!t) return 999;
+    const a = new Date(); a.setHours(0, 0, 0, 0);
+    const b = new Date(t); b.setHours(0, 0, 0, 0);
+    return Math.round((a - b) / 86400000);
+}
+function lanGroupOf(ann) {
+    const d = lanDaysAgo(ann);
+    return d <= 0 ? 'Today' : d <= 7 ? 'This week' : 'Earlier';
+}
+function lanRowTime(ann) {
+    const t = getLearnerAnnouncementTime(ann);
+    if (!t) return '';
+    const d = new Date(t), days = lanDaysAgo(ann);
+    if (days <= 0) return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+    return d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+function lanPlain(ann) { return String(ann.message || '').replace(/\s+/g, ' ').trim(); }
+function lanUnreadCount() {
+    return (window._allLearnerAnnouncementsFlat || []).filter(a => !window._lanRead.has(lanKey(a))).length;
+}
+
+window.lanRenderDesktopList = function () {
+    const list = document.getElementById('lan-list');
+    if (!list || !window._lanRead) return;
+    const keepScroll = list.scrollTop;
+    const term = window._lanTerm;
+    const read = window._lanRead;
+    const items = (window._allLearnerAnnouncementsFlat || []).map((ann, idx) => ({ ann, idx }));
+    const showActive = !!document.querySelector('#lan-main-panel .lan-dh');
+
+    const counts = { all: items.length, unread: 0, school: 0, teacher: 0 };
+    items.forEach(({ ann }) => {
+        if (!read.has(lanKey(ann))) counts.unread++;
+        if (ann._type === 'school') counts.school++; else counts.teacher++;
+    });
+    const chipsEl = document.getElementById('lan-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = [['all', 'All'], ['unread', 'Unread'], ['school', 'School-wide'], ['teacher', 'Teachers']]
+            .map(([k, label]) => `<button type="button" class="lan-chip${window._lanFilter === k ? ' on' : ''}" onclick="lanSetFilter('${k}')">${label} ${counts[k]}</button>`)
+            .join('');
+    }
+    const markAll = document.getElementById('lan-markall');
+    if (markAll) markAll.disabled = counts.unread === 0;
+
+    const visible = items.filter(({ ann }) => {
+        const f = window._lanFilter;
+        const ok = f === 'all' || (f === 'unread' && !read.has(lanKey(ann))) ||
+            (f === 'school' && ann._type === 'school') || (f === 'teacher' && ann._type !== 'school');
+        return ok && (!term || `${ann.title || ''} ${ann.teacher || ''} ${ann.message || ''}`.toLowerCase().includes(term));
+    });
+
+    let html = '';
+    ['Today', 'This week', 'Earlier'].forEach(group => {
+        const rows = visible.filter(({ ann }) => lanGroupOf(ann) === group)
+            .sort((a, b) => getLearnerAnnouncementTime(b.ann) - getLearnerAnnouncementTime(a.ann));
+        if (!rows.length) return;
+        html += `<div class="lan-gh">${group}</div>`;
+        rows.forEach(({ ann, idx }) => {
+            const isSchool = ann._type === 'school';
+            const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
+            const initials = ann.initials || getLearnerAnnouncementInitials(sender);
+            const unread = !read.has(lanKey(ann));
+            const active = showActive && idx === window._learnerAnnouncementSelectedIdx ? ' active' : '';
+            html += `
+                <div class="lan-sidebar-item lan-row${active}" id="lan-sidebar-${idx}" onclick="selectDesktopLearnerAnnouncement(${idx})">
+                    <span class="lan-ava${isSchool ? ' lan-ava--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</span>
+                    <div class="lan-sidebar-item-info">
+                        <div class="lan-sidebar-item-title${unread ? ' lan-unread' : ''}">${escapeLearnerAnnouncementHtml(ann.title || '')}</div>
+                        <div class="lan-sidebar-item-meta">${escapeLearnerAnnouncementHtml(sender)} &middot; ${escapeLearnerAnnouncementHtml(lanPlain(ann).slice(0, 140))}</div>
+                    </div>
+                    <span class="lan-rr"><span class="lan-tm">${escapeLearnerAnnouncementHtml(lanRowTime(ann))}</span>${unread ? '<span class="lan-udot"></span>' : ''}</span>
+                </div>`;
+        });
+    });
+    list.innerHTML = html || `<div class="lan-list-empty">${items.length ? 'No announcements match.' : "Your teachers haven't posted any announcements yet."}</div>`;
+    list.scrollTop = keepScroll;
+};
+
+window.lanSetFilter = function (key) { window._lanFilter = key; window.lanRenderDesktopList(); };
+window.lanDesktopSearch = function (val) {
+    window._lanTerm = String(val || '').toLowerCase().trim();
+    window.lanRenderDesktopList();
+};
+
+function lanSelected() { return (window._allLearnerAnnouncementsFlat || [])[window._learnerAnnouncementSelectedIdx]; }
+
+function lanRefreshReadBtn() {
+    const btn = document.getElementById('lan-readbtn');
+    const ann = lanSelected();
+    if (btn && ann) btn.textContent = window._lanRead.has(lanKey(ann)) ? 'Mark as unread' : 'Mark as read';
+}
+
+// Opening an announcement marks it read after a short pause
+window.lanScheduleRead = function (ann) {
+    clearTimeout(window._lanReadTimer);
+    const key = lanKey(ann);
+    if (window._lanRead.has(key)) return;
+    window._lanReadTimer = setTimeout(() => {
+        const cur = lanSelected();
+        if (!cur || lanKey(cur) !== key) return;
+        window._lanRead.add(key);
+        lanSaveRead();
+        window.lanRenderDesktopList();
+        lanRefreshReadBtn();
+    }, 900);
+};
+
+window.lanToggleRead = function () {
+    const ann = lanSelected();
+    if (!ann) return;
+    clearTimeout(window._lanReadTimer);
+    const key = lanKey(ann);
+    if (window._lanRead.has(key)) window._lanRead.delete(key); else window._lanRead.add(key);
+    lanSaveRead();
+    window.lanRenderDesktopList();
+    lanRefreshReadBtn();
+};
+
+window.lanMarkAllRead = function () {
+    clearTimeout(window._lanReadTimer);
+    (window._allLearnerAnnouncementsFlat || []).forEach(a => window._lanRead.add(lanKey(a)));
+    lanSaveRead();
+    window.lanRenderDesktopList();
+    lanRefreshReadBtn();
+};
+
+// ↑ / ↓ move through the list
+window.lanListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#lan-list .lan-sidebar-item'))
+        .map(el => parseInt(el.id.replace('lan-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._learnerAnnouncementSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopLearnerAnnouncement(ids[next]);
+    const el = document.getElementById(`lan-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+// Desktop never shows an empty detail pane when there's something to show
+window.lanEnsureSelection = function () {
+    if (window.innerWidth < 900) return;
+    if (document.querySelector('#lan-list .lan-sidebar-item.active')) return;
+    const first = document.querySelector('#lan-list .lan-sidebar-item');
+    if (first) window.selectDesktopLearnerAnnouncement(parseInt(first.id.replace('lan-sidebar-', ''), 10));
+};
+
+// Drag (or ← / →) to resize the list; width is remembered and shared with Quiz and Assignments
+window.lanInitSplit = function () {
+    const layout = document.getElementById('lan-desktop-layout');
+    const split = document.getElementById('lan-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--lan-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--lan-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.lanInitDesktop = function () {
+    clearTimeout(window._lanReadTimer);
+    window._lanFilter = 'all';
+    window._lanTerm = '';
+    lanLoadRead();
+    window.lanRenderDesktopList();
+    window.lanInitSplit();
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT ANNOUNCEMENT
+// ─────────────────────────────────────────────
 window.selectDesktopLearnerAnnouncement = function(flatIdx) {
+    const flat = window._allLearnerAnnouncementsFlat || [];
+    const ann = flat[flatIdx];
+    if (!ann) return;
     window._learnerAnnouncementSelectedIdx = flatIdx;
     saveAnnouncementPageState();
     document.querySelectorAll('.lan-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lan-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
-    const ann = (window._allLearnerAnnouncementsFlat || [])[flatIdx];
-    if (!ann) return;
-
     const panel = document.getElementById('lan-main-panel');
     if (!panel) return;
-
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const isNew = new Date(ann.created_at) > sevenDaysAgo;
 
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const roleLabel = isSchool ? 'School Admin' : 'Teacher';
     const initials = ann.initials || getLearnerAnnouncementInitials(sender);
+    const isRead = window._lanRead ? window._lanRead.has(lanKey(ann)) : true;
+
+    const chips =
+        (isSchool ? '<span class="lan-panel-status" style="background:rgba(210,149,34,0.12);border-color:rgba(210,149,34,0.35);color:#d29522;">School-wide</span>' : '') +
+        (ann.is_edited ? '<span class="lan-panel-status">Edited</span>' : '');
+
+    // More from the same sender (most recent first)
+    const more = flat
+        .map((a, i) => ({ a, i }))
+        .filter(({ a, i }) => i !== flatIdx && a._type === ann._type && (a.teacher || a.sender) === (ann.teacher || ann.sender))
+        .sort((x, y) => getLearnerAnnouncementTime(y.a) - getLearnerAnnouncementTime(x.a))
+        .slice(0, 3)
+        .map(({ a, i }) => `
+            <button type="button" class="lan-more" onclick="selectDesktopLearnerAnnouncement(${i})">
+                <b>${escapeLearnerAnnouncementHtml(a.title || '')}</b>
+                <small>${escapeLearnerAnnouncementHtml(a.display_date || '')}</small>
+            </button>`)
+        .join('');
 
     panel.innerHTML = `
-        <div class="lan-panel-content">
-            <div class="lan-panel-header">
-                <div class="lan-panel-header-main">
-                    ${isSchool ? `
-                        <div class="lan-school-wide-badge">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                <polyline points="9 22 9 12 15 12 15 22"/>
-                            </svg>
-                            School-wide
-                        </div>` : ''}
-                    <div class="lan-panel-author-row">
-                        <div class="lan-panel-avatar ${isSchool ? 'lan-panel-avatar--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</div>
-                        <div class="lan-panel-author-info">
-                            <div class="lan-panel-author-name">${escapeLearnerAnnouncementHtml(sender)}</div>
-                            <div class="lan-panel-author-role">
-                                <span>Author</span><span class="lan-panel-role-sep">|</span><span class="lan-panel-role-badge ${isSchool ? 'lan-panel-role-badge--school' : ''}">${escapeLearnerAnnouncementHtml(roleLabel)}</span>
-                            </div>
-                            <div class="lan-panel-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+        <div class="lan-dh">
+            <h2 class="lan-dh-title">${escapeLearnerAnnouncementHtml(ann.title || '')}</h2>
+            ${chips}
+            <span class="lan-dsp"></span>
+            <button type="button" class="lan-btn2" id="lan-readbtn" onclick="lanToggleRead()">${isRead ? 'Mark as unread' : 'Mark as read'}</button>
+        </div>
+        <div class="lan-dbody">
+            <div class="lan-body">
+                <div class="lan-read">
+                    <div class="lan-auth">
+                        <span class="lan-ava lan-ava--lg${isSchool ? ' lan-ava--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</span>
+                        <div>
+                            <b>${escapeLearnerAnnouncementHtml(sender)}</b>
+                            <small>${escapeLearnerAnnouncementHtml(roleLabel)} &middot; Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</small>
                         </div>
                     </div>
-                    <div class="lan-panel-title">${ann.title}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</div>
-                    ${ann.is_edited ? `<div class="lan-edited-meta">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}</div>` : ''}
+                    ${ann.is_edited ? `<div class="lan-edn">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}. Changes are highlighted.</div>` : ''}
+                    <div class="lan-msg">${renderLearnerAnnouncementBody(ann)}</div>
                 </div>
-                ${isNew ? '<span class="lan-panel-new-badge">NEW</span>' : ''}
             </div>
-            <div class="lan-panel-message">
-                ${renderLearnerAnnouncementBody(ann)}
-            </div>
+            <aside class="lan-rail">
+                <h4>Details</h4>
+                <div class="lan-kv"><span>From</span><b>${escapeLearnerAnnouncementHtml(sender)}</b></div>
+                <div class="lan-kv"><span>Role</span><b>${escapeLearnerAnnouncementHtml(roleLabel)}</b></div>
+                <div class="lan-kv"><span>Audience</span><b>${isSchool ? 'Whole school' : 'Your class'}</b></div>
+                <div class="lan-kv"><span>Posted</span><b>${escapeLearnerAnnouncementHtml(ann.display_date || '')}</b></div>
+                ${ann.is_edited ? `<div class="lan-kv"><span>Edited</span><b>${escapeLearnerAnnouncementHtml(ann.edited_date || '')}</b></div>` : ''}
+                ${more ? `<h4 class="lan-rail-sub">More from ${escapeLearnerAnnouncementHtml(sender)}</h4>${more}` : ''}
+            </aside>
         </div>`;
+
+    // Keep the selected row visible inside the list (scrolls the list only)
+    const listBox = document.getElementById('lan-list');
+    if (listBox && sidebarItem) {
+        const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
+        if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
+        else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
+    }
+    if (window._lanRead) window.lanScheduleRead(ann);
+    if (window.learnerPageState) wireAnnouncementScrollState();
 };
