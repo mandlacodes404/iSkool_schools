@@ -251,7 +251,7 @@ if (!empty($joinedClassIds)) {
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -2167,30 +2167,71 @@ if (avatarWrapper && profileInput) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Show instant preview BEFORE upload completes (no loader needed)
+        // Remember how the avatar looked, so a failed upload can put it back
+        const prevImg  = avatarWrapper.querySelector('img.learner-avatar');
+        const prevSrc  = prevImg ? prevImg.src : null;
+        const initials = '<?= htmlspecialchars($initials) ?>';
+
+        // Instant preview BEFORE the upload completes
         const previewUrl = URL.createObjectURL(file);
         window.updateAvatarUI(previewUrl);
 
-        const fd = new FormData();
-        fd.append("profile", file);
+        // Upload failed: put the old avatar back and say why (a preview that was never saved looks like it worked)
+        const undo = (msg) => {
+            if (prevSrc) window.updateAvatarUI(prevSrc); else window.resetAvatarUI(initials);
+            URL.revokeObjectURL(previewUrl);
+            profileInput.value = '';   // so the same file can be picked again
+            alert(msg);
+        };
 
-        fetch("upload_profile.php", { method: "POST", headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    // Swap blob preview with real permanent server URL
-                    const serverUrl = "uploads/learners/" + data.file + "?t=" + Date.now();
-                    window.updateAvatarUI(serverUrl);
-                     loadLearnerSettings(); // ← ADDED
+        // Phone photos are often 3-8 MB, which is over many servers' upload limit and slow on mobile data.
+        // An avatar never needs more than ~800px, so anything over 1 MB (or not jpg/png/gif) is shrunk to a JPEG first.
+        // If the browser can't decode the file, the original is sent unchanged.
+        const prepare = () => new Promise((resolve) => {
+            const okType = /\.(jpe?g|png|gif)$/i.test(file.name);
+            if (file.size <= 1024 * 1024 && okType) return resolve({ blob: file, name: file.name });
+            const img = new Image();
+            img.onload = () => {
+                const scale  = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+                const canvas = document.createElement('canvas');
+                canvas.width  = Math.max(1, Math.round(img.naturalWidth  * scale));
+                canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#fff';                         // JPEG has no transparency
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(b => resolve(b ? { blob: b, name: 'profile.jpg' } : { blob: file, name: file.name }), 'image/jpeg', 0.85);
+            };
+            img.onerror = () => resolve({ blob: file, name: file.name });
+            img.src = previewUrl;
+        });
+
+        prepare()
+            .then(({ blob, name }) => {
+                const fd = new FormData();
+                fd.append("profile", blob, name);
+                return fetch("upload_profile.php", { method: "POST", headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+            })
+            .then(r => r.text().then(text => ({ ok: r.ok, status: r.status, text })))
+            .then(({ ok, status, text }) => {
+                let data = null;
+                try { data = JSON.parse(text); } catch (_) { /* not JSON: PHP error page, 413 from the web server, etc. */ }
+
+                if (ok && data && data.success) {
+                    // Swap the blob preview for the real saved file
+                    window.updateAvatarUI("uploads/learners/" + data.file + "?t=" + Date.now());
+                    URL.revokeObjectURL(previewUrl);
+                    profileInput.value = '';
+                    loadLearnerSettings();
+                } else if (data && data.error) {
+                    undo(data.error);
                 } else {
-                    alert(data.error || "Upload failed");
+                    undo("Upload failed (HTTP " + status + "): " + text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160));
                 }
-                profileInput.value = ''; // Reset so same file can be picked again
             })
             .catch(err => {
                 console.error("Upload Error:", err);
-                alert("A connection error occurred during upload.");
-                profileInput.value = '';
+                undo("A connection error occurred during upload.");
             });
     });
 }
