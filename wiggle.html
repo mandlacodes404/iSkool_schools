@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#faf9f5" />
+<meta name="description" content="Wiggle is a technology company building products that make life a little better." />
+<title>Wiggle — We make things.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#faf9f5; --surface:rgba(255,255,255,.68); --ink:#0a1b31; --muted:#5b697d; --line:rgba(12,29,51,.1);
+  --shadow:0 30px 100px rgba(30,42,62,.085); --ease:cubic-bezier(.16,1,.3,1);
+  --font:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;overflow-x:hidden;min-width:320px;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
+body.menu-open{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid rgba(74,126,206,.6);outline-offset:5px;border-radius:4px}
+::selection{background:rgba(119,164,232,.22)}
+
+.site{position:relative}
+
+/* header */
+header{height:88px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:20}
+.logo{display:block;width:113px;height:auto}
+.head-right{display:flex;align-items:center;gap:34px}
+.desktop-nav{display:flex;gap:34px;font-size:14px;font-weight:500}
+.desktop-nav a{transition:opacity .2s}.desktop-nav a:hover{opacity:.5}
+.menu-button{width:24px;height:20px;padding:0;border:0;background:none;display:none;flex-direction:column;justify-content:center;gap:7px;cursor:pointer}
+.menu-button span{display:block;height:1.5px;width:100%;background:#526278;transition:transform .35s var(--ease)}
+.menu-button[aria-expanded=true] span:first-child{transform:translateY(4.25px) rotate(45deg)}
+.menu-button[aria-expanded=true] span:last-child{transform:translateY(-4.25px) rotate(-45deg)}
+
+.mobile-panel{position:fixed;inset:0;z-index:15;display:grid;place-items:center;padding:90px 34px 34px;background:rgba(250,249,245,.985);
+  backdrop-filter:blur(18px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.mobile-panel.open{opacity:1;visibility:visible}
+.mobile-links{width:min(420px,100%);display:grid}
+.mobile-links a{padding:14px 0;font-size:34px;letter-spacing:-1.5px;font-weight:400;border-bottom:1px solid var(--line)}
+
+/* hero */
+.hero{min-height:420px;padding:44px var(--gutter) 38px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:20px;position:relative}
+.hero h1{margin:0 0 22px;font-size:clamp(54px,6vw,72px);line-height:1;letter-spacing:-.06em;font-weight:400}
+.hero p{margin:0 0 30px;max-width:420px;color:var(--muted);font-size:17px;line-height:1.6;font-weight:400}
+.jump{display:inline-flex;align-items:center;gap:15px;font-size:14px;font-weight:500;transition:transform .25s var(--ease)}
+.jump:hover{transform:translateX(4px)}
+.jump .arrow{font-size:24px;font-weight:300;line-height:1}
+
+.orbital{position:relative;width:380px;height:300px;justify-self:end;margin-right:20px;animation:float 8s ease-in-out infinite}
+.orbital::after{content:"";position:absolute;width:260px;height:70px;left:60px;bottom:-6px;background:radial-gradient(ellipse,rgba(242,182,128,.2),transparent 70%);filter:blur(10px)}
+.blob{position:absolute;border-radius:48% 52% 44% 56%;filter:drop-shadow(0 17px 20px rgba(0,0,0,.08));transform:rotate(var(--r))}
+.b1{--r:-34deg;width:150px;height:180px;left:20px;top:78px;background:linear-gradient(145deg,#ffe08c,#ffbb3e);animation:dA 9s ease-in-out infinite}
+.b2{--r:-35deg;width:145px;height:190px;left:130px;top:6px;background:linear-gradient(145deg,#a9d5ff,#5e9fe9);animation:dB 11s ease-in-out infinite}
+.b3{--r:-9deg;width:165px;height:120px;left:190px;top:152px;background:linear-gradient(145deg,#ff9f9e,#f36e79);animation:dC 10s ease-in-out infinite}
+.b4{--r:25deg;width:58px;height:72px;left:312px;top:62px;background:linear-gradient(145deg,#76d4ad,#3bb889);animation:dD 8s ease-in-out infinite}
+@keyframes float{50%{translate:0 -8px}}
+@keyframes dA{50%{translate:-6px 4px}}@keyframes dB{50%{translate:5px -5px}}
+@keyframes dC{50%{translate:4px 5px}}@keyframes dD{50%{translate:-4px -4px}}
+
+/* products */
+.products{padding:34px var(--gutter) 0}
+.eyebrow{margin:0 0 12px;color:#657287;font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600}
+.section-title{margin:0 0 24px;font-size:32px;line-height:1.14;letter-spacing:-.04em;font-weight:400}
+.cards{display:grid;grid-template-columns:1.02fr .98fr;gap:18px}
+.card{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;min-height:290px;padding:30px 30px 28px 32px;border:1px solid rgba(255,255,255,.75);border-radius:16px;isolation:isolate;transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.card:hover{transform:translateY(-3px);box-shadow:0 24px 70px rgba(44,56,79,.11)}
+.iskool{background:linear-gradient(135deg,#e9f4fc,#eef3fb)}
+.laura{background:linear-gradient(135deg,#f8f2fb,#fbf0f2)}
+.card-text{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start}
+.product-name{margin:0 0 20px;font-size:36px;line-height:1;letter-spacing:-.06em;font-weight:700}
+.iskool .product-name{color:#2b61d7}.iskool .i{color:#f04f5f}.iskool .S{color:#3a78db}.iskool .k{color:#f2b537}.iskool .o{color:#42b77b}.iskool .l{color:#5c9ee9}
+.laura .product-name{color:#292d9d;font-weight:600}
+.card h3{margin:0 0 12px;font-size:20px;line-height:1.2;letter-spacing:-.03em;font-weight:500}
+.card p{margin:0 0 24px;max-width:250px;color:var(--muted);font-size:14px;line-height:1.6}
+.card-link{margin-top:auto;display:flex;align-items:center;gap:11px;font-size:14px;font-weight:500;transition:gap .25s var(--ease)}
+.card-link:hover{gap:16px}
+
+.stage{position:relative;align-self:center;justify-self:end;width:100%;max-width:250px;aspect-ratio:1.3;z-index:1}
+.glow{position:absolute;border-radius:48% 52% 44% 56%;z-index:0}
+.iskool .g1{left:-2%;top:-2%;width:70%;height:58%;background:#9cc3f5;opacity:.85;transform:rotate(-12deg)}
+.iskool .g2{right:-10%;bottom:-14%;width:36%;height:42%;background:#b8a6ee;opacity:.9}
+.laura .g1{left:-2%;top:-10%;width:78%;height:96%;background:#cdbaf5;opacity:.7;border-radius:50%}
+.laura .g2{right:-2%;top:2%;width:30%;height:66%;background:#ffc6a0;transform:rotate(14deg)}
+.laura .g3{right:4%;bottom:-8%;width:44%;height:40%;background:#f6b8d4;opacity:.7}
+.mock{position:absolute;inset:8% 10% 0 0;overflow:hidden;z-index:1;border:1px solid rgba(255,255,255,.85);border-radius:10px;background:rgba(255,255,255,.88);box-shadow:0 15px 35px rgba(70,92,128,.15)}
+.iskool .mock::before{content:"";position:absolute;left:0;top:0;bottom:0;width:13%;background:linear-gradient(#3456ba,#567ce1)}
+.iskool .row{height:8%;margin:7% 8% 0 20%;background:#edf1f7;border-radius:3px}
+.iskool .row:nth-child(3){width:70%}.iskool .row:nth-child(4){width:55%}.iskool .row:nth-child(5){width:64%}
+.note{position:absolute;right:-6%;top:-8%;z-index:3;padding:7px 10px;border-radius:8px;background:#fff;box-shadow:0 9px 24px rgba(50,64,90,.14);font-size:10px;line-height:1.35;color:#26354b;font-weight:500}
+.laura .mock{inset:6% 12% 4% 0}
+.check{display:flex;align-items:center;gap:9px;margin:13px 16px;font-size:11px;font-weight:500;color:#334158}
+.dot{width:13px;height:13px;border-radius:50%;background:#9e7af1}.dot.green{background:#6bc9a6}.dot.orange{background:#ffad64}
+.date{position:absolute;right:-8%;bottom:12%;z-index:3;padding:8px 10px;border-radius:8px;background:#fff;box-shadow:0 9px 24px rgba(50,64,90,.14);font-size:10px;line-height:1.3;text-align:center}
+.date b{display:block;font-size:13px}
+
+/* about */
+.about{margin:38px var(--gutter) 0;padding:24px 0 36px;display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--line)}
+.about-title{margin:0;font-size:22px;line-height:1.2;letter-spacing:-.035em;font-weight:500}
+.about-toggle{display:none}
+.about-body p{margin:0 0 14px;max-width:340px;color:var(--muted);font-size:14px;line-height:1.7}
+.about-link{font-size:14px;font-weight:500}
+
+footer{height:86px;margin:0 var(--gutter);display:flex;align-items:center;gap:28px}
+footer .logo{width:72px;flex:none}
+.footer-line{flex:1;height:1px;background:var(--line)}
+.footer-nav{display:flex;gap:30px;color:#738095;font-size:13px}
+.footer-nav a:hover{color:var(--ink)}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s var(--ease)}
+.reveal.visible{opacity:1;transform:none}
+.no-js .reveal{opacity:1;transform:none}
+
+/* mobile */
+@media (max-width:800px){
+  :root{--pad:24px}
+  .site{width:calc(100% - 12px);margin:6px auto 10px;border-radius:10px}
+  header{height:72px}
+  .menu-button{display:flex}
+  .logo{width:92px}
+  .desktop-nav{display:none}
+  .hero{display:block;min-height:0;padding:30px var(--gutter) 8px;overflow:hidden}
+  .hero-copy{position:relative;z-index:2}
+  .hero h1{font-size:48px;margin-bottom:14px}
+  .hero p{font-size:15px;max-width:230px;margin-bottom:22px}
+  .orbital{position:absolute;right:-6px;bottom:6px;margin:0;transform:scale(.5);transform-origin:100% 100%}
+  .hero{padding-bottom:70px}
+  .products{padding-top:28px}
+  .section-title{font-size:24px}
+  .cards{grid-template-columns:1fr;gap:14px}
+  .card{min-height:0;padding:20px;gap:12px}
+  .product-name{font-size:28px;margin-bottom:12px}
+  .card h3{font-size:16px;margin-bottom:18px}
+  .card p{display:none}
+  .card-link{font-size:13px}
+  .about{margin-top:26px;padding:18px 0 22px;grid-template-columns:1fr;gap:0}
+  .about-head{display:flex;justify-content:space-between;align-items:flex-start}
+  .about-toggle{display:block;border:0;background:none;font-size:24px;font-weight:300;line-height:1;cursor:pointer;transition:transform .3s var(--ease)}
+  .about-toggle[aria-expanded=true]{transform:rotate(45deg)}
+  .about-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--ease)}
+  .about-body>div{overflow:hidden}
+  .about-body.open{grid-template-rows:1fr}
+  .about-body p{margin-top:16px}
+  footer{height:70px;gap:14px}
+  footer .logo{width:62px}
+  .footer-line{display:none}
+  .footer-nav{margin-left:auto;gap:14px;font-size:12px}
+}
+@media (max-width:360px){.card{grid-template-columns:1fr}.stage{justify-self:start;max-width:240px}.footer-nav{gap:10px}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body class="no-js">
+<main class="site" id="top">
+  <header>
+    <a href="#top" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+    <div class="head-right">
+      <nav class="desktop-nav" aria-label="Primary">
+        <a href="#products">Products</a><a href="#about">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
+      </nav>
+      <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <div class="mobile-panel" id="mobile-panel" aria-hidden="true">
+    <nav class="mobile-links" aria-label="Mobile">
+      <a href="#products">Products</a><a href="#about">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
+    </nav>
+  </div>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>We make<br>things.</h1>
+      <p>Wiggle is a technology company building products that make life a little better.</p>
+      <a class="jump" href="#products"><span class="arrow">↓</span><span>Our products</span></a>
+    </div>
+    <div class="orbital" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span></div>
+  </section>
+
+  <section class="products reveal" id="products">
+    <p class="eyebrow">Our products</p>
+    <h2 class="section-title">Tools for today.<br>Built for tomorrow.</h2>
+    <div class="cards">
+      <article class="card iskool">
+        <div class="card-text">
+          <div class="product-name" aria-label="iSkool"><span class="i">i</span><span class="S">S</span><span class="k">k</span><span class="o">o</span><span class="o">o</span><span class="l">l</span></div>
+          <h3>Teaching and<br>learning, connected.</h3>
+          <p>A modern platform for schools to manage, teach, communicate and help every learner thrive.</p>
+        <a class="card-link" href="#">Explore iSkool <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="stage" aria-hidden="true">
+          <i class="glow g1"></i><i class="glow g2"></i>
+          <div class="mock"><div class="row"></div><div class="row"></div><div class="row"></div><div class="row"></div><div class="row"></div></div>
+          <div class="note">Good morning,<br>Class 5A</div>
+        </div>
+      </article>
+
+      <article class="card laura">
+        <div class="card-text">
+          <div class="product-name">Laura</div>
+          <h3>Something new<br>is taking shape.</h3>
+          <p>Laura is our next product — focused on helping people work, organise and get more done.</p>
+        <a class="card-link" href="#">Discover Laura <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="stage" aria-hidden="true">
+          <i class="glow g1"></i><i class="glow g2"></i><i class="glow g3"></i>
+          <div class="mock">
+            <div class="check"><span class="dot"></span>Plan</div>
+            <div class="check"><span class="dot green"></span>Organise</div>
+            <div class="check"><span class="dot orange"></span>Get things done</div>
+          </div>
+          <div class="date">Nov<b>24</b></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="about reveal" id="about">
+    <div class="about-head">
+      <div>
+        <p class="eyebrow">About Wiggle</p>
+        <h2 class="about-title">A small team with<br>a big belief.</h2>
+      </div>
+      <button class="about-toggle" type="button" aria-label="Show more about Wiggle" aria-expanded="false" aria-controls="about-body">+</button>
+    </div>
+    <div class="about-body" id="about-body">
+      <div>
+        <p>We’re a technology company based in South Africa, building products that create real value for schools, people and the communities we serve.</p>
+        <a class="about-link" href="#">Learn more about us →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <a href="#top" aria-label="Back to top"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+    <span class="footer-line"></span>
+    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="#about">About</a><a href="#careers" id="careers">Careers</a><a href="#contact">Contact</a></nav>
+  </footer>
+</main>
+
+<script>
+(() => {
+  document.body.classList.remove('no-js');
+  const btn = document.querySelector('.menu-button'), panel = document.getElementById('mobile-panel');
+  const setMenu = open => {
+    document.body.classList.toggle('menu-open', open);
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', String(!open));
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  btn.addEventListener('click', () => setMenu(btn.getAttribute('aria-expanded') !== 'true'));
+  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  matchMedia('(min-width:801px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+  const tog = document.querySelector('.about-toggle'), body = document.getElementById('about-body');
+  tog.addEventListener('click', () => {
+    const open = tog.getAttribute('aria-expanded') !== 'true';
+    tog.setAttribute('aria-expanded', String(open));
+    body.classList.toggle('open', open);
+  });
+
+  const items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } }), { threshold: .12 });
+    items.forEach(i => io.observe(i));
+  } else items.forEach(i => i.classList.add('visible'));
+})();
+</script>
+</body>
+</html>
