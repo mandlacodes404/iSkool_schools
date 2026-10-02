@@ -39,8 +39,15 @@ if (isset($_FILES['profile']) && $_FILES['profile']['error'] === 0) {
     }
 
     // ── CHANGED: school-scoped upload directory ──────────────────────────────
-    $uploadDir  = getSchoolUploadDir($conn, 'uploads/learners');
+    $uploadDir  = getSchoolUploadDir($conn, __DIR__ . '/uploads/learners');  // absolute, so it never depends on the server's working directory
     $schoolSlug = getSchoolSlug($conn);
+
+    // The helper ignores a failed mkdir(), so check the folder is really there and writable
+    if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
+        error_log('upload_profile.php: upload folder missing or not writable: ' . $uploadDir);
+        echo json_encode(['error' => 'Server error: the upload folder is missing or not writable.']);
+        exit();
+    }
     // ────────────────────────────────────────────────────────────────────────
 
     $newName     = 'learner_' . time() . '.' . $ext;
