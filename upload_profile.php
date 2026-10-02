@@ -12,14 +12,54 @@ if (!isset($_SESSION['email'])) {
 
 verify_csrf_token();
 
-$email      = $_SESSION['email'];
-$defaultPic = 'default.png';
+$email       = $_SESSION['email'];
+$defaultPic  = 'default.png';
+$uploadsBase = __DIR__ . '/uploads/learners';   // absolute, so it never depends on the server's working directory
+
+// The picture this learner has right now (needed to clean up after a change)
+function getCurrentPicture(mysqli $conn, string $email): string
+{
+    $stmt = $conn->prepare("SELECT profile_picture FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->bind_result($pic);
+    $stmt->fetch();
+    $stmt->close();
+    return (string)($pic ?? '');
+}
+
+// Delete a learner's previous picture file, but only when that is clearly safe:
+//  - it looks like one of our own uploads (learner_<time>[_<hex>].jpg/png/gif), never a shared default or other asset
+//  - it really sits inside uploads/learners (no path tricks)
+//  - no other learner still points at the same file (older uploads could collide on the same name)
+function deleteOldProfilePicture(mysqli $conn, string $email, string $old, string $base): void
+{
+    $old = trim(str_replace('\\', '/', $old), '/');
+    if ($old === '' || $old === 'default.png') return;
+    if (!preg_match('/^learner_\d+(?:_[a-f0-9]+)?\.(?:jpe?g|png|gif)$/i', basename($old))) return;
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE profile_picture = ? AND email <> ?");
+    $stmt->bind_param("ss", $old, $email);
+    $stmt->execute();
+    $stmt->bind_result($others);
+    $stmt->fetch();
+    $stmt->close();
+    if ((int)$others > 0) return;
+
+    $real     = realpath($base . '/' . $old);
+    $realBase = realpath($base);
+    if ($real === false || $realBase === false || strpos($real, $realBase . DIRECTORY_SEPARATOR) !== 0 || !is_file($real)) return;
+
+    @unlink($real);
+}
 
 // ---- Handle remove profile request ----
 if (isset($_POST['remove']) && $_POST['remove'] == '1') {
+    $oldPicture = getCurrentPicture($conn, $email);
     $stmt = $conn->prepare("UPDATE users SET profile_picture = ? WHERE email = ?");
     $stmt->bind_param("ss", $defaultPic, $email);
     if ($stmt->execute()) {
+        deleteOldProfilePicture($conn, $email, $oldPicture, $uploadsBase);
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'error' => 'Failed to reset profile']);
@@ -29,17 +69,20 @@ if (isset($_POST['remove']) && $_POST['remove'] == '1') {
 
 // ---- Handle new profile upload ----
 if (isset($_FILES['profile']) && $_FILES['profile']['error'] === 0) {
-    $file    = $_FILES['profile'];
-    $ext     = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+    $file = $_FILES['profile'];
 
-    if (!in_array($ext, $allowed)) {
-        echo json_encode(['error' => 'Invalid file type']);
+    // Check the file really is an image (a file name can be faked) and take the extension from its real type
+    $info    = @getimagesize($file['tmp_name']);
+    $allowed = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif'];
+
+    if ($info === false || !isset($allowed[$info[2]])) {
+        echo json_encode(['error' => 'Invalid file type. Please choose a JPG, PNG or GIF image.']);
         exit();
     }
+    $ext = $allowed[$info[2]];
 
     // ── CHANGED: school-scoped upload directory ──────────────────────────────
-    $uploadDir  = getSchoolUploadDir($conn, __DIR__ . '/uploads/learners');  // absolute, so it never depends on the server's working directory
+    $uploadDir  = getSchoolUploadDir($conn, $uploadsBase);
     $schoolSlug = getSchoolSlug($conn);
 
     // The helper ignores a failed mkdir(), so check the folder is really there and writable
@@ -50,17 +93,32 @@ if (isset($_FILES['profile']) && $_FILES['profile']['error'] === 0) {
     }
     // ────────────────────────────────────────────────────────────────────────
 
-    $newName     = 'learner_' . time() . '.' . $ext;
+    $newName     = 'learner_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;   // random part: two learners can never overwrite each other
     $destination = $uploadDir . $newName;
 
     if (move_uploaded_file($file['tmp_name'], $destination)) {
         // Store slug/filename so the serving code can reconstruct the path
         $storedName = $schoolSlug . '/' . $newName;
 
+        $oldPicture = getCurrentPicture($conn, $email);
+
         $stmt = $conn->prepare("UPDATE users SET profile_picture = ? WHERE email = ?");
         $stmt->bind_param("ss", $storedName, $email);
-        $stmt->execute();
+        try {
+            $saved = $stmt->execute();
+        } catch (Throwable $e) {
+            error_log('upload_profile.php: could not save profile picture: ' . $e->getMessage());
+            $saved = false;
+        }
         $stmt->close();
+
+        if (!$saved) {
+            @unlink($destination);   // don't leave an orphan file behind, and keep the old picture
+            echo json_encode(['error' => 'Failed to save your profile picture. Please try again.']);
+            exit();
+        }
+
+        deleteOldProfilePicture($conn, $email, $oldPicture, $uploadsBase);
 
         echo json_encode(['success' => true, 'file' => $storedName]);
         exit();
