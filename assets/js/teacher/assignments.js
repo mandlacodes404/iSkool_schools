@@ -395,15 +395,33 @@ function asDpIcon(name, size) {
     return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
 }
 
-/** "Due in 2 days" / "Due today" / "Due 3 days ago". Returns '' whenever the
- * due_date string can't be read with certainty (no year, or a day/month
- * order that could be read two ways), so a wrong pill is never shown. */
+/** get_assignments.php sends due_date as PHP date('d M Y, g:i A'), e.g.
+ * "03 Oct 2026, 4:00 PM". That exact shape is parsed by hand: new Date() on it
+ * isn't reliable in every browser (Safari in particular). Returns null for any
+ * other shape. */
+function parseAssignmentDueDate(raw) {
+    const m = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}),? (\d{1,2}):(\d{2}) ?(AM|PM)$/i.exec(raw);
+    if (!m) return null;
+    const mon = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+        .indexOf(m[2].toLowerCase());
+    if (mon < 0) return null;
+    let hour = parseInt(m[4], 10) % 12;
+    if (m[6].toUpperCase() === 'PM') hour += 12;
+    return new Date(parseInt(m[3], 10), mon, parseInt(m[1], 10), hour, parseInt(m[5], 10));
+}
+
+/** "Due in 2 days" / "Due today" / "Due 3 days ago". Any other date shape falls
+ * back to new Date(), but only when it has a year and isn't a day/month order
+ * that could be read two ways. Returns '' otherwise, so a wrong pill is never shown. */
 function getAssignmentDueLabel(rawDue) {
     const raw = String(rawDue || '').trim();
     if (!raw) return '';
-    if (!/\b(19|20)\d{2}\b/.test(raw)) return '';
-    if (/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/.test(raw)) return '';
-    const due = new Date(raw);
+    let due = parseAssignmentDueDate(raw);
+    if (!due) {
+        if (!/\b(19|20)\d{2}\b/.test(raw)) return '';
+        if (/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/.test(raw)) return '';
+        due = new Date(raw);
+    }
     if (isNaN(due.getTime())) return '';
     const dayStart = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     const days = Math.round((dayStart(due) - dayStart(new Date())) / 86400000);
