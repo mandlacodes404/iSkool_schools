@@ -247,7 +247,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.9">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.2">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
@@ -3932,7 +3932,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/manual.js?v=11.0"></script>
 <script src="assets/js/learner/quiz.js?v=12.1"></script>
 <script src="assets/js/learner/assignments.js?v=10.0"></script>
-<script src="assets/js/learner/resources.js?v=8.5"></script>
+<script src="assets/js/learner/resources.js?v=8.6"></script>
 <script src="assets/js/learner/announcements.js?v=9.2"></script>
 <script src="assets/js/learner/grades.js?v=9.8"></script>
 <script src="assets/js/learner/evaluations.js?v=6.9"></script>
