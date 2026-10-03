@@ -380,6 +380,83 @@ function renderGrades(data) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DESKTOP: class performance overview ("range" view)
+// ─────────────────────────────────────────────────────────────────────────────
+window.grLoadRange = async function () {
+    const box = document.querySelector('.gr-ov');
+    if (!box) return;
+    const quizId = box.dataset.quizId;
+    const pct = Number(box.dataset.pct) || 0;
+    let data = window.learnerGradeStatsCache[quizId];
+    try {
+        if (!data) {
+            const res = await fetch(`get_quiz_stats.php?quiz_id=${quizId}`);
+            data = await res.json();
+            if (data.error) throw new Error(data.error);
+            window.learnerGradeStatsCache[quizId] = data;
+        }
+    } catch (e) {
+        if (document.body.contains(box)) {
+            const body = box.querySelector('.gr-ov-body');
+            if (body) body.innerHTML = '<div class="gr-ov-msg">Could not load class comparison.</div>';
+        }
+        return;
+    }
+    if (!document.body.contains(box)) return;
+    grPaintRange(box, pct, data);
+};
+
+function grPaintRange(box, p, d) {
+    const body = box.querySelector('.gr-ov-body');
+    const chip = box.querySelector('.gr-ov-chip');
+    const big = box.querySelector('.gr-ov-big');
+    const key = box.querySelector('.gr-ov-key');
+    const num = v => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+    const mn = num(d.min), av = num(d.avg), mx = num(d.max);
+
+    if (d.max === undefined || d.max === null || mn === mx) {
+        body.innerHTML = '<div class="gr-ov-msg">Not enough class results to compare yet.</div>';
+        return;
+    }
+
+    const diff = Math.round(p - av);
+    let ins;
+    if (p >= mx) ins = { t: 'Top score in the class', c: 'ok', a: '\u2605' };
+    else if (Math.abs(diff) <= 2) ins = { t: 'In line with the class average', c: 'mid', a: '=' };
+    else if (diff > 0) ins = { t: `${diff} point${diff === 1 ? '' : 's'} above the class average`, c: 'ok', a: '\u25B2' };
+    else ins = { t: `${-diff} point${diff === -1 ? '' : 's'} below the class average`, c: 'warn', a: '\u25BC' };
+
+    chip.hidden = false;
+    chip.className = 'gr-ov-chip ' + ins.c;
+    chip.textContent = ins.a + ' ' + ins.t;
+    big.className = 'gr-ov-big gr-ov-c-' + ins.c;
+
+    // Labels sit on one row; when two are too close the next drops to another row (up to three).
+    const last = [-99, -99, -99];
+    let rows = 1, labels = '';
+    [['Lowest', mn], ['Average', av], ['Highest', mx]].forEach(([name, v]) => {
+        let r = last.findIndex(x => v - x >= 17);
+        if (r < 0) r = 2;
+        rows = Math.max(rows, r + 1);
+        last[r] = v;
+        labels += `<span class="gr-ov-lbl" style="left:${v}%;top:${18 + r * 34}px;"><i></i>${name} <b>${v}%</b></span>`;
+    });
+
+    body.style.marginBottom = (26 + rows * 34) + 'px';
+    body.innerHTML = `
+        <div class="gr-ov-rng">
+            <span class="gr-ov-end" style="left:-34px;">0%</span>
+            <span class="gr-ov-end" style="right:-44px;">100%</span>
+            <div class="gr-ov-tr"></div>
+            <div class="gr-ov-band" style="left:${mn}%;width:${mx - mn}%;"></div>
+            <span class="gr-ov-avg" style="left:${av}%;"></span>
+            <span class="gr-ov-you" style="left:${num(p)}%;"><em>You ${Math.round(p)}%</em></span>
+            ${labels}
+        </div>`;
+    key.innerHTML = '<span class="k1">Class range, lowest to highest</span><span class="k2">Class average</span>';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DESKTOP: subject list (term chips + search), detail panel, info modals
 // ─────────────────────────────────────────────────────────────────────────────
 window._grTerm = null;
@@ -666,7 +743,6 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
         const pq = m.per.get(q.result_id);
         const open = published && String(openId) === String(q.result_id);
         const note = grNote(q);
-        const statsId = `gstats-gr-${q.result_id}`;
         let row = `
             <tr class="gr-qr${published ? ' gr-can' : ''}${open ? ' gr-open' : ''}"
                 ${published ? `tabindex="0" role="button" aria-expanded="${open}" onclick="grToggleQuiz(${q.result_id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();grToggleQuiz(${q.result_id});}"` : ''}>
@@ -678,14 +754,19 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
                 <td>${q.is_summative && pq ? pq.e.toFixed(1) : '&mdash;'}</td>
             </tr>`;
         if (open) {
+            const pctNow = pct === null ? 0 : pct;
             row += `
-            <tr class="gr-xp"><td colspan="6"><div class="gr-xi">
-                <div class="gr-xi-stats"><div class="grade-inline-stats loading" id="${statsId}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div></div>
-                <div class="gr-xi-side">
+            <tr class="gr-xp"><td colspan="6"><div class="gr-ov" data-quiz-id="${q.quiz_id}" data-pct="${pctNow}">
+                <div class="gr-ov-head">
+                    <span class="gr-ov-big">${pctNow}%</span>
+                    <span class="gr-ov-of">${escHtml(String(q.score))} out of ${escHtml(String(q.total))}</span>
+                    <span class="gr-ov-chip" hidden></span>
+                    <span class="gr-ov-sp"></span>
                     <button type="button" class="gr-btn2" onclick="openQuizReview(${q.result_id}, event)">Review answers</button>
-                    <span>Taken ${escHtml(formatDate(q.submitted_at))}</span>
-                    <span>${escHtml(formatDuration(q.time_taken, q.duration * 60))} of ${escHtml(String(q.duration))} min</span>
                 </div>
+                <div class="gr-ov-body"><div class="gr-ov-msg">Loading class comparison...</div></div>
+                <div class="gr-ov-meta">Taken ${escHtml(formatDate(q.submitted_at))} &middot; ${escHtml(formatDuration(q.time_taken, q.duration * 60))} of ${escHtml(String(q.duration))} min</div>
+                <div class="gr-ov-key"></div>
             </div></td></tr>`;
         }
         return row;
@@ -760,8 +841,7 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
         }
     }
 
-    const openStats = document.querySelector('.gr-xp .grade-inline-stats');
-    if (openStats) loadGradeStatsInline(openStats.id);
+    window.grLoadRange();
     wireGradesScrollState();
 };
 
