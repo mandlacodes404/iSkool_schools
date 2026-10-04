@@ -446,6 +446,7 @@ function renderAnnouncements(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lanEnsureFont();
     window.lanInitDesktop();
 }
 
@@ -910,3 +911,14 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     if (window._lanRead) window.lanScheduleRead(ann);
     if (window.learnerPageState) wireAnnouncementScrollState();
 };
+
+// Nunito 400/600/700 for the desktop announcements page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function lanEnsureFont() {
+    if (document.getElementById('lan-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lan-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

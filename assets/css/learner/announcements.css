@@ -15,6 +15,9 @@
 
 .lan-desktop-layout {
     --lan-listw: 320px;
+    /* Type weights for the whole desktop page. Tune here. */
+    --lan-w-strong: 700;  /* title, status chip, group labels, primary button */
+    --lan-w-medium: 600;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
@@ -72,7 +75,7 @@
     color: #9aa4b2;
     font-family: inherit;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: var(--lan-w-medium, 600);
     white-space: nowrap;
     cursor: pointer;
 }
@@ -100,7 +103,7 @@
     z-index: 1;
     background: #12161c;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: var(--lan-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -124,7 +127,7 @@
 .lan-sidebar-item-info { flex: 1; min-width: 0; }
 .lan-sidebar-item-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: var(--lan-w-medium, 600);
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
@@ -138,7 +141,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lan-row-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.lan-row-badge { font-size: 12px; font-weight: var(--lan-w-medium, 600); flex-shrink: 0; }
 .lan-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 
 /* ── Resize handle ── */
@@ -187,42 +190,54 @@
     border-bottom: 1px solid rgba(255,255,255,0.07);
     flex-shrink: 0;
 }
-.lan-dh-title {
+
+.lan-dh, .lan-dh *, .lan-dh *::before, .lan-dh *::after { box-sizing: border-box; }
+/* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+#lan-main-panel .lan-dh-title {
     margin: 0;
     min-width: 0;
+    font-family: inherit;
     font-size: 18px;
-    font-weight: 800;
+    font-weight: var(--lan-w-strong, 700);
+    line-height: 1.25;
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+   line-height the host page sets, and sits centred on the title. */
 .lan-panel-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
+    height: 23px;
+    padding: 0 8px;
     border-radius: 6px;
     border: 1px solid rgba(255,255,255,0.07);
+    font-size: 11px;
+    font-weight: var(--lan-w-strong, 700);
+    line-height: 1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
     color: #9aa4b2;
 }
-.lan-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.lan-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .lan-dsp { flex: 1; }
-.lan-act-text { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.lan-act-text { font-weight: var(--lan-w-medium, 600); font-size: 13px; flex-shrink: 0; }
 .lan-pri {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1;
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
     background: #4fd1c5;
     color: #0d1117;
-    font-weight: 800;
+    font-weight: var(--lan-w-strong, 700);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
@@ -251,7 +266,7 @@
 .lan-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: var(--lan-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -265,7 +280,7 @@
     font-size: 13px;
 }
 .lan-kv span { color: #9aa4b2; }
-.lan-kv b { font-weight: 700; text-align: right; color: #e6edf3; }
+.lan-kv b { font-weight: var(--lan-w-medium, 600); text-align: right; color: #e6edf3; }
 @container (max-width: 899px) { .lan-rail { display: none; } }
 
 /* ── Announcements: rows, reading column, rail ── */
@@ -280,10 +295,10 @@
 .lan-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
 .lan-sidebar-item.lan-row { height: 66px; }
 .lan-row .lan-sidebar-item-title { font-weight: 600; color: #9aa4b2; }
-.lan-row .lan-sidebar-item-title.lan-unread { font-weight: 800; color: #e6edf3; }
+.lan-row .lan-sidebar-item-title.lan-unread { font-weight: var(--lan-w-strong, 700); color: #e6edf3; }
 .lan-ava {
     width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
-    background: #1c222b; color: #9aa4b2; font-size: 12px; font-weight: 800;
+    background: #1c222b; color: #9aa4b2; font-size: 12px; font-weight: var(--lan-w-strong, 700);
 }
 .lan-ava--school { background: rgba(210,149,34,0.15); color: #d29522; }
 .lan-ava--lg { width: 44px; height: 44px; font-size: 14px; }
@@ -293,7 +308,7 @@
 .lan-btn2 {
     height: 32px; padding: 0 14px; border-radius: 8px; flex-shrink: 0; cursor: pointer;
     border: 1px solid rgba(255,255,255,0.07); background: none; color: #9aa4b2;
-    font: inherit; font-size: 13px; font-weight: 700;
+    font: inherit; font-size: 13px; font-weight: var(--lan-w-medium, 600);
 }
 .lan-btn2:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
 .lan-auth { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
@@ -308,7 +323,7 @@
     display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer;
     background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit;
 }
-.lan-more b { display: block; font-size: 13px; font-weight: 700; color: #e6edf3; }
+.lan-more b { display: block; font-size: 13px; font-weight: var(--lan-w-medium, 600); color: #e6edf3; }
 .lan-more small { color: #7d8794; font-size: 12px; }
 .lan-more:hover b { color: #4fd1c5; }
 .lan-rail h4.lan-rail-sub { margin: 28px 0 4px; }

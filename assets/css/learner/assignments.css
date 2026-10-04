@@ -15,6 +15,9 @@
 
 .las-desktop-layout {
     --las-listw: 320px;
+    /* Type weights for the whole desktop page. Tune here. */
+    --las-w-strong: 700;  /* title, status chip, group labels, primary button */
+    --las-w-medium: 600;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
@@ -72,7 +75,7 @@
     color: #9aa4b2;
     font-family: inherit;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: var(--las-w-medium, 600);
     white-space: nowrap;
     cursor: pointer;
 }
@@ -100,7 +103,7 @@
     z-index: 1;
     background: #12161c;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: var(--las-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -124,7 +127,7 @@
 .las-sidebar-item-info { flex: 1; min-width: 0; }
 .las-sidebar-item-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: var(--las-w-medium, 600);
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
@@ -138,7 +141,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.las-row-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.las-row-badge { font-size: 12px; font-weight: var(--las-w-medium, 600); flex-shrink: 0; }
+/* the selected row keeps one step more weight so it still reads as current */
+.las-sidebar-item.active .las-sidebar-item-title { font-weight: var(--las-w-strong, 700); }
 .las-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 
 /* ── Resize handle ── */
@@ -187,42 +192,54 @@
     border-bottom: 1px solid rgba(255,255,255,0.07);
     flex-shrink: 0;
 }
-.las-dh-title {
+
+.las-dh, .las-dh *, .las-dh *::before, .las-dh *::after { box-sizing: border-box; }
+/* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+#las-main-panel .las-dh-title {
     margin: 0;
     min-width: 0;
+    font-family: inherit;
     font-size: 18px;
-    font-weight: 800;
+    font-weight: var(--las-w-strong, 700);
+    line-height: 1.25;
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+   line-height the host page sets, and sits centred on the title. */
 .las-panel-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
+    height: 23px;
+    padding: 0 8px;
     border-radius: 6px;
     border: 1px solid rgba(255,255,255,0.07);
+    font-size: 11px;
+    font-weight: var(--las-w-strong, 700);
+    line-height: 1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
     color: #9aa4b2;
 }
-.las-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.las-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .las-dsp { flex: 1; }
-.las-act-text { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.las-act-text { font-weight: var(--las-w-medium, 600); font-size: 13px; flex-shrink: 0; }
 .las-pri {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1;
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
     background: #4fd1c5;
     color: #0d1117;
-    font-weight: 800;
+    font-weight: var(--las-w-strong, 700);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
@@ -251,7 +268,7 @@
 .las-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: var(--las-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -265,15 +282,15 @@
     font-size: 13px;
 }
 .las-kv span { color: #9aa4b2; }
-.las-kv b { font-weight: 700; text-align: right; color: #e6edf3; }
+.las-kv b { font-weight: var(--las-w-medium, 600); text-align: right; color: #e6edf3; }
 @container (max-width: 899px) { .las-rail { display: none; } }
 
 /* ── Inline submission composer (desktop) ── */
 .las-panel-status--ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: #22c55e; }
-.las-h3 { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
+.las-h3 { font-size: 12px; font-weight: var(--las-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
 .las-muted { color: #7d8794; font-size: 13px; line-height: 1.6; margin: 0; }
 .las-comp { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 16px; }
-.las-lbl { display: block; font-size: 12px; font-weight: 700; color: #9aa4b2; margin: 16px 0 6px; }
+.las-lbl { display: block; font-size: 12px; font-weight: var(--las-w-medium, 600); color: #9aa4b2; margin: 16px 0 6px; }
 .las-lbl--first { margin-top: 0; }
 .las-lbl em { font-style: normal; font-weight: 400; color: #7d8794; }
 .las-comp-textarea {
@@ -291,19 +308,19 @@
 .las-comp-file::file-selector-button {
     margin-right: 12px; height: 30px; padding: 0 12px; border-radius: 7px;
     border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
-    color: #e6edf3; font: inherit; font-weight: 700; cursor: pointer;
+    color: #e6edf3; font: inherit; font-weight: var(--las-w-medium, 600); cursor: pointer;
 }
 .las-comp-hint { color: #7d8794; font-size: 12px; margin: 10px 0 0; line-height: 1.5; }
-.las-comp-hint a { color: #4fd1c5; font-weight: 700; text-decoration: none; }
+.las-comp-hint a { color: #4fd1c5; font-weight: var(--las-w-medium, 600); text-decoration: none; }
 .las-comp .las-submission-error { margin-top: 12px; }
 .las-comp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.las-comp-cancel, .las-comp-submit { height: 34px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.las-comp-cancel, .las-comp-submit { height: 34px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: var(--las-w-strong, 700); cursor: pointer; }
 .las-comp-cancel { color: #9aa4b2; border: 1px solid rgba(255,255,255,0.07); background: none; }
 .las-comp-cancel:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
 .las-comp-submit { color: #0d1117; border: 0; background: #4fd1c5; min-width: 150px; }
 .las-comp-submit:hover { background: #38b2ac; }
 .las-comp-submit .btn-spinner span { background: #0d1117; }
-.las-okrow { display: flex; align-items: center; gap: 8px; color: #22c55e; font-weight: 700; font-size: 13px; }
+.las-okrow { display: flex; align-items: center; gap: 8px; color: #22c55e; font-weight: var(--las-w-medium, 600); font-size: 13px; }
 .las-subtxt { margin: 12px 0 0; white-space: pre-wrap; color: #c9d1d9; font-size: 14px; line-height: 1.7; }
 .las-file {
     display: flex; align-items: center; gap: 12px; max-width: 440px;
@@ -314,7 +331,7 @@
 .las-fx { flex: 1; min-width: 0; }
 .las-fx b { display: block; font-size: 13px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .las-fx small { display: block; color: #7d8794; font-size: 12px; }
-.las-btn2 { height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); background: none; color: #9aa4b2; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.las-btn2 { height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); background: none; color: #9aa4b2; font: inherit; font-size: 12px; font-weight: var(--las-w-medium, 600); cursor: pointer; }
 .las-btn2:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
 
 

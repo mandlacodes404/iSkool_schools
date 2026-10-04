@@ -499,6 +499,7 @@ function renderAssignmentCards(groupedData) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lasEnsureFont();
     window.lasInitDesktop();
 }
 
@@ -1040,3 +1041,14 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     }
     if (window.learnerPageState) wireAssignmentScrollState();
 };
+
+// Nunito 400/600/700 for the desktop assignments page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function lasEnsureFont() {
+    if (document.getElementById('las-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'las-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}
