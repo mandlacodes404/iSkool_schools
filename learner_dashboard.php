@@ -252,6 +252,7 @@ if (!empty($joinedClassIds)) {
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -3941,6 +3942,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
+<script>window.ISKOOL_LEARNER = <?= json_encode(['name'=>$learnerFullName,'email'=>$learnerEmail,'gender'=>$learnerGender,'initials'=>$initials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
+<script src="assets/js/learner/mobile_settings.js?v=1.0"></script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>
