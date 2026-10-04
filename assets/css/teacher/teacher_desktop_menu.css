@@ -470,9 +470,11 @@ html body .dm-page-title {
    page stylesheets (grades.css and so on) do not follow yet. */
 html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
 html body { --card-bg: var(--dm-card); }
-html body .tchr-flat-panel { background: var(--dm-page) !important; }
+/* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the inset
+   itself (#api-content-area / #mainFrame above). Only the frame (sidebar + header) is darker. */
 html body .tchr-flat-sidebar,
-html body .tchr-info-rail { background: var(--dm-bg) !important; }
+html body .tchr-flat-panel,
+html body .tchr-info-rail { background: var(--dm-page) !important; }
 
 @keyframes dm-pop { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes dm-fade { from { opacity: 0; } to { opacity: 1; } }
