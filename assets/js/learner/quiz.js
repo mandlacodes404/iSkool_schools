@@ -378,8 +378,8 @@ if (!data.isContinuing) {
     }
 };
 
-// Nunito 400/600/700 for the desktop quiz page. 600 is the medium weight above, so load it
-// explicitly instead of letting the browser quietly fall back to 400 or 700.
+// Nunito 400/600/700 for the MOBILE quiz list (.lqz-mobile-*). The desktop page now uses Geist
+// (loaded in learner_dashboard.php). Keep this loader: the global Nunito link only has weight 600.
 function lqzEnsureFont() {
     if (document.getElementById('lqz-nunito-font')) return;
     const link = document.createElement('link');
@@ -459,14 +459,18 @@ function renderQuizCards(groupedData) {
 
             .lqz-desktop-layout {
                 --lqz-listw: 320px;
-                /* Type weights for the whole desktop quiz page. Tune here. */
-                --lqz-w-strong: 700;  /* title, status chip, group labels, primary button */
-                --lqz-w-medium: 600;  /* list rows, filter chips, values, small actions */
+                /* Type weights for the whole desktop quiz page (Geist). Tune here. */
+                --lqz-w-strong: 500;  /* title, status chip, group labels, primary button */
+                --lqz-w-medium: 450;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
-                font-family: 'Nunito', system-ui, sans-serif;
+                font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
                 font-size: 14px;
+                font-weight: 400;
+                font-variant-numeric: tabular-nums; /* marks, times and counts line up */
+                -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+                -moz-osx-font-smoothing: grayscale;
                 line-height: normal;
                 color: #e6edf3;
             }
@@ -515,7 +519,7 @@ function renderQuizCards(groupedData) {
                 border: 1px solid rgba(255,255,255,0.07);
                 color: #e6edf3;
                 font-size: 13px;
-                font-family: 'Nunito', sans-serif;
+                font-family: inherit;
                 transition: border-color 0.2s;
             }
             .lqz-desktop-search:focus { outline: none; border-color: #4fd1c5; }
