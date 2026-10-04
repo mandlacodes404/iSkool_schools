@@ -324,7 +324,7 @@ function rv_verdict(array $q, string $type, string $o, bool $published): string 
 $rvPublished = ((int)$quizInfo['publish_marks'] === 1);
 $rvTypeLabels = ['mcq' => 'Multiple choice', 'multiple_answer' => 'Multiple answer', 'fill_in_blank' => 'Fill in the blank', 'open_ended' => 'Open-ended'];
 $rvOutcomeLabels = ['ok' => 'Correct', 'part' => 'Partly correct', 'bad' => 'Incorrect', 'pend' => 'Awaiting grading'];
-$rvOutcomeIcons = ['ok' => 'fa-check', 'part' => 'fa-circle-half-stroke', 'bad' => 'fa-xmark', 'pend' => 'fa-ellipsis'];
+$rvOutcomeIcons = ['ok' => '&#10003;', 'part' => '&frac12;', 'bad' => '&#10005;', 'pend' => '&hellip;'];
 $rvCounts = ['ok' => 0, 'part' => 0, 'bad' => 0, 'pend' => 0];
 $rvItems = [];
 $rvN = 0;
@@ -643,10 +643,10 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
            ═══════════════════════════════════════════════ */
         .rv-desktop { display: none; }
         @media (min-width: 700px) {
-            html, body { height: 100%; margin: 0; padding: 0; min-height: 0; overflow: hidden; background: #0d1117; }
+            html, body { height: 100%; margin: 0; padding: 0; min-height: 0; overflow-x: hidden; overflow-y: auto; background: #0d1117; }
             body { display: block; font-weight: 400; color: #e6edf3; }
             .rv-legacy { display: none; }
-            .rv-desktop { display: flex; height: 100vh; --rv-listw: 320px; }
+            .rv-desktop { display: flex; height: 100vh; min-height: 520px; --rv-listw: 320px; }
             .rv-desktop * { box-sizing: border-box; }
             .rv-desktop button { font-family: inherit; }
 
@@ -900,6 +900,7 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
       
     </div>
 
+</div><!-- /.container -->
 </div><!-- /.rv-legacy -->
 
 <!-- ═══ DESKTOP REVIEW LAYOUT ═══ -->
@@ -933,7 +934,7 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
                 $pts = ($o === 'pend' ? '—' : format_review_points($q['points_earned'])) . ' / ' . format_review_points($q['points_possible']);
             ?>
                 <button type="button" class="rv-row" data-q="<?= (int)$it['n'] ?>" data-o="<?= $o ?>" data-type="<?= rv_h($typeLabel) ?>" data-pts="<?= rv_h($pts) ?>">
-                    <span class="rv-qs rv-o-<?= $o ?>"><i class="fas <?= $rvOutcomeIcons[$o] ?>"></i></span>
+                    <span class="rv-qs rv-o-<?= $o ?>"><?= $rvOutcomeIcons[$o] ?></span>
                     <span class="rv-ri">
                         <span class="rv-rt"><?= (int)$it['n'] ?>. <?= rv_h($q['text']) ?></span>
                         <span class="rv-rm"><?= rv_h($typeLabel) ?> &middot; <?= rv_h($pts) ?> pts</span>
@@ -975,7 +976,7 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
                                 <span class="l">Blank <?= rv_h($blank['blank_index']) ?></span>
                                 <div>
                                     <small>Your answer</small>
-                                    <span class="ya"><i class="fas <?= $blank['is_correct'] ? 'fa-check' : 'fa-xmark' ?>"></i> <?= rv_h($blank['learner_answer'] !== '' ? $blank['learner_answer'] : 'No answer submitted.') ?></span>
+                                    <span class="ya"><?= $blank['is_correct'] ? '&#10003;' : '&#10005;' ?> <?= rv_h($blank['learner_answer'] !== '' ? $blank['learner_answer'] : 'No answer submitted.') ?></span>
                                 </div>
                                 <div>
                                     <?php if ($rvPublished): ?>
@@ -1008,7 +1009,7 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
                             } elseif ($isSelected) { $cls = 'sel'; $tag = 'Your answer'; }
                         ?>
                             <div class="rv-op <?= $cls ?>">
-                                <span class="rv-mk s"><?php if ($cls === 'ok' || $cls === 'sel'): ?><i class="fas fa-check"></i><?php elseif ($cls === 'bad'): ?><i class="fas fa-xmark"></i><?php endif; ?></span>
+                                <span class="rv-mk s"><?php if ($cls === 'ok' || $cls === 'sel'): ?>&#10003;<?php elseif ($cls === 'bad'): ?>&#10005;<?php endif; ?></span>
                                 <?= rv_h($choice['text']) ?>
                                 <?php if ($tag !== ''): ?><span class="rv-tg"><?= rv_h($tag) ?></span><?php endif; ?>
                             </div>
@@ -1034,7 +1035,7 @@ $rvAttn = $rvCounts['part'] + $rvCounts['bad'] + $rvCounts['pend'];
                             elseif ($isCorrect)            { $cls = 'miss'; $tag = 'Correct answer'; }
                         ?>
                             <div class="rv-op <?= $cls ?>">
-                                <span class="rv-mk r"><?php if ($cls === 'ok'): ?><i class="fas fa-check"></i><?php elseif ($cls === 'bad'): ?><i class="fas fa-xmark"></i><?php endif; ?></span>
+                                <span class="rv-mk r"><?php if ($cls === 'ok'): ?>&#10003;<?php elseif ($cls === 'bad'): ?>&#10005;<?php endif; ?></span>
                                 <?= rv_h($choice['text']) ?>
                                 <?php if ($tag !== ''): ?><span class="rv-tg"><?= rv_h($tag) ?></span><?php endif; ?>
                             </div>
