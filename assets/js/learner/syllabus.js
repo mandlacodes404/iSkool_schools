@@ -45,6 +45,7 @@ window.fetchSyllabus = async function() {
     if (window.syllabusCache) {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+        sylEnsureFont();
         if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
         restoreSyllabusPageState();
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
@@ -64,6 +65,7 @@ window.fetchSyllabus = async function() {
         window.syllabusCache = data;
         apiArea.innerHTML = renderSyllabusPage(data);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+        sylEnsureFont();
         if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
         restoreSyllabusPageState();
 
@@ -210,6 +212,9 @@ function renderSyllabusPage(data) {
 
             .syl-desktop-layout {
                 --syl-listw: 320px;
+                /* Type weights for the whole desktop page. Tune here. */
+                --syl-w-strong: 700;  /* title, status chip, group labels, primary button */
+                --syl-w-medium: 600;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
@@ -267,7 +272,7 @@ function renderSyllabusPage(data) {
                 color: #9aa4b2;
                 font-family: inherit;
                 font-size: 12px;
-                font-weight: 700;
+                font-weight: var(--syl-w-medium, 600);
                 white-space: nowrap;
                 cursor: pointer;
             }
@@ -295,7 +300,7 @@ function renderSyllabusPage(data) {
                 z-index: 1;
                 background: #12161c;
                 font-size: 11px;
-                font-weight: 800;
+                font-weight: var(--syl-w-strong, 700);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 color: #7d8794;
@@ -319,7 +324,7 @@ function renderSyllabusPage(data) {
             .syl-sidebar-item-info { flex: 1; min-width: 0; }
             .syl-sidebar-item-title {
                 font-size: 13px;
-                font-weight: 700;
+                font-weight: var(--syl-w-medium, 600);
                 color: #e6edf3;
                 white-space: nowrap;
                 overflow: hidden;
@@ -333,7 +338,9 @@ function renderSyllabusPage(data) {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .syl-row-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+            .syl-row-badge { font-size: 12px; font-weight: var(--syl-w-medium, 600); flex-shrink: 0; }
+            /* the selected row keeps one step more weight so it still reads as current */
+            .syl-sidebar-item.active .syl-sidebar-item-title { font-weight: var(--syl-w-strong, 700); }
             .syl-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 
             /* ── Resize handle ── */
@@ -382,42 +389,54 @@ function renderSyllabusPage(data) {
                 border-bottom: 1px solid rgba(255,255,255,0.07);
                 flex-shrink: 0;
             }
-            .syl-dh-title {
+
+            .syl-dh, .syl-dh *, .syl-dh *::before, .syl-dh *::after { box-sizing: border-box; }
+            /* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+            #syl-main-panel .syl-dh-title {
                 margin: 0;
                 min-width: 0;
+                font-family: inherit;
                 font-size: 18px;
-                font-weight: 800;
+                font-weight: var(--syl-w-strong, 700);
+                line-height: 1.25;
                 color: #e6edf3;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            /* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+               line-height the host page sets, and sits centred on the title. */
             .syl-panel-status {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 flex-shrink: 0;
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-                padding: 3px 8px;
+                height: 23px;
+                padding: 0 8px;
                 border-radius: 6px;
                 border: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: var(--syl-w-strong, 700);
+                line-height: 1;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
                 color: #9aa4b2;
             }
-            .syl-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+            .syl-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
             .syl-dsp { flex: 1; }
-            .syl-act-text { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+            .syl-act-text { font-weight: var(--syl-w-medium, 600); font-size: 13px; flex-shrink: 0; }
             .syl-pri {
                 display: inline-flex;
                 align-items: center;
+                justify-content: center;
+                line-height: 1;
                 height: 34px;
                 padding: 0 18px;
                 border-radius: 8px;
                 background: #4fd1c5;
                 color: #0d1117;
-                font-weight: 800;
+                font-weight: var(--syl-w-strong, 700);
                 font-size: 13px;
                 text-decoration: none;
                 flex-shrink: 0;
@@ -446,7 +465,7 @@ function renderSyllabusPage(data) {
             .syl-rail h4 {
                 margin: 0 0 14px;
                 font-size: 12px;
-                font-weight: 800;
+                font-weight: var(--syl-w-strong, 700);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
                 color: #7d8794;
@@ -460,17 +479,17 @@ function renderSyllabusPage(data) {
                 font-size: 13px;
             }
             .syl-kv span { color: #9aa4b2; }
-            .syl-kv b { font-weight: 700; text-align: right; color: #e6edf3; }
+            .syl-kv b { font-weight: var(--syl-w-medium, 600); text-align: right; color: #e6edf3; }
             @container (max-width: 899px) { .syl-rail { display: none; } }
 
             /* ── Syllabus: rows, topics, assessment bar, rail ── */
             .syl-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
             .syl-chip .syl-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; margin-right: 6px; vertical-align: 1px; }
             .syl-gh { display: flex; justify-content: space-between; }
-            .syl-gh i { font-style: normal; font-weight: 700; color: #7d8794; }
+            .syl-gh i { font-style: normal; font-weight: var(--syl-w-medium, 600); color: #7d8794; }
             .syl-ft {
                 width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
-                font-size: 11px; font-weight: 800; background: rgba(79,209,197,0.1); color: #4fd1c5;
+                font-size: 11px; font-weight: var(--syl-w-strong, 700); background: rgba(79,209,197,0.1); color: #4fd1c5;
             }
             .syl-tm { font-size: 12px; color: #7d8794; flex-shrink: 0; }
             .syl-muted { color: #7d8794; font-size: 13px; flex-shrink: 0; }
@@ -479,20 +498,20 @@ function renderSyllabusPage(data) {
                 border-left: 3px solid rgba(79,209,197,0.4); background: rgba(255,255,255,0.03); border-radius: 8px;
                 padding: 12px 14px; color: #c9d1d9; line-height: 1.65; font-size: 14px; margin-bottom: 8px; white-space: pre-line;
             }
-            .syl-note2 small { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin-bottom: 4px; }
-            .syl-h3 { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
+            .syl-note2 small { display: block; font-size: 11px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin-bottom: 4px; }
+            .syl-h3 { font-size: 12px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
             .syl-tl { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0 28px; }
             .syl-tl li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
-            .syl-tl li span { color: #7d8794; font-weight: 800; font-size: 12px; width: 18px; flex-shrink: 0; padding-top: 2px; }
+            .syl-tl li span { color: #7d8794; font-weight: var(--syl-w-strong, 700); font-size: 12px; width: 18px; flex-shrink: 0; padding-top: 2px; }
             .syl-stack { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; margin: 4px 0 14px; }
             .syl-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
             .syl-wrow i { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-            .syl-wrow b { margin-left: auto; font-weight: 800; }
+            .syl-wrow b { margin-left: auto; font-weight: var(--syl-w-strong, 700); }
             .syl-more {
                 display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer;
                 background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit;
             }
-            .syl-more b { display: block; font-size: 13px; font-weight: 700; color: #e6edf3; }
+            .syl-more b { display: block; font-size: 13px; font-weight: var(--syl-w-medium, 600); color: #e6edf3; }
             .syl-more small { color: #7d8794; font-size: 12px; }
             .syl-more:hover b { color: #4fd1c5; }
             .syl-rail h4.syl-rail-sub { margin: 28px 0 4px; }
@@ -991,3 +1010,14 @@ window.selectDesktopSyllabusBrief = function (idx) {
     }
     if (window.learnerPageState) wireSyllabusScrollState();
 };
+
+// Nunito 400/600/700 for the desktop syllabus page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function sylEnsureFont() {
+    if (document.getElementById('syl-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'syl-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

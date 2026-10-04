@@ -378,6 +378,7 @@ function renderResourceCards(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lrsEnsureFont();
     window.lrsInitDesktop();
 }
 
@@ -749,3 +750,14 @@ function escapeResourceHtml(value) {
 window.openResourceMenu = function(btn) {
     window.open(path, '_blank');
 };
+
+// Nunito 400/600/700 for the desktop resources page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function lrsEnsureFont() {
+    if (document.getElementById('lrs-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lrs-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

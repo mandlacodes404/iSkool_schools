@@ -373,6 +373,7 @@ function renderGrades(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    grEnsureFont();
     apiArea._gradesData = data;
     window.grInitDesktop();
     restoreGradesStateAfterRender();
@@ -749,7 +750,7 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
                 <td><div class="gr-qt">${escHtml(q.quiz_title)}${q.is_summative ? '<span class="gr-sb">Summative</span>' : ''}</div>${note ? `<div class="gr-qn">${escHtml(note)}</div>` : ''}</td>
                 <td>${escHtml(grShortDate(q.submitted_at))}</td>
                 <td>${published ? escHtml(String(q.score)) + '/' + escHtml(String(q.total)) : '&mdash;'}</td>
-                <td class="${grCls(pct)}" style="font-weight:800;">${published ? pct + '%' : 'Pending'}</td>
+                <td class="${grCls(pct)}" style="font-weight:var(--gr-w-strong,700);">${published ? pct + '%' : 'Pending'}</td>
                 <td>${q.is_summative && pq ? pq.w.toFixed(0) + '%' : '&mdash;'}</td>
                 <td>${q.is_summative && pq ? pq.e.toFixed(1) : '&mdash;'}</td>
             </tr>`;
@@ -2732,3 +2733,14 @@ window.closeQuizReviewModal = function () {
     const modal = document.getElementById('prReportModal');
     if (modal) modal.remove();
 };
+
+// Nunito 400/600/700 for the desktop grades page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function grEnsureFont() {
+    if (document.getElementById('gr-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'gr-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

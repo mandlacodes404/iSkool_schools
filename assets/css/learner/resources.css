@@ -15,6 +15,9 @@
 
 .lrs-desktop-layout {
     --lrs-listw: 320px;
+    /* Type weights for the whole desktop page. Tune here. */
+    --lrs-w-strong: 700;  /* title, status chip, group labels, primary button */
+    --lrs-w-medium: 600;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
@@ -72,7 +75,7 @@
     color: #9aa4b2;
     font-family: inherit;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: var(--lrs-w-medium, 600);
     white-space: nowrap;
     cursor: pointer;
 }
@@ -100,7 +103,7 @@
     z-index: 1;
     background: #12161c;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: var(--lrs-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -124,7 +127,7 @@
 .lrs-sidebar-item-info { flex: 1; min-width: 0; }
 .lrs-sidebar-item-title {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: var(--lrs-w-medium, 600);
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
@@ -138,7 +141,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lrs-row-badge { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.lrs-row-badge { font-size: 12px; font-weight: var(--lrs-w-medium, 600); flex-shrink: 0; }
+/* the selected row keeps one step more weight so it still reads as current */
+.lrs-sidebar-item.active .lrs-sidebar-item-title { font-weight: var(--lrs-w-strong, 700); }
 .lrs-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 
 /* ── Resize handle ── */
@@ -187,42 +192,54 @@
     border-bottom: 1px solid rgba(255,255,255,0.07);
     flex-shrink: 0;
 }
-.lrs-dh-title {
+
+.lrs-dh, .lrs-dh *, .lrs-dh *::before, .lrs-dh *::after { box-sizing: border-box; }
+/* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+#lrs-main-panel .lrs-dh-title {
     margin: 0;
     min-width: 0;
+    font-family: inherit;
     font-size: 18px;
-    font-weight: 800;
+    font-weight: var(--lrs-w-strong, 700);
+    line-height: 1.25;
     color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+   line-height the host page sets, and sits centred on the title. */
 .lrs-panel-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 3px 8px;
+    height: 23px;
+    padding: 0 8px;
     border-radius: 6px;
     border: 1px solid rgba(255,255,255,0.07);
+    font-size: 11px;
+    font-weight: var(--lrs-w-strong, 700);
+    line-height: 1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
     color: #9aa4b2;
 }
-.lrs-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.lrs-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .lrs-dsp { flex: 1; }
-.lrs-act-text { font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.lrs-act-text { font-weight: var(--lrs-w-medium, 600); font-size: 13px; flex-shrink: 0; }
 .lrs-pri {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1;
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
     background: #4fd1c5;
     color: #0d1117;
-    font-weight: 800;
+    font-weight: var(--lrs-w-strong, 700);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
@@ -251,7 +268,7 @@
 .lrs-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: var(--lrs-w-strong, 700);
     letter-spacing: 0.6px;
     text-transform: uppercase;
     color: #7d8794;
@@ -265,16 +282,16 @@
     font-size: 13px;
 }
 .lrs-kv span { color: #9aa4b2; }
-.lrs-kv b { font-weight: 700; text-align: right; color: #e6edf3; }
+.lrs-kv b { font-weight: var(--lrs-w-medium, 600); text-align: right; color: #e6edf3; }
 @container (max-width: 899px) { .lrs-rail { display: none; } }
 
 /* ── Resources: rows, preview canvas, rail ── */
 .lrs-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
 .lrs-gh { display: flex; justify-content: space-between; }
-.lrs-gh i { font-style: normal; font-weight: 700; color: #7d8794; }
+.lrs-gh i { font-style: normal; font-weight: var(--lrs-w-medium, 600); color: #7d8794; }
 .lrs-ft {
     width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
-    font-size: 10px; font-weight: 800; letter-spacing: 0.3px;
+    font-size: 10px; font-weight: var(--lrs-w-strong, 700); letter-spacing: 0.3px;
 }
 .lrs-ft--lg { width: 64px; height: 64px; border-radius: 14px; font-size: 15px; }
 .lrs-ft--sm { width: 28px; height: 28px; border-radius: 7px; font-size: 9px; }
@@ -287,7 +304,7 @@
 .lrs-tm { font-size: 12px; color: #7d8794; flex-shrink: 0; }
 .lrs-btn2 {
     display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 8px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.07); color: #9aa4b2; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.07); color: #9aa4b2; font-size: 13px; font-weight: var(--lrs-w-medium, 600); text-decoration: none; cursor: pointer;
 }
 .lrs-btn2:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
 
@@ -305,7 +322,7 @@
     display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 0; cursor: pointer;
     background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit; color: inherit;
 }
-.lrs-more b { display: block; font-size: 13px; font-weight: 700; color: #e6edf3; }
+.lrs-more b { display: block; font-size: 13px; font-weight: var(--lrs-w-medium, 600); color: #e6edf3; }
 .lrs-more small { color: #7d8794; font-size: 12px; }
 .lrs-more:hover b { color: #4fd1c5; }
 .lrs-more-text { min-width: 0; }
@@ -346,7 +363,7 @@
 .lrs-mobile-video-card:last-child::after { display: none; }
 .lrs-mobile-video-title {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: var(--lrs-w-medium, 600);
     color: #e2e8f0;
     margin: 0 0 3px;
 }

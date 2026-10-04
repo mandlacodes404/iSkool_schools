@@ -412,6 +412,7 @@ function renderEvaluationsUI(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    levEnsureFont();
     window.levInitDesktop();
 }
 
@@ -895,3 +896,14 @@ window.handleEvalSubmit = async function(e, id) {
          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// Nunito 400/600/700 for the desktop evaluations page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function levEnsureFont() {
+    if (document.getElementById('lev-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lev-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}
