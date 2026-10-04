@@ -489,6 +489,7 @@ function renderQuizCards(groupedData) {
                 flex-direction: column;
                 overflow: hidden;
                 background: #12161c;
+                border-right: 1px solid rgba(255,255,255,0.07);
             }
             .lqz-lh {
                 padding: 12px 12px 10px;
