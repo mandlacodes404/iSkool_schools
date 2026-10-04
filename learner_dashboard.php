@@ -3942,8 +3942,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
-<script>window.ISKOOL_LEARNER = <?= json_encode(['name'=>$learnerFullName,'email'=>$learnerEmail,'gender'=>$learnerGender,'initials'=>$initials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/learner/mobile_settings.js?v=1.0"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.1"></script>
+<script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

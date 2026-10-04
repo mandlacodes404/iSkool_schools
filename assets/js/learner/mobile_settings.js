@@ -477,14 +477,26 @@
   }
 
   /* ── Hook into the page ─────────────────────────────────────────────── */
-  var origSettings = window.loadLearnerSettings, origPersonal = window.loadLearnerPersonalInfo;
-  window.loadLearnerSettings = function () {
-    if (!isMobile()) return origSettings ? origSettings.apply(this, arguments) : undefined;
-    return showHome();
-  };
-  window.loadLearnerPersonalInfo = function () {
-    if (!isMobile()) return origPersonal ? origPersonal.apply(this, arguments) : undefined;
-    return showPersonal();
-  };
+  // learner_dashboard.php defines loadLearnerSettings / loadLearnerPersonalInfo INSIDE its DOMContentLoaded handler,
+  // which fires after this file has already run. A plain `window.x = ...` here is therefore overwritten a moment
+  // later by the original, and the old screens come back. So instead of assigning, we put an accessor on window:
+  // reading it always returns our wrapper, and when the page assigns its original later, the setter just stores
+  // it as the desktop fallback. This works whatever order the scripts and DOMContentLoaded run in.
+  function hook(name, mobileFn) {
+    var orig = window[name];
+    var wrapper = function () {
+      if (!isMobile()) return typeof orig === 'function' ? orig.apply(this, arguments) : undefined;
+      return mobileFn.apply(this, arguments);
+    };
+    try {
+      Object.defineProperty(window, name, {
+        configurable: true, enumerable: true,
+        get: function () { return wrapper; },
+        set: function (fn) { orig = fn; }
+      });
+    } catch (e) { window[name] = wrapper; }   // last resort: plain assignment
+  }
+  hook('loadLearnerSettings', showHome);
+  hook('loadLearnerPersonalInfo', showPersonal);
   window.loadLearnerPassword = showPassword;
 })();
