@@ -180,3 +180,44 @@
     background: #38b2ac;
     box-shadow: 0 4px 12px rgba(79, 209, 197, 0.2);
 }
+
+/* ── DESKTOP TYPOGRAPHY: Geist with lighter weights (900px and up) ──
+   Everything below 900px is untouched and stays on Nunito.
+   Weights: 400 body text, 500 titles/labels/buttons. Nothing heavier. */
+@media (min-width: 900px) {
+    #api-content-area {
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-weight: 400;
+        /* Light text on dark backgrounds renders heavier than it is; this keeps thin weights thin */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Page title (was 700) */
+    #api-content-area h2 {
+        font-weight: 500;
+    }
+
+    /* Section labels (had no weight set, so they were falling back to the browser's bold) */
+    #api-content-area h3 {
+        font-weight: 500;
+    }
+
+    /* Quiz title in each card (was 600) */
+    .quiz-card h4 {
+        font-weight: 500;
+    }
+
+    /* Meta line: stays at 400 because it's small grey text and thinner would hurt contrast.
+       Tabular numbers keep marks/durations aligned from card to card. */
+    .quiz-info-text {
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Buttons don't inherit the page font by default, so this makes sure Geist is applied (was 600) */
+    .quiz-start-btn {
+        font-family: inherit;
+        font-weight: 500;
+    }
+}
