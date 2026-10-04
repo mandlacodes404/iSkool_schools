@@ -16,7 +16,9 @@
   if (window.__msLoaded) return;
   window.__msLoaded = true;
 
-  var cfg = window.ISKOOL_SETTINGS || {};
+  // read lazily: learner_dashboard.php sets window.ISKOOL_SETTINGS in an inline script AFTER this file's <script src>,
+  // so a one-off read at load time would always see an empty object and hide "Forgot your password?"
+  var cfg = { get sendResetUrl() { return (window.ISKOOL_SETTINGS || {}).sendResetUrl || ''; } };
   var boot = window.ISKOOL_LEARNER || {};
 
   function isMobile() { return window.innerWidth <= 768; }
